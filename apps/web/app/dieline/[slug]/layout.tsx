@@ -10,9 +10,9 @@ export default async function Layout({
   const { slug } = await params;
 
   return (
-    <div className="bg-accent">
+    <div className="bg-accent grid grid-rows-[auto_1fr] h-screen">
       <ProductNavbar productName={slug} />
-      {children}
+      <div className="h-full overflow-hidden">{children}</div>
     </div>
   );
 }

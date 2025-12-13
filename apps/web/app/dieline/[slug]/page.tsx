@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 import M from "makerjs";
-import ProductDetails from "@/components/product/ProductDetails";
+import ProductDetails, {
+  DimensionKey,
+} from "@/components/product/ProductDetails";
+import { Card } from "@workspace/ui/components/card";
+import { ZoomIn, ZoomOut } from "lucide-react";
+import { Separator } from "@workspace/ui/components/separator";
+import { Button } from "@workspace/ui/components/button";
 
 export default function Page() {
   const [width, setWidth] = useState(80);
@@ -11,25 +17,49 @@ export default function Page() {
 
   const svg = model(width, height);
 
+  const setDimension = (key: DimensionKey, value: number) => {
+    if (key === "width") setWidth(value);
+    if (key === "height") setHeight(value);
+    if (key === "length") setLength(value);
+  };
+
   return (
-    <div className="p-10 space-y-6">
-      {/* INPUT CONTROLS */}
+    <div className="grid h-full grid-cols-[320px_1fr_320px] gap-6 px-10 py-4">
+      {/* LEFT PANEL */}
       <ProductDetails
-        width={width}
-        setHeight={setHeight}
-        height={height}
-        setWidth={setWidth}
-        length={length}
-        setLength={setLength}
+        dimensions={{ height, width, length }}
+        setDimension={setDimension}
       />
 
-      {/* RENDER SVG */}
-      <div className="flex justify-center">
+      {/* RIGHT PREVIEW */}
+      <div className="flex items-center justify-center overflow-auto">
         <div
-          className="bg-white w-fit rounded-sm"
+          className="w-fit rounded-sm bg-white"
           dangerouslySetInnerHTML={{ __html: svg }}
         />
+
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
+          <Card className="p-1 flex items-center gap-3 flex-row text-muted-foreground">
+            <Button variant={"ghost"}>
+              <ZoomIn size={20} className="scale-110" />
+            </Button>
+
+            <div className="h-5">
+              <Separator orientation="vertical" />
+            </div>
+
+            <Button variant={"ghost"}>
+              <ZoomOut size={20} className="scale-110" />
+            </Button>
+          </Card>
+        </div>
       </div>
+
+      {/* LEFT PANEL */}
+      <ProductDetails
+        dimensions={{ height, width, length }}
+        setDimension={setDimension}
+      />
     </div>
   );
 }
