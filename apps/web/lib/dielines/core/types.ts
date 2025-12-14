@@ -7,7 +7,6 @@ export type DielineModel = (params: {
 export interface DielineDefinition {
   slug: string;
   title: string;
-  code: number;
   description?: string;
   defaultDimensions: {
     width: number;

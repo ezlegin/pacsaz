@@ -1,11 +1,10 @@
-// lib/dielines/simple-box.ts
 import M from "makerjs";
-import { DielineDefinition } from "./types";
+import { DielineDefinition } from "./core/types";
 
-export const postalCard: DielineDefinition = {
-  slug: "simple-box",
-  title: "کارت پستال دو طرفه",
-  code: 32978,
+export const mailerBox: DielineDefinition = {
+  slug: "maler-box",
+  title: "باکس نامه ای",
+  code: 89798,
   defaultDimensions: {
     width: 90,
     height: 160,
@@ -34,6 +33,7 @@ export const postalCard: DielineDefinition = {
 
     return M.exporter.toSVG(model, {
       units: "mm",
+      viewBox: true,
       layerOptions: {
         bleed: { stroke: "green", fill: "white" },
         trim: { stroke: "blue" },

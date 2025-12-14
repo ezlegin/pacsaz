@@ -1,5 +1,5 @@
 import ProductNavbar from "@/components/product/ProductNavbar";
-import { dielines } from "@/lib/dielines";
+import { dielines, DielineSlug } from "@/lib/dielines/registery";
 import { notFound } from "next/navigation";
 
 export default async function Layout({
@@ -11,9 +11,9 @@ export default async function Layout({
 }) {
   const { slug } = await params;
 
-  const dieline = dielines[slug as keyof typeof dielines];
+  const dieline = dielines[slug as DielineSlug];
   if (!dieline) return notFound();
-  const productName = dieline.title + " - " + dieline.code;
+  const productName = dieline.title;
 
   return (
     <div className="bg-accent grid grid-rows-[auto_1fr] h-screen">

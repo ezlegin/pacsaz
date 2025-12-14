@@ -210,6 +210,8 @@ function DimensionInput({
   value: number;
   onChange: (value: number) => void;
 }) {
+  if (!value) return null;
+
   return (
     <div className="space-y-1">
       <p className="text-xs text-muted-foreground">{label}</p>

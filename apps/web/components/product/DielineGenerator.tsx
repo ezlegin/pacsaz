@@ -5,7 +5,7 @@ import ProductDetails, {
 } from "@/components/product/ProductDetails";
 import ProductInfo from "@/components/product/ProductInfo";
 import SVGPreview from "@/components/product/SVGPreview";
-import { dielines } from "@/lib/dielines";
+import { dielines, DielineSlug } from "@/lib/dielines/registery";
 import { useState } from "react";
 
 interface Props {
@@ -13,7 +13,7 @@ interface Props {
 }
 
 export default function DielineGenerator({ slug }: Props) {
-  const dieline = dielines[slug as keyof typeof dielines];
+  const dieline = dielines[slug as DielineSlug];
   const [width, setWidth] = useState(dieline.defaultDimensions.width);
   const [height, setHeight] = useState(dieline.defaultDimensions.height);
   const [length, setLength] = useState(dieline.defaultDimensions.length);
