@@ -9,9 +9,11 @@ import { Card } from "@workspace/ui/components/card";
 import { ZoomIn, ZoomOut } from "lucide-react";
 import { Separator } from "@workspace/ui/components/separator";
 import { Button } from "@workspace/ui/components/button";
+import ProductInfo from "@/components/product/ProductInfo";
+import SVGPreview from "@/components/product/SVGPreview";
 
 export default function Page() {
-  const [width, setWidth] = useState(80);
+  const [width, setWidth] = useState(90);
   const [height, setHeight] = useState(160);
   const [length, setLength] = useState(30);
 
@@ -24,42 +26,15 @@ export default function Page() {
   };
 
   return (
-    <div className="grid h-full grid-cols-[320px_1fr_320px] gap-6 px-10 py-4">
-      {/* LEFT PANEL */}
+    <div className="h-full relative gap-6">
       <ProductDetails
         dimensions={{ height, width, length }}
         setDimension={setDimension}
       />
 
-      {/* RIGHT PREVIEW */}
-      <div className="flex items-center justify-center overflow-auto">
-        <div
-          className="w-fit rounded-sm bg-white"
-          dangerouslySetInnerHTML={{ __html: svg }}
-        />
+      <SVGPreview svg={svg} />
 
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
-          <Card className="p-1 flex items-center gap-3 flex-row text-muted-foreground">
-            <Button variant={"ghost"}>
-              <ZoomIn size={20} className="scale-110" />
-            </Button>
-
-            <div className="h-5">
-              <Separator orientation="vertical" />
-            </div>
-
-            <Button variant={"ghost"}>
-              <ZoomOut size={20} className="scale-110" />
-            </Button>
-          </Card>
-        </div>
-      </div>
-
-      {/* LEFT PANEL */}
-      <ProductDetails
-        dimensions={{ height, width, length }}
-        setDimension={setDimension}
-      />
+      <ProductInfo height={height} width={width} length={length} />
     </div>
   );
 }

@@ -56,79 +56,81 @@ const MATERIALS = [
 
 export default function ProductDetails({ dimensions, setDimension }: Props) {
   return (
-    <div className="h-full flex flex-col justify-between w-80 overflow-y-auto rounded-2xl bg-white p-6 shadow-md">
-      <div className="space-y-8">
-        {/* Dimensions */}
-        <Section title="ابعاد">
-          <div className="grid grid-cols-2 gap-4">
-            {DIMENSIONS.map(({ key, label }) => (
-              <DimensionInput
-                key={key}
-                label={label}
-                value={dimensions[key]}
-                onChange={(value) => setDimension(key, value)}
-              />
-            ))}
-          </div>
-        </Section>
-
-        {/* Material */}
-        <Section title="متریال چاپ">
-          <Select dir="rtl" defaultValue="white-cardboard">
-            <SelectTrigger>
-              <SelectValue placeholder="انتخاب متریال" />
-            </SelectTrigger>
-
-            <SelectContent position="popper">
-              {MATERIALS.map((group) => (
-                <SelectGroup key={group.label}>
-                  <SelectLabel>{group.label}</SelectLabel>
-                  {group.items.map((item) => (
-                    <SelectItem key={item.value} value={item.value}>
-                      <span
-                        className={`h-5 w-5 rounded-full border ${item.color}`}
-                      />
-                      {item.label}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
+    <div className="p-3 h-full absolute right-0 top-0 z-10">
+      <div className="h-full w-80 flex flex-col justify-between overflow-y-auto rounded-2xl bg-white p-6 shadow-md">
+        <div className="space-y-8">
+          {/* Dimensions */}
+          <Section title="ابعاد">
+            <div className="grid grid-cols-2 gap-4">
+              {DIMENSIONS.map(({ key, label }) => (
+                <DimensionInput
+                  key={key}
+                  label={label}
+                  value={dimensions[key]}
+                  onChange={(value) => setDimension(key, value)}
+                />
               ))}
-            </SelectContent>
-          </Select>
-        </Section>
+            </div>
+          </Section>
 
-        {/* Thickness */}
-        <Section title="ضخامت">
-          <Input dir="ltr" value="0.5 mm" disabled className="text-center" />
-        </Section>
-      </div>
+          {/* Material */}
+          <Section title="متریال چاپ">
+            <Select dir="rtl" defaultValue="white-cardboard">
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="انتخاب متریال" />
+              </SelectTrigger>
 
-      <div>
-        {/* Format & Download */}
-        <Section title="فرمت">
-          <ToggleGroup
-            type="single"
-            size="lg"
-            variant="outline"
-            defaultValue="PDF"
-            className="w-full"
-          >
-            {FORMATS.map(({ value, icon }) => (
-              <ToggleGroupItem
-                key={value}
-                value={value}
-                className="w-1/3 border"
-              >
-                <Image src={icon} alt={value} width={20} height={20} />
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
+              <SelectContent position="popper">
+                {MATERIALS.map((group) => (
+                  <SelectGroup key={group.label}>
+                    <SelectLabel>{group.label}</SelectLabel>
+                    {group.items.map((item) => (
+                      <SelectItem key={item.value} value={item.value}>
+                        <span
+                          className={`h-5 w-5 rounded-full border ${item.color}`}
+                        />
+                        {item.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                ))}
+              </SelectContent>
+            </Select>
+          </Section>
 
-          <Button size="lg" className="mt-4 w-full gap-2">
-            <Download />
-            دانلود فایل
-          </Button>
-        </Section>
+          {/* Thickness */}
+          <Section title="ضخامت">
+            <Input dir="ltr" value="0.5 mm" disabled className="text-center" />
+          </Section>
+        </div>
+
+        <div>
+          {/* Format & Download */}
+          <Section title="فرمت">
+            <ToggleGroup
+              type="single"
+              size="lg"
+              variant="outline"
+              defaultValue="PDF"
+              className="w-full"
+            >
+              {FORMATS.map(({ value, icon }) => (
+                <ToggleGroupItem
+                  key={value}
+                  value={value}
+                  className="w-1/3 border"
+                >
+                  <Image src={icon} alt={value} width={20} height={20} />
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+
+            <Button size="lg" className="mt-4 w-full gap-2">
+              <Download />
+              دانلود فایل
+            </Button>
+          </Section>
+        </div>
       </div>
     </div>
   );
