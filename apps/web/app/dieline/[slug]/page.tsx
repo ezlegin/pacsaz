@@ -1,67 +1,17 @@
-"use client";
+import { dielines } from "@/lib/dielines";
+import { notFound } from "next/navigation";
+import DielineGenerator from "../../../components/product/DielineGenerator";
 
-import ProductDetails, {
-  DimensionKey,
-} from "@/components/product/ProductDetails";
-import ProductInfo from "@/components/product/ProductInfo";
-import SVGPreview from "@/components/product/SVGPreview";
-import M from "makerjs";
-import { useState } from "react";
-
-export default function Page() {
-  const [width, setWidth] = useState(90);
-  const [height, setHeight] = useState(160);
-  const [length, setLength] = useState(30);
-
-  const svg = model(width, height);
-
-  const setDimension = (key: DimensionKey, value: number) => {
-    if (key === "width") setWidth(value);
-    if (key === "height") setHeight(value);
-    if (key === "length") setLength(value);
-  };
-
-  return (
-    <div className="h-full relative gap-6">
-      <ProductDetails
-        dimensions={{ height, width, length }}
-        setDimension={setDimension}
-      />
-
-      <SVGPreview svg={svg} />
-
-      <ProductInfo height={height} width={width} length={length} />
-    </div>
-  );
+interface Props {
+  params: Promise<{ slug: string }>;
 }
 
-function model(width: number, height: number) {
-  const model: M.IModel = { paths: {}, models: {} };
-  const rect = new M.models.Rectangle(width * 2, height);
+export default async function DielinePage({ params }: Props) {
+  const { slug } = await params;
 
-  //! BLEED
-  model.models!["bleed"] = M.model.outline(rect, 3, 1);
-  model.models!["bleed"].layer = "bleed";
+  const dieline = dielines[slug as keyof typeof dielines];
 
-  //! TRIM
-  const trim = rect;
-  model.models!["trim"] = trim;
-  model.models!["trim"].layer = "trim";
+  if (!dieline) notFound();
 
-  //! FOLD
-  const fold = new M.models.ConnectTheDots(false, [
-    [width, 0],
-    [width, height],
-  ]);
-  model.models!["fold"] = fold;
-  model.models!["fold"].layer = "fold";
-
-  return M.exporter.toSVG(model, {
-    units: "mm",
-    layerOptions: {
-      bleed: { stroke: "green", fill: "white" },
-      trim: { stroke: "blue" },
-      fold: { stroke: "red", cssStyle: "stroke-dasharray:5,2;" },
-    },
-  });
+  return <DielineGenerator slug={slug} />;
 }

@@ -16,7 +16,7 @@ const ProductNavbar = ({ productName }: Props) => {
           <Image alt="logo" src={pacsazLogo} width={25} height={34} />
           <p className="text-muted-foreground">ساخت دایلاین</p>
           <ArrowLeft size={16} />
-          <p className="font-semibold">کارت پستال دو طرفه - 98642</p>
+          <p className="font-semibold">{productName}</p>
         </div>
         <div className="flex gap-3 items-center">
           <Button variant={"ghost"} className="gap-1">
