@@ -17,3 +17,10 @@ export default function RootLayout({
     </html>
   );
 }
+
+export const metadata = {
+  title: "Pacsaz",
+  icons: {
+    icon: "/pacsaz-logo.svg",
+  },
+};

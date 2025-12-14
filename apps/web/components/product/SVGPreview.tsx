@@ -40,10 +40,7 @@ export default function SvgPreview({ svg }: { svg: string }) {
                 alignItems: "center",
               }}
             >
-              <div
-                className="rounded-sm bg-white"
-                dangerouslySetInnerHTML={{ __html: svg }}
-              />
+              <div dangerouslySetInnerHTML={{ __html: svg }} />
             </TransformComponent>
 
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
