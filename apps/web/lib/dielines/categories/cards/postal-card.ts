@@ -1,11 +1,12 @@
 import M from "makerjs";
-import { addGuideLine } from "../../core/helpers/GuidelineGenerator";
 import { DielineDefinition } from "../../core/types";
 import { coreLayerOptions } from "../../core/layerOptions";
+import { addFoldLine } from "../../core/helpers/foldLineGenerator";
+import { addGuideLine } from "../../core/helpers/guidelineGenerator";
 
 export const postalCard: DielineDefinition = {
   slug: "postal-card",
-  title: "کارت پستال دو برگ",
+  title: "کارت پستال تا شو",
   dimensions: {
     defaultDimensions: {
       length: 160,
@@ -17,12 +18,8 @@ export const postalCard: DielineDefinition = {
       width: 30,
       height: 0,
     },
-    maxDimensions: {
-      length: 160,
-      width: 90,
-      height: 0,
-    },
   },
+  dimensionsType: ["manufacture"],
   model({ width, length }) {
     const model: M.IModel = { models: {} };
     const rect = new M.models.Rectangle(width * 2, length);
@@ -37,12 +34,11 @@ export const postalCard: DielineDefinition = {
     model.models!["trim"].layer = "trim";
 
     //! FOLD
-    const fold = new M.models.ConnectTheDots(false, [
-      [width, 0],
-      [width, length],
-    ]);
-    model.models!["fold"] = fold;
-    model.models!["fold"].layer = "fold";
+    addFoldLine(model, {
+      id: "centerFold",
+      from: [width, 0],
+      to: [width, length],
+    });
 
     //! GUIDES
     addGuideLine(model, {

@@ -1,13 +1,11 @@
 "use client";
 
-import ProductDetails, {
-  DimensionKey,
-} from "@/components/product/ProductDetails";
+import ProductDetails from "@/components/product/ProductDetails";
 import ProductInfo from "@/components/product/ProductInfo";
 import SVGPreview from "@/components/product/SVGPreview";
+import { useSize } from "@/hooks/useSize";
 import { DielineDefinition } from "@/lib/dielines/core/types";
 import { dielines, DielineSlug } from "@/lib/dielines/registery";
-import { useState } from "react";
 
 interface Props {
   slug: string;
@@ -15,34 +13,22 @@ interface Props {
 
 export default function DielineGenerator({ slug }: Props) {
   const dieline = dielines[slug as DielineSlug] as DielineDefinition;
-  const [width, setWidth] = useState(
-    dieline.dimensions.defaultDimensions.width
-  );
-  const [height, setHeight] = useState(
-    dieline.dimensions.defaultDimensions.height
-  );
-  const [length, setLength] = useState(
-    dieline.dimensions.defaultDimensions.length
-  );
 
-  const svg = dieline.model({ width, height, length });
+  const { size, setDimension } = useSize(dieline.dimensions);
 
-  const setDimension = (key: DimensionKey, value: number) => {
-    if (key === "width") setWidth(value);
-    if (key === "height") setHeight(value);
-    if (key === "length") setLength(value);
-  };
+  const svg = dieline.model(size);
 
   return (
     <div className="h-full relative gap-6">
       <ProductDetails
         dimensions={dieline.dimensions}
+        dimensionsType={dieline.dimensionsType}
         setDimension={setDimension}
       />
 
       <SVGPreview svg={svg} />
 
-      <ProductInfo height={height} width={width} length={length} />
+      <ProductInfo dimension={size} dimensionsType={dieline.dimensionsType} />
     </div>
   );
 }

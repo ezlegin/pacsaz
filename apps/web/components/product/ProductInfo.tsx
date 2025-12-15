@@ -1,12 +1,14 @@
+import { Dimensions, DimensionsTypeType } from "@/lib/dielines/core/types";
 import React from "react";
 
 interface Props {
-  width: number;
-  height: number;
-  length: number;
+  dimension: Dimensions;
+  dimensionsType: DimensionsTypeType;
 }
 
-const ProductInfo = ({ height, length, width }: Props) => {
+const ProductInfo = ({ dimensionsType, dimension }: Props) => {
+  const { height, length, width } = dimension;
+
   const packLengend = [
     { color: "bg-blue-500", label: "خط برش" },
     { color: "bg-red-500", label: "خط تا" },
@@ -15,9 +17,21 @@ const ProductInfo = ({ height, length, width }: Props) => {
 
   const dimensions = [
     //TODO fetch correct data
-    { label: "ابعاد تولید", value: `${width} x ${length} x ${height} mm` },
-    { label: "ابعاد داخلی", value: `${width} x ${length} x ${height} mm` },
-    { label: "ابعاد خارجی", value: `${width} x ${length} x ${height} mm` },
+    {
+      label: "ابعاد تولید",
+      value: `${width} x ${length} x ${height} mm`,
+      key: "manufacture",
+    },
+    {
+      label: "ابعاد داخلی",
+      value: `${width} x ${length} x ${height} mm`,
+      key: "inner",
+    },
+    {
+      label: "ابعاد خارجی",
+      value: `${width} x ${length} x ${height} mm`,
+      key: "outer",
+    },
   ];
 
   const deliveries = [
@@ -39,14 +53,21 @@ const ProductInfo = ({ height, length, width }: Props) => {
 
       {/* Dimensions */}
       <div className="space-y-1 mb-6">
-        {dimensions.map(({ label, value }) => (
-          <div key={label}>
-            <span className="block text-muted-foreground text-xs">{label}</span>
-            <span dir="ltr" className="font-medium text-sm">
-              {value}
-            </span>
-          </div>
-        ))}
+        {dimensions.map(
+          ({ label, value, key }) =>
+            dimensionsType.includes(
+              key as "manufacture" | "inner" | "outer"
+            ) && (
+              <div key={label}>
+                <span className="block text-muted-foreground text-xs">
+                  {label}
+                </span>
+                <span dir="ltr" className="font-medium text-sm">
+                  {value}
+                </span>
+              </div>
+            )
+        )}
 
         {/* Deliveries */}
         <ul className="mt-4 space-y-2 list-disc list-inside">

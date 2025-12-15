@@ -26,13 +26,17 @@ import { JSX } from "react";
 import DimensionInfo from "./info/DimensionInfo";
 import { useEffect, useState } from "react";
 import { useDebouncedCallback } from "@/hooks/useDebouncedCallback";
-import { DielineDimensions } from "@/lib/dielines/core/types";
-import { clamp } from "@/lib/dielines/core/helpers/clamp";
+import {
+  DielineDimensions,
+  DimensionsTypeType,
+} from "@/lib/dielines/core/types";
+import { clamp } from "@/hooks/useSize";
 
 export type DimensionKey = "width" | "length" | "height";
 
 interface Props {
   dimensions: DielineDimensions;
+  dimensionsType: DimensionsTypeType;
   setDimension: (key: DimensionKey, value: number) => void;
 }
 
@@ -72,7 +76,11 @@ const DIMENSIONS_TYPE = [
   { key: "outer", label: "ابعاد خارجی" },
 ] as const;
 
-export default function ProductDetails({ dimensions, setDimension }: Props) {
+export default function ProductDetails({
+  dimensions,
+  setDimension,
+  dimensionsType,
+}: Props) {
   return (
     <div className="p-3 h-full absolute right-0 top-0 z-10">
       <div className="h-full w-80 flex flex-col justify-between overflow-y-auto rounded-2xl bg-white p-6 shadow-md">
@@ -85,7 +93,6 @@ export default function ProductDetails({ dimensions, setDimension }: Props) {
                   label={label}
                   value={dimensions.defaultDimensions[key]}
                   min={dimensions.minDimensions[key]}
-                  max={dimensions.maxDimensions[key]}
                   onChange={(value) => setDimension(key, value)}
                 />
               ))}
@@ -129,15 +136,18 @@ export default function ProductDetails({ dimensions, setDimension }: Props) {
               spacing={2}
               dir="rtl"
             >
-              {DIMENSIONS_TYPE.map(({ label, key }) => (
-                <ToggleGroupItem
-                  key={key}
-                  value={key}
-                  className="border-2 cursor-pointer w-1/3 data-[state=on]:border-primary data-[state=on]:bg-transparent hover:border-primary hover:bg-transparent"
-                >
-                  <p className="font-normal text-xs">{label}</p>
-                </ToggleGroupItem>
-              ))}
+              {DIMENSIONS_TYPE.map(
+                ({ label, key }) =>
+                  dimensionsType.includes(key) && (
+                    <ToggleGroupItem
+                      key={key}
+                      value={key}
+                      className="border-2 cursor-pointer data-[state=on]:border-primary data-[state=on]:bg-transparent hover:border-primary hover:bg-transparent"
+                    >
+                      <p className="font-normal text-xs">{label}</p>
+                    </ToggleGroupItem>
+                  )
+              )}
             </ToggleGroup>
           </Section>
         </div>
@@ -211,13 +221,11 @@ function DimensionInput({
   label,
   value,
   min,
-  max,
   onChange,
 }: {
   label: string;
   value: number;
   min: number;
-  max: number;
   onChange: (value: number) => void;
 }) {
   const [localValue, setLocalValue] = useState(value);
@@ -228,11 +236,11 @@ function DimensionInput({
   }, [value]);
 
   const debouncedChange = useDebouncedCallback((val: number) => {
-    const clamped = clamp(val, min, max);
+    const clamped = clamp(val, min);
     onChange(clamped);
   }, 1000);
 
-  if (localValue === 0) return null;
+  if (value === 0) return null;
 
   return (
     <div className="space-y-1">
@@ -252,7 +260,7 @@ function DimensionInput({
           }}
           onBlur={() => {
             // hard snap on blur (UX polish)
-            const clamped = clamp(localValue, min, max);
+            const clamped = clamp(localValue, min);
             setLocalValue(clamped);
             onChange(clamped);
           }}
