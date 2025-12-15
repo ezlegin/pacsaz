@@ -1,8 +1,10 @@
-export type DielineModel = (params: {
+export type Dimensions = {
   width: number;
   height: number;
   length: number;
-}) => string;
+};
+
+export type DielineModel = (params: Dimensions) => string;
 
 export interface DielineDefinition {
   slug: string;

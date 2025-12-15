@@ -24,6 +24,8 @@ import { Download, Info } from "lucide-react";
 import Image from "next/image";
 import { JSX } from "react";
 import DimensionInfo from "./info/DimensionInfo";
+import { useEffect, useState } from "react";
+import { useDebouncedCallback } from "@/hooks/useDebouncedCallback";
 
 export type DimensionKey = "width" | "length" | "height";
 
@@ -33,8 +35,8 @@ interface Props {
 }
 
 const DIMENSIONS = [
-  { key: "width", label: "عرض" },
   { key: "length", label: "طول" },
+  { key: "width", label: "عرض" },
   { key: "height", label: "ارتفاع" },
 ] as const;
 
@@ -210,7 +212,16 @@ function DimensionInput({
   value: number;
   onChange: (value: number) => void;
 }) {
-  if (!value) return null;
+  const [localValue, setLocalValue] = useState(value);
+
+  // sync وقتی مقدار از بیرون عوض شد
+  useEffect(() => {
+    setLocalValue(value);
+  }, [value]);
+
+  const debouncedChange = useDebouncedCallback(onChange, 500);
+
+  if (localValue === 0) return null;
 
   return (
     <div className="space-y-1">
@@ -218,8 +229,12 @@ function DimensionInput({
       <div className="relative">
         <Input
           dir="ltr"
-          value={value}
-          onChange={(e) => onChange(Number(e.target.value))}
+          value={localValue}
+          onChange={(e) => {
+            const val = Number(e.target.value);
+            setLocalValue(val);
+            debouncedChange(val);
+          }}
         />
         <span className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
           mm
