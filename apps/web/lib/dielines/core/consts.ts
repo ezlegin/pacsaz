@@ -12,3 +12,4 @@ export const colors = {
 
 export const foldDasharray = "5,2";
 export const guideTextFontSize = 3.75;
+export const bleedAmount = 3;

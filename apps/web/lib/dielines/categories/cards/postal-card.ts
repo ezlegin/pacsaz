@@ -3,6 +3,7 @@ import { DielineDefinition } from "../../core/types";
 import { coreLayerOptions } from "../../core/layerOptions";
 import { addFoldLine } from "../../core/helpers/foldLineGenerator";
 import { addGuideLine } from "../../core/helpers/guidelineGenerator";
+import { bleedAmount } from "../../core/consts";
 
 export const postalCard: DielineDefinition = {
   slug: "postal-card",
@@ -25,7 +26,7 @@ export const postalCard: DielineDefinition = {
     const rect = new M.models.Rectangle(width * 2, length);
 
     //! BLEED
-    model.models!["bleed"] = M.model.outline(rect, 3, 1);
+    model.models!["bleed"] = M.model.outline(rect, bleedAmount, 1);
     model.models!["bleed"].layer = "bleed";
 
     //! TRIM

@@ -31,6 +31,8 @@ import {
   DimensionsTypeType,
 } from "@/lib/dielines/core/types";
 import { clamp } from "@/hooks/useSize";
+import { downloadPdf } from "@/actions/export/downloader";
+import { bleedAmount } from "@/lib/dielines/core/consts";
 
 export type DimensionKey = "width" | "length" | "height";
 
@@ -38,6 +40,7 @@ interface Props {
   dimensions: DielineDimensions;
   dimensionsType: DimensionsTypeType;
   setDimension: (key: DimensionKey, value: number) => void;
+  svg: string;
 }
 
 const DIMENSIONS = [
@@ -80,7 +83,18 @@ export default function ProductDetails({
   dimensions,
   setDimension,
   dimensionsType,
+  svg,
 }: Props) {
+  const download = async () => {
+    await downloadPdf({
+      svg,
+      filename: "new-dieline",
+      length: 160 + bleedAmount * 2,
+      width: 90 + bleedAmount * 2,
+      format: "PDF", //todo
+    }); //todo: get the SVG width and height and pass it here.
+  };
+
   return (
     <div className="p-3 h-full absolute right-0 top-0 z-10">
       <div className="h-full w-80 flex flex-col justify-between overflow-y-auto rounded-2xl bg-white p-6 shadow-md">
@@ -176,7 +190,11 @@ export default function ProductDetails({
               ))}
             </ToggleGroup>
 
-            <Button size="lg" className="mt-4 w-full gap-2 font-medium">
+            <Button
+              onClick={download}
+              size="lg"
+              className="mt-4 w-full gap-2 font-medium"
+            >
               <Download />
               دانلود فایل
             </Button>

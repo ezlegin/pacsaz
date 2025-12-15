@@ -24,6 +24,7 @@ export default function DielineGenerator({ slug }: Props) {
         dimensions={dieline.dimensions}
         dimensionsType={dieline.dimensionsType}
         setDimension={setDimension}
+        svg={svg}
       />
 
       <SVGPreview svg={svg} />

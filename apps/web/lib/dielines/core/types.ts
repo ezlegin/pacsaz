@@ -5,6 +5,7 @@ export type Dimensions = {
 };
 
 export type DimensionsTypeType = ["manufacture"?, "inner"?, "outer"?];
+export type FormatsType = "PDF" | "AI" | "DXF";
 
 export type DielineDimensions = {
   defaultDimensions: Dimensions;
