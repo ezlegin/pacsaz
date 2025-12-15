@@ -1,6 +1,7 @@
 import M from "makerjs";
-import { DielineDefinition } from "../../core/types";
 import { addGuideLine } from "../../core/helpers/GuidelineGenerator";
+import { DielineDefinition } from "../../core/types";
+import { coreLayerOptions } from "../../core/layerOptions";
 
 export const postalCard: DielineDefinition = {
   slug: "postal-card",
@@ -51,24 +52,7 @@ export const postalCard: DielineDefinition = {
     return M.exporter.toSVG(model, {
       units: "mm",
       layerOptions: {
-        bleed: { stroke: "green", fill: "white" },
-        trim: { stroke: "blue" },
-        fold: { stroke: "red", cssStyle: "stroke-dasharray:5,2;" },
-        widthGuideBox: { fill: "white", stroke: "none" },
-        lengthGuideBox: { fill: "white", stroke: "none" },
-        widthGuideLine: { stroke: "dodgerBlue" },
-        lengthGuideLine: { stroke: "dodgerBlue" },
-        pointer: { stroke: "none", fill: "dodgerBlue" },
-        widthGuideText: {
-          stroke: "none",
-          fill: "dodgerBlue",
-          cssStyle: "font-size: 3.75; direction: ltr",
-        },
-        lengthGuideText: {
-          stroke: "none",
-          fill: "dodgerBlue",
-          cssStyle: "font-size: 3.75; direction: ltr",
-        },
+        ...coreLayerOptions,
       },
     });
   },

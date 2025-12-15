@@ -16,23 +16,24 @@ export function addGuideLine(model: M.IModel, options: GuideLineOptions) {
   // guide line
   const guideLine = new M.models.ConnectTheDots(false, [from, to]);
   model.models![`${type}Line`] = guideLine;
-  model.models![`${type}Line`]!.layer = `${type}GuideLine`;
+  model.models![`${type}Line`]!.layer = `guideLine`;
 
   // arrow pointer
-  const basePointer = new M.models.Polygon(3, 1.2);
+  const pointerRadius = 1.2;
+  const basePointer = new M.models.Polygon(3, pointerRadius);
 
   const startPointer = M.cloneObject(basePointer);
   const endPointer = M.cloneObject(basePointer);
 
   if (orientation === "horizontal") {
     M.model.rotate(startPointer, 180);
-    M.model.move(startPointer, [from[0] + 1.2, from[1]]);
-    M.model.move(endPointer, [to[0] - 1.2, to[1]]);
+    M.model.move(startPointer, [from[0] + pointerRadius, from[1]]);
+    M.model.move(endPointer, [to[0] - pointerRadius, to[1]]);
   } else {
     M.model.rotate(startPointer, -90);
-    M.model.move(startPointer, [from[0], from[1] + 1.2]);
+    M.model.move(startPointer, [from[0], from[1] + pointerRadius]);
     M.model.rotate(endPointer, 90);
-    M.model.move(endPointer, [to[0], to[1] - 1.2]);
+    M.model.move(endPointer, [to[0], to[1] - pointerRadius]);
   }
 
   model.models![`${type}StartPointer`] = startPointer;
@@ -47,11 +48,11 @@ export function addGuideLine(model: M.IModel, options: GuideLineOptions) {
   M.model.addCaption(textCarrier, `${value} mm`, mid);
 
   model.models![`${type}Text`] = textCarrier;
-  model.models![`${type}Text`]!.layer = `${type}GuideText`;
+  model.models![`${type}Text`]!.layer = `guideText`;
 
   // optional background box
   const box = new M.models.Rectangle(18, 6);
   M.model.move(box, [mid[0] - 9, mid[1] - 3]);
   model.models![`${type}Box`] = box;
-  model.models![`${type}Box`]!.layer = `${type}GuideBox`;
+  model.models![`${type}Box`]!.layer = `guideBox`;
 }
