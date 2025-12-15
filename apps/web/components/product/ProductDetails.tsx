@@ -90,7 +90,7 @@ export default function ProductDetails({
       svg,
       filename: "new-dieline",
       length: 160 + bleedAmount * 2,
-      width: 90 + bleedAmount * 2,
+      width: 180 + bleedAmount * 2,
       format: "PDF", //todo
     }); //todo: get the SVG width and height and pass it here.
   };

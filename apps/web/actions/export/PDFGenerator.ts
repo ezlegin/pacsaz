@@ -5,7 +5,7 @@ import PDFDocument from "pdfkit";
 import SVGtoPDF from "svg-to-pdfkit";
 
 const MM_TO_PT = 72 / 25.4;
-const margin = 25; // in mm
+const margin = 100; // in mm
 
 export type ExportPdfParams = {
   svg: string;

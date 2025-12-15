@@ -10,8 +10,8 @@ export async function downloadPdf({
 }: ExportPdfParams & { filename: string; format: FormatsType }) {
   const pdf = await PDFGenerator({
     svg,
-    width: width * 2,
-    length: length,
+    width,
+    length,
   });
 
   const byteCharacters = atob(pdf.pdfBase64);
