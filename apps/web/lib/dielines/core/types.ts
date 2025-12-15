@@ -4,16 +4,18 @@ export type Dimensions = {
   length: number;
 };
 
+export type DielineDimensions = {
+  defaultDimensions: Dimensions;
+  minDimensions: Dimensions;
+  maxDimensions: Dimensions;
+};
+
 export type DielineModel = (params: Dimensions) => string;
 
 export interface DielineDefinition {
   slug: string;
   title: string;
   description?: string;
-  defaultDimensions: {
-    width: number;
-    height: number;
-    length: number;
-  };
+  dimensions: DielineDimensions;
   model: DielineModel;
 }

@@ -26,11 +26,13 @@ import { JSX } from "react";
 import DimensionInfo from "./info/DimensionInfo";
 import { useEffect, useState } from "react";
 import { useDebouncedCallback } from "@/hooks/useDebouncedCallback";
+import { DielineDimensions } from "@/lib/dielines/core/types";
+import { clamp } from "@/lib/dielines/core/helpers/clamp";
 
 export type DimensionKey = "width" | "length" | "height";
 
 interface Props {
-  dimensions: Record<DimensionKey, number>;
+  dimensions: DielineDimensions;
   setDimension: (key: DimensionKey, value: number) => void;
 }
 
@@ -81,7 +83,9 @@ export default function ProductDetails({ dimensions, setDimension }: Props) {
                 <DimensionInput
                   key={key}
                   label={label}
-                  value={dimensions[key]}
+                  value={dimensions.defaultDimensions[key]}
+                  min={dimensions.minDimensions[key]}
+                  max={dimensions.maxDimensions[key]}
                   onChange={(value) => setDimension(key, value)}
                 />
               ))}
@@ -206,20 +210,27 @@ function Section({
 function DimensionInput({
   label,
   value,
+  min,
+  max,
   onChange,
 }: {
   label: string;
   value: number;
+  min: number;
+  max: number;
   onChange: (value: number) => void;
 }) {
   const [localValue, setLocalValue] = useState(value);
 
-  // sync وقتی مقدار از بیرون عوض شد
+  // sync when external value changes
   useEffect(() => {
     setLocalValue(value);
   }, [value]);
 
-  const debouncedChange = useDebouncedCallback(onChange, 500);
+  const debouncedChange = useDebouncedCallback((val: number) => {
+    const clamped = clamp(val, min, max);
+    onChange(clamped);
+  }, 1000);
 
   if (localValue === 0) return null;
 
@@ -231,9 +242,19 @@ function DimensionInput({
           dir="ltr"
           value={localValue}
           onChange={(e) => {
-            const val = Number(e.target.value);
-            setLocalValue(val);
-            debouncedChange(val);
+            const raw = Number(e.target.value);
+
+            // allow typing freely
+            setLocalValue(raw);
+
+            // apply constraint AFTER debounce
+            debouncedChange(raw);
+          }}
+          onBlur={() => {
+            // hard snap on blur (UX polish)
+            const clamped = clamp(localValue, min, max);
+            setLocalValue(clamped);
+            onChange(clamped);
           }}
         />
         <span className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">

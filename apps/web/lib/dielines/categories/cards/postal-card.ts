@@ -6,10 +6,22 @@ import { coreLayerOptions } from "../../core/layerOptions";
 export const postalCard: DielineDefinition = {
   slug: "postal-card",
   title: "کارت پستال دو برگ",
-  defaultDimensions: {
-    length: 160,
-    width: 90,
-    height: 0,
+  dimensions: {
+    defaultDimensions: {
+      length: 160,
+      width: 90,
+      height: 0,
+    },
+    minDimensions: {
+      length: 30,
+      width: 30,
+      height: 0,
+    },
+    maxDimensions: {
+      length: 160,
+      width: 90,
+      height: 0,
+    },
   },
   model({ width, length }) {
     const model: M.IModel = { models: {} };

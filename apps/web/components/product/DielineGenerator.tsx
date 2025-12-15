@@ -5,6 +5,7 @@ import ProductDetails, {
 } from "@/components/product/ProductDetails";
 import ProductInfo from "@/components/product/ProductInfo";
 import SVGPreview from "@/components/product/SVGPreview";
+import { DielineDefinition } from "@/lib/dielines/core/types";
 import { dielines, DielineSlug } from "@/lib/dielines/registery";
 import { useState } from "react";
 
@@ -13,10 +14,16 @@ interface Props {
 }
 
 export default function DielineGenerator({ slug }: Props) {
-  const dieline = dielines[slug as DielineSlug];
-  const [width, setWidth] = useState(dieline.defaultDimensions.width);
-  const [height, setHeight] = useState(dieline.defaultDimensions.height);
-  const [length, setLength] = useState(dieline.defaultDimensions.length);
+  const dieline = dielines[slug as DielineSlug] as DielineDefinition;
+  const [width, setWidth] = useState(
+    dieline.dimensions.defaultDimensions.width
+  );
+  const [height, setHeight] = useState(
+    dieline.dimensions.defaultDimensions.height
+  );
+  const [length, setLength] = useState(
+    dieline.dimensions.defaultDimensions.length
+  );
 
   const svg = dieline.model({ width, height, length });
 
@@ -29,7 +36,7 @@ export default function DielineGenerator({ slug }: Props) {
   return (
     <div className="h-full relative gap-6">
       <ProductDetails
-        dimensions={{ height, width, length }}
+        dimensions={dieline.dimensions}
         setDimension={setDimension}
       />
 
