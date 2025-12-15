@@ -1,9 +1,9 @@
 import M from "makerjs";
-import { DielineDefinition } from "../../core/types";
-import { coreLayerOptions } from "../../core/layerOptions";
+import { bleedAmount } from "../../core/consts";
 import { addFoldLine } from "../../core/helpers/foldLineGenerator";
 import { addGuideLine } from "../../core/helpers/guidelineGenerator";
-import { bleedAmount } from "../../core/consts";
+import { coreLayerOptions } from "../../core/layerOptions";
+import { DielineDefinition } from "../../core/types";
 
 export const postalCard: DielineDefinition = {
   slug: "postal-card",

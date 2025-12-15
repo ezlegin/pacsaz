@@ -6,8 +6,8 @@ export const colors = {
 
   // GUIDES
   guideBox: "white",
-  guideLine: "dodgerBlue",
-  guideText: "dodgerBlue",
+  guideLine: "#1E90FF", // dodgerBlue
+  guideText: "#1E90FF", // dodgerBlue
 };
 
 export const foldDasharray = "5,2";

@@ -14,9 +14,9 @@ export async function downloadPdf({
     length,
   });
 
+  // Decode the base64 PDF
   const byteCharacters = atob(pdf.pdfBase64);
   const byteNumbers = new Array(byteCharacters.length);
-
   for (let i = 0; i < byteCharacters.length; i++) {
     byteNumbers[i] = byteCharacters.charCodeAt(i);
   }
@@ -27,6 +27,7 @@ export async function downloadPdf({
 
   const url = URL.createObjectURL(blob);
 
+  // Create and click the download link
   const a = document.createElement("a");
   a.href = url;
   a.download = `${filename}.${format}`;

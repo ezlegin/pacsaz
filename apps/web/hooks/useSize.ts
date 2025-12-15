@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { DielineDimensions, Dimensions } from "@/lib/dielines/core/types";
 import { DimensionKey } from "@/components/product/ProductDetails";
+import { DielineDimensions, Dimensions } from "@/lib/dielines/core/types";
+import { useState } from "react";
 
 export function clamp(value: number, min: number) {
   if (value < min) return min;
