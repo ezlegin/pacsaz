@@ -5,11 +5,11 @@ export async function downloadPdf({
   svg,
   format,
   filename,
-  docSize,
+  svgSize,
 }: ExportPdfParams & { filename: string; format: FormatsType }) {
   const pdf = await PDFGenerator({
     svg,
-    docSize,
+    svgSize,
   });
 
   // Decode the base64 PDF
@@ -25,7 +25,6 @@ export async function downloadPdf({
 
   const url = URL.createObjectURL(blob);
 
-  // Create and click the download link
   const a = document.createElement("a");
   a.href = url;
   a.download = `${filename}.${format}`;

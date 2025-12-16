@@ -43,9 +43,9 @@ export const bleed = {
   },
 };
 
-//  PDF
-export const pdf = {
-  marginMM: 28,
+export const margins = {
+  pdf: 22,
+  container: 15,
 };
 
 export const DIMENSIONS = [

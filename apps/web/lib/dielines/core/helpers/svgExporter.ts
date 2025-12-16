@@ -1,5 +1,6 @@
 import M from "makerjs";
-import { colors, guides } from "../consts";
+import { colors, guides, margins } from "../consts";
+import { mmToPt } from "./sizeConvertor";
 
 type SvgExporterParams = {
   model: M.IModel;
@@ -7,7 +8,15 @@ type SvgExporterParams = {
 };
 
 export function svgExporter({ model, getMeasurementFrom }: SvgExporterParams) {
-  const trimSize = M.measure.modelExtents(getMeasurementFrom);
+  const containerSize = M.measure.modelExtents(getMeasurementFrom);
+
+  const container = M.model.outline(
+    new M.models.Rectangle(containerSize.width, containerSize.height),
+    mmToPt(margins.container),
+    1
+  );
+  model.models!["container"] = container;
+  model.models!["container"].layer = "container";
 
   return M.exporter.toSVG(model, {
     cssStyle: "stroke-linecap: butt;",
@@ -31,6 +40,7 @@ export function svgExporter({ model, getMeasurementFrom }: SvgExporterParams) {
         fill: colors.guides.text,
         cssStyle: `direction: ltr`,
       },
+      container: { stroke: "none" },
     },
   });
 }

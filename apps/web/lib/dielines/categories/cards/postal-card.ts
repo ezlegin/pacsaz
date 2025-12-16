@@ -27,7 +27,8 @@ export const postalCard: DielineDefinition = {
     const rect = new M.models.Rectangle(width * 2, length);
 
     //! BLEED
-    model.models!["bleed"] = M.model.outline(rect, bleed.sm.pt, 1);
+    const bleedModel = M.model.outline(rect, bleed.sm.pt, 1);
+    model.models!["bleed"] = bleedModel;
     model.models!["bleed"].layer = "bleed";
 
     //! TRIM

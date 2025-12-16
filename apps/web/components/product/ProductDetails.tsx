@@ -2,10 +2,10 @@ import { useDebouncedCallback } from "@/hooks/useDebouncedCallback";
 import { clamp } from "@/hooks/useSize";
 import { downloadPdf } from "@/lib/actions/export/downloader";
 import {
-  bleed,
   DIMENSIONS,
   DIMENSIONS_TYPE,
   FORMATS,
+  margins,
   MATERIALS,
 } from "@/lib/dielines/core/consts";
 import {
@@ -62,9 +62,9 @@ export default function ProductDetails({
     await downloadPdf({
       svg,
       filename: slug + "-dieline",
-      docSize: {
-        lengthMM: 160 + bleed.sm.mm * 2,
-        widthMM: 180 + bleed.sm.mm * 2,
+      svgSize: {
+        widthMM: 180 + margins.container * 2,
+        lengthMM: 160 + margins.container * 2,
       },
       format,
     }); //todo: get the SVG width and height and pass it here.
