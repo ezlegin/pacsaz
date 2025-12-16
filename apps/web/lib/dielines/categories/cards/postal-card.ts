@@ -60,7 +60,7 @@ export const postalCard: DielineDefinition = {
 
     return svgExporter({
       model,
-      modelToGetMeasurement: rect,
+      getMeasurementFrom: rect,
     });
   },
 };

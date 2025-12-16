@@ -1,11 +1,18 @@
-import { downloadPdf } from "@/actions/export/downloader";
 import { useDebouncedCallback } from "@/hooks/useDebouncedCallback";
 import { clamp } from "@/hooks/useSize";
+import { downloadPdf } from "@/lib/actions/export/downloader";
+import {
+  bleed,
+  DIMENSIONS,
+  DIMENSIONS_TYPE,
+  FORMATS,
+  MATERIALS,
+} from "@/lib/dielines/core/consts";
 import {
   DielineDimensions,
   DimensionsTypeType,
+  FormatsType,
 } from "@/lib/dielines/core/types";
-import { aiIcon, dxfIcon, pdfIcon } from "@/public";
 import { Button } from "@workspace/ui/components/button";
 import {
   Dialog,
@@ -31,7 +38,6 @@ import { Download, Info } from "lucide-react";
 import Image from "next/image";
 import { JSX, useEffect, useState } from "react";
 import DimensionInfo from "./info/DimensionInfo";
-import { bleed } from "@/lib/dielines/core/consts";
 
 export type DimensionKey = "width" | "length" | "height";
 
@@ -40,59 +46,27 @@ interface Props {
   dimensionsType: DimensionsTypeType;
   setDimension: (key: DimensionKey, value: number) => void;
   svg: string;
+  slug: string;
 }
-
-const DIMENSIONS = [
-  { key: "length", label: "طول" },
-  { key: "width", label: "عرض" },
-  { key: "height", label: "ارتفاع" },
-] as const;
-
-const FORMATS = [
-  { value: "PDF", icon: pdfIcon },
-  { value: "AI", icon: aiIcon },
-  { value: "DXF", icon: dxfIcon },
-] as const;
-
-const MATERIALS = [
-  {
-    label: "مقوا",
-    items: [
-      { value: "white-cardboard", label: "مقوا سفید", color: "bg-white" },
-      { value: "kraft-cardboard", label: "مقوا کرافت", color: "bg-orange-100" },
-    ],
-  },
-  {
-    label: "کارتن",
-    items: [
-      { value: "e-flute", label: "کارتن E-Flut", color: "bg-orange-100" },
-      { value: "b-flute", label: "کارتن B-Flut", color: "bg-orange-100" },
-      { value: "c-flute", label: "کارتن C-Flut", color: "bg-orange-100" },
-    ],
-  },
-];
-
-const DIMENSIONS_TYPE = [
-  { key: "manufacture", label: "ابعاد تولید" },
-  { key: "inner", label: "ابعاد داخلی" },
-  { key: "outer", label: "ابعاد خارجی" },
-] as const;
 
 export default function ProductDetails({
   dimensions,
   setDimension,
   dimensionsType,
   svg,
+  slug,
 }: Props) {
+  const [format, setFormat] = useState<FormatsType>("PDF");
+
   const download = async () => {
     await downloadPdf({
       svg,
-      filename: "new-dieline",
+      filename: slug + "-dieline",
       docSize: {
         lengthMM: 160 + bleed.sm.mm * 2,
         widthMM: 180 + bleed.sm.mm * 2,
       },
-      format: "PDF", //todo
+      format,
     }); //todo: get the SVG width and height and pass it here.
   };
 
@@ -175,7 +149,10 @@ export default function ProductDetails({
               dir="rtl"
               variant="outline"
               spacing={2}
-              defaultValue="PDF"
+              value={format}
+              onValueChange={(val) => {
+                if (val) setFormat(val as FormatsType);
+              }}
             >
               {FORMATS.map(({ value, icon }) => (
                 <ToggleGroupItem
@@ -271,14 +248,11 @@ function DimensionInput({
           onChange={(e) => {
             const raw = Number(e.target.value);
 
-            // allow typing freely
             setLocalValue(raw);
 
-            // apply constraint AFTER debounce
             debouncedChange(raw);
           }}
           onBlur={() => {
-            // hard snap on blur (UX polish)
             const clamped = clamp(localValue, min);
             setLocalValue(clamped);
             onChange(clamped);

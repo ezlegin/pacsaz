@@ -3,14 +3,11 @@ import { colors, guides } from "../consts";
 
 type SvgExporterParams = {
   model: M.IModel;
-  modelToGetMeasurement: M.IModel;
+  getMeasurementFrom: M.IModel;
 };
 
-export function svgExporter({
-  model,
-  modelToGetMeasurement,
-}: SvgExporterParams) {
-  const trimSize = M.measure.modelExtents(modelToGetMeasurement);
+export function svgExporter({ model, getMeasurementFrom }: SvgExporterParams) {
+  const trimSize = M.measure.modelExtents(getMeasurementFrom);
 
   return M.exporter.toSVG(model, {
     cssStyle: "stroke-linecap: butt;",
