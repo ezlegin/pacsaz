@@ -1,4 +1,5 @@
 import { useDebouncedCallback } from "@/hooks/useDebouncedCallback";
+import { useLoading } from "@/hooks/useLoading";
 import { clamp } from "@/hooks/useSize";
 import { downloadPdf } from "@/lib/actions/export/downloader";
 import {
@@ -13,7 +14,6 @@ import {
   DimensionsTypeType,
   FormatsType,
 } from "@/lib/dielines/core/types";
-import { Button } from "@workspace/ui/components/button";
 import {
   Dialog,
   DialogContent,
@@ -34,9 +34,10 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@workspace/ui/components/toggle-group";
-import { Download, Info } from "lucide-react";
+import { Info } from "lucide-react";
 import Image from "next/image";
 import { JSX, useEffect, useState } from "react";
+import DielineDownloadButton from "./DielineDownloadButton";
 import DimensionInfo from "./info/DimensionInfo";
 
 export type DimensionKey = "width" | "length" | "height";
@@ -56,18 +57,24 @@ export default function ProductDetails({
   svg,
   slug,
 }: Props) {
-  const [format, setFormat] = useState<FormatsType>("PDF");
+  const [format, setFormat] = useState<FormatsType>("pdf");
+  const { startLoading, stopLoading, isLoading } = useLoading();
 
-  const download = async () => {
+  const onDownload = async () => {
+    startLoading();
+
     await downloadPdf({
       svg,
       filename: slug + "-dieline",
       svgSize: {
+        //todo: get the SVG width and height and pass it here.
         widthMM: 180 + margins.container * 2,
         lengthMM: 160 + margins.container * 2,
       },
       format,
-    }); //todo: get the SVG width and height and pass it here.
+    });
+
+    stopLoading();
   };
 
   return (
@@ -168,14 +175,7 @@ export default function ProductDetails({
               ))}
             </ToggleGroup>
 
-            <Button
-              onClick={download}
-              size="lg"
-              className="mt-4 w-full gap-2 font-medium"
-            >
-              <Download />
-              دانلود فایل
-            </Button>
+            <DielineDownloadButton loading={isLoading} download={onDownload} />
           </Section>
         </div>
       </div>

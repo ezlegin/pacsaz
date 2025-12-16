@@ -55,9 +55,9 @@ export const DIMENSIONS = [
 ] as const;
 
 export const FORMATS = [
-  { value: "PDF", icon: pdfIcon },
-  { value: "AI", icon: aiIcon },
-  { value: "DXF", icon: dxfIcon },
+  { value: "pdf", icon: pdfIcon },
+  { value: "ai", icon: aiIcon },
+  { value: "dxf", icon: dxfIcon },
 ] as const;
 
 export const DIMENSIONS_TYPE = [
