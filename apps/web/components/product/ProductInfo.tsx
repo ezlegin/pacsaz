@@ -1,3 +1,4 @@
+import { formatDimensions } from "@/utils/formatDimensions";
 import { Dimensions, DimensionsTypeType } from "@/lib/dielines/core/types";
 import React from "react";
 
@@ -16,20 +17,19 @@ const ProductInfo = ({ dimensionsType, dimension }: Props) => {
   ];
 
   const dimensions = [
-    //TODO fetch correct data
     {
       label: "ابعاد تولید",
-      value: `${width} x ${length} x ${height} mm`,
+      value: formatDimensions({ width, length, height }),
       key: "manufacture",
     },
     {
       label: "ابعاد داخلی",
-      value: `${width} x ${length} x ${height} mm`,
+      value: formatDimensions({ width, length, height }),
       key: "inner",
     },
     {
       label: "ابعاد خارجی",
-      value: `${width} x ${length} x ${height} mm`,
+      value: formatDimensions({ width, length, height }),
       key: "outer",
     },
   ];

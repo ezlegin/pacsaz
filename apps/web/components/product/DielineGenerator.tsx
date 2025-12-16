@@ -4,7 +4,7 @@ import ProductDetails from "@/components/product/ProductDetails";
 import ProductInfo from "@/components/product/ProductInfo";
 import SVGPreview from "@/components/product/SVGPreview";
 import { useSize } from "@/hooks/useSize";
-import { mmToPt } from "@/lib/dielines/core/helpers/sizeConvertor";
+import { mmToPt } from "@/utils/sizeConvertor";
 import { DielineDefinition } from "@/lib/dielines/core/types";
 import { dielines, DielineSlug } from "@/lib/dielines/registery";
 

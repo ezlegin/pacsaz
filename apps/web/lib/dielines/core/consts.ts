@@ -1,5 +1,5 @@
 import { aiIcon, dxfIcon, pdfIcon } from "@/public";
-import { mmToPt } from "./helpers/sizeConvertor";
+import { mmToPt } from "../../../utils/sizeConvertor";
 
 // COLORS
 export const colors = {

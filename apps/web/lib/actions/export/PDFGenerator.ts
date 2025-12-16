@@ -1,7 +1,7 @@
 "use server";
 
 import { colors, margins } from "@/lib/dielines/core/consts";
-import { mmToPt } from "@/lib/dielines/core/helpers/sizeConvertor";
+import { mmToPt } from "@/utils/sizeConvertor";
 import path from "path";
 import PDFDocument from "pdfkit";
 import SVGtoPDF from "svg-to-pdfkit";

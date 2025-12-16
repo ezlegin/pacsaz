@@ -1,5 +1,5 @@
 import M from "makerjs";
-import { ptToMm } from "./sizeConvertor";
+import { ptToMm } from "../../../../utils/sizeConvertor";
 
 type Point = [number, number];
 

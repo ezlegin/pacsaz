@@ -1,6 +1,6 @@
 import M from "makerjs";
 import { colors, guides, margins } from "../consts";
-import { mmToPt } from "./sizeConvertor";
+import { mmToPt } from "../../../../utils/sizeConvertor";
 
 type SvgExporterParams = {
   model: M.IModel;
