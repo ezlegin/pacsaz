@@ -44,5 +44,5 @@ export const bleed = {
 
 //  PDF
 export const pdf = {
-  marginMM: 25,
+  marginMM: 28,
 };

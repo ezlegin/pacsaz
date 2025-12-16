@@ -1,6 +1,6 @@
 "use server";
 
-import { pdf } from "@/lib/dielines/core/consts";
+import { colors, pdf } from "@/lib/dielines/core/consts";
 import { mmToPt } from "@/lib/dielines/core/helpers/sizeConvertor";
 import path from "path";
 import PDFDocument from "pdfkit";
@@ -20,11 +20,10 @@ export async function PDFGenerator({
 }: ExportPdfParams) {
   const fontPath = path.join(process.cwd(), "public/fonts/ARIAL.TTF");
 
+  const docWidth = mmToPt(widthMM + pdf.marginMM * 2);
+  const docLength = mmToPt(lengthMM + pdf.marginMM * 2);
   const doc = new PDFDocument({
-    size: [
-      mmToPt(widthMM + pdf.marginMM * 2),
-      mmToPt(lengthMM + pdf.marginMM * 2),
-    ],
+    size: [docWidth, docLength],
     font: fontPath,
     info: {
       Title: "PacSaz Dieline",
@@ -36,6 +35,16 @@ export async function PDFGenerator({
   doc.on("data", (chunk) => chunks.push(chunk));
 
   doc.on("end", () => {});
+
+  const guideText = [
+    "Created By: PacSaz.ir",
+    "------------------------------",
+    "Bleed: 3mm",
+    `Trim Size: ${180} x ${160} x 0 mm`, //todo
+    `Bleed Size: ${widthMM} x ${lengthMM} x 0 mm`,
+  ].join("\n");
+
+  doc.fontSize(9).fillColor(colors.guides.text).text(guideText, 10, 10);
 
   SVGtoPDF(doc, svg, mmToPt(pdf.marginMM), mmToPt(pdf.marginMM), {
     assumePt: true,
