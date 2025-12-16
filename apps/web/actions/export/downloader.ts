@@ -5,13 +5,11 @@ export async function downloadPdf({
   svg,
   format,
   filename,
-  length,
-  width,
+  docSize,
 }: ExportPdfParams & { filename: string; format: FormatsType }) {
   const pdf = await PDFGenerator({
     svg,
-    width,
-    length,
+    docSize,
   });
 
   // Decode the base64 PDF

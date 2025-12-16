@@ -1,3 +1,5 @@
+import { mmToPt } from "./helpers/sizeConvertor";
+
 export const colors = {
   bleed: "green",
   trim: "blue",
@@ -10,6 +12,8 @@ export const colors = {
   guideText: "#1E90FF", // dodgerBlue
 };
 
-export const foldDasharray = "5,2";
-export const guideTextFontSize = 3.75;
-export const bleedAmount = 3;
+export const foldDasharray = "5,3"; // in PT
+export const guideTextFontSize = 12; // in PT
+export const bleedMM = 3; // in MM
+export const bleedPT = mmToPt(3); // in MM
+export const PDFDocMarginMM = 25; // in mm;

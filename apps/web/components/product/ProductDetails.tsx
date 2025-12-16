@@ -1,3 +1,11 @@
+import { downloadPdf } from "@/actions/export/downloader";
+import { useDebouncedCallback } from "@/hooks/useDebouncedCallback";
+import { clamp } from "@/hooks/useSize";
+import { bleedMM } from "@/lib/dielines/core/consts";
+import {
+  DielineDimensions,
+  DimensionsTypeType,
+} from "@/lib/dielines/core/types";
 import { aiIcon, dxfIcon, pdfIcon } from "@/public";
 import { Button } from "@workspace/ui/components/button";
 import {
@@ -22,17 +30,8 @@ import {
 } from "@workspace/ui/components/toggle-group";
 import { Download, Info } from "lucide-react";
 import Image from "next/image";
-import { JSX } from "react";
+import { JSX, useEffect, useState } from "react";
 import DimensionInfo from "./info/DimensionInfo";
-import { useEffect, useState } from "react";
-import { useDebouncedCallback } from "@/hooks/useDebouncedCallback";
-import {
-  DielineDimensions,
-  DimensionsTypeType,
-} from "@/lib/dielines/core/types";
-import { clamp } from "@/hooks/useSize";
-import { downloadPdf } from "@/actions/export/downloader";
-import { bleedAmount } from "@/lib/dielines/core/consts";
 
 export type DimensionKey = "width" | "length" | "height";
 
@@ -89,8 +88,10 @@ export default function ProductDetails({
     await downloadPdf({
       svg,
       filename: "new-dieline",
-      length: 160 + bleedAmount * 2,
-      width: 180 + bleedAmount * 2,
+      docSize: {
+        lengthMM: 160 + bleedMM * 2,
+        widthMM: 180 + bleedMM * 2,
+      },
       format: "PDF", //todo
     }); //todo: get the SVG width and height and pass it here.
   };

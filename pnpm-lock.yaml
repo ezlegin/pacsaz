@@ -57,8 +57,8 @@ importers:
         specifier: ^1.17.1
         version: 1.17.1
       pdfkit:
-        specifier: 0.17.0
-        version: 0.17.0
+        specifier: 0.17.2
+        version: 0.17.2
       react:
         specifier: ^19.2.1
         version: 19.2.1
@@ -2803,8 +2803,8 @@ packages:
   pdf-lib@1.17.1:
     resolution: {integrity: sha512-V/mpyJAoTsN4cnP31vc0wfNA1+p20evqqnap0KLoRUN0Yk/p3wN52DOEsL4oBFcLdb76hlpKPtzJIgo67j/XLw==}
 
-  pdfkit@0.17.0:
-    resolution: {integrity: sha512-XRb2Bwtl+oIo+TOf4HOlbqIn6NBiYk8Um4FsfKXrgX9uZQILTbXDlbf0DEZQJxFqognrwIS5QFn5PsOxU8eLMA==}
+  pdfkit@0.17.2:
+    resolution: {integrity: sha512-UnwF5fXy08f0dnp4jchFYAROKMNTaPqb/xgR8GtCzIcqoTnbOqtp3bwKvO4688oHI6vzEEs8Q6vqqEnC5IUELw==}
 
   picocolors@1.0.1:
     resolution: {integrity: sha512-anP1Z8qwhkbmu7MFP5iTt+wQKXgwzf7zTyGlcdzabySa9vd0Xt392U0rVmz9poOaBj0uHJKyyo9/upk0HrEQew==}
@@ -6324,7 +6324,7 @@ snapshots:
       pako: 1.0.11
       tslib: 1.14.1
 
-  pdfkit@0.17.0:
+  pdfkit@0.17.2:
     dependencies:
       crypto-js: 4.2.0
       fontkit: 2.0.4
@@ -6764,7 +6764,7 @@ snapshots:
 
   svg-to-pdfkit@0.1.8:
     dependencies:
-      pdfkit: 0.17.0
+      pdfkit: 0.17.2
 
   swap-case@1.1.2:
     dependencies:

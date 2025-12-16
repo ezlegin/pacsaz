@@ -1,4 +1,5 @@
 import M from "makerjs";
+import { ptToMm } from "./sizeConvertor";
 
 export type Point = [number, number];
 
@@ -19,7 +20,7 @@ export function addGuideLine(model: M.IModel, options: GuideLineOptions) {
   model.models![`${type}Line`]!.layer = `guideLine`;
 
   // arrow pointer
-  const pointerRadius = 1.2;
+  const pointerRadius = 3;
   const basePointer = new M.models.Polygon(3, pointerRadius);
 
   const startPointer = M.cloneObject(basePointer);
@@ -45,14 +46,14 @@ export function addGuideLine(model: M.IModel, options: GuideLineOptions) {
   const mid: Point = [(from[0] + to[0]) / 2, (from[1] + to[1]) / 2];
 
   const textCarrier = M.cloneObject(guideLine);
-  M.model.addCaption(textCarrier, `${value} mm`, mid);
+  M.model.addCaption(textCarrier, `${ptToMm(value)} mm`, mid);
 
   model.models![`${type}Text`] = textCarrier;
   model.models![`${type}Text`]!.layer = `guideText`;
 
   // optional background box
-  const box = new M.models.Rectangle(18, 6);
-  M.model.move(box, [mid[0] - 9, mid[1] - 3]);
+  const box = new M.models.Rectangle(50, 30);
+  M.model.move(box, [mid[0] - 25, mid[1] - 15]);
   model.models![`${type}Box`] = box;
   model.models![`${type}Box`]!.layer = `guideBox`;
 }

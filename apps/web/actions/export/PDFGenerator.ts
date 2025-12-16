@@ -1,23 +1,30 @@
 "use server";
 
+import { PDFDocMarginMM } from "@/lib/dielines/core/consts";
+import { mmToPt } from "@/lib/dielines/core/helpers/sizeConvertor";
 import path from "path";
 import PDFDocument from "pdfkit";
 import SVGtoPDF from "svg-to-pdfkit";
 
-const MM_TO_PT = 72 / 25.4;
-const margin = 25; // in mm
-
 export type ExportPdfParams = {
   svg: string;
-  width: number;
-  length: number;
+  docSize: {
+    widthMM: number;
+    lengthMM: number;
+  };
 };
 
-export async function PDFGenerator({ svg, length, width }: ExportPdfParams) {
+export async function PDFGenerator({
+  svg,
+  docSize: { lengthMM, widthMM },
+}: ExportPdfParams) {
   const fontPath = path.join(process.cwd(), "public/fonts/ARIAL.TTF");
 
   const doc = new PDFDocument({
-    size: [(width + margin * 2) * MM_TO_PT, (length + margin * 2) * MM_TO_PT],
+    size: [
+      mmToPt(widthMM + PDFDocMarginMM * 2),
+      mmToPt(lengthMM + PDFDocMarginMM * 2),
+    ],
     font: fontPath,
   });
 
@@ -27,8 +34,8 @@ export async function PDFGenerator({ svg, length, width }: ExportPdfParams) {
 
   doc.on("end", () => {});
 
-  SVGtoPDF(doc, svg, margin * MM_TO_PT, margin * MM_TO_PT, {
-    assumePt: false,
+  SVGtoPDF(doc, svg, mmToPt(PDFDocMarginMM), mmToPt(PDFDocMarginMM), {
+    assumePt: true,
   });
 
   doc.end();
