@@ -1,7 +1,6 @@
 import { downloadPdf } from "@/actions/export/downloader";
 import { useDebouncedCallback } from "@/hooks/useDebouncedCallback";
 import { clamp } from "@/hooks/useSize";
-import { bleedMM } from "@/lib/dielines/core/consts";
 import {
   DielineDimensions,
   DimensionsTypeType,
@@ -32,6 +31,7 @@ import { Download, Info } from "lucide-react";
 import Image from "next/image";
 import { JSX, useEffect, useState } from "react";
 import DimensionInfo from "./info/DimensionInfo";
+import { bleed } from "@/lib/dielines/core/consts";
 
 export type DimensionKey = "width" | "length" | "height";
 
@@ -89,8 +89,8 @@ export default function ProductDetails({
       svg,
       filename: "new-dieline",
       docSize: {
-        lengthMM: 160 + bleedMM * 2,
-        widthMM: 180 + bleedMM * 2,
+        lengthMM: 160 + bleed.mm * 2,
+        widthMM: 180 + bleed.mm * 2,
       },
       format: "PDF", //todo
     }); //todo: get the SVG width and height and pass it here.

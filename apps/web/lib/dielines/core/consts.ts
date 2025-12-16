@@ -1,19 +1,34 @@
 import { mmToPt } from "./helpers/sizeConvertor";
 
+// COLORS
 export const colors = {
-  bleed: "green",
-  trim: "blue",
-  fold: "red",
-  dielineFill: "white",
+  dielines: {
+    bleed: "green",
+    trim: "blue",
+    fold: "red",
+    fill: "white",
+  },
 
-  // GUIDES
-  guideBox: "white",
-  guideLine: "#1E90FF", // dodgerBlue
-  guideText: "#1E90FF", // dodgerBlue
+  guides: {
+    box: "white",
+    line: "#1E90FF", // dodgerBlue
+    text: "#1E90FF", // dodgerBlue
+  },
 };
 
-export const foldDasharray = "5,2"; // in PT
-export const guideTextFontSize = 12; // in PT
-export const bleedMM = 3; // in MM
-export const bleedPT = mmToPt(3); // in MM
-export const PDFDocMarginMM = 25; // in mm;
+// GUIDES
+export const guides = {
+  foldDasharray: "5,2", // PT
+  textFontSizePT: 12,
+};
+
+//  BLEED
+export const bleed = {
+  mm: 3,
+  pt: mmToPt(3),
+};
+
+//  PDF
+export const pdf = {
+  marginMM: 25,
+};

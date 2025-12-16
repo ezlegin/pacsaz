@@ -1,6 +1,6 @@
 "use server";
 
-import { PDFDocMarginMM } from "@/lib/dielines/core/consts";
+import { pdf } from "@/lib/dielines/core/consts";
 import { mmToPt } from "@/lib/dielines/core/helpers/sizeConvertor";
 import path from "path";
 import PDFDocument from "pdfkit";
@@ -22,8 +22,8 @@ export async function PDFGenerator({
 
   const doc = new PDFDocument({
     size: [
-      mmToPt(widthMM + PDFDocMarginMM * 2),
-      mmToPt(lengthMM + PDFDocMarginMM * 2),
+      mmToPt(widthMM + pdf.marginMM * 2),
+      mmToPt(lengthMM + pdf.marginMM * 2),
     ],
     font: fontPath,
   });
@@ -34,7 +34,7 @@ export async function PDFGenerator({
 
   doc.on("end", () => {});
 
-  SVGtoPDF(doc, svg, mmToPt(PDFDocMarginMM), mmToPt(PDFDocMarginMM), {
+  SVGtoPDF(doc, svg, mmToPt(pdf.marginMM), mmToPt(pdf.marginMM), {
     assumePt: true,
   });
 

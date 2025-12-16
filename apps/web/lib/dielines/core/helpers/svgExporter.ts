@@ -1,5 +1,5 @@
 import M from "makerjs";
-import { colors, foldDasharray } from "../consts";
+import { colors, guides } from "../consts";
 
 type SvgExporterParams = {
   model: M.IModel;
@@ -26,22 +26,22 @@ export function svgExporter({
     cssStyle: "stroke-linecap: butt;",
     layerOptions: {
       bleed: {
-        stroke: colors.bleed,
-        fill: colors.dielineFill,
+        stroke: colors.dielines.bleed,
+        fill: colors.dielines.fill,
         strokeWidth: "1",
       },
-      trim: { stroke: colors.trim, strokeWidth: "1" },
+      trim: { stroke: colors.dielines.trim, strokeWidth: "1" },
       fold: {
-        stroke: colors.fold,
+        stroke: colors.dielines.fold,
         strokeWidth: "1",
-        cssStyle: `stroke-dasharray:${foldDasharray}`,
+        cssStyle: `stroke-dasharray:${guides.foldDasharray}`,
       },
-      guideBox: { fill: colors.guideBox, stroke: "none" },
-      guideLine: { stroke: colors.guideLine },
-      pointer: { stroke: "none", fill: colors.guideLine },
+      guideBox: { fill: colors.guides.box, stroke: "none" },
+      guideLine: { stroke: colors.guides.line },
+      pointer: { stroke: "none", fill: colors.guides.line },
       guideText: {
         stroke: "none",
-        fill: colors.guideText,
+        fill: colors.guides.text,
         cssStyle: `direction: ltr`,
       },
     },

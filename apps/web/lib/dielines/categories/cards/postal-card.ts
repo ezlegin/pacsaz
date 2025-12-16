@@ -1,9 +1,9 @@
 import M from "makerjs";
-import { bleedPT } from "../../core/consts";
 import { addFoldLine } from "../../core/helpers/foldLineGenerator";
 import { addGuideLine } from "../../core/helpers/guidelineGenerator";
 import { DielineDefinition } from "../../core/types";
 import { svgExporter } from "../../core/helpers/svgExporter";
+import { bleed } from "../../core/consts";
 
 export const postalCard: DielineDefinition = {
   slug: "postal-card",
@@ -26,7 +26,7 @@ export const postalCard: DielineDefinition = {
     const rect = new M.models.Rectangle(width * 2, length);
 
     //! BLEED
-    model.models!["bleed"] = M.model.outline(rect, bleedPT, 1);
+    model.models!["bleed"] = M.model.outline(rect, bleed.pt, 1);
     model.models!["bleed"].layer = "bleed";
 
     //! TRIM
@@ -60,7 +60,7 @@ export const postalCard: DielineDefinition = {
     return svgExporter({
       model,
       modelToGetMeasurement: rect,
-      bleedPT,
+      bleedPT: bleed.pt,
     });
   },
 };
