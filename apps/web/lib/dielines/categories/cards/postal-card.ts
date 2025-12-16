@@ -2,8 +2,8 @@ import M from "makerjs";
 import { bleedPT } from "../../core/consts";
 import { addFoldLine } from "../../core/helpers/foldLineGenerator";
 import { addGuideLine } from "../../core/helpers/guidelineGenerator";
-import { coreLayerOptions } from "../../core/layerOptions";
 import { DielineDefinition } from "../../core/types";
+import { svgExporter } from "../../core/helpers/svgExporter";
 
 export const postalCard: DielineDefinition = {
   slug: "postal-card",
@@ -49,7 +49,6 @@ export const postalCard: DielineDefinition = {
       value: width,
       orientation: "horizontal",
     });
-
     addGuideLine(model, {
       type: "length",
       from: [width / 4, 0],
@@ -58,10 +57,10 @@ export const postalCard: DielineDefinition = {
       orientation: "vertical",
     });
 
-    return M.exporter.toSVG(model, {
-      layerOptions: {
-        ...coreLayerOptions,
-      },
+    return svgExporter({
+      model,
+      modelToGetMeasurement: rect,
+      bleedPT,
     });
   },
 };

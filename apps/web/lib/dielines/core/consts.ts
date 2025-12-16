@@ -12,7 +12,7 @@ export const colors = {
   guideText: "#1E90FF", // dodgerBlue
 };
 
-export const foldDasharray = "5,3"; // in PT
+export const foldDasharray = "5,2"; // in PT
 export const guideTextFontSize = 12; // in PT
 export const bleedMM = 3; // in MM
 export const bleedPT = mmToPt(3); // in MM
