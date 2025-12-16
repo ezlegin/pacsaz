@@ -24,8 +24,22 @@ export const guides = {
 
 //  BLEED
 export const bleed = {
-  mm: 3,
-  pt: mmToPt(3),
+  sm: {
+    mm: 3,
+    pt: mmToPt(3),
+  },
+  md: {
+    mm: 5,
+    pt: mmToPt(5),
+  },
+  lg: {
+    mm: 7,
+    pt: mmToPt(7),
+  },
+  xl: {
+    mm: 10,
+    pt: mmToPt(10),
+  },
 };
 
 //  PDF

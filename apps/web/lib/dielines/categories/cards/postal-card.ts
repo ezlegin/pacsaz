@@ -26,7 +26,7 @@ export const postalCard: DielineDefinition = {
     const rect = new M.models.Rectangle(width * 2, length);
 
     //! BLEED
-    model.models!["bleed"] = M.model.outline(rect, bleed.pt, 1);
+    model.models!["bleed"] = M.model.outline(rect, bleed.sm.pt, 1);
     model.models!["bleed"].layer = "bleed";
 
     //! TRIM
@@ -60,7 +60,6 @@ export const postalCard: DielineDefinition = {
     return svgExporter({
       model,
       modelToGetMeasurement: rect,
-      bleedPT: bleed.pt,
     });
   },
 };

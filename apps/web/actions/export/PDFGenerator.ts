@@ -26,6 +26,9 @@ export async function PDFGenerator({
       mmToPt(lengthMM + pdf.marginMM * 2),
     ],
     font: fontPath,
+    info: {
+      Title: "PacSaz Dieline",
+    },
   });
 
   const chunks: Buffer[] = [];

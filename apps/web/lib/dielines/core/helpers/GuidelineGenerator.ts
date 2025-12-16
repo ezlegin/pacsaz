@@ -1,7 +1,7 @@
 import M from "makerjs";
 import { ptToMm } from "./sizeConvertor";
 
-export type Point = [number, number];
+type Point = [number, number];
 
 export interface GuideLineOptions {
   type: "width" | "length" | "height";
@@ -14,11 +14,6 @@ export interface GuideLineOptions {
 export function addGuideLine(model: M.IModel, options: GuideLineOptions) {
   const { type, from, to, value, orientation } = options;
 
-  // guide line
-  const guideLine = new M.models.ConnectTheDots(false, [from, to]);
-  model.models![`${type}Line`] = guideLine;
-  model.models![`${type}Line`]!.layer = `guideLine`;
-
   // arrow pointer
   const pointerRadius = 3;
   const basePointer = new M.models.Polygon(3, pointerRadius);
@@ -26,11 +21,46 @@ export function addGuideLine(model: M.IModel, options: GuideLineOptions) {
   const startPointer = M.cloneObject(basePointer);
   const endPointer = M.cloneObject(basePointer);
 
+  // Position Pointers
   if (orientation === "horizontal") {
+    // Horizontal guide line
+    const textBoxSize = 25;
+
+    const guideLineBefore = new M.models.ConnectTheDots(false, [
+      from,
+      [to[0] / 2 - textBoxSize, to[1]],
+    ]);
+    model.models![`${type}LineBefore`] = guideLineBefore;
+    model.models![`${type}LineBefore`]!.layer = `guideLine`;
+
+    const guideLineAfter = new M.models.ConnectTheDots(false, [
+      [to[0] / 2 + textBoxSize, to[1]],
+      to,
+    ]);
+    model.models![`${type}LineAfter`] = guideLineAfter;
+    model.models![`${type}LineAfter`]!.layer = `guideLine`;
+
     M.model.rotate(startPointer, 180);
     M.model.move(startPointer, [from[0] + pointerRadius, from[1]]);
     M.model.move(endPointer, [to[0] - pointerRadius, to[1]]);
   } else {
+    // Vertical guide line
+    const textBoxSize = 10;
+
+    const guideLineBefore = new M.models.ConnectTheDots(false, [
+      from,
+      [from[0], to[1] / 2 - textBoxSize],
+    ]);
+    model.models![`${type}LineBefore`] = guideLineBefore;
+    model.models![`${type}LineBefore`]!.layer = `guideLine`;
+
+    const guideLineAfter = new M.models.ConnectTheDots(false, [
+      [to[0], to[1] / 2 + textBoxSize],
+      to,
+    ]);
+    model.models![`${type}LineAfter`] = guideLineAfter;
+    model.models![`${type}LineAfter`]!.layer = `guideLine`;
+
     M.model.rotate(startPointer, -90);
     M.model.move(startPointer, [from[0], from[1] + pointerRadius]);
     M.model.rotate(endPointer, 90);
@@ -45,15 +75,9 @@ export function addGuideLine(model: M.IModel, options: GuideLineOptions) {
   // text anchor
   const mid: Point = [(from[0] + to[0]) / 2, (from[1] + to[1]) / 2];
 
-  const textCarrier = M.cloneObject(guideLine);
+  const textCarrier = new M.models.ConnectTheDots(false, [[0, 0]]);
   M.model.addCaption(textCarrier, `${ptToMm(value)} mm`, mid);
 
   model.models![`${type}Text`] = textCarrier;
   model.models![`${type}Text`]!.layer = `guideText`;
-
-  // optional background box
-  const box = new M.models.Rectangle(50, 30);
-  M.model.move(box, [mid[0] - 25, mid[1] - 15]);
-  model.models![`${type}Box`] = box;
-  model.models![`${type}Box`]!.layer = `guideBox`;
 }
