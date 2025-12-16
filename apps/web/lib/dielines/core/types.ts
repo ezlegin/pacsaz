@@ -8,6 +8,7 @@ export type DimensionsTypeType = ["manufacture"?, "inner"?, "outer"?];
 export type FormatsType = "PDF" | "AI" | "DXF";
 
 export type DielineDimensions = {
+  initialScale?: number;
   defaultDimensions: Dimensions;
   minDimensions: Dimensions;
 };

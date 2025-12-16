@@ -6,7 +6,13 @@ import { Separator } from "@workspace/ui/components/separator";
 import { ZoomIn, ZoomOut } from "lucide-react";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 
-export default function SvgPreview({ svg }: { svg: string }) {
+export default function SvgPreview({
+  svg,
+  initalScale = 1,
+}: {
+  svg: string;
+  initalScale?: number;
+}) {
   return (
     <div className="relative flex justify-center items-center w-full h-full overflow-visible">
       <TransformWrapper
@@ -17,8 +23,11 @@ export default function SvgPreview({ svg }: { svg: string }) {
         doubleClick={{ disabled: true }}
         maxScale={3}
         minScale={0.3}
-        onInit={({ setTransform }) => {
-          setTransform(0, -50, 1);
+        smooth
+        centerZoomedOut
+        limitToBounds={false}
+        onInit={({ centerView }) => {
+          centerView(initalScale);
         }}
       >
         {({ zoomIn, zoomOut, resetTransform }) => (

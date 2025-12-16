@@ -32,7 +32,7 @@ export default function DielineGenerator({ slug }: Props) {
         svg={svg}
       />
 
-      <SVGPreview svg={svg} />
+      <SVGPreview svg={svg} initalScale={dieline.dimensions.initialScale} />
 
       <ProductInfo dimension={size} dimensionsType={dieline.dimensionsType} />
     </div>

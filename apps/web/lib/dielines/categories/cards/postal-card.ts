@@ -9,6 +9,7 @@ export const postalCard: DielineDefinition = {
   slug: "postal-card",
   title: "کارت پستال تا شو",
   dimensions: {
+    initialScale: 1.5,
     defaultDimensions: {
       length: 160,
       width: 90,
