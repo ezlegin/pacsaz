@@ -1,3 +1,5 @@
+import { DimensionType } from "./helpers/applyDimensionOffset";
+
 export type Dimensions = {
   width: number;
   length: number;
@@ -5,7 +7,7 @@ export type Dimensions = {
 };
 
 export type DimensionKey = "width" | "length" | "height";
-export type DimensionsTypeType = ["manufacture"?, "inner"?, "outer"?];
+export type DimensionsType = ["manufacture"?, "inner"?, "outer"?];
 export type FormatsType = "pdf" | "ai" | "dxf";
 
 export type DielineDimensions = {
@@ -43,13 +45,16 @@ export type SVGModel = {
   sizes: SVGModelSizes;
 };
 
-export type DielineModel = (params: Dimensions) => SVGModel;
+export type DielineModel = (params: {
+  dimension: Dimensions;
+  dimensionType: DimensionType;
+}) => SVGModel;
 
 export interface DielineDefinition {
   slug: string;
   title: string;
   dimensions: DielineDimensions;
-  dimensionsType: DimensionsTypeType;
+  dimensionsType: DimensionsType;
   materials: MaterialsInput;
   model: DielineModel;
 }

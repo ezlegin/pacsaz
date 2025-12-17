@@ -7,10 +7,10 @@ export function formatDimensions({
   length: number;
   height: number;
 }) {
-  const values = [width, length];
+  const values = [+width.toFixed(1), +length.toFixed(1)];
 
   if (height > 0) {
-    values.push(height);
+    values.push(+height.toFixed(1));
   }
 
   return `${values.join(" x ")} mm`;

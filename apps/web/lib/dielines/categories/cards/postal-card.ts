@@ -5,6 +5,7 @@ import {
   MARGINS,
   MATERIALS,
 } from "../../core/consts";
+import { applyDimensionOffset } from "../../core/helpers/applyDimensionOffset";
 import { addContainer } from "../../core/helpers/containerGenerator";
 import { addFoldLine } from "../../core/helpers/foldLineGenerator";
 import { addGuideLine } from "../../core/helpers/guidelineGenerator";
@@ -32,20 +33,13 @@ export const postalCard: DielineDefinition = {
     default: MATERIALS["cardboard"],
     included: [MATERIALS["cardboard"]],
   },
-  model({ width: rawWidth, length: rawLength }) {
+  model({ dimension: { width: rawWidth, length: rawLength }, dimensionType }) {
     let width = rawWidth;
     let length = rawLength;
     const overalDimensionOffset = DimensionsTypeOffset * 2;
-    const isInnerDimension = true;
-    const isOuterDimension = false;
-    if (isInnerDimension) {
-      width += overalDimensionOffset;
-      length += overalDimensionOffset;
-    }
-    if (isOuterDimension) {
-      width -= overalDimensionOffset;
-      length -= overalDimensionOffset;
-    }
+
+    width = applyDimensionOffset(width, dimensionType, overalDimensionOffset);
+    length = applyDimensionOffset(length, dimensionType, overalDimensionOffset);
 
     const model: M.IModel = { models: {} };
     const rect = new M.models.Rectangle(width * 2, length);
@@ -75,8 +69,7 @@ export const postalCard: DielineDefinition = {
       to: [width, length / 4],
       value: rawWidth,
       orientation: "horizontal",
-      isInnerDimension,
-      isOuterDimension,
+      dimensionType,
     });
     addGuideLine(model, {
       type: "length",
@@ -84,8 +77,7 @@ export const postalCard: DielineDefinition = {
       to: [width / 4, length],
       value: rawLength,
       orientation: "vertical",
-      isInnerDimension,
-      isOuterDimension,
+      dimensionType,
     });
 
     // SIZES

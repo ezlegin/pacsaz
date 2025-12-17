@@ -1,13 +1,71 @@
-import { Dimensions, DimensionsTypeType } from "@/lib/dielines/core/types";
+import { DimensionsTypeOffset } from "@/lib/dielines/core/consts";
+import {
+  applyDimensionOffset,
+  DimensionType,
+} from "@/lib/dielines/core/helpers/applyDimensionOffset";
+import { Dimensions, DimensionsType } from "@/lib/dielines/core/types";
 import { formatDimensions } from "@/utils/formatDimensions";
+import { ptToMm } from "@/utils/sizeConvertor";
 
 interface Props {
   dimension: Dimensions;
-  dimensionsType: DimensionsTypeType;
+  dimensionsType: DimensionsType;
+  dimensionType: DimensionType;
 }
 
-const ProductInfo = ({ dimensionsType, dimension }: Props) => {
+const ProductInfo = ({ dimensionsType, dimension, dimensionType }: Props) => {
   const { height, length, width } = dimension;
+
+  const manufactureDimWidth = applyDimensionOffset(
+    width,
+    dimensionType,
+    ptToMm(DimensionsTypeOffset * 2)
+  );
+  const manufactureDimLength = applyDimensionOffset(
+    length,
+    dimensionType,
+    ptToMm(DimensionsTypeOffset * 2)
+  );
+
+  const innerDimWidth = applyDimensionOffset(
+    dimensionType === "outer" ? manufactureDimWidth : width,
+    dimensionType === "inner"
+      ? "manufacture"
+      : dimensionType === "outer"
+        ? "outer"
+        : "outer",
+    ptToMm(DimensionsTypeOffset * 2)
+  );
+
+  const innerDimLength = applyDimensionOffset(
+    dimensionType === "outer" ? manufactureDimLength : length,
+    dimensionType === "inner"
+      ? "manufacture"
+      : dimensionType === "outer"
+        ? "outer"
+        : "outer",
+    ptToMm(DimensionsTypeOffset * 2)
+  );
+
+  const outerDimWidth = applyDimensionOffset(
+    dimensionType === "inner" ? manufactureDimWidth : width,
+    dimensionType === "outer"
+      ? "manufacture"
+      : dimensionType === "inner"
+        ? "inner"
+        : "inner",
+    ptToMm(DimensionsTypeOffset * 2)
+  );
+
+  const outerDimLength = applyDimensionOffset(
+    dimensionType === "inner" ? manufactureDimLength : length,
+    dimensionType === "outer"
+      ? "manufacture"
+      : dimensionType === "inner"
+        ? "inner"
+        : "inner",
+    ptToMm(DimensionsTypeOffset * 2)
+  );
 
   const packLengend = [
     { color: "bg-blue-500", label: "خط برش" },
@@ -18,25 +76,31 @@ const ProductInfo = ({ dimensionsType, dimension }: Props) => {
   const dimensions = [
     {
       label: "ابعاد تولید",
-      value: formatDimensions({ width, length, height }),
+      value: formatDimensions({
+        width: manufactureDimWidth,
+        length: manufactureDimLength,
+        height,
+      }),
       key: "manufacture",
     },
     {
       label: "ابعاد داخلی",
-      value: formatDimensions({ width, length, height }),
+      value: formatDimensions({
+        width: innerDimWidth,
+        length: innerDimLength,
+        height,
+      }),
       key: "inner",
     },
     {
       label: "ابعاد خارجی",
-      value: formatDimensions({ width, length, height }),
+      value: formatDimensions({
+        width: outerDimWidth,
+        length: outerDimLength,
+        height,
+      }),
       key: "outer",
     },
-  ];
-
-  const deliveries = [
-    "تمام فایل‌های دایلاین در عرض چند دقیقه قابل تولید و دانلود هستند.",
-    "تمام فایل‌های دایلاین از نظر ساختاری به‌طور دقیق بررسی می‌شوند. ابعاد، ضخامت و توضیحات مربوط به متریال در آن‌ها درج شده است و فایل‌ها کاملاً آماده چاپ هستند.",
-    "تمام فایل‌های دایلاین بدون واترمارک بوده و امکان ویرایش محلی آن‌ها با نرم‌افزار Adobe Illustrator وجود دارد.",
   ];
 
   return (
@@ -81,3 +145,9 @@ const ProductInfo = ({ dimensionsType, dimension }: Props) => {
   );
 };
 export default ProductInfo;
+
+const deliveries = [
+  "تمام فایل‌های دایلاین در عرض چند دقیقه قابل تولید و دانلود هستند.",
+  "تمام فایل‌های دایلاین از نظر ساختاری به‌طور دقیق بررسی می‌شوند. ابعاد، ضخامت و توضیحات مربوط به متریال در آن‌ها درج شده است و فایل‌ها کاملاً آماده چاپ هستند.",
+  "تمام فایل‌های دایلاین بدون واترمارک بوده و امکان ویرایش محلی آن‌ها با نرم‌افزار Adobe Illustrator وجود دارد.",
+];

@@ -9,7 +9,7 @@ import {
 import {
   DielineDimensions,
   DimensionKey,
-  DimensionsTypeType,
+  DimensionsType,
   FormatsType,
   MaterialsInput,
   MaterialValue,
@@ -39,6 +39,7 @@ import Image from "next/image";
 import { JSX, useState } from "react";
 import DielineDownloadButton from "./DielineDownloadButton";
 import DimensionInfo from "./info/DimensionInfo";
+import { DimensionType } from "@/lib/dielines/core/helpers/applyDimensionOffset";
 
 export interface SVGSizeProps {
   width: number;
@@ -48,8 +49,10 @@ export interface SVGSizeProps {
 interface Props {
   defaultDimensions: DielineDimensions;
   materials: MaterialsInput;
-  dimensionsType: DimensionsTypeType;
+  dimensionsType: DimensionsType;
   setDimension: (key: DimensionKey, value: number) => void;
+  dimensionType: DimensionType;
+  setDimensionType: (value: DimensionType) => void;
   svg: SVGModel;
   slug: string;
 }
@@ -57,6 +60,8 @@ interface Props {
 export default function ProductDetails({
   defaultDimensions,
   setDimension,
+  setDimensionType,
+  dimensionType,
   dimensionsType,
   svg,
   slug,
@@ -150,6 +155,10 @@ export default function ProductDetails({
               defaultValue="manufacture"
               spacing={2}
               dir="rtl"
+              value={dimensionType}
+              onValueChange={(val) => {
+                if (val) setDimensionType(val as DimensionType);
+              }}
             >
               {DIMENSIONS_TYPE.map(
                 ({ label, key }) =>
