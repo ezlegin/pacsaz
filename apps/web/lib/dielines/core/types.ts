@@ -38,6 +38,10 @@ export type SVGModelSizes = {
   trim: SizesProps;
   bleed: SizesProps;
   bleedAmount: number;
+  offset: {
+    width: number;
+    length: number;
+  };
 };
 
 export type SVGModel = {

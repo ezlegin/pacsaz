@@ -49,6 +49,7 @@ export default function DielineGenerator({ slug }: Props) {
       />
 
       <ProductInfo
+        offset={svg.sizes.offset}
         dimension={size}
         dimensionType={dimensionType}
         dimensionsType={dieline.dimensionsType}

@@ -1,6 +1,5 @@
 import M from "makerjs";
 import { ptToMm } from "../../../../utils/sizeConvertor";
-import { DimensionsTypeOffset as offset } from "../consts";
 import { DimensionType, applyDimensionOffset } from "./applyDimensionOffset";
 
 type Point = [number, number];
@@ -12,10 +11,19 @@ export interface GuideLineOptions {
   value: number;
   orientation: "horizontal" | "vertical";
   dimensionType: DimensionType;
+  dimensionTypeOffset: number;
 }
 
 export function addGuideLine(model: M.IModel, options: GuideLineOptions) {
-  const { type, from, to, value, orientation, dimensionType } = options;
+  const {
+    type,
+    from,
+    to,
+    value,
+    orientation,
+    dimensionType,
+    dimensionTypeOffset: offset,
+  } = options;
 
   const pointerRadius = 4;
   const indicatorLength = 4;

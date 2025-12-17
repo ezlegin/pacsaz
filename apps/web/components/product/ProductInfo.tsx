@@ -1,4 +1,3 @@
-import { DimensionsTypeOffset } from "@/lib/dielines/core/consts";
 import {
   applyDimensionOffset,
   DimensionType,
@@ -11,20 +10,29 @@ interface Props {
   dimension: Dimensions;
   dimensionsType: DimensionsType;
   dimensionType: DimensionType;
+  offset: {
+    width: number;
+    length: number;
+  };
 }
 
-const ProductInfo = ({ dimensionsType, dimension, dimensionType }: Props) => {
+const ProductInfo = ({
+  dimensionsType,
+  dimension,
+  dimensionType,
+  offset,
+}: Props) => {
   const { height, length, width } = dimension;
 
   const manufactureDimWidth = applyDimensionOffset(
     width,
     dimensionType,
-    ptToMm(DimensionsTypeOffset * 2)
+    ptToMm(offset.width)
   );
   const manufactureDimLength = applyDimensionOffset(
     length,
     dimensionType,
-    ptToMm(DimensionsTypeOffset * 2)
+    ptToMm(offset.length)
   );
 
   const innerDimWidth = applyDimensionOffset(
@@ -34,7 +42,7 @@ const ProductInfo = ({ dimensionsType, dimension, dimensionType }: Props) => {
       : dimensionType === "outer"
         ? "outer"
         : "outer",
-    ptToMm(DimensionsTypeOffset * 2)
+    ptToMm(offset.width)
   );
 
   const innerDimLength = applyDimensionOffset(
@@ -44,7 +52,7 @@ const ProductInfo = ({ dimensionsType, dimension, dimensionType }: Props) => {
       : dimensionType === "outer"
         ? "outer"
         : "outer",
-    ptToMm(DimensionsTypeOffset * 2)
+    ptToMm(offset.length)
   );
 
   const outerDimWidth = applyDimensionOffset(
@@ -54,7 +62,7 @@ const ProductInfo = ({ dimensionsType, dimension, dimensionType }: Props) => {
       : dimensionType === "inner"
         ? "inner"
         : "inner",
-    ptToMm(DimensionsTypeOffset * 2)
+    ptToMm(offset.width)
   );
 
   const outerDimLength = applyDimensionOffset(
@@ -64,7 +72,7 @@ const ProductInfo = ({ dimensionsType, dimension, dimensionType }: Props) => {
       : dimensionType === "inner"
         ? "inner"
         : "inner",
-    ptToMm(DimensionsTypeOffset * 2)
+    ptToMm(offset.length)
   );
 
   const packLengend = [

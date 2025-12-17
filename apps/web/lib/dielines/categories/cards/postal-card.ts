@@ -11,6 +11,7 @@ import { addFoldLine } from "../../core/helpers/foldLineGenerator";
 import { addGuideLine } from "../../core/helpers/guidelineGenerator";
 import { svgExporter } from "../../core/helpers/svgExporter";
 import { DielineDefinition } from "../../core/types";
+import { mmToPt } from "@/utils/sizeConvertor";
 
 export const postalCard: DielineDefinition = {
   slug: "postal-card",
@@ -38,8 +39,11 @@ export const postalCard: DielineDefinition = {
     let length = rawLength;
     const overalDimensionOffset = DimensionsTypeOffset * 2;
 
-    width = applyDimensionOffset(width, dimensionType, overalDimensionOffset);
-    length = applyDimensionOffset(length, dimensionType, overalDimensionOffset);
+    const widthOffset = overalDimensionOffset;
+    const lengthOffset = mmToPt(10);
+
+    width = applyDimensionOffset(width, dimensionType, widthOffset);
+    length = applyDimensionOffset(length, dimensionType, lengthOffset);
 
     const model: M.IModel = { models: {} };
     const rect = new M.models.Rectangle(width * 2, length);
@@ -70,6 +74,7 @@ export const postalCard: DielineDefinition = {
       value: rawWidth,
       orientation: "horizontal",
       dimensionType,
+      dimensionTypeOffset: widthOffset,
     });
     addGuideLine(model, {
       type: "length",
@@ -78,6 +83,7 @@ export const postalCard: DielineDefinition = {
       value: rawLength,
       orientation: "vertical",
       dimensionType,
+      dimensionTypeOffset: lengthOffset,
     });
 
     // SIZES
@@ -95,6 +101,10 @@ export const postalCard: DielineDefinition = {
         trim: trimSize,
         bleed: bleedSize,
         bleedAmount,
+        offset: {
+          width: widthOffset,
+          length: lengthOffset,
+        },
       },
       model: svgExporter({
         model,
