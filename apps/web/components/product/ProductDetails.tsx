@@ -13,6 +13,7 @@ import {
   FormatsType,
   MaterialsInput,
   MaterialValue,
+  SVGModel,
 } from "@/lib/dielines/core/types";
 import { Card } from "@workspace/ui/components/card";
 import {
@@ -40,8 +41,8 @@ import DielineDownloadButton from "./DielineDownloadButton";
 import DimensionInfo from "./info/DimensionInfo";
 
 export interface SVGSizeProps {
-  widthMM: number;
-  lengthMM: number;
+  width: number;
+  length: number;
 }
 
 interface Props {
@@ -49,8 +50,7 @@ interface Props {
   materials: MaterialsInput;
   dimensionsType: DimensionsTypeType;
   setDimension: (key: DimensionKey, value: number) => void;
-  svg: string;
-  svgSize: SVGSizeProps;
+  svg: SVGModel;
   slug: string;
 }
 
@@ -59,7 +59,6 @@ export default function ProductDetails({
   setDimension,
   dimensionsType,
   svg,
-  svgSize,
   slug,
   materials,
 }: Props) {
@@ -72,9 +71,9 @@ export default function ProductDetails({
     startLoading();
 
     await downloadPdf({
-      svg,
+      svg: svg.model,
       filename: slug + "-dieline",
-      svgSize,
+      sizes: svg.sizes,
       format,
     });
 

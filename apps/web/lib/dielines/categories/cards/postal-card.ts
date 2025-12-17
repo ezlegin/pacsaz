@@ -1,9 +1,10 @@
 import M from "makerjs";
+import { BLEED, MARGINS, MATERIALS } from "../../core/consts";
+import { addContainer } from "../../core/helpers/containerGenerator";
 import { addFoldLine } from "../../core/helpers/foldLineGenerator";
 import { addGuideLine } from "../../core/helpers/guidelineGenerator";
-import { DielineDefinition } from "../../core/types";
 import { svgExporter } from "../../core/helpers/svgExporter";
-import { BLEED, MATERIALS } from "../../core/consts";
+import { DielineDefinition } from "../../core/types";
 
 export const postalCard: DielineDefinition = {
   slug: "postal-card",
@@ -29,10 +30,11 @@ export const postalCard: DielineDefinition = {
   model({ width, length }) {
     const model: M.IModel = { models: {} };
     const rect = new M.models.Rectangle(width * 2, length);
+    const bleedAmount = BLEED.md.pt;
 
     //! BLEED
-    const bleedModel = M.model.outline(rect, BLEED.sm.pt, 1);
-    model.models!["bleed"] = bleedModel;
+    const bleed = M.model.outline(rect, bleedAmount, 1);
+    model.models!["bleed"] = bleed;
     model.models!["bleed"].layer = "bleed";
 
     //! TRIM
@@ -63,9 +65,31 @@ export const postalCard: DielineDefinition = {
       orientation: "vertical",
     });
 
-    return svgExporter({
+    const container = addContainer({
       model,
-      getMeasurementFrom: rect,
+      from: rect,
+      marginMM: MARGINS.container,
     });
+
+    const containerSize = {
+      width: container.size.width,
+      height: container.size.height,
+      length: 0,
+    };
+
+    const trimSize = M.measure.modelExtents(trim);
+    const bleedSize = M.measure.modelExtents(bleed);
+
+    return {
+      sizes: {
+        container: containerSize,
+        trim: trimSize,
+        bleed: bleedSize,
+        bleedAmount,
+      },
+      model: svgExporter({
+        model,
+      }),
+    };
   },
 };

@@ -1,9 +1,7 @@
-import { SVGSizeProps } from "@/components/product/ProductDetails";
-
 export type Dimensions = {
   width: number;
-  height: number;
   length: number;
+  height: number;
 };
 
 export type DimensionKey = "width" | "length" | "height";
@@ -14,11 +12,6 @@ export type DielineDimensions = {
   initialScale?: number;
   defaultDimensions: Dimensions;
   minDimensions: Dimensions;
-};
-
-export type DielineModel = (params: Dimensions) => {
-  svg: string;
-  svgSize: SVGSizeProps;
 };
 
 export type MaterialValue = {
@@ -32,6 +25,25 @@ export type MaterialsInput = {
   default: MaterialValue;
   included: MaterialValue[];
 };
+
+export type SizesProps = {
+  width: number;
+  height: number;
+};
+
+export type SVGModelSizes = {
+  container: SizesProps;
+  trim: SizesProps;
+  bleed: SizesProps;
+  bleedAmount: number;
+};
+
+export type SVGModel = {
+  model: string;
+  sizes: SVGModelSizes;
+};
+
+export type DielineModel = (params: Dimensions) => SVGModel;
 
 export interface DielineDefinition {
   slug: string;

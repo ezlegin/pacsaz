@@ -5,11 +5,11 @@ export async function downloadPdf({
   svg,
   format,
   filename,
-  svgSize,
+  sizes,
 }: ExportPdfParams & { filename: string; format: FormatsType }) {
   const pdf = await PDFGenerator({
     svg,
-    svgSize,
+    sizes,
   });
 
   const byteCharacters = atob(pdf.pdfBase64);

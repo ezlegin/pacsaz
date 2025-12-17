@@ -1,29 +1,25 @@
 "use server";
 
 import { COLORS, MARGINS } from "@/lib/dielines/core/consts";
-import { mmToPt } from "@/utils/sizeConvertor";
+import { SVGModelSizes } from "@/lib/dielines/core/types";
+import { mmToPt, ptToMm } from "@/utils/sizeConvertor";
 import path from "path";
 import PDFDocument from "pdfkit";
 import SVGtoPDF from "svg-to-pdfkit";
 
 export type ExportPdfParams = {
   svg: string;
-  svgSize: {
-    widthMM: number;
-    lengthMM: number;
-  };
+  sizes: SVGModelSizes;
 };
 
-export async function PDFGenerator({
-  svg,
-  svgSize: { lengthMM, widthMM },
-}: ExportPdfParams) {
+export async function PDFGenerator({ svg, sizes }: ExportPdfParams) {
   const fontPath = path.join(process.cwd(), "public/fonts/ARIAL.TTF");
 
-  const docWidth = mmToPt(widthMM + MARGINS.pdf * 2);
-  const docLength = mmToPt(lengthMM + MARGINS.pdf * 2);
   const doc = new PDFDocument({
-    size: [docWidth, docLength],
+    size: [
+      sizes.container.width + mmToPt(MARGINS.pdf * 2),
+      sizes.container.height + mmToPt(MARGINS.pdf * 2),
+    ],
     font: fontPath,
     info: {
       Title: "PacSaz Dieline",
@@ -39,9 +35,9 @@ export async function PDFGenerator({
   const guideText = [
     "Created By: PacSaz.ir",
     "------------------------------",
-    "Bleed: 3mm",
-    `Trim Size: ${180} x ${160} x 0 mm`, //todo
-    `Bleed Size: ${widthMM} x ${lengthMM} x 0 mm`,
+    `Bleed: ${ptToMm(sizes.bleedAmount)} mm`,
+    `Trim Size: ${ptToMm(sizes.trim.width)} x ${ptToMm(sizes.trim.height)} mm`,
+    `Bleed Size: ${ptToMm(sizes.bleed.width).toFixed()} x ${ptToMm(sizes.bleed.height).toFixed()} mm`,
   ].join("\n");
 
   doc.fontSize(9).fillColor(COLORS.guides.text).text(guideText, 6, 6);
