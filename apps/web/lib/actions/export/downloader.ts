@@ -12,7 +12,6 @@ export async function downloadPdf({
     svgSize,
   });
 
-  // Decode the base64 PDF
   const byteCharacters = atob(pdf.pdfBase64);
   const byteNumbers = new Array(byteCharacters.length);
   for (let i = 0; i < byteCharacters.length; i++) {

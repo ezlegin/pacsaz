@@ -1,4 +1,3 @@
-import { useDebouncedCallback } from "@/hooks/useDebouncedCallback";
 import { useLoading } from "@/hooks/useLoading";
 import { clamp } from "@/hooks/useSize";
 import { downloadPdf } from "@/lib/actions/export/downloader";
@@ -6,7 +5,6 @@ import {
   DIMENSIONS,
   DIMENSIONS_TYPE,
   FORMATS,
-  margins,
   MATERIALS,
 } from "@/lib/dielines/core/consts";
 import {
@@ -14,6 +12,7 @@ import {
   DimensionsTypeType,
   FormatsType,
 } from "@/lib/dielines/core/types";
+import { Card } from "@workspace/ui/components/card";
 import {
   Dialog,
   DialogContent,
@@ -36,25 +35,32 @@ import {
 } from "@workspace/ui/components/toggle-group";
 import { Info } from "lucide-react";
 import Image from "next/image";
-import { JSX, useEffect, useState } from "react";
+import { JSX, useState } from "react";
 import DielineDownloadButton from "./DielineDownloadButton";
 import DimensionInfo from "./info/DimensionInfo";
 
 export type DimensionKey = "width" | "length" | "height";
 
+export interface SVGSizeProps {
+  widthMM: number;
+  lengthMM: number;
+}
+
 interface Props {
-  dimensions: DielineDimensions;
+  defaultDimensions: DielineDimensions;
   dimensionsType: DimensionsTypeType;
   setDimension: (key: DimensionKey, value: number) => void;
   svg: string;
+  svgSize: SVGSizeProps;
   slug: string;
 }
 
 export default function ProductDetails({
-  dimensions,
+  defaultDimensions,
   setDimension,
   dimensionsType,
   svg,
+  svgSize,
   slug,
 }: Props) {
   const [format, setFormat] = useState<FormatsType>("pdf");
@@ -66,11 +72,7 @@ export default function ProductDetails({
     await downloadPdf({
       svg,
       filename: slug + "-dieline",
-      svgSize: {
-        //todo: get the SVG width and height and pass it here.
-        widthMM: 180 + margins.container * 2,
-        lengthMM: 160 + margins.container * 2,
-      },
+      svgSize,
       format,
     });
 
@@ -79,7 +81,7 @@ export default function ProductDetails({
 
   return (
     <div className="p-3 h-full absolute right-0 top-0 z-10">
-      <div className="h-full w-80 flex flex-col justify-between overflow-y-auto rounded-2xl bg-white p-6 shadow-md">
+      <Card className="h-full w-80 flex flex-col justify-between overflow-y-auto bg-white p-6 ">
         <div className="space-y-8">
           <Section title="ابعاد" infoContent={<DimensionInfo />}>
             <div className="grid grid-cols-2 gap-4">
@@ -87,8 +89,8 @@ export default function ProductDetails({
                 <DimensionInput
                   key={key}
                   label={label}
-                  value={dimensions.defaultDimensions[key]}
-                  min={dimensions.minDimensions[key]}
+                  value={defaultDimensions.defaultDimensions[key]}
+                  min={defaultDimensions.minDimensions[key]}
                   onChange={(value) => setDimension(key, value)}
                 />
               ))}
@@ -178,7 +180,7 @@ export default function ProductDetails({
             <DielineDownloadButton loading={isLoading} download={onDownload} />
           </Section>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }
@@ -226,16 +228,6 @@ function DimensionInput({
 }) {
   const [localValue, setLocalValue] = useState(value);
 
-  // sync when external value changes
-  useEffect(() => {
-    setLocalValue(value);
-  }, [value]);
-
-  const debouncedChange = useDebouncedCallback((val: number) => {
-    const clamped = clamp(val, min);
-    onChange(clamped);
-  }, 1000);
-
   if (value === 0) return null;
 
   return (
@@ -249,11 +241,11 @@ function DimensionInput({
             const raw = Number(e.target.value);
 
             setLocalValue(raw);
-
-            debouncedChange(raw);
           }}
-          onBlur={() => {
-            const clamped = clamp(localValue, min);
+          onBlur={(e) => {
+            const raw = Number(e.target.value);
+
+            const clamped = clamp(raw, min);
             setLocalValue(clamped);
             onChange(clamped);
           }}

@@ -1,6 +1,5 @@
-import { formatDimensions } from "@/utils/formatDimensions";
 import { Dimensions, DimensionsTypeType } from "@/lib/dielines/core/types";
-import React from "react";
+import { formatDimensions } from "@/utils/formatDimensions";
 
 interface Props {
   dimension: Dimensions;
@@ -41,11 +40,11 @@ const ProductInfo = ({ dimensionsType, dimension }: Props) => {
   ];
 
   return (
-    <div className="absolute top-0 left-0 w-80 p-4">
+    <div className="absolute top-0 left-0 w-80 p-6 py-4">
       <div className="flex justify-between">
         {packLengend.map(({ color, label }) => (
           <div key={label} className="flex items-center gap-1 mb-2">
-            <div className={`h-1 w-10 rounded-full border ${color}`} />
+            <div className={`h-1 w-7 rounded-full border ${color}`} />
             <span className="text-sm">{label}</span>
           </div>
         ))}
@@ -72,9 +71,8 @@ const ProductInfo = ({ dimensionsType, dimension }: Props) => {
         {/* Deliveries */}
         <ul className="mt-4 space-y-2 list-disc list-inside">
           {deliveries.map((item, index) => (
-            <li key={index} className="flex items-start gap-2">
-              <span>-</span>
-              <p className="text-xs text-muted-foreground">{item}</p>
+            <li key={index} className="text-xs text-muted-foreground">
+              {item}
             </li>
           ))}
         </ul>

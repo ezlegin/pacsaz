@@ -1,3 +1,5 @@
+import { SVGSizeProps } from "@/components/product/ProductDetails";
+
 export type Dimensions = {
   width: number;
   height: number;
@@ -13,7 +15,10 @@ export type DielineDimensions = {
   minDimensions: Dimensions;
 };
 
-export type DielineModel = (params: Dimensions) => string;
+export type DielineModel = (params: Dimensions) => {
+  svg: string;
+  svgSize: SVGSizeProps;
+};
 
 export interface DielineDefinition {
   slug: string;

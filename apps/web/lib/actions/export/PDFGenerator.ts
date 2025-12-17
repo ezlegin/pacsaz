@@ -44,7 +44,7 @@ export async function PDFGenerator({
     `Bleed Size: ${widthMM} x ${lengthMM} x 0 mm`,
   ].join("\n");
 
-  doc.fontSize(9).fillColor(colors.guides.text).text(guideText, 12, 12);
+  doc.fontSize(9).fillColor(colors.guides.text).text(guideText, 6, 6);
 
   SVGtoPDF(doc, svg, mmToPt(margins.pdf), mmToPt(margins.pdf), {
     assumePt: true,

@@ -1,12 +1,15 @@
 "use client";
 
-import ProductDetails from "@/components/product/ProductDetails";
+import ProductDetails, {
+  SVGSizeProps,
+} from "@/components/product/ProductDetails";
 import ProductInfo from "@/components/product/ProductInfo";
 import SVGPreview from "@/components/product/SVGPreview";
 import { useSize } from "@/hooks/useSize";
 import { mmToPt } from "@/utils/sizeConvertor";
 import { DielineDefinition } from "@/lib/dielines/core/types";
 import { dielines, DielineSlug } from "@/lib/dielines/registery";
+import { margins } from "@/lib/dielines/core/consts";
 
 interface Props {
   slug: string;
@@ -23,17 +26,23 @@ export default function DielineGenerator({ slug }: Props) {
     length: mmToPt(size.length),
   });
 
+  const svgSize: SVGSizeProps = {
+    widthMM: svg.svgSize.widthMM + margins.container * 2,
+    lengthMM: svg.svgSize.lengthMM + margins.container * 2,
+  };
+
   return (
     <div className="h-full relative gap-6">
       <ProductDetails
-        dimensions={dieline.dimensions}
+        defaultDimensions={dieline.dimensions}
         dimensionsType={dieline.dimensionsType}
         setDimension={setDimension}
-        svg={svg}
+        svg={svg.svg}
+        svgSize={svgSize}
         slug={dieline.slug}
       />
 
-      <SVGPreview svg={svg} initalScale={dieline.dimensions.initialScale} />
+      <SVGPreview svg={svg.svg} initalScale={dieline.dimensions.initialScale} />
 
       <ProductInfo dimension={size} dimensionsType={dieline.dimensionsType} />
     </div>
