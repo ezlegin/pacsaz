@@ -47,6 +47,8 @@ export const MARGINS = {
   container: 40,
 };
 
+export const DimensionsTypeOffset = mmToPt(1.4);
+
 export const DIMENSIONS = [
   { key: "length", label: "طول" },
   { key: "width", label: "عرض" },

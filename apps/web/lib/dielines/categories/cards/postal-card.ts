@@ -1,5 +1,10 @@
 import M from "makerjs";
-import { BLEED, MARGINS, MATERIALS } from "../../core/consts";
+import {
+  BLEED,
+  DimensionsTypeOffset,
+  MARGINS,
+  MATERIALS,
+} from "../../core/consts";
 import { addContainer } from "../../core/helpers/containerGenerator";
 import { addFoldLine } from "../../core/helpers/foldLineGenerator";
 import { addGuideLine } from "../../core/helpers/guidelineGenerator";
@@ -22,12 +27,26 @@ export const postalCard: DielineDefinition = {
       height: 0,
     },
   },
-  dimensionsType: ["manufacture"],
+  dimensionsType: ["manufacture", "inner", "outer"],
   materials: {
     default: MATERIALS["cardboard"],
     included: [MATERIALS["cardboard"]],
   },
-  model({ width, length }) {
+  model({ width: rawWidth, length: rawLength }) {
+    let width = rawWidth;
+    let length = rawLength;
+    const overalDimensionOffset = DimensionsTypeOffset * 2;
+    const isInnerDimension = true;
+    const isOuterDimension = false;
+    if (isInnerDimension) {
+      width += overalDimensionOffset;
+      length += overalDimensionOffset;
+    }
+    if (isOuterDimension) {
+      width -= overalDimensionOffset;
+      length -= overalDimensionOffset;
+    }
+
     const model: M.IModel = { models: {} };
     const rect = new M.models.Rectangle(width * 2, length);
     const bleedAmount = BLEED.default.pt;
@@ -54,15 +73,19 @@ export const postalCard: DielineDefinition = {
       type: "width",
       from: [0, length / 4],
       to: [width, length / 4],
-      value: width,
+      value: rawWidth,
       orientation: "horizontal",
+      isInnerDimension,
+      isOuterDimension,
     });
     addGuideLine(model, {
       type: "length",
       from: [width / 4, 0],
       to: [width / 4, length],
-      value: length,
+      value: rawLength,
       orientation: "vertical",
+      isInnerDimension,
+      isOuterDimension,
     });
 
     // SIZES

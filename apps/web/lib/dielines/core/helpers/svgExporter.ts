@@ -21,7 +21,10 @@ export function svgExporter({ model }: SvgExporterParams) {
         cssStyle: `stroke-dasharray:${GUIDS.foldDasharray}`,
       },
       guideBox: { fill: COLORS.guides.box, stroke: "none" },
-      guideLine: { stroke: COLORS.guides.line, strokeWidth: "0.75" },
+      guideLine: {
+        stroke: COLORS.guides.line,
+        strokeWidth: "1",
+      },
       pointer: { stroke: "none", fill: COLORS.guides.line },
       guideText: {
         stroke: "none",
