@@ -2,7 +2,11 @@ import {
   applyDimensionOffset,
   DimensionType,
 } from "@/lib/dielines/core/helpers/applyDimensionOffset";
-import { Dimensions, DimensionsType } from "@/lib/dielines/core/types";
+import {
+  Dimensions,
+  DimensionsType,
+  OffsetType,
+} from "@/lib/dielines/core/types";
 import { formatDimensions } from "@/utils/formatDimensions";
 import { ptToMm } from "@/utils/sizeConvertor";
 
@@ -10,10 +14,7 @@ interface Props {
   dimension: Dimensions;
   dimensionsType: DimensionsType;
   dimensionType: DimensionType;
-  offset: {
-    width: number;
-    length: number;
-  };
+  offset: OffsetType;
 }
 
 const ProductInfo = ({
@@ -24,56 +25,52 @@ const ProductInfo = ({
 }: Props) => {
   const { height, length, width } = dimension;
 
-  const manufactureDimWidth = applyDimensionOffset(
-    width,
-    dimensionType,
-    ptToMm(offset.width)
-  );
-  const manufactureDimLength = applyDimensionOffset(
-    length,
-    dimensionType,
-    ptToMm(offset.length)
-  );
+  const calcManufacture = (value: number, axis: "width" | "length") =>
+    applyDimensionOffset(
+      value,
+      dimensionType,
+      dimensionType === "inner"
+        ? ptToMm(offset[axis].inner)
+        : ptToMm(offset[axis].outer)
+    );
 
-  const innerDimWidth = applyDimensionOffset(
-    dimensionType === "outer" ? manufactureDimWidth : width,
-    dimensionType === "inner"
-      ? "manufacture"
-      : dimensionType === "outer"
-        ? "outer"
-        : "outer",
-    ptToMm(offset.width)
-  );
+  const calcInner = (
+    rawValue: number,
+    manufactureValue: number,
+    axis: "width" | "length"
+  ) => {
+    const base = dimensionType === "outer" ? manufactureValue : rawValue;
 
-  const innerDimLength = applyDimensionOffset(
-    dimensionType === "outer" ? manufactureDimLength : length,
-    dimensionType === "inner"
-      ? "manufacture"
-      : dimensionType === "outer"
-        ? "outer"
-        : "outer",
-    ptToMm(offset.length)
-  );
+    const fromType: DimensionType =
+      dimensionType === "inner" ? "manufacture" : "outer";
 
-  const outerDimWidth = applyDimensionOffset(
-    dimensionType === "inner" ? manufactureDimWidth : width,
-    dimensionType === "outer"
-      ? "manufacture"
-      : dimensionType === "inner"
-        ? "inner"
-        : "inner",
-    ptToMm(offset.width)
-  );
+    return applyDimensionOffset(base, fromType, ptToMm(offset[axis].inner));
+  };
 
-  const outerDimLength = applyDimensionOffset(
-    dimensionType === "inner" ? manufactureDimLength : length,
-    dimensionType === "outer"
-      ? "manufacture"
-      : dimensionType === "inner"
-        ? "inner"
-        : "inner",
-    ptToMm(offset.length)
-  );
+  const calcOuter = (
+    rawValue: number,
+    manufactureValue: number,
+    axis: "width" | "length"
+  ) => {
+    const base = dimensionType === "inner" ? manufactureValue : rawValue;
+
+    const fromType: DimensionType =
+      dimensionType === "outer" ? "manufacture" : "inner";
+
+    return applyDimensionOffset(base, fromType, ptToMm(offset[axis].outer));
+  };
+
+  // manufacture dims
+  const manufactureDimWidth = calcManufacture(width, "width");
+  const manufactureDimLength = calcManufacture(length, "length");
+
+  // inner dims
+  const innerDimWidth = calcInner(width, manufactureDimWidth, "width");
+  const innerDimLength = calcInner(length, manufactureDimLength, "length");
+
+  // outer dims
+  const outerDimWidth = calcOuter(width, manufactureDimWidth, "width");
+  const outerDimLength = calcOuter(length, manufactureDimLength, "length");
 
   const packLengend = [
     { color: "bg-blue-500", label: "خط برش" },
@@ -123,22 +120,24 @@ const ProductInfo = ({
       </div>
 
       {/* Dimensions */}
-      <div className="space-y-1 mb-6">
-        {dimensions.map(
-          ({ label, value, key }) =>
-            dimensionsType.includes(
-              key as "manufacture" | "inner" | "outer"
-            ) && (
-              <div key={label}>
-                <span className="block text-muted-foreground text-xs">
-                  {label}
-                </span>
-                <span dir="ltr" className="font-medium text-sm">
-                  {value}
-                </span>
-              </div>
-            )
-        )}
+      <div>
+        <div className="space-y-1">
+          {dimensions.map(
+            ({ label, value, key }) =>
+              dimensionsType.includes(
+                key as "manufacture" | "inner" | "outer"
+              ) && (
+                <div key={label} className="border w-3/4 p-2 rounded-2xl">
+                  <span className="block text-muted-foreground text-xs">
+                    {label}
+                  </span>
+                  <span dir="ltr" className="font-medium text-sm">
+                    {value}
+                  </span>
+                </div>
+              )
+          )}
+        </div>
 
         {/* Deliveries */}
         <ul className="mt-4 space-y-2 list-disc list-inside">

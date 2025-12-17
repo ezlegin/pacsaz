@@ -1,17 +1,12 @@
+import { mmToPt } from "@/utils/sizeConvertor";
 import M from "makerjs";
-import {
-  BLEED,
-  DimensionsTypeOffset,
-  MARGINS,
-  MATERIALS,
-} from "../../core/consts";
+import { BLEED, MARGINS, MATERIALS } from "../../core/consts";
 import { applyDimensionOffset } from "../../core/helpers/applyDimensionOffset";
 import { addContainer } from "../../core/helpers/containerGenerator";
 import { addFoldLine } from "../../core/helpers/foldLineGenerator";
 import { addGuideLine } from "../../core/helpers/guidelineGenerator";
 import { svgExporter } from "../../core/helpers/svgExporter";
-import { DielineDefinition } from "../../core/types";
-import { mmToPt } from "@/utils/sizeConvertor";
+import { DielineDefinition, OffsetObject } from "../../core/types";
 
 export const postalCard: DielineDefinition = {
   slug: "postal-card",
@@ -37,13 +32,28 @@ export const postalCard: DielineDefinition = {
   model({ dimension: { width: rawWidth, length: rawLength }, dimensionType }) {
     let width = rawWidth;
     let length = rawLength;
-    const overalDimensionOffset = DimensionsTypeOffset * 2;
 
-    const widthOffset = overalDimensionOffset;
-    const lengthOffset = mmToPt(10);
+    const { lengthOffset, widthOffset }: OffsetObject = {
+      widthOffset: {
+        inner: mmToPt(5) * 2,
+        outer: mmToPt(5) * 2,
+      },
+      lengthOffset: {
+        inner: mmToPt(5) * 2,
+        outer: mmToPt(5) * 2,
+      },
+    };
 
-    width = applyDimensionOffset(width, dimensionType, widthOffset);
-    length = applyDimensionOffset(length, dimensionType, lengthOffset);
+    width = applyDimensionOffset(
+      width,
+      dimensionType,
+      dimensionType === "inner" ? widthOffset.inner : widthOffset.outer
+    );
+    length = applyDimensionOffset(
+      length,
+      dimensionType,
+      dimensionType === "inner" ? lengthOffset.inner : lengthOffset.outer
+    );
 
     const model: M.IModel = { models: {} };
     const rect = new M.models.Rectangle(width * 2, length);
@@ -74,7 +84,7 @@ export const postalCard: DielineDefinition = {
       value: rawWidth,
       orientation: "horizontal",
       dimensionType,
-      dimensionTypeOffset: widthOffset,
+      dimensionTypeOffset: { widthOffset, lengthOffset },
     });
     addGuideLine(model, {
       type: "length",
@@ -83,7 +93,7 @@ export const postalCard: DielineDefinition = {
       value: rawLength,
       orientation: "vertical",
       dimensionType,
-      dimensionTypeOffset: lengthOffset,
+      dimensionTypeOffset: { lengthOffset, widthOffset },
     });
 
     // SIZES
@@ -102,8 +112,14 @@ export const postalCard: DielineDefinition = {
         bleed: bleedSize,
         bleedAmount,
         offset: {
-          width: widthOffset,
-          length: lengthOffset,
+          width: {
+            inner: widthOffset.inner,
+            outer: widthOffset.outer,
+          },
+          length: {
+            inner: lengthOffset.outer,
+            outer: lengthOffset.outer,
+          },
         },
       },
       model: svgExporter({

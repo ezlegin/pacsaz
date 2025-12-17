@@ -1,6 +1,7 @@
 import M from "makerjs";
 import { ptToMm } from "../../../../utils/sizeConvertor";
 import { DimensionType, applyDimensionOffset } from "./applyDimensionOffset";
+import { OffsetObject } from "../types";
 
 type Point = [number, number];
 
@@ -11,7 +12,7 @@ export interface GuideLineOptions {
   value: number;
   orientation: "horizontal" | "vertical";
   dimensionType: DimensionType;
-  dimensionTypeOffset: number;
+  dimensionTypeOffset: OffsetObject;
 }
 
 export function addGuideLine(model: M.IModel, options: GuideLineOptions) {
@@ -22,7 +23,7 @@ export function addGuideLine(model: M.IModel, options: GuideLineOptions) {
     value,
     orientation,
     dimensionType,
-    dimensionTypeOffset: offset,
+    dimensionTypeOffset: { lengthOffset, widthOffset },
   } = options;
 
   const pointerRadius = 4;
@@ -34,6 +35,9 @@ export function addGuideLine(model: M.IModel, options: GuideLineOptions) {
 
   if (orientation === "horizontal") {
     const textBoxSize = 25;
+
+    const offset =
+      dimensionType === "inner" ? widthOffset.inner / 2 : widthOffset.outer / 2;
 
     const startX = applyDimensionOffset(from[0], dimensionType, offset);
     const endX = applyDimensionOffset(to[0], dimensionType, -offset);
@@ -75,6 +79,11 @@ export function addGuideLine(model: M.IModel, options: GuideLineOptions) {
   } else {
     // vertical
     const textBoxSize = 10;
+
+    const offset =
+      dimensionType === "inner"
+        ? lengthOffset.inner / 2
+        : lengthOffset.outer / 2;
 
     const startY = applyDimensionOffset(from[1], dimensionType, offset);
     const endY = applyDimensionOffset(to[1], dimensionType, -offset);

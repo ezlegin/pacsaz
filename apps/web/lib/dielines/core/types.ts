@@ -33,15 +33,23 @@ export type SizesProps = {
   height: number;
 };
 
+export type OffsetType = {
+  width: {
+    inner: number;
+    outer: number;
+  };
+  length: {
+    inner: number;
+    outer: number;
+  };
+};
+
 export type SVGModelSizes = {
   container: SizesProps;
   trim: SizesProps;
   bleed: SizesProps;
   bleedAmount: number;
-  offset: {
-    width: number;
-    length: number;
-  };
+  offset: OffsetType;
 };
 
 export type SVGModel = {
@@ -62,3 +70,14 @@ export interface DielineDefinition {
   materials: MaterialsInput;
   model: DielineModel;
 }
+
+export type OffsetObjectParams = {
+  inner: number;
+  outer: number;
+};
+
+export type OffsetObject = {
+  widthOffset: OffsetObjectParams;
+  lengthOffset: OffsetObjectParams;
+  heightOffset?: OffsetObjectParams;
+};
