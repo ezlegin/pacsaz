@@ -30,5 +30,10 @@ export function addContainer({
   model.models[id] = container;
   model.models[id].layer = layer;
 
-  return { size: { width: containerSize.width, height: containerSize.height } };
+  return {
+    size: {
+      width: containerSize.width,
+      height: containerSize.height,
+    },
+  };
 }

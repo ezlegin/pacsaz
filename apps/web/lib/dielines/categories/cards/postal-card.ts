@@ -8,7 +8,7 @@ import { DielineDefinition } from "../../core/types";
 
 export const postalCard: DielineDefinition = {
   slug: "postal-card",
-  title: "کارت پستال تا شو",
+  title: "کارت پستال تا شو", //todo: sync to database, not here.
   dimensions: {
     initialScale: 1.5,
     defaultDimensions: {
@@ -30,7 +30,7 @@ export const postalCard: DielineDefinition = {
   model({ width, length }) {
     const model: M.IModel = { models: {} };
     const rect = new M.models.Rectangle(width * 2, length);
-    const bleedAmount = BLEED.md.pt;
+    const bleedAmount = BLEED.default.pt;
 
     //! BLEED
     const bleed = M.model.outline(rect, bleedAmount, 1);
@@ -65,24 +65,18 @@ export const postalCard: DielineDefinition = {
       orientation: "vertical",
     });
 
+    // SIZES
     const container = addContainer({
       model,
       from: rect,
       marginMM: MARGINS.container,
     });
-
-    const containerSize = {
-      width: container.size.width,
-      height: container.size.height,
-      length: 0,
-    };
-
     const trimSize = M.measure.modelExtents(trim);
     const bleedSize = M.measure.modelExtents(bleed);
 
     return {
       sizes: {
-        container: containerSize,
+        container: container.size,
         trim: trimSize,
         bleed: bleedSize,
         bleedAmount,

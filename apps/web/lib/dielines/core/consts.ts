@@ -25,7 +25,7 @@ export const GUIDS = {
 
 //  BLEED
 export const BLEED = {
-  sm: {
+  default: {
     mm: 3,
     pt: mmToPt(3),
   },
@@ -44,8 +44,7 @@ export const BLEED = {
 };
 
 export const MARGINS = {
-  pdf: 22,
-  container: 15,
+  container: 40,
 };
 
 export const DIMENSIONS = [

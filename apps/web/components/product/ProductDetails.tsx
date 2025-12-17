@@ -71,10 +71,10 @@ export default function ProductDetails({
     startLoading();
 
     await downloadPdf({
-      svg: svg.model,
-      filename: slug + "-dieline",
-      sizes: svg.sizes,
+      svg,
+      fileName: slug + "-dieline",
       format,
+      slug,
     });
 
     stopLoading();

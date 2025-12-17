@@ -1,15 +1,24 @@
-import { FormatsType } from "@/lib/dielines/core/types";
-import { PDFGenerator, ExportPdfParams } from "./PDFGenerator";
+import { FormatsType, SVGModel } from "@/lib/dielines/core/types";
+import { PDFGenerator } from "./PDFGenerator";
+
+type NewType = FormatsType;
+
+interface ExportPdfParams {
+  svg: SVGModel;
+  format: NewType;
+  fileName: string;
+  slug: string;
+}
 
 export async function downloadPdf({
-  svg,
+  fileName,
   format,
-  filename,
-  sizes,
-}: ExportPdfParams & { filename: string; format: FormatsType }) {
+  svg,
+  slug,
+}: ExportPdfParams) {
   const pdf = await PDFGenerator({
     svg,
-    sizes,
+    slug,
   });
 
   const byteCharacters = atob(pdf.pdfBase64);
@@ -26,7 +35,7 @@ export async function downloadPdf({
 
   const a = document.createElement("a");
   a.href = url;
-  a.download = `${filename}.${format}`;
+  a.download = `${fileName}.${format}`;
   a.click();
 
   URL.revokeObjectURL(url);
