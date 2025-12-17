@@ -3,7 +3,7 @@ import { addFoldLine } from "../../core/helpers/foldLineGenerator";
 import { addGuideLine } from "../../core/helpers/guidelineGenerator";
 import { DielineDefinition } from "../../core/types";
 import { svgExporter } from "../../core/helpers/svgExporter";
-import { bleed } from "../../core/consts";
+import { BLEED, MATERIALS } from "../../core/consts";
 
 export const postalCard: DielineDefinition = {
   slug: "postal-card",
@@ -22,12 +22,16 @@ export const postalCard: DielineDefinition = {
     },
   },
   dimensionsType: ["manufacture"],
+  materials: {
+    default: MATERIALS["cardboard"],
+    included: [MATERIALS["cardboard"]],
+  },
   model({ width, length }) {
     const model: M.IModel = { models: {} };
     const rect = new M.models.Rectangle(width * 2, length);
 
     //! BLEED
-    const bleedModel = M.model.outline(rect, bleed.sm.pt, 1);
+    const bleedModel = M.model.outline(rect, BLEED.sm.pt, 1);
     model.models!["bleed"] = bleedModel;
     model.models!["bleed"].layer = "bleed";
 

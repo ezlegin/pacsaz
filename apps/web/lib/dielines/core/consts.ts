@@ -2,7 +2,7 @@ import { aiIcon, dxfIcon, pdfIcon } from "@/public";
 import { mmToPt } from "../../../utils/sizeConvertor";
 
 // COLORS
-export const colors = {
+export const COLORS = {
   dielines: {
     bleed: "green",
     trim: "blue",
@@ -18,13 +18,13 @@ export const colors = {
 };
 
 // GUIDES
-export const guides = {
+export const GUIDS = {
   foldDasharray: "5,2", // PT
   textFontSizePT: 12,
 };
 
 //  BLEED
-export const bleed = {
+export const BLEED = {
   sm: {
     mm: 3,
     pt: mmToPt(3),
@@ -43,7 +43,7 @@ export const bleed = {
   },
 };
 
-export const margins = {
+export const MARGINS = {
   pdf: 22,
   container: 15,
 };
@@ -66,20 +66,59 @@ export const DIMENSIONS_TYPE = [
   { key: "outer", label: "ابعاد خارجی" },
 ] as const;
 
-export const MATERIALS = [
-  {
-    label: "مقوا",
-    items: [
-      { value: "white-cardboard", label: "مقوا سفید", color: "bg-white" },
-      { value: "kraft-cardboard", label: "مقوا کرافت", color: "bg-orange-100" },
-    ],
+export const MATERIALS = {
+  cardboard: {
+    value: "cardboard",
+    label: "مقوا گلاسه",
+    color: "bg-white",
+    thicknessMM: 0.4,
   },
-  {
-    label: "کارتن",
-    items: [
-      { value: "e-flute", label: "کارتن E-Flut", color: "bg-orange-100" },
-      { value: "b-flute", label: "کارتن B-Flut", color: "bg-orange-100" },
-      { value: "c-flute", label: "کارتن C-Flut", color: "bg-orange-100" },
-    ],
+  "f-flute": {
+    value: "f-flute",
+    label: "کارتن فلوت F",
+    color: "bg-orange-100/70",
+    thicknessMM: 1.2,
   },
-];
+  "e-flute": {
+    value: "e-flute",
+    label: "کارتن فلوت E",
+    color: "bg-orange-100",
+    thicknessMM: 2,
+  },
+  "b-flute": {
+    value: "b-flute",
+    label: "کارتن فلوت B",
+    color: "bg-orange-200",
+    thicknessMM: 3,
+  },
+  "c-flute": {
+    value: "c-flute",
+    label: "کارتن فلوت C",
+    color: "bg-orange-300",
+    thicknessMM: 4,
+  },
+  "be-flute": {
+    value: "be-flute",
+    label: "کارتن فلوت BE",
+    color: "bg-orange-400",
+    thicknessMM: 5,
+  },
+  "bc-flute": {
+    value: "bc-flute",
+    label: "کارتن فلوت BC",
+    color: "bg-orange-500",
+    thicknessMM: 7,
+  },
+  "ab-flute": {
+    value: "ab-flute",
+    label: "کارتن فلوت AB",
+    color: "bg-orange-500",
+    thicknessMM: 7,
+  },
+  "art-paper": {
+    value: "art-paper",
+    label: "کاغذ گلاسه",
+    color: "bg-white",
+    thicknessMM: 0.2,
+  },
+};

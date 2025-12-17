@@ -9,7 +9,7 @@ import { useSize } from "@/hooks/useSize";
 import { mmToPt } from "@/utils/sizeConvertor";
 import { DielineDefinition } from "@/lib/dielines/core/types";
 import { dielines, DielineSlug } from "@/lib/dielines/registery";
-import { margins } from "@/lib/dielines/core/consts";
+import { MARGINS } from "@/lib/dielines/core/consts";
 
 interface Props {
   slug: string;
@@ -27,8 +27,8 @@ export default function DielineGenerator({ slug }: Props) {
   });
 
   const svgSize: SVGSizeProps = {
-    widthMM: svg.svgSize.widthMM + margins.container * 2,
-    lengthMM: svg.svgSize.lengthMM + margins.container * 2,
+    widthMM: svg.svgSize.widthMM + MARGINS.container * 2,
+    lengthMM: svg.svgSize.lengthMM + MARGINS.container * 2,
   };
 
   return (
@@ -40,6 +40,7 @@ export default function DielineGenerator({ slug }: Props) {
         svg={svg.svg}
         svgSize={svgSize}
         slug={dieline.slug}
+        materials={dieline.materials}
       />
 
       <SVGPreview svg={svg.svg} initalScale={dieline.dimensions.initialScale} />

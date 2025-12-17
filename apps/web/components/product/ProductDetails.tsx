@@ -5,12 +5,14 @@ import {
   DIMENSIONS,
   DIMENSIONS_TYPE,
   FORMATS,
-  MATERIALS,
 } from "@/lib/dielines/core/consts";
 import {
   DielineDimensions,
+  DimensionKey,
   DimensionsTypeType,
   FormatsType,
+  MaterialsInput,
+  MaterialValue,
 } from "@/lib/dielines/core/types";
 import { Card } from "@workspace/ui/components/card";
 import {
@@ -23,9 +25,7 @@ import { Input } from "@workspace/ui/components/input";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select";
@@ -39,8 +39,6 @@ import { JSX, useState } from "react";
 import DielineDownloadButton from "./DielineDownloadButton";
 import DimensionInfo from "./info/DimensionInfo";
 
-export type DimensionKey = "width" | "length" | "height";
-
 export interface SVGSizeProps {
   widthMM: number;
   lengthMM: number;
@@ -48,6 +46,7 @@ export interface SVGSizeProps {
 
 interface Props {
   defaultDimensions: DielineDimensions;
+  materials: MaterialsInput;
   dimensionsType: DimensionsTypeType;
   setDimension: (key: DimensionKey, value: number) => void;
   svg: string;
@@ -62,8 +61,11 @@ export default function ProductDetails({
   svg,
   svgSize,
   slug,
+  materials,
 }: Props) {
   const [format, setFormat] = useState<FormatsType>("pdf");
+  const [material, setMaterial] = useState<MaterialValue>(materials.default);
+
   const { startLoading, stopLoading, isLoading } = useLoading();
 
   const onDownload = async () => {
@@ -77,6 +79,14 @@ export default function ProductDetails({
     });
 
     stopLoading();
+  };
+
+  const onSelectMaterial = (val: string) => {
+    const material = materials.included.find((m) => m.value === val);
+
+    if (!material) return;
+
+    setMaterial(material);
   };
 
   return (
@@ -98,31 +108,39 @@ export default function ProductDetails({
           </Section>
 
           <Section title="متریال چاپ" infoContent={<DimensionInfo />}>
-            <Select dir="rtl" defaultValue="white-cardboard">
+            <Select
+              onValueChange={onSelectMaterial}
+              dir="rtl"
+              defaultValue={materials.default.value}
+            >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="انتخاب متریال" />
               </SelectTrigger>
 
               <SelectContent position="popper">
-                {MATERIALS.map((group) => (
-                  <SelectGroup key={group.label}>
-                    <SelectLabel>{group.label}</SelectLabel>
-                    {group.items.map((item) => (
-                      <SelectItem key={item.value} value={item.value}>
-                        <span
-                          className={`h-5 w-5 rounded-full border ${item.color}`}
-                        />
-                        {item.label}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
+                {materials.included.map((item) => (
+                  <SelectItem
+                    className="py-2.5"
+                    key={item.value}
+                    value={item.value}
+                  >
+                    <span
+                      className={`h-5 w-5 rounded-full border ${item.color}`}
+                    />
+                    {item.label}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </Section>
 
           <Section title="ضخامت" infoContent={<DimensionInfo />}>
-            <Input dir="ltr" value="0.5 mm" disabled className="text-center" />
+            <Input
+              dir="ltr"
+              value={`${material?.thicknessMM} mm`}
+              disabled
+              className="text-center"
+            />
           </Section>
 
           <Section title="نوع ابعاد" infoContent={<DimensionInfo />}>

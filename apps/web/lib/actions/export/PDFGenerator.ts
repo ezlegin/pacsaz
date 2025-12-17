@@ -1,6 +1,6 @@
 "use server";
 
-import { colors, margins } from "@/lib/dielines/core/consts";
+import { COLORS, MARGINS } from "@/lib/dielines/core/consts";
 import { mmToPt } from "@/utils/sizeConvertor";
 import path from "path";
 import PDFDocument from "pdfkit";
@@ -20,8 +20,8 @@ export async function PDFGenerator({
 }: ExportPdfParams) {
   const fontPath = path.join(process.cwd(), "public/fonts/ARIAL.TTF");
 
-  const docWidth = mmToPt(widthMM + margins.pdf * 2);
-  const docLength = mmToPt(lengthMM + margins.pdf * 2);
+  const docWidth = mmToPt(widthMM + MARGINS.pdf * 2);
+  const docLength = mmToPt(lengthMM + MARGINS.pdf * 2);
   const doc = new PDFDocument({
     size: [docWidth, docLength],
     font: fontPath,
@@ -44,9 +44,9 @@ export async function PDFGenerator({
     `Bleed Size: ${widthMM} x ${lengthMM} x 0 mm`,
   ].join("\n");
 
-  doc.fontSize(9).fillColor(colors.guides.text).text(guideText, 6, 6);
+  doc.fontSize(9).fillColor(COLORS.guides.text).text(guideText, 6, 6);
 
-  SVGtoPDF(doc, svg, mmToPt(margins.pdf), mmToPt(margins.pdf), {
+  SVGtoPDF(doc, svg, mmToPt(MARGINS.pdf), mmToPt(MARGINS.pdf), {
     assumePt: true,
   });
 

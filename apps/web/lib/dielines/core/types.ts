@@ -6,6 +6,7 @@ export type Dimensions = {
   length: number;
 };
 
+export type DimensionKey = "width" | "length" | "height";
 export type DimensionsTypeType = ["manufacture"?, "inner"?, "outer"?];
 export type FormatsType = "pdf" | "ai" | "dxf";
 
@@ -20,10 +21,23 @@ export type DielineModel = (params: Dimensions) => {
   svgSize: SVGSizeProps;
 };
 
+export type MaterialValue = {
+  value: string;
+  label: string;
+  color: string;
+  thicknessMM: number;
+};
+
+export type MaterialsInput = {
+  default: MaterialValue;
+  included: MaterialValue[];
+};
+
 export interface DielineDefinition {
   slug: string;
   title: string;
   dimensions: DielineDimensions;
   dimensionsType: DimensionsTypeType;
+  materials: MaterialsInput;
   model: DielineModel;
 }
