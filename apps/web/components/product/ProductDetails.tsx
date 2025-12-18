@@ -5,14 +5,16 @@ import {
   DIMENSIONS,
   DIMENSIONS_TYPE,
   FORMATS,
+  MaterialKey,
+  MATERIALS,
 } from "@/lib/dielines/core/consts";
+import { DimensionType } from "@/lib/dielines/core/helpers/applyDimensionOffset";
 import {
   DielineDimensions,
   DimensionKey,
   DimensionsType,
   FormatsType,
   MaterialsInput,
-  MaterialValue,
   SVGModel,
 } from "@/lib/dielines/core/types";
 import { Card } from "@workspace/ui/components/card";
@@ -39,7 +41,6 @@ import Image from "next/image";
 import { JSX, useState } from "react";
 import DielineDownloadButton from "./DielineDownloadButton";
 import DimensionInfo from "./info/DimensionInfo";
-import { DimensionType } from "@/lib/dielines/core/helpers/applyDimensionOffset";
 
 export interface SVGSizeProps {
   width: number;
@@ -51,24 +52,27 @@ interface Props {
   materials: MaterialsInput;
   dimensionsType: DimensionsType;
   setDimension: (key: DimensionKey, value: number) => void;
+  setMaterial: (mat: MaterialKey) => void;
   dimensionType: DimensionType;
   setDimensionType: (value: DimensionType) => void;
   svg: SVGModel;
   slug: string;
+  material: MaterialKey;
 }
 
 export default function ProductDetails({
   defaultDimensions,
   setDimension,
   setDimensionType,
+  setMaterial,
   dimensionType,
   dimensionsType,
   svg,
   slug,
   materials,
+  material,
 }: Props) {
   const [format, setFormat] = useState<FormatsType>("pdf");
-  const [material, setMaterial] = useState<MaterialValue>(materials.default);
 
   const { startLoading, stopLoading, isLoading } = useLoading();
 
@@ -86,12 +90,15 @@ export default function ProductDetails({
   };
 
   const onSelectMaterial = (val: string) => {
-    const material = materials.included.find((m) => m.value === val);
+    const material = materials.included.find((m) => m.value === val)
+      ?.value as MaterialKey;
 
     if (!material) return;
 
     setMaterial(material);
   };
+
+  const selectedMaterial = MATERIALS[material];
 
   return (
     <div className="p-3 h-full absolute right-0 top-0 z-10">
@@ -141,7 +148,7 @@ export default function ProductDetails({
           <Section title="ضخامت" infoContent={<DimensionInfo />}>
             <Input
               dir="ltr"
-              value={`${material?.thicknessMM} mm`}
+              value={`${selectedMaterial?.thickness} mm`}
               disabled
               className="text-center"
             />

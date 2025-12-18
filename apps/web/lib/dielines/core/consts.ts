@@ -68,58 +68,114 @@ export const DIMENSIONS_TYPE = [
 ] as const;
 
 export const MATERIALS = {
-  cardboard: {
-    value: "cardboard",
+  "glossy-cardboard": {
+    value: "glossy-cardboard",
     label: "مقوا گلاسه",
     color: "bg-white",
-    thicknessMM: 0.4,
+    thickness: 0.4,
+    get offset() {
+      return {
+        inner: 2,
+        outer: this.thickness,
+      };
+    },
   },
   "f-flute": {
     value: "f-flute",
     label: "کارتن فلوت F",
     color: "bg-orange-100/70",
-    thicknessMM: 1.2,
+    thickness: 1.2,
+    get offset() {
+      return {
+        inner: 2,
+        outer: this.thickness,
+      };
+    },
   },
   "e-flute": {
     value: "e-flute",
     label: "کارتن فلوت E",
     color: "bg-orange-100",
-    thicknessMM: 2,
+    thickness: 2,
+    get offset() {
+      return {
+        inner: 2,
+        outer: this.thickness,
+      };
+    },
   },
   "b-flute": {
     value: "b-flute",
     label: "کارتن فلوت B",
     color: "bg-orange-200",
-    thicknessMM: 3,
+    thickness: 3,
+    get offset() {
+      return {
+        inner: 3,
+        outer: this.thickness,
+      };
+    },
   },
   "c-flute": {
     value: "c-flute",
     label: "کارتن فلوت C",
     color: "bg-orange-300",
-    thicknessMM: 4,
+    thickness: 4,
+    get offset() {
+      return {
+        inner: 4,
+        outer: this.thickness,
+      };
+    },
   },
   "be-flute": {
     value: "be-flute",
     label: "کارتن فلوت BE",
     color: "bg-orange-400",
-    thicknessMM: 5,
+    thickness: 5,
+    get offset() {
+      return {
+        inner: 4,
+        outer: this.thickness,
+      };
+    },
   },
   "bc-flute": {
     value: "bc-flute",
     label: "کارتن فلوت BC",
     color: "bg-orange-500",
-    thicknessMM: 7,
+    thickness: 7,
+    get offset() {
+      return {
+        inner: 4,
+        outer: this.thickness,
+      };
+    },
   },
   "ab-flute": {
     value: "ab-flute",
     label: "کارتن فلوت AB",
     color: "bg-orange-500",
-    thicknessMM: 7,
+    thickness: 7,
+    get offset() {
+      return {
+        inner: 4,
+        outer: this.thickness,
+      };
+    },
   },
   "art-paper": {
     value: "art-paper",
     label: "کاغذ گلاسه",
     color: "bg-white",
-    thicknessMM: 0.2,
+    thickness: 0.2,
+    get offset() {
+      return {
+        inner: 2,
+        outer: this.thickness,
+      };
+    },
   },
-};
+} as const;
+
+export type MaterialKey = keyof typeof MATERIALS;

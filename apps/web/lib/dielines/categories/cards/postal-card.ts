@@ -26,21 +26,27 @@ export const postalCard: DielineDefinition = {
   },
   dimensionsType: ["manufacture", "inner", "outer"],
   materials: {
-    default: MATERIALS["cardboard"],
-    included: [MATERIALS["cardboard"]],
+    default: MATERIALS["glossy-cardboard"],
+    included: [MATERIALS["glossy-cardboard"], MATERIALS["e-flute"]],
   },
-  model({ dimension: { width: rawWidth, length: rawLength }, dimensionType }) {
+  model({
+    dimension: { width: rawWidth, length: rawLength },
+    dimensionType,
+    selectedMaterial,
+  }) {
     let width = rawWidth;
     let length = rawLength;
 
+    const { offset } = MATERIALS[selectedMaterial];
+
     const { lengthOffset, widthOffset }: OffsetObject = {
       widthOffset: {
-        inner: mmToPt(5) * 2,
-        outer: mmToPt(5) * 2,
+        inner: mmToPt(offset.inner) * 2,
+        outer: mmToPt(offset.outer) * 2,
       },
       lengthOffset: {
-        inner: mmToPt(5) * 2,
-        outer: mmToPt(5) * 2,
+        inner: mmToPt(offset.inner) * 2,
+        outer: mmToPt(offset.outer) * 2,
       },
     };
 
@@ -93,7 +99,7 @@ export const postalCard: DielineDefinition = {
       value: rawLength,
       orientation: "vertical",
       dimensionType,
-      dimensionTypeOffset: { lengthOffset, widthOffset },
+      dimensionTypeOffset: { widthOffset, lengthOffset },
     });
 
     // SIZES
@@ -117,7 +123,7 @@ export const postalCard: DielineDefinition = {
             outer: widthOffset.outer,
           },
           length: {
-            inner: lengthOffset.outer,
+            inner: lengthOffset.inner,
             outer: lengthOffset.outer,
           },
         },

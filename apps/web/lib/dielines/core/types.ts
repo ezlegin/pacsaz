@@ -1,3 +1,4 @@
+import { MaterialKey } from "./consts";
 import { DimensionType } from "./helpers/applyDimensionOffset";
 
 export type Dimensions = {
@@ -5,6 +6,17 @@ export type Dimensions = {
   length: number;
   height: number;
 };
+
+// export type MaterialsList =
+//   | "glossy-cardboard"
+//   | "f-flute"
+//   | "e-flute"
+//   | "b-flute"
+//   | "c-flute"
+//   | "be-flute"
+//   | "bc-flute"
+//   | "ab-flute"
+//   | "art-paper";
 
 export type DimensionKey = "width" | "length" | "height";
 export type DimensionsType = ["manufacture"?, "inner"?, "outer"?];
@@ -20,7 +32,7 @@ export type MaterialValue = {
   value: string;
   label: string;
   color: string;
-  thicknessMM: number;
+  thickness: number;
 };
 
 export type MaterialsInput = {
@@ -60,6 +72,7 @@ export type SVGModel = {
 export type DielineModel = (params: {
   dimension: Dimensions;
   dimensionType: DimensionType;
+  selectedMaterial: MaterialKey;
 }) => SVGModel;
 
 export interface DielineDefinition {

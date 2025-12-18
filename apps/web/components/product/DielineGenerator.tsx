@@ -4,6 +4,7 @@ import ProductDetails from "@/components/product/ProductDetails";
 import ProductInfo from "@/components/product/ProductInfo";
 import SVGPreview from "@/components/product/SVGPreview";
 import { useSize } from "@/hooks/useSize";
+import { MaterialKey } from "@/lib/dielines/core/consts";
 import { DimensionType } from "@/lib/dielines/core/helpers/applyDimensionOffset";
 import { DielineDefinition } from "@/lib/dielines/core/types";
 import { dielines, DielineSlug } from "@/lib/dielines/registery";
@@ -17,6 +18,10 @@ interface Props {
 export default function DielineGenerator({ slug }: Props) {
   const dieline = dielines[slug as DielineSlug] as DielineDefinition;
 
+  const [material, setMaterial] = useState<MaterialKey>(
+    dieline.materials.default.value as MaterialKey
+  );
+
   const { size, setDimension } = useSize(dieline.dimensions);
   const [dimensionType, setDimensionType] =
     useState<DimensionType>("manufacture");
@@ -28,6 +33,7 @@ export default function DielineGenerator({ slug }: Props) {
       length: mmToPt(size.length),
     },
     dimensionType,
+    selectedMaterial: material,
   });
 
   return (
@@ -36,11 +42,13 @@ export default function DielineGenerator({ slug }: Props) {
         defaultDimensions={dieline.dimensions}
         dimensionsType={dieline.dimensionsType}
         setDimension={setDimension}
+        setMaterial={setMaterial}
         setDimensionType={setDimensionType}
         svg={svg}
         dimensionType={dimensionType}
         slug={dieline.slug}
         materials={dieline.materials}
+        material={material}
       />
 
       <SVGPreview
