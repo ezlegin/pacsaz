@@ -1,22 +1,12 @@
 import { MaterialKey } from "./consts";
 import { DimensionType } from "./helpers/applyDimensionOffset";
+import M from "makerjs";
 
 export type Dimensions = {
   width: number;
   length: number;
   height: number;
 };
-
-// export type MaterialsList =
-//   | "glossy-cardboard"
-//   | "f-flute"
-//   | "e-flute"
-//   | "b-flute"
-//   | "c-flute"
-//   | "be-flute"
-//   | "bc-flute"
-//   | "ab-flute"
-//   | "art-paper";
 
 export type DimensionKey = "width" | "length" | "height";
 export type DimensionsType = ["manufacture"?, "inner"?, "outer"?];
@@ -69,10 +59,24 @@ export type SVGModel = {
   sizes: SVGModelSizes;
 };
 
+export type Offsets = {
+  width: {
+    inner: number;
+    outer: number;
+  };
+  length: {
+    inner: number;
+    outer: number;
+  };
+};
+
 export type DielineModel = (params: {
-  dimension: Dimensions;
+  dimensions: {
+    raw: { width: number; height: number; length: number };
+    resolved: { width: number; length: number; offsets: Offsets };
+  };
   dimensionType: DimensionType;
-  selectedMaterial: MaterialKey;
+  selectedMaterial?: MaterialKey;
 }) => SVGModel;
 
 export interface DielineDefinition {
@@ -93,4 +97,22 @@ export type OffsetObject = {
   widthOffset: OffsetObjectParams;
   lengthOffset: OffsetObjectParams;
   heightOffset?: OffsetObjectParams;
+};
+
+export type ModelExporter = {
+  model: M.IModel;
+  trim: M.IModel;
+  bleed: M.IModel;
+  container: M.IModel;
+  bleedAmount: number;
+  offsets: {
+    width: {
+      inner: number;
+      outer: number;
+    };
+    length: {
+      inner: number;
+      outer: number;
+    };
+  };
 };

@@ -4,8 +4,9 @@ import ProductDetails from "@/components/product/ProductDetails";
 import ProductInfo from "@/components/product/ProductInfo";
 import SVGPreview from "@/components/product/SVGPreview";
 import { useSize } from "@/hooks/useSize";
-import { MaterialKey } from "@/lib/dielines/core/consts";
+import { MaterialKey, MATERIALS } from "@/lib/dielines/core/consts";
 import { DimensionType } from "@/lib/dielines/core/helpers/applyDimensionOffset";
+import { resolveDimensions } from "@/lib/dielines/core/helpers/dimensionResolver";
 import { DielineDefinition } from "@/lib/dielines/core/types";
 import { dielines, DielineSlug } from "@/lib/dielines/registery";
 import { mmToPt } from "@/utils/sizeConvertor";
@@ -26,11 +27,27 @@ export default function DielineGenerator({ slug }: Props) {
   const [dimensionType, setDimensionType] =
     useState<DimensionType>("manufacture");
 
+  const selectedMaterial = MATERIALS[material];
+
+  const widthPT = mmToPt(size.width);
+  const lengthPT = mmToPt(size.length);
+  const heightPT = mmToPt(size.height);
+
+  const { width, length, offsets } = resolveDimensions({
+    width: widthPT,
+    length: lengthPT,
+    dimensionType,
+    material: selectedMaterial,
+  });
+
   const svg = dieline.model({
-    dimension: {
-      width: mmToPt(size.width),
-      height: mmToPt(size.height),
-      length: mmToPt(size.length),
+    dimensions: {
+      raw: {
+        width: widthPT,
+        height: heightPT,
+        length: lengthPT,
+      },
+      resolved: { width, length, offsets },
     },
     dimensionType,
     selectedMaterial: material,

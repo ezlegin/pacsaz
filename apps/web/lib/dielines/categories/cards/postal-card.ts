@@ -1,12 +1,10 @@
 import M from "makerjs";
 import { BLEED, MARGINS, MATERIALS } from "../../core/consts";
 import { addContainer } from "../../core/helpers/containerGenerator";
-import { resolveDimensions } from "../../core/helpers/dimensionResolver";
 import { addFoldLine } from "../../core/helpers/foldLineGenerator";
 import { addGuideLine } from "../../core/helpers/guidelineGenerator";
-import { svgExporter } from "../../core/helpers/svgExporter";
+import { modelExporter } from "../../core/helpers/modelGenerator";
 import { DielineDefinition } from "../../core/types";
-import { getSizes } from "../../core/helpers/getSizes";
 
 export const postalCard: DielineDefinition = {
   slug: "postal-card",
@@ -34,20 +32,14 @@ export const postalCard: DielineDefinition = {
     ],
   },
   model({
-    dimension: { width: rawWidth, length: rawLength },
+    dimensions: {
+      raw: rawDim,
+      resolved: { width, length, offsets },
+    },
     dimensionType,
-    selectedMaterial,
   }) {
-    const material = MATERIALS[selectedMaterial];
     const model: M.IModel = { models: {} };
     const bleedAmount = BLEED.default.pt;
-
-    const { width, length, offsets } = resolveDimensions({
-      width: rawWidth,
-      length: rawLength,
-      dimensionType,
-      material,
-    });
 
     const rect = new M.models.Rectangle(width * 2, length);
 
@@ -73,7 +65,7 @@ export const postalCard: DielineDefinition = {
       type: "width",
       from: [0, length / 4],
       to: [width, length / 4],
-      value: rawWidth,
+      value: rawDim.width,
       orientation: "horizontal",
       dimensionType,
       dimensionTypeOffset: {
@@ -85,7 +77,7 @@ export const postalCard: DielineDefinition = {
       type: "length",
       from: [width / 4, 0],
       to: [width / 4, length],
-      value: rawLength,
+      value: rawDim.length,
       orientation: "vertical",
       dimensionType,
       dimensionTypeOffset: {
@@ -100,33 +92,13 @@ export const postalCard: DielineDefinition = {
       marginMM: MARGINS.container,
     });
 
-    // SIZES
-    const { bleedSize, containerSize, trimSize } = getSizes({
-      bleed,
-      container,
+    return modelExporter({
+      model,
       trim,
+      bleed,
+      bleedAmount,
+      container,
+      offsets,
     });
-
-    return {
-      sizes: {
-        container: containerSize,
-        trim: trimSize,
-        bleed: bleedSize,
-        bleedAmount,
-        offset: {
-          width: {
-            inner: offsets.width.inner,
-            outer: offsets.width.outer,
-          },
-          length: {
-            inner: offsets.length.inner,
-            outer: offsets.length.outer,
-          },
-        },
-      },
-      model: svgExporter({
-        model,
-      }),
-    };
   },
 };
