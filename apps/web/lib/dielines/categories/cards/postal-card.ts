@@ -1,12 +1,12 @@
-import { mmToPt } from "@/utils/sizeConvertor";
 import M from "makerjs";
 import { BLEED, MARGINS, MATERIALS } from "../../core/consts";
-import { applyDimensionOffset } from "../../core/helpers/applyDimensionOffset";
 import { addContainer } from "../../core/helpers/containerGenerator";
+import { resolveDimensions } from "../../core/helpers/dimensionResolver";
 import { addFoldLine } from "../../core/helpers/foldLineGenerator";
 import { addGuideLine } from "../../core/helpers/guidelineGenerator";
 import { svgExporter } from "../../core/helpers/svgExporter";
-import { DielineDefinition, OffsetObject } from "../../core/types";
+import { DielineDefinition } from "../../core/types";
+import { getSizes } from "../../core/helpers/getSizes";
 
 export const postalCard: DielineDefinition = {
   slug: "postal-card",
@@ -27,43 +27,29 @@ export const postalCard: DielineDefinition = {
   dimensionsType: ["manufacture", "inner", "outer"],
   materials: {
     default: MATERIALS["glossy-cardboard"],
-    included: [MATERIALS["glossy-cardboard"], MATERIALS["e-flute"]],
+    included: [
+      MATERIALS["glossy-cardboard"],
+      MATERIALS["f-flute"],
+      MATERIALS["art-paper"],
+    ],
   },
   model({
     dimension: { width: rawWidth, length: rawLength },
     dimensionType,
     selectedMaterial,
   }) {
-    let width = rawWidth;
-    let length = rawLength;
-
-    const { offset } = MATERIALS[selectedMaterial];
-
-    const { lengthOffset, widthOffset }: OffsetObject = {
-      widthOffset: {
-        inner: mmToPt(offset.inner) * 2,
-        outer: mmToPt(offset.outer) * 2,
-      },
-      lengthOffset: {
-        inner: mmToPt(offset.inner) * 2,
-        outer: mmToPt(offset.outer) * 2,
-      },
-    };
-
-    width = applyDimensionOffset(
-      width,
-      dimensionType,
-      dimensionType === "inner" ? widthOffset.inner : widthOffset.outer
-    );
-    length = applyDimensionOffset(
-      length,
-      dimensionType,
-      dimensionType === "inner" ? lengthOffset.inner : lengthOffset.outer
-    );
-
+    const material = MATERIALS[selectedMaterial];
     const model: M.IModel = { models: {} };
-    const rect = new M.models.Rectangle(width * 2, length);
     const bleedAmount = BLEED.default.pt;
+
+    const { width, length, offsets } = resolveDimensions({
+      width: rawWidth,
+      length: rawLength,
+      dimensionType,
+      material,
+    });
+
+    const rect = new M.models.Rectangle(width * 2, length);
 
     //! BLEED
     const bleed = M.model.outline(rect, bleedAmount, 1);
@@ -90,7 +76,10 @@ export const postalCard: DielineDefinition = {
       value: rawWidth,
       orientation: "horizontal",
       dimensionType,
-      dimensionTypeOffset: { widthOffset, lengthOffset },
+      dimensionTypeOffset: {
+        widthOffset: offsets.width,
+        lengthOffset: offsets.length,
+      },
     });
     addGuideLine(model, {
       type: "length",
@@ -99,32 +88,39 @@ export const postalCard: DielineDefinition = {
       value: rawLength,
       orientation: "vertical",
       dimensionType,
-      dimensionTypeOffset: { widthOffset, lengthOffset },
+      dimensionTypeOffset: {
+        widthOffset: offsets.width,
+        lengthOffset: offsets.length,
+      },
     });
 
-    // SIZES
     const container = addContainer({
       model,
       from: rect,
       marginMM: MARGINS.container,
     });
-    const trimSize = M.measure.modelExtents(trim);
-    const bleedSize = M.measure.modelExtents(bleed);
+
+    // SIZES
+    const { bleedSize, containerSize, trimSize } = getSizes({
+      bleed,
+      container,
+      trim,
+    });
 
     return {
       sizes: {
-        container: container.size,
+        container: containerSize,
         trim: trimSize,
         bleed: bleedSize,
         bleedAmount,
         offset: {
           width: {
-            inner: widthOffset.inner,
-            outer: widthOffset.outer,
+            inner: offsets.width.inner,
+            outer: offsets.width.outer,
           },
           length: {
-            inner: lengthOffset.inner,
-            outer: lengthOffset.outer,
+            inner: offsets.length.inner,
+            outer: offsets.length.outer,
           },
         },
       },

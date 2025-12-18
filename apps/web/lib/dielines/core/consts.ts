@@ -171,7 +171,7 @@ export const MATERIALS = {
     thickness: 0.2,
     get offset() {
       return {
-        inner: 2,
+        inner: 1.5,
         outer: this.thickness,
       };
     },
