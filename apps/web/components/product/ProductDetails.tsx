@@ -81,7 +81,6 @@ export default function ProductDetails({
 
     await downloadPdf({
       svg,
-      fileName: slug + "-dieline",
       format,
       slug,
     });
@@ -270,6 +269,9 @@ function DimensionInput({
         <Input
           dir="ltr"
           value={localValue}
+          onFocus={(e) => {
+            e.target.select();
+          }}
           onChange={(e) => {
             const raw = Number(e.target.value);
 

@@ -6,16 +6,10 @@ type NewType = FormatsType;
 interface ExportPdfParams {
   svg: SVGModel;
   format: NewType;
-  fileName: string;
   slug: string;
 }
 
-export async function downloadPdf({
-  fileName,
-  format,
-  svg,
-  slug,
-}: ExportPdfParams) {
+export async function downloadPdf({ format, svg, slug }: ExportPdfParams) {
   const pdf = await PDFGenerator({
     svg,
     slug,
@@ -32,6 +26,8 @@ export async function downloadPdf({
   });
 
   const url = URL.createObjectURL(blob);
+
+  const fileName = `${slug}-dieline`;
 
   const a = document.createElement("a");
   a.href = url;
