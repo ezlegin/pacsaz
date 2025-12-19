@@ -1,15 +1,14 @@
 import { toMm, toPt } from "@/utils/sizeConvertor";
 import M from "makerjs";
-import { BLEED, GLUES, MARGINS, MATERIALS, zero } from "../../core/consts";
+import { BLEED, GLUES, MATERIALS, zero } from "../../core/consts";
 import { addModelToLayer } from "../../core/helpers/addModelToLayer";
-import { addBleed } from "../../core/helpers/bleedGenerator";
-import { addContainer } from "../../core/helpers/containerGenerator";
 import { addFoldLine } from "../../core/helpers/foldLineGenerator";
 import { getLastPointMm } from "../../core/helpers/getLastPointMm";
 import { addGuideLine } from "../../core/helpers/guidelineGenerator";
 import { modelBuilder } from "../../core/helpers/modelGenerator";
 import { PointBuilder } from "../../core/helpers/pointBuilder";
 import { DielineDefinition } from "../../core/types";
+import { drawFoldLines } from "../../core/helpers/drawFoldLines";
 
 const tuckEnd: DielineDefinition = {
   slug: "tuck-end",
@@ -124,33 +123,35 @@ const tuckEnd: DielineDefinition = {
     // DUST
     const dustModelGroup: M.IModel = { models: {} };
 
-    const dustPB = new PointBuilder(getLastPointMm(doorPTS));
-    const dustPTS = dustPB.draw(dust.indent.bl, dust.height.l).build();
-    const dustTL = new M.models.ConnectTheDots(false, dustPTS);
-    addModelToLayer(dustModelGroup, "dust-tl", dustTL, "trim");
+    const dustP1_PB = new PointBuilder(getLastPointMm(doorPTS));
+    const dustP1_PTS = dustP1_PB.draw(dust.indent.bl, dust.height.l).build();
 
-    const xPB = new PointBuilder(getLastPointMm(dustPTS));
-    const xPTS = xPB
+    const dustP2_PB = new PointBuilder(getLastPointMm(dustP1_PTS));
+    const dustP2_PTS = dustP2_PB
       .draw(dust.indent.tl, dust.size - dust.height.l)
       .right(heightMM - dust.indent.bl - dust.indent.tl - dust.indent.tr)
       .draw(dust.indent.tr - dust.indent.br, -dust.size + dust.height.r.inner)
 
       .build();
-    const x = new M.models.ConnectTheDots(false, xPTS); //todo
-    addModelToLayer(dustModelGroup, "x", x, "trim");
+    const dustP2 = new M.models.ConnectTheDots(false, dustP2_PTS); //todo
+    addModelToLayer(dustModelGroup, "dustP2", dustP2, "trim");
 
-    const xChain = M.model.findSingleChain(x);
-    const xFillet = M.chain.fillet(xChain, 5);
-    if (fillet) addModelToLayer(dustModelGroup, "fillet", xFillet, "trim");
+    const dustP2_Chain = M.model.findSingleChain(dustP2);
+    const dustP2_Fillet = M.chain.fillet(dustP2_Chain, 5);
+    if (fillet)
+      addModelToLayer(dustModelGroup, "fillet", dustP2_Fillet, "trim");
 
-    const yPB = new PointBuilder(getLastPointMm(xPTS));
-    const yPTS = yPB
+    const dustP3_PB = new PointBuilder(getLastPointMm(dustP2_PTS));
+    const dustP3_PTS = dustP3_PB
       .draw(dust.indent.br, -(dust.height.r.inner - dust.height.r.outer))
       .down(dust.height.r.outer)
       .build();
-    const y = new M.models.ConnectTheDots(false, yPTS);
+    const dustP3 = new M.models.ConnectTheDots(false, dustP3_PTS);
 
-    addModelToLayer(dustModelGroup, "y", y, "trim");
+    addModelToLayer(dustModelGroup, "dustP3", dustP3, "trim");
+
+    const dustTL = new M.models.ConnectTheDots(false, dustP1_PTS);
+    addModelToLayer(dustModelGroup, "dust-tl", dustTL, "trim");
 
     const dustTR = M.model.moveRelative(
       M.model.zero(M.model.mirror(M.model.clone(dustModelGroup), true, false)),
@@ -190,62 +191,59 @@ const tuckEnd: DielineDefinition = {
     addModelToLayer(trimModel, "single-3", s3, "trim");
 
     //! -------------- FOLD --------------
-    const foldModel: M.IModel = { models: {} };
-    addModelToLayer(model, "folds", foldModel, "folds");
-
-    addFoldLine(foldModel, {
-      id: "fold-Vertical-1",
-      from: zero,
-      to: [0, length],
-    });
-
-    addFoldLine(foldModel, {
-      id: "fold-Vertical-2",
-      from: [width, length],
-      to: [width, 0],
-    });
-
-    addFoldLine(foldModel, {
-      id: "fold-Vertical-3",
-      from: [width + height, length],
-      to: [width + height, 0],
-    });
-
-    addFoldLine(foldModel, {
-      id: "fold-Vertical-4",
-      from: [width * 2 + height, length],
-      to: [width * 2 + height, 0],
-    });
-
-    addFoldLine(doorModelGroup, {
-      id: "fold-horizontal-1",
-      from: [0, length + height],
-      to: [width, length + height],
-    });
-
-    addFoldLine(foldModel, {
-      id: "fold-horizontal-2",
-      from: [width * 2 + height, length],
-      to: [width * 2 + height * 2, length],
-    });
-
-    addFoldLine(foldModel, {
-      id: "fold-horizontal-3",
-      from: [0, length],
-      to: [width + height, length],
-    });
-
-    addFoldLine(foldModel, {
-      id: "fold-horizontal-4",
-      from: [width, 0],
-      to: [width * 2 + height * 2, 0],
-    });
-
-    addFoldLine(doorModelGroup, {
-      id: "fold-horizontal-5",
-      from: [width + height, -height],
-      to: [width * 2 + height, -height],
-    });
+    drawFoldLines(model, [
+      { type: "vertical", coords: { from: zero, to: [0, length] } },
+      {
+        type: "vertical",
+        coords: { from: [width, length], to: [width, 0] },
+      },
+      {
+        type: "vertical",
+        coords: { from: [width + height, length], to: [width + height, 0] },
+      },
+      {
+        type: "vertical",
+        coords: {
+          from: [width * 2 + height, length],
+          to: [width * 2 + height, 0],
+        },
+      },
+      {
+        type: "horizontal",
+        coords: {
+          from: [0, length + height],
+          to: [width, length + height],
+        },
+      },
+      {
+        type: "horizontal",
+        coords: {
+          from: [width * 2 + height, length],
+          to: [width * 2 + height * 2, length],
+        },
+      },
+      {
+        type: "horizontal",
+        coords: {
+          from: [0, length],
+          to: [width + height, length],
+        },
+      },
+      {
+        type: "horizontal",
+        coords: {
+          from: [width, 0],
+          to: [width * 2 + height * 2, 0],
+        },
+      },
+      {
+        type: "horizontal",
+        coords: {
+          from: [width + height, -height],
+          to: [width * 2 + height, -height],
+        },
+      },
+    ]);
 
     //! --------------------------------- GUIDES
     const guidesModel: M.IModel = { models: {} };
@@ -288,12 +286,6 @@ const tuckEnd: DielineDefinition = {
       },
     });
 
-    const container = addContainer({
-      model,
-      from: trimModel,
-      marginMM: MARGINS.container,
-    });
-
     return modelBuilder({
       model,
       trim: trimModel,
@@ -301,7 +293,6 @@ const tuckEnd: DielineDefinition = {
         bleedAmount,
         connectorLine: { from: [0, 0], to: [0, length] },
       },
-      container,
       offsets,
       showAnchors,
     });

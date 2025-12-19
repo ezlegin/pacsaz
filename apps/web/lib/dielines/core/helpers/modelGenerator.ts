@@ -1,13 +1,14 @@
+import { MARGINS } from "../consts";
 import { ModelExporter } from "../types";
 import { addAnchor } from "./addAnchor";
 import { addBleed } from "./bleedGenerator";
+import { addContainer } from "./containerGenerator";
 import { getSizes } from "./getSizes";
 import { svgExporter } from "./svgExporter";
 
 export function modelBuilder({
   model,
   trim,
-  container,
   bleed: { bleedAmount, connectorLine },
   offsets,
   showAnchors,
@@ -17,6 +18,12 @@ export function modelBuilder({
     trimModel: trim,
     bleedAmount,
     connectorLine,
+  });
+
+  const container = addContainer({
+    model,
+    from: trim,
+    marginMM: MARGINS.container,
   });
 
   const { bleedSize, containerSize, trimSize } = getSizes({

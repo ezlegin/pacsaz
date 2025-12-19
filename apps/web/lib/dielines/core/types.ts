@@ -111,10 +111,9 @@ export type OffsetObject = {
 export type ModelExporter = {
   model: M.IModel;
   trim: M.IModel;
-  container: M.IModel;
   bleed: {
     bleedAmount: number;
-    connectorLine: ConnectorLine;
+    connectorLine?: ConnectorLine;
   };
   offsets: {
     width: {

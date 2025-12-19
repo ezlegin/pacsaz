@@ -1,12 +1,12 @@
+import { toPt } from "@/utils/sizeConvertor";
 import M from "makerjs";
-import { BLEED, MARGINS, MATERIALS } from "../../core/consts";
-import { addContainer } from "../../core/helpers/containerGenerator";
+import { BLEED, MATERIALS } from "../../core/consts";
+import { addModelToLayer } from "../../core/helpers/addModelToLayer";
 import { addFoldLine } from "../../core/helpers/foldLineGenerator";
 import { addGuideLine } from "../../core/helpers/guidelineGenerator";
 import { modelBuilder } from "../../core/helpers/modelGenerator";
 import { DielineDefinition } from "../../core/types";
-import { toPt } from "@/utils/sizeConvertor";
-import { addModelToLayer } from "../../core/helpers/addModelToLayer";
+import { drawFoldLines } from "../../core/helpers/drawFoldLines";
 
 const postalCard: DielineDefinition = {
   slug: "postal-card",
@@ -39,26 +39,23 @@ const postalCard: DielineDefinition = {
       resolved: { width, length, offsets },
     },
     dimensionType,
+    developers: { showAnchors },
   }) {
     const model: M.IModel = { models: {} };
     const bleedAmount = toPt(BLEED.default);
 
     const rect = new M.models.Rectangle(width * 2, length);
 
-    //! BLEED
-    const bleed = M.model.outline(rect, bleedAmount, 1);
-    addModelToLayer(model, "bleed", bleed, "bleed");
-
     //! TRIM
     const trim = rect;
     addModelToLayer(model, "trim", trim, "trim");
 
     //! FOLD
-    addFoldLine(model, {
-      id: "centerFold",
-      from: [width, 0],
-      to: [width, length],
-    });
+    drawFoldLines(model, [
+      { type: "vertical", coords: { from: [width, 0], to: [width, length] } },
+    ]);
+
+    console.log(model);
 
     //! GUIDES
     addGuideLine(model, {
@@ -86,18 +83,13 @@ const postalCard: DielineDefinition = {
       },
     });
 
-    const container = addContainer({
-      model,
-      from: rect,
-      marginMM: MARGINS.container,
-    });
-
     return modelBuilder({
       model,
       trim,
-      bleed,
-      bleedAmount,
-      container,
+      bleed: {
+        bleedAmount,
+      },
+      showAnchors,
       offsets,
     });
   },
