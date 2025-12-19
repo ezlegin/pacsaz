@@ -22,6 +22,7 @@ export default function DielineGenerator({ slug }: Props) {
   const [material, setMaterial] = useState<MaterialKey>(
     dieline.materials.default.value as MaterialKey
   );
+  const [showAnchors, setShowAnchors] = useState<boolean>(false);
 
   const { size, setDimension } = useSize(dieline.dimensions);
   const [dimensionType, setDimensionType] =
@@ -50,6 +51,9 @@ export default function DielineGenerator({ slug }: Props) {
       },
       resolved: { width, length, height, offsets },
     },
+    developers: {
+      showAnchors,
+    },
     dimensionType,
     selectedMaterial: material,
   });
@@ -75,10 +79,12 @@ export default function DielineGenerator({ slug }: Props) {
       />
 
       <ProductInfo
-        offset={svg.sizes.offset}
         dimension={size}
         dimensionType={dimensionType}
         dimensionsType={dieline.dimensionsType}
+        sizes={svg.sizes}
+        slug={dieline.slug}
+        setShowAnchors={setShowAnchors}
       />
     </div>
   );

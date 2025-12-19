@@ -1,10 +1,10 @@
-import { FormatsType, SVGModel } from "@/lib/dielines/core/types";
+import { FormatsType, Model } from "@/lib/dielines/core/types";
 import { PDFGenerator } from "./PDFGenerator";
 
 type NewType = FormatsType;
 
 interface ExportPdfParams {
-  svg: SVGModel;
+  svg: Model;
   format: NewType;
   slug: string;
 }

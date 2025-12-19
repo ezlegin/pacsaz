@@ -1,4 +1,5 @@
 import { ModelExporter } from "../types";
+import { addAnchor } from "./addAnchor";
 import { getSizes } from "./getSizes";
 import { svgExporter } from "./svgExporter";
 
@@ -9,12 +10,15 @@ export function modelExporter({
   container,
   bleedAmount,
   offsets,
+  showAnchors,
 }: ModelExporter) {
   const { bleedSize, containerSize, trimSize } = getSizes({
     bleed,
     container,
     trim,
   });
+
+  addAnchor(model, trim, showAnchors);
 
   return {
     sizes: {

@@ -1,14 +1,14 @@
 "use server";
 
 import { COLORS } from "@/lib/dielines/core/consts";
-import { SVGModel } from "@/lib/dielines/core/types";
+import { Model } from "@/lib/dielines/core/types";
 import { toMm } from "@/utils/sizeConvertor";
 import path from "path";
 import PDFDocument from "pdfkit";
 import SVGtoPDF from "svg-to-pdfkit";
 
 interface Props {
-  svg: SVGModel;
+  svg: Model;
   slug: string;
 }
 

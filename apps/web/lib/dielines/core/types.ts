@@ -54,7 +54,7 @@ export type SVGModelSizes = {
   offset: OffsetType;
 };
 
-export type SVGModel = {
+export type Model = {
   model: string;
   sizes: SVGModelSizes;
 };
@@ -71,6 +71,9 @@ export type Offsets = {
 };
 
 export type DielineModel = (params: {
+  developers: {
+    showAnchors: boolean;
+  };
   dimensions: {
     raw: { width: number; height: number; length: number };
     resolved: {
@@ -82,7 +85,7 @@ export type DielineModel = (params: {
   };
   dimensionType: DimensionType;
   selectedMaterial?: MaterialKey;
-}) => SVGModel;
+}) => Model;
 
 export interface DielineDefinition {
   slug: string;
@@ -120,4 +123,5 @@ export type ModelExporter = {
       outer: number;
     };
   };
+  showAnchors: boolean;
 };

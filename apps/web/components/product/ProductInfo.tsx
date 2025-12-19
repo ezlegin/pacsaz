@@ -5,23 +5,29 @@ import {
 import {
   Dimensions,
   DimensionsType,
-  OffsetType,
+  SVGModelSizes,
 } from "@/lib/dielines/core/types";
 import { formatDimensions } from "@/utils/formatDimensions";
 import { toMm } from "@/utils/sizeConvertor";
+import { Card, CardContent, CardTitle } from "@workspace/ui/components/card";
+import { Switch } from "@workspace/ui/components/switch";
 
 interface Props {
   dimension: Dimensions;
   dimensionsType: DimensionsType;
   dimensionType: DimensionType;
-  offset: OffsetType;
+  sizes: SVGModelSizes;
+  slug: string;
+  setShowAnchors: (val: boolean) => void;
 }
 
 const ProductInfo = ({
   dimensionsType,
   dimension,
   dimensionType,
-  offset,
+  sizes,
+  slug,
+  setShowAnchors,
 }: Props) => {
   const { height, length, width } = dimension;
 
@@ -30,8 +36,8 @@ const ProductInfo = ({
       value,
       dimensionType,
       dimensionType === "inner"
-        ? toMm(offset[axis].inner)
-        : toMm(offset[axis].outer)
+        ? toMm(sizes.offset[axis].inner)
+        : toMm(sizes.offset[axis].outer)
     );
 
   const calcInner = (
@@ -44,7 +50,7 @@ const ProductInfo = ({
     const fromType: DimensionType =
       dimensionType === "inner" ? "manufacture" : "outer";
 
-    return applyDimensionOffset(base, fromType, toMm(offset[axis].inner));
+    return applyDimensionOffset(base, fromType, toMm(sizes.offset[axis].inner));
   };
 
   const calcOuter = (
@@ -57,7 +63,7 @@ const ProductInfo = ({
     const fromType: DimensionType =
       dimensionType === "outer" ? "manufacture" : "inner";
 
-    return applyDimensionOffset(base, fromType, toMm(offset[axis].outer));
+    return applyDimensionOffset(base, fromType, toMm(sizes.offset[axis].outer));
   };
 
   // manufacture dims
@@ -109,7 +115,7 @@ const ProductInfo = ({
   ];
 
   return (
-    <div className="absolute top-0 left-0 w-80 p-6 py-4">
+    <div className="absolute h-full top-0 left-0 w-80 p-6 py-4">
       <div className="flex justify-between">
         {packLengend.map(({ color, label }) => (
           <div key={label} className="flex items-center gap-1 mb-2">
@@ -148,6 +154,42 @@ const ProductInfo = ({
           ))}
         </ul>
       </div>
+
+      {process.env.NODE_ENV === "development" && (
+        <div className="absolute bottom-0 left-0 p-4 w-full">
+          <Card dir="ltr" className="p-4 gap-1">
+            <CardTitle>Developer Tools:</CardTitle>
+
+            <CardContent className="p-1 text-sm">
+              <div className="flex justify-between">
+                <p>Slug:</p>
+                <p>{slug}</p>
+              </div>
+              <div className="flex justify-between">
+                <p>Trim Size:</p>
+                <p>
+                  {toMm(sizes.trim.width)} x {toMm(sizes.trim.height)} mm
+                </p>
+              </div>
+              <div className="flex justify-between">
+                <p>Bleed Size:</p>
+                <p>
+                  {toMm(sizes.bleed.width).toFixed()} x{" "}
+                  {toMm(+sizes.bleed.height).toFixed()} mm
+                </p>
+              </div>
+              <div className="flex justify-between">
+                <p>Bleed Amount:</p>
+                <p>{toMm(sizes.bleedAmount)} mm</p>
+              </div>
+              <div className="flex justify-between">
+                <p>Show Anchors</p>
+                <Switch onCheckedChange={setShowAnchors} />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 };

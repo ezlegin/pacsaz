@@ -1,7 +1,6 @@
 import { toMm, toPt } from "@/utils/sizeConvertor";
 import M from "makerjs";
 import { BLEED, GLUES, MARGINS, MATERIALS, zero } from "../../core/consts";
-import { addAnchor } from "../../core/helpers/addAnchor";
 import { addModelToLayer } from "../../core/helpers/addModelToLayer";
 import { addBleed } from "../../core/helpers/bleedGenerator";
 import { addContainer } from "../../core/helpers/containerGenerator";
@@ -13,7 +12,7 @@ import { PointBuilder } from "../../core/helpers/pointBuilder";
 import { DielineDefinition } from "../../core/types";
 
 const tuckEnd: DielineDefinition = {
-  slug: "postal-card",
+  slug: "tuck-end",
   title: "جعبه دو طرف درب", //todo: sync to database, not here.
   dimensions: {
     initialScale: 0.8,
@@ -38,6 +37,7 @@ const tuckEnd: DielineDefinition = {
     ],
   },
   model({
+    developers: { showAnchors },
     dimensions: {
       raw: rawDim,
       resolved: { width, length, height, offsets },
@@ -198,7 +198,6 @@ const tuckEnd: DielineDefinition = {
     });
 
     //! -------------- ANCHOR --------------
-    addAnchor(model, trimModel);
 
     //! -------------- FOLD --------------
 
@@ -313,6 +312,7 @@ const tuckEnd: DielineDefinition = {
       bleedAmount,
       container,
       offsets,
+      showAnchors,
     });
   },
 };

@@ -15,7 +15,7 @@ import {
   DimensionsType,
   FormatsType,
   MaterialsInput,
-  SVGModel,
+  Model,
 } from "@/lib/dielines/core/types";
 import { Card } from "@workspace/ui/components/card";
 import {
@@ -55,7 +55,7 @@ interface Props {
   setMaterial: (mat: MaterialKey) => void;
   dimensionType: DimensionType;
   setDimensionType: (value: DimensionType) => void;
-  svg: SVGModel;
+  svg: Model;
   slug: string;
   material: MaterialKey;
 }
