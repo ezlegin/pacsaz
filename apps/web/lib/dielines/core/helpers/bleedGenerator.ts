@@ -8,7 +8,7 @@ export function addBleed(
 ) {
   const bleed = M.model.outline(trimModel, bleedAmount, 1);
   addModelToLayer(model, "bleed", bleed, "bleed");
-  model.models = { bleed: bleed, ...model.models };
+  model.models = { bleed, ...model.models };
 
   return bleed;
 }
