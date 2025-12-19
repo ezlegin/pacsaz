@@ -2,13 +2,12 @@ import { toMm, toPt } from "@/utils/sizeConvertor";
 import M from "makerjs";
 import { BLEED, GLUES, MATERIALS, zero } from "../../core/consts";
 import { addModelToLayer } from "../../core/helpers/addModelToLayer";
-import { addFoldLine } from "../../core/helpers/foldLineGenerator";
+import { drawFoldLines } from "../../core/helpers/drawFoldLines";
+import { drawGuideLines } from "../../core/helpers/drawGuideLines";
 import { getLastPointMm } from "../../core/helpers/getLastPointMm";
-import { addGuideLine } from "../../core/helpers/guidelineGenerator";
 import { modelBuilder } from "../../core/helpers/modelGenerator";
 import { PointBuilder } from "../../core/helpers/pointBuilder";
 import { DielineDefinition } from "../../core/types";
-import { drawFoldLines } from "../../core/helpers/drawFoldLines";
 
 const tuckEnd: DielineDefinition = {
   slug: "tuck-end",
@@ -191,99 +190,62 @@ const tuckEnd: DielineDefinition = {
     addModelToLayer(trimModel, "single-3", s3, "trim");
 
     //! -------------- FOLD --------------
-    drawFoldLines(model, [
-      { type: "vertical", coords: { from: zero, to: [0, length] } },
-      {
-        type: "vertical",
-        coords: { from: [width, length], to: [width, 0] },
-      },
-      {
-        type: "vertical",
-        coords: { from: [width + height, length], to: [width + height, 0] },
-      },
-      {
-        type: "vertical",
-        coords: {
+    drawFoldLines(model, {
+      verticals: [
+        { from: zero, to: [0, length] },
+        { from: [width, length], to: [width, 0] },
+        { from: [width + height, length], to: [width + height, 0] },
+        {
           from: [width * 2 + height, length],
           to: [width * 2 + height, 0],
         },
-      },
-      {
-        type: "horizontal",
-        coords: {
+      ],
+      horizontals: [
+        {
           from: [0, length + height],
           to: [width, length + height],
         },
-      },
-      {
-        type: "horizontal",
-        coords: {
+        {
           from: [width * 2 + height, length],
           to: [width * 2 + height * 2, length],
         },
-      },
-      {
-        type: "horizontal",
-        coords: {
+        {
           from: [0, length],
           to: [width + height, length],
         },
-      },
-      {
-        type: "horizontal",
-        coords: {
+        {
           from: [width, 0],
           to: [width * 2 + height * 2, 0],
         },
-      },
-      {
-        type: "horizontal",
-        coords: {
+        {
           from: [width + height, -height],
           to: [width * 2 + height, -height],
         },
-      },
-    ]);
-
-    //! --------------------------------- GUIDES
-    const guidesModel: M.IModel = { models: {} };
-    addModelToLayer(model, "guides", guidesModel, "guides");
-
-    addGuideLine(guidesModel, {
-      type: "height",
-      from: [width, length / 2],
-      to: [width + height, length / 2],
-      value: rawDim.height,
-      orientation: "horizontal",
-      dimensionType,
-      dimensionTypeOffset: {
-        widthOffset: offsets.width,
-        lengthOffset: offsets.length,
-      },
+      ],
     });
-    addGuideLine(guidesModel, {
-      type: "width",
-      from: [0, length / 4],
-      to: [width, length / 4],
-      value: rawDim.width,
-      orientation: "horizontal",
+
+    //! -------------- GUIDES --------------
+    drawGuideLines(model, {
       dimensionType,
-      dimensionTypeOffset: {
-        widthOffset: offsets.width,
-        lengthOffset: offsets.length,
-      },
-    });
-    addGuideLine(guidesModel, {
-      type: "length",
-      from: [width / 4, 0],
-      to: [width / 4, length],
-      value: rawDim.length,
-      orientation: "vertical",
-      dimensionType,
-      dimensionTypeOffset: {
-        widthOffset: offsets.width,
-        lengthOffset: offsets.length,
-      },
+      height,
+      length,
+      offsets,
+      rawDim,
+      width,
+      guides: [
+        {
+          type: "height",
+          orientation: "horizontal",
+        },
+        {
+          type: "width",
+          orientation: "horizontal",
+        },
+        {
+          type: "length",
+          orientation: "vertical",
+        },
+      ],
     });
 
     return modelBuilder({

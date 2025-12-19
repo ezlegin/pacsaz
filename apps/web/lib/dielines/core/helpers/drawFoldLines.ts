@@ -2,28 +2,38 @@ import { IModel, IPoint } from "makerjs";
 import { addFoldLine } from "./foldLineGenerator";
 import { addModelToLayer } from "./addModelToLayer";
 
+type Coordinates = { from: IPoint; to: IPoint }[];
+
 export function drawFoldLines(
   model: IModel,
-  fold: {
-    type: "vertical" | "horizontal" | "diagonal";
-    coords: { from: IPoint; to: IPoint };
-  }[]
+  folds: {
+    verticals?: Coordinates;
+    horizontals?: Coordinates;
+    diagonal?: Coordinates;
+  }
 ) {
   const typeCounters: Record<string, number> = {};
 
   const foldModel: IModel = { models: {} };
   addModelToLayer(model, "folds", foldModel, "folds");
 
-  for (const {
-    coords: { from, to },
-    type,
-  } of fold) {
-    typeCounters[type] = (typeCounters[type] || 0) + 1;
+  const foldTypes: { type: string; coords?: Coordinates }[] = [
+    { type: "vertical", coords: folds.verticals },
+    { type: "horizontal", coords: folds.horizontals },
+    { type: "diagonal", coords: folds.diagonal },
+  ];
 
-    addFoldLine(foldModel, {
-      id: `fold-${type}-${typeCounters[type]}`,
-      from,
-      to,
-    });
+  for (const { type, coords } of foldTypes) {
+    if (!coords) continue;
+
+    for (const { from, to } of coords) {
+      typeCounters[type] = (typeCounters[type] || 0) + 1;
+
+      addFoldLine(foldModel, {
+        id: `fold-${type}-${typeCounters[type]}`,
+        from,
+        to,
+      });
+    }
   }
 }

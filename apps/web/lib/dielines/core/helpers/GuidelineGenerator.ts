@@ -1,14 +1,12 @@
-import M from "makerjs";
+import M, { IPoint } from "makerjs";
 import { toMm } from "../../../../utils/sizeConvertor";
 import { DimensionType, applyDimensionOffset } from "./applyDimensionOffset";
 import { OffsetObject } from "../types";
 
-type Point = [number, number];
-
 export interface GuideLineOptions {
   type: "width" | "length" | "height";
-  from: Point;
-  to: Point;
+  from: IPoint;
+  to: IPoint;
   value: number;
   orientation: "horizontal" | "vertical";
   dimensionType: DimensionType;
@@ -25,6 +23,18 @@ export function addGuideLine(model: M.IModel, options: GuideLineOptions) {
     dimensionType,
     dimensionTypeOffset: { lengthOffset, widthOffset },
   } = options;
+
+  if (
+    from[0] === undefined ||
+    from[1] === undefined ||
+    to[0] === undefined ||
+    to[1] === undefined
+  ) {
+    from[0] = 0;
+    from[1] = 0;
+    to[0] = 0;
+    to[1] = 0;
+  }
 
   const pointerRadius = 4;
   const indicatorLength = 4;
@@ -142,7 +152,7 @@ export function addGuideLine(model: M.IModel, options: GuideLineOptions) {
   model.models![`${type}EndPointer`]!.layer = "pointer";
 
   // text
-  const mid: Point = [(from[0] + to[0]) / 2, (from[1] + to[1]) / 2];
+  const mid: IPoint = [(from[0] + to[0]) / 2, (from[1] + to[1]) / 2];
   const textCarrier = new M.models.ConnectTheDots(false, [[0, 0]]);
   M.model.addCaption(textCarrier, `${toMm(value)} mm`, mid);
 

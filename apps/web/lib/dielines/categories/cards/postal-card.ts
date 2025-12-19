@@ -2,11 +2,10 @@ import { toPt } from "@/utils/sizeConvertor";
 import M from "makerjs";
 import { BLEED, MATERIALS } from "../../core/consts";
 import { addModelToLayer } from "../../core/helpers/addModelToLayer";
-import { addFoldLine } from "../../core/helpers/foldLineGenerator";
-import { addGuideLine } from "../../core/helpers/guidelineGenerator";
+import { drawFoldLines } from "../../core/helpers/drawFoldLines";
+import { drawGuideLines } from "../../core/helpers/drawGuideLines";
 import { modelBuilder } from "../../core/helpers/modelGenerator";
 import { DielineDefinition } from "../../core/types";
-import { drawFoldLines } from "../../core/helpers/drawFoldLines";
 
 const postalCard: DielineDefinition = {
   slug: "postal-card",
@@ -51,36 +50,21 @@ const postalCard: DielineDefinition = {
     addModelToLayer(model, "trim", trim, "trim");
 
     //! FOLD
-    drawFoldLines(model, [
-      { type: "vertical", coords: { from: [width, 0], to: [width, length] } },
-    ]);
-
-    console.log(model);
+    drawFoldLines(model, {
+      verticals: [{ from: [width, 0], to: [width, length] }],
+    });
 
     //! GUIDES
-    addGuideLine(model, {
-      type: "width",
-      from: [0, length / 4],
-      to: [width, length / 4],
-      value: rawDim.width,
-      orientation: "horizontal",
+    drawGuideLines(model, {
       dimensionType,
-      dimensionTypeOffset: {
-        widthOffset: offsets.width,
-        lengthOffset: offsets.length,
-      },
-    });
-    addGuideLine(model, {
-      type: "length",
-      from: [width / 4, 0],
-      to: [width / 4, length],
-      value: rawDim.length,
-      orientation: "vertical",
-      dimensionType,
-      dimensionTypeOffset: {
-        widthOffset: offsets.width,
-        lengthOffset: offsets.length,
-      },
+      length,
+      offsets,
+      rawDim,
+      width,
+      guides: [
+        { orientation: "vertical", type: "length" },
+        { orientation: "horizontal", type: "width" },
+      ],
     });
 
     return modelBuilder({
