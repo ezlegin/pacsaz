@@ -34,7 +34,7 @@ export async function PDFGenerator({ svg, slug }: Props) {
     "Created By: PacSaz.ir",
     `Slug: ${slug}`,
     `Bleed: ${toMm(sizes.bleedAmount)} mm`,
-    `Trim Size: `, // ${toMm(sizes.trim.width).toFixed(1)} x ${toMm(sizes.trim.height).toFixed(1)} mm
+    `Trim Size: ${toMm(sizes.trim.width).toFixed(1)} x ${toMm(sizes.trim.height).toFixed(1)} mm`,
     `Bleed Size: ${toMm(sizes.bleed.width).toFixed(1)} x ${toMm(sizes.bleed.height).toFixed(1)} mm`,
   ].join("\n");
 

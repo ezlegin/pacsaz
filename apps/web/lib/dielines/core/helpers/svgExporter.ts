@@ -12,9 +12,13 @@ export function svgExporter({ model }: SvgExporterParams) {
       bleed: {
         stroke: COLORS.dielines.bleed,
         fill: COLORS.dielines.fill,
+        cssStyle: "z-index: -20",
         strokeWidth: "0.75",
       },
-      trim: { stroke: COLORS.dielines.trim, strokeWidth: "0.75" },
+      trim: {
+        stroke: COLORS.dielines.trim,
+        strokeWidth: "0.75",
+      },
       fold: {
         stroke: COLORS.dielines.fold,
         strokeWidth: "0.75",

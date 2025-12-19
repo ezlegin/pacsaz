@@ -1,20 +1,21 @@
 import { toMm, toPt } from "@/utils/sizeConvertor";
 import M from "makerjs";
 import { BLEED, GLUES, MARGINS, MATERIALS, zero } from "../../core/consts";
+import { addModelToLayer } from "../../core/helpers/addModelToLayer";
 import { addContainer } from "../../core/helpers/containerGenerator";
 import { addFoldLine } from "../../core/helpers/foldLineGenerator";
-import { modelExporter } from "../../core/helpers/modelGenerator";
-import { DielineDefinition } from "../../core/types";
-import { addModelToLayer } from "../../core/helpers/addModelToLayer";
-import { PointBuilder } from "../../core/helpers/pointBuilder";
 import { getLastPointMm } from "../../core/helpers/getLastPointMm";
 import { addGuideLine } from "../../core/helpers/guidelineGenerator";
+import { modelExporter } from "../../core/helpers/modelGenerator";
+import { PointBuilder } from "../../core/helpers/pointBuilder";
+import { DielineDefinition } from "../../core/types";
+import { addBleed } from "../../core/helpers/bleedGenerator";
 
 const tuckEnd: DielineDefinition = {
   slug: "postal-card",
   title: "جعبه دو طرف درب", //todo: sync to database, not here.
   dimensions: {
-    initialScale: 1.5,
+    initialScale: 0.8,
     defaultDimensions: {
       length: 140,
       width: 90,
@@ -45,11 +46,7 @@ const tuckEnd: DielineDefinition = {
     const model: M.IModel = { models: {} };
     const bleedAmount = toPt(BLEED.default);
 
-    const rect = new M.models.Rectangle(width * 2, length);
-
     //! BLEED
-    const bleed = M.model.outline(rect, bleedAmount, 1);
-    // addModelToLayer(model, "bleed", bleed, "bleed");
 
     height = height ?? 0;
 
@@ -66,39 +63,26 @@ const tuckEnd: DielineDefinition = {
     };
     const dust = {
       size: (heightMM + tuckFlap.size) / 2,
-      l: {
-        height: {
-          l: 6,
-          r: {
-            inner: 12,
-            outer: 8,
-          },
-        },
-        indent: {
-          bl: 5,
-          tl: 4,
-          tr: 6,
-          br: 3,
+      height: {
+        l: 6,
+        r: {
+          inner: 12,
+          outer: 8,
         },
       },
-      r: {
-        height: {
-          l: {
-            inner: 12,
-            outer: 8,
-          },
-          r: 6,
-        },
-        indent: {
-          bl: 3,
-          tl: 6,
-          tr: 4,
-          br: 5,
-        },
+      indent: {
+        bl: 5,
+        tl: 4,
+        tr: 6,
+        br: 3,
       },
     };
 
     //! --------------------------------- TRIM
+    const trimModel: M.IModel = { models: {} };
+
+    addModelToLayer(model, "trim", trimModel, "trim");
+
     // GLUE
     const gluePB = new PointBuilder();
     const gluePTS = gluePB
@@ -106,7 +90,7 @@ const tuckEnd: DielineDefinition = {
       .up(lengthMM - glueMargin * 2)
       .draw(glueSize, glueMargin);
     const glue = new M.models.ConnectTheDots(false, gluePTS.build());
-    addModelToLayer(model, "glue", glue, "trim");
+    addModelToLayer(trimModel, "glue", glue, "trim");
 
     // DOOR
     const doorModelGroup: M.IModel = { models: {} };
@@ -140,22 +124,19 @@ const tuckEnd: DielineDefinition = {
     );
     addModelToLayer(doorModelGroup, "bottomDoorModel", bottomDoor, "trim");
 
-    addModelToLayer(model, "door", doorModelGroup, "trim");
+    addModelToLayer(trimModel, "door", doorModelGroup, "trim");
 
     // DUST
     const dustModelGroup: M.IModel = { models: {} };
 
     const dustPB = new PointBuilder(getLastPointMm(doorPTS));
     const dustPTS = dustPB
-      .draw(dust.l.indent.bl, dust.l.height.l) // Start Left Dust Flap
-      .draw(dust.l.indent.tl, dust.size - dust.l.height.l)
-      .right(heightMM - dust.l.indent.bl - dust.l.indent.tl - dust.l.indent.tr)
-      .draw(
-        dust.l.indent.tr - dust.l.indent.br,
-        -dust.size + dust.l.height.r.inner
-      )
-      .draw(dust.l.indent.br, -(dust.l.height.r.inner - dust.l.height.r.outer))
-      .down(dust.l.height.r.outer);
+      .draw(dust.indent.bl, dust.height.l) // Start Left Dust Flap
+      .draw(dust.indent.tl, dust.size - dust.height.l)
+      .right(heightMM - dust.indent.bl - dust.indent.tl - dust.indent.tr)
+      .draw(dust.indent.tr - dust.indent.br, -dust.size + dust.height.r.inner)
+      .draw(dust.indent.br, -(dust.height.r.inner - dust.height.r.outer))
+      .down(dust.height.r.outer);
     const dustTL = new M.models.ConnectTheDots(false, dustPTS.build());
     addModelToLayer(dustModelGroup, "dust-tl", dustTL, "trim");
 
@@ -178,71 +159,78 @@ const tuckEnd: DielineDefinition = {
     addModelToLayer(dustModelGroup, "dust-br", dustBR, "trim");
     addModelToLayer(dustModelGroup, "dust-bl", dustBL, "trim");
 
-    addModelToLayer(model, "dust", dustModelGroup, "trim");
+    addModelToLayer(trimModel, "dust", dustModelGroup, "trim");
 
     // POOR SINGLES
     const s1 = new M.models.ConnectTheDots(false, [zero, [width, 0]]);
-    addModelToLayer(model, "single-1", s1, "trim");
+    addModelToLayer(trimModel, "single-1", s1, "trim");
 
     const s2 = new M.models.ConnectTheDots(false, [
       [width + height, length],
       [width + height + width, length],
     ]);
-    addModelToLayer(model, "single-2", s2, "trim");
+    addModelToLayer(trimModel, "single-2", s2, "trim");
 
     const s3 = new M.models.ConnectTheDots(false, [
       [width * 2 + height * 2, length],
       [width * 2 + height * 2, 0],
     ]);
-    addModelToLayer(model, "single-3", s3, "trim");
+    addModelToLayer(trimModel, "single-3", s3, "trim");
+
+    //! --------------------------------- BLEED
+    const bleed = addBleed(model, trimModel, bleedAmount);
 
     //! --------------------------------- FOLD
-    addFoldLine(model, {
+    const foldModel: M.IModel = { models: {} };
+    addModelToLayer(model, "folds", foldModel, "folds");
+
+    addFoldLine(foldModel, {
       id: "fold-Vertical-1",
       from: zero,
       to: [0, length],
     });
 
-    console.log(model);
-
-    addFoldLine(model, {
+    addFoldLine(foldModel, {
       id: "fold-Vertical-2",
       from: [width, length],
       to: [width, 0],
     });
 
-    addFoldLine(model, {
+    addFoldLine(foldModel, {
       id: "fold-Vertical-3",
       from: [width + height, length],
       to: [width + height, 0],
     });
 
-    addFoldLine(model, {
+    addFoldLine(foldModel, {
       id: "fold-Vertical-4",
       from: [width * 2 + height, length],
       to: [width * 2 + height, 0],
     });
 
-    addFoldLine(model, {
+    addFoldLine(foldModel, {
       id: "fold-horizontal-1",
       from: [width * 2 + height, length],
       to: [width * 2 + height * 2, length],
     });
 
-    addFoldLine(model, {
+    addFoldLine(foldModel, {
       id: "fold-horizontal-2",
       from: [0, length],
       to: [width + height, length],
     });
 
-    addFoldLine(model, {
+    addFoldLine(foldModel, {
       id: "fold-horizontal-3",
       from: [width, 0],
       to: [width * 2 + height * 2, 0],
     });
 
-    // //! GUIDES
-    addGuideLine(model, {
+    //! --------------------------------- GUIDES
+    const guidesModel: M.IModel = { models: {} };
+    addModelToLayer(model, "guides", guidesModel, "guides");
+
+    addGuideLine(guidesModel, {
       type: "height",
       from: [width, length / 2],
       to: [width + height, length / 2],
@@ -254,7 +242,7 @@ const tuckEnd: DielineDefinition = {
         lengthOffset: offsets.length,
       },
     });
-    addGuideLine(model, {
+    addGuideLine(guidesModel, {
       type: "width",
       from: [0, length / 4],
       to: [width, length / 4],
@@ -266,7 +254,7 @@ const tuckEnd: DielineDefinition = {
         lengthOffset: offsets.length,
       },
     });
-    addGuideLine(model, {
+    addGuideLine(guidesModel, {
       type: "length",
       from: [width / 4, 0],
       to: [width / 4, length],
@@ -281,13 +269,15 @@ const tuckEnd: DielineDefinition = {
 
     const container = addContainer({
       model,
-      from: rect,
+      from: trimModel,
       marginMM: MARGINS.container,
     });
 
+    console.log(model);
+
     return modelExporter({
       model,
-      trim: {}, // todo
+      trim: trimModel,
       bleed,
       bleedAmount,
       container,
@@ -297,45 +287,3 @@ const tuckEnd: DielineDefinition = {
 };
 
 export default tuckEnd;
-
-// const points = pb
-//   .draw(-glue, glueMargin) // GLUE
-
-//   .up(lengthMM - glueMargin * 2) // Start Top Panel
-//   .draw(glue, glueMargin)
-//   .up(heightMM)
-
-//   .right(tuckFlap.indent) // Start Top Tuck Flap
-//   .up(tuckFlap.size)
-//   .right(widthMM - tuckFlap.indent * 2)
-//   .down(tuckFlap.size)
-//   .right(tuckFlap.indent) // End Top Tuck Flap
-
-//   .down(heightMM) // End Top Panel
-
-//   .draw(dust.l.indent.bl, dust.l.height.l) // Start Left Dust Flap
-//   .draw(dust.l.indent.tl, dust.size - dust.l.height.l)
-//   .right(heightMM - dust.l.indent.bl - dust.l.indent.tl - dust.l.indent.tr)
-//   .draw(
-//     dust.l.indent.tr - dust.l.indent.br,
-//     -dust.size + dust.l.height.r.inner
-//   )
-//   .draw(dust.l.indent.br, -(dust.l.height.r.inner - dust.l.height.r.outer))
-//   .down(dust.l.height.r.outer) // End Left Dust Flap
-
-//   .right(widthMM)
-
-//   .up(dust.r.height.l.outer)
-//   .draw(dust.r.indent.bl, dust.r.height.l.inner - dust.r.height.l.outer)
-//   .draw(
-//     dust.r.indent.tl - dust.r.indent.bl,
-//     dust.size - dust.r.height.l.inner
-//   )
-//   .right(heightMM - dust.r.indent.tl - dust.r.indent.tr - dust.r.indent.br)
-//   .draw(dust.r.indent.tr, -(dust.size - dust.r.indent.br))
-//   .draw(dust.r.indent.br, -dust.r.indent.br) // Start right Dust Flap
-
-//   .down(lengthMM);
-
-// const trim = new M.models.ConnectTheDots(false, points.build());
-// addModelToLayer(model, "trim", trim, "trim");
