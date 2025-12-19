@@ -1,9 +1,9 @@
-import M from "makerjs";
+import { IModel } from "makerjs";
 
 export function addModelToLayer(
-  model: M.IModel,
+  model: IModel,
   key: string,
-  child: M.IModel,
+  child: IModel,
   layer: string
 ) {
   model.models ??= {};

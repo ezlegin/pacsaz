@@ -1,6 +1,7 @@
 import { toMm, toPt } from "@/utils/sizeConvertor";
 import M from "makerjs";
 import { BLEED, GLUES, MATERIALS, zero } from "../../core/consts";
+import { addFillet } from "../../core/helpers/addFillet";
 import { addModelToLayer } from "../../core/helpers/addModelToLayer";
 import { drawFoldLines } from "../../core/helpers/drawFoldLines";
 import { drawGuideLines } from "../../core/helpers/drawGuideLines";
@@ -92,10 +93,8 @@ const tuckEnd: DielineDefinition = {
     addModelToLayer(trimModel, "glue", glue, "trim");
 
     // DOOR
-    const doorModelGroup: M.IModel = { models: {} };
-
-    const doorPB = new PointBuilder([0, lengthMM]);
-    const doorPTS = doorPB
+    const topPanelPB = new PointBuilder([0, lengthMM]);
+    const topPanelPTS = topPanelPB
       .up(heightMM)
       .right(tuckFlap.indent)
       .up(tuckFlap.size)
@@ -104,26 +103,29 @@ const tuckEnd: DielineDefinition = {
       .right(tuckFlap.indent)
       .down(heightMM)
       .build();
-    const topDoor = new M.models.ConnectTheDots(false, doorPTS);
-    addModelToLayer(doorModelGroup, "door_P1", topDoor, "trim");
+    const topPanel = new M.models.ConnectTheDots(false, topPanelPTS);
 
-    const chain = M.model.findSingleChain(topDoor);
-    const fillet = M.chain.fillet(chain, 25);
-    if (fillet) addModelToLayer(doorModelGroup, "fillet", fillet, "trim");
+    addFillet(topPanel, 25);
 
-    const bottomDoor = M.model.moveRelative(
-      M.model.zero(M.model.rotate(M.model.clone(doorModelGroup), 180)),
+    const bottomPanel = M.model.moveRelative(
+      M.model.zero(M.model.rotate(M.model.clone(topPanel), 180)),
       [width + height, -height - toPt(tuckFlap.size)]
     );
-    addModelToLayer(doorModelGroup, "bottomDoorModel", bottomDoor, "trim");
 
-    addModelToLayer(trimModel, "door", doorModelGroup, "trim");
+    addModelToLayer(
+      trimModel,
+      "door",
+      { models: { topPanel, bottomPanel } },
+      "trim"
+    );
 
     // DUST
-    const dustModelGroup: M.IModel = { models: {} };
+    const dustTL: M.IModel = { models: {} };
 
-    const dustP1_PB = new PointBuilder(getLastPointMm(doorPTS));
+    const dustP1_PB = new PointBuilder(getLastPointMm(topPanelPTS));
     const dustP1_PTS = dustP1_PB.draw(dust.indent.bl, dust.height.l).build();
+    const dustP1 = new M.models.ConnectTheDots(false, dustP1_PTS);
+    addModelToLayer(dustTL, "dust-tl", dustP1, "trim");
 
     const dustP2_PB = new PointBuilder(getLastPointMm(dustP1_PTS));
     const dustP2_PTS = dustP2_PB
@@ -133,12 +135,8 @@ const tuckEnd: DielineDefinition = {
 
       .build();
     const dustP2 = new M.models.ConnectTheDots(false, dustP2_PTS); //todo
-    addModelToLayer(dustModelGroup, "dustP2", dustP2, "trim");
 
-    const dustP2_Chain = M.model.findSingleChain(dustP2);
-    const dustP2_Fillet = M.chain.fillet(dustP2_Chain, 5);
-    if (fillet)
-      addModelToLayer(dustModelGroup, "fillet", dustP2_Fillet, "trim");
+    addFillet(dustP2, 5);
 
     const dustP3_PB = new PointBuilder(getLastPointMm(dustP2_PTS));
     const dustP3_PTS = dustP3_PB
@@ -147,47 +145,50 @@ const tuckEnd: DielineDefinition = {
       .build();
     const dustP3 = new M.models.ConnectTheDots(false, dustP3_PTS);
 
-    addModelToLayer(dustModelGroup, "dustP3", dustP3, "trim");
-
-    const dustTL = new M.models.ConnectTheDots(false, dustP1_PTS);
-    addModelToLayer(dustModelGroup, "dust-tl", dustTL, "trim");
+    addModelToLayer(
+      dustTL,
+      "dust-tl",
+      { models: { dustP1, dustP2, dustP3 } },
+      "trim"
+    );
 
     const dustTR = M.model.moveRelative(
-      M.model.zero(M.model.mirror(M.model.clone(dustModelGroup), true, false)),
+      M.model.zero(M.model.mirror(M.model.clone(dustTL), true, false)),
       [width * 2 + height, length]
     );
 
     const dustBR = M.model.moveRelative(
-      M.model.zero(M.model.mirror(M.model.clone(dustModelGroup), false, true)),
+      M.model.zero(M.model.mirror(M.model.clone(dustTL), false, true)),
       [width * 2 + height, -toPt(dust.size)]
     );
 
     const dustBL = M.model.moveRelative(
-      M.model.zero(M.model.mirror(M.model.clone(dustModelGroup), true, true)),
+      M.model.zero(M.model.mirror(M.model.clone(dustTL), true, true)),
       [width, -toPt(dust.size)]
     );
 
-    addModelToLayer(dustModelGroup, "dust-tr", dustTR, "trim");
-    addModelToLayer(dustModelGroup, "dust-br", dustBR, "trim");
-    addModelToLayer(dustModelGroup, "dust-bl", dustBL, "trim");
-
-    addModelToLayer(trimModel, "dust", dustModelGroup, "trim");
+    addModelToLayer(
+      trimModel,
+      "dust",
+      { models: { dustTL, dustTR, dustBR, dustBL } },
+      "trim"
+    );
 
     // POOR SINGLES
     const s1 = new M.models.ConnectTheDots(false, [zero, [width, 0]]);
-    addModelToLayer(trimModel, "single-1", s1, "trim");
 
     const s2 = new M.models.ConnectTheDots(false, [
       [width + height, length],
       [width + height + width, length],
     ]);
-    addModelToLayer(trimModel, "single-2", s2, "trim");
 
     const s3 = new M.models.ConnectTheDots(false, [
       [width * 2 + height * 2, length],
       [width * 2 + height * 2, 0],
     ]);
-    addModelToLayer(trimModel, "single-3", s3, "trim");
+
+    const singles: M.IModel = { models: { s1, s2, s3 } };
+    addModelToLayer(trimModel, "singles", singles, "trim");
 
     //! -------------- FOLD --------------
     drawFoldLines(model, {
@@ -248,6 +249,7 @@ const tuckEnd: DielineDefinition = {
       ],
     });
 
+    console.log(model);
     return modelBuilder({
       model,
       trim: trimModel,

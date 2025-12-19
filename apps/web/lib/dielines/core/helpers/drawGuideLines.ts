@@ -1,4 +1,4 @@
-import M, { IModel } from "makerjs";
+import { IModel, IPoint } from "makerjs";
 import { DimensionKey, Offsets } from "../types";
 import { addModelToLayer } from "./addModelToLayer";
 import { DimensionType } from "./applyDimensionOffset";
@@ -27,12 +27,12 @@ type DrawGuideLinesParams = {
 type GuideConfig = {
   type: DimensionKey;
   orientation: Orientation;
-  from?: M.IPoint;
-  to?: M.IPoint;
+  from?: IPoint;
+  to?: IPoint;
 };
 
 export function drawGuideLines(model: IModel, params: DrawGuideLinesParams) {
-  const guidesModel: M.IModel = { models: {} };
+  const guidesModel: IModel = { models: {} };
   addModelToLayer(model, "guides", guidesModel, "guides");
 
   const { width, length, height, rawDim, offsets, dimensionType, guides } =

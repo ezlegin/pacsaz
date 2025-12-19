@@ -1,10 +1,10 @@
 import { toPt } from "@/utils/sizeConvertor";
-import M from "makerjs";
+import { IPoint } from "makerjs";
 
 export class PointBuilder {
-  private pts: M.IPoint[] = [];
+  private pts: IPoint[] = [];
 
-  constructor(start: M.IPoint = [0, 0]) {
+  constructor(start: IPoint = [0, 0]) {
     this.pts.push([toPt(start[0]!), toPt(start[1]!)]);
   }
 
