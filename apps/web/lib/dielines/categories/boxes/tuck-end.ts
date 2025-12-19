@@ -1,7 +1,9 @@
 import { toMm, toPt } from "@/utils/sizeConvertor";
 import M from "makerjs";
 import { BLEED, GLUES, MARGINS, MATERIALS, zero } from "../../core/consts";
+import { addAnchor } from "../../core/helpers/addAnchor";
 import { addModelToLayer } from "../../core/helpers/addModelToLayer";
+import { addBleed } from "../../core/helpers/bleedGenerator";
 import { addContainer } from "../../core/helpers/containerGenerator";
 import { addFoldLine } from "../../core/helpers/foldLineGenerator";
 import { getLastPointMm } from "../../core/helpers/getLastPointMm";
@@ -9,7 +11,6 @@ import { addGuideLine } from "../../core/helpers/guidelineGenerator";
 import { modelExporter } from "../../core/helpers/modelGenerator";
 import { PointBuilder } from "../../core/helpers/pointBuilder";
 import { DielineDefinition } from "../../core/types";
-import { addBleed } from "../../core/helpers/bleedGenerator";
 
 const tuckEnd: DielineDefinition = {
   slug: "postal-card",
@@ -135,7 +136,7 @@ const tuckEnd: DielineDefinition = {
       .draw(dust.indent.tr - dust.indent.br, -dust.size + dust.height.r.inner)
 
       .build();
-    const x = new M.models.ConnectTheDots(false, xPTS);
+    const x = new M.models.ConnectTheDots(false, xPTS); //todo
     addModelToLayer(dustModelGroup, "x", x, "trim");
 
     const xChain = M.model.findSingleChain(x);
@@ -189,7 +190,15 @@ const tuckEnd: DielineDefinition = {
     addModelToLayer(trimModel, "single-3", s3, "trim");
 
     //! -------------- BLEED --------------
-    const bleed = addBleed(model, trimModel, bleedAmount);
+    const bleed = addBleed({
+      model,
+      trimModel,
+      bleedAmount,
+      connectorLine: { from: [0, 0], to: [0, length] },
+    });
+
+    //! -------------- ANCHOR --------------
+    addAnchor(model, trimModel);
 
     //! -------------- FOLD --------------
 

@@ -36,6 +36,7 @@ export function svgExporter({ model }: SvgExporterParams) {
         cssStyle: `direction: ltr`,
       },
       container: { stroke: "none" },
+      anchor: { stroke: "none", fill: "black" },
     },
   });
 }

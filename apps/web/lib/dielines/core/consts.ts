@@ -24,7 +24,7 @@ export const GUIDES = {
 };
 
 export const GLUES = {
-  sm: 12,
+  sm: 16,
 };
 
 //  BLEED
