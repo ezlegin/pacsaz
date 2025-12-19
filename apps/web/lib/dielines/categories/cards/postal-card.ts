@@ -3,7 +3,7 @@ import { BLEED, MARGINS, MATERIALS } from "../../core/consts";
 import { addContainer } from "../../core/helpers/containerGenerator";
 import { addFoldLine } from "../../core/helpers/foldLineGenerator";
 import { addGuideLine } from "../../core/helpers/guidelineGenerator";
-import { modelExporter } from "../../core/helpers/modelGenerator";
+import { modelBuilder } from "../../core/helpers/modelGenerator";
 import { DielineDefinition } from "../../core/types";
 import { toPt } from "@/utils/sizeConvertor";
 import { addModelToLayer } from "../../core/helpers/addModelToLayer";
@@ -92,7 +92,7 @@ const postalCard: DielineDefinition = {
       marginMM: MARGINS.container,
     });
 
-    return modelExporter({
+    return modelBuilder({
       model,
       trim,
       bleed,

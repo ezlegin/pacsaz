@@ -7,7 +7,7 @@ import { addContainer } from "../../core/helpers/containerGenerator";
 import { addFoldLine } from "../../core/helpers/foldLineGenerator";
 import { getLastPointMm } from "../../core/helpers/getLastPointMm";
 import { addGuideLine } from "../../core/helpers/guidelineGenerator";
-import { modelExporter } from "../../core/helpers/modelGenerator";
+import { modelBuilder } from "../../core/helpers/modelGenerator";
 import { PointBuilder } from "../../core/helpers/pointBuilder";
 import { DielineDefinition } from "../../core/types";
 
@@ -189,18 +189,7 @@ const tuckEnd: DielineDefinition = {
     ]);
     addModelToLayer(trimModel, "single-3", s3, "trim");
 
-    //! -------------- BLEED --------------
-    const bleed = addBleed({
-      model,
-      trimModel,
-      bleedAmount,
-      connectorLine: { from: [0, 0], to: [0, length] },
-    });
-
-    //! -------------- ANCHOR --------------
-
     //! -------------- FOLD --------------
-
     const foldModel: M.IModel = { models: {} };
     addModelToLayer(model, "folds", foldModel, "folds");
 
@@ -305,11 +294,13 @@ const tuckEnd: DielineDefinition = {
       marginMM: MARGINS.container,
     });
 
-    return modelExporter({
+    return modelBuilder({
       model,
       trim: trimModel,
-      bleed,
-      bleedAmount,
+      bleed: {
+        bleedAmount,
+        connectorLine: { from: [0, 0], to: [0, length] },
+      },
       container,
       offsets,
       showAnchors,

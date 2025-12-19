@@ -1,17 +1,24 @@
 import { ModelExporter } from "../types";
 import { addAnchor } from "./addAnchor";
+import { addBleed } from "./bleedGenerator";
 import { getSizes } from "./getSizes";
 import { svgExporter } from "./svgExporter";
 
-export function modelExporter({
+export function modelBuilder({
   model,
   trim,
-  bleed,
   container,
-  bleedAmount,
+  bleed: { bleedAmount, connectorLine },
   offsets,
   showAnchors,
 }: ModelExporter) {
+  const bleed = addBleed({
+    model,
+    trimModel: trim,
+    bleedAmount,
+    connectorLine,
+  });
+
   const { bleedSize, containerSize, trimSize } = getSizes({
     bleed,
     container,

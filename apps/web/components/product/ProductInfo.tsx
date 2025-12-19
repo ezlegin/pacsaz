@@ -168,7 +168,8 @@ const ProductInfo = ({
               <div className="flex justify-between">
                 <p>Trim Size:</p>
                 <p>
-                  {toMm(sizes.trim.width)} x {toMm(sizes.trim.height)} mm
+                  {toMm(sizes.trim.width).toFixed()} x{" "}
+                  {toMm(sizes.trim.height).toFixed()} mm
                 </p>
               </div>
               <div className="flex justify-between">

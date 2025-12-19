@@ -1,6 +1,7 @@
 import { MaterialKey } from "./consts";
 import { DimensionType } from "./helpers/applyDimensionOffset";
 import M from "makerjs";
+import { ConnectorLine } from "./helpers/bleedGenerator";
 
 export type Dimensions = {
   width: number;
@@ -110,9 +111,11 @@ export type OffsetObject = {
 export type ModelExporter = {
   model: M.IModel;
   trim: M.IModel;
-  bleed: M.IModel;
   container: M.IModel;
-  bleedAmount: number;
+  bleed: {
+    bleedAmount: number;
+    connectorLine: ConnectorLine;
+  };
   offsets: {
     width: {
       inner: number;

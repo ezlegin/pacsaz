@@ -1,30 +1,36 @@
 import M from "makerjs";
 import { addModelToLayer } from "./addModelToLayer";
 
+export type ConnectorLine = {
+  from: M.IPoint;
+  to: M.IPoint;
+};
 type AddBleedWithCompletorLineParams = {
   model: M.IModel;
   trimModel: M.IModel;
   bleedAmount: number;
-  connectorLine: {
-    from: M.IPoint;
-    to: M.IPoint;
-  };
+  connectorLine?: ConnectorLine;
 };
 
 export function addBleed({
   model,
   trimModel,
   bleedAmount,
-  connectorLine: { from, to },
+  connectorLine,
 }: AddBleedWithCompletorLineParams): M.IModel {
-  const connectorLine = new M.models.ConnectTheDots(false, [from, to]);
+  let line: M.IModel = {};
+  if (connectorLine) {
+    const { from, to } = connectorLine;
+
+    line = new M.models.ConnectTheDots(false, [from, to]);
+  }
 
   const trimForBleed: M.IModel = {
     ...trimModel,
     models: {
       ...trimModel.models,
       glue: {},
-      connectorLine,
+      connectorLine: line,
     },
   };
 
