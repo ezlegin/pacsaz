@@ -1,4 +1,4 @@
-import { mmToPt } from "@/utils/sizeConvertor";
+import { toPt } from "@/utils/sizeConvertor";
 import { applyDimensionOffset, DimensionType } from "./applyDimensionOffset";
 
 type MaterialLike = {
@@ -11,6 +11,7 @@ type MaterialLike = {
 type ResolveDimensionsParams = {
   width: number;
   length: number;
+  height?: number;
   dimensionType: DimensionType;
   material: MaterialLike;
 };
@@ -18,6 +19,7 @@ type ResolveDimensionsParams = {
 export function resolveDimensions({
   width,
   length,
+  height,
   dimensionType,
   material,
 }: ResolveDimensionsParams) {
@@ -26,13 +28,14 @@ export function resolveDimensions({
   return {
     width: resolveSingleDimension(width, dimensionType, offsets.width),
     length: resolveSingleDimension(length, dimensionType, offsets.length),
+    height: resolveSingleDimension(height || 0, dimensionType, offsets.height),
     offsets,
   };
 }
 
 function resolveOffsets(material: MaterialLike) {
-  const innerPt = mmToPt(material.offset.inner) * 2;
-  const outerPt = mmToPt(material.offset.outer) * 2;
+  const innerPt = toPt(material.offset.inner) * 2;
+  const outerPt = toPt(material.offset.outer) * 2;
 
   return {
     width: {
@@ -40,6 +43,10 @@ function resolveOffsets(material: MaterialLike) {
       outer: outerPt,
     },
     length: {
+      inner: innerPt,
+      outer: outerPt,
+    },
+    height: {
       inner: innerPt,
       outer: outerPt,
     },

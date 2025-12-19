@@ -8,7 +8,7 @@ import {
   OffsetType,
 } from "@/lib/dielines/core/types";
 import { formatDimensions } from "@/utils/formatDimensions";
-import { ptToMm } from "@/utils/sizeConvertor";
+import { toMm } from "@/utils/sizeConvertor";
 
 interface Props {
   dimension: Dimensions;
@@ -30,8 +30,8 @@ const ProductInfo = ({
       value,
       dimensionType,
       dimensionType === "inner"
-        ? ptToMm(offset[axis].inner)
-        : ptToMm(offset[axis].outer)
+        ? toMm(offset[axis].inner)
+        : toMm(offset[axis].outer)
     );
 
   const calcInner = (
@@ -44,7 +44,7 @@ const ProductInfo = ({
     const fromType: DimensionType =
       dimensionType === "inner" ? "manufacture" : "outer";
 
-    return applyDimensionOffset(base, fromType, ptToMm(offset[axis].inner));
+    return applyDimensionOffset(base, fromType, toMm(offset[axis].inner));
   };
 
   const calcOuter = (
@@ -57,7 +57,7 @@ const ProductInfo = ({
     const fromType: DimensionType =
       dimensionType === "outer" ? "manufacture" : "inner";
 
-    return applyDimensionOffset(base, fromType, ptToMm(offset[axis].outer));
+    return applyDimensionOffset(base, fromType, toMm(offset[axis].outer));
   };
 
   // manufacture dims

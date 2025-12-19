@@ -73,7 +73,12 @@ export type Offsets = {
 export type DielineModel = (params: {
   dimensions: {
     raw: { width: number; height: number; length: number };
-    resolved: { width: number; length: number; offsets: Offsets };
+    resolved: {
+      width: number;
+      length: number;
+      height?: number;
+      offsets: Offsets;
+    };
   };
   dimensionType: DimensionType;
   selectedMaterial?: MaterialKey;

@@ -1,5 +1,5 @@
 import M from "makerjs";
-import { ptToMm } from "../../../../utils/sizeConvertor";
+import { toMm } from "../../../../utils/sizeConvertor";
 import { DimensionType, applyDimensionOffset } from "./applyDimensionOffset";
 import { OffsetObject } from "../types";
 
@@ -32,6 +32,7 @@ export function addGuideLine(model: M.IModel, options: GuideLineOptions) {
   const basePointer = new M.models.Polygon(3, pointerRadius);
   const startPointer = M.cloneObject(basePointer);
   const endPointer = M.cloneObject(basePointer);
+  const dist = M.measure.pointDistance(from, to);
 
   if (orientation === "horizontal") {
     const textBoxSize = 25;
@@ -56,12 +57,15 @@ export function addGuideLine(model: M.IModel, options: GuideLineOptions) {
     ]);
 
     // guide lines
-    model.models![`${type}LineBefore`] = new M.models.ConnectTheDots(false, [
+
+    const beforeLine = new M.models.ConnectTheDots(false, [
       [startX, from[1]],
-      [to[0] / 2 - textBoxSize, to[1]],
+      [to[0] - dist / 2 - textBoxSize, to[1]],
     ]);
+    model.models![`${type}LineBefore`] = beforeLine;
+
     model.models![`${type}LineAfter`] = new M.models.ConnectTheDots(false, [
-      [to[0] / 2 + textBoxSize, to[1]],
+      [to[0] - dist / 2 + textBoxSize, to[1]],
       [endX, to[1]],
     ]);
 
@@ -103,11 +107,11 @@ export function addGuideLine(model: M.IModel, options: GuideLineOptions) {
 
     model.models![`${type}LineBefore`] = new M.models.ConnectTheDots(false, [
       [from[0], startY],
-      [from[0], to[1] / 2 - textBoxSize],
+      [from[0], to[1] - dist / 2 - textBoxSize],
     ]);
 
     model.models![`${type}LineAfter`] = new M.models.ConnectTheDots(false, [
-      [to[0], to[1] / 2 + textBoxSize],
+      [to[0], to[1] - dist / 2 + textBoxSize],
       [to[0], endY],
     ]);
 
@@ -140,7 +144,7 @@ export function addGuideLine(model: M.IModel, options: GuideLineOptions) {
   // text
   const mid: Point = [(from[0] + to[0]) / 2, (from[1] + to[1]) / 2];
   const textCarrier = new M.models.ConnectTheDots(false, [[0, 0]]);
-  M.model.addCaption(textCarrier, `${ptToMm(value)} mm`, mid);
+  M.model.addCaption(textCarrier, `${toMm(value)} mm`, mid);
 
   model.models![`${type}Text`] = textCarrier;
   model.models![`${type}Text`]!.layer = "guideText";

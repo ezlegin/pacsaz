@@ -1,11 +1,9 @@
 import M from "makerjs";
 
-export type Point = [number, number];
-
 interface AddFoldLineOptions {
   id: string;
-  from: Point;
-  to: Point;
+  from: M.IPoint;
+  to: M.IPoint;
 }
 
 export function addFoldLine(

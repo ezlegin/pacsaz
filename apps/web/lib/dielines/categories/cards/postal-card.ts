@@ -5,8 +5,10 @@ import { addFoldLine } from "../../core/helpers/foldLineGenerator";
 import { addGuideLine } from "../../core/helpers/guidelineGenerator";
 import { modelExporter } from "../../core/helpers/modelGenerator";
 import { DielineDefinition } from "../../core/types";
+import { toPt } from "@/utils/sizeConvertor";
+import { addModelToLayer } from "../../core/helpers/addModelToLayer";
 
-export const postalCard: DielineDefinition = {
+const postalCard: DielineDefinition = {
   slug: "postal-card",
   title: "کارت پستال تا شو", //todo: sync to database, not here.
   dimensions: {
@@ -39,19 +41,17 @@ export const postalCard: DielineDefinition = {
     dimensionType,
   }) {
     const model: M.IModel = { models: {} };
-    const bleedAmount = BLEED.default.pt;
+    const bleedAmount = toPt(BLEED.default);
 
     const rect = new M.models.Rectangle(width * 2, length);
 
     //! BLEED
     const bleed = M.model.outline(rect, bleedAmount, 1);
-    model.models!["bleed"] = bleed;
-    model.models!["bleed"].layer = "bleed";
+    addModelToLayer(model, "bleed", bleed, "bleed");
 
     //! TRIM
     const trim = rect;
-    model.models!["trim"] = trim;
-    model.models!["trim"].layer = "trim";
+    addModelToLayer(model, "trim", trim, "trim");
 
     //! FOLD
     addFoldLine(model, {
@@ -102,3 +102,5 @@ export const postalCard: DielineDefinition = {
     });
   },
 };
+
+export default postalCard;

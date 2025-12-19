@@ -1,5 +1,5 @@
 import M from "makerjs";
-import { COLORS, GUIDS } from "../consts";
+import { COLORS, GUIDES } from "../consts";
 
 type SvgExporterParams = {
   model: M.IModel;
@@ -18,7 +18,7 @@ export function svgExporter({ model }: SvgExporterParams) {
       fold: {
         stroke: COLORS.dielines.fold,
         strokeWidth: "0.75",
-        cssStyle: `stroke-dasharray:${GUIDS.foldDasharray}`,
+        cssStyle: `stroke-dasharray:${GUIDES.foldDasharray}`,
       },
       guideBox: { fill: COLORS.guides.box, stroke: "none" },
       guideLine: {

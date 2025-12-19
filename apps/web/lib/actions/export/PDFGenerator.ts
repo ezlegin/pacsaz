@@ -2,7 +2,7 @@
 
 import { COLORS } from "@/lib/dielines/core/consts";
 import { SVGModel } from "@/lib/dielines/core/types";
-import { ptToMm } from "@/utils/sizeConvertor";
+import { toMm } from "@/utils/sizeConvertor";
 import path from "path";
 import PDFDocument from "pdfkit";
 import SVGtoPDF from "svg-to-pdfkit";
@@ -33,9 +33,9 @@ export async function PDFGenerator({ svg, slug }: Props) {
   const guideText = [
     "Created By: PacSaz.ir",
     `Slug: ${slug}`,
-    `Bleed: ${ptToMm(sizes.bleedAmount)} mm`,
-    `Trim Size: ${ptToMm(sizes.trim.width).toFixed(1)} x ${ptToMm(sizes.trim.height).toFixed(1)} mm`,
-    `Bleed Size: ${ptToMm(sizes.bleed.width).toFixed(1)} x ${ptToMm(sizes.bleed.height).toFixed(1)} mm`,
+    `Bleed: ${toMm(sizes.bleedAmount)} mm`,
+    `Trim Size: `, // ${toMm(sizes.trim.width).toFixed(1)} x ${toMm(sizes.trim.height).toFixed(1)} mm
+    `Bleed Size: ${toMm(sizes.bleed.width).toFixed(1)} x ${toMm(sizes.bleed.height).toFixed(1)} mm`,
   ].join("\n");
 
   doc

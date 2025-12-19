@@ -1,5 +1,5 @@
 import { aiIcon, dxfIcon, pdfIcon } from "@/public";
-import { mmToPt } from "../../../utils/sizeConvertor";
+import { toPt } from "../../../utils/sizeConvertor";
 
 // COLORS
 export const COLORS = {
@@ -18,36 +18,30 @@ export const COLORS = {
 };
 
 // GUIDES
-export const GUIDS = {
+export const GUIDES = {
   foldDasharray: "5,2", // PT
   textFontSizePT: 12,
 };
 
+export const GLUES = {
+  sm: 12,
+};
+
 //  BLEED
 export const BLEED = {
-  default: {
-    mm: 3,
-    pt: mmToPt(3),
-  },
-  md: {
-    mm: 5,
-    pt: mmToPt(5),
-  },
-  lg: {
-    mm: 7,
-    pt: mmToPt(7),
-  },
-  xl: {
-    mm: 10,
-    pt: mmToPt(10),
-  },
+  default: 3,
+  md: 5,
+  lg: 7,
+  xl: 10,
 };
+
+export const zero = [0, 0];
 
 export const MARGINS = {
   container: 40,
 };
 
-export const DimensionsTypeOffset = mmToPt(1.4);
+export const DimensionsTypeOffset = toPt(1.4);
 
 export const DIMENSIONS = [
   { key: "length", label: "طول" },

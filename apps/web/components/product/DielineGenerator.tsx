@@ -9,7 +9,7 @@ import { DimensionType } from "@/lib/dielines/core/helpers/applyDimensionOffset"
 import { resolveDimensions } from "@/lib/dielines/core/helpers/dimensionResolver";
 import { DielineDefinition } from "@/lib/dielines/core/types";
 import { dielines, DielineSlug } from "@/lib/dielines/registery";
-import { mmToPt } from "@/utils/sizeConvertor";
+import { toPt } from "@/utils/sizeConvertor";
 import { useState } from "react";
 
 interface Props {
@@ -29,13 +29,14 @@ export default function DielineGenerator({ slug }: Props) {
 
   const selectedMaterial = MATERIALS[material];
 
-  const widthPT = mmToPt(size.width);
-  const lengthPT = mmToPt(size.length);
-  const heightPT = mmToPt(size.height);
+  const widthPT = toPt(size.width);
+  const lengthPT = toPt(size.length);
+  const heightPT = toPt(size.height);
 
-  const { width, length, offsets } = resolveDimensions({
+  const { width, length, height, offsets } = resolveDimensions({
     width: widthPT,
     length: lengthPT,
+    height: heightPT,
     dimensionType,
     material: selectedMaterial,
   });
@@ -47,7 +48,7 @@ export default function DielineGenerator({ slug }: Props) {
         height: heightPT,
         length: lengthPT,
       },
-      resolved: { width, length, offsets },
+      resolved: { width, length, height, offsets },
     },
     dimensionType,
     selectedMaterial: material,

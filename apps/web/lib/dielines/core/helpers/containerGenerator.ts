@@ -1,4 +1,4 @@
-import { mmToPt } from "@/utils/sizeConvertor";
+import { toPt } from "@/utils/sizeConvertor";
 import M from "makerjs";
 
 interface AddContainerOptions {
@@ -20,7 +20,7 @@ export function addContainer({
 
   const container = M.model.outline(
     new M.models.Rectangle(width, height),
-    mmToPt(marginMM),
+    toPt(marginMM),
     1
   );
 
