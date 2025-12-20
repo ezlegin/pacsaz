@@ -16,8 +16,8 @@ interface Props {
   dimension: Dimensions;
   dimensionsType: DimensionsType;
   dimensionType: DimensionType;
-  sizes: SVGModelSizes;
-  slug: string;
+  sizes: SVGModelSizes | undefined;
+  slug: string | undefined;
   setShowAnchors: (val: boolean) => void;
 }
 
@@ -36,8 +36,8 @@ const ProductInfo = ({
       value,
       dimensionType,
       dimensionType === "inner"
-        ? toMm(sizes.offset[axis].inner)
-        : toMm(sizes.offset[axis].outer)
+        ? toMm(sizes?.offset[axis].inner ?? 0)
+        : toMm(sizes?.offset[axis].outer ?? 0)
     );
 
   const calcInner = (
@@ -50,7 +50,11 @@ const ProductInfo = ({
     const fromType: DimensionType =
       dimensionType === "inner" ? "manufacture" : "outer";
 
-    return applyDimensionOffset(base, fromType, toMm(sizes.offset[axis].inner));
+    return applyDimensionOffset(
+      base,
+      fromType,
+      toMm(sizes?.offset[axis].inner ?? 0)
+    );
   };
 
   const calcOuter = (
@@ -63,7 +67,11 @@ const ProductInfo = ({
     const fromType: DimensionType =
       dimensionType === "outer" ? "manufacture" : "inner";
 
-    return applyDimensionOffset(base, fromType, toMm(sizes.offset[axis].outer));
+    return applyDimensionOffset(
+      base,
+      fromType,
+      toMm(sizes?.offset[axis].outer ?? 0)
+    );
   };
 
   // manufacture dims
@@ -155,7 +163,7 @@ const ProductInfo = ({
         </ul>
       </div>
 
-      {process.env.NODE_ENV === "development" && (
+      {process.env.NODE_ENV === "development" && sizes && (
         <div className="absolute bottom-0 left-0 p-4 w-full">
           <Card dir="ltr" className="p-4 gap-1">
             <CardTitle>Developer Tools:</CardTitle>

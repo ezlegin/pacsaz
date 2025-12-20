@@ -46,8 +46,7 @@ const postalCard: DielineDefinition = {
     const rect = new M.models.Rectangle(width * 2, length);
 
     //! TRIM
-    const trim = rect;
-    addModelToLayer(model, "trim", trim, "trim");
+    addModelToLayer(model, "trim", rect, "trim");
 
     //! FOLD
     drawFoldLines(model, {
@@ -69,7 +68,7 @@ const postalCard: DielineDefinition = {
 
     return modelBuilder({
       model,
-      trimModel: trim,
+      trimModel: rect,
       bleed: {
         bleedAmount,
       },

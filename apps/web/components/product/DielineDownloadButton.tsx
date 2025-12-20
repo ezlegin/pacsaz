@@ -6,13 +6,18 @@ import { Download } from "lucide-react";
 interface Props {
   download: () => void;
   loading: boolean;
+  disabled: boolean;
 }
 
-const DielineDownloadButton = ({ download, loading = false }: Props) => {
+const DielineDownloadButton = ({
+  download,
+  disabled,
+  loading = false,
+}: Props) => {
   const isSubscribed = false;
   return (
     <Button
-      disabled={loading}
+      disabled={disabled}
       onClick={download}
       size="lg"
       className="mt-4 w-full gap-2 font-medium"

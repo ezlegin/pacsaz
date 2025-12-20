@@ -41,6 +41,8 @@ import Image from "next/image";
 import { JSX, useState } from "react";
 import DielineDownloadButton from "./DielineDownloadButton";
 import DimensionInfo from "./info/DimensionInfo";
+import { toast } from "@workspace/ui/index";
+import { Spinner } from "@workspace/ui/components/spinner";
 
 export interface SVGSizeProps {
   width: number;
@@ -55,9 +57,10 @@ interface Props {
   setMaterial: (mat: MaterialKey) => void;
   dimensionType: DimensionType;
   setDimensionType: (value: DimensionType) => void;
-  svg: Model;
+  svg: Model | null;
   slug: string;
   material: MaterialKey;
+  isRendering: boolean;
 }
 
 export default function ProductDetails({
@@ -71,12 +74,17 @@ export default function ProductDetails({
   slug,
   materials,
   material,
+  isRendering,
 }: Props) {
   const [format, setFormat] = useState<FormatsType>("pdf");
 
   const { startLoading, stopLoading, isLoading } = useLoading();
 
   const onDownload = async () => {
+    if (!svg) {
+      toast.error("فایل آماده دانلود نیست.");
+      return;
+    }
     startLoading();
 
     await downloadPdf({
@@ -112,6 +120,8 @@ export default function ProductDetails({
                   value={defaultDimensions.defaultDimensions[key]}
                   min={defaultDimensions.minDimensions[key]}
                   onChange={(value) => setDimension(key, value)}
+                  dimKey={key}
+                  isRendering={isRendering}
                 />
               ))}
             </div>
@@ -209,7 +219,11 @@ export default function ProductDetails({
               ))}
             </ToggleGroup>
 
-            <DielineDownloadButton loading={isLoading} download={onDownload} />
+            <DielineDownloadButton
+              disabled={isRendering || isLoading}
+              loading={isLoading}
+              download={onDownload}
+            />
           </Section>
         </div>
       </Card>
@@ -252,13 +266,18 @@ function DimensionInput({
   value,
   min,
   onChange,
+  dimKey,
+  isRendering,
 }: {
   label: string;
   value: number;
   min: number;
+  dimKey: DimensionKey;
   onChange: (value: number) => void;
+  isRendering: boolean;
 }) {
   const [localValue, setLocalValue] = useState(value);
+  const [blurredInput, setBlurredInput] = useState<DimensionKey | null>(null);
 
   if (value === 0) return null;
 
@@ -267,6 +286,7 @@ function DimensionInput({
       <p className="text-xs text-muted-foreground">{label}</p>
       <div className="relative">
         <Input
+          disabled={isRendering && dimKey === blurredInput}
           dir="ltr"
           value={localValue}
           onFocus={(e) => {
@@ -278,6 +298,8 @@ function DimensionInput({
             setLocalValue(raw);
           }}
           onBlur={(e) => {
+            setBlurredInput(dimKey);
+
             const raw = Number(e.target.value);
 
             const clamped = clamp(raw, min);
@@ -286,7 +308,11 @@ function DimensionInput({
           }}
         />
         <span className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-          mm
+          {isRendering && dimKey === blurredInput ? (
+            <Spinner className="text-primary" />
+          ) : (
+            "mm"
+          )}
         </span>
       </div>
     </div>

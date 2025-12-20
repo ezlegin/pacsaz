@@ -76,7 +76,7 @@ const tuckEnd: DielineDefinition = {
       },
       indent: {
         bl: 5,
-        tl: 3,
+        tl: 2,
         tr: 6,
         br: 3,
       },
