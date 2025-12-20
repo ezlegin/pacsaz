@@ -3,6 +3,8 @@ import { addModelToLayer } from "./addModelToLayer";
 
 export function addFillet(model: IModel, radius: number = 0) {
   const chain = M.model.findSingleChain(model);
+  if (!chain) return;
+
   const fillet = M.chain.fillet(chain, radius);
   if (fillet) addModelToLayer(model, "fillet", fillet, "trim");
 }

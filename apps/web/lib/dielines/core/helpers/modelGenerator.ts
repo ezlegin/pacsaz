@@ -1,6 +1,7 @@
 import { MARGINS } from "../consts";
 import { ModelExporter } from "../types";
 import { addAnchor } from "./addAnchor";
+import { addModelToLayer } from "./addModelToLayer";
 import { addBleed } from "./bleedGenerator";
 import { addContainer } from "./containerGenerator";
 import { getSizes } from "./getSizes";
@@ -8,31 +9,33 @@ import { svgExporter } from "./svgExporter";
 
 export function modelBuilder({
   model,
-  trim,
+  trimModel,
   bleed: { bleedAmount, connectorLine },
   offsets,
   showAnchors,
 }: ModelExporter) {
   const bleed = addBleed({
     model,
-    trimModel: trim,
+    trimModel,
     bleedAmount,
     connectorLine,
   });
 
+  addModelToLayer(model, "trim", trimModel, "trim");
+
   const container = addContainer({
     model,
-    from: trim,
+    from: trimModel,
     marginMM: MARGINS.container,
   });
 
   const { bleedSize, containerSize, trimSize } = getSizes({
     bleed,
     container,
-    trim,
+    trimModel,
   });
 
-  addAnchor(model, trim, showAnchors);
+  addAnchor(model, trimModel, showAnchors);
 
   return {
     sizes: {

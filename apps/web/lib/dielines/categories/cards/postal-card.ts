@@ -69,7 +69,7 @@ const postalCard: DielineDefinition = {
 
     return modelBuilder({
       model,
-      trim,
+      trimModel: trim,
       bleed: {
         bleedAmount,
       },

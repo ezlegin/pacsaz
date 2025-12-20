@@ -1,11 +1,19 @@
-import { toMm, toPt } from "@/utils/sizeConvertor";
-import M from "makerjs";
+import { toPt } from "@/utils/sizeConvertor";
+import M, { IModel } from "makerjs";
 import { BLEED, GLUES, MATERIALS, zero } from "../../core/consts";
-import { addFillet } from "../../core/helpers/addFillet";
+import { addLine } from "../../core/helpers/addLine";
 import { addModelToLayer } from "../../core/helpers/addModelToLayer";
+import { buildTrimModel } from "../../core/helpers/buildTrimModel";
+import {
+  cloneMirrorMove,
+  cloneRotateMove,
+} from "../../core/helpers/cloneMirrorMove";
+import { createDielineContext } from "../../core/helpers/contextCreator";
 import { drawFoldLines } from "../../core/helpers/drawFoldLines";
 import { drawGuideLines } from "../../core/helpers/drawGuideLines";
+import { drawSingleLines } from "../../core/helpers/drawSingleLines";
 import { getLastPointMm } from "../../core/helpers/getLastPointMm";
+import { addGlue } from "../../core/helpers/glueGenerator";
 import { modelBuilder } from "../../core/helpers/modelGenerator";
 import { PointBuilder } from "../../core/helpers/pointBuilder";
 import { DielineDefinition } from "../../core/types";
@@ -37,28 +45,24 @@ const tuckEnd: DielineDefinition = {
   },
   model({
     developers: { showAnchors },
-    dimensions: {
-      raw: rawDim,
-      resolved: { width, length, height, offsets },
-    },
+    dimensions: { raw: rawDim, resolved },
     dimensionType,
   }) {
-    const model: M.IModel = { models: {} };
-    const bleedAmount = toPt(BLEED.default);
+    const model: IModel = { models: {} };
+    const bleedAmount = toPt(BLEED.md);
 
-    //! BLEED
+    const { height, heightMM, length, offsets, lengthMM, width, widthMM } =
+      createDielineContext(resolved);
 
-    height = height ?? 0;
-
-    //! TRIM
-    const widthMM = toMm(width);
-    const lengthMM = toMm(length);
-    const heightMM = toMm(height);
     const glueSize = GLUES.sm;
     const glueMargin = 10;
     const tuckFlap = {
       size: 20,
       indent: 1,
+      seam: {
+        w: 8,
+        h: 2,
+      },
     };
     const dustSize = (heightMM + tuckFlap.size) / 2;
     const dust = {
@@ -72,123 +76,115 @@ const tuckEnd: DielineDefinition = {
       },
       indent: {
         bl: 5,
-        tl: 4,
+        tl: 3,
         tr: 6,
         br: 3,
       },
     };
 
     //! -------------- TRIM --------------
-    const trimModel: M.IModel = { models: {} };
-
-    addModelToLayer(model, "trim", trimModel, "trim");
 
     // GLUE
-    const gluePB = new PointBuilder();
-    const gluePTS = gluePB
-      .draw(-glueSize, glueMargin)
-      .up(lengthMM - glueMargin * 2)
-      .draw(glueSize, glueMargin);
-    const glue = new M.models.ConnectTheDots(false, gluePTS.build());
-    addModelToLayer(trimModel, "glue", glue, "trim");
+    const glue = addGlue({
+      normal: { size: glueSize, lengthMM, margin: glueMargin },
+    });
 
     // DOOR
     const topPanelPB = new PointBuilder([0, lengthMM]);
     const topPanelPTS = topPanelPB
-      .up(heightMM)
+      .up(heightMM + tuckFlap.seam.h / 2)
       .right(tuckFlap.indent)
       .up(tuckFlap.size)
       .right(widthMM - tuckFlap.indent * 2)
       .down(tuckFlap.size)
       .right(tuckFlap.indent)
-      .down(heightMM)
+      .down(heightMM + tuckFlap.seam.h / 2)
       .build();
-    const topPanel = new M.models.ConnectTheDots(false, topPanelPTS);
 
-    addFillet(topPanel, 25);
+    const topDoor = addLine(topPanelPTS, false, 25);
 
-    const bottomPanel = M.model.moveRelative(
-      M.model.zero(M.model.rotate(M.model.clone(topPanel), 180)),
-      [width + height, -height - toPt(tuckFlap.size)]
-    );
+    const seamPB = new PointBuilder([
+      tuckFlap.indent,
+      lengthMM + heightMM + tuckFlap.seam.h / 2,
+    ]);
+    const seamPTS = seamPB.right(tuckFlap.seam.w).down(tuckFlap.seam.h).build();
+    const leftSeam = addLine(seamPTS, false, 3);
 
-    addModelToLayer(
-      trimModel,
-      "door",
-      { models: { topPanel, bottomPanel } },
-      "trim"
-    );
+    const rightSeam = cloneMirrorMove(leftSeam, true, false, [
+      width - toPt(tuckFlap.seam.w + tuckFlap.indent),
+      length + height - tuckFlap.seam.h - tuckFlap.seam.h / 2,
+    ]);
+
+    const seamModel: IModel = { models: { leftSeam, rightSeam } };
+    addModelToLayer(topDoor, "seam", seamModel, "trim");
+
+    const bottomDoor = cloneRotateMove(topDoor, 180, [
+      width + height,
+      -height - toPt(tuckFlap.size + tuckFlap.seam.h / 2),
+    ]);
 
     // DUST
-    const dustTL: M.IModel = { models: {} };
+    const dustTL: IModel = { models: {} };
 
     const dustP1_PB = new PointBuilder(getLastPointMm(topPanelPTS));
-    const dustP1_PTS = dustP1_PB.draw(dust.indent.bl, dust.height.l).build();
+    const dustP1_PTS = dustP1_PB
+      .draw(dust.indent.bl, dust.height.l)
+      .draw(dust.indent.tl, dust.size - dust.height.l)
+      .right(heightMM / 2 - dust.indent.bl - dust.indent.tl)
+      .build();
     const dustP1 = new M.models.ConnectTheDots(false, dustP1_PTS);
-    addModelToLayer(dustTL, "dust-tl", dustP1, "trim");
 
     const dustP2_PB = new PointBuilder(getLastPointMm(dustP1_PTS));
     const dustP2_PTS = dustP2_PB
-      .draw(dust.indent.tl, dust.size - dust.height.l)
-      .right(heightMM - dust.indent.bl - dust.indent.tl - dust.indent.tr)
+      .right(heightMM / 2 - dust.indent.tr)
       .draw(dust.indent.tr - dust.indent.br, -dust.size + dust.height.r.inner)
-
-      .build();
-    const dustP2 = new M.models.ConnectTheDots(false, dustP2_PTS); //todo
-
-    addFillet(dustP2, 5);
-
-    const dustP3_PB = new PointBuilder(getLastPointMm(dustP2_PTS));
-    const dustP3_PTS = dustP3_PB
       .draw(dust.indent.br, -(dust.height.r.inner - dust.height.r.outer))
       .down(dust.height.r.outer)
       .build();
-    const dustP3 = new M.models.ConnectTheDots(false, dustP3_PTS);
+    const dustP2 = addLine(dustP2_PTS, false, 30);
 
-    addModelToLayer(
-      dustTL,
-      "dust-tl",
-      { models: { dustP1, dustP2, dustP3 } },
-      "trim"
-    );
+    addModelToLayer(dustTL, "dust-tl", { models: { dustP1, dustP2 } }, "trim");
 
-    const dustTR = M.model.moveRelative(
-      M.model.zero(M.model.mirror(M.model.clone(dustTL), true, false)),
-      [width * 2 + height, length]
-    );
-
-    const dustBR = M.model.moveRelative(
-      M.model.zero(M.model.mirror(M.model.clone(dustTL), false, true)),
-      [width * 2 + height, -toPt(dust.size)]
-    );
-
-    const dustBL = M.model.moveRelative(
-      M.model.zero(M.model.mirror(M.model.clone(dustTL), true, true)),
-      [width, -toPt(dust.size)]
-    );
-
-    addModelToLayer(
-      trimModel,
-      "dust",
-      { models: { dustTL, dustTR, dustBR, dustBL } },
-      "trim"
-    );
-
-    // POOR SINGLES
-    const s1 = new M.models.ConnectTheDots(false, [zero, [width, 0]]);
-
-    const s2 = new M.models.ConnectTheDots(false, [
-      [width + height, length],
-      [width + height + width, length],
+    const dustTR = cloneMirrorMove(dustTL, true, false, [
+      width * 2 + height,
+      length,
     ]);
 
-    const s3 = new M.models.ConnectTheDots(false, [
-      [width * 2 + height * 2, length],
-      [width * 2 + height * 2, 0],
+    const dustBR = cloneMirrorMove(dustTL, false, true, [
+      width * 2 + height,
+      -toPt(dust.size),
     ]);
 
-    const singles: M.IModel = { models: { s1, s2, s3 } };
-    addModelToLayer(trimModel, "singles", singles, "trim");
+    const dustBL = cloneMirrorMove(dustTL, true, true, [
+      width,
+      -toPt(dust.size),
+    ]);
+
+    // SINGLES
+    const singles = drawSingleLines([
+      { id: "s1", pts: [zero, [width, 0]] },
+      {
+        id: "s2",
+        pts: [
+          [width + height, length],
+          [width + height + width, length],
+        ],
+      },
+      {
+        id: "s3",
+        pts: [
+          [width * 2 + height * 2, length],
+          [width * 2 + height * 2, 0],
+        ],
+      },
+    ]);
+
+    const trimModel = buildTrimModel({
+      singles,
+      glue,
+      door: { models: { topDoor, bottomDoor } },
+      dust: { models: { dustTL, dustTR, dustBR, dustBL } },
+    });
 
     //! -------------- FOLD --------------
     drawFoldLines(model, {
@@ -203,8 +199,11 @@ const tuckEnd: DielineDefinition = {
       ],
       horizontals: [
         {
-          from: [0, length + height],
-          to: [width, length + height],
+          from: [toPt(tuckFlap.seam.w + tuckFlap.indent), length + height],
+          to: [
+            width - toPt(tuckFlap.seam.w + tuckFlap.indent),
+            length + height,
+          ],
         },
         {
           from: [width * 2 + height, length],
@@ -219,8 +218,14 @@ const tuckEnd: DielineDefinition = {
           to: [width * 2 + height * 2, 0],
         },
         {
-          from: [width + height, -height],
-          to: [width * 2 + height, -height],
+          from: [
+            width + height + toPt(tuckFlap.seam.w + tuckFlap.indent),
+            -height,
+          ],
+          to: [
+            width * 2 + height - toPt(tuckFlap.indent + tuckFlap.seam.w),
+            -height,
+          ],
         },
       ],
     });
@@ -252,7 +257,7 @@ const tuckEnd: DielineDefinition = {
     console.log(model);
     return modelBuilder({
       model,
-      trim: trimModel,
+      trimModel,
       bleed: {
         bleedAmount,
         connectorLine: { from: [0, 0], to: [0, length] },
