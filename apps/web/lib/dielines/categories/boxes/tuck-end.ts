@@ -76,7 +76,7 @@ const tuckEnd: DielineDefinition = {
       },
       indent: {
         bl: 5,
-        tl: 2,
+        tl: 3,
         tr: 6,
         br: 3,
       },
@@ -264,6 +264,10 @@ const tuckEnd: DielineDefinition = {
       },
       offsets,
       showAnchors,
+      watermarkOffset: {
+        x: glueSize,
+        y: 0,
+      },
     });
   },
 };

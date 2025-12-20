@@ -52,45 +52,6 @@ export default function DielineGenerator({ slug }: Props) {
   const [svg, setSvg] = useState<Model | null>(null);
   const [isRendering, startTransition] = useTransition();
 
-  // useEffect(() => {
-  //   let cancelled = false;
-
-  //   // 1️⃣ Immediately show loading
-  //   setSvg(null);
-  //   // setLoadedCount((pre) => (pre += 1));
-
-  //   // 2️⃣ Yield to browser (allow paint)
-  //   const frameId = requestAnimationFrame(() => {
-  //     // 3️⃣ Artificial delay
-  //     const timeoutId = setTimeout(() => {
-  //       if (cancelled) return;
-
-  //       const result = dieline.model({
-  //         dimensions: {
-  //           raw: {
-  //             width: widthPT,
-  //             height: heightPT,
-  //             length: lengthPT,
-  //           },
-  //           resolved: { width, length, height, offsets },
-  //         },
-  //         developers: { showAnchors },
-  //         dimensionType,
-  //         selectedMaterial: material,
-  //       });
-
-  //       setSvg(result);
-  //     }, 1000); // ⏳ REAL delay you can see
-
-  //     return () => clearTimeout(timeoutId);
-  //   });
-
-  //   return () => {
-  //     cancelled = true;
-  //     cancelAnimationFrame(frameId);
-  //   };
-  // }, [widthPT, lengthPT, heightPT, dimensionType, material, showAnchors]);
-
   useEffect(() => {
     startTransition(() => {
       const result = dieline.model({
@@ -111,7 +72,15 @@ export default function DielineGenerator({ slug }: Props) {
 
       setSvg(result);
     });
-  }, [widthPT, lengthPT, heightPT, dimensionType, material, showAnchors]);
+  }, [
+    widthPT,
+    lengthPT,
+    heightPT,
+    dimensionType,
+    material,
+    showAnchors,
+    dieline,
+  ]);
 
   return (
     <div className="h-full relative gap-6">

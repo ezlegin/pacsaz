@@ -32,7 +32,7 @@ export function addContainer({
       [maxX, maxY],
       [minX, maxY],
     ]),
-    marginMM,
+    0.1,
     1
   );
 

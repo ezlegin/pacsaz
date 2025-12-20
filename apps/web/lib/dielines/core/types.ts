@@ -2,6 +2,7 @@ import { IModel } from "makerjs";
 import { MaterialKey } from "./consts";
 import { DimensionType } from "./helpers/applyDimensionOffset";
 import { ConnectorLine } from "./helpers/bleedGenerator";
+import { WatermarkOffset } from "./helpers/injectWatermark";
 
 export type Dimensions = {
   width: number;
@@ -126,4 +127,5 @@ export type ModelExporter = {
     };
   };
   showAnchors: boolean;
+  watermarkOffset?: WatermarkOffset;
 };

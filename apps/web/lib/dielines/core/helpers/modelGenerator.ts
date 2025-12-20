@@ -13,6 +13,7 @@ export function modelBuilder({
   bleed: { bleedAmount, connectorLine },
   offsets,
   showAnchors,
+  watermarkOffset = { x: 0, y: 0 },
 }: ModelExporter) {
   const bleed = addBleed({
     model,
@@ -54,6 +55,11 @@ export function modelBuilder({
         },
       },
     },
-    model: svgExporter({ model }),
+    model: svgExporter({
+      model,
+      bleedModel: bleed,
+      bleedAmount,
+      watermarkOffset,
+    }),
   };
 }
