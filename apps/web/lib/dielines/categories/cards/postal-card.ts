@@ -4,7 +4,7 @@ import { BLEED, MATERIALS } from "../../core/consts";
 import { addModelToLayer } from "../../core/helpers/addModelToLayer";
 import { drawFoldLines } from "../../core/helpers/drawFoldLines";
 import { drawGuideLines } from "../../core/helpers/drawGuideLines";
-import { modelBuilder } from "../../core/helpers/modelGenerator";
+import { modelBuilder } from "../../core/helpers/modelBuilder";
 import { DielineDefinition } from "../../core/types";
 
 const postalCard: DielineDefinition = {

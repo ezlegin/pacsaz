@@ -19,6 +19,7 @@ interface Props {
   sizes: SVGModelSizes | undefined;
   slug: string | undefined;
   setShowAnchors: (val: boolean) => void;
+  setShowWatermark: (val: boolean) => void;
 }
 
 const ProductInfo = ({
@@ -28,6 +29,7 @@ const ProductInfo = ({
   sizes,
   slug,
   setShowAnchors,
+  setShowWatermark,
 }: Props) => {
   const { height, length, width } = dimension;
 
@@ -194,6 +196,10 @@ const ProductInfo = ({
               <div className="flex justify-between">
                 <p>Show Anchors</p>
                 <Switch onCheckedChange={setShowAnchors} />
+              </div>
+              <div className="flex justify-between">
+                <p>Show Watermark</p>
+                <Switch onCheckedChange={setShowWatermark} />
               </div>
             </CardContent>
           </Card>

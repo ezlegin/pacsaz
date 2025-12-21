@@ -2,7 +2,7 @@ import { IModel } from "makerjs";
 import { MaterialKey } from "./consts";
 import { DimensionType } from "./helpers/applyDimensionOffset";
 import { ConnectorLine } from "./helpers/bleedGenerator";
-import { WatermarkOffset } from "./helpers/injectWatermark";
+import { Watermark } from "./helpers/injectWatermark";
 
 export type Dimensions = {
   width: number;
@@ -75,6 +75,7 @@ export type Offsets = {
 export type DielineModel = (params: {
   developers: {
     showAnchors: boolean;
+    showWatermark: boolean;
   };
   dimensions: {
     raw: { width: number; height: number; length: number };
@@ -127,5 +128,5 @@ export type ModelExporter = {
     };
   };
   showAnchors: boolean;
-  watermarkOffset?: WatermarkOffset;
+  watermark: Watermark;
 };

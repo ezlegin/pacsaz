@@ -1,7 +1,7 @@
 import { pacsazLogo } from "@/public";
 import Diamond from "@/public/icons/Diamond";
 import { Button } from "@workspace/ui/components/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Heart } from "lucide-react";
 import Image from "next/image";
 
 interface Props {
@@ -17,6 +17,7 @@ const ProductNavbar = ({ productName }: Props) => {
           <p className="text-muted-foreground">ساخت دایلاین</p>
           <ArrowLeft size={16} />
           <p className="font-semibold">{productName}</p>
+          <Heart size={20} className="mr-2 text-muted-foreground" />
         </div>
         <div className="flex gap-3 items-center">
           <Button variant={"ghost"} className="gap-1">

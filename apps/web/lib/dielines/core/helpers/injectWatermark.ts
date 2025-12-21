@@ -8,11 +8,16 @@ export type WatermarkOffset = {
   y: number;
 };
 
+export type Watermark = {
+  show: boolean;
+  offset: WatermarkOffset;
+};
+
 export function injectWatermark(
   svg: string,
   clippingModel: M.IModel,
   bleedAmount: number,
-  { x, y }: WatermarkOffset
+  offset?: WatermarkOffset
 ) {
   const clipD = extractPathDs(M.exporter.toSVG(clippingModel));
 
@@ -21,7 +26,7 @@ export function injectWatermark(
   return svg.replace(
     "</svg>",
     `
-      <clipPath transform="translate(${toPt(MARGINS.container - bleedAmountMM + x)}, ${toPt(MARGINS.container - bleedAmountMM + y)})" id="watermark">
+      <clipPath transform="translate(${toPt(MARGINS.container - bleedAmountMM + (offset?.x ?? 0))}, ${toPt(MARGINS.container - bleedAmountMM + (offset?.y ?? 0))})" id="watermark">
         <path d="${clipD[0]}" />
       </clipPath>
 

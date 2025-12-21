@@ -1,19 +1,19 @@
 import M from "makerjs";
 import { COLORS, GUIDES } from "../consts";
-import { injectWatermark, WatermarkOffset } from "./injectWatermark";
+import { injectWatermark, Watermark } from "./injectWatermark";
 
 type SvgExporterParams = {
   model: M.IModel;
   bleedModel: M.IModel;
   bleedAmount: number;
-  watermarkOffset: WatermarkOffset;
+  watermark: Watermark;
 };
 
 export function svgExporter({
   model,
   bleedModel,
   bleedAmount,
-  watermarkOffset,
+  watermark,
 }: SvgExporterParams) {
   const svg = M.exporter.toSVG(model, {
     cssStyle: "stroke-linecap: butt;",
@@ -50,5 +50,7 @@ export function svgExporter({
     },
   });
 
-  return injectWatermark(svg, bleedModel, bleedAmount, watermarkOffset); //todo: only in production
+  return watermark.show
+    ? injectWatermark(svg, bleedModel, bleedAmount, watermark.offset)
+    : svg;
 }

@@ -1,6 +1,9 @@
 import { aiIcon, dxfIcon, pdfIcon } from "@/public";
 import { toPt } from "../../../utils/sizeConvertor";
 
+export const onDevelepe = process.env.NODE_ENV === "development";
+export const onProduction = process.env.NODE_ENV === "production";
+
 // COLORS
 export const COLORS = {
   dielines: {

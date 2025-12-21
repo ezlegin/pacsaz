@@ -29,7 +29,8 @@ export default function DielineGenerator({ slug }: Props) {
   const [material, setMaterial] = useState<MaterialKey>(
     dieline.materials.default.value as MaterialKey
   );
-  const [showAnchors, setShowAnchors] = useState<boolean>(false);
+  const [showAnchors, setShowAnchors] = useState(false);
+  const [showWatermark, setShowWatermark] = useState(false);
 
   const { size, setDimension } = useSize(dieline.dimensions);
   const [dimensionType, setDimensionType] =
@@ -65,6 +66,7 @@ export default function DielineGenerator({ slug }: Props) {
         },
         developers: {
           showAnchors,
+          showWatermark,
         },
         dimensionType,
         selectedMaterial: material,
@@ -80,6 +82,7 @@ export default function DielineGenerator({ slug }: Props) {
     material,
     showAnchors,
     dieline,
+    showWatermark,
   ]);
 
   return (
@@ -127,6 +130,7 @@ export default function DielineGenerator({ slug }: Props) {
         sizes={svg?.sizes}
         slug={dieline.slug}
         setShowAnchors={setShowAnchors}
+        setShowWatermark={setShowWatermark}
       />
     </div>
   );

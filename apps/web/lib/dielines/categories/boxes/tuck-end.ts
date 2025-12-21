@@ -14,7 +14,7 @@ import { drawGuideLines } from "../../core/helpers/drawGuideLines";
 import { drawSingleLines } from "../../core/helpers/drawSingleLines";
 import { getLastPointMm } from "../../core/helpers/getLastPointMm";
 import { addGlue } from "../../core/helpers/glueGenerator";
-import { modelBuilder } from "../../core/helpers/modelGenerator";
+import { modelBuilder } from "../../core/helpers/modelBuilder";
 import { PointBuilder } from "../../core/helpers/pointBuilder";
 import { DielineDefinition } from "../../core/types";
 
@@ -44,7 +44,7 @@ const tuckEnd: DielineDefinition = {
     ],
   },
   model({
-    developers: { showAnchors },
+    developers: { showAnchors, showWatermark },
     dimensions: { raw: rawDim, resolved },
     dimensionType,
   }) {
@@ -264,9 +264,12 @@ const tuckEnd: DielineDefinition = {
       },
       offsets,
       showAnchors,
-      watermarkOffset: {
-        x: glueSize,
-        y: 0,
+      watermark: {
+        show: showWatermark,
+        offset: {
+          x: glueSize,
+          y: 0,
+        },
       },
     });
   },
