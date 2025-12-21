@@ -2,6 +2,7 @@ import { useLoading } from "@/hooks/useLoading";
 import { clamp } from "@/hooks/useSize";
 import { downloadPdf } from "@/lib/actions/export/downloader";
 import {
+  BLEED,
   DIMENSIONS,
   DIMENSIONS_TYPE,
   FORMATS,
@@ -32,17 +33,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select";
+import { Spinner } from "@workspace/ui/components/spinner";
 import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@workspace/ui/components/toggle-group";
+import { toast } from "@workspace/ui/index";
 import { Info } from "lucide-react";
 import Image from "next/image";
 import { JSX, useState } from "react";
 import DielineDownloadButton from "./DielineDownloadButton";
 import DimensionInfo from "./info/DimensionInfo";
-import { toast } from "@workspace/ui/index";
-import { Spinner } from "@workspace/ui/components/spinner";
+import Diamond from "@/public/icons/Diamond";
 
 export interface SVGSizeProps {
   width: number;
@@ -55,8 +57,9 @@ interface Props {
   dimensionsType: DimensionsType;
   setDimension: (key: DimensionKey, value: number) => void;
   setMaterial: (mat: MaterialKey) => void;
-  dimensionType: DimensionType;
   setDimensionType: (value: DimensionType) => void;
+  setBleedAmount: (value: number) => void;
+  dimensionType: DimensionType;
   svg: Model | null;
   slug: string;
   material: MaterialKey;
@@ -68,6 +71,7 @@ export default function ProductDetails({
   setDimension,
   setDimensionType,
   setMaterial,
+  setBleedAmount,
   dimensionType,
   dimensionsType,
   svg,
@@ -107,6 +111,19 @@ export default function ProductDetails({
 
   const selectedMaterial = MATERIALS[material];
 
+  const bleeds = Object.entries(BLEED).map(([type, size]) => ({
+    type,
+    size,
+  }));
+
+  const slateColors = [
+    "bg-slate-300",
+    "bg-slate-400",
+    "bg-slate-500",
+    "bg-slate-600",
+    "bg-slate-700",
+  ];
+
   return (
     <div className="p-3 h-full absolute right-0 top-0 z-10">
       <Card className="h-full w-80 flex flex-col justify-between overflow-y-auto bg-white p-6 ">
@@ -125,6 +142,33 @@ export default function ProductDetails({
                 />
               ))}
             </div>
+          </Section>
+
+          <Section title="اندازه بلید" infoContent={<DimensionInfo />}>
+            <Select
+              onValueChange={(val: string) => setBleedAmount(+val)}
+              dir="rtl"
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="انتخاب بلید" />
+              </SelectTrigger>
+
+              <SelectContent position="popper">
+                {bleeds.map((item, idx) => (
+                  <SelectItem
+                    className="py-2.5"
+                    key={item.type}
+                    value={item.size.toString()}
+                  >
+                    <div
+                      className={`${slateColors[idx]} * 100} w-5`}
+                      style={{ height: `${idx + 3}px` }}
+                    />
+                    <span dir="ltr">{item.size} mm</span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </Section>
 
           <Section title="متریال چاپ" infoContent={<DimensionInfo />}>
@@ -235,27 +279,37 @@ function Section({
   title,
   children,
   infoContent,
+  isPremium,
 }: {
   title: string;
   infoContent: JSX.Element;
   children: React.ReactNode;
+  isPremium?: boolean;
 }) {
   return (
     <div className="space-y-3">
-      <p className="flex items-center gap-1 text-sm font-semibold">
-        {title}
-        <Dialog>
-          <DialogTrigger dir="rtl">
-            <Info
-              size={14}
-              className="text-muted-foreground cursor-pointer hover:text-primary"
-            />
-          </DialogTrigger>
-          <DialogContent dir="rtl" showCloseButton={false}>
-            <DialogHeader dir="rtl">{infoContent}</DialogHeader>
-          </DialogContent>
-        </Dialog>
-      </p>
+      <div className="flex justify-between">
+        <p className="flex items-center gap-1 text-sm font-semibold">
+          {title}
+          <Dialog>
+            <DialogTrigger dir="rtl">
+              <Info
+                size={14}
+                className="text-muted-foreground cursor-pointer hover:text-primary"
+              />
+            </DialogTrigger>
+            <DialogContent dir="rtl" showCloseButton={false}>
+              <DialogHeader dir="rtl">{infoContent}</DialogHeader>
+            </DialogContent>
+          </Dialog>
+        </p>
+
+        {isPremium && (
+          <div>
+            <Diamond />
+          </div>
+        )}
+      </div>
       {children}
     </div>
   );

@@ -78,6 +78,7 @@ export type DielineModel = (params: {
     showWatermark: boolean;
   };
   dimensions: {
+    bleedSize?: number;
     raw: { width: number; height: number; length: number };
     resolved: {
       width: number;

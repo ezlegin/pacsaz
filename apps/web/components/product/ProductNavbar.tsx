@@ -1,6 +1,7 @@
 import { pacsazLogo } from "@/public";
 import Diamond from "@/public/icons/Diamond";
 import { Button } from "@workspace/ui/components/button";
+import { cn } from "@workspace/ui/lib/utils";
 import { ArrowLeft, Heart } from "lucide-react";
 import Image from "next/image";
 
@@ -9,6 +10,8 @@ interface Props {
 }
 
 const ProductNavbar = ({ productName }: Props) => {
+  const isFaved = true;
+
   return (
     <div className="bg-background p-4 px-10 border-b">
       <div className="flex items-center justify-between">
@@ -17,7 +20,21 @@ const ProductNavbar = ({ productName }: Props) => {
           <p className="text-muted-foreground">ساخت دایلاین</p>
           <ArrowLeft size={16} />
           <p className="font-semibold">{productName}</p>
-          <Heart size={20} className="mr-2 text-muted-foreground" />
+          <Button
+            size={"icon"}
+            variant={"ghost"}
+            className="hover:text-destructive hover:border rounded-full"
+          >
+            <Heart
+              size={18}
+              className={cn(
+                isFaved
+                  ? "text-destructive"
+                  : "text-muted-foreground hover:text-destructive"
+              )}
+              fill={isFaved ? "#fb2c36" : "transparent"}
+            />
+          </Button>
         </div>
         <div className="flex gap-3 items-center">
           <Button variant={"ghost"} className="gap-1">

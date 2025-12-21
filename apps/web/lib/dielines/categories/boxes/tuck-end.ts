@@ -40,16 +40,17 @@ const tuckEnd: DielineDefinition = {
     included: [
       MATERIALS["glossy-cardboard"],
       MATERIALS["f-flute"],
-      MATERIALS["art-paper"],
+      MATERIALS["e-flute"],
+      MATERIALS["b-flute"],
     ],
   },
   model({
     developers: { showAnchors, showWatermark },
-    dimensions: { raw: rawDim, resolved },
+    dimensions: { raw: rawDim, resolved, bleedSize },
     dimensionType,
   }) {
     const model: IModel = { models: {} };
-    const bleedAmount = toPt(BLEED.md);
+    const bleedAmount = bleedSize ? toPt(bleedSize) : toPt(BLEED.md);
 
     const { height, heightMM, length, offsets, lengthMM, width, widthMM } =
       createDielineContext(resolved);

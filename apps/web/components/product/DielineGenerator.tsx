@@ -52,11 +52,13 @@ export default function DielineGenerator({ slug }: Props) {
 
   const [svg, setSvg] = useState<Model | null>(null);
   const [isRendering, startTransition] = useTransition();
+  const [bleedSize, setBleedSize] = useState<number | undefined>();
 
   useEffect(() => {
     startTransition(() => {
       const result = dieline.model({
         dimensions: {
+          bleedSize,
           raw: {
             width: widthPT,
             height: heightPT,
@@ -83,6 +85,7 @@ export default function DielineGenerator({ slug }: Props) {
     showAnchors,
     dieline,
     showWatermark,
+    bleedSize,
   ]);
 
   return (
@@ -93,6 +96,7 @@ export default function DielineGenerator({ slug }: Props) {
         setDimension={setDimension}
         setMaterial={setMaterial}
         setDimensionType={setDimensionType}
+        setBleedAmount={setBleedSize}
         svg={svg}
         dimensionType={dimensionType}
         slug={dieline.slug}

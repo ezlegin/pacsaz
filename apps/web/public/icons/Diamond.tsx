@@ -3,7 +3,15 @@ import React from "react";
 import { diamond } from "..";
 
 const Diamond = () => {
-  return <Image alt="" src={diamond} width={16} height={16} />;
+  return (
+    <Image
+      alt=""
+      src={diamond}
+      width={16}
+      height={16}
+      className="pointer-events-none select-none"
+    />
+  );
 };
 
 export default Diamond;
