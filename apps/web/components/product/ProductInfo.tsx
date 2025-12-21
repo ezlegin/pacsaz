@@ -20,6 +20,7 @@ interface Props {
   slug: string | undefined;
   setShowAnchors: (val: boolean) => void;
   setShowWatermark: (val: boolean) => void;
+  showWatermark: boolean;
 }
 
 const ProductInfo = ({
@@ -30,6 +31,7 @@ const ProductInfo = ({
   slug,
   setShowAnchors,
   setShowWatermark,
+  showWatermark,
 }: Props) => {
   const { height, length, width } = dimension;
 
@@ -199,7 +201,10 @@ const ProductInfo = ({
               </div>
               <div className="flex justify-between">
                 <p>Show Watermark</p>
-                <Switch onCheckedChange={setShowWatermark} />
+                <Switch
+                  checked={showWatermark}
+                  onCheckedChange={setShowWatermark}
+                />
               </div>
             </CardContent>
           </Card>

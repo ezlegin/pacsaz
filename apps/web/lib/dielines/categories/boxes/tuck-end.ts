@@ -260,7 +260,6 @@ const tuckEnd: DielineDefinition = {
       trimModel,
       bleed: {
         bleedAmount,
-        connectorLine: { from: [0, 0], to: [0, length] },
       },
       offsets,
       showAnchors,

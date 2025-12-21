@@ -30,7 +30,7 @@ export default function DielineGenerator({ slug }: Props) {
     dieline.materials.default.value as MaterialKey
   );
   const [showAnchors, setShowAnchors] = useState(false);
-  const [showWatermark, setShowWatermark] = useState(false);
+  const [showWatermark, setShowWatermark] = useState(true);
 
   const { size, setDimension } = useSize(dieline.dimensions);
   const [dimensionType, setDimensionType] =
@@ -131,6 +131,7 @@ export default function DielineGenerator({ slug }: Props) {
         slug={dieline.slug}
         setShowAnchors={setShowAnchors}
         setShowWatermark={setShowWatermark}
+        showWatermark={showWatermark}
       />
     </div>
   );
