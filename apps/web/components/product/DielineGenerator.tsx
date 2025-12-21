@@ -2,13 +2,9 @@
 
 import ProductDetails from "@/components/product/ProductDetails";
 import SVGPreview from "@/components/product/SVGPreview";
-import { useSize } from "@/hooks/useSize";
-import { MaterialKey, MATERIALS } from "@/lib/dielines/core/consts";
-import { DimensionType } from "@/lib/dielines/core/helpers/applyDimensionOffset";
-import { resolveDimensions } from "@/lib/dielines/core/helpers/dimensionResolver";
-import { DielineDefinition, Model } from "@/lib/dielines/core/types";
+import { useDielineGenerator } from "@/hooks/useDielineGenerator";
+import { DielineDefinition } from "@/lib/dielines/core/types";
 import { dielines, DielineSlug } from "@/lib/dielines/registery";
-import { toPt } from "@/utils/sizeConvertor";
 import {
   Dialog,
   DialogContent,
@@ -16,7 +12,6 @@ import {
   DialogTitle,
 } from "@workspace/ui/components/dialog";
 import { Spinner } from "@workspace/ui/components/spinner";
-import { useEffect, useState, useTransition } from "react";
 import ProductInfo from "./ProductInfo";
 
 interface Props {
@@ -26,67 +21,20 @@ interface Props {
 export default function DielineGenerator({ slug }: Props) {
   const dieline = dielines[slug as DielineSlug] as DielineDefinition;
 
-  const [material, setMaterial] = useState<MaterialKey>(
-    dieline.materials.default.value as MaterialKey
-  );
-  const [showAnchors, setShowAnchors] = useState(false);
-  const [showWatermark, setShowWatermark] = useState(true);
-
-  const { size, setDimension } = useSize(dieline.dimensions);
-  const [dimensionType, setDimensionType] =
-    useState<DimensionType>("manufacture");
-
-  const selectedMaterial = MATERIALS[material];
-
-  const widthPT = toPt(size.width);
-  const lengthPT = toPt(size.length);
-  const heightPT = toPt(size.height);
-
-  const { width, length, height, offsets } = resolveDimensions({
-    width: widthPT,
-    length: lengthPT,
-    height: heightPT,
-    dimensionType,
-    material: selectedMaterial,
-  });
-
-  const [svg, setSvg] = useState<Model | null>(null);
-  const [isRendering, startTransition] = useTransition();
-  const [bleedSize, setBleedSize] = useState<number | undefined>();
-
-  useEffect(() => {
-    startTransition(() => {
-      const result = dieline.model({
-        dimensions: {
-          bleedSize,
-          raw: {
-            width: widthPT,
-            height: heightPT,
-            length: lengthPT,
-          },
-          resolved: { width, length, height, offsets },
-        },
-        developers: {
-          showAnchors,
-          showWatermark,
-        },
-        dimensionType,
-        selectedMaterial: material,
-      });
-
-      setSvg(result);
-    });
-  }, [
-    widthPT,
-    lengthPT,
-    heightPT,
-    dimensionType,
+  const {
+    size,
+    svg,
+    isRendering,
     material,
-    showAnchors,
-    dieline,
+    dimensionType,
     showWatermark,
-    bleedSize,
-  ]);
+    setDimension,
+    setMaterial,
+    setDimensionType,
+    setBleedSize,
+    setShowAnchors,
+    setShowWatermark,
+  } = useDielineGenerator(dieline);
 
   return (
     <div className="h-full relative gap-6">
