@@ -1,6 +1,7 @@
 import { toPt } from "@/utils/sizeConvertor";
 import M, { IModel } from "makerjs";
 import { BLEED, GLUES, MATERIALS, zero } from "../../core/consts";
+import { addDoor } from "../../core/helpers/addDoor";
 import { addLine } from "../../core/helpers/addLine";
 import { addModelToLayer } from "../../core/helpers/addModelToLayer";
 import { buildTrimModel } from "../../core/helpers/buildTrimModel";
@@ -91,35 +92,18 @@ const tuckEnd: DielineDefinition = {
     });
 
     // DOOR
-    const topPanelPB = new PointBuilder([0, lengthMM]);
-    const topPanelPTS = topPanelPB
-      .up(heightMM + tuckFlap.seam.h / 2)
-      .right(tuckFlap.indent)
-      .up(tuckFlap.size)
-      .right(widthMM - tuckFlap.indent * 2)
-      .down(tuckFlap.size)
-      .right(tuckFlap.indent)
-      .down(heightMM + tuckFlap.seam.h / 2)
-      .build();
+    const topDoor = addDoor({
+      widthMM,
+      heightMM,
+      lengthMM,
+      width,
+      height,
+      length,
+      tuckFlap,
+      withFingerHole: true,
+    });
 
-    const topDoor = addLine(topPanelPTS, false, 25);
-
-    const seamPB = new PointBuilder([
-      tuckFlap.indent,
-      lengthMM + heightMM + tuckFlap.seam.h / 2,
-    ]);
-    const seamPTS = seamPB.right(tuckFlap.seam.w).down(tuckFlap.seam.h).build();
-    const leftSeam = addLine(seamPTS, false, 3);
-
-    const rightSeam = cloneMirrorMove(leftSeam, true, false, [
-      width - toPt(tuckFlap.seam.w + tuckFlap.indent),
-      length + height - tuckFlap.seam.h - tuckFlap.seam.h / 2,
-    ]);
-
-    const seamModel: IModel = { models: { leftSeam, rightSeam } };
-    addModelToLayer(topDoor, "seam", seamModel, "trim");
-
-    const bottomDoor = cloneRotateMove(topDoor, 180, [
+    const bottomDoor = cloneRotateMove(topDoor.model, 180, [
       width + height,
       -height - toPt(tuckFlap.size + tuckFlap.seam.h / 2),
     ]);
@@ -127,7 +111,7 @@ const tuckEnd: DielineDefinition = {
     // DUST
     const dustTL: IModel = { models: {} };
 
-    const dustP1_PB = new PointBuilder(getLastPointMm(topPanelPTS));
+    const dustP1_PB = new PointBuilder(getLastPointMm(topDoor.pts));
     const dustP1_PTS = dustP1_PB
       .draw(dust.indent.bl, dust.height.l)
       .draw(dust.indent.tl, dust.size - dust.height.l)
@@ -183,7 +167,7 @@ const tuckEnd: DielineDefinition = {
     const trimModel = buildTrimModel({
       singles,
       glue,
-      door: { models: { topDoor, bottomDoor } },
+      door: { models: { topDoor: topDoor.model, bottomDoor } },
       dust: { models: { dustTL, dustTR, dustBR, dustBL } },
     });
 
@@ -200,13 +184,6 @@ const tuckEnd: DielineDefinition = {
       ],
       horizontals: [
         {
-          from: [toPt(tuckFlap.seam.w + tuckFlap.indent), length + height],
-          to: [
-            width - toPt(tuckFlap.seam.w + tuckFlap.indent),
-            length + height,
-          ],
-        },
-        {
           from: [width * 2 + height, length],
           to: [width * 2 + height * 2, length],
         },
@@ -217,16 +194,6 @@ const tuckEnd: DielineDefinition = {
         {
           from: [width, 0],
           to: [width * 2 + height * 2, 0],
-        },
-        {
-          from: [
-            width + height + toPt(tuckFlap.seam.w + tuckFlap.indent),
-            -height,
-          ],
-          to: [
-            width * 2 + height - toPt(tuckFlap.indent + tuckFlap.seam.w),
-            -height,
-          ],
         },
       ],
     });

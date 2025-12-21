@@ -58,6 +58,7 @@ export function useDielineGenerator(dieline: DielineDefinition) {
     showAnchors,
     showWatermark,
     bleedSize,
+    dieline,
   ]);
 
   return {

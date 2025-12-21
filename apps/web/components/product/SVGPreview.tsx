@@ -1,5 +1,6 @@
 "use client";
 
+import { onDevelepe } from "@/lib/dielines/core/consts";
 import { Button } from "@workspace/ui/components/button";
 import { Card } from "@workspace/ui/components/card";
 import { Separator } from "@workspace/ui/components/separator";
@@ -26,7 +27,7 @@ export default function SvgPreview({
         alignmentAnimation={{ disabled: true }}
         zoomAnimation={{ disabled: true }}
         doubleClick={{ disabled: true }}
-        maxScale={3}
+        maxScale={onDevelepe ? 10 : 3}
         minScale={0.3}
         smooth
         centerZoomedOut
