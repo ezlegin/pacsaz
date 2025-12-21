@@ -34,6 +34,7 @@ export default function DielineGenerator({ slug }: Props) {
     setBleedSize,
     setShowAnchors,
     setShowWatermark,
+    setCustomThickness,
   } = useDielineGenerator(dieline);
 
   return (
@@ -45,6 +46,7 @@ export default function DielineGenerator({ slug }: Props) {
         setMaterial={setMaterial}
         setDimensionType={setDimensionType}
         setBleedAmount={setBleedSize}
+        setCustomThickness={setCustomThickness}
         svg={svg}
         dimensionType={dimensionType}
         slug={dieline.slug}

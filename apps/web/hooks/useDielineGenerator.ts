@@ -17,6 +17,8 @@ export function useDielineGenerator(dieline: DielineDefinition) {
   const [showWatermark, setShowWatermark] = useState(true);
 
   const { size, setDimension } = useSize(dieline.dimensions);
+  const [customThickness, setCustomThickness] = useState<number | undefined>();
+
   const selectedMaterial = MATERIALS[material];
 
   const widthPT = toPt(size.width);
@@ -29,6 +31,7 @@ export function useDielineGenerator(dieline: DielineDefinition) {
     height: heightPT,
     dimensionType,
     material: selectedMaterial,
+    customThickness,
   });
 
   const [svg, setSvg] = useState<Model | null>(null);
@@ -58,6 +61,7 @@ export function useDielineGenerator(dieline: DielineDefinition) {
     showAnchors,
     showWatermark,
     bleedSize,
+    customThickness,
     dieline,
   ]);
 
@@ -76,5 +80,6 @@ export function useDielineGenerator(dieline: DielineDefinition) {
     setBleedSize,
     setShowAnchors,
     setShowWatermark,
+    setCustomThickness,
   };
 }

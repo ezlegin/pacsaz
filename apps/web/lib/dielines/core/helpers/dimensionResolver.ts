@@ -14,6 +14,7 @@ type ResolveDimensionsParams = {
   height?: number;
   dimensionType: DimensionType;
   material: MaterialLike;
+  customThickness?: number;
 };
 
 export function resolveDimensions({
@@ -22,8 +23,9 @@ export function resolveDimensions({
   height,
   dimensionType,
   material,
+  customThickness,
 }: ResolveDimensionsParams) {
-  const offsets = resolveOffsets(material);
+  const offsets = resolveOffsets(material, customThickness);
 
   return {
     width: resolveSingleDimension(width, dimensionType, offsets.width),
@@ -33,9 +35,10 @@ export function resolveDimensions({
   };
 }
 
-function resolveOffsets(material: MaterialLike) {
+function resolveOffsets(material: MaterialLike, customThickness?: number) {
   const innerPt = toPt(material.offset.inner) * 2;
-  const outerPt = toPt(material.offset.outer) * 2;
+  const outerPt =
+    toPt(customThickness ? customThickness : material.offset.outer) * 2;
 
   return {
     width: {

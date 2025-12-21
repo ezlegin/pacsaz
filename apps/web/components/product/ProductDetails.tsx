@@ -41,7 +41,7 @@ import {
 import { toast } from "@workspace/ui/index";
 import { Info } from "lucide-react";
 import Image from "next/image";
-import { JSX, useState } from "react";
+import { JSX, useEffect, useState } from "react";
 import DielineDownloadButton from "./DielineDownloadButton";
 import DimensionInfo from "./info/DimensionInfo";
 import Diamond from "@/public/icons/Diamond";
@@ -59,6 +59,7 @@ interface Props {
   setMaterial: (mat: MaterialKey) => void;
   setDimensionType: (value: DimensionType) => void;
   setBleedAmount: (value: number) => void;
+  setCustomThickness: (value: number | undefined) => void;
   dimensionType: DimensionType;
   svg: Model | null;
   slug: string;
@@ -72,6 +73,7 @@ export default function ProductDetails({
   setDimensionType,
   setMaterial,
   setBleedAmount,
+  setCustomThickness,
   dimensionType,
   dimensionsType,
   svg,
@@ -111,6 +113,17 @@ export default function ProductDetails({
 
   const selectedMaterial = MATERIALS[material];
 
+  const [localCustomThickness, setLocalCustomThickness] = useState<
+    string | undefined
+  >();
+
+  useEffect(() => {
+    if (!localCustomThickness) return;
+
+    setCustomThickness(undefined);
+    setLocalCustomThickness(String(selectedMaterial?.thickness) + " mm");
+  }, [selectedMaterial]);
+
   const bleeds = Object.entries(BLEED).map(([type, size]) => ({
     type,
     size,
@@ -144,7 +157,11 @@ export default function ProductDetails({
             </div>
           </Section>
 
-          <Section title="اندازه بلید" infoContent={<DimensionInfo />}>
+          <Section
+            isPremium
+            title="اندازه بلید"
+            infoContent={<DimensionInfo />}
+          >
             <Select
               onValueChange={(val: string) => setBleedAmount(+val)}
               dir="rtl"
@@ -198,12 +215,19 @@ export default function ProductDetails({
             </Select>
           </Section>
 
-          <Section title="ضخامت" infoContent={<DimensionInfo />}>
+          <Section isPremium title="ضخامت" infoContent={<DimensionInfo />}>
             <Input
               dir="ltr"
-              value={`${selectedMaterial?.thickness} mm`}
-              disabled
+              value={
+                localCustomThickness ?? `${selectedMaterial?.thickness} mm`
+              }
               className="text-center"
+              onChange={(e) => setLocalCustomThickness(e.target.value)}
+              onBlur={(e) => {
+                const val = +parseFloat(e.target.value).toFixed();
+                setLocalCustomThickness(val + " mm");
+                setCustomThickness(val);
+              }}
             />
           </Section>
 
