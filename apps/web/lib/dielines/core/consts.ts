@@ -27,7 +27,11 @@ export const GUIDES = {
 };
 
 export const GLUES = {
-  sm: 16,
+  sm: 12,
+  md: 16,
+  lg: 25,
+  xl: 35,
+  xxl: 50,
 };
 
 //  BLEED
@@ -36,6 +40,38 @@ export const BLEED = {
   md: 5,
   lg: 7,
   xl: 10,
+};
+
+export const DOOR = {
+  tuckFlap: {
+    size: 20,
+    indent: 1,
+    seam: {
+      w: 8,
+      h: 2,
+    },
+  },
+  foldOffset: 1,
+};
+export type TuckFlap = typeof DOOR.tuckFlap;
+
+export const DUST = {
+  size: (widthMM: number, dustSize: number, heightMM: number): number => {
+    return widthMM <= dustSize * 2 ? heightMM / 2 : dustSize;
+  },
+  height: {
+    l: 6,
+    r: {
+      inner: 12,
+      outer: 8,
+    },
+  },
+  indent: {
+    bl: 5,
+    tl: 2,
+    tr: 6,
+    br: 3,
+  },
 };
 
 export const zero = [0, 0];

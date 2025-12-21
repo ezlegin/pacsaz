@@ -1,5 +1,5 @@
 import M from "makerjs";
-import { COLORS, GUIDES } from "../consts";
+import { COLORS, GUIDES, MaterialKey } from "../consts";
 import { injectWatermark, Watermark } from "./injectWatermark";
 
 type SvgExporterParams = {
@@ -7,6 +7,7 @@ type SvgExporterParams = {
   bleedModel: M.IModel;
   bleedAmount: number;
   watermark: Watermark;
+  material: MaterialKey;
 };
 
 export function svgExporter({
@@ -14,13 +15,16 @@ export function svgExporter({
   bleedModel,
   bleedAmount,
   watermark,
+  material,
 }: SvgExporterParams) {
+  const isCardboard = material === "glossy-cardboard";
+
   const svg = M.exporter.toSVG(model, {
     cssStyle: "stroke-linecap: butt;",
     layerOptions: {
       bleed: {
         stroke: COLORS.dielines.bleed,
-        fill: COLORS.dielines.fill,
+        fill: isCardboard ? COLORS.dielines.fill : "#f6efe4",
         cssStyle:
           "z-index: -20; background-image: url(/apps/web/public/watermark.png)",
         strokeWidth: "0.75",

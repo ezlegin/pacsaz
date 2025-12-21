@@ -1,9 +1,8 @@
 import { toPt } from "@/utils/sizeConvertor";
-import M, { IModel } from "makerjs";
-import { BLEED, GLUES, MATERIALS, zero } from "../../core/consts";
+import { IModel } from "makerjs";
+import { BLEED, DOOR, MATERIALS, zero } from "../../core/consts";
 import { addDoor } from "../../core/helpers/addDoor";
-import { addLine } from "../../core/helpers/addLine";
-import { addModelToLayer } from "../../core/helpers/addModelToLayer";
+import { addDust } from "../../core/helpers/addDust";
 import { buildTrimModel } from "../../core/helpers/buildTrimModel";
 import {
   cloneMirrorMove,
@@ -13,10 +12,8 @@ import { createDielineContext } from "../../core/helpers/contextCreator";
 import { drawFoldLines } from "../../core/helpers/drawFoldLines";
 import { drawGuideLines } from "../../core/helpers/drawGuideLines";
 import { drawSingleLines } from "../../core/helpers/drawSingleLines";
-import { getLastPointMm } from "../../core/helpers/getLastPointMm";
 import { addGlue } from "../../core/helpers/glueGenerator";
 import { modelBuilder } from "../../core/helpers/modelBuilder";
-import { PointBuilder } from "../../core/helpers/pointBuilder";
 import { DielineDefinition } from "../../core/types";
 
 const tuckEnd: DielineDefinition = {
@@ -49,6 +46,7 @@ const tuckEnd: DielineDefinition = {
     developers: { showAnchors, showWatermark },
     dimensions: { raw: rawDim, resolved, bleedSize },
     dimensionType,
+    selectedMaterial,
   }) {
     const model: IModel = { models: {} };
     const bleedAmount = bleedSize ? toPt(bleedSize) : toPt(BLEED.md);
@@ -56,43 +54,21 @@ const tuckEnd: DielineDefinition = {
     const { height, heightMM, length, offsets, lengthMM, width, widthMM } =
       createDielineContext(resolved);
 
-    const glueSize = GLUES.sm;
-    const glueMargin = 10;
-    const tuckFlap = {
-      size: 20,
-      indent: 1,
-      seam: {
-        w: 8,
-        h: 2,
-      },
-    };
-    const dustSize = (heightMM + tuckFlap.size) / 2;
-    const dust = {
-      size: widthMM <= dustSize * 2 ? heightMM / 2 : dustSize,
-      height: {
-        l: 6,
-        r: {
-          inner: 12,
-          outer: 8,
-        },
-      },
-      indent: {
-        bl: 5,
-        tl: 3,
-        tr: 6,
-        br: 3,
-      },
-    };
+    const { foldOffset: doorFoldOffset, tuckFlap } = DOOR;
 
     //! -------------- TRIM --------------
 
     // GLUE
-    const glue = addGlue({
-      normal: { size: glueSize, lengthMM, margin: glueMargin },
+
+    const glueMargin = 10;
+    const { model: glue, size: glueSize } = addGlue({
+      heightMM,
+      widthMM,
+      normal: { lengthMM, margin: glueMargin },
     });
 
     // DOOR
-    const topDoor = addDoor({
+    const { model: topDoor } = addDoor({
       widthMM,
       heightMM,
       lengthMM,
@@ -103,32 +79,19 @@ const tuckEnd: DielineDefinition = {
       withFingerHole: true,
     });
 
-    const bottomDoor = cloneRotateMove(topDoor.model, 180, [
+    const bottomDoor = cloneRotateMove(topDoor, 180, [
       width + height,
       -height - toPt(tuckFlap.size + tuckFlap.seam.h / 2),
     ]);
 
     // DUST
-    const dustTL: IModel = { models: {} };
-
-    const dustP1_PB = new PointBuilder(getLastPointMm(topDoor.pts));
-    const dustP1_PTS = dustP1_PB
-      .draw(dust.indent.bl, dust.height.l)
-      .draw(dust.indent.tl, dust.size - dust.height.l)
-      .right(heightMM / 2 - dust.indent.bl - dust.indent.tl)
-      .build();
-    const dustP1 = new M.models.ConnectTheDots(false, dustP1_PTS);
-
-    const dustP2_PB = new PointBuilder(getLastPointMm(dustP1_PTS));
-    const dustP2_PTS = dustP2_PB
-      .right(heightMM / 2 - dust.indent.tr)
-      .draw(dust.indent.tr - dust.indent.br, -dust.size + dust.height.r.inner)
-      .draw(dust.indent.br, -(dust.height.r.inner - dust.height.r.outer))
-      .down(dust.height.r.outer)
-      .build();
-    const dustP2 = addLine(dustP2_PTS, false, 30);
-
-    addModelToLayer(dustTL, "dust-tl", { models: { dustP1, dustP2 } }, "trim");
+    const { dustSize, model: dustTL } = addDust({
+      id: "dust-tl",
+      drawAfter: topDoor,
+      heightMM,
+      widthMM,
+      tuckFlapSize: tuckFlap.size,
+    });
 
     const dustTR = cloneMirrorMove(dustTL, true, false, [
       width * 2 + height,
@@ -137,12 +100,12 @@ const tuckEnd: DielineDefinition = {
 
     const dustBR = cloneMirrorMove(dustTL, false, true, [
       width * 2 + height,
-      -toPt(dust.size),
+      -toPt(dustSize),
     ]);
 
     const dustBL = cloneMirrorMove(dustTL, true, true, [
       width,
-      -toPt(dust.size),
+      -toPt(dustSize),
     ]);
 
     // SINGLES
@@ -167,7 +130,7 @@ const tuckEnd: DielineDefinition = {
     const trimModel = buildTrimModel({
       singles,
       glue,
-      door: { models: { topDoor: topDoor.model, bottomDoor } },
+      door: { models: { topDoor, bottomDoor } },
       dust: { models: { dustTL, dustTR, dustBR, dustBL } },
     });
 
@@ -184,15 +147,27 @@ const tuckEnd: DielineDefinition = {
       ],
       horizontals: [
         {
+          from: [0, length + toPt(doorFoldOffset)],
+          to: [width, length + toPt(doorFoldOffset)],
+        },
+        {
+          from: [width, length],
+          to: [width + height, length],
+        },
+        {
           from: [width * 2 + height, length],
           to: [width * 2 + height * 2, length],
         },
         {
-          from: [0, length],
-          to: [width + height, length],
+          from: [width, 0],
+          to: [width + height, 0],
         },
         {
-          from: [width, 0],
+          from: [width + height, -toPt(doorFoldOffset)],
+          to: [width * 2 + height, -toPt(doorFoldOffset)],
+        },
+        {
+          from: [width * 2 + height, 0],
           to: [width * 2 + height * 2, 0],
         },
       ],
@@ -238,6 +213,7 @@ const tuckEnd: DielineDefinition = {
           y: 0,
         },
       },
+      material: selectedMaterial,
     });
   },
 };

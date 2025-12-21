@@ -8,6 +8,7 @@ import { drawFoldLines } from "./drawFoldLines";
 import { addFoldLine } from "./foldLineGenerator";
 import { getPathXYLength } from "./getPathXYLength";
 import { PointBuilder } from "./pointBuilder";
+import { TuckFlap } from "../consts";
 
 interface AddDoorParams {
   widthMM: number;
@@ -16,14 +17,7 @@ interface AddDoorParams {
   width: number; // pt
   height: number; // pt
   length: number; // pt
-  tuckFlap: {
-    size: number;
-    indent: number;
-    seam: {
-      w: number;
-      h: number;
-    };
-  };
+  tuckFlap: TuckFlap;
   withFingerHole?: boolean;
 }
 
@@ -86,7 +80,7 @@ export function addDoor({
   // ─────────────────────────────────────────
   // Finger Hole
   // ─────────────────────────────────────────
-  const fingerHoleRaduis = 8;
+  const fingerHoleRaduis = 10;
   if (withFingerHole) {
     const arc = new M.paths.Arc(
       [width / 2, length + height],

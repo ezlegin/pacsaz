@@ -88,7 +88,7 @@ export type DielineModel = (params: {
     };
   };
   dimensionType: DimensionType;
-  selectedMaterial?: MaterialKey;
+  selectedMaterial: MaterialKey;
 }) => Model;
 
 export interface DielineDefinition {
@@ -130,4 +130,22 @@ export type ModelExporter = {
   };
   showAnchors: boolean;
   watermark: Watermark;
+  material: MaterialKey;
+};
+
+export type Dust = {
+  size: number;
+  indent: {
+    bl: number;
+    tl: number;
+    tr: number;
+    br: number;
+  };
+  height: {
+    l: number;
+    r: {
+      inner: number;
+      outer: number;
+    };
+  };
 };
