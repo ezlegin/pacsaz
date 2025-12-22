@@ -15,6 +15,7 @@ export function useDielineGenerator(dieline: DielineDefinition) {
   const [bleedSize, setBleedSize] = useState<number | undefined>();
   const [showAnchors, setShowAnchors] = useState(false);
   const [showWatermark, setShowWatermark] = useState(true);
+  const [showOverallDimensions, setShowOverallDimensions] = useState(false);
 
   const { size, setDimension } = useSize(dieline.dimensions);
   const [customThickness, setCustomThickness] = useState<number | undefined>();
@@ -45,7 +46,7 @@ export function useDielineGenerator(dieline: DielineDefinition) {
           raw: { width: widthPT, height: heightPT, length: lengthPT },
           resolved,
         },
-        developers: { showAnchors, showWatermark },
+        developers: { showAnchors, showWatermark, showOverallDimensions },
         dimensionType,
         selectedMaterial: material,
       });
@@ -60,6 +61,7 @@ export function useDielineGenerator(dieline: DielineDefinition) {
     material,
     showAnchors,
     showWatermark,
+    showOverallDimensions,
     bleedSize,
     customThickness,
     dieline,
@@ -74,6 +76,7 @@ export function useDielineGenerator(dieline: DielineDefinition) {
     bleedSize,
     showAnchors,
     showWatermark,
+    showOverallDimensions,
     setDimension,
     setMaterial,
     setDimensionType,
@@ -81,5 +84,6 @@ export function useDielineGenerator(dieline: DielineDefinition) {
     setShowAnchors,
     setShowWatermark,
     setCustomThickness,
+    setShowOverallDimensions,
   };
 }

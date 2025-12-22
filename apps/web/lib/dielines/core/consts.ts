@@ -78,6 +78,7 @@ export const zero = [0, 0];
 
 export const MARGINS = {
   container: 40,
+  dimensionGuide: 20,
 };
 
 export const DimensionsTypeOffset = toPt(1.4);

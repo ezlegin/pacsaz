@@ -18,9 +18,11 @@ interface Props {
   dimensionType: DimensionType;
   sizes: SVGModelSizes | undefined;
   slug: string | undefined;
+  showWatermark: boolean;
+  showOverallDimensions: boolean;
+  setShowOverallDimensions: (val: boolean) => void;
   setShowAnchors: (val: boolean) => void;
   setShowWatermark: (val: boolean) => void;
-  showWatermark: boolean;
 }
 
 const ProductInfo = ({
@@ -29,9 +31,11 @@ const ProductInfo = ({
   dimensionType,
   sizes,
   slug,
+  showWatermark,
+  showOverallDimensions,
   setShowAnchors,
   setShowWatermark,
-  showWatermark,
+  setShowOverallDimensions,
 }: Props) => {
   const { height, length, width } = dimension;
 
@@ -204,6 +208,13 @@ const ProductInfo = ({
                 <Switch
                   checked={showWatermark}
                   onCheckedChange={setShowWatermark}
+                />
+              </div>
+              <div className="flex justify-between">
+                <p>Show Overall Dimensions</p>
+                <Switch
+                  checked={showOverallDimensions}
+                  onCheckedChange={setShowOverallDimensions}
                 />
               </div>
             </CardContent>

@@ -44,9 +44,15 @@ export function svgExporter({
         strokeWidth: "1",
       },
       pointer: { stroke: "none", fill: COLORS.guides.line },
+      pointerOverall: { stroke: "none", fill: "black" },
       guideText: {
         stroke: "none",
         fill: COLORS.guides.text,
+        cssStyle: `direction: ltr`,
+      },
+      guideTextOverall: {
+        stroke: "none",
+        fill: "black",
         cssStyle: `direction: ltr`,
       },
       container: { stroke: "none" },

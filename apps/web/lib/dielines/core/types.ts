@@ -76,6 +76,7 @@ export type DielineModel = (params: {
   developers: {
     showAnchors: boolean;
     showWatermark: boolean;
+    showOverallDimensions: boolean;
   };
   dimensions: {
     bleedSize?: number;
@@ -129,6 +130,7 @@ export type ModelExporter = {
     };
   };
   showAnchors: boolean;
+  showOverallDimensions: boolean;
   watermark: Watermark;
   material: MaterialKey;
 };

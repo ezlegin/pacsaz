@@ -43,7 +43,7 @@ const tuckEnd: DielineDefinition = {
     ],
   },
   model({
-    developers: { showAnchors, showWatermark },
+    developers: { showAnchors, showWatermark, showOverallDimensions },
     dimensions: { raw: rawDim, resolved, bleedSize },
     dimensionType,
     selectedMaterial,
@@ -59,7 +59,6 @@ const tuckEnd: DielineDefinition = {
     //! -------------- TRIM --------------
 
     // GLUE
-
     const glueMargin = 10;
     const { model: glue, size: glueSize } = addGlue({
       heightMM,
@@ -214,6 +213,7 @@ const tuckEnd: DielineDefinition = {
         },
       },
       material: selectedMaterial,
+      showOverallDimensions,
     });
   },
 };

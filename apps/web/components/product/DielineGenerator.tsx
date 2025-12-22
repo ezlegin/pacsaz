@@ -28,6 +28,7 @@ export default function DielineGenerator({ slug }: Props) {
     material,
     dimensionType,
     showWatermark,
+    setShowOverallDimensions,
     setDimension,
     setMaterial,
     setDimensionType,
@@ -35,6 +36,7 @@ export default function DielineGenerator({ slug }: Props) {
     setShowAnchors,
     setShowWatermark,
     setCustomThickness,
+    showOverallDimensions,
   } = useDielineGenerator(dieline);
 
   return (
@@ -86,6 +88,8 @@ export default function DielineGenerator({ slug }: Props) {
         setShowAnchors={setShowAnchors}
         setShowWatermark={setShowWatermark}
         showWatermark={showWatermark}
+        showOverallDimensions={showOverallDimensions}
+        setShowOverallDimensions={setShowOverallDimensions}
       />
     </div>
   );

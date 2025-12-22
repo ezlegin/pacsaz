@@ -1,8 +1,7 @@
 import M, { IPoint } from "makerjs";
 import { toMm } from "../../../../utils/sizeConvertor";
-import { OffsetObject } from "../types";
-import { addModelToLayer } from "./addModelToLayer";
 import { DimensionType, applyDimensionOffset } from "./applyDimensionOffset";
+import { OffsetObject } from "../types";
 
 export interface GuideLineOptions {
   type: "width" | "length" | "height";
@@ -12,7 +11,6 @@ export interface GuideLineOptions {
   orientation: "horizontal" | "vertical";
   dimensionType: DimensionType;
   dimensionTypeOffset: OffsetObject;
-  dimType: "overall" | "partly";
 }
 
 export function addGuideLine(model: M.IModel, options: GuideLineOptions) {
@@ -23,7 +21,6 @@ export function addGuideLine(model: M.IModel, options: GuideLineOptions) {
     value,
     orientation,
     dimensionType,
-    dimType,
     dimensionTypeOffset: { lengthOffset, widthOffset },
   } = options;
 
@@ -142,30 +139,23 @@ export function addGuideLine(model: M.IModel, options: GuideLineOptions) {
   }
 
   // layers
-  const isOverall = dimType === "overall";
-
   Object.keys(model.models!).forEach((key) => {
     if (key.includes("Indicator") || key.includes("Line")) {
-      model.models![key]!.layer = isOverall ? "guideLineOverall" : "guideLine";
+      model.models![key]!.layer = "guideLine";
     }
   });
 
-  addModelToLayer(
-    model,
-    `${type}StartPointer`,
-    { models: { startPointer, endPointer } },
-    isOverall ? "pointerOverall" : "pointer"
-  );
+  model.models![`${type}StartPointer`] = startPointer;
+  model.models![`${type}StartPointer`]!.layer = "pointer";
+
+  model.models![`${type}EndPointer`] = endPointer;
+  model.models![`${type}EndPointer`]!.layer = "pointer";
 
   // text
   const mid: IPoint = [(from[0] + to[0]) / 2, (from[1] + to[1]) / 2];
   const textCarrier = new M.models.ConnectTheDots(false, [[0, 0]]);
-  const caption = M.model.addCaption(textCarrier, `${toMm(value)} mm`, mid);
+  M.model.addCaption(textCarrier, `${toMm(value)} mm`, mid);
 
-  addModelToLayer(
-    model,
-    `${type}Text`,
-    caption,
-    isOverall ? `guideTextOverall` : `guideText`
-  );
+  model.models![`${type}Text`] = textCarrier;
+  model.models![`${type}Text`]!.layer = "guideText";
 }

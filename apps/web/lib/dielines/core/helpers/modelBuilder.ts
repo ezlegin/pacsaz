@@ -2,6 +2,7 @@ import { MARGINS } from "../consts";
 import { ModelExporter } from "../types";
 import { addAnchor } from "./addAnchor";
 import { addModelToLayer } from "./addModelToLayer";
+import { addOverallDimensionGuides } from "./addOverallDimensionGuides";
 import { addBleed } from "./bleedGenerator";
 import { addContainer } from "./containerGenerator";
 import { getSizes } from "./getSizes";
@@ -15,6 +16,7 @@ export function modelBuilder({
   showAnchors,
   watermark,
   material,
+  showOverallDimensions,
 }: ModelExporter) {
   const bleed = addBleed({
     model,
@@ -38,6 +40,12 @@ export function modelBuilder({
   });
 
   addAnchor(model, trimModel, showAnchors);
+
+  addOverallDimensionGuides({
+    model,
+    trimModel,
+    show: showOverallDimensions,
+  });
 
   return {
     sizes: {

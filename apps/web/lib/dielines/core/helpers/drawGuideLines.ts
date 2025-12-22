@@ -58,6 +58,7 @@ export function drawGuideLines(model: IModel, params: DrawGuideLinesParams) {
 
   for (const guide of guides) {
     addGuideLine(guidesModel, {
+      dimType: "partly",
       type: guide.type,
       from: guide.from ?? defaults[guide.type].from,
       to: guide.to ?? defaults[guide.type].to,
