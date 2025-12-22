@@ -17,7 +17,8 @@ export function svgExporter({
   watermark,
   material,
 }: SvgExporterParams) {
-  const isCardboard = material === "glossy-cardboard";
+  const isCardboard =
+    material === "glossy-cardboard" || material === "art-paper";
 
   const svg = M.exporter.toSVG(model, {
     cssStyle: "stroke-linecap: butt;",

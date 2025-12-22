@@ -75,7 +75,7 @@ const tuckEnd: DielineDefinition = {
       height,
       length,
       tuckFlap,
-      withFingerHole: false,
+      withFingerHole: true,
       material: selectedMaterial,
     });
 

@@ -38,7 +38,8 @@ const postalCard: DielineDefinition = {
       resolved: { width, length, offsets },
     },
     dimensionType,
-    developers: { showAnchors },
+    developers: { showAnchors, showOverallDimensions, showWatermark },
+    selectedMaterial,
   }) {
     const model: M.IModel = { models: {} };
     const bleedAmount = toPt(BLEED.default);
@@ -74,6 +75,15 @@ const postalCard: DielineDefinition = {
       },
       showAnchors,
       offsets,
+      material: selectedMaterial,
+      showOverallDimensions,
+      watermark: {
+        show: showWatermark,
+        offset: {
+          x: 0,
+          y: 0,
+        },
+      },
     });
   },
 };
