@@ -54,8 +54,6 @@ const tuckEnd: DielineDefinition = {
     const { height, heightMM, length, offsets, lengthMM, width, widthMM } =
       createDielineContext(resolved);
 
-    const { foldOffset: doorFoldOffset, tuckFlap } = DOOR;
-
     //! -------------- TRIM --------------
 
     // GLUE
@@ -67,7 +65,9 @@ const tuckEnd: DielineDefinition = {
     });
 
     // DOOR
-    const { model: topDoor } = addDoor({
+    const { tuckFlap } = DOOR;
+
+    const { model: topDoor, doorSize } = addDoor({
       widthMM,
       heightMM,
       lengthMM,
@@ -75,12 +75,13 @@ const tuckEnd: DielineDefinition = {
       height,
       length,
       tuckFlap,
-      withFingerHole: true,
+      withFingerHole: false,
+      material: selectedMaterial,
     });
 
     const bottomDoor = cloneRotateMove(topDoor, 180, [
       width + height,
-      -height - toPt(tuckFlap.size + tuckFlap.seam.h / 2),
+      -doorSize,
     ]);
 
     // DUST
@@ -146,10 +147,6 @@ const tuckEnd: DielineDefinition = {
       ],
       horizontals: [
         {
-          from: [0, length + toPt(doorFoldOffset)],
-          to: [width, length + toPt(doorFoldOffset)],
-        },
-        {
           from: [width, length],
           to: [width + height, length],
         },
@@ -160,10 +157,6 @@ const tuckEnd: DielineDefinition = {
         {
           from: [width, 0],
           to: [width + height, 0],
-        },
-        {
-          from: [width + height, -toPt(doorFoldOffset)],
-          to: [width * 2 + height, -toPt(doorFoldOffset)],
         },
         {
           from: [width * 2 + height, 0],

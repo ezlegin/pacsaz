@@ -44,7 +44,7 @@ export const BLEED = {
 
 export const DOOR = {
   tuckFlap: {
-    size: 20,
+    size: 18,
     indent: 1,
     seam: {
       w: 8,
