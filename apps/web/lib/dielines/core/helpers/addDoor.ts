@@ -1,6 +1,6 @@
 import { toPt } from "@/utils/sizeConvertor";
 import M, { IModel } from "makerjs";
-import { MaterialKey, MATERIALS, TuckFlap } from "../consts";
+import { TuckFlap } from "../consts";
 import { addLine } from "./addLine";
 import { addModelToLayer } from "./addModelToLayer";
 import { addSeam } from "./addSeam";
@@ -20,7 +20,8 @@ interface AddDoorParams {
   length: number;
   tuckFlap: TuckFlap;
   withFingerHole?: boolean;
-  material: MaterialKey;
+  materialThickkness: number;
+  safeFoldOffset: number;
 }
 
 export function addDoor({
@@ -32,12 +33,10 @@ export function addDoor({
   length,
   tuckFlap,
   withFingerHole,
-  material,
+  materialThickkness: mThickness,
+  safeFoldOffset,
 }: AddDoorParams) {
-  const { thickness: mThickness } = MATERIALS[material];
-
-  const foldOffset = mThickness / 2;
-  const topPanelWithFoldOffsetSize = heightMM + foldOffset + mThickness;
+  const topPanelWithFoldOffsetSize = heightMM + safeFoldOffset + mThickness;
 
   // ─────────────────────────────────────────
   // Top door panel
@@ -74,7 +73,7 @@ export function addDoor({
 
   const rightSeam = cloneMirrorMove(leftSeam, true, false, [
     width - toPt(tuckFlap.seam.w + mThickness),
-    length + height - toPt(foldOffset),
+    length + height + toPt(safeFoldOffset - mThickness),
   ]);
 
   const seamModel: IModel = {
@@ -90,7 +89,7 @@ export function addDoor({
   // Finger Hole
   // ─────────────────────────────────────────
   const fingerHoleRaduis = 10;
-  const foldY = length + toPt(heightMM + foldOffset);
+  const foldY = length + toPt(heightMM + safeFoldOffset);
   const seamTotalWidth = tuckFlap.seam.w + mThickness;
 
   if (withFingerHole) {
@@ -105,7 +104,7 @@ export function addDoor({
 
     const topOfHole = arc.origin[1]! + arc.radius;
     const distanceFromFold =
-      topOfHole - (length + height) - yLength - toPt(mThickness / 2);
+      topOfHole - (length + height) - yLength - toPt(safeFoldOffset);
 
     M.model.moveRelative(arc, [0, -distanceFromFold]);
 
@@ -140,8 +139,8 @@ export function addDoor({
   // ─────────────────────────────────────────
   addFoldLine(door, {
     id: "opener-fold-horizontal",
-    from: [0, length + toPt(foldOffset)],
-    to: [width, length + toPt(foldOffset)],
+    from: [0, length + toPt(safeFoldOffset)],
+    to: [width, length + toPt(safeFoldOffset)],
   });
 
   const { height: doorSize } = getMeasurementOfModel(door);

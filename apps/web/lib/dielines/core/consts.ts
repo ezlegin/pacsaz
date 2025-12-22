@@ -1,5 +1,6 @@
 import { aiIcon, dxfIcon, pdfIcon } from "@/public";
 import { toPt } from "../../../utils/sizeConvertor";
+import { calculateSafeFoldOffset } from "./helpers/calculateSafeFoldOffset";
 
 export const onDevelepe = process.env.NODE_ENV === "development";
 export const onProduction = process.env.NODE_ENV === "production";
@@ -107,6 +108,9 @@ export const MATERIALS = {
     label: "مقوا گلاسه",
     color: "bg-white",
     thickness: 0.4,
+    get safeFoldOffset() {
+      return calculateSafeFoldOffset(this.thickness);
+    },
     get offset() {
       return {
         inner: 2,
@@ -119,6 +123,9 @@ export const MATERIALS = {
     label: "کارتن فلوت F",
     color: "bg-orange-100/70",
     thickness: 1.2,
+    get safeFoldOffset() {
+      return calculateSafeFoldOffset(this.thickness);
+    },
     get offset() {
       return {
         inner: 2,
@@ -131,6 +138,9 @@ export const MATERIALS = {
     label: "کارتن فلوت E",
     color: "bg-orange-100",
     thickness: 2,
+    get safeFoldOffset() {
+      return calculateSafeFoldOffset(this.thickness);
+    },
     get offset() {
       return {
         inner: 2,
@@ -143,6 +153,9 @@ export const MATERIALS = {
     label: "کارتن فلوت B",
     color: "bg-orange-200",
     thickness: 3,
+    get safeFoldOffset() {
+      return calculateSafeFoldOffset(this.thickness);
+    },
     get offset() {
       return {
         inner: 3,
@@ -155,6 +168,9 @@ export const MATERIALS = {
     label: "کارتن فلوت C",
     color: "bg-orange-300",
     thickness: 4,
+    get safeFoldOffset() {
+      return calculateSafeFoldOffset(this.thickness);
+    },
     get offset() {
       return {
         inner: 4,
@@ -167,6 +183,9 @@ export const MATERIALS = {
     label: "کارتن فلوت BE",
     color: "bg-orange-400",
     thickness: 5,
+    get safeFoldOffset() {
+      return calculateSafeFoldOffset(this.thickness);
+    },
     get offset() {
       return {
         inner: 4,
@@ -179,6 +198,9 @@ export const MATERIALS = {
     label: "کارتن فلوت BC",
     color: "bg-orange-500",
     thickness: 7,
+    get safeFoldOffset() {
+      return calculateSafeFoldOffset(this.thickness);
+    },
     get offset() {
       return {
         inner: 4,
@@ -191,6 +213,9 @@ export const MATERIALS = {
     label: "کارتن فلوت AB",
     color: "bg-orange-500",
     thickness: 7,
+    get safeFoldOffset() {
+      return calculateSafeFoldOffset(this.thickness);
+    },
     get offset() {
       return {
         inner: 4,
@@ -203,6 +228,9 @@ export const MATERIALS = {
     label: "کاغذ گلاسه",
     color: "bg-white",
     thickness: 0.2,
+    get safeFoldOffset() {
+      return calculateSafeFoldOffset(this.thickness);
+    },
     get offset() {
       return {
         inner: 1.5,

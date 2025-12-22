@@ -48,6 +48,7 @@ const tuckEnd: DielineDefinition = {
     dimensionType,
     selectedMaterial,
   }) {
+    const mateial = MATERIALS[selectedMaterial];
     const model: IModel = { models: {} };
     const bleedAmount = bleedSize ? toPt(bleedSize) : toPt(BLEED.md);
 
@@ -76,7 +77,8 @@ const tuckEnd: DielineDefinition = {
       length,
       tuckFlap,
       withFingerHole: true,
-      material: selectedMaterial,
+      materialThickkness: mateial.thickness,
+      safeFoldOffset: mateial.safeFoldOffset,
     });
 
     const bottomDoor = cloneRotateMove(topDoor, 180, [
@@ -90,7 +92,9 @@ const tuckEnd: DielineDefinition = {
       drawAfter: topDoor,
       heightMM,
       widthMM,
+      lengthMM,
       tuckFlapSize: tuckFlap.size,
+      material: selectedMaterial,
     });
 
     const dustTR = cloneMirrorMove(dustTL, true, false, [
@@ -146,22 +150,22 @@ const tuckEnd: DielineDefinition = {
         },
       ],
       horizontals: [
-        {
-          from: [width, length],
-          to: [width + height, length],
-        },
-        {
-          from: [width * 2 + height, length],
-          to: [width * 2 + height * 2, length],
-        },
-        {
-          from: [width, 0],
-          to: [width + height, 0],
-        },
-        {
-          from: [width * 2 + height, 0],
-          to: [width * 2 + height * 2, 0],
-        },
+        // {
+        //   from: [width, length],
+        //   to: [width + height, length],
+        // },
+        // {
+        //   from: [width * 2 + height, length],
+        //   to: [width * 2 + height * 2, length],
+        // },
+        // {
+        //   from: [width, 0],
+        //   to: [width + height, 0],
+        // },
+        // {
+        //   from: [width * 2 + height, 0],
+        //   to: [width * 2 + height * 2, 0],
+        // },
       ],
     });
 
