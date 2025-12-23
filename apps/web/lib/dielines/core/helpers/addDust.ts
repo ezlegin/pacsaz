@@ -31,7 +31,6 @@ export function addDust({
   const mappedDustSize = DUST.size(widthMM, dustSize, heightMM);
   const { indent, height } = DUST;
   const { thickness, safeFoldOffset } = MATERIALS[material];
-
   const dust: IModel = { models: {} };
 
   const xx = thickness - safeFoldOffset;
@@ -47,10 +46,7 @@ export function addDust({
   const dustP1_PTS = dustP1_PB
     .down(thickness)
     .right(thickness * 2)
-    .up(thickness * 2)
-    // .draw(indent.bl, height.l)
-    // .draw(indent.tl, mappedDustSize - height.l)
-    // .right(heightMM / 2 - indent.bl - indent.tl - thickness)
+    .draw(indent.bl - thickness, thickness * 2 + height.l)
     .build();
 
   const dustP1 = addLine(dustP1_PTS, false, 8.5);
@@ -61,9 +57,8 @@ export function addDust({
   const dustP2_PB = new PointBuilder(getLastPointMm(dustP1_PTS));
 
   const dustP2_PTS = dustP2_PB
-    // .draw(indent.bl, height.l)
-    .draw(indent.tl, mappedDustSize - thickness)
-    .right(heightMM / 2 - indent.bl - indent.tl - thickness)
+    .draw(indent.tl, mappedDustSize - thickness - height.l)
+    .right(heightMM / 2 - indent.bl - thickness - indent.tl)
     .build();
 
   const dustP2 = new M.models.ConnectTheDots(false, dustP2_PTS);
@@ -74,7 +69,7 @@ export function addDust({
   const dustP3_PB = new PointBuilder(getLastPointMm(dustP2_PTS));
 
   const dustP3_PTS = dustP3_PB
-    .right(heightMM / 2 + indent.tl - indent.tr - thickness)
+    .right(heightMM / 2 - indent.tr - indent.br)
     .draw(
       +indent.tr - thickness,
       -mappedDustSize - thickness + height.r.inner + xx

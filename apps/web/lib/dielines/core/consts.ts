@@ -68,7 +68,7 @@ export const DUST = {
     },
   },
   indent: {
-    bl: 5,
+    bl: 4,
     tl: 2,
     tr: 6,
     br: 3,
