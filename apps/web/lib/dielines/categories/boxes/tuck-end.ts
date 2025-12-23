@@ -89,7 +89,6 @@ const tuckEnd: DielineDefinition = {
 
     // DUST
     const { dustSize, model: dustTL } = addDust({
-      id: "dust-tl",
       drawAfter: topDoor,
       heightMM,
       widthMM,
@@ -98,7 +97,17 @@ const tuckEnd: DielineDefinition = {
       material: selectedMaterial,
     });
 
-    const dustBR = cloneMirrorMove(dustTL, false, true, [
+    const { model: dustBR_RAW } = addDust({
+      drawAfter: topDoor,
+      heightMM,
+      lengthMM,
+      material: selectedMaterial,
+      tuckFlapSize: tuckFlap.size,
+      widthMM,
+      considerOuterIndent: false,
+    });
+
+    const dustBR = cloneMirrorMove(dustBR_RAW, false, true, [
       width * 2 + height,
       -toPt(dustSize) - toPt(mateial.safeFoldOffset),
     ]);
@@ -108,15 +117,21 @@ const tuckEnd: DielineDefinition = {
       -toPt(dustSize) - toPt(mateial.safeFoldOffset),
     ]);
 
-    const dustTR = addDust({
-      id: "dust-tl",
+    const { model: dustTR_RAW } = addDust({
       drawAfter: topDoor,
       heightMM,
-      widthMM,
       lengthMM,
-      tuckFlapSize: tuckFlap.size,
       material: selectedMaterial,
+      tuckFlapSize: tuckFlap.size,
+      widthMM,
+      considerOuterIndent: true,
+      considerDustHole: false,
     });
+
+    const dustTR = cloneMirrorMove(dustTR_RAW, true, false, [
+      width * 2 + height,
+      length,
+    ]);
 
     // SINGLES
     const singles = drawSingleLines([
@@ -141,7 +156,7 @@ const tuckEnd: DielineDefinition = {
       singles,
       glue,
       door: { models: { topDoor, bottomDoor } },
-      dust: { models: { dustTL, dustBR, dustBL } },
+      dust: { models: { dustTL, dustBR, dustBL, dustTR } },
     });
 
     //! -------------- FOLD --------------
