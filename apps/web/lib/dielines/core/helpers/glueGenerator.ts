@@ -11,6 +11,7 @@ export function addGlue({
   heightMM,
   widthMM,
   normal,
+  safeFoldOffset,
 }: {
   widthMM: number;
   heightMM: number;
@@ -19,6 +20,7 @@ export function addGlue({
     lengthMM: number;
   };
   customPoints?: IPoint[];
+  safeFoldOffset: number;
 }) {
   const pb = new PointBuilder();
   const size = glueMapper(widthMM, heightMM);
@@ -28,6 +30,7 @@ export function addGlue({
         .draw(-size, normal.margin)
         .up(normal.lengthMM - normal.margin * 2)
         .draw(size, normal.margin)
+        .up(safeFoldOffset)
         .build()
     : customPoints;
 

@@ -42,7 +42,7 @@ export function addDoor({
   // Top door panel
   // ─────────────────────────────────────────
   const tuckFlapSize = tuckFlap.size - mThickness;
-  const pb = new PointBuilder([0, lengthMM]);
+  const pb = new PointBuilder([0, lengthMM + safeFoldOffset]);
 
   const pts = pb
     .up(topPanelWithFoldOffsetSize)
@@ -137,11 +137,11 @@ export function addDoor({
   // ─────────────────────────────────────────
   // Fold Lines
   // ─────────────────────────────────────────
-  addFoldLine(door, {
-    id: "opener-fold-horizontal",
-    from: [0, length + toPt(safeFoldOffset)],
-    to: [width, length + toPt(safeFoldOffset)],
-  });
+  // addFoldLine(door, {
+  //   id: "opener-fold-horizontal",
+  //   from: [0, length + toPt(safeFoldOffset)],
+  //   to: [width, length + toPt(safeFoldOffset)],
+  // });
 
   const { height: doorSize } = getMeasurementOfModel(door);
 

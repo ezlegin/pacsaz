@@ -1,11 +1,11 @@
+import { toPt } from "@/utils/sizeConvertor";
 import M, { IModel } from "makerjs";
 import { DUST, MaterialKey, MATERIALS } from "../consts";
 import { addLine } from "./addLine";
 import { addModelToLayer } from "./addModelToLayer";
+import { addFoldLine } from "./foldLineGenerator";
 import { getLastPointMm } from "./getLastPointMm";
 import { PointBuilder } from "./pointBuilder";
-import { addFoldLine } from "./foldLineGenerator";
-import { toPt } from "@/utils/sizeConvertor";
 
 interface AddDustParams {
   id: string;
@@ -30,9 +30,11 @@ export function addDust({
   const dustSize = doorSize / 2;
   const mappedDustSize = DUST.size(widthMM, dustSize, heightMM);
   const { indent, height } = DUST;
-  const { thickness } = MATERIALS[material];
+  const { thickness, safeFoldOffset } = MATERIALS[material];
 
   const dust: IModel = { models: {} };
+
+  const xx = thickness - safeFoldOffset;
 
   // ─────────────────────────────────────────
   // Dust part 1
@@ -43,12 +45,15 @@ export function addDust({
   const dustP1_PB = new PointBuilder(getLastPointMm(pts));
 
   const dustP1_PTS = dustP1_PB
-    .draw(indent.bl, height.l)
-    .draw(indent.tl, mappedDustSize - height.l)
-    .right(heightMM / 2 - indent.bl - indent.tl - thickness)
+    .down(thickness)
+    .right(thickness * 2)
+    .up(thickness * 2)
+    // .draw(indent.bl, height.l)
+    // .draw(indent.tl, mappedDustSize - height.l)
+    // .right(heightMM / 2 - indent.bl - indent.tl - thickness)
     .build();
 
-  const dustP1 = new M.models.ConnectTheDots(false, dustP1_PTS);
+  const dustP1 = addLine(dustP1_PTS, false, 8.5);
 
   // ─────────────────────────────────────────
   // Dust part 2
@@ -56,20 +61,36 @@ export function addDust({
   const dustP2_PB = new PointBuilder(getLastPointMm(dustP1_PTS));
 
   const dustP2_PTS = dustP2_PB
-    .right(heightMM / 2 - indent.tr)
-    .draw(indent.tr - indent.br, -mappedDustSize + height.r.inner)
+    // .draw(indent.bl, height.l)
+    .draw(indent.tl, mappedDustSize - thickness)
+    .right(heightMM / 2 - indent.bl - indent.tl - thickness)
+    .build();
+
+  const dustP2 = new M.models.ConnectTheDots(false, dustP2_PTS);
+
+  // ─────────────────────────────────────────
+  // Dust part 2
+  // ─────────────────────────────────────────
+  const dustP3_PB = new PointBuilder(getLastPointMm(dustP2_PTS));
+
+  const dustP3_PTS = dustP3_PB
+    .right(heightMM / 2 + indent.tl - indent.tr - thickness)
+    .draw(
+      +indent.tr - thickness,
+      -mappedDustSize - thickness + height.r.inner + xx
+    )
     .draw(indent.br, -(height.r.inner - height.r.outer))
     .down(height.r.outer)
     .right(thickness)
     .build();
 
-  const dustP2 = addLine(dustP2_PTS, false, 30);
+  const dustP3 = addLine(dustP3_PTS, false, 30);
 
   // ─────────────────────────────────────────
   // Layering
   // ─────────────────────────────────────────
 
-  addModelToLayer(dust, "dust", { models: { dustP1, dustP2 } }, "trim");
+  addModelToLayer(dust, "dust", { models: { dustP1, dustP2, dustP3 } }, "trim");
 
   addFoldLine(dust, {
     id: "dust-fold2",

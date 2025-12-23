@@ -63,6 +63,7 @@ const tuckEnd: DielineDefinition = {
       heightMM,
       widthMM,
       normal: { lengthMM, margin: glueMargin },
+      safeFoldOffset: mateial.safeFoldOffset,
     });
 
     // DOOR
@@ -83,7 +84,7 @@ const tuckEnd: DielineDefinition = {
 
     const bottomDoor = cloneRotateMove(topDoor, 180, [
       width + height,
-      -doorSize,
+      -doorSize - toPt(mateial.safeFoldOffset),
     ]);
 
     // DUST
@@ -97,19 +98,19 @@ const tuckEnd: DielineDefinition = {
       material: selectedMaterial,
     });
 
-    const dustTR = cloneMirrorMove(dustTL, true, false, [
-      width * 2 + height,
-      length,
-    ]);
+    // const dustTR = cloneMirrorMove(dustTL, true, false, [
+    //   width * 2 + height,
+    //   length - toPt(mateial.thickness - mateial.safeFoldOffset),
+    // ]);
 
     const dustBR = cloneMirrorMove(dustTL, false, true, [
       width * 2 + height,
-      -toPt(dustSize),
+      -toPt(dustSize) - toPt(mateial.safeFoldOffset),
     ]);
 
     const dustBL = cloneMirrorMove(dustTL, true, true, [
       width,
-      -toPt(dustSize),
+      -toPt(dustSize) - toPt(mateial.safeFoldOffset),
     ]);
 
     // SINGLES
@@ -135,7 +136,7 @@ const tuckEnd: DielineDefinition = {
       singles,
       glue,
       door: { models: { topDoor, bottomDoor } },
-      dust: { models: { dustTL, dustTR, dustBR, dustBL } },
+      dust: { models: { dustTL, dustBR, dustBL } },
     });
 
     //! -------------- FOLD --------------
