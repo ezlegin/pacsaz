@@ -103,9 +103,10 @@ export function addDust({
 
   const dustP2_PTS = dustP2_PB
     .right(
-      heightMM / 2 - thickness - indent.br - indent.tr
-      // (considerOuterIndent ? 0 : thickness) +
-      // (considerDustHole ? 0 : thickness)
+      heightMM / 2 -
+        indent.br -
+        indent.tr -
+        (considerOuterIndent ? thickness : 0)
     )
     .draw(
       indent.tr,
@@ -118,7 +119,6 @@ export function addDust({
     .down(height.r.outer)
     .right(considerOuterIndent ? thickness : 0)
     .build();
-  // thickness + indentBR - indentTR
   const dustP2 = addLine(dustP2_PTS, false, 35);
 
   // ─────────────────────────────────────────

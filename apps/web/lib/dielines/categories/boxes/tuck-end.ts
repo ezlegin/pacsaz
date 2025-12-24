@@ -95,6 +95,7 @@ const tuckEnd: DielineDefinition = {
       lengthMM,
       tuckFlapSize: tuckFlap.size,
       material: selectedMaterial,
+      considerDustHole: true,
     });
 
     const { model: dustBR_RAW } = addDust({
