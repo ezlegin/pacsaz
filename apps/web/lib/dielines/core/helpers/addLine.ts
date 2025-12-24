@@ -8,7 +8,7 @@ export function addLine(
 ) {
   const drawnLine = new M.models.ConnectTheDots(closed ?? false, pts);
 
-  if (filletRaduis) addFillet(drawnLine, filletRaduis);
+  addFillet(drawnLine, filletRaduis);
 
   return drawnLine;
 }

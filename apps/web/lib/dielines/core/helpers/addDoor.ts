@@ -137,11 +137,11 @@ export function addDoor({
   // ─────────────────────────────────────────
   // Fold Lines
   // ─────────────────────────────────────────
-  // addFoldLine(door, {
-  //   id: "opener-fold-horizontal",
-  //   from: [0, length + toPt(safeFoldOffset)],
-  //   to: [width, length + toPt(safeFoldOffset)],
-  // });
+  addFoldLine(door, {
+    id: "opener-fold-horizontal",
+    from: [0 + 3, length + toPt(safeFoldOffset)], //todo
+    to: [width - 3, length + toPt(safeFoldOffset)], //todo
+  });
 
   const { height: doorSize } = getMeasurementOfModel(door);
 
