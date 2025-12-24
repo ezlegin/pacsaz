@@ -12,6 +12,7 @@ import {
 } from "./getLastPoint";
 import { PointBuilder } from "./pointBuilder";
 import { getDistanceOfFirstAndLastPoint } from "./getDistance";
+import { getPathXYLength } from "./getPathXYLength";
 
 interface AddDustParams {
   drawAfter: IModel;
@@ -56,48 +57,47 @@ export function addDust({
     endAngle
   );
 
-  const dustHole_line_PB = new PointBuilder(
-    getLastPointFromPath(dustHoleArc, "mm")
-  );
-  const indentBL = addLineToHole ? Math.max(0, indent.bl - holeRadius) : 0;
-
-  const dustHole_line_PTS = dustHole_line_PB
-    .draw(indentBL, addLineToHole ? height.l : 0)
-    .build();
-  const dustHoe_line = addLine(dustHole_line_PTS, false);
-
-  const dustHole: IModel = {
-    models: { dustHoe_line },
-    paths: { dustHole: dustHoleArc },
-  };
-
   // ─────────────────────────────────────────
   // Dust part 1
   // ─────────────────────────────────────────
-
-  // in hole section, we went to right in:
-  const { width: widthOfDustHole } = M.measure.modelExtents(dustHole);
-
-  const dustP1_PB = new PointBuilder(
-    addLineToHole
-      ? getLastPointFromModel(dustHole, "mm")
-      : getLastPointFromPath(dustHoleArc, "mm")
-  );
+  const { xLength: widthOfDustHole } = getPathXYLength(dustHoleArc);
+  const indentBL = considerDustHole
+    ? addLineToHole
+      ? Math.max(0, indent.bl - holeRadius)
+      : 0
+    : indent.bl;
 
   const { disOfHeight } = getDistanceOfFirstAndLastPoint(dustHoleArc, "path");
+  const toTop = considerDustHole
+    ? addLineToHole
+      ? mappedDustSize - height.l + toMm(disOfHeight) - safeFoldOffset
+      : mappedDustSize - safeFoldOffset
+    : mappedDustSize - height.l;
 
-  const toTop = addLineToHole
-    ? mappedDustSize - height.l + toMm(disOfHeight)
-    : mappedDustSize;
+  const startPointOfPart1 = getLastPointFromModel(drawAfter, "mm");
+  const dustP1_PB = new PointBuilder(
+    considerDustHole
+      ? getLastPointFromPath(dustHoleArc, "mm")
+      : [startPointOfPart1[0]!, startPointOfPart1[1]! - safeFoldOffset]
+  );
   const dustP1_PTS = dustP1_PB
+    .draw(
+      indentBL,
+      considerDustHole ? (addLineToHole ? height.l : 0) : height.l
+    )
     .draw(indent.tl, toTop)
-    .right(heightMM / 2 - toMm(widthOfDustHole) - indent.tl)
+    .right(
+      heightMM / 2 -
+        indentBL -
+        indent.tl -
+        (considerDustHole ? toMm(widthOfDustHole) : 0)
+    )
     .build();
 
   const dustP1 = addLine(dustP1_PTS, false);
 
   // ─────────────────────────────────────────
-  // Dust part 1
+  // Dust part 2
   // ─────────────────────────────────────────
   const dustP2_PB = new PointBuilder(getLastPointMm(dustP1_PTS));
 
@@ -108,13 +108,7 @@ export function addDust({
         indent.tr -
         (considerOuterIndent ? thickness : 0)
     )
-    .draw(
-      indent.tr,
-      -mappedDustSize - safeFoldOffset + height.r.inner
-      // considerDustHole
-      //   ? -mappedDustSize - thickness + height.r.inner
-      //   : -mappedDustSize + height.r.inner + thickness
-    )
+    .draw(indent.tr, -mappedDustSize + height.r.inner)
     .draw(indent.br, -(height.r.inner - height.r.outer))
     .down(height.r.outer)
     .right(considerOuterIndent ? thickness : 0)
@@ -145,7 +139,8 @@ export function addDust({
     dust,
     "dust",
     {
-      models: { dustHole, dustP1, dustP2 },
+      models: { dustP1, dustP2 },
+      paths: considerDustHole ? { dustHoleArc } : {},
     },
     "trim"
   );

@@ -40,6 +40,7 @@ const tuckEnd: DielineDefinition = {
       MATERIALS["f-flute"],
       MATERIALS["e-flute"],
       MATERIALS["b-flute"],
+      MATERIALS["c-flute"],
     ],
   },
   model({
@@ -77,7 +78,7 @@ const tuckEnd: DielineDefinition = {
       height,
       length,
       tuckFlap,
-      withFingerHole: true,
+      withFingerHole: false,
       materialThickkness: mateial.thickness,
       safeFoldOffset: mateial.safeFoldOffset,
     });
@@ -110,12 +111,12 @@ const tuckEnd: DielineDefinition = {
 
     const dustBR = cloneMirrorMove(dustBR_RAW, false, true, [
       width * 2 + height,
-      -toPt(dustSize) - toPt(mateial.safeFoldOffset),
+      -toPt(dustSize),
     ]);
 
     const dustBL = cloneMirrorMove(dustTL, true, true, [
       width,
-      -toPt(dustSize) - toPt(mateial.safeFoldOffset),
+      -toPt(dustSize),
     ]);
 
     const { model: dustTR_RAW } = addDust({

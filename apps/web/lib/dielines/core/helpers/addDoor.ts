@@ -36,12 +36,12 @@ export function addDoor({
   materialThickkness: mThickness,
   safeFoldOffset,
 }: AddDoorParams) {
-  const topPanelWithFoldOffsetSize = heightMM + safeFoldOffset + mThickness;
+  const topPanelWithFoldOffsetSize = heightMM;
 
   // ─────────────────────────────────────────
   // Top door panel
   // ─────────────────────────────────────────
-  const tuckFlapSize = tuckFlap.size - mThickness;
+  const tuckFlapSize = tuckFlap.size;
   const pb = new PointBuilder([0, lengthMM + safeFoldOffset]);
 
   const pts = pb
