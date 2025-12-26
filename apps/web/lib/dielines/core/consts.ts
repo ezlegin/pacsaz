@@ -49,7 +49,7 @@ export const DOOR = {
     indent: 1,
     seam: {
       w: 8,
-      h: 2,
+      h: 1.5,
     },
   },
   foldOffset: 1,

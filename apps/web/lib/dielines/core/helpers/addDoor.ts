@@ -1,13 +1,11 @@
 import { toPt } from "@/utils/sizeConvertor";
-import M, { IModel } from "makerjs";
+import { IModel } from "makerjs";
 import { TuckFlap } from "../consts";
 import { addLine } from "./addLine";
 import { addModelToLayer } from "./addModelToLayer";
 import { addSeam } from "./addSeam";
 import { cloneMirrorMove } from "./cloneMirrorMove";
-import { drawFoldLines } from "./drawFoldLines";
 import { addFoldLine } from "./foldLineGenerator";
-import { getPathXYLength } from "./getPathXYLength";
 import { getMeasurementOfModel } from "./getWidthAndHeightOfModel";
 import { PointBuilder } from "./pointBuilder";
 
@@ -59,21 +57,18 @@ export function addDoor({
   // ─────────────────────────────────────────
   // Seam
   // ─────────────────────────────────────────
+  const seamHeight = Math.max(mThickness * 2, tuckFlap.seam.h);
+
   const seamPB = new PointBuilder([
     mThickness,
-    lengthMM + topPanelWithFoldOffsetSize,
+    lengthMM + topPanelWithFoldOffsetSize + safeFoldOffset,
   ]);
-
-  const seamPTS = seamPB
-    .right(tuckFlap.seam.w)
-    .down(mThickness * 2)
-    .build();
-
-  const leftSeam = addSeam(seamPTS, false, 3);
+  const seamPTS = seamPB.right(tuckFlap.seam.w).down(seamHeight).build();
+  const leftSeam = addSeam(seamPTS, false, 2);
 
   const rightSeam = cloneMirrorMove(leftSeam, true, false, [
     width - toPt(tuckFlap.seam.w + mThickness),
-    length + height + toPt(safeFoldOffset - mThickness),
+    length + toPt(topPanelWithFoldOffsetSize + safeFoldOffset - seamHeight),
   ]);
 
   const seamModel: IModel = {
@@ -88,57 +83,20 @@ export function addDoor({
   // ─────────────────────────────────────────
   // Finger Hole
   // ─────────────────────────────────────────
-  const fingerHoleRaduis = 10;
-  const foldY = length + toPt(heightMM + safeFoldOffset);
+  const foldY = length + toPt(heightMM);
   const seamTotalWidth = tuckFlap.seam.w + mThickness;
 
-  if (withFingerHole) {
-    const arc = new M.paths.Arc(
-      [width / 2, length + height],
-      toPt(fingerHoleRaduis),
-      30,
-      150
-    );
-
-    const { xLength, yLength } = getPathXYLength(arc);
-
-    const topOfHole = arc.origin[1]! + arc.radius;
-    const distanceFromFold =
-      topOfHole - (length + height) - yLength - toPt(safeFoldOffset);
-
-    M.model.moveRelative(arc, [0, -distanceFromFold]);
-
-    const fingerHoleModel: IModel = {
-      paths: { arc },
-    };
-
-    drawFoldLines(door, {
-      horizontals: [
-        {
-          from: [toPt(seamTotalWidth), foldY],
-          to: [width / 2 - xLength / 2, foldY],
-        },
-        {
-          from: [width / 2 + xLength / 2, foldY],
-          to: [width - toPt(seamTotalWidth), foldY],
-        },
-      ],
-    });
-
-    addModelToLayer(door, "fingerHole", fingerHoleModel, "trim");
-  } else {
-    addFoldLine(door, {
-      from: [toPt(seamTotalWidth), foldY],
-      to: [width - toPt(seamTotalWidth), foldY],
-      id: "fold-horizontal-x1",
-    });
-  }
+  addFoldLine(door, {
+    id: "tuckflap-fold",
+    from: [toPt(seamTotalWidth), foldY],
+    to: [width - toPt(seamTotalWidth), foldY],
+  });
 
   // ─────────────────────────────────────────
   // Fold Lines
   // ─────────────────────────────────────────
   addFoldLine(door, {
-    id: "opener-fold-horizontal",
+    id: "topPanel-fold",
     from: [0 + 3, length + toPt(safeFoldOffset)], //todo
     to: [width - 3, length + toPt(safeFoldOffset)], //todo
   });
@@ -151,3 +109,45 @@ export function addDoor({
     doorSize,
   };
 }
+
+//  if (withFingerHole) {
+//     const arc = new M.paths.Arc(
+//       [width / 2, length + height],
+//       toPt(fingerHoleRaduis),
+//       30,
+//       150
+//     );
+
+//     const { xLength, yLength } = getPathXYLength(arc);
+
+//     const topOfHole = arc.origin[1]! + arc.radius;
+//     const distanceFromFold =
+//       topOfHole - (length + height) - yLength - toPt(safeFoldOffset);
+
+//     M.model.moveRelative(arc, [0, -distanceFromFold]);
+
+//     const fingerHoleModel: IModel = {
+//       paths: { arc },
+//     };
+
+//     drawFoldLines(door, {
+//       horizontals: [
+//         {
+//           from: [toPt(seamTotalWidth), foldY],
+//           to: [width / 2 - xLength / 2, foldY],
+//         },
+//         {
+//           from: [width / 2 + xLength / 2, foldY],
+//           to: [width - toPt(seamTotalWidth), foldY],
+//         },
+//       ],
+//     });
+
+//     addModelToLayer(door, "fingerHole", fingerHoleModel, "trim");
+//   } else {
+//     addFoldLine(door, {
+//       from: [toPt(seamTotalWidth), foldY],
+//       to: [width - toPt(seamTotalWidth), foldY],
+//       id: "fold-horizontal-x1",
+//     });
+//   }

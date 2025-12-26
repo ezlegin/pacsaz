@@ -40,7 +40,6 @@ const tuckEnd: DielineDefinition = {
       MATERIALS["f-flute"],
       MATERIALS["e-flute"],
       MATERIALS["b-flute"],
-      MATERIALS["c-flute"],
     ],
   },
   model({
