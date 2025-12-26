@@ -28,6 +28,7 @@ export function addBleed({
   M.model.addModel(cloned, line, "connectorLine");
 
   const chain = M.model.findSingleChain(cloned);
+  console.log("chain", chain);
   const newTrimModel = M.chain.toNewModel(chain);
 
   const bleed = M.model.outline(newTrimModel, bleedAmount, 1);

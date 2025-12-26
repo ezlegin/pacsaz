@@ -120,18 +120,21 @@ export function addDust({
   // ─────────────────────────────────────────
   const foldPoints = {
     from: [toPt(widthMM), toPt(lengthMM)],
-    to: [toPt(widthMM + heightMM - thickness), +toPt(lengthMM)],
+    to: [
+      toPt(widthMM + heightMM - (considerOuterIndent ? thickness : 0)),
+      +toPt(lengthMM),
+    ],
   };
   const foldTemp = new M.paths.Line([foldPoints.from, foldPoints.to]);
-  const int = M.path.intersection(foldTemp, dustHoleArc);
-  const intPoints = int.intersectionPoints;
+  const int = M.path.intersection(foldTemp, dustHoleArc) ?? {};
+  const intPoints = int.intersectionPoints ?? [0, 0];
   const intOfFoldToArc = intPoints[intPoints.length - 1]!;
 
-  // addFoldLine(dust, {
-  //   id: "dust-fold",
-  //   from: intOfFoldToArc,
-  //   to: foldPoints.to,
-  // });
+  addFoldLine(dust, {
+    id: "dust-fold",
+    from: considerDustHole ? intOfFoldToArc : foldPoints.from,
+    to: foldPoints.to,
+  });
   // ─────────────────────────────────────────
   // Layering
   // ─────────────────────────────────────────

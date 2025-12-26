@@ -8,6 +8,7 @@
     "incremental": false,
     "isolatedModules": true,
     "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "lib": ["es2022", "DOM", "DOM.Iterable"],
     "module": "NodeNext",
     "moduleDetection": "force",

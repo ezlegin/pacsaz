@@ -153,13 +153,22 @@ const tuckEnd: DielineDefinition = {
       },
     ]);
 
-    const trimModel = buildTrimModel({
-      singles,
-      glue,
-      door: { models: { topDoor, bottomDoor } },
-      dust: { models: { dustTL, dustBR, dustBL, dustTR } },
-    });
+    const trimModel: IModel = {
+      models: {
+        trims: {
+          models: {
+            singles,
+            glue,
+            door: { models: { topDoor, bottomDoor } },
+            dust: { models: { dustTL, dustBR, dustBL, dustTR } },
+          },
+        },
+      },
+    };
 
+    // trimModel
+    // ---Trims
+    // ---Folds
     //! -------------- FOLD --------------
     drawFoldLines(model, {
       verticals: [
