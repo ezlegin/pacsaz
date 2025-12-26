@@ -163,13 +163,13 @@ const tuckEnd: DielineDefinition = {
     //! -------------- FOLD --------------
     drawFoldLines(model, {
       verticals: [
-        { from: zero, to: [0, length] },
-        { from: [width, length], to: [width, 0] },
-        { from: [width + height, length], to: [width + height, 0] },
-        {
-          from: [width * 2 + height, length],
-          to: [width * 2 + height, 0],
-        },
+        // { from: zero, to: [0, length] },
+        // { from: [width, length], to: [width, 0] },
+        // { from: [width + height, length], to: [width + height, 0] },
+        // {
+        //   from: [width * 2 + height, length],
+        //   to: [width * 2 + height, 0],
+        // },
       ],
       horizontals: [
         // {
@@ -216,11 +216,16 @@ const tuckEnd: DielineDefinition = {
     });
 
     console.log(model);
+
     return modelBuilder({
       model,
       trimModel,
       bleed: {
         bleedAmount,
+        connectorLine: {
+          from: [0, 0],
+          to: [0, length + toPt(mateial.safeFoldOffset)],
+        },
       },
       offsets,
       showAnchors,

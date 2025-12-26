@@ -127,11 +127,11 @@ export function addDust({
   const intPoints = int.intersectionPoints;
   const intOfFoldToArc = intPoints[intPoints.length - 1]!;
 
-  addFoldLine(dust, {
-    id: "dust-fold",
-    from: intOfFoldToArc,
-    to: foldPoints.to,
-  });
+  // addFoldLine(dust, {
+  //   id: "dust-fold",
+  //   from: intOfFoldToArc,
+  //   to: foldPoints.to,
+  // });
   // ─────────────────────────────────────────
   // Layering
   // ─────────────────────────────────────────

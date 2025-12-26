@@ -9,41 +9,28 @@ type AddBleedWithConnectorLineParams = {
   model: M.IModel;
   trimModel: M.IModel;
   bleedAmount: number;
-  connectorLine?: ConnectorLine;
 };
 
 export function addBleed({
   model,
   trimModel,
   bleedAmount,
-  connectorLine,
 }: AddBleedWithConnectorLineParams): M.IModel {
-  const trimmedTrimModel: M.IModel = {
-    ...trimModel,
-    models: {
-      ...trimModel.models,
-      glue: {},
-    },
-  };
+  const cloned = M.model.clone(trimModel);
+  delete cloned.models?.glue;
 
-  let line: M.IModel = {};
+  const chianWithoutGlue = M.model.findSingleChain(cloned);
+  const keyPoints = M.chain.toKeyPoints(chianWithoutGlue);
+  const startPoint = keyPoints[keyPoints.length - 1]!;
+  const endPoint = keyPoints[0]!;
 
-  if (connectorLine) {
-    const { from, to } = connectorLine;
+  const line = new M.models.ConnectTheDots(false, [startPoint, endPoint]);
+  M.model.addModel(cloned, line, "connectorLine");
 
-    line = new M.models.ConnectTheDots(false, [from, to]);
-  } else {
-    const trimChain = M.model.findSingleChain(trimmedTrimModel);
-    const trimKeyPoints = M.chain.toKeyPoints(trimChain);
-    const startPoint = trimKeyPoints[0];
-    const endPoint = trimKeyPoints[trimKeyPoints.length - 1];
+  const chain = M.model.findSingleChain(cloned);
+  const newTrimModel = M.chain.toNewModel(chain);
 
-    line = new M.models.ConnectTheDots(false, [startPoint!, endPoint!]);
-  }
-
-  trimmedTrimModel.models!["line"] = line;
-
-  const bleed = M.model.outline(trimmedTrimModel, bleedAmount, 1);
+  const bleed = M.model.outline(newTrimModel, bleedAmount, 1);
 
   addModelToLayer(model, "bleed", bleed, "bleed");
   model.models = { bleed, ...model.models };

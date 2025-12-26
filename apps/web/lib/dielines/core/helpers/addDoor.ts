@@ -78,28 +78,25 @@ export function addDoor({
     },
   };
 
-  addModelToLayer(door, "seam", seamModel, "trim");
-
-  // ─────────────────────────────────────────
-  // Finger Hole
-  // ─────────────────────────────────────────
-  const foldY = length + toPt(heightMM);
-  const seamTotalWidth = tuckFlap.seam.w + mThickness;
-
-  addFoldLine(door, {
-    id: "tuckflap-fold",
-    from: [toPt(seamTotalWidth), foldY],
-    to: [width - toPt(seamTotalWidth), foldY],
-  });
+  // addModelToLayer(door, "seam", seamModel, "trim");
 
   // ─────────────────────────────────────────
   // Fold Lines
   // ─────────────────────────────────────────
-  addFoldLine(door, {
-    id: "topPanel-fold",
-    from: [0 + 3, length + toPt(safeFoldOffset)], //todo
-    to: [width - 3, length + toPt(safeFoldOffset)], //todo
-  });
+  const foldY = length + toPt(heightMM);
+  const seamTotalWidth = tuckFlap.seam.w + mThickness;
+
+  // addFoldLine(door, {
+  //   id: "tuckflap-fold",
+  //   from: [toPt(seamTotalWidth), foldY],
+  //   to: [width - toPt(seamTotalWidth), foldY],
+  // });
+
+  // addFoldLine(door, {
+  //   id: "topPanel-fold",
+  //   from: [0 + 3, length + toPt(safeFoldOffset)], //todo
+  //   to: [width - 3, length + toPt(safeFoldOffset)], //todo
+  // });
 
   const { height: doorSize } = getMeasurementOfModel(door);
 
