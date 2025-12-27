@@ -2,17 +2,15 @@ import { toMm, toPt } from "@/utils/sizeConvertor";
 import M, { IModel } from "makerjs";
 import { DUST, MaterialKey, MATERIALS } from "../consts";
 import { addLine } from "./addLine";
-import { addModelToLayer } from "./addModelToLayer";
 import { calculateDustHoleSize } from "./calculateDustHoleSize";
-import { addFoldLine } from "./foldLineGenerator";
+import { getDistanceOfFirstAndLastPoint } from "./getDistance";
 import {
   getLastPointFromModel,
   getLastPointFromPath,
   getLastPointMm,
 } from "./getLastPoint";
-import { PointBuilder } from "./pointBuilder";
-import { getDistanceOfFirstAndLastPoint } from "./getDistance";
 import { getPathXYLength } from "./getPathXYLength";
+import { PointBuilder } from "./pointBuilder";
 
 interface AddDustParams {
   drawAfter: IModel;
@@ -115,6 +113,15 @@ export function addDust({
     .build();
   const dustP2 = addLine(dustP2_PTS, false, 35);
 
+  M.model.addModel(
+    dust,
+    {
+      models: { dustP1, dustP2 },
+      paths: considerDustHole ? { dustHoleArc } : {},
+    },
+    "trim"
+  );
+
   // ─────────────────────────────────────────
   // Folds
   // ─────────────────────────────────────────
@@ -130,23 +137,14 @@ export function addDust({
   const intPoints = int.intersectionPoints ?? [0, 0];
   const intOfFoldToArc = intPoints[intPoints.length - 1]!;
 
-  addFoldLine(dust, {
-    id: "dust-fold",
-    from: considerDustHole ? intOfFoldToArc : foldPoints.from,
-    to: foldPoints.to,
-  });
-  // ─────────────────────────────────────────
-  // Layering
-  // ─────────────────────────────────────────
-  addModelToLayer(
-    dust,
-    "dust",
-    {
-      models: { dustP1, dustP2 },
-      paths: considerDustHole ? { dustHoleArc } : {},
-    },
-    "trim"
-  );
+  const fold = new M.paths.Line([
+    considerDustHole ? intOfFoldToArc : foldPoints.from,
+    foldPoints.to,
+  ]);
+  M.path.addTo(fold, dust, "fold");
 
-  return { model: dust, dustSize: mappedDustSize };
+  return {
+    model: dust,
+    dustSize: mappedDustSize,
+  };
 }

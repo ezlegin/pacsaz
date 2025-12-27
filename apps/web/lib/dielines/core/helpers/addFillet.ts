@@ -13,6 +13,6 @@ export function addFillet(model: IModel, radius: number = 0) {
   }
 
   if (fillet) {
-    addModelToLayer(model, "fillet", fillet, "trim");
+    addModelToLayer(model, "fillet", fillet);
   }
 }

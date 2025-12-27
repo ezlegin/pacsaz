@@ -70,13 +70,6 @@ const postalCard: DielineDefinition = {
     // main laying
     M.model.addModel(model, dieline, "dieline");
 
-    // chains
-    const dielineChain = M.model.findSingleChain(dieline);
-    const trimChain = M.model.findSingleChain(dieline.models?.trim!);
-
-    console.log("dielineChain", dielineChain);
-    console.log("trimChain", trimChain);
-
     console.log(model);
     return modelBuilder({
       model,

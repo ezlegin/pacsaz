@@ -1,20 +1,19 @@
 import { toPt } from "@/utils/sizeConvertor";
-import { IModel } from "makerjs";
+import M, { IModel } from "makerjs";
 import { BLEED, DOOR, MATERIALS, zero } from "../../core/consts";
 import { addDoor } from "../../core/helpers/addDoor";
 import { addDust } from "../../core/helpers/addDust";
-import { buildTrimModel } from "../../core/helpers/buildTrimModel";
 import {
   cloneMirrorMove,
   cloneRotateMove,
 } from "../../core/helpers/cloneMirrorMove";
 import { createDielineContext } from "../../core/helpers/contextCreator";
-import { drawFoldLines } from "../../core/helpers/drawFoldLines";
-import { drawGuideLines } from "../../core/helpers/drawGuideLines";
 import { drawSingleLines } from "../../core/helpers/drawSingleLines";
 import { addGlue } from "../../core/helpers/glueGenerator";
 import { modelBuilder } from "../../core/helpers/modelBuilder";
 import { DielineDefinition } from "../../core/types";
+import { drawFoldLines } from "../../core/helpers/drawFoldLines";
+import { drawGuideLines } from "../../core/helpers/drawGuideLines";
 
 const tuckEnd: DielineDefinition = {
   slug: "tuck-end",
@@ -55,9 +54,11 @@ const tuckEnd: DielineDefinition = {
     const { height, heightMM, length, offsets, lengthMM, width, widthMM } =
       createDielineContext(resolved);
 
+    const { dieline, foldModel, trimModel } = initiateModels();
+
     //! -------------- TRIM --------------
 
-    // GLUE
+    // GLUE ----------------------------
     const glueMargin = 10;
     const { model: glue, size: glueSize } = addGlue({
       heightMM,
@@ -66,7 +67,9 @@ const tuckEnd: DielineDefinition = {
       safeFoldOffset: mateial.safeFoldOffset,
     });
 
-    // DOOR
+    M.model.addModel(trimModel, glue, "glue");
+
+    // DOOR ----------------------------
     const { tuckFlap } = DOOR;
 
     const { model: topDoor, doorSize } = addDoor({
@@ -74,18 +77,39 @@ const tuckEnd: DielineDefinition = {
       heightMM,
       lengthMM,
       width,
-      height,
       length,
       tuckFlap,
-      withFingerHole: false,
       materialThickkness: mateial.thickness,
       safeFoldOffset: mateial.safeFoldOffset,
     });
 
-    const bottomDoor = cloneRotateMove(topDoor, 180, [
+    M.model.addModel(trimModel, topDoor.models?.trim!, "topDoor");
+    if (topDoor.paths) {
+      for (const path of Object.values(topDoor.paths)) {
+        M.path.addTo(path, foldModel, "fold");
+      }
+    }
+
+    const clonedBottomDoor = cloneRotateMove(topDoor, 180, [
       width + height,
       -doorSize - toPt(mateial.safeFoldOffset),
     ]);
+
+    const bottomDoor: IModel = {
+      models: clonedBottomDoor.models,
+      origin: clonedBottomDoor.origin,
+    };
+
+    M.model.addModel(trimModel, bottomDoor, "dustTR");
+    if (clonedBottomDoor.paths) {
+      for (const path of Object.values(clonedBottomDoor.paths)) {
+        const model: IModel = {
+          origin: clonedBottomDoor.origin,
+        };
+        M.path.addTo(path, model, "fold");
+        M.model.addModel(foldModel, model, "fold");
+      }
+    }
 
     // DUST
     const { dustSize, model: dustTL } = addDust({
@@ -95,46 +119,109 @@ const tuckEnd: DielineDefinition = {
       lengthMM,
       tuckFlapSize: tuckFlap.size,
       material: selectedMaterial,
-      considerDustHole: true,
     });
 
-    const { model: dustBR_RAW } = addDust({
-      drawAfter: topDoor,
-      heightMM,
-      lengthMM,
-      material: selectedMaterial,
-      tuckFlapSize: tuckFlap.size,
-      widthMM,
-      considerOuterIndent: false,
-    });
-
-    const dustBR = cloneMirrorMove(dustBR_RAW, false, true, [
-      width * 2 + height,
-      -toPt(dustSize),
-    ]);
-
-    const dustBL = cloneMirrorMove(dustTL, true, true, [
-      width,
-      -toPt(dustSize),
-    ]);
+    M.model.addModel(trimModel, dustTL.models?.trim!, "dustTL");
+    if (dustTL.paths) {
+      for (const path of Object.values(dustTL.paths)) {
+        M.path.addTo(path, foldModel, "fold");
+      }
+    }
 
     const { model: dustTR_RAW } = addDust({
       drawAfter: topDoor,
       heightMM,
-      lengthMM,
-      material: selectedMaterial,
-      tuckFlapSize: tuckFlap.size,
       widthMM,
-      considerOuterIndent: true,
+      lengthMM,
+      tuckFlapSize: tuckFlap.size,
+      material: selectedMaterial,
       considerDustHole: false,
     });
 
-    const dustTR = cloneMirrorMove(dustTR_RAW, true, false, [
+    const clonedDustTR = cloneMirrorMove(dustTR_RAW, true, false, [
       width * 2 + height,
       length,
     ]);
 
-    // SINGLES
+    const dustTR_TRIM: IModel = {
+      models: clonedDustTR.models,
+      origin: clonedDustTR.origin,
+    };
+
+    M.model.addModel(trimModel, dustTR_TRIM, "dustTR");
+    if (clonedDustTR.paths) {
+      for (const path of Object.values(clonedDustTR.paths)) {
+        const model: IModel = {
+          origin: clonedDustTR.origin,
+        };
+        M.path.addTo(path, model, "fold");
+        M.model.addModel(foldModel, model, "fold");
+      }
+    }
+
+    const { model: dustBR_RAW } = addDust({
+      drawAfter: topDoor,
+      heightMM,
+      widthMM,
+      lengthMM,
+      tuckFlapSize: tuckFlap.size,
+      material: selectedMaterial,
+      considerOuterIndent: false,
+    });
+
+    const clonedDustBR = cloneMirrorMove(dustBR_RAW, false, true, [
+      width * 2 + height,
+      0 - toPt(dustSize),
+    ]);
+
+    const dustBR_TRIM: IModel = {
+      models: clonedDustBR.models,
+      origin: clonedDustBR.origin,
+    };
+
+    M.model.addModel(trimModel, dustBR_TRIM, "dustTR");
+    if (clonedDustBR.paths) {
+      for (const path of Object.values(clonedDustBR.paths)) {
+        const model: IModel = {
+          origin: clonedDustBR.origin,
+        };
+        M.path.addTo(path, model, "fold");
+        M.model.addModel(foldModel, model, "fold");
+      }
+    }
+
+    const { model: dustBL_RAW } = addDust({
+      drawAfter: topDoor,
+      heightMM,
+      widthMM,
+      lengthMM,
+      tuckFlapSize: tuckFlap.size,
+      material: selectedMaterial,
+      considerOuterIndent: false,
+    });
+
+    const clonedDustBL = cloneMirrorMove(dustBL_RAW, true, true, [
+      width,
+      0 - toPt(dustSize),
+    ]);
+
+    const dustBL_TRIM: IModel = {
+      models: clonedDustBL.models,
+      origin: clonedDustBL.origin,
+    };
+
+    M.model.addModel(trimModel, dustBL_TRIM, "dustTR");
+    if (clonedDustBL.paths) {
+      for (const path of Object.values(clonedDustBL.paths)) {
+        const model: IModel = {
+          origin: clonedDustBL.origin,
+        };
+        M.path.addTo(path, model, "fold");
+        M.model.addModel(foldModel, model, "fold");
+      }
+    }
+
+    // SINGLES ----------------------------
     const singles = drawSingleLines([
       { id: "s1", pts: [zero, [width, 0]] },
       {
@@ -153,50 +240,18 @@ const tuckEnd: DielineDefinition = {
       },
     ]);
 
-    const trimModel: IModel = {
-      models: {
-        trims: {
-          models: {
-            singles,
-            glue,
-            door: { models: { topDoor, bottomDoor } },
-            dust: { models: { dustTL, dustBR, dustBL, dustTR } },
-          },
-        },
-      },
-    };
+    M.model.addModel(trimModel, singles, "singles");
 
-    // trimModel
-    // ---Trims
-    // ---Folds
     //! -------------- FOLD --------------
-    drawFoldLines(model, {
+    drawFoldLines(foldModel, {
       verticals: [
-        // { from: zero, to: [0, length] },
-        // { from: [width, length], to: [width, 0] },
-        // { from: [width + height, length], to: [width + height, 0] },
-        // {
-        //   from: [width * 2 + height, length],
-        //   to: [width * 2 + height, 0],
-        // },
-      ],
-      horizontals: [
-        // {
-        //   from: [width, length],
-        //   to: [width + height, length],
-        // },
-        // {
-        //   from: [width * 2 + height, length],
-        //   to: [width * 2 + height * 2, length],
-        // },
-        // {
-        //   from: [width, 0],
-        //   to: [width + height, 0],
-        // },
-        // {
-        //   from: [width * 2 + height, 0],
-        //   to: [width * 2 + height * 2, 0],
-        // },
+        { from: zero, to: [0, length] },
+        { from: [width, length], to: [width, 0] },
+        { from: [width + height, length], to: [width + height, 0] },
+        {
+          from: [width * 2 + height, length],
+          to: [width * 2 + height, 0],
+        },
       ],
     });
 
@@ -224,17 +279,12 @@ const tuckEnd: DielineDefinition = {
       ],
     });
 
-    console.log(model);
-
     return modelBuilder({
       model,
-      trimModel,
+      trimModel: trimModel,
+      dieline,
       bleed: {
         bleedAmount,
-        connectorLine: {
-          from: [0, 0],
-          to: [0, length + toPt(mateial.safeFoldOffset)],
-        },
       },
       offsets,
       showAnchors,
@@ -252,3 +302,21 @@ const tuckEnd: DielineDefinition = {
 };
 
 export default tuckEnd;
+
+function initiateModels() {
+  const dieline: IModel = {};
+
+  const trimModel: IModel = {};
+  M.model.addModel(dieline, trimModel, "trim");
+  M.model.layer(trimModel, "trim");
+
+  const foldModel: IModel = {};
+  M.model.addModel(dieline, foldModel, "fold");
+  M.model.layer(foldModel, "fold");
+
+  return {
+    dieline,
+    trimModel,
+    foldModel,
+  };
+}

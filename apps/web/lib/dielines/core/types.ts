@@ -1,7 +1,6 @@
 import { IModel } from "makerjs";
 import { MaterialKey } from "./consts";
 import { DimensionType } from "./helpers/applyDimensionOffset";
-import { ConnectorLine } from "./helpers/bleedGenerator";
 import { Watermark } from "./helpers/injectWatermark";
 
 export type Dimensions = {
@@ -115,9 +114,9 @@ export type OffsetObject = {
 export type ModelExporter = {
   model: IModel;
   trimModel: IModel;
+  dieline: IModel;
   bleed: {
     bleedAmount: number;
-    connectorLine?: ConnectorLine;
   };
   offsets: {
     width: {
