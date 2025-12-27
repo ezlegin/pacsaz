@@ -15,7 +15,7 @@ export function drawFoldLines(
   const typeCounters: Record<string, number> = {};
 
   const foldModel: IModel = { models: {} };
-  addModelToLayer(model, "folds", foldModel, "folds");
+  addModelToLayer(model, "folds", foldModel);
 
   const foldTypes: { type: string; coords?: Coordinates }[] = [
     { type: "vertical", coords: folds.verticals },

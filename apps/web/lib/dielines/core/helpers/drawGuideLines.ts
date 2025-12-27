@@ -33,7 +33,7 @@ type GuideConfig = {
 
 export function drawGuideLines(model: IModel, params: DrawGuideLinesParams) {
   const guidesModel: IModel = { models: {} };
-  addModelToLayer(model, "guides", guidesModel, "guides");
+  addModelToLayer(model, "guides", guidesModel);
 
   const { width, length, height, rawDim, offsets, dimensionType, guides } =
     params;

@@ -1,4 +1,4 @@
-import M from "makerjs";
+import M, { IModel } from "makerjs";
 import { addLine } from "./addLine";
 
 type Lines = {
@@ -7,7 +7,7 @@ type Lines = {
   filledRaudius?: number;
 }[];
 
-export function drawSingleLines(lines: Lines) {
+export function drawSingleLines(trimModel: IModel, lines: Lines) {
   const singlesModel: M.IModel = { models: {} };
 
   for (const line of lines) {
@@ -16,5 +16,5 @@ export function drawSingleLines(lines: Lines) {
     singlesModel.models![line.id] = drawnLine;
   }
 
-  return singlesModel;
+  M.model.addModel(trimModel, singlesModel, "singles");
 }

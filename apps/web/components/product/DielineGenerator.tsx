@@ -3,7 +3,7 @@
 import ProductDetails from "@/components/product/ProductDetails";
 import SVGPreview from "@/components/product/SVGPreview";
 import { useDielineGenerator } from "@/hooks/useDielineGenerator";
-import { DielineDefinition } from "@/lib/dielines/core/types";
+import { DielineGenerator } from "@/lib/dielines/core/types";
 import { dielines, DielineSlug } from "@/lib/dielines/registery";
 import {
   Dialog,
@@ -19,7 +19,7 @@ interface Props {
 }
 
 export default function DielineGenerator({ slug }: Props) {
-  const dieline = dielines[slug as DielineSlug] as DielineDefinition;
+  const dieline = dielines[slug as DielineSlug] as DielineGenerator;
 
   const {
     size,

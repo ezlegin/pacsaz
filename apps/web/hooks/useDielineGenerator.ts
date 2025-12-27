@@ -1,12 +1,12 @@
 import { MaterialKey, MATERIALS } from "@/lib/dielines/core/consts";
 import { DimensionType } from "@/lib/dielines/core/helpers/applyDimensionOffset";
 import { resolveDimensions } from "@/lib/dielines/core/helpers/dimensionResolver";
-import { DielineDefinition, Model } from "@/lib/dielines/core/types";
+import { DielineGenerator, Model } from "@/lib/dielines/core/types";
 import { toPt } from "@/utils/sizeConvertor";
 import { useState, useTransition, useEffect } from "react";
 import { useSize } from "./useSize";
 
-export function useDielineGenerator(dieline: DielineDefinition) {
+export function useDielineGenerator(dieline: DielineGenerator) {
   const [material, setMaterial] = useState<MaterialKey>(
     dieline.materials.default.value as MaterialKey
   );

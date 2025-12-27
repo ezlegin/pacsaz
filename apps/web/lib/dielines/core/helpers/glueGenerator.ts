@@ -1,27 +1,31 @@
-import { IPoint } from "makerjs";
+import { IModel, IPoint } from "makerjs";
 import { PointBuilder } from "../helpers/pointBuilder";
 import { addLine } from "./addLine";
 import { glueMapper } from "./glueMapper";
+import M from "makerjs";
 
-export function addGlue({
-  customPoints = [
-    [0, 0],
-    [100, 100],
-  ],
-  heightMM,
-  widthMM,
-  normal,
-  safeFoldOffset,
-}: {
-  widthMM: number;
-  heightMM: number;
-  normal?: {
-    margin: number;
-    lengthMM: number;
-  };
-  customPoints?: IPoint[];
-  safeFoldOffset: number;
-}) {
+export function addGlue(
+  trimModel: IModel,
+  {
+    customPoints = [
+      [0, 0],
+      [100, 100],
+    ],
+    heightMM,
+    widthMM,
+    normal,
+    safeFoldOffset,
+  }: {
+    widthMM: number;
+    heightMM: number;
+    normal?: {
+      margin: number;
+      lengthMM: number;
+    };
+    customPoints?: IPoint[];
+    safeFoldOffset: number;
+  }
+) {
   const pb = new PointBuilder();
   const size = glueMapper(widthMM, heightMM);
 
@@ -36,5 +40,6 @@ export function addGlue({
 
   const glue = addLine(pts, false);
 
+  M.model.addModel(trimModel, glue, "glue");
   return { model: glue, size };
 }

@@ -4,6 +4,7 @@ import { calculateSafeFoldOffset } from "./helpers/calculateSafeFoldOffset";
 
 export const onDevelepe = process.env.NODE_ENV === "development";
 export const onProduction = process.env.NODE_ENV === "production";
+export const EPS = 0.0001;
 
 // COLORS
 export const COLORS = {

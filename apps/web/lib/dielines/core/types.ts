@@ -91,7 +91,7 @@ export type DielineModel = (params: {
   selectedMaterial: MaterialKey;
 }) => Model;
 
-export interface DielineDefinition {
+export interface DielineGenerator {
   slug: string;
   title: string;
   dimensions: DielineDimensions;
@@ -114,7 +114,6 @@ export type OffsetObject = {
 export type ModelExporter = {
   model: IModel;
   trimModel: IModel;
-  dieline: IModel;
   bleed: {
     bleedAmount: number;
   };

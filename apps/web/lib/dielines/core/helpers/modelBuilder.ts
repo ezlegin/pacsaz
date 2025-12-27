@@ -1,7 +1,6 @@
 import { MARGINS, onDevelepe } from "../consts";
 import { ModelExporter } from "../types";
 import { addAnchor } from "./addAnchor";
-import { addModelToLayer } from "./addModelToLayer";
 import { addOverallDimensionGuides } from "./addOverallDimensionGuides";
 import { addBleed } from "./bleedGenerator";
 import { addContainer } from "./containerGenerator";
@@ -11,7 +10,6 @@ import { svgExporter } from "./svgExporter";
 export function modelBuilder({
   model,
   trimModel,
-  dieline,
   bleed: { bleedAmount },
   offsets,
   showAnchors,
@@ -24,8 +22,6 @@ export function modelBuilder({
     trimModel,
     bleedAmount,
   });
-
-  addModelToLayer(model, "dieline", dieline);
 
   const container = addContainer({
     model,
