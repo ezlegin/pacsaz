@@ -1,12 +1,12 @@
 import { MaterialKey, MATERIALS } from "@/lib/dielines/core/consts";
 import { DimensionType } from "@/lib/dielines/core/helpers/applyDimensionOffset";
 import { resolveDimensions } from "@/lib/dielines/core/helpers/dimensionResolver";
-import { DielineGenerator, Model } from "@/lib/dielines/core/types";
+import { DielineGeneratorProps, Model } from "@/lib/dielines/core/types";
 import { toPt } from "@/utils/sizeConvertor";
-import { useState, useTransition, useEffect } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useSize } from "./useSize";
 
-export function useDielineGenerator(dieline: DielineGenerator) {
+export function useDielineGenerator(dieline: DielineGeneratorProps) {
   const [material, setMaterial] = useState<MaterialKey>(
     dieline.materials.default.value as MaterialKey
   );
@@ -16,6 +16,7 @@ export function useDielineGenerator(dieline: DielineGenerator) {
   const [showAnchors, setShowAnchors] = useState(false);
   const [showWatermark, setShowWatermark] = useState(true);
   const [showOverallDimensions, setShowOverallDimensions] = useState(false);
+  const [doCenterSVG, setDoCenterSVG] = useState(true);
 
   const { size, setDimension } = useSize(dieline.dimensions);
   const [customThickness, setCustomThickness] = useState<number | undefined>();
@@ -77,6 +78,7 @@ export function useDielineGenerator(dieline: DielineGenerator) {
     showAnchors,
     showWatermark,
     showOverallDimensions,
+    doCenterSVG,
     setDimension,
     setMaterial,
     setDimensionType,
@@ -85,5 +87,6 @@ export function useDielineGenerator(dieline: DielineGenerator) {
     setShowWatermark,
     setCustomThickness,
     setShowOverallDimensions,
+    setDoCenterSVG,
   };
 }

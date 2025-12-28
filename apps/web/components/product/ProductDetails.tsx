@@ -359,6 +359,13 @@ function DimensionInput({
 
   if (value === 0) return null;
 
+  const handleSubmit = () => {
+    setBlurredInput(dimKey);
+    const clamped = clamp(localValue, min);
+    setLocalValue(clamped);
+    onChange(clamped);
+  };
+
   return (
     <div className="space-y-1">
       <p className="text-xs text-muted-foreground">{label}</p>
@@ -367,22 +374,13 @@ function DimensionInput({
           disabled={isRendering && dimKey === blurredInput}
           dir="ltr"
           value={localValue}
-          onFocus={(e) => {
-            e.target.select();
-          }}
-          onChange={(e) => {
-            const raw = Number(e.target.value);
-
-            setLocalValue(raw);
-          }}
-          onBlur={(e) => {
-            setBlurredInput(dimKey);
-
-            const raw = Number(e.target.value);
-
-            const clamped = clamp(raw, min);
-            setLocalValue(clamped);
-            onChange(clamped);
+          onFocus={(e) => e.target.select()}
+          onChange={(e) => setLocalValue(Number(e.target.value))}
+          onBlur={handleSubmit}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleSubmit();
+            }
           }}
         />
         <span className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">

@@ -31,12 +31,20 @@ type GuideConfig = {
   to?: IPoint;
 };
 
-export function drawGuideLines(model: IModel, params: DrawGuideLinesParams) {
+export function drawGuideLines(
+  model: IModel,
+  {
+    width,
+    length,
+    height = 0,
+    rawDim,
+    offsets,
+    dimensionType,
+    guides,
+  }: DrawGuideLinesParams
+) {
   const guidesModel: IModel = { models: {} };
   addModelToLayer(model, "guides", guidesModel);
-
-  const { width, length, height, rawDim, offsets, dimensionType, guides } =
-    params;
 
   const defaults = {
     height: {
@@ -51,8 +59,8 @@ export function drawGuideLines(model: IModel, params: DrawGuideLinesParams) {
     },
     length: {
       type: "length",
-      from: [width / 4, 0],
-      to: [width / 4, length],
+      from: [width + height + width / 4, 0],
+      to: [width + height + width / 4, length],
     },
   };
 

@@ -90,7 +90,7 @@ export type DielineModel = (params: {
   selectedMaterial: MaterialKey;
 }) => Model;
 
-export interface DielineGenerator {
+export interface DielineGeneratorProps {
   slug: string;
   title: string;
   dimensions: DielineDimensions;

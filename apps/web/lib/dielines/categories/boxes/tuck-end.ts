@@ -14,9 +14,9 @@ import { drawSingleLines } from "../../core/helpers/drawSingleLines";
 import { addGlue } from "../../core/helpers/glueGenerator";
 import { modelBuilder } from "../../core/helpers/modelBuilder";
 import { pushModelSeparatly } from "../../core/helpers/pushModelSeparatly";
-import { DielineGenerator } from "../../core/types";
+import { DielineGeneratorProps } from "../../core/types";
 
-const tuckEnd: DielineGenerator = {
+const tuckEnd: DielineGeneratorProps = {
   slug: "tuck-end",
   title: "جعبه دو طرف درب", //todo: sync to database, not here.
   dimensions: {
@@ -172,14 +172,18 @@ const tuckEnd: DielineGenerator = {
     ]);
 
     //! -------------- FOLD --------------
+    const safeOffset = toPt(mateial.safeFoldOffset);
     drawFoldLines(foldModel, {
       verticals: [
         { from: zero, to: [0, length] },
-        { from: [width, length], to: [width, 0] },
-        { from: [width + height, length], to: [width + height, 0] },
+        { from: [width, length + safeOffset], to: [width, 0] },
+        {
+          from: [width + height, length],
+          to: [width + height, -safeOffset],
+        },
         {
           from: [width * 2 + height, length],
-          to: [width * 2 + height, 0],
+          to: [width * 2 + height, -safeOffset],
         },
       ],
     });

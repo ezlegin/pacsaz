@@ -5,9 +5,9 @@ import { addModelToLayer } from "./core/helpers/addModelToLayer";
 import { drawFoldLines } from "./core/helpers/drawFoldLines";
 import { drawGuideLines } from "./core/helpers/drawGuideLines";
 import { modelBuilder } from "./core/helpers/modelBuilder";
-import { DielineGenerator } from "./core/types";
+import { DielineGeneratorProps } from "./core/types";
 
-const postalCard: DielineGenerator = {
+const postalCard: DielineGeneratorProps = {
   slug: "postal-card",
   title: "Test", //todo: sync to database, not here.
   dimensions: {

@@ -20,9 +20,12 @@ interface Props {
   slug: string | undefined;
   showWatermark: boolean;
   showOverallDimensions: boolean;
+  doCenterSVG: boolean;
+  showAnchors: boolean;
   setShowOverallDimensions: (val: boolean) => void;
   setShowAnchors: (val: boolean) => void;
   setShowWatermark: (val: boolean) => void;
+  setDoCenterSVG: (val: boolean) => void;
 }
 
 const ProductInfo = ({
@@ -33,9 +36,12 @@ const ProductInfo = ({
   slug,
   showWatermark,
   showOverallDimensions,
+  doCenterSVG,
+  showAnchors,
   setShowAnchors,
   setShowWatermark,
   setShowOverallDimensions,
+  setDoCenterSVG,
 }: Props) => {
   const { height, length, width } = dimension;
 
@@ -176,7 +182,7 @@ const ProductInfo = ({
           <Card dir="ltr" className="p-4 gap-1">
             <CardTitle>Developer Tools:</CardTitle>
 
-            <CardContent className="p-1 text-sm">
+            <CardContent className="p-1 text-sm flex flex-col gap-2">
               <div className="flex justify-between">
                 <p>Slug:</p>
                 <p>{slug}</p>
@@ -201,7 +207,10 @@ const ProductInfo = ({
               </div>
               <div className="flex justify-between">
                 <p>Show Anchors</p>
-                <Switch onCheckedChange={setShowAnchors} />
+                <Switch
+                  checked={showAnchors}
+                  onCheckedChange={setShowAnchors}
+                />
               </div>
               <div className="flex justify-between">
                 <p>Show Watermark</p>
@@ -215,6 +224,13 @@ const ProductInfo = ({
                 <Switch
                   checked={showOverallDimensions}
                   onCheckedChange={setShowOverallDimensions}
+                />
+              </div>
+              <div className="flex justify-between">
+                <p>Do Center the SVG</p>
+                <Switch
+                  checked={doCenterSVG}
+                  onCheckedChange={setDoCenterSVG}
                 />
               </div>
             </CardContent>
