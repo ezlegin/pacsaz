@@ -71,13 +71,7 @@ export default function DielineGenerator({ slug }: Props) {
         </DialogContent>
       </Dialog>
 
-      {svg && (
-        <SVGPreview
-          svg={svg.model}
-          initalScale={dieline.dimensions.initialScale}
-          isRendering={isRendering}
-        />
-      )}
+      {svg && <SVGPreview svg={svg.model} isRendering={isRendering} />}
 
       <ProductInfo
         dimension={size}

@@ -16,8 +16,10 @@ export async function PDFGenerator({ svg, slug }: Props) {
   const fontPath = path.join(process.cwd(), "public/fonts/ARIAL.TTF");
   const { sizes } = svg;
 
+  const docWidth = sizes.container.width;
+  const docHeight = sizes.container.height;
   const doc = new PDFDocument({
-    size: [sizes.container.width, sizes.container.height],
+    size: [docWidth, docHeight],
     font: fontPath,
     info: {
       Title: "PacSaz Dieline",
@@ -41,7 +43,11 @@ export async function PDFGenerator({ svg, slug }: Props) {
   doc
     .fontSize(9)
     .fillColor(COLORS.guides.text)
-    .text(guideText, 6, 6, { lineGap: 3 });
+    .text(guideText, 10, 10, { lineGap: 3 });
+
+  const imageWidth = 25;
+  const image = path.join(process.cwd(), "public/pacsaz-logo.png");
+  doc.image(image, docWidth - imageWidth - 10, 10, { width: imageWidth });
 
   SVGtoPDF(doc, svg.model, 0, 0, {
     assumePt: true,
