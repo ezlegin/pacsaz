@@ -27,18 +27,39 @@ export function injectWatermark(
   return svg.replace(
     "</svg>",
     `
-      <clipPath transform="translate(${toPt(MARGINS.container - bleedAmountMM + (offset?.x ?? 0))}, ${toPt(MARGINS.container - bleedAmountMM + (offset?.y ?? 0))})" id="watermark">
-        <path d="${clipD[0]}" />
-      </clipPath>
+  <defs>
+    <pattern
+      id="watermarkPattern"
+      patternUnits="userSpaceOnUse"
+      width="900"
+      height="900"
+    >
+      <image
+        href="${watermark}"
+        width="900"
+        height="900"
+        opacity="0.5"
+        preserveAspectRatio="xMidYMid meet"
+      />
+    </pattern>
 
-    <image
-      href="${watermark}"
-      width="100%"
-      height="100%"
-      opacity="0.4"
-      clip-path="url(#watermark)"
-    />
-    </svg>
-    `
+    <clipPath
+      id="watermarkClip"
+      transform="translate(${toPt(
+        MARGINS.container - bleedAmountMM + (offset?.x ?? 0)
+      )}, ${toPt(MARGINS.container - bleedAmountMM + (offset?.y ?? 0))})"
+    >
+      <path d="${clipD[0]}" />
+    </clipPath>
+  </defs>
+
+  <rect
+    width="100%"
+    height="100%"
+    fill="url(#watermarkPattern)"
+    clip-path="url(#watermarkClip)"
+  />
+  </svg>
+`
   );
 }
