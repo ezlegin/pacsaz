@@ -20,7 +20,6 @@ const tuckEnd: DielineGenerator = {
   slug: "tuck-end",
   title: "جعبه دو طرف درب", //todo: sync to database, not here.
   dimensions: {
-    initialScale: 0.8,
     defaultDimensions: {
       length: 160,
       width: 90,

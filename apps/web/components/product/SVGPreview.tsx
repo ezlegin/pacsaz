@@ -83,7 +83,7 @@ export default function SvgPreview({
                 height: "100%",
               }}
             >
-              <div className="relative" ref={contentRef}>
+              <div className="relative pb-20 " ref={contentRef}>
                 {isRendering && (
                   <Spinner className="scale-200 text-primary absolute top-1/2 translate-y-1/2 left-1/2 translate-x-1/2" />
                 )}

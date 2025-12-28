@@ -1,5 +1,5 @@
 import M from "makerjs";
-import { COLORS, GUIDES, MaterialKey } from "../consts";
+import { COLORS, GUIDES, MaterialKey, strokeWidth } from "../consts";
 import { injectWatermark, Watermark } from "./injectWatermark";
 
 type SvgExporterParams = {
@@ -26,23 +26,21 @@ export function svgExporter({
       bleed: {
         stroke: COLORS.dielines.bleed,
         fill: isCardboard ? COLORS.dielines.fill : "#f6efe4",
-        cssStyle:
-          "z-index: -20; background-image: url(/apps/web/public/watermark.png)",
-        strokeWidth: "0.75",
+        strokeWidth: strokeWidth.svg,
       },
       trim: {
         stroke: COLORS.dielines.trim,
-        strokeWidth: "0.75",
+        strokeWidth: strokeWidth.svg,
       },
       fold: {
         stroke: COLORS.dielines.fold,
-        strokeWidth: "0.75",
+        strokeWidth: strokeWidth.svg,
         cssStyle: `stroke-dasharray:${GUIDES.foldDasharray}`,
       },
       guideBox: { fill: COLORS.guides.box, stroke: "none" },
       guideLine: {
         stroke: COLORS.guides.line,
-        strokeWidth: "1",
+        strokeWidth: strokeWidth.guide,
       },
       pointer: { stroke: "none", fill: COLORS.guides.line },
       pointerOverall: { stroke: "none", fill: "black" },

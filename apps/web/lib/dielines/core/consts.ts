@@ -6,6 +6,11 @@ export const onDevelepe = process.env.NODE_ENV === "development";
 export const onProduction = process.env.NODE_ENV === "production";
 export const EPS = 0.0001;
 
+export const strokeWidth = {
+  svg: "0.75",
+  guide: "1",
+};
+
 // COLORS
 export const COLORS = {
   dielines: {
