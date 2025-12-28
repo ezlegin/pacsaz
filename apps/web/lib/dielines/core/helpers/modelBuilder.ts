@@ -10,7 +10,7 @@ import { svgExporter } from "./svgExporter";
 export function modelBuilder({
   model,
   trimModel,
-  bleed: { bleedAmount },
+  bleedAmount,
   offsets,
   showAnchors,
   watermark,

@@ -157,6 +157,33 @@ export default function ProductDetails({
             </div>
           </Section>
 
+          <Section title="متریال چاپ" infoContent={<DimensionInfo />}>
+            <Select
+              onValueChange={onSelectMaterial}
+              dir="rtl"
+              defaultValue={materials.default.value}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="انتخاب متریال" />
+              </SelectTrigger>
+
+              <SelectContent position="popper">
+                {materials.included.map((item) => (
+                  <SelectItem
+                    className="py-2.5"
+                    key={item.value}
+                    value={item.value}
+                  >
+                    <span
+                      className={`h-5 w-5 rounded-full border ${item.color}`}
+                    />
+                    {item.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Section>
+
           <Section
             isPremium
             title="اندازه بلید"
@@ -182,33 +209,6 @@ export default function ProductDetails({
                       style={{ height: `${idx + 3}px` }}
                     />
                     <span dir="ltr">{item.size} mm</span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Section>
-
-          <Section title="متریال چاپ" infoContent={<DimensionInfo />}>
-            <Select
-              onValueChange={onSelectMaterial}
-              dir="rtl"
-              defaultValue={materials.default.value}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="انتخاب متریال" />
-              </SelectTrigger>
-
-              <SelectContent position="popper">
-                {materials.included.map((item) => (
-                  <SelectItem
-                    className="py-2.5"
-                    key={item.value}
-                    value={item.value}
-                  >
-                    <span
-                      className={`h-5 w-5 rounded-full border ${item.color}`}
-                    />
-                    {item.label}
                   </SelectItem>
                 ))}
               </SelectContent>

@@ -1,29 +1,22 @@
 import { toPt } from "@/utils/sizeConvertor";
 import M from "makerjs";
+import { addModelToLayer } from "./addModelToLayer";
 
 interface AddContainerOptions {
   model: M.IModel;
   from: M.IModel;
   marginMM: number;
-  id?: string;
-  layer?: string;
 }
 
-export function addContainer({
-  model,
-  from,
-  marginMM,
-  id = "container",
-  layer = "container",
-}: AddContainerOptions) {
+export function addContainer({ model, from, marginMM }: AddContainerOptions) {
   const { low, high } = M.measure.modelExtents(from);
 
   const marginPt = toPt(marginMM);
 
-  const minX = low[0]! - marginPt;
-  const minY = low[1]! - marginPt;
-  const maxX = high[0]! + marginPt;
-  const maxY = high[1]! + marginPt;
+  const minX = low[0]!;
+  const minY = low[1]!;
+  const maxX = high[0]!;
+  const maxY = high[1]!;
 
   const container = M.model.outline(
     new M.models.ConnectTheDots(true, [
@@ -32,13 +25,11 @@ export function addContainer({
       [maxX, maxY],
       [minX, maxY],
     ]),
-    0.1,
+    marginPt,
     1
   );
 
-  model.models ??= {};
-  model.models[id] = container;
-  model.models[id].layer = layer;
+  addModelToLayer(model, "container", container, "container");
 
   return container;
 }

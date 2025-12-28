@@ -34,7 +34,7 @@ export function addDoor({
   // ─────────────────────────────────────────
   // Top door panel
   // ─────────────────────────────────────────
-  const tuckFlapSize = tuckFlap.size;
+  const tuckFlapSize = tuckFlap.size(widthMM) - mThickness;
   const pb = new PointBuilder([0, lengthMM + safeFoldOffset]);
 
   const pts = pb
@@ -101,45 +101,3 @@ export function addDoor({
     doorSize,
   };
 }
-
-//  if (withFingerHole) {
-//     const arc = new M.paths.Arc(
-//       [width / 2, length + height],
-//       toPt(fingerHoleRaduis),
-//       30,
-//       150
-//     );
-
-//     const { xLength, yLength } = getPathXYLength(arc);
-
-//     const topOfHole = arc.origin[1]! + arc.radius;
-//     const distanceFromFold =
-//       topOfHole - (length + height) - yLength - toPt(safeFoldOffset);
-
-//     M.model.moveRelative(arc, [0, -distanceFromFold]);
-
-//     const fingerHoleModel: IModel = {
-//       paths: { arc },
-//     };
-
-//     drawFoldLines(door, {
-//       horizontals: [
-//         {
-//           from: [toPt(seamTotalWidth), foldY],
-//           to: [width / 2 - xLength / 2, foldY],
-//         },
-//         {
-//           from: [width / 2 + xLength / 2, foldY],
-//           to: [width - toPt(seamTotalWidth), foldY],
-//         },
-//       ],
-//     });
-
-//     addModelToLayer(door, "fingerHole", fingerHoleModel, "trim");
-//   } else {
-//     addFoldLine(door, {
-//       from: [toPt(seamTotalWidth), foldY],
-//       to: [width - toPt(seamTotalWidth), foldY],
-//       id: "fold-horizontal-x1",
-//     });
-//   }

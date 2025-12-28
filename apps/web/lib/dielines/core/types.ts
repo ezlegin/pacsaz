@@ -113,9 +113,7 @@ export type OffsetObject = {
 export type ModelExporter = {
   model: IModel;
   trimModel: IModel;
-  bleed: {
-    bleedAmount: number;
-  };
+  bleedAmount: number;
   offsets: {
     width: {
       inner: number;

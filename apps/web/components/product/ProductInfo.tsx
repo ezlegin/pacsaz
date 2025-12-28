@@ -1,3 +1,4 @@
+import { onDevelepe } from "@/lib/dielines/core/consts";
 import {
   applyDimensionOffset,
   DimensionType,
@@ -177,7 +178,7 @@ const ProductInfo = ({
         </ul>
       </div>
 
-      {process.env.NODE_ENV === "development" && sizes && (
+      {onDevelepe && sizes && (
         <div className="absolute bottom-0 left-0 p-4 w-full">
           <Card dir="ltr" className="p-4 gap-1">
             <CardTitle>Developer Tools:</CardTitle>

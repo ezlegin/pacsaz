@@ -17,5 +17,5 @@ export function initiateModels() {
   const guideModel: IModel = {};
   M.model.addModel(model, guideModel, "guides");
 
-  return { model, guideModel, dieline, trimModel, foldModel };
+  return { model, guideModel, trimModel, foldModel };
 }

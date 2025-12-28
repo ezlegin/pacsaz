@@ -68,6 +68,7 @@ const tuckEnd: DielineGeneratorProps = {
 
     // DOOR ----------------------------
     const { tuckFlap } = DOOR;
+    const tuckFlapSize = tuckFlap.size(widthMM);
 
     const { model: topDoor, doorSize } = addDoor({
       widthMM,
@@ -95,7 +96,7 @@ const tuckEnd: DielineGeneratorProps = {
       heightMM,
       widthMM,
       lengthMM,
-      tuckFlapSize: tuckFlap.size,
+      tuckFlapSize,
       material: selectedMaterial,
     });
 
@@ -106,7 +107,7 @@ const tuckEnd: DielineGeneratorProps = {
       heightMM,
       widthMM,
       lengthMM,
-      tuckFlapSize: tuckFlap.size,
+      tuckFlapSize,
       material: selectedMaterial,
       considerDustHole: false,
     });
@@ -123,7 +124,7 @@ const tuckEnd: DielineGeneratorProps = {
       heightMM,
       widthMM,
       lengthMM,
-      tuckFlapSize: tuckFlap.size,
+      tuckFlapSize,
       material: selectedMaterial,
       considerOuterIndent: false,
     });
@@ -140,7 +141,7 @@ const tuckEnd: DielineGeneratorProps = {
       heightMM,
       widthMM,
       lengthMM,
-      tuckFlapSize: tuckFlap.size,
+      tuckFlapSize,
       material: selectedMaterial,
       considerOuterIndent: false,
     });
@@ -215,9 +216,7 @@ const tuckEnd: DielineGeneratorProps = {
     return modelBuilder({
       model,
       trimModel,
-      bleed: {
-        bleedAmount,
-      },
+      bleedAmount,
       offsets,
       showAnchors,
       watermark: {

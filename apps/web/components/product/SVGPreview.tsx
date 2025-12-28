@@ -86,9 +86,10 @@ export default function SvgPreview({
               wrapperStyle={{
                 width: "100%",
                 height: "100%",
+                cursor: "grab",
               }}
             >
-              <div className="relative pb-24" ref={contentRef}>
+              <div className="relative pb-16" ref={contentRef}>
                 {isRendering && (
                   <Spinner className="scale-200 text-primary absolute top-1/2 translate-y-1/2 left-1/2 translate-x-1/2" />
                 )}

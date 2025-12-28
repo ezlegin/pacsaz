@@ -6,12 +6,12 @@ import { drawFoldLines } from "../../core/helpers/drawFoldLines";
 import { drawGuideLines } from "../../core/helpers/drawGuideLines";
 import { modelBuilder } from "../../core/helpers/modelBuilder";
 import { DielineGeneratorProps } from "../../core/types";
+import { initiateModels } from "../../core/helpers/initiateModels";
 
 const postalCard: DielineGeneratorProps = {
   slug: "postal-card",
   title: "کارت پستال تا شو", //todo: sync to database, not here.
   dimensions: {
-    initialScale: 1.5,
     defaultDimensions: {
       length: 160,
       width: 90,
@@ -41,21 +41,20 @@ const postalCard: DielineGeneratorProps = {
     developers: { showAnchors, showOverallDimensions, showWatermark },
     selectedMaterial,
   }) {
-    const model: M.IModel = { models: {} };
+    const { foldModel, guideModel, model, trimModel } = initiateModels();
     const bleedAmount = toPt(BLEED.default);
 
-    const rect = new M.models.Rectangle(width * 2, length);
-
     //! TRIM
-    addModelToLayer(model, "trim", rect, "trim");
+    const rect = new M.models.Rectangle(width * 2, length);
+    addModelToLayer(trimModel, "trim", rect);
 
     //! FOLD
-    drawFoldLines(model, {
+    drawFoldLines(foldModel, {
       verticals: [{ from: [width, 0], to: [width, length] }],
     });
 
     //! GUIDES
-    drawGuideLines(model, {
+    drawGuideLines(guideModel, {
       dimensionType,
       length,
       offsets,
@@ -69,10 +68,8 @@ const postalCard: DielineGeneratorProps = {
 
     return modelBuilder({
       model,
-      trimModel: rect,
-      bleed: {
-        bleedAmount,
-      },
+      trimModel,
+      bleedAmount,
       showAnchors,
       offsets,
       material: selectedMaterial,
