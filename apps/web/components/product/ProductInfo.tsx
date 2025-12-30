@@ -138,7 +138,7 @@ const ProductInfo = ({
   ];
 
   return (
-    <div className="h-full flex flex-col justify-between w-80 p-3">
+    <div className="h-full flex flex-col justify-between w-80">
       <div>
         <div className="flex justify-between">
           {packLengend.map(({ color, label }) => (

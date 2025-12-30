@@ -16,16 +16,10 @@ interface Props {
   svg: string;
   isRendering: boolean;
   doCenterSVG: boolean;
-  sidebarsTotalWidth: number;
 }
 
-export default function SvgPreview({
-  svg,
-  isRendering,
-  doCenterSVG,
-  sidebarsTotalWidth,
-}: Props) {
-  const tranformRef = useRef<ReactZoomPanPinchRef | null>(null);
+export default function SvgPreview({ svg, isRendering, doCenterSVG }: Props) {
+  const transformRef = useRef<ReactZoomPanPinchRef | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState<number>();
@@ -34,31 +28,45 @@ export default function SvgPreview({
     if (!contentRef.current || !wrapperRef.current) return;
 
     const measureAndCenter = () => {
-      const contentHeight = contentRef.current!.clientHeight;
-      const wrapperHeight = wrapperRef.current!.clientHeight;
-      const scaleY = wrapperHeight / contentHeight;
+      const content = contentRef.current!;
+      const wrapper = wrapperRef.current!;
 
-      const contentWidth = contentRef.current!.clientWidth;
-      const wrapperWidth = wrapperRef.current!.clientWidth - sidebarsTotalWidth;
+      const contentHeight = content.clientHeight;
+      const contentWidth = content.clientWidth;
+
+      const wrapperHeight = wrapper.clientHeight;
+      const wrapperWidth = wrapper.clientWidth;
+
+      if (!contentHeight || !contentWidth) return;
+
       const scaleX = wrapperWidth / contentWidth;
+      const scaleY = wrapperHeight / contentHeight;
+      const nextScale = Math.min(scaleX, scaleY);
 
-      const scale = Math.min(scaleX, scaleY);
-      setScale(scale);
+      setScale(nextScale);
 
-      if (isFinite(scale) && scale > 0 && doCenterSVG) {
-        tranformRef.current?.centerView(scale, 0);
+      if (isFinite(nextScale) && nextScale > 0 && doCenterSVG) {
+        transformRef.current?.centerView(nextScale, 0);
       }
     };
 
-    const raf = requestAnimationFrame(measureAndCenter);
+    measureAndCenter();
 
-    const imgs = Array.from(contentRef.current.querySelectorAll("img"));
-    const onImgLoad = () => requestAnimationFrame(measureAndCenter);
-    imgs.forEach((i) => i.addEventListener("load", onImgLoad));
+    const resizeObserver = new ResizeObserver(() => {
+      requestAnimationFrame(measureAndCenter);
+    });
+
+    resizeObserver.observe(wrapperRef.current);
+    resizeObserver.observe(contentRef.current);
+
+    const images = Array.from(contentRef.current.querySelectorAll("img"));
+    images.forEach((img) => img.addEventListener("load", measureAndCenter));
 
     return () => {
-      cancelAnimationFrame(raf);
-      imgs.forEach((i) => i.removeEventListener("load", onImgLoad));
+      resizeObserver.disconnect();
+      images.forEach((img) =>
+        img.removeEventListener("load", measureAndCenter)
+      );
     };
   }, [svg, doCenterSVG]);
 
@@ -66,11 +74,11 @@ export default function SvgPreview({
     <div
       ref={wrapperRef}
       dir="ltr"
-      className="h-full w-screen flex items-center justify-center"
+      className="h-full flex items-center justify-center"
     >
       <TransformWrapper
         key={doCenterSVG ? svg : undefined}
-        ref={tranformRef}
+        ref={transformRef}
         centerOnInit
         limitToBounds={false}
         minScale={0.5}
@@ -91,9 +99,10 @@ export default function SvgPreview({
                 width: "100%",
                 height: "100%",
                 cursor: "grab",
+                overflow: "visible",
               }}
             >
-              <div className="relative pb-16" ref={contentRef}>
+              <div className="relative" ref={contentRef}>
                 {isRendering && (
                   <Spinner className="scale-200 text-primary absolute top-1/2 translate-y-1/2 left-1/2 translate-x-1/2" />
                 )}

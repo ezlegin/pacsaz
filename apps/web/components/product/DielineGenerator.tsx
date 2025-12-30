@@ -3,7 +3,7 @@
 import { useDielineGenerator } from "@/hooks/useDielineGenerator";
 import { DielineGeneratorProps } from "@/lib/dielines/core/types";
 import { dielines, DielineSlug } from "@/lib/dielines/registery";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import LoadingOverlay from "./LoadingOverlay";
 import ProductDetails from "./ProductDetails";
 import ProductInfo from "./ProductInfo";
@@ -38,19 +38,11 @@ const DielineGenerator = ({ slug }: { slug: string }) => {
     if (svg) setIsRenderingLoading(false);
   }, [svg]);
 
-  const detailsRef = useRef<HTMLDivElement>(null);
-  const infoRef = useRef<HTMLDivElement>(null);
-
-  const detailsWidth = detailsRef.current?.clientWidth ?? 0;
-  const infoWidth = infoRef.current?.clientWidth ?? 0;
-
-  const sidebarsTotalWidth = detailsWidth + infoWidth;
-
   return (
-    <div className="h-full relative">
+    <div className="h-full grid grid-cols-[320px_1fr_320px] gap-3 p-3">
       <LoadingOverlay isLoading={isRenderingLoading} />
 
-      <div className="absolute right-0 top-0 h-full z-10" ref={detailsRef}>
+      <div className="h-full w-full z-10">
         <ProductDetails
           defaultDimensions={dieline.dimensions}
           dimensionsType={dieline.dimensionsType}
@@ -68,18 +60,19 @@ const DielineGenerator = ({ slug }: { slug: string }) => {
         />
       </div>
 
-      <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 h-full flex justify-center items-center w-full">
-        {svg && (
-          <SVGPreview
-            sidebarsTotalWidth={sidebarsTotalWidth}
-            svg={svg.model}
-            isRendering={isRendering}
-            doCenterSVG={doCenterSVG}
-          />
-        )}
+      <div className="h-full w-full relative">
+        <div className="absolute top-1/2 right-1/2 -translate-y-1/2 translate-x-1/2 h-full w-full pb-16">
+          {svg && (
+            <SVGPreview
+              svg={svg.model}
+              isRendering={isRendering}
+              doCenterSVG={doCenterSVG}
+            />
+          )}
+        </div>
       </div>
 
-      <div className="absolute left-0 top-0 h-full z-10" ref={infoRef}>
+      <div className="h-full w-full">
         <ProductInfo
           dimension={size}
           dimensionType={dimensionType}
