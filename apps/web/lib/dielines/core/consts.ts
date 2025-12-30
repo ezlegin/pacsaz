@@ -43,8 +43,8 @@ export const GLUES = {
 
 //  BLEED
 export const BLEED = {
-  default: 3,
-  md: 5,
+  sm: 3,
+  default: 5, // md
   lg: 7,
   xl: 10,
 };

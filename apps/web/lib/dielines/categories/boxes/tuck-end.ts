@@ -1,5 +1,4 @@
 import { toPt } from "@/utils/sizeConvertor";
-import { initiateModels } from "lib/dielines/core/helpers/initiateModels";
 import { BLEED, DOOR, MATERIALS, zero } from "../../core/consts";
 import { addDoor } from "../../core/helpers/addDoor";
 import { addDust } from "../../core/helpers/addDust";
@@ -7,11 +6,11 @@ import {
   cloneMirrorMove,
   cloneRotateMove,
 } from "../../core/helpers/cloneMirrorMove";
-import { createDielineContext } from "../../core/helpers/contextCreator";
 import { drawFoldLines } from "../../core/helpers/drawFoldLines";
 import { drawGuideLines } from "../../core/helpers/drawGuideLines";
 import { drawSingleLines } from "../../core/helpers/drawSingleLines";
 import { addGlue } from "../../core/helpers/glueGenerator";
+import { initiateModel } from "../../core/helpers/initiateModels";
 import { modelBuilder } from "../../core/helpers/modelBuilder";
 import { pushModelSeparatly } from "../../core/helpers/pushModelSeparatly";
 import { DielineGeneratorProps } from "../../core/types";
@@ -48,15 +47,28 @@ const tuckEnd: DielineGeneratorProps = {
     dimensionType,
     selectedMaterial,
   }) {
-    console.log(this.materials.included);
-    const { safeFoldOffset, thickness } = MATERIALS[selectedMaterial];
-    const materialThickness = customThickness ?? thickness;
-    const bleedAmount = bleedSize ? toPt(bleedSize) : toPt(BLEED.md);
-
-    const { height, heightMM, length, offsets, lengthMM, width, widthMM } =
-      createDielineContext(resolved);
-
-    const { model, foldModel, trimModel, guideModel } = initiateModels();
+    const {
+      materialThickness,
+      safeFoldOffset,
+      bleedAmount,
+      height,
+      width,
+      model,
+      foldModel,
+      trimModel,
+      guideModel,
+      heightMM,
+      length,
+      lengthMM,
+      offsets,
+      widthMM,
+    } = initiateModel({
+      selectedMaterial,
+      customThickness,
+      bleedSize,
+      resolved,
+      defaultBleed: BLEED.default,
+    });
 
     //! -------------- TRIM --------------
 
@@ -81,7 +93,7 @@ const tuckEnd: DielineGeneratorProps = {
       length,
       tuckFlap,
       materialThickness,
-      safeFoldOffset: safeFoldOffset,
+      safeFoldOffset,
     });
 
     pushModelSeparatly(trimModel, foldModel, topDoor, "topDoor");

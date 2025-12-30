@@ -1,12 +1,11 @@
-import { toPt } from "@/utils/sizeConvertor";
 import M from "makerjs";
 import { BLEED, MATERIALS } from "../../core/consts";
 import { addModelToLayer } from "../../core/helpers/addModelToLayer";
 import { drawFoldLines } from "../../core/helpers/drawFoldLines";
 import { drawGuideLines } from "../../core/helpers/drawGuideLines";
+import { initiateModel } from "../../core/helpers/initiateModels";
 import { modelBuilder } from "../../core/helpers/modelBuilder";
 import { DielineGeneratorProps } from "../../core/types";
-import { initiateModels } from "../../core/helpers/initiateModels";
 
 const postalCard: DielineGeneratorProps = {
   slug: "postal-card",
@@ -33,16 +32,27 @@ const postalCard: DielineGeneratorProps = {
     ],
   },
   model({
-    dimensions: {
-      raw: rawDim,
-      resolved: { width, length, offsets },
-    },
+    dimensions: { bleedSize, customThickness, raw: rawDim, resolved },
     dimensionType,
     developers: { showAnchors, showOverallDimensions, showWatermark },
     selectedMaterial,
   }) {
-    const { foldModel, guideModel, model, trimModel } = initiateModels();
-    const bleedAmount = toPt(BLEED.default);
+    const {
+      bleedAmount,
+      width,
+      model,
+      foldModel,
+      trimModel,
+      guideModel,
+      length,
+      offsets,
+    } = initiateModel({
+      selectedMaterial,
+      customThickness,
+      bleedSize,
+      resolved,
+      defaultBleed: BLEED.default,
+    });
 
     //! TRIM
     const rect = new M.models.Rectangle(width * 2, length);

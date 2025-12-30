@@ -70,6 +70,13 @@ export type Offsets = {
   };
 };
 
+export type ResolvedDimensions = {
+  width: number;
+  length: number;
+  height?: number;
+  offsets: Offsets;
+};
+
 export type DielineModel = (params: {
   developers: {
     showAnchors: boolean;
@@ -80,12 +87,7 @@ export type DielineModel = (params: {
     customThickness?: number;
     bleedSize?: number;
     raw: { width: number; height: number; length: number };
-    resolved: {
-      width: number;
-      length: number;
-      height?: number;
-      offsets: Offsets;
-    };
+    resolved: ResolvedDimensions;
   };
   dimensionType: DimensionType;
   selectedMaterial: MaterialKey;
