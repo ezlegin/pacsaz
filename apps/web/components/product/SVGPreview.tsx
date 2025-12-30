@@ -12,15 +12,19 @@ import {
   TransformWrapper,
 } from "react-zoom-pan-pinch";
 
+interface Props {
+  svg: string;
+  isRendering: boolean;
+  doCenterSVG: boolean;
+  sidebarsTotalWidth: number;
+}
+
 export default function SvgPreview({
   svg,
   isRendering,
   doCenterSVG,
-}: {
-  svg: string;
-  isRendering: boolean;
-  doCenterSVG: boolean;
-}) {
+  sidebarsTotalWidth,
+}: Props) {
   const tranformRef = useRef<ReactZoomPanPinchRef | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -30,12 +34,12 @@ export default function SvgPreview({
     if (!contentRef.current || !wrapperRef.current) return;
 
     const measureAndCenter = () => {
-      const contentHeight = contentRef.current!.clientHeight || 1;
-      const wrapperHeight = wrapperRef.current!.clientHeight || 1;
+      const contentHeight = contentRef.current!.clientHeight;
+      const wrapperHeight = wrapperRef.current!.clientHeight;
       const scaleY = wrapperHeight / contentHeight;
 
-      const contentWidth = contentRef.current!.clientWidth || 1;
-      const wrapperWidth = wrapperRef.current!.clientWidth || 1;
+      const contentWidth = contentRef.current!.clientWidth;
+      const wrapperWidth = wrapperRef.current!.clientWidth - sidebarsTotalWidth;
       const scaleX = wrapperWidth / contentWidth;
 
       const scale = Math.min(scaleX, scaleY);

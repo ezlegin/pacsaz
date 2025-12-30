@@ -16,9 +16,9 @@ export default async function Layout({
   const productName = dieline.title;
 
   return (
-    <div className="bg-accent grid grid-rows-[auto_1fr] h-screen">
+    <div className="bg-accent flex flex-col h-screen overflow-hidden">
       <ProductNavbar productName={productName} />
-      <div className="h-full overflow-hidden">{children}</div>
+      {children}
     </div>
   );
 }

@@ -138,7 +138,7 @@ export default function ProductDetails({
   ];
 
   return (
-    <div className="p-3 h-full absolute right-0 top-0 z-10">
+    <div className="h-full p-3">
       <Card className="h-full w-80 flex flex-col justify-between overflow-y-auto bg-white p-6 ">
         <div className="space-y-8">
           <Section title="ابعاد" infoContent={<DimensionInfo />}>
