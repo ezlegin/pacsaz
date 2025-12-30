@@ -1,6 +1,6 @@
 import { toMm, toPt } from "@/utils/sizeConvertor";
 import M, { IModel } from "makerjs";
-import { DUST, MaterialKey, MATERIALS } from "../consts";
+import { DUST } from "../consts";
 import { addLine } from "./addLine";
 import { calculateDustHoleSize } from "./calculateDustHoleSize";
 import { getDistanceOfFirstAndLastPoint } from "./getDistance";
@@ -18,9 +18,10 @@ interface AddDustParams {
   widthMM: number;
   lengthMM: number;
   tuckFlapSize: number;
-  material: MaterialKey;
   considerOuterIndent?: boolean;
   considerDustHole?: boolean;
+  materialThickness: number;
+  safeFoldOffset: number;
 }
 
 export function addDust({
@@ -29,15 +30,15 @@ export function addDust({
   widthMM,
   lengthMM,
   tuckFlapSize,
-  material,
   considerOuterIndent = true,
   considerDustHole = true,
+  materialThickness,
+  safeFoldOffset,
 }: AddDustParams) {
   const doorSize = heightMM + tuckFlapSize;
   const dustSize = doorSize / 2;
   const mappedDustSize = DUST.size(widthMM, dustSize, heightMM);
   const { indent, height } = DUST;
-  const { thickness, safeFoldOffset } = MATERIALS[material];
   const dust: IModel = { models: {} };
   const startPoint = getLastPointFromModel(drawAfter, "pt");
 
@@ -104,12 +105,12 @@ export function addDust({
       heightMM / 2 -
         indent.br -
         indent.tr -
-        (considerOuterIndent ? thickness : 0)
+        (considerOuterIndent ? materialThickness : 0)
     )
     .draw(indent.tr, -mappedDustSize + height.r.inner)
     .draw(indent.br, -(height.r.inner - height.r.outer))
     .down(height.r.outer)
-    .right(considerOuterIndent ? thickness : 0)
+    .right(considerOuterIndent ? materialThickness : 0)
     .build();
   const dustP2 = addLine(dustP2_PTS, false, 35);
 
@@ -128,7 +129,7 @@ export function addDust({
   const foldPoints = {
     from: [toPt(widthMM), toPt(lengthMM)],
     to: [
-      toPt(widthMM + heightMM - (considerOuterIndent ? thickness : 0)),
+      toPt(widthMM + heightMM - (considerOuterIndent ? materialThickness : 0)),
       +toPt(lengthMM),
     ],
   };

@@ -43,6 +43,7 @@ export function useDielineGenerator(dieline: DielineGeneratorProps) {
     startTransition(() => {
       const result = dieline.model({
         dimensions: {
+          customThickness,
           bleedSize,
           raw: { width: widthPT, height: heightPT, length: lengthPT },
           resolved,

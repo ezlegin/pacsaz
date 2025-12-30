@@ -10,6 +10,7 @@ import {
   MATERIALS,
 } from "@/lib/dielines/core/consts";
 import { DimensionType } from "@/lib/dielines/core/helpers/applyDimensionOffset";
+import { getThicknessRange } from "@/lib/dielines/core/helpers/getThicknessRange";
 import {
   DielineDimensions,
   DimensionKey,
@@ -18,6 +19,8 @@ import {
   MaterialsInput,
   Model,
 } from "@/lib/dielines/core/types";
+import Diamond from "@/public/icons/Diamond";
+import { Button } from "@workspace/ui/components/button";
 import { Card } from "@workspace/ui/components/card";
 import {
   Dialog,
@@ -39,12 +42,13 @@ import {
   ToggleGroupItem,
 } from "@workspace/ui/components/toggle-group";
 import { toast } from "@workspace/ui/index";
-import { Info } from "lucide-react";
+import { cn } from "@workspace/ui/lib/utils";
+import { Info, Minus, Plus } from "lucide-react";
 import Image from "next/image";
 import { JSX, useEffect, useState } from "react";
 import DielineDownloadButton from "./DielineDownloadButton";
 import DimensionInfo from "./info/DimensionInfo";
-import Diamond from "@/public/icons/Diamond";
+import { formatToFixed } from "@/lib/dielines/core/helpers/format";
 
 export interface SVGSizeProps {
   width: number;
@@ -85,6 +89,11 @@ export default function ProductDetails({
   const [format, setFormat] = useState<FormatsType>("pdf");
 
   const { startLoading, stopLoading, isLoading } = useLoading();
+  const {
+    startLoading: startMThicknessLoading,
+    stopLoading: stopMThicknessLoading,
+    isLoading: isMThicknessLoading,
+  } = useLoading();
 
   const onDownload = async () => {
     if (!svg) {
@@ -121,7 +130,7 @@ export default function ProductDetails({
     if (!localCustomThickness) return;
 
     setCustomThickness(undefined);
-    setLocalCustomThickness(String(selectedMaterial?.thickness) + " mm");
+    setLocalCustomThickness(selectedMaterial?.thickness.toFixed());
   }, [selectedMaterial]);
 
   const bleeds = Object.entries(BLEED).map(([type, size]) => ({
@@ -137,8 +146,29 @@ export default function ProductDetails({
     "bg-slate-700",
   ];
 
+  const { min: mMinThick, max: mMaxThick } = getThicknessRange(
+    materials.included
+  );
+
+  const handleThicknessChange = (type: "inc" | "dec") => {
+    startMThicknessLoading();
+
+    const thickness = localCustomThickness ?? selectedMaterial?.thickness;
+
+    const newThickness = +thickness + (type === "inc" ? 0.1 : -0.1);
+
+    if (+newThickness < mMinThick || +newThickness > mMaxThick) return;
+
+    setLocalCustomThickness(newThickness.toString());
+    setCustomThickness(+newThickness);
+  };
+
+  useEffect(() => {
+    if (isRendering === false) stopMThicknessLoading();
+  }, [isRendering]);
+
   return (
-    <div className="h-full">
+    <div className="h-full z-10">
       <Card className="h-full w-80 flex flex-col justify-between overflow-y-auto bg-white p-6 ">
         <div className="space-y-8">
           <Section title="ابعاد" infoContent={<DimensionInfo />}>
@@ -216,19 +246,82 @@ export default function ProductDetails({
           </Section>
 
           <Section isPremium title="ضخامت" infoContent={<DimensionInfo />}>
-            <Input
-              dir="ltr"
-              value={
-                localCustomThickness ?? `${selectedMaterial?.thickness} mm`
-              }
-              className="text-center"
-              onChange={(e) => setLocalCustomThickness(e.target.value)}
-              onBlur={(e) => {
-                const val = +parseFloat(e.target.value).toFixed();
-                setLocalCustomThickness(val + " mm");
-                setCustomThickness(val);
-              }}
-            />
+            <div>
+              <div
+                className={cn(
+                  isRendering &&
+                    isMThicknessLoading &&
+                    "opacity-50 pointer-events-none",
+                  "relative"
+                )}
+              >
+                {isRendering && isMThicknessLoading && (
+                  <Spinner className="text-primary absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 opacity-100" />
+                )}
+                <Input
+                  dir="ltr"
+                  value={formatToFixed(
+                    localCustomThickness ??
+                      selectedMaterial?.thickness.toString()
+                  )}
+                  className="text-center"
+                  onFocus={(e) => e.currentTarget.select()}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (!/^\d*\.?\d*$/.test(val)) return;
+
+                    setLocalCustomThickness(val);
+                  }}
+                  onBlur={(e) => {
+                    const val = e.target.value;
+
+                    if (+val < mMinThick) {
+                      setLocalCustomThickness(mMinThick.toString());
+                      setCustomThickness(mMinThick);
+                      return;
+                    }
+                    if (+val > mMaxThick) {
+                      setLocalCustomThickness(mMaxThick.toString());
+                      setCustomThickness(mMaxThick);
+                      return;
+                    }
+
+                    setLocalCustomThickness(val);
+                    setCustomThickness(+val);
+                  }}
+                />
+                <Button
+                  variant={"ghost"}
+                  size={"icon"}
+                  className="absolute left-0 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  onClick={() => handleThicknessChange("dec")}
+                  disabled={
+                    (+(localCustomThickness ?? 0) ||
+                      selectedMaterial.thickness) <= mMinThick
+                  }
+                >
+                  <Minus />
+                </Button>
+                <Button
+                  variant={"ghost"}
+                  size={"icon"}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  onClick={() => handleThicknessChange("inc")}
+                  disabled={
+                    (+(localCustomThickness ?? 0) ||
+                      selectedMaterial.thickness) >= mMaxThick
+                  }
+                >
+                  <Plus />
+                </Button>
+              </div>
+              <div
+                className="text-xs text-slate-400 text-center w-full pt-1"
+                dir="ltr"
+              >
+                {mMinThick} ~ {mMaxThick} mm
+              </div>
+            </div>
           </Section>
 
           <Section title="نوع ابعاد" infoContent={<DimensionInfo />}>
@@ -304,14 +397,16 @@ function Section({
   children,
   infoContent,
   isPremium,
+  className,
 }: {
   title: string;
   infoContent: JSX.Element;
   children: React.ReactNode;
   isPremium?: boolean;
+  className?: string;
 }) {
   return (
-    <div className="space-y-3">
+    <div className={cn("space-y-3", className)}>
       <div className="flex justify-between">
         <p className="flex items-center gap-1 text-sm font-semibold">
           {title}

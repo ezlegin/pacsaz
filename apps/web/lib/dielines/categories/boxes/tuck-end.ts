@@ -41,13 +41,16 @@ const tuckEnd: DielineGeneratorProps = {
       MATERIALS["b-flute"],
     ],
   },
+
   model({
     developers: { showAnchors, showWatermark, showOverallDimensions },
-    dimensions: { raw: rawDim, resolved, bleedSize },
+    dimensions: { raw: rawDim, resolved, bleedSize, customThickness },
     dimensionType,
     selectedMaterial,
   }) {
-    const mateial = MATERIALS[selectedMaterial];
+    console.log(this.materials.included);
+    const { safeFoldOffset, thickness } = MATERIALS[selectedMaterial];
+    const materialThickness = customThickness ?? thickness;
     const bleedAmount = bleedSize ? toPt(bleedSize) : toPt(BLEED.md);
 
     const { height, heightMM, length, offsets, lengthMM, width, widthMM } =
@@ -63,7 +66,7 @@ const tuckEnd: DielineGeneratorProps = {
       heightMM,
       widthMM,
       normal: { lengthMM, margin: glueMargin },
-      safeFoldOffset: mateial.safeFoldOffset,
+      safeFoldOffset: safeFoldOffset,
     });
 
     // DOOR ----------------------------
@@ -77,15 +80,15 @@ const tuckEnd: DielineGeneratorProps = {
       width,
       length,
       tuckFlap,
-      materialThickkness: mateial.thickness,
-      safeFoldOffset: mateial.safeFoldOffset,
+      materialThickness,
+      safeFoldOffset: safeFoldOffset,
     });
 
     pushModelSeparatly(trimModel, foldModel, topDoor, "topDoor");
 
     const bottomDoor = cloneRotateMove(topDoor, 180, [
       width + height,
-      -doorSize - toPt(mateial.safeFoldOffset),
+      -doorSize - toPt(safeFoldOffset),
     ]);
 
     pushModelSeparatly(trimModel, foldModel, bottomDoor, "bottomDoor");
@@ -97,7 +100,8 @@ const tuckEnd: DielineGeneratorProps = {
       widthMM,
       lengthMM,
       tuckFlapSize,
-      material: selectedMaterial,
+      safeFoldOffset,
+      materialThickness,
     });
 
     pushModelSeparatly(trimModel, foldModel, dustTL, "dustTL");
@@ -108,8 +112,9 @@ const tuckEnd: DielineGeneratorProps = {
       widthMM,
       lengthMM,
       tuckFlapSize,
-      material: selectedMaterial,
+      safeFoldOffset,
       considerDustHole: false,
+      materialThickness,
     });
 
     const dustTR = cloneMirrorMove(dustTR_RAW, true, false, [
@@ -125,8 +130,9 @@ const tuckEnd: DielineGeneratorProps = {
       widthMM,
       lengthMM,
       tuckFlapSize,
-      material: selectedMaterial,
+      safeFoldOffset,
       considerOuterIndent: false,
+      materialThickness,
     });
 
     const clonedDustBR = cloneMirrorMove(dustBR_RAW, false, true, [
@@ -142,8 +148,9 @@ const tuckEnd: DielineGeneratorProps = {
       widthMM,
       lengthMM,
       tuckFlapSize,
-      material: selectedMaterial,
       considerOuterIndent: false,
+      materialThickness,
+      safeFoldOffset,
     });
 
     const dustBL = cloneMirrorMove(dustBL_RAW, true, true, [
@@ -173,7 +180,7 @@ const tuckEnd: DielineGeneratorProps = {
     ]);
 
     //! -------------- FOLD --------------
-    const safeOffset = toPt(mateial.safeFoldOffset);
+    const safeOffset = toPt(safeFoldOffset);
     drawFoldLines(foldModel, {
       verticals: [
         { from: zero, to: [0, length] },

@@ -104,7 +104,7 @@ export default function SvgPreview({ svg, isRendering, doCenterSVG }: Props) {
             >
               <div className="relative" ref={contentRef}>
                 {isRendering && (
-                  <Spinner className="scale-200 text-primary absolute top-1/2 translate-y-1/2 left-1/2 translate-x-1/2" />
+                  <Spinner className="scale-200 text-primary absolute top-1/2 -translate-y-1/2 left-1/2 translate-x-1/2" />
                 )}
                 <div
                   dangerouslySetInnerHTML={{ __html: svg }}

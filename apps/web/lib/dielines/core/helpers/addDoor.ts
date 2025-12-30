@@ -14,7 +14,7 @@ interface AddDoorParams {
   width: number;
   length: number;
   tuckFlap: TuckFlap;
-  materialThickkness: number;
+  materialThickness: number;
   safeFoldOffset: number;
 }
 
@@ -25,7 +25,7 @@ export function addDoor({
   width,
   length,
   tuckFlap,
-  materialThickkness: mThickness,
+  materialThickness: mThickness,
   safeFoldOffset,
 }: AddDoorParams) {
   const topPanelWithFoldOffsetSize = heightMM;

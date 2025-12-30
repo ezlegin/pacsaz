@@ -77,6 +77,7 @@ export type DielineModel = (params: {
     showOverallDimensions: boolean;
   };
   dimensions: {
+    customThickness?: number;
     bleedSize?: number;
     raw: { width: number; height: number; length: number };
     resolved: {
