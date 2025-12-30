@@ -70,6 +70,20 @@ export default function SvgPreview({ svg, isRendering, doCenterSVG }: Props) {
     };
   }, [svg, doCenterSVG]);
 
+  // useEffect(() => {
+  //   const handleKeyDown = (e: KeyboardEvent) => {
+  //     if (e.key === "?" && e.shiftKey) {
+  //       e.preventDefault();
+  //       if (scale && transformRef.current) {
+  //         transformRef.current.centerView(scale);
+  //       }
+  //     }
+  //   };
+
+  //   window.addEventListener("keydown", handleKeyDown);
+  //   return () => window.removeEventListener("keydown", handleKeyDown);
+  // }, [scale]);
+
   return (
     <div
       ref={wrapperRef}

@@ -18,6 +18,7 @@ export default async function Layout({
   return (
     <div className="bg-accent flex flex-col h-screen overflow-hidden">
       <ProductNavbar productName={productName} />
+
       {children}
     </div>
   );

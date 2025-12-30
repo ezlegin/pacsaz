@@ -1,5 +1,4 @@
 import M from "makerjs";
-import { addModelToLayer } from "./addModelToLayer";
 
 interface AddFoldLineOptions {
   id: string;
@@ -8,12 +7,12 @@ interface AddFoldLineOptions {
 }
 
 export function addFoldLine(
-  model: M.IModel,
+  foldModel: M.IModel,
   { id, from, to }: AddFoldLineOptions
 ) {
-  const foldLine = new M.models.ConnectTheDots(false, [from, to]);
+  const foldLine = new M.paths.Line([from, to]);
 
-  addModelToLayer(model, id, foldLine, "fold");
+  M.path.addTo(foldLine, foldModel, id);
 
   return foldLine;
 }

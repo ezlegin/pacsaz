@@ -13,7 +13,7 @@ const ProductNavbar = ({ productName }: Props) => {
   const isFaved = true;
 
   return (
-    <div className="bg-background p-4 px-10 border-b">
+    <div className="bg-background p-4 px-10 border-b z-10">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Image alt="logo" src={pacsazLogo} width={25} height={34} />

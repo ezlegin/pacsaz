@@ -1,11 +1,10 @@
 import { IModel, IPoint } from "makerjs";
-import { addFoldLine } from "./foldLineGenerator";
-import { addModelToLayer } from "./addModelToLayer";
+import { addFoldLine } from "./addFoldLine";
 
 type Coordinates = { from: IPoint; to: IPoint }[];
 
 export function drawFoldLines(
-  model: IModel,
+  foldModel: IModel,
   folds: {
     verticals?: Coordinates;
     horizontals?: Coordinates;
@@ -13,9 +12,6 @@ export function drawFoldLines(
   }
 ) {
   const typeCounters: Record<string, number> = {};
-
-  const foldModel: IModel = { models: {} };
-  addModelToLayer(model, "folds", foldModel);
 
   const foldTypes: { type: string; coords?: Coordinates }[] = [
     { type: "vertical", coords: folds.verticals },

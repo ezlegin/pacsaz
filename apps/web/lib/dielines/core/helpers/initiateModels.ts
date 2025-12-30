@@ -70,5 +70,7 @@ export function arrangeModels() {
   const guideModel: IModel = {};
   M.model.addModel(model, guideModel, "guides");
 
+  //todo: add perforation model as well
+
   return { model, guideModel, trimModel, foldModel };
 }

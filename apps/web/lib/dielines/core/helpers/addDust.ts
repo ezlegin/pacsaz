@@ -1,8 +1,8 @@
 import { toMm, toPt } from "@/utils/sizeConvertor";
 import M, { IModel } from "makerjs";
 import { DUST } from "../consts";
+import { createHoleArc } from "./addHoleArc";
 import { addLine } from "./addLine";
-import { calculateDustHoleSize } from "./calculateDustHoleSize";
 import { getDistanceOfFirstAndLastPoint } from "./getDistance";
 import {
   getLastPointFromModel,
@@ -45,16 +45,14 @@ export function addDust({
   // ─────────────────────────────────────────
   // Dust Hole
   // ─────────────────────────────────────────
-  const { holeRadius, addLineToHole, endAngle } =
-    calculateDustHoleSize(safeFoldOffset);
-
-  const arcStartPoint = [startPoint[0]! + toPt(holeRadius), startPoint[1]!];
-  const dustHoleArc = new M.paths.Arc(
-    arcStartPoint,
-    toPt(holeRadius),
-    180,
-    endAngle
-  );
+  const {
+    hole: dustHoleArc,
+    holeRadius,
+    addLineToHole,
+  } = createHoleArc({
+    startPoint,
+    safeFoldOffset,
+  });
 
   // ─────────────────────────────────────────
   // Dust part 1
