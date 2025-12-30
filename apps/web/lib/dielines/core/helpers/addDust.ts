@@ -1,7 +1,7 @@
 import { toMm, toPt } from "@/utils/sizeConvertor";
 import M, { IModel } from "makerjs";
 import { DUST } from "../consts";
-import { createHoleArc } from "./addHoleArc";
+import { addHoleArc } from "./addHoleArc";
 import { addLine } from "./addLine";
 import { getDistanceOfFirstAndLastPoint } from "./getDistance";
 import {
@@ -49,7 +49,7 @@ export function addDust({
     hole: dustHoleArc,
     holeRadius,
     addLineToHole,
-  } = createHoleArc({
+  } = addHoleArc({
     startPoint,
     safeFoldOffset,
   });

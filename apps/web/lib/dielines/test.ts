@@ -1,17 +1,15 @@
-import { toPt } from "@/utils/sizeConvertor";
-import M, { IModel, IPath, IPathMap } from "makerjs";
-import { MATERIALS, BLEED } from "./core/consts";
-import { addModelToLayer } from "./core/helpers/addModelToLayer";
-import { drawFoldLines } from "./core/helpers/drawFoldLines";
-import { drawGuideLines } from "./core/helpers/drawGuideLines";
+import M from "makerjs";
+import { BLEED, MATERIALS } from "./core/consts";
+import { initiateModel } from "./core/helpers/initiateModels";
 import { modelBuilder } from "./core/helpers/modelBuilder";
 import { DielineGeneratorProps } from "./core/types";
+import { addFoldLine } from "./core/helpers/addFoldLine";
+import { addHoleArc } from "./core/helpers/addHoleArc";
 
 const postalCard: DielineGeneratorProps = {
   slug: "postal-card",
   title: "Test", //todo: sync to database, not here.
   dimensions: {
-    initialScale: 1.5,
     defaultDimensions: {
       length: 160,
       width: 90,
@@ -33,19 +31,24 @@ const postalCard: DielineGeneratorProps = {
     ],
   },
   model({
-    dimensions: {
-      raw: rawDim,
-      resolved: { width, length, offsets },
-    },
-    dimensionType,
+    dimensions: { resolved, bleedSize, customThickness },
     developers: { showAnchors, showOverallDimensions, showWatermark },
     selectedMaterial,
   }) {
-    const model: M.IModel = { models: {} };
-    const bleedAmount = toPt(BLEED.default);
-
-    const dieline: IModel = {};
-    const trimModel: IModel = {};
+    const {
+      bleedAmount,
+      model,
+      offsets,
+      trimModel,
+      foldModel,
+      safeFoldOffset,
+    } = initiateModel({
+      defaultBleed: BLEED.default,
+      resolved,
+      selectedMaterial,
+      bleedSize,
+      customThickness,
+    });
 
     //! TRIM
     const poly = new M.models.ConnectTheDots(false, [
@@ -53,30 +56,20 @@ const postalCard: DielineGeneratorProps = {
       [0, 100],
       [100, 100],
       [100, 0],
-      [120, -50],
+      [120, 0],
     ]);
     M.model.addModel(trimModel, poly, "myTrim");
 
-    const fold = new M.paths.Line([
-      [0, 0],
-      [120, -50],
-    ]);
-    M.model.layer(fold, "fold");
+    const { hole } = addHoleArc({ startPoint: [120, 0], safeFoldOffset });
 
-    // layering
-    M.model.addModel(dieline, trimModel, "trim");
-    M.path.addTo(fold, dieline, "fold");
+    M.path.addTo(hole, trimModel, "hole");
 
-    // main laying
-    M.model.addModel(model, dieline, "dieline");
+    addFoldLine(foldModel, { id: "hi", from: [0, 0], to: [120, -50] });
 
-    console.log(model);
     return modelBuilder({
       model,
       trimModel: trimModel,
-      bleed: {
-        bleedAmount,
-      },
+      bleedAmount,
       showAnchors,
       offsets,
       material: selectedMaterial,
@@ -93,10 +86,3 @@ const postalCard: DielineGeneratorProps = {
 };
 
 export default postalCard;
-
-function addFoldsToDieline(dielineModel: IModel, folds: IPath[]) {
-  for (const fold of folds) {
-    M.model.layer(fold, "fold");
-    M.path.addTo(fold, dielineModel, "fold");
-  }
-}

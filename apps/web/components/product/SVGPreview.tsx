@@ -82,9 +82,12 @@ export default function SvgPreview({ svg, isRendering, doCenterSVG }: Props) {
         centerOnInit
         limitToBounds={false}
         minScale={0.5}
-        maxScale={onDevelepe ? 10 : 3}
+        maxScale={onDevelepe ? 10 : 2}
         panning={{ disabled: isRendering }}
-        wheel={{ disabled: isRendering }}
+        wheel={{
+          disabled: isRendering,
+          smoothStep: onDevelepe ? 0.002 : 0.0003,
+        }}
         velocityAnimation={{ disabled: true }}
         alignmentAnimation={{ disabled: true }}
         zoomAnimation={{ disabled: true }}

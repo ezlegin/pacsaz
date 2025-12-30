@@ -1,5 +1,4 @@
 import { useLoading } from "@/hooks/useLoading";
-import { clamp } from "@/hooks/useSize";
 import { downloadPdf } from "@/lib/actions/export/downloader";
 import {
   BLEED,
@@ -10,7 +9,6 @@ import {
   MATERIALS,
 } from "@/lib/dielines/core/consts";
 import { DimensionType } from "@/lib/dielines/core/helpers/applyDimensionOffset";
-import { getThicknessRange } from "@/lib/dielines/core/helpers/getThicknessRange";
 import {
   DielineDimensions,
   DimensionKey,
@@ -19,16 +17,7 @@ import {
   MaterialsInput,
   Model,
 } from "@/lib/dielines/core/types";
-import Diamond from "@/public/icons/Diamond";
-import { Button } from "@workspace/ui/components/button";
 import { Card } from "@workspace/ui/components/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTrigger,
-} from "@workspace/ui/components/dialog";
-import { Input } from "@workspace/ui/components/input";
 import {
   Select,
   SelectContent,
@@ -36,19 +25,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select";
-import { Spinner } from "@workspace/ui/components/spinner";
 import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@workspace/ui/components/toggle-group";
 import { toast } from "@workspace/ui/index";
-import { cn } from "@workspace/ui/lib/utils";
-import { Info, Minus, Plus } from "lucide-react";
 import Image from "next/image";
-import { JSX, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { Section } from "./DetailsSection";
 import DielineDownloadButton from "./DielineDownloadButton";
+import { DimensionInput } from "./DimensionsInput";
 import DimensionInfo from "./info/DimensionInfo";
-import { formatToFixed } from "@/lib/dielines/core/helpers/format";
+import ThicknessInput from "./ThicknessInput";
 
 export interface SVGSizeProps {
   width: number;
@@ -89,11 +77,6 @@ export default function ProductDetails({
   const [format, setFormat] = useState<FormatsType>("pdf");
 
   const { startLoading, stopLoading, isLoading } = useLoading();
-  const {
-    startLoading: startMThicknessLoading,
-    stopLoading: stopMThicknessLoading,
-    isLoading: isMThicknessLoading,
-  } = useLoading();
 
   const onDownload = async () => {
     if (!svg) {
@@ -145,27 +128,6 @@ export default function ProductDetails({
     "bg-slate-600",
     "bg-slate-700",
   ];
-
-  const { min: mMinThick, max: mMaxThick } = getThicknessRange(
-    materials.included
-  );
-
-  const handleThicknessChange = (type: "inc" | "dec") => {
-    startMThicknessLoading();
-
-    const thickness = localCustomThickness ?? selectedMaterial?.thickness;
-
-    const newThickness = +thickness + (type === "inc" ? 0.1 : -0.1);
-
-    if (+newThickness < mMinThick || +newThickness > mMaxThick) return;
-
-    setLocalCustomThickness(newThickness.toString());
-    setCustomThickness(+newThickness);
-  };
-
-  useEffect(() => {
-    if (isRendering === false) stopMThicknessLoading();
-  }, [isRendering]);
 
   return (
     <div className="h-full z-10">
@@ -246,82 +208,14 @@ export default function ProductDetails({
           </Section>
 
           <Section isPremium title="ضخامت" infoContent={<DimensionInfo />}>
-            <div>
-              <div
-                className={cn(
-                  isRendering &&
-                    isMThicknessLoading &&
-                    "opacity-50 pointer-events-none",
-                  "relative"
-                )}
-              >
-                {isRendering && isMThicknessLoading && (
-                  <Spinner className="text-primary absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 opacity-100" />
-                )}
-                <Input
-                  dir="ltr"
-                  value={formatToFixed(
-                    localCustomThickness ??
-                      selectedMaterial?.thickness.toString()
-                  )}
-                  className="text-center"
-                  onFocus={(e) => e.currentTarget.select()}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    if (!/^\d*\.?\d*$/.test(val)) return;
-
-                    setLocalCustomThickness(val);
-                  }}
-                  onBlur={(e) => {
-                    const val = e.target.value;
-
-                    if (+val < mMinThick) {
-                      setLocalCustomThickness(mMinThick.toString());
-                      setCustomThickness(mMinThick);
-                      return;
-                    }
-                    if (+val > mMaxThick) {
-                      setLocalCustomThickness(mMaxThick.toString());
-                      setCustomThickness(mMaxThick);
-                      return;
-                    }
-
-                    setLocalCustomThickness(val);
-                    setCustomThickness(+val);
-                  }}
-                />
-                <Button
-                  variant={"ghost"}
-                  size={"icon"}
-                  className="absolute left-0 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  onClick={() => handleThicknessChange("dec")}
-                  disabled={
-                    (+(localCustomThickness ?? 0) ||
-                      selectedMaterial.thickness) <= mMinThick
-                  }
-                >
-                  <Minus />
-                </Button>
-                <Button
-                  variant={"ghost"}
-                  size={"icon"}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  onClick={() => handleThicknessChange("inc")}
-                  disabled={
-                    (+(localCustomThickness ?? 0) ||
-                      selectedMaterial.thickness) >= mMaxThick
-                  }
-                >
-                  <Plus />
-                </Button>
-              </div>
-              <div
-                className="text-xs text-slate-400 text-center w-full pt-1"
-                dir="ltr"
-              >
-                {mMinThick} ~ {mMaxThick} mm
-              </div>
-            </div>
+            <ThicknessInput
+              isRendering={isRendering}
+              localCustomThickness={localCustomThickness}
+              setLocalCustomThickness={setLocalCustomThickness}
+              materialsIncluded={materials.included}
+              selectedMaterialThickness={selectedMaterial.thickness}
+              setCustomThickness={setCustomThickness}
+            />
           </Section>
 
           <Section title="نوع ابعاد" infoContent={<DimensionInfo />}>
@@ -388,104 +282,6 @@ export default function ProductDetails({
           </Section>
         </div>
       </Card>
-    </div>
-  );
-}
-
-function Section({
-  title,
-  children,
-  infoContent,
-  isPremium,
-  className,
-}: {
-  title: string;
-  infoContent: JSX.Element;
-  children: React.ReactNode;
-  isPremium?: boolean;
-  className?: string;
-}) {
-  return (
-    <div className={cn("space-y-3", className)}>
-      <div className="flex justify-between">
-        <p className="flex items-center gap-1 text-sm font-semibold">
-          {title}
-          <Dialog>
-            <DialogTrigger dir="rtl">
-              <Info
-                size={14}
-                className="text-muted-foreground cursor-pointer hover:text-primary"
-              />
-            </DialogTrigger>
-            <DialogContent dir="rtl" showCloseButton={false}>
-              <DialogHeader dir="rtl">{infoContent}</DialogHeader>
-            </DialogContent>
-          </Dialog>
-        </p>
-
-        {isPremium && (
-          <div>
-            <Diamond />
-          </div>
-        )}
-      </div>
-      {children}
-    </div>
-  );
-}
-
-function DimensionInput({
-  label,
-  value,
-  min,
-  onChange,
-  dimKey,
-  isRendering,
-}: {
-  label: string;
-  value: number;
-  min: number;
-  dimKey: DimensionKey;
-  onChange: (value: number) => void;
-  isRendering: boolean;
-}) {
-  const [localValue, setLocalValue] = useState(value);
-  const [blurredInput, setBlurredInput] = useState<DimensionKey | null>(null);
-
-  if (value === 0) return null;
-
-  const handleSubmit = () => {
-    setBlurredInput(dimKey);
-    const clamped = clamp(localValue, min);
-    setLocalValue(clamped);
-    onChange(clamped);
-  };
-
-  return (
-    <div className="space-y-1">
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <div className="relative">
-        <Input
-          disabled={isRendering && dimKey === blurredInput}
-          dir="ltr"
-          value={localValue}
-          onFocus={(e) => e.target.select()}
-          onChange={(e) => setLocalValue(Number(e.target.value))}
-          onBlur={handleSubmit}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleSubmit();
-            }
-          }}
-        />
-        <span className="pointer-events-none absolute right-1.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
-          {isRendering && dimKey === blurredInput ? (
-            <Spinner className="text-primary" />
-          ) : (
-            "mm"
-          )}
-        </span>
-      </div>
     </div>
   );
 }

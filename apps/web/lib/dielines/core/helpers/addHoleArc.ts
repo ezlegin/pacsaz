@@ -7,7 +7,7 @@ interface CreateDustHoleParams {
   safeFoldOffset: number;
 }
 
-export function createHoleArc({
+export function addHoleArc({
   startPoint,
   safeFoldOffset,
 }: CreateDustHoleParams) {
