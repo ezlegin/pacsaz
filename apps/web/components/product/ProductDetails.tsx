@@ -169,7 +169,7 @@ export default function ProductDetails({
 
   return (
     <div className="h-full z-10">
-      <Card className="h-full w-80 flex flex-col justify-between overflow-y-auto bg-white p-6 ">
+      <Card className="h-full flex flex-col justify-between overflow-y-auto bg-white p-6 ">
         <div className="space-y-8">
           <Section title="ابعاد" infoContent={<DimensionInfo />}>
             <div className="grid grid-cols-2 gap-4">

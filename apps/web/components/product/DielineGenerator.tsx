@@ -39,7 +39,7 @@ const DielineGenerator = ({ slug }: { slug: string }) => {
   }, [svg]);
 
   return (
-    <div className="h-full grid grid-cols-[320px_1fr_320px] p-3">
+    <div className="h-full grid grid-cols-[320px_1fr_300px] p-3">
       <LoadingOverlay isLoading={isRenderingLoading} />
 
       <ProductDetails
@@ -59,7 +59,7 @@ const DielineGenerator = ({ slug }: { slug: string }) => {
       />
 
       <div className="relative">
-        <div className="absolute top-1/2 right-1/2 -translate-y-1/2 translate-x-1/2 h-full w-full pb-16">
+        <div className="absolute top-1/2 right-1/2 -translate-y-1/2 translate-x-1/2 h-full w-full pb-10">
           {svg && (
             <SVGPreview
               svg={svg.model}
