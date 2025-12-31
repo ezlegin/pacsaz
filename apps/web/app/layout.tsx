@@ -26,6 +26,6 @@ export default function RootLayout({
 export const metadata = {
   title: "Pacsaz",
   icons: {
-    icon: "/pacsaz-logo.svg",
+    icon: "/logos/pacsaz-logo.svg",
   },
 };
