@@ -2,9 +2,9 @@ import Navbar from "@/components/Navbar";
 
 const layout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="h-screen flex flex-col">
       <Navbar />
-      <div className="flex-1">{children}</div>
+      <div className="bg-accent h-full">{children}</div>
     </div>
   );
 };

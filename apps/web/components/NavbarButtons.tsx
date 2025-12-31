@@ -6,10 +6,12 @@ import React from "react";
 const NavbarButtons = () => {
   return (
     <div className="flex gap-3 items-center">
-      <Button variant={"ghost"} className="gap-1">
-        <Diamond />
-        اشتراک
-      </Button>
+      <Link href={"/subscription"}>
+        <Button variant={"ghost"} className="gap-1">
+          <Diamond />
+          اشتراک
+        </Button>
+      </Link>
       <div>
         <div className="w-[1px] ml-3 h-6 bg-slate-300" />
       </div>

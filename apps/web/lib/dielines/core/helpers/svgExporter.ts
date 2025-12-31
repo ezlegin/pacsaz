@@ -1,5 +1,11 @@
 import M from "makerjs";
-import { COLORS, GUIDES, MaterialKey, strokeWidth } from "../consts";
+import {
+  COLORS,
+  GUIDES,
+  isSubscribed,
+  MaterialKey,
+  strokeWidth,
+} from "../consts";
 import { injectWatermark, Watermark } from "./injectWatermark";
 
 type SvgExporterParams = {
@@ -60,6 +66,8 @@ export function svgExporter({
   });
 
   return watermark.show
-    ? injectWatermark(svg, bleedModel, bleedAmount, watermark.offset)
+    ? !isSubscribed
+      ? injectWatermark(svg, bleedModel, bleedAmount, watermark.offset)
+      : svg
     : svg;
 }

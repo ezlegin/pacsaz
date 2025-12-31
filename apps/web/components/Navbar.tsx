@@ -7,7 +7,7 @@ export const navbarPaddings = "p-3 px-10";
 const Navbar = () => {
   return (
     <div
-      className={`flex justify-between items-center border-b ${navbarPaddings}`}
+      className={`flex justify-between items-center border-b bg-background ${navbarPaddings}`}
     >
       <div className="flex gap-10 items-center">
         <Link href={"/"}>
