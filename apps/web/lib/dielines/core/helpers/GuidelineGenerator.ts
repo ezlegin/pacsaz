@@ -48,7 +48,7 @@ export function addGuideLine(model: M.IModel, options: GuideLineOptions) {
   const dist = M.measure.pointDistance(from, to);
 
   if (orientation === "horizontal") {
-    const textBoxSize = 25;
+    const textBoxSize = 32;
 
     const offset =
       dimensionType === "inner" ? widthOffset.inner / 2 : widthOffset.outer / 2;
@@ -70,7 +70,6 @@ export function addGuideLine(model: M.IModel, options: GuideLineOptions) {
     ]);
 
     // guide lines
-
     const beforeLine = new M.models.ConnectTheDots(false, [
       [startX, from[1]],
       [to[0] - dist / 2 - textBoxSize, to[1]],

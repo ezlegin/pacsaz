@@ -82,7 +82,7 @@ export default function SvgPreview({ svg, isRendering, doCenterSVG }: Props) {
         centerOnInit
         limitToBounds={false}
         minScale={0.5}
-        maxScale={onDevelepe ? 10 : 2}
+        maxScale={onDevelepe ? 10 : 1.8}
         panning={{ disabled: isRendering }}
         wheel={{
           disabled: isRendering,

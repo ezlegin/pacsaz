@@ -1,5 +1,3 @@
-import { useLoading } from "@/hooks/useLoading";
-import { downloadPdf } from "@/lib/actions/export/downloader";
 import {
   BLEED,
   DIMENSIONS,
@@ -29,7 +27,6 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@workspace/ui/components/toggle-group";
-import { toast } from "@workspace/ui/index";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Section } from "./DetailsSection";
@@ -75,24 +72,6 @@ export default function ProductDetails({
   isRendering,
 }: Props) {
   const [format, setFormat] = useState<FormatsType>("pdf");
-
-  const { startLoading, stopLoading, isLoading } = useLoading();
-
-  const onDownload = async () => {
-    if (!svg) {
-      toast.error("فایل آماده دانلود نیست.");
-      return;
-    }
-    startLoading();
-
-    await downloadPdf({
-      svg,
-      format,
-      slug,
-    });
-
-    stopLoading();
-  };
 
   const onSelectMaterial = (val: string) => {
     const material = materials.included.find((m) => m.value === val)
@@ -176,11 +155,7 @@ export default function ProductDetails({
             </Select>
           </Section>
 
-          <Section
-            isPremium
-            title="اندازه بلید"
-            infoContent={<DimensionInfo />}
-          >
+          <Section title="اندازه بلید" infoContent={<DimensionInfo />}>
             <Select
               onValueChange={(val: string) => setBleedAmount(+val)}
               dir="rtl"
@@ -207,7 +182,7 @@ export default function ProductDetails({
             </Select>
           </Section>
 
-          <Section isPremium title="ضخامت" infoContent={<DimensionInfo />}>
+          <Section title="ضخامت" infoContent={<DimensionInfo />}>
             <ThicknessInput
               isRendering={isRendering}
               localCustomThickness={localCustomThickness}
@@ -237,7 +212,7 @@ export default function ProductDetails({
                     <ToggleGroupItem
                       key={key}
                       value={key}
-                      className="border-2 cursor-pointer data-[state=on]:border-primary data-[state=on]:bg-transparent hover:border-primary hover:bg-transparent"
+                      className="cursor-pointer data-[state=on]:border-primary data-[state=on]:bg-transparent hover:border-primary hover:bg-transparent"
                     >
                       <p className="font-normal text-xs">{label}</p>
                     </ToggleGroupItem>
@@ -264,7 +239,7 @@ export default function ProductDetails({
                 <ToggleGroupItem
                   key={value}
                   value={value}
-                  className="border-2 cursor-pointer w-1/3 data-[state=on]:border-primary data-[state=on]:bg-transparent hover:border-primary hover:bg-transparent"
+                  className="cursor-pointer w-1/3 data-[state=on]:border-primary data-[state=on]:bg-transparent hover:border-primary hover:bg-transparent"
                 >
                   <div className="flex items-center justify-center gap-2">
                     <span className="pt-1 text-muted-foreground">{value}</span>
@@ -275,9 +250,10 @@ export default function ProductDetails({
             </ToggleGroup>
 
             <DielineDownloadButton
-              disabled={isRendering || isLoading}
-              loading={isLoading}
-              download={onDownload}
+              format={format}
+              isRendering={isRendering}
+              slug={slug}
+              svg={svg}
             />
           </Section>
         </div>

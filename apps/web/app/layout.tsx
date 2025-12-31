@@ -12,7 +12,12 @@ export default function RootLayout({
     <html lang="fa" dir="rtl" suppressHydrationWarning>
       <body style={{ fontFamily }} className="antialiased">
         {children}
-        <Toaster theme="light" position="top-center" style={{ fontFamily }} />
+        <Toaster
+          richColors
+          theme="light"
+          position="top-center"
+          style={{ fontFamily }}
+        />
       </body>
     </html>
   );
