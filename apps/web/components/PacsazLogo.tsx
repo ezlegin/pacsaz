@@ -1,12 +1,12 @@
-import { pacsazLogo, pacsazLogoFull } from "@/public";
+import { pacsazLogoIcon, pacsazLogoFull } from "@/public";
 import Image from "next/image";
 import React from "react";
 
 const PacsazLogo = ({ type = "icon" }: { type?: "icon" | "full" }) => {
   return type === "icon" ? (
-    <Image alt="logo" src={pacsazLogo} width={25} height={34} />
+    <Image alt="logo" src={pacsazLogoIcon} width={36} height={36} />
   ) : (
-    <Image alt="logo" src={pacsazLogoFull} width={70} height={34} />
+    <Image alt="logo" src={pacsazLogoFull} width={85} height={36} />
   );
 };
 

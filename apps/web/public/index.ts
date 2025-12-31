@@ -1,5 +1,5 @@
 // LOGOS
-export const pacsazLogo = "/logos/pacsaz-logo.svg";
+export const pacsazLogoIcon = "/logos/pacsaz-logo-icon.svg";
 export const pacsazLogoFull = "/logos/pacsaz-logo-full.svg";
 
 // ICONS
@@ -10,3 +10,7 @@ export const dxfIcon = "/icons/dxf-icon.svg";
 
 // WATERMARK
 export const watermark = "/watermark.png";
+
+// TEMP
+export const tuckEnd = "/tuck-end.png";
+export const tuckEndModel = "/tuck-end-model.jpg";

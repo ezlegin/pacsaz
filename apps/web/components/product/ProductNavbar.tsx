@@ -21,7 +21,9 @@ const ProductNavbar = ({ productName }: Props) => {
             <PacsazLogo />
           </Link>
 
-          <p className="text-muted-foreground">ساخت دایلاین</p>
+          <Link href={"/dielines"} className="text-muted-foreground">
+            ساخت دایلاین
+          </Link>
           <ArrowLeft size={16} />
           <p className="font-semibold">{productName}</p>
           <Button

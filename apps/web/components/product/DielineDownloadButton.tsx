@@ -1,5 +1,6 @@
 import { useLoading } from "@/hooks/useLoading";
 import { downloadPdf } from "@/lib/actions/export/downloader";
+import { isSubscribed } from "@/lib/dielines/core/consts";
 import { FormatsType, Model } from "@/lib/dielines/core/types";
 import Diamond from "@/public/icons/Diamond";
 import { Button } from "@workspace/ui/components/button";
@@ -23,8 +24,6 @@ interface Props {
 }
 
 const DielineDownloadButton = ({ format, svg, slug, isRendering }: Props) => {
-  const isSubscribed = true;
-
   const { startLoading, stopLoading, isLoading } = useLoading();
   const [openLoginPopup, setOpenLoginPopup] = useState(false);
 
@@ -66,6 +65,7 @@ const DielineDownloadButton = ({ format, svg, slug, isRendering }: Props) => {
       <Button
         disabled={isRendering || isLoading}
         onClick={onDownload}
+        variant={isSubscribed ? "green" : "default"}
         size="lg"
         className="mt-4 w-full gap-2 font-medium"
       >

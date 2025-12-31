@@ -3,6 +3,7 @@ import {
   DIMENSIONS,
   DIMENSIONS_TYPE,
   FORMATS,
+  isSubscribed,
   MaterialKey,
   MATERIALS,
 } from "@/lib/dielines/core/consts";
@@ -155,7 +156,11 @@ export default function ProductDetails({
             </Select>
           </Section>
 
-          <Section title="اندازه بلید" infoContent={<DimensionInfo />}>
+          <Section
+            isPremium={!isSubscribed}
+            title="اندازه بلید"
+            infoContent={<DimensionInfo />}
+          >
             <Select
               onValueChange={(val: string) => setBleedAmount(+val)}
               dir="rtl"
@@ -182,7 +187,11 @@ export default function ProductDetails({
             </Select>
           </Section>
 
-          <Section title="ضخامت" infoContent={<DimensionInfo />}>
+          <Section
+            isPremium={!isSubscribed}
+            title="ضخامت"
+            infoContent={<DimensionInfo />}
+          >
             <ThicknessInput
               isRendering={isRendering}
               localCustomThickness={localCustomThickness}

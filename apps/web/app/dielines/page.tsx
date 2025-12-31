@@ -1,3 +1,4 @@
+import DielinesGrid from "@/components/DielinesGrid";
 import DielinesSidebar from "@/components/DielinesSidebar";
 
 const page = () => {
@@ -6,7 +7,9 @@ const page = () => {
       <div className="w-[400px]">
         <DielinesSidebar />
       </div>
-      <div className="w-full bg-red-300">hi</div>
+      <div className="w-full">
+        <DielinesGrid />
+      </div>
     </div>
   );
 };
