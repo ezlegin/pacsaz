@@ -1,5 +1,6 @@
 // LOGOS
-export const pacsazLogo = "/pacsaz-logo.svg";
+export const pacsazLogo = "/logos/pacsaz-logo.svg";
+export const pacsazLogoFull = "/logos/pacsaz-logo-full.svg";
 
 // ICONS
 export const diamond = "/icons/diamond.png";

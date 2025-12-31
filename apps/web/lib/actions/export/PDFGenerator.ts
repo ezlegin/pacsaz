@@ -46,7 +46,7 @@ export async function PDFGenerator({ svg, slug }: Props) {
     .text(guideText, 10, 10, { lineGap: 3 });
 
   const imageWidth = 25;
-  const image = path.join(process.cwd(), "public/pacsaz-logo.png");
+  const image = path.join(process.cwd(), "public/logos/pacsaz-logo.png");
   doc.image(image, docWidth - imageWidth - 10, 10, { width: imageWidth });
 
   SVGtoPDF(doc, svg.model, 0, 0, {
