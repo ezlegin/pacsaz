@@ -2,7 +2,7 @@ import M from "makerjs";
 import { extractPathDs } from "./extractPathDs";
 import { toMm, toPt } from "@/utils/sizeConvertor";
 import { MARGINS } from "../consts";
-import { watermark } from "@/public";
+import { watermarkPattern } from "@/public";
 
 export type WatermarkOffset = {
   x: number;
@@ -35,7 +35,7 @@ export function injectWatermark(
       height="900"
     >
       <image
-        href="${watermark}"
+        href="${watermarkPattern}"
         width="900"
         height="900"
         opacity="0.5"

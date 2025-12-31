@@ -7,14 +7,13 @@ import { Button } from "@workspace/ui/components/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogHeader,
   DialogTitle,
 } from "@workspace/ui/components/dialog";
 import { Spinner } from "@workspace/ui/components/spinner";
 import { toast } from "@workspace/ui/index";
 import { Download } from "lucide-react";
 import { useState } from "react";
+import LoginForm from "../forms/LoginForm";
 
 interface Props {
   format: FormatsType;
@@ -51,14 +50,14 @@ const DielineDownloadButton = ({ format, svg, slug, isRendering }: Props) => {
 
   return (
     <>
-      <Dialog open={openLoginPopup}>
-        <DialogContent dir="rtl" showCloseButton={false}>
-          <DialogHeader dir="rtl" className="text-right">
-            <DialogTitle className="text-right">ورود یا ثبت نام</DialogTitle>
-            <DialogDescription className="text-right">
-              ورود به حساب کاربری با ارسال کد تایید
-            </DialogDescription>
-          </DialogHeader>
+      <Dialog open={openLoginPopup} onOpenChange={setOpenLoginPopup}>
+        <DialogContent
+          overlayClassname="bg-accent/20 backdrop-blur-[4px]"
+          showCloseButton={false}
+          className="p-0 border-none sm:max-w-2xl"
+        >
+          <DialogTitle className="sr-only" />
+          <LoginForm />
         </DialogContent>
       </Dialog>
 

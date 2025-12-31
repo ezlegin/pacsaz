@@ -1,8 +1,7 @@
+import { pacsazLogoIcon } from "@/public";
 import { Toaster } from "@workspace/ui/components/sonner";
 import "@workspace/ui/globals.css";
 import "./fonts.css";
-import Navbar from "@/components/Navbar";
-import { pacsazLogoIcon } from "@/public";
 
 export default function RootLayout({
   children,
@@ -13,7 +12,6 @@ export default function RootLayout({
   return (
     <html lang="fa" dir="rtl" suppressHydrationWarning>
       <body style={{ fontFamily }} className="antialiased">
-        {/* <Navbar /> */}
         {children}
         <Toaster
           richColors

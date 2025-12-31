@@ -1,6 +1,6 @@
+import DielineGenerator from "@/components/product/DielineGenerator";
 import { dielines, DielineSlug } from "@/lib/dielines/registery";
 import { notFound } from "next/navigation";
-import DielineGenerator from "../../../components/product/DielineGenerator";
 
 interface Props {
   params: Promise<{ slug: string }>;
