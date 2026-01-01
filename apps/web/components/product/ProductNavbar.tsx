@@ -1,10 +1,10 @@
 import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
-import { ArrowLeft, Heart } from "lucide-react";
+import { ArrowLeft, Bookmark } from "lucide-react";
+import Link from "next/link";
 import { navbarPaddings } from "../Navbar";
 import NavbarButtons from "../NavbarButtons";
 import PacsazLogo from "../PacsazLogo";
-import Link from "next/link";
 
 interface Props {
   productName: string;
@@ -31,14 +31,14 @@ const ProductNavbar = ({ productName }: Props) => {
             variant={"ghost"}
             className="hover:text-destructive hover:border rounded-full"
           >
-            <Heart
+            <Bookmark
               size={18}
               className={cn(
                 isFaved
-                  ? "text-destructive"
+                  ? "text-orange-400"
                   : "text-muted-foreground hover:text-destructive"
               )}
-              fill={isFaved ? "#fb2c36" : "transparent"}
+              fill={isFaved ? "#ff8904" : "transparent"}
             />
           </Button>
         </div>
