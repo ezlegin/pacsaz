@@ -2,8 +2,8 @@ import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
 import { ArrowLeft, Bookmark } from "lucide-react";
 import Link from "next/link";
-import { navbarPaddings } from "../Navbar";
-import NavbarButtons from "../NavbarButtons";
+import { navbarPaddings } from "../Navbars/Navbar";
+import NavbarButtons from "../Navbars/NavbarButtons";
 import PacsazLogo from "../PacsazLogo";
 
 interface Props {

@@ -9,19 +9,25 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@workspace/ui/components/sidebar";
-import { Bookmark, Flag, LogOut, User } from "lucide-react";
+import { Bookmark, CreditCard, Flag, User } from "lucide-react";
+import Link from "next/link";
 import PacsazLogo from "./PacsazLogo";
 
 const items = [
+  {
+    title: "وضعیت اشتراک",
+    url: "/panel/subscription",
+    icon: Flag,
+  },
   {
     title: "ذخیره شده",
     url: "/panel/saved",
     icon: Bookmark,
   },
   {
-    title: "وضعیت اشتراک",
-    url: "/panel/subscription",
-    icon: Flag,
+    title: "پرداخت ها",
+    url: "/panel/payments",
+    icon: CreditCard,
   },
   {
     title: "مشخصات",
@@ -34,9 +40,9 @@ export function PanelSidebar() {
   return (
     <Sidebar side="right">
       <SidebarContent className="p-10 py-5">
-        <div className="mb-4">
+        <Link href={"/"} className="mb-4">
           <PacsazLogo type="full" scale={1.2} />
-        </div>
+        </Link>
 
         <div>
           <p className="font-semibold text-lg">{testUser.fullName}</p>
@@ -52,22 +58,13 @@ export function PanelSidebar() {
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <a href={item.url}>
+                    <Link href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
-
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <div className="text-muted-foreground cursor-pointer">
-                    <LogOut className="text-destructive/50" />
-                    <span>خروج از حساب</span>
-                  </div>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

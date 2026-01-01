@@ -1,4 +1,4 @@
-import ProductNavbar from "@/components/product/ProductNavbar";
+import ProductNavbar from "@/components/Navbars/ProductNavbar";
 import { dielines, DielineSlug } from "@/lib/dielines/registery";
 import { notFound } from "next/navigation";
 

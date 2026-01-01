@@ -1,6 +1,6 @@
 import Link from "next/link";
 import NavbarButtons from "./NavbarButtons";
-import PacsazLogo from "./PacsazLogo";
+import PacsazLogo from "../PacsazLogo";
 
 export const navbarPaddings = "p-3 px-10";
 
