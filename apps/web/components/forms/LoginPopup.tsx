@@ -29,8 +29,8 @@ const LoginPopup = () => {
       <Image
         alt=""
         src={loginPic}
-        width={300}
-        height={300}
+        width={268}
+        height={441}
         className="h-full w-2/5"
       />
     </Card>

@@ -1,10 +1,11 @@
-import LoginPopup from "@/components/forms/LoginPopup";
+import Onboarding from "@/components/onboarding/Onboarding";
 import PacsazBGPattern from "@/components/PacsazBGPattern";
+import React from "react";
 
 const page = () => {
   return (
     <PacsazBGPattern>
-      <LoginPopup />
+      <Onboarding />
     </PacsazBGPattern>
   );
 };

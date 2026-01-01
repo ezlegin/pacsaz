@@ -9,3 +9,9 @@ export const otpFormSchema = z.object({
   otp: z.string().regex(/^\d{5}$/),
 });
 export type OTPFormType = z.infer<typeof otpFormSchema>;
+
+export const onboardingStep2Schema = z.object({
+  fullName: z.string().min(2).trim(),
+  email: z.string().email().trim(),
+});
+export type OnboardingStep2Type = z.infer<typeof onboardingStep2Schema>;
