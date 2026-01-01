@@ -13,7 +13,7 @@ import { Spinner } from "@workspace/ui/components/spinner";
 import { toast } from "@workspace/ui/index";
 import { Download } from "lucide-react";
 import { useState } from "react";
-import LoginForm from "../forms/LoginForm";
+import LoginPopup from "../forms/LoginPopup";
 
 interface Props {
   format: FormatsType;
@@ -57,7 +57,7 @@ const DielineDownloadButton = ({ format, svg, slug, isRendering }: Props) => {
           className="p-0 border-none sm:max-w-2xl"
         >
           <DialogTitle className="sr-only" />
-          <LoginForm />
+          <LoginPopup />
         </DialogContent>
       </Dialog>
 

@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
     "@workspace/ui": "workspace:*",
     "cheerio": "^1.1.2",
     "date-fns": "^4.1.0",
@@ -25,7 +26,8 @@
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "react-zoom-pan-pinch": "^3.7.0",
-    "svg-to-pdfkit": "^0.1.8"
+    "svg-to-pdfkit": "^0.1.8",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.17",

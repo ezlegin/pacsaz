@@ -1,4 +1,4 @@
-import LoginForm from "@/components/forms/LoginForm";
+import LoginPopup from "@/components/forms/LoginPopup";
 
 const page = () => {
   return (
@@ -13,7 +13,7 @@ const page = () => {
       pointer-events-none
     `}
       />
-      <LoginForm />
+      <LoginPopup />
     </div>
   );
 };

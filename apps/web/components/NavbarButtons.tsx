@@ -1,17 +1,27 @@
+import { isSubscribed } from "@/lib/dielines/core/consts";
 import Diamond from "@/public/icons/Diamond";
 import { Button } from "@workspace/ui/components/button";
 import Link from "next/link";
-import React from "react";
 
 const NavbarButtons = () => {
   return (
     <div className="flex gap-3 items-center">
       <Link href={"/subscription"}>
-        <Button variant={"ghost"} className="gap-1">
-          <Diamond />
-          اشتراک
+        <Button variant={isSubscribed ? "secondary" : "ghost"}>
+          {isSubscribed ? (
+            <div className="flex gap-2 items-center">
+              <Diamond />
+              38 دانلود
+            </div>
+          ) : (
+            <div className="flex items-center gap-1">
+              <Diamond />
+              اشتراک
+            </div>
+          )}
         </Button>
       </Link>
+
       <div>
         <div className="w-[1px] ml-3 h-6 bg-slate-300" />
       </div>
