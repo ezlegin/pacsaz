@@ -8,11 +8,19 @@ export type LoginStep = "input" | "otp";
 
 const LoginForm = () => {
   const [loginStep, setLoginStep] = useState<LoginStep>("input");
+  const [phoneNumber, setPhoneNumber] = useState<string>("");
 
   return (
     <>
-      {loginStep === "input" && <InputForm setLoginStep={setLoginStep} />}
-      {loginStep === "otp" && <OTPForm setLoginStep={setLoginStep} />}
+      {loginStep === "input" && (
+        <InputForm
+          setLoginStep={setLoginStep}
+          setPhoneNumber={setPhoneNumber}
+        />
+      )}
+      {loginStep === "otp" && (
+        <OTPForm setLoginStep={setLoginStep} phoneNumber={phoneNumber} />
+      )}
     </>
   );
 };

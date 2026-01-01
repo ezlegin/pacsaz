@@ -8,10 +8,12 @@ import {
   DimensionsType,
   SVGModelSizes,
 } from "@/lib/dielines/core/types";
+import { tuckEndModel } from "@/public";
 import { formatDimensions } from "@/utils/formatDimensions";
 import { toMm } from "@/utils/sizeConvertor";
 import { Card, CardContent, CardTitle } from "@workspace/ui/components/card";
 import { Switch } from "@workspace/ui/components/switch";
+import Image from "next/image";
 
 interface Props {
   dimension: Dimensions;
@@ -139,49 +141,52 @@ const ProductInfo = ({
 
   return (
     <div className="h-full flex flex-col justify-between w-full z-10">
-      <div>
+      <div className="space-y-3">
+        <Image
+          alt=""
+          src={tuckEndModel}
+          width={300}
+          height={300}
+          className="bg-accent rounded-2xl"
+        />
         <div className="flex justify-between">
           {packLengend.map(({ color, label }) => (
-            <div key={label} className="flex items-center gap-1 mb-2">
+            <div key={label} className="flex items-center gap-1">
               <div className={`h-1 w-7 rounded-full border ${color}`} />
               <span className="text-sm">{label}</span>
             </div>
           ))}
         </div>
 
-        {/* Dimensions */}
-        <div>
-          <div className="space-y-1">
-            {dimensions.map(
-              ({ label, value, key }) =>
-                dimensionsType.includes(
-                  key as "manufacture" | "inner" | "outer"
-                ) && (
-                  <div key={label} className="border w-3/4 p-2 rounded-2xl">
-                    <span className="block text-muted-foreground text-xs">
-                      {label}
-                    </span>
-                    <span dir="ltr" className="font-medium text-sm">
-                      {value}
-                    </span>
-                  </div>
-                )
-            )}
-          </div>
-
-          {/* Deliveries */}
-          <ul className="mt-4 space-y-2 list-disc list-inside">
-            {deliveries.map((item, index) => (
-              <li key={index} className="text-xs text-muted-foreground">
-                {item}
-              </li>
-            ))}
-          </ul>
+        <div className="space-y-1">
+          {dimensions.map(
+            ({ label, value, key }) =>
+              dimensionsType.includes(
+                key as "manufacture" | "inner" | "outer"
+              ) && (
+                <div key={label} className="border w-3/4 p-2 rounded-2xl">
+                  <span className="block text-muted-foreground text-xs">
+                    {label}
+                  </span>
+                  <span dir="ltr" className="font-medium text-sm">
+                    {value}
+                  </span>
+                </div>
+              )
+          )}
         </div>
+
+        <ul className="mt-4 space-y-2 list-disc list-inside">
+          {deliveries.map((item, index) => (
+            <li key={index} className="text-xs text-muted-foreground">
+              {item}
+            </li>
+          ))}
+        </ul>
       </div>
 
       {onDevelepe && sizes && (
-        <div className="w-full">
+        <div className="absolute left-0 bottom-0 w-fit m-3 opacity-0 hover:opacity-100 transition-opacity">
           <Card dir="ltr" className="p-4 gap-1">
             <CardTitle>Developer Tools:</CardTitle>
 

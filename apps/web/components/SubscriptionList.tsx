@@ -15,7 +15,7 @@ const SubscriptionList = () => {
   const discountFactor = 0.35;
 
   return (
-    <div className="h-full flex flex-col items-center justify-center gap-6">
+    <div className="h-full flex flex-col items-center justify-center gap-6 z-10">
       <div className="w-sm text-center flex flex-col items-center gap-3">
         <Badge variant={"lightPrimary"}>
           <Flag />

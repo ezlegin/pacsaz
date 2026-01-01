@@ -1,8 +1,15 @@
+import { cn } from "@workspace/ui/lib/utils";
 import { ReactNode } from "react";
 
-const PacsazBGPattern = ({ children }: { children: ReactNode }) => {
+const PacsazBGPattern = ({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) => {
   return (
-    <div className="bg-accent h-screen overflow-hidden flex  items-center justify-center ">
+    <div className="bg-accent absolute inset-0 h-full overflow-hidden">
       <div
         className={`
         absolute inset-0 
@@ -13,7 +20,7 @@ const PacsazBGPattern = ({ children }: { children: ReactNode }) => {
         pointer-events-none
       `}
       />
-      {children}
+      <div className={cn("min-h-screen z-10", className)}>{children}</div>
     </div>
   );
 };

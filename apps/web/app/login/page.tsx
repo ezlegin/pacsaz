@@ -3,7 +3,7 @@ import PacsazBGPattern from "@/components/PacsazBGPattern";
 
 const page = () => {
   return (
-    <PacsazBGPattern>
+    <PacsazBGPattern className="flex justify-center items-center">
       <LoginPopup />
     </PacsazBGPattern>
   );

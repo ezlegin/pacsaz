@@ -16,9 +16,10 @@ import { LoginStep } from "./LoginForm";
 
 interface Props {
   setLoginStep: (val: LoginStep) => void;
+  setPhoneNumber: (val: string) => void;
 }
 
-export function InputForm({ setLoginStep }: Props) {
+export function InputForm({ setLoginStep, setPhoneNumber }: Props) {
   const form = useForm<InputFormType>({
     resolver: zodResolver(inputFormSchema),
     defaultValues: {
@@ -26,9 +27,10 @@ export function InputForm({ setLoginStep }: Props) {
     },
   });
 
-  function onSubmit(values: InputFormType) {
+  function onSubmit(data: InputFormType) {
     setLoginStep("otp");
-    console.log(values);
+    setPhoneNumber(data.phoneNumber);
+    console.log(data);
   }
 
   return (

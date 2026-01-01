@@ -34,7 +34,7 @@ const DielinesGrid = () => {
           <Ratio />
         </ToggleGroupItem>
       </ToggleGroup>
-      <div className="grid grid-cols-5 gap-8">
+      <div className="grid grid-cols-4 gap-8">
         {dielines.map((d, idx) => (
           <DielineCard key={idx} dieline={d} imageType={imageType} />
         ))}
@@ -79,7 +79,7 @@ const DielineCard = ({
           src={dieline.dielineImg}
           width={400}
           height={400}
-          className="w-full aspect-square bg-accent rounded-2xl"
+          className="w-full aspect-square border rounded-2xl"
         />
         <div className="text-sm text-muted-foreground">{dieline.title}</div>
       </div>

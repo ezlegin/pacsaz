@@ -6,7 +6,7 @@ import Link from "next/link";
 const NavbarButtons = () => {
   return (
     <div className="flex gap-3 items-center">
-      <Link href={"/subscription"}>
+      <Link href={isSubscribed ? "/panel/subscription" : "/subscription"}>
         <Button variant={isSubscribed ? "secondary" : "ghost"}>
           {isSubscribed ? (
             <div className="flex gap-2 items-center">

@@ -22,9 +22,10 @@ import { useEffect } from "react";
 
 interface Props {
   setLoginStep: (val: LoginStep) => void;
+  phoneNumber: string;
 }
 
-export function OTPForm({ setLoginStep }: Props) {
+export function OTPForm({ setLoginStep, phoneNumber }: Props) {
   const form = useForm<OTPFormType>({
     resolver: zodResolver(otpFormSchema),
     defaultValues: {
@@ -59,7 +60,7 @@ export function OTPForm({ setLoginStep }: Props) {
                 <FormControl>
                   <div className="space-y-2">
                     <p className="text-center text-sm text-muted-foreground">
-                      لطفا کد ارسال شده به 09127452859 را وارد کنید.
+                      لطفا کد ارسال شده به {phoneNumber} را وارد کنید.
                     </p>
                     <InputOTP
                       autoFocus
