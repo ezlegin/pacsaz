@@ -12,11 +12,12 @@ import {
 import { Bookmark, CreditCard, Flag, User } from "lucide-react";
 import Link from "next/link";
 import PacsazLogo from "./PacsazLogo";
+import { isSubscribed } from "@/lib/dielines/core/consts";
 
 const items = [
   {
-    title: "وضعیت اشتراک",
-    url: "/panel/subscription",
+    title: isSubscribed ? "وضعیت اشتراک" : "اشتراک",
+    url: "/panel",
     icon: Flag,
   },
   {

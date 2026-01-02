@@ -22,9 +22,9 @@ export const SubscriptionCard = ({
   discountFactor: number;
 }) => {
   return (
-    <div className="even:bg-primary/10 p-1 rounded-2xl group">
+    <div className="even:bg-gradient-to-r even:from-violet-500 even:to-purple-500 p-1 rounded-2xl group">
       {index === 1 && (
-        <div className="flex justify-center items-center gap-1 text-sm pt-1.5 font-medium text-primary">
+        <div className="flex justify-center items-center gap-1 text-sm pt-1.5 font-medium text-primary-foreground">
           <Zap size={16} fill="#8c38fe" />
           پیشنهاد پک ساز
         </div>
@@ -52,7 +52,7 @@ export const SubscriptionCard = ({
         </div>
 
         <Button
-          variant={index === 1 ? "default" : "primaryForeground"}
+          variant={index === 1 ? "gradient" : "primaryForeground"}
           className="w-full mb-8"
         >
           خرید اشتراک
