@@ -64,3 +64,10 @@ export function mapPeriodLabel(period: SubPeriod) {
   if (period === "monthly") return "ماهیانه";
   return "سالیانه";
 }
+
+export type Status = "success" | "failed" | "canceled";
+export function mapStatusLable(status: Status) {
+  if (status === "failed") return "ناموفق";
+  if (status === "success") return "موفق";
+  return "کنسل شده";
+}
