@@ -15,14 +15,20 @@ export type UserType =
   | "designStudio"
   | "printHouse"
   | "dielineMaker"
-  | "packagingFactory";
+  | "packagingFactory"
+  | "other";
+
+export type MostUsage =
+  | "practice"
+  | "projects"
+  | "portfolio"
+  | "hobby"
+  | "other";
 
 export type PersonaData = {
   email: string;
   fullName: string;
 };
-
-export type MostUsage = "practice" | "projects" | "portfolio";
 
 const Onboarding = () => {
   const [onboardingStep, setOnboardingStep] = useState(1);
@@ -50,31 +56,37 @@ const Onboarding = () => {
         : !usageGoal;
 
   return (
-    <Card className="w-full flex flex-col gap-5 items-center max-w-2xl px-5 z-10">
+    <Card className="w-full flex flex-col gap-4 items-center max-w-2xl px-5 z-10 pt-4">
       <div className="flex justify-between items-center w-full">
         <div className="flex gap-3 items-center">
-          <PacsazLogo scale={1.1} />
-          <h1 className="font-semibold text-xl">به پک ساز خوش آمدید!</h1>
+          <PacsazLogo />
+          <h1 className="font-semibold text-lg">به پک ساز خوش آمدید!</h1>
         </div>
-        <Button
-          variant={disableButton ? "outline" : "default"}
-          disabled={disableButton}
-          onClick={() =>
-            setOnboardingStep((p) => {
-              if (p === 3) {
-                onSubmit();
-                return p;
-              }
+        <div className="flex items-center gap-3">
+          <div dir="ltr" className="text-xs text-muted-foreground font-medium">
+            {onboardingStep} / 3
+          </div>
+          <Button
+            variant={disableButton ? "outline" : "default"}
+            disabled={disableButton}
+            onClick={() =>
+              setOnboardingStep((p) => {
+                if (p === 3) {
+                  onSubmit();
+                  return p;
+                }
 
-              return p + 1;
-            })
-          }
-        >
-          ادامه
-        </Button>
+                return p + 1;
+              })
+            }
+          >
+            ادامه
+          </Button>
+        </div>
       </div>
 
-      <Separator />
+      <Separator className="mb-3" />
+
       {onboardingStep === 1 && (
         <Step1 userType={userType} setUserType={setUserType} />
       )}

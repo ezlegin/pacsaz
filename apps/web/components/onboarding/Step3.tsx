@@ -46,4 +46,6 @@ const usageGoals: {
   { title: "پروژه‌های واقعی", key: "projects" },
   { title: "تمرین و یادگیری", key: "practice" },
   { title: "نمونه کار (Portfolio)", key: "portfolio" },
+  { title: "سرگرمی", key: "hobby" },
+  { title: "سایر", key: "other" },
 ];

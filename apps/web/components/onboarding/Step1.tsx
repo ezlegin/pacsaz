@@ -1,9 +1,9 @@
-import { UserType } from "@/app/login/onboarding/page";
 import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@workspace/ui/components/toggle-group";
 import React from "react";
+import { UserType } from "./Onboarding";
 
 interface Props {
   userType: UserType | null;
@@ -51,4 +51,5 @@ const userTypes: {
   { title: "چاپخانه", key: "printHouse" },
   { title: "قالب سازی", key: "dielineMaker" },
   { title: "تولیدی بسته بندی", key: "packagingFactory" },
+  { title: "سایر", key: "other" },
 ];
