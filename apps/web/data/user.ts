@@ -1,16 +1,13 @@
 import { UserType as UserTypes } from "@/components/onboarding/Onboarding";
-import { plans } from "@/components/UpgradeSubscription";
-
-export type PlanKey = "standard" | "pro" | "organization";
-export type PlanTitle = "استاندارد" | "حرفه‌ای" | "سازمانی";
-type PlanLevel = 1 | 2 | 3;
+import { SubPeriod } from "@/components/SubscriptionList";
+import { PlanTitle, PlanLevel, PlanKey } from "./subscription";
 
 export type PlanType = {
   title: PlanTitle;
   level: PlanLevel;
-  price: number;
   description: string;
   key: PlanKey;
+  period: SubPeriod;
 };
 
 type UserType = {
@@ -33,15 +30,14 @@ export const testUser: UserType = {
   subscriptionEndsAt: new Date("2026-01-29"),
   userType: "student",
   plan: {
+    period: "monthly",
     key: "standard",
-
     get title() {
       return mapUserPlanTitle(this.key);
     },
     get level() {
       return mapUserPlanLevel(this.key);
     },
-    price: 399,
     description: "مخصوص مبتدیان و تازه کار",
   },
   fairDownload: 50,
@@ -64,4 +60,7 @@ function mapUserPlanLevel(userPlan: PlanKey) {
   return 3;
 }
 
-plans;
+export function mapPeriodLabel(period: SubPeriod) {
+  if (period === "monthly") return "ماهیانه";
+  return "سالیانه";
+}

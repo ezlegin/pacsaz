@@ -1,31 +1,32 @@
+import { PlanFeature, SubCardProps } from "@/data/subscription";
 import { Button } from "@workspace/ui/components/button";
 import { Separator } from "@workspace/ui/components/separator";
 import { cn } from "@workspace/ui/lib/utils";
 import { CircleCheck, Zap } from "lucide-react";
+import Link from "next/link";
 import Price from "./Price";
-import { PlanKey, PlanTitle } from "@/data/user";
-
-export interface SubCardProps {
-  title: PlanTitle;
-  price: number;
-  description: string;
-  key: PlanKey;
-  shortDescription: string;
-  level: 1 | 2 | 3;
-  fairDownload: number | undefined;
-}
+import { SubPeriod } from "./SubscriptionList";
 
 export const SubscriptionCard = ({
-  props: { description, fairDownload: failDownload, price, title },
+  props: {
+    key,
+    description,
+    fairDownload: { annual, monthly },
+    price,
+    title,
+  },
   index,
   isAnnual,
-  discountFactor,
+  features,
 }: {
   props: SubCardProps;
   index: number;
+  features: PlanFeature[];
   isAnnual: boolean;
-  discountFactor: number;
 }) => {
+  const fairDownload = isAnnual ? annual : monthly;
+  const period: SubPeriod = isAnnual ? "annual" : "monthly";
+
   return (
     <div className="even:bg-gradient-to-r even:from-violet-500 even:to-purple-500 p-1 rounded-2xl group">
       {index === 1 && (
@@ -43,39 +44,33 @@ export const SubscriptionCard = ({
       >
         <div className="flex flex-col gap-3">
           <span className="font-semibold">{title}</span>
-          <Price
-            discountFactor={discountFactor}
-            isAnnual={isAnnual}
-            price={price}
-          />
+          <Price isAnnual={isAnnual} price={price} />
           <p className="text-xs text-muted-foreground">{description}</p>
         </div>
 
-        <Button
-          variant={index === 1 ? "gradient" : "primaryForeground"}
-          className="w-full mb-8"
-        >
-          خرید اشتراک
-        </Button>
+        <Link href={`/payment?plan=${key}&period=${period}`}>
+          <Button
+            variant={index === 1 ? "gradient" : "primaryForeground"}
+            className="w-full mb-8"
+          >
+            خرید اشتراک
+          </Button>
+        </Link>
 
         <div className="space-y-3 text-sm font-medium">
           <Separator />
-          <div>دانلود منصفانه: {failDownload} عدد</div>
+          <div>دانلود منصفانه: {fairDownload} عدد</div>
           <Separator />
           <ul className="text-xs text-muted-foreground space-y-1.5">
-            {subOptions.map((i, idx) => (
+            {features.map((i, idx) => (
               <li key={idx} className="flex items-center gap-2">
                 <CircleCheck
                   size={13}
-                  className={cn(
-                    (idx === subOptions.length - 1 ||
-                      idx === subOptions.length - 2) &&
-                      index === 0
-                      ? "text-muted-foreground"
-                      : "text-green-600"
-                  )}
+                  className={
+                    !i.active ? "text-muted-foreground" : "text-green-600"
+                  }
                 />
-                {i}
+                {i.value}
               </li>
             ))}
           </ul>
@@ -84,14 +79,3 @@ export const SubscriptionCard = ({
     </div>
   );
 };
-
-const subOptions = [
-  "دسترسی به تمام قالب ها",
-  "ذخیره نامحدود قالب ها",
-  "دانلود فرمت دلخواه",
-  "انتخاب متریال چاپ",
-  "انتخاب نوع ابعاد",
-  "دریافت فایل بدون واترمارک",
-  "تنظیم ضخامت سفارشی",
-  "انتخاب میزان بلید",
-];

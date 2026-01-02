@@ -11,6 +11,7 @@ import { RotateCw, Zap } from "lucide-react";
 import { useState } from "react";
 import Card from "./Card";
 import UpgradeSubscription from "./UpgradeSubscription";
+import Link from "next/link";
 
 const UserSubscriptionCard = () => {
   const [openUpgradeDialog, setOpenUpgradeDialog] = useState(false);
@@ -39,15 +40,14 @@ const UserSubscriptionCard = () => {
         </div>
 
         <div className="flex flex-col items-center gap-2">
-          <Button
-            variant="primaryForeground"
-            onClick={() => setOpenUpgradeDialog(true)}
-            className="w-full"
-            size={"sm"}
+          <Link
+            href={`/payment?plan=${testUser.plan.key}&period=${testUser.plan.period}`}
           >
-            <RotateCw />
-            تمدید اشتراک
-          </Button>
+            <Button variant="primaryForeground" className="w-full" size={"sm"}>
+              <RotateCw />
+              تمدید اشتراک
+            </Button>
+          </Link>
 
           {testUser.plan.level !== 3 && (
             <Button

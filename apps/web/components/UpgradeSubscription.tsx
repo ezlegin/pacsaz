@@ -1,6 +1,6 @@
 "use client";
 
-import { PlanKey, testUser } from "@/data/user";
+import { testUser } from "@/data/user";
 import { Button } from "@workspace/ui/components/button";
 import { Label } from "@workspace/ui/components/label";
 import {
@@ -13,8 +13,8 @@ import { useState } from "react";
 import Card from "./Card";
 import PeriodSwitch from "./PeriodSwitch";
 import Price from "./Price";
-import { SubCardProps } from "./SubscriptionCard";
-import { discountFactor, SubPeriod } from "./SubscriptionList";
+import { SubPeriod } from "./SubscriptionList";
+import { PlanKey, plans } from "@/data/subscription";
 
 const UpgradeSubscription = () => {
   const [plan, setPlan] = useState<PlanKey>(
@@ -59,7 +59,6 @@ const UpgradeSubscription = () => {
               ) : (
                 <div>
                   <Price
-                    discountFactor={discountFactor}
                     isAnnual={period === "annual"}
                     price={p.price}
                     size="sm"
@@ -76,7 +75,7 @@ const UpgradeSubscription = () => {
           <Button
             size={"sm"}
             variant={"link"}
-            className="w-full text-xs text-primary hover:text-primary hover:no-underline"
+            className="text-xs text-primary hover:text-primary hover:no-underline"
           >
             <SquareArrowOutUpRight className="scale-90" />
             مشاهده ویژگی پلن ها
@@ -85,7 +84,7 @@ const UpgradeSubscription = () => {
       </div>
 
       <div>
-        <Link href={"/payment"}>
+        <Link href={`/payment?plan=${plan}&period=${period}`}>
           <Button size={"lg"} variant={"gradient"} className="w-full">
             <Zap />
             ارتقا اشتراک
@@ -97,36 +96,3 @@ const UpgradeSubscription = () => {
 };
 
 export default UpgradeSubscription;
-
-export const plans: SubCardProps[] = [
-  {
-    title: "استاندارد",
-    key: "standard",
-    shortDescription: "مخصوص مبتدیان و تازه کار",
-    description:
-      "مناسب طراحان تازه‌کار و دانشجویانی که می‌خواهند بدون دردسر، دایلاین‌های آماده و دقیق برای پروژه‌های خود بسازند.",
-    fairDownload: 50,
-    price: 399,
-    level: 1,
-  },
-  {
-    title: "حرفه‌ای",
-    key: "pro",
-    shortDescription: "مخصوص حرفه‌ای ها و متخصص ها",
-    description:
-      "بهترین انتخاب برای طراحان حرفه‌ای و فریلنسرها؛ دسترسی گسترده‌تر، آزادی عمل بیشتر و سرعت بالاتر در آماده‌سازی دایلاین‌ها.",
-    fairDownload: 100,
-    price: 699,
-    level: 2,
-  },
-  {
-    title: "سازمانی",
-    key: "organization",
-    shortDescription: "مخصوص سازمان ها و تیم ها",
-    description:
-      "مناسب چاپخانه‌ها و تیم‌های طراحی بزرگ که به تولید نامحدود، دقت صنعتی و جریان کاری پایدار نیاز دارند.",
-    fairDownload: 400,
-    price: 1399,
-    level: 3,
-  },
-];

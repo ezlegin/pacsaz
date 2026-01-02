@@ -1,11 +1,11 @@
 "use client";
 
+import { plans } from "@/data/subscription";
 import { Badge } from "@workspace/ui/components/badge";
 import { Flag } from "lucide-react";
 import { useState } from "react";
 import PeriodSwitch from "./PeriodSwitch";
 import { SubscriptionCard } from "./SubscriptionCard";
-import { plans } from "./UpgradeSubscription";
 
 export type SubPeriod = "monthly" | "annual";
 
@@ -38,9 +38,9 @@ const SubscriptionList = () => {
           <SubscriptionCard
             key={idx}
             props={p}
-            index={idx}
-            discountFactor={discountFactor}
             isAnnual={period === "annual"}
+            features={p.features}
+            index={idx}
           />
         ))}
       </div>

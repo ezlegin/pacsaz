@@ -15,7 +15,7 @@ const PeriodSwitch = ({
     <div className="flex gap-2 items-center mx-auto w-fit">
       <Label className="w-32 flex justify-end">
         <Badge dir="ltr" variant={"destructive"}>
-          -35%
+          -30%
         </Badge>
         سالیانه
       </Label>
