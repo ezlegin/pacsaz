@@ -8,6 +8,7 @@ import {
   MATERIALS,
 } from "@/lib/dielines/core/consts";
 import { DimensionType } from "@/lib/dielines/core/helpers/applyDimensionOffset";
+import { isPackagingSizeLogical } from "@/lib/dielines/core/helpers/isPackagingSizeLogical";
 import {
   DielineDimensions,
   DimensionKey,
@@ -16,6 +17,7 @@ import {
   MaterialsInput,
   Model,
 } from "@/lib/dielines/core/types";
+import { Badge } from "@workspace/ui/components/badge";
 import { Card } from "@workspace/ui/components/card";
 import {
   Select,
@@ -28,6 +30,12 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@workspace/ui/components/toggle-group";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@workspace/ui/components/tooltip";
+import { CircleQuestionMark } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Section } from "./DetailsSection";
@@ -55,6 +63,11 @@ interface Props {
   slug: string;
   material: MaterialKey;
   isRendering: boolean;
+  resolvedSizes: {
+    width: number;
+    height: number;
+    length: number;
+  };
 }
 
 export default function ProductDetails({
@@ -66,6 +79,7 @@ export default function ProductDetails({
   setCustomThickness,
   dimensionType,
   dimensionsType,
+  resolvedSizes: { height, width },
   svg,
   slug,
   materials,
@@ -109,6 +123,8 @@ export default function ProductDetails({
     "bg-slate-700",
   ];
 
+  const isPackagingLogical = isPackagingSizeLogical(height, width);
+
   return (
     <div className="h-full z-10">
       <Card className="h-full flex flex-col justify-between overflow-y-auto bg-white p-6 ">
@@ -127,6 +143,35 @@ export default function ProductDetails({
                 />
               ))}
             </div>
+
+            {!isPackagingLogical && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Badge variant={"lightRed"} className="p-3 rounded-2xl">
+                    <div className="flex gap-2">
+                      <CircleQuestionMark size={16} />
+                      <div className="text-wrap">
+                        احتمال وجود خطای برش با ابعاد ورودی شما وجود دارد.
+                      </div>
+                    </div>
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent side="left">
+                  <p className="max-w-sm leading-5">
+                    دایلاین باید با استانداردهای مشخصات ساخت بسته‌بندی مطابقت
+                    داشته باشد. پس از اینکه ابعاد را تنظیم کردید، ما بررسی‌های
+                    منطقیِ ساختاری انجام می‌دهیم تا اطمینان حاصل شود که فایل با
+                    مشخصات تولید مطابقت دارد.
+                    <br />
+                    اگر پیام «احتمال وجود خطای برش با ابعاد ورودی شما وجود
+                    دارد.» نمایش داده شود، یعنی بسته‌بندی شما در بررسی منطقی
+                    مردود شده است. با این حال، همچنان می‌توانید دایلاین را
+                    دانلود کنید، اما باید پیش از تولید، جزئیات را به‌طور کامل با
+                    کارخانه بررسی و تأیید کنید.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            )}
           </Section>
 
           <Section title="متریال چاپ" infoContent={<DimensionInfo />}>

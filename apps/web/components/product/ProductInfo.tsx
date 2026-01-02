@@ -140,7 +140,7 @@ const ProductInfo = ({
   ];
 
   return (
-    <div className="h-full flex flex-col justify-between w-full z-10">
+    <div className="flex flex-col justify-between w-full bg-accent/40 z-10 p-3 rounded-2xl h-fit backdrop-blur-[2px]">
       <div className="space-y-3">
         <Image
           alt=""
@@ -164,7 +164,7 @@ const ProductInfo = ({
               dimensionsType.includes(
                 key as "manufacture" | "inner" | "outer"
               ) && (
-                <div key={label} className="border w-3/4 p-2 rounded-2xl">
+                <div key={label} className="border p-2 rounded-2xl">
                   <span className="block text-muted-foreground text-xs">
                     {label}
                   </span>

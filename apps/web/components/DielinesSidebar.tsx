@@ -22,9 +22,21 @@ const DielinesSidebar = () => {
             <ToggleGroup
               dir="rtl"
               type="single"
+              defaultValue="all"
               className="flex-col items-start w-full"
               spacing={2}
             >
+              <ToggleGroupItem
+                className="w-full justify-start cursor-pointer"
+                key={idx}
+                value={"all"}
+              >
+                <div className="flex gap-2 items-center">
+                  <ChevronLeft className="scale-[80%] text-muted-foreground" />{" "}
+                  <span>همه</span>
+                  <span className="text-muted-foreground">982</span>
+                </div>
+              </ToggleGroupItem>
               {c.categories.map((cc, idx) => (
                 <ToggleGroupItem
                   className="w-full justify-start cursor-pointer"

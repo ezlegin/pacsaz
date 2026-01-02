@@ -22,6 +22,7 @@ const DielineGenerator = ({ slug }: { slug: string }) => {
     doCenterSVG,
     showAnchors,
     showOverallDimensions,
+    resolved,
     setShowOverallDimensions,
     setDimension,
     setMaterial,
@@ -56,6 +57,7 @@ const DielineGenerator = ({ slug }: { slug: string }) => {
         materials={dieline.materials}
         material={material}
         isRendering={isRendering}
+        resolvedSizes={resolved}
       />
 
       <div className="relative">

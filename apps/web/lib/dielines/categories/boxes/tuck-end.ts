@@ -160,9 +160,9 @@ const tuckEnd: DielineGeneratorProps = {
       widthMM,
       lengthMM,
       tuckFlapSize,
-      considerOuterIndent: false,
       materialThickness,
       safeFoldOffset,
+      considerOuterIndent: true,
     });
 
     const dustBL = cloneMirrorMove(dustBL_RAW, true, true, [

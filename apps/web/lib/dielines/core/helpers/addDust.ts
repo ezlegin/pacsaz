@@ -62,7 +62,7 @@ export function addDust({
     ? addLineToHole
       ? Math.max(0, indent.bl - holeRadius)
       : 0
-    : indent.bl;
+    : indent.bl + indent.tl;
 
   const { disOfHeight } = getDistanceOfFirstAndLastPoint(dustHoleArc, "path");
   const toTop = considerDustHole

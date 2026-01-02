@@ -71,6 +71,7 @@ export function useDielineGenerator(dieline: DielineGeneratorProps) {
 
   return {
     size,
+    resolved,
     svg,
     isRendering,
     material,
