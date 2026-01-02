@@ -2,23 +2,28 @@ import { Button } from "@workspace/ui/components/button";
 import { Separator } from "@workspace/ui/components/separator";
 import { cn } from "@workspace/ui/lib/utils";
 import { CircleCheck, Zap } from "lucide-react";
+import Price from "./Price";
+import { PlanKey, PlanTitle } from "@/data/user";
 
 export interface SubCardProps {
-  title: string;
+  title: PlanTitle;
   price: number;
   description: string;
-  failDownload: number | undefined;
+  key: PlanKey;
+  shortDescription: string;
+  level: 1 | 2 | 3;
+  fairDownload: number | undefined;
 }
 
 export const SubscriptionCard = ({
-  props: { description, failDownload, price, title },
+  props: { description, fairDownload: failDownload, price, title },
   index,
-  isYearly,
+  isAnnual,
   discountFactor,
 }: {
   props: SubCardProps;
   index: number;
-  isYearly: boolean;
+  isAnnual: boolean;
   discountFactor: number;
 }) => {
   return (
@@ -38,16 +43,11 @@ export const SubscriptionCard = ({
       >
         <div className="flex flex-col gap-3">
           <span className="font-semibold">{title}</span>
-          <div className="space-x-1">
-            <span className="font-bold text-3xl">
-              {(isYearly
-                ? (price * (1 - discountFactor)).toFixed()
-                : price
-              ).toLocaleString("en-US")}{" "}
-              تومان
-            </span>
-            <span className="text-sm text-muted-foreground">/ ماهانه</span>
-          </div>
+          <Price
+            discountFactor={discountFactor}
+            isAnnual={isAnnual}
+            price={price}
+          />
           <p className="text-xs text-muted-foreground">{description}</p>
         </div>
 

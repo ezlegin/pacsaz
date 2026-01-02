@@ -1,4 +1,4 @@
-import { mapUserPlan, PlanType, testUser } from "@/data/user";
+import { mapUserPlanTitle, PlanKey, testUser } from "@/data/user";
 import { isSubscribed } from "@/lib/dielines/core/consts";
 import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
@@ -18,7 +18,7 @@ const PanelNavbar = () => {
         <span>
           {isSubscribed ? (
             <span className="font-semibold">
-              {mapUserPlan(testUser.plan as PlanType)}
+              {mapUserPlanTitle(testUser.plan.key)}
             </span>
           ) : (
             "ندارد"

@@ -1,18 +1,18 @@
 "use client";
 
 import { Badge } from "@workspace/ui/components/badge";
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@workspace/ui/components/toggle-group";
 import { Flag } from "lucide-react";
-import React, { useState } from "react";
-import { SubCardProps, SubscriptionCard } from "./SubscriptionCard";
-type Period = "monthly" | "yearly";
+import { useState } from "react";
+import PeriodSwitch from "./PeriodSwitch";
+import { SubscriptionCard } from "./SubscriptionCard";
+import { plans } from "./UpgradeSubscription";
+
+export type SubPeriod = "monthly" | "annual";
+
+export const discountFactor = 0.35;
 
 const SubscriptionList = () => {
-  const [period, setPeriod] = useState<Period>("monthly");
-  const discountFactor = 0.35;
+  const [period, setPeriod] = useState<SubPeriod>("monthly");
 
   return (
     <div className="h-full flex flex-col items-center justify-center gap-6 z-10">
@@ -31,34 +31,16 @@ const SubscriptionList = () => {
         </p>
       </div>
 
-      <ToggleGroup
-        value={period}
-        type="single"
-        spacing={1}
-        size={"sm"}
-        className="bg-foreground/5 p-1"
-        onValueChange={(val: Period | "") => {
-          if (val === "") return;
-          setPeriod(val);
-        }}
-      >
-        <ToggleGroupItem className="cursor-pointer w-32" value="yearly">
-          <Badge variant={"destructive"}>-35%</Badge>
-          سالانه
-        </ToggleGroupItem>
-        <ToggleGroupItem className="cursor-pointer w-32" value="monthly">
-          ماهانه
-        </ToggleGroupItem>
-      </ToggleGroup>
+      <PeriodSwitch isAnnual={period === "annual"} setPeriod={setPeriod} />
 
       <div className="flex gap-5">
-        {subPlans.map((p, idx) => (
+        {plans.map((p, idx) => (
           <SubscriptionCard
             key={idx}
             props={p}
             index={idx}
             discountFactor={discountFactor}
-            isYearly={period === "yearly"}
+            isAnnual={period === "annual"}
           />
         ))}
       </div>
@@ -67,27 +49,3 @@ const SubscriptionList = () => {
 };
 
 export default SubscriptionList;
-
-const subPlans: SubCardProps[] = [
-  {
-    title: "استاندارد",
-    description:
-      "مناسب طراحان تازه‌کار و دانشجویانی که می‌خواهند بدون دردسر، دایلاین‌های آماده و دقیق برای پروژه‌های خود بسازند.",
-    failDownload: 50,
-    price: 399,
-  },
-  {
-    title: "حرفه‌ای",
-    description:
-      "بهترین انتخاب برای طراحان حرفه‌ای و فریلنسرها؛ دسترسی گسترده‌تر، آزادی عمل بیشتر و سرعت بالاتر در آماده‌سازی دایلاین‌ها.",
-    failDownload: 100,
-    price: 699,
-  },
-  {
-    title: "سازمانی",
-    description:
-      "مناسب چاپخانه‌ها و تیم‌های طراحی بزرگ که به تولید نامحدود، دقت صنعتی و جریان کاری پایدار نیاز دارند.",
-    failDownload: 400,
-    price: 1399,
-  },
-];
