@@ -1,3 +1,4 @@
+import { Separator } from "@workspace/ui/components/separator";
 import { cn } from "@workspace/ui/lib/utils";
 import React, { ReactNode } from "react";
 
@@ -5,20 +6,30 @@ const Card = ({
   children,
   className,
   primaryTheme,
+  title,
 }: {
   children: ReactNode;
   className?: string;
   primaryTheme?: boolean;
+  title?: string;
 }) => {
   return (
     <div
       className={cn(
-        "border p-5 rounded-2xl bg-accent/30",
+        title ? "py-5 pt-3" : "p-5",
         primaryTheme && "bg-primary-foreground border-primary",
+        "border rounded-2xl bg-accent/30",
         className
       )}
     >
-      {children}
+      {title && (
+        <>
+          <div className="px-5 pb-3 text-sm">{title}</div>
+          <Separator />
+        </>
+      )}
+
+      {title ? <div className={"p-5 pb-0"}>{children}</div> : children}
     </div>
   );
 };

@@ -9,7 +9,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@workspace/ui/components/sidebar";
-import { Bookmark, CreditCard, Flag, User } from "lucide-react";
+import { Bookmark, CreditCard, Flag, Heart, User } from "lucide-react";
 import Link from "next/link";
 import PacsazLogo from "./PacsazLogo";
 import { isSubscribed } from "@/lib/dielines/core/consts";
@@ -19,6 +19,11 @@ const items = [
     title: isSubscribed ? "وضعیت اشتراک" : "اشتراک",
     url: "/panel",
     icon: Flag,
+  },
+  {
+    title: "علاقه‌مندی ها",
+    url: "/panel/favs",
+    icon: Heart,
   },
   {
     title: "ذخیره شده",

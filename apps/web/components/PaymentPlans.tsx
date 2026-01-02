@@ -1,6 +1,7 @@
 import Card from "@/components/Card";
 import Price from "@/components/Price";
-import { PlanKey, plans } from "@/data/subscription";
+import { PlanKey } from "@/data/subscription";
+import { plans } from "@/data/subscription";
 import { Label } from "@workspace/ui/components/label";
 import {
   RadioGroup,

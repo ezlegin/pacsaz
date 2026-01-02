@@ -14,7 +14,8 @@ import Card from "./Card";
 import PeriodSwitch from "./PeriodSwitch";
 import Price from "./Price";
 import { SubPeriod } from "./SubscriptionList";
-import { PlanKey, plans } from "@/data/subscription";
+import { PlanKey } from "@/data/subscription";
+import { plans } from "@/data/subscription";
 
 const UpgradeSubscription = () => {
   const [plan, setPlan] = useState<PlanKey>(

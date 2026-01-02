@@ -14,10 +14,16 @@ interface Props {
   data: any[];
   renderRows: (item: any, index?: number) => ReactNode;
   noDataMessage?: string;
-  dir: "ltr" | "rtl";
+  dir?: "ltr" | "rtl";
 }
 
-const Table = ({ columns, data, renderRows, noDataMessage, dir }: Props) => {
+const Table = ({
+  columns,
+  data,
+  renderRows,
+  noDataMessage,
+  dir = "rtl",
+}: Props) => {
   return (
     <>
       <MyTable>

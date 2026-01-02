@@ -22,6 +22,14 @@ export interface SubCardProps {
   features: PlanFeature[];
 }
 
+export const generals = [
+  { active: true, value: "دسترسی به تمام قالب ها" },
+  { active: true, value: "ذخیره نامحدود قالب ها" },
+  { active: true, value: "دانلود فرمت دلخواه" },
+  { active: true, value: "انتخاب متریال چاپ" },
+  { active: true, value: "انتخاب نوع ابعاد" },
+  { active: true, value: "دریافت فایل بدون واترمارک" },
+];
 export const plans: SubCardProps[] = [
   {
     title: "استاندارد",
@@ -42,16 +50,12 @@ export const plans: SubCardProps[] = [
     },
     level: 1,
     features: [
-      { active: true, value: "دسترسی به تمام قالب ها" },
-      { active: true, value: "ذخیره نامحدود قالب ها" },
-      { active: true, value: "دانلود فرمت دلخواه" },
-      { active: true, value: "انتخاب متریال چاپ" },
-      { active: true, value: "انتخاب نوع ابعاد" },
-      { active: true, value: "دریافت فایل بدون واترمارک" },
+      ...generals,
       { active: false, value: "تنظیم ضخامت سفارشی متریال" },
       { active: false, value: "انتخاب میزان بلید" },
       { active: false, value: "مشاهده ابعاد کامل دایلاین" },
       { active: false, value: "هشدار خطای برش در ابعاد غیر متعارف" },
+      { active: false, value: "امکان ذخیره قالب با نام دلخواه و استفاده مجدد" },
     ],
   },
   {
@@ -73,16 +77,12 @@ export const plans: SubCardProps[] = [
     },
     level: 2,
     features: [
-      { active: true, value: "دسترسی به تمام قالب ها" },
-      { active: true, value: "ذخیره نامحدود قالب ها" },
-      { active: true, value: "دانلود فرمت دلخواه" },
-      { active: true, value: "انتخاب متریال چاپ" },
-      { active: true, value: "انتخاب نوع ابعاد" },
-      { active: true, value: "دریافت فایل بدون واترمارک" },
+      ...generals,
       { active: true, value: "تنظیم ضخامت سفارشی متریال" },
       { active: true, value: "انتخاب میزان بلید" },
       { active: true, value: "مشاهده ابعاد کامل دایلاین" },
       { active: true, value: "هشدار خطای برش در ابعاد غیر متعارف" },
+      { active: true, value: "امکان ذخیره قالب با نام دلخواه و استفاده مجدد" },
     ],
   },
   {
@@ -104,16 +104,12 @@ export const plans: SubCardProps[] = [
     },
     level: 3,
     features: [
-      { active: true, value: "دسترسی به تمام قالب ها" },
-      { active: true, value: "ذخیره نامحدود قالب ها" },
-      { active: true, value: "دانلود فرمت دلخواه" },
-      { active: true, value: "انتخاب متریال چاپ" },
-      { active: true, value: "انتخاب نوع ابعاد" },
-      { active: true, value: "دریافت فایل بدون واترمارک" },
+      ...generals,
       { active: true, value: "تنظیم ضخامت سفارشی متریال" },
       { active: true, value: "انتخاب میزان بلید" },
       { active: true, value: "مشاهده ابعاد کامل دایلاین" },
       { active: true, value: "هشدار خطای برش در ابعاد غیر متعارف" },
+      { active: true, value: "امکان ذخیره قالب با نام دلخواه و استفاده مجدد" },
     ],
   },
 ];
