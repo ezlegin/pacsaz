@@ -57,6 +57,6 @@ const menu = [
   { label: "اشتراک", href: "/subscription" },
   { label: "قوانین و مقررات", href: "/terms" },
   { label: "درباره ما", href: "/about-us" },
-  { label: "ارتباط با ما", href: "/contact-us" },
+  { label: "تماس با ما", href: "/contact-us" },
   { label: "آموزش", href: "https://igraphical.ir/courses/packaging" },
 ];

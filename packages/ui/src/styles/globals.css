@@ -133,7 +133,7 @@ html > body[data-scroll-locked] {
   }
 }
 
-.dark {
+/* .dark {
   --sidebar: hsl(240 5.9% 10%);
   --sidebar-foreground: hsl(240 4.8% 95.9%);
   --sidebar-primary: hsl(224.3 76.3% 48%);
@@ -142,4 +142,23 @@ html > body[data-scroll-locked] {
   --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
   --sidebar-border: hsl(240 3.7% 15.9%);
   --sidebar-ring: hsl(217.2 91.2% 59.8%);
+} */
+
+/*! ------------- SCROLLBAR ------------- */
+.custom-scrollbar {
+  overflow-y: scroll;
+}
+.custom-scrollbar::-webkit-scrollbar {
+  width: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  border-radius: 9999px;
+  background-color: #e5e7eb;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background-color: rgba(148, 163, 184, 0.7);
+}
+.custom-scrollbar:hover::-webkit-scrollbar-thumb {
+  background-color: #94a3b8;
 }

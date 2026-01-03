@@ -46,7 +46,7 @@ export function InputForm({ setLoginStep, setPhoneNumber }: Props) {
                   <Input
                     {...field}
                     placeholder="شماره تماس خود را وارد کنید..."
-                    className="pr-10 h-10"
+                    className="pr-10"
                     onChange={(e) =>
                       field.onChange(e.target.value.replace(/\D/g, ""))
                     }

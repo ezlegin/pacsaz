@@ -3,22 +3,20 @@
 import PacsazLogo from "@/components/PacsazLogo";
 import Card from "@/components/Card";
 import { Separator } from "@workspace/ui/components/separator";
+import PageTitle from "@/components/PageTitle";
 
 const AboutPage = () => {
   return (
     <div className="max-w-5xl mx-auto px-4 py-16 space-y-8">
-      <div className="text-center space-y-4">
-        <div className="flex justify-center">
-          <PacsazLogo scale={1.4} />
-        </div>
+      <div className="flex flex-col justify-center items-center space-y-4">
+        <PacsazLogo scale={1.4} />
 
-        <h1 className="text-3xl md:text-4xl font-bold">درباره پک‌ساز</h1>
-
-        <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-          پک‌ساز تلاشی است برای ساده‌سازی یکی از پیچیده‌ترین بخش‌های دنیای
+        <PageTitle
+          title="درباره پک‌ساز"
+          subTitle="پک‌ساز تلاشی است برای ساده‌سازی یکی از پیچیده‌ترین بخش‌های دنیای
           بسته‌بندی؛ جایی که دقت، میلی‌مترها و تصمیم‌های فنی، مستقیماً به نتیجه
-          نهایی گره می‌خورند.
-        </p>
+          نهایی گره می‌خورند."
+        />
       </div>
 
       <Card className="space-y-6 leading-relaxed">

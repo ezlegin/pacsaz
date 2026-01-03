@@ -15,3 +15,20 @@ export const onboardingStep2Schema = z.object({
   email: z.string().email().trim(),
 });
 export type OnboardingStep2Type = z.infer<typeof onboardingStep2Schema>;
+
+export const contactFormSchema = z.object({
+  fullName: z.string().min(3, "نام و نام خانوادگی حداقل باید ۳ کاراکتر باشد"),
+
+  email: z.string().email("ایمیل وارد شده معتبر نیست"),
+
+  phone: z
+    .string()
+    .min(10, "شماره تماس معتبر نیست")
+    .max(15, "شماره تماس معتبر نیست"),
+
+  subject: z.string().min(3, "عنوان باید حداقل ۳ کاراکتر باشد"),
+
+  message: z.string().min(10, "پیام باید حداقل ۱۰ کاراکتر باشد"),
+});
+
+export type ContactFormType = z.infer<typeof contactFormSchema>;
