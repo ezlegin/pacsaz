@@ -210,6 +210,7 @@ export default function ProductDetails({
             infoContent={<DimensionInfo />}
           >
             <Select
+              disabled={!isSubscribed}
               onValueChange={(val: string) => setBleedAmount(+val)}
               dir="rtl"
             >

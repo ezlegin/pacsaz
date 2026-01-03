@@ -5,6 +5,11 @@ import {
   DialogContent,
   DialogHeader,
 } from "@workspace/ui/components/dialog";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@workspace/ui/components/tooltip";
 import { cn } from "@workspace/ui/lib/utils";
 import { Info } from "lucide-react";
 import { JSX } from "react";
@@ -42,7 +47,15 @@ export function Section({
 
         {isPremium && (
           <div>
-            <Diamond />
+            <Tooltip>
+              <TooltipTrigger>
+                <Diamond />
+              </TooltipTrigger>
+
+              <TooltipContent side="left">
+                <p className="p-1">فقط در اشتراک حرفه‌ای و سازمانی</p>
+              </TooltipContent>
+            </Tooltip>
           </div>
         )}
       </div>

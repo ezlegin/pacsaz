@@ -38,7 +38,7 @@ export const plans: SubCardProps[] = [
     description:
       "مناسب طراحان تازه‌کار و دانشجویانی که می‌خواهند بدون دردسر، دایلاین‌های آماده و دقیق برای پروژه‌های خود بسازند.",
     fairDownload: {
-      monthly: 50,
+      monthly: 45,
       get annual() {
         return this.monthly * 12;
       },

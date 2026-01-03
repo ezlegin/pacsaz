@@ -1,4 +1,5 @@
 import { useLoading } from "@/hooks/useLoading";
+import { isSubscribed } from "@/lib/dielines/core/consts";
 import { formatToFixed } from "@/lib/dielines/core/helpers/format";
 import { getThicknessRange } from "@/lib/dielines/core/helpers/getThicknessRange";
 import { MaterialValue } from "@/lib/dielines/core/types";
@@ -58,6 +59,7 @@ const ThicknessInput = ({
           isRendering &&
             isMThicknessLoading &&
             "opacity-50 pointer-events-none",
+          !isSubscribed && "pointer-events-none opacity-40",
           "relative"
         )}
       >
@@ -69,7 +71,7 @@ const ThicknessInput = ({
           value={formatToFixed(
             localCustomThickness ?? selectedMaterialThickness.toString()
           )}
-          className="text-center"
+          className={"text-center"}
           onFocus={(e) => e.currentTarget.select()}
           onChange={(e) => {
             const val = e.target.value;
