@@ -1,4 +1,4 @@
-import ProductNavbar from "@/components/product/ProductNavbar";
+import ProductNavbar from "@/components/Navbars/ProductNavbar";
 import React from "react";
 
 const page = () => {

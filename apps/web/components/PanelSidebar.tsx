@@ -9,10 +9,11 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@workspace/ui/components/sidebar";
-import { Bookmark, CreditCard, Flag, Heart, User } from "lucide-react";
+import { Bookmark, CreditCard, Flag, Heart, User, Users } from "lucide-react";
 import Link from "next/link";
 import PacsazLogo from "./PacsazLogo";
 import { isSubscribed } from "@/lib/dielines/core/consts";
+import { Badge } from "@workspace/ui/components/badge";
 
 const items = [
   {
@@ -29,6 +30,12 @@ const items = [
     title: "ذخیره شده",
     url: "/panel/saved",
     icon: Bookmark,
+  },
+  {
+    title: "مشتری‌ها",
+    url: "#",
+    icon: Users,
+    onDevelopment: true,
   },
   {
     title: "پرداخت ها",
@@ -66,7 +73,12 @@ export function PanelSidebar() {
                   <SidebarMenuButton asChild>
                     <Link href={item.url}>
                       <item.icon />
-                      <span>{item.title}</span>
+                      <div className="flex gap-2 items-center">
+                        <span>{item.title}</span>
+                        {item.onDevelopment && (
+                          <Badge variant={"primaryForeground"}>بزودی</Badge>
+                        )}
+                      </div>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

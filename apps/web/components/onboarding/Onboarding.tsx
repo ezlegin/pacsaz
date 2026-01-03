@@ -8,6 +8,7 @@ import { Button } from "@workspace/ui/components/button";
 import { Card } from "@workspace/ui/components/card";
 import { Separator } from "@workspace/ui/components/separator";
 import { useState } from "react";
+import Step4 from "./Step4";
 
 export type UserType =
   | "student"
@@ -64,14 +65,14 @@ const Onboarding = () => {
         </div>
         <div className="flex items-center gap-3">
           <div dir="ltr" className="text-xs text-muted-foreground font-medium">
-            {onboardingStep} / 3
+            {onboardingStep} / 4
           </div>
           <Button
             variant={disableButton ? "outline" : "default"}
             disabled={disableButton}
             onClick={() =>
               setOnboardingStep((p) => {
-                if (p === 3) {
+                if (p === 4) {
                   onSubmit();
                   return p;
                 }
@@ -94,6 +95,8 @@ const Onboarding = () => {
         <Step2 isIndividual={isIndividual} setPersonaData={setPersonaData} />
       )}
       {onboardingStep === 3 && <Step3 setUsageGoal={setUsageGoal} />}
+
+      {onboardingStep === 4 && <Step4 />}
     </Card>
   );
 };
