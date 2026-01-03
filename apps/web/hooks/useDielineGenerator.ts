@@ -17,7 +17,6 @@ export function useDielineGenerator(dieline: DielineGeneratorProps) {
   const [showWatermark, setShowWatermark] = useState(true);
   const [showOverallDimensions, setShowOverallDimensions] = useState(false);
   const [doCenterSVG, setDoCenterSVG] = useState(true);
-
   const { size, setDimension } = useSize(dieline.dimensions);
   const [customThickness, setCustomThickness] = useState<number | undefined>();
 

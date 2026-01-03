@@ -11,9 +11,8 @@ import {
 import { tuckEndModel } from "@/public";
 import { formatDimensions } from "@/utils/formatDimensions";
 import { toMm } from "@/utils/sizeConvertor";
-import { Card, CardContent, CardTitle } from "@workspace/ui/components/card";
-import { Switch } from "@workspace/ui/components/switch";
 import Image from "next/image";
+import DeveloperTools from "./DeveloperTools";
 
 interface Props {
   dimension: Dimensions;
@@ -142,13 +141,6 @@ const ProductInfo = ({
   return (
     <div className="flex flex-col justify-between w-full bg-accent/40 z-10 p-3 rounded-2xl h-fit backdrop-blur-[2px]">
       <div className="space-y-3">
-        <Image
-          alt=""
-          src={tuckEndModel}
-          width={300}
-          height={300}
-          className="bg-accent rounded-2xl"
-        />
         <div className="flex justify-between">
           {packLengend.map(({ color, label }) => (
             <div key={label} className="flex items-center gap-1">
@@ -157,6 +149,14 @@ const ProductInfo = ({
             </div>
           ))}
         </div>
+
+        <Image
+          alt=""
+          src={tuckEndModel}
+          width={300}
+          height={300}
+          className="bg-accent rounded-2xl"
+        />
 
         <div className="space-y-1">
           {dimensions.map(
@@ -186,64 +186,18 @@ const ProductInfo = ({
       </div>
 
       {onDevelepe && sizes && (
-        <div className="absolute left-0 bottom-0 w-fit m-3 opacity-0 hover:opacity-100 transition-opacity">
-          <Card dir="ltr" className="p-4 gap-1">
-            <CardTitle>Developer Tools:</CardTitle>
-
-            <CardContent className="p-1 text-sm flex flex-col gap-2">
-              <div className="flex justify-between">
-                <p>Slug:</p>
-                <p>{slug}</p>
-              </div>
-              <div className="flex justify-between">
-                <p>Trim Size:</p>
-                <p>
-                  {toMm(sizes.trim.width).toFixed()} x{" "}
-                  {toMm(sizes.trim.height).toFixed()} mm
-                </p>
-              </div>
-              <div className="flex justify-between">
-                <p>Bleed Size:</p>
-                <p>
-                  {toMm(sizes.bleed.width).toFixed()} x{" "}
-                  {toMm(+sizes.bleed.height).toFixed()} mm
-                </p>
-              </div>
-              <div className="flex justify-between">
-                <p>Bleed Amount:</p>
-                <p>{toMm(sizes.bleedAmount)} mm</p>
-              </div>
-              <div className="flex justify-between">
-                <p>Show Anchors</p>
-                <Switch
-                  checked={showAnchors}
-                  onCheckedChange={setShowAnchors}
-                />
-              </div>
-              <div className="flex justify-between">
-                <p>Show Watermark</p>
-                <Switch
-                  checked={showWatermark}
-                  onCheckedChange={setShowWatermark}
-                />
-              </div>
-              <div className="flex justify-between">
-                <p>Show Overall Dimensions</p>
-                <Switch
-                  checked={showOverallDimensions}
-                  onCheckedChange={setShowOverallDimensions}
-                />
-              </div>
-              <div className="flex justify-between">
-                <p>Do Center the SVG</p>
-                <Switch
-                  checked={doCenterSVG}
-                  onCheckedChange={setDoCenterSVG}
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <DeveloperTools
+          doCenterSVG={doCenterSVG}
+          setDoCenterSVG={setDoCenterSVG}
+          setShowAnchors={setShowAnchors}
+          setShowOverallDimensions={setShowOverallDimensions}
+          setShowWatermark={setShowWatermark}
+          showAnchors={showAnchors}
+          showOverallDimensions={showOverallDimensions}
+          showWatermark={showWatermark}
+          sizes={sizes}
+          slug={slug}
+        />
       )}
     </div>
   );

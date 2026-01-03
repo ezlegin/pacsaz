@@ -45,7 +45,7 @@ export async function PDFGenerator({ svg, slug }: Props) {
     .fillColor(COLORS.guides.text)
     .text(guideText, 10, 10, { lineGap: 3 });
 
-  const imageWidth = 25;
+  const imageWidth = 30;
   const image = path.join(process.cwd(), "public/logos/pacsaz-logo.png");
   doc.image(image, docWidth - imageWidth - 10, 10, { width: imageWidth });
 

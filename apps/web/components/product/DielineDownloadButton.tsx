@@ -1,7 +1,7 @@
 import { useLoading } from "@/hooks/useLoading";
 import { downloadPdf } from "@/lib/actions/export/downloader";
 import { isSubscribed } from "@/lib/dielines/core/consts";
-import { FormatsType, Model } from "@/lib/dielines/core/types";
+import { Dimensions, FormatsType, Model } from "@/lib/dielines/core/types";
 import Diamond from "@/public/icons/Diamond";
 import { Button } from "@workspace/ui/components/button";
 import {
@@ -20,9 +20,16 @@ interface Props {
   svg: Model | null;
   slug: string;
   isRendering: boolean;
+  dimensions: Dimensions;
 }
 
-const DielineDownloadButton = ({ format, svg, slug, isRendering }: Props) => {
+const DielineDownloadButton = ({
+  format,
+  svg,
+  slug,
+  isRendering,
+  dimensions,
+}: Props) => {
   const { startLoading, stopLoading, isLoading } = useLoading();
   const [openLoginPopup, setOpenLoginPopup] = useState(false);
 
@@ -42,6 +49,7 @@ const DielineDownloadButton = ({ format, svg, slug, isRendering }: Props) => {
       svg,
       format,
       slug,
+      dimensions,
     });
     toast.success("فایل با موفقیت تولید شد.");
 
@@ -68,7 +76,7 @@ const DielineDownloadButton = ({ format, svg, slug, isRendering }: Props) => {
         size="lg"
         className="mt-4 w-full gap-2 font-medium"
       >
-        {isLoading ? (
+        {isLoading || isRendering ? (
           <Spinner />
         ) : (
           <div className="flex gap-1.5 items-center">

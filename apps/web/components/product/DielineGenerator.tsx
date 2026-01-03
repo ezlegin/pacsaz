@@ -58,6 +58,7 @@ const DielineGenerator = ({ slug }: { slug: string }) => {
         material={material}
         isRendering={isRendering}
         resolvedSizes={resolved}
+        dimension={size}
       />
 
       <div className="relative">

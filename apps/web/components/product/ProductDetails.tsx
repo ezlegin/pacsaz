@@ -12,6 +12,7 @@ import { isPackagingSizeLogical } from "@/lib/dielines/core/helpers/isPackagingS
 import {
   DielineDimensions,
   DimensionKey,
+  Dimensions,
   DimensionsType,
   FormatsType,
   MaterialsInput,
@@ -61,6 +62,7 @@ interface Props {
   dimensionType: DimensionType;
   svg: Model | null;
   slug: string;
+  dimension: Dimensions;
   material: MaterialKey;
   isRendering: boolean;
   resolvedSizes: {
@@ -78,6 +80,7 @@ export default function ProductDetails({
   setBleedAmount,
   setCustomThickness,
   dimensionType,
+  dimension,
   dimensionsType,
   resolvedSizes: { height, width },
   svg,
@@ -308,6 +311,7 @@ export default function ProductDetails({
               isRendering={isRendering}
               slug={slug}
               svg={svg}
+              dimensions={dimension}
             />
           </Section>
         </div>
