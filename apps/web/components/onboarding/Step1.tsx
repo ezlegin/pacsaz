@@ -41,7 +41,7 @@ const Step1 = ({ userType, setUserType }: Props) => {
 
 export default Step1;
 
-const userTypes: {
+export const userTypes: {
   title: string;
   key: UserType;
 }[] = [

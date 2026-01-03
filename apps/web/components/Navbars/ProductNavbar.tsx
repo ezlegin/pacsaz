@@ -1,10 +1,9 @@
-import { Button } from "@workspace/ui/components/button";
-import { cn } from "@workspace/ui/lib/utils";
-import { ArrowLeft, Bookmark } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { layoutPaddings } from "../Navbars/Navbar";
 import NavbarButtons from "../Navbars/NavbarButtons";
 import PacsazLogo from "../PacsazLogo";
+import FavoriteDieline from "../product/FavoriteDieline";
 
 interface Props {
   productName: string;
@@ -26,21 +25,7 @@ const ProductNavbar = ({ productName }: Props) => {
           </Link>
           <ArrowLeft size={16} />
           <p className="font-semibold">{productName}</p>
-          <Button
-            size={"icon"}
-            variant={"ghost"}
-            className="hover:text-destructive hover:border rounded-full"
-          >
-            <Bookmark
-              size={18}
-              className={cn(
-                isFaved
-                  ? "text-orange-400"
-                  : "text-muted-foreground hover:text-destructive"
-              )}
-              fill={isFaved ? "#ff8904" : "transparent"}
-            />
-          </Button>
+          <FavoriteDieline isFaved={isFaved} />
         </div>
         <NavbarButtons />
       </div>
