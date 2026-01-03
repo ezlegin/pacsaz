@@ -2,7 +2,7 @@ import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
 import { ArrowLeft, Bookmark } from "lucide-react";
 import Link from "next/link";
-import { navbarPaddings } from "../Navbars/Navbar";
+import { layoutPaddings } from "../Navbars/Navbar";
 import NavbarButtons from "../Navbars/NavbarButtons";
 import PacsazLogo from "../PacsazLogo";
 
@@ -14,7 +14,7 @@ const ProductNavbar = ({ productName }: Props) => {
   const isFaved = true;
 
   return (
-    <div className={`bg-background border-b z-10 ${navbarPaddings}`}>
+    <div className={`bg-background border-b z-10 ${layoutPaddings}`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link href={"/"}>

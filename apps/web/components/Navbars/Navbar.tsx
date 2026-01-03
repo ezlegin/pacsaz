@@ -2,12 +2,12 @@ import Link from "next/link";
 import NavbarButtons from "./NavbarButtons";
 import PacsazLogo from "../PacsazLogo";
 
-export const navbarPaddings = "p-3 px-10";
+export const layoutPaddings = "p-3 px-10";
 
 const Navbar = () => {
   return (
     <div
-      className={`flex justify-between items-center border-b bg-background z-10 ${navbarPaddings}`}
+      className={`flex justify-between items-center border-b bg-background z-10 ${layoutPaddings}`}
     >
       <div className="flex gap-10 items-center">
         <Link href={"/"}>
@@ -36,5 +36,5 @@ export default Navbar;
 const navbarMenu = [
   { label: "قالب ها", href: "/dielines" },
   { label: "آموزش", href: "https://igraphical.ir/courses/packaging" },
-  { label: "درباره ما", href: "" },
+  { label: "درباره ما", href: "/about-us" },
 ];

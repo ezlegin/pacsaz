@@ -6,6 +6,7 @@ import { CircleCheck, Zap } from "lucide-react";
 import Link from "next/link";
 import Price from "./Price";
 import { SubPeriod } from "./SubscriptionList";
+import Card from "./Card";
 
 export const SubscriptionCard = ({
   props: {
@@ -36,10 +37,10 @@ export const SubscriptionCard = ({
         </div>
       )}
 
-      <div
+      <Card
         className={cn(
-          index === 1 ? "mt-2 rounded-lg" : "mt-9 rounded-2xl",
-          "bg-white p-5  space-y-8 w-xs"
+          index === 1 ? "mt-2 rounded-lg bg-background" : "mt-9 rounded-2xl",
+          "p-5 space-y-8 w-xs"
         )}
       >
         <div className="flex flex-col gap-3">
@@ -75,7 +76,7 @@ export const SubscriptionCard = ({
             ))}
           </ul>
         </div>
-      </div>
+      </Card>
     </div>
   );
 };

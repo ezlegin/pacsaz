@@ -11,7 +11,7 @@ const Terms = ({ style = "styled" }: { style?: "raw" | "styled" }) => {
       ))}
     </div>
   ) : (
-    <div className="w-fit space-y-3 ">
+    <div className="w-fit space-y-3 mx-auto">
       {termsAndConditions.map((t, idx) => (
         <Card key={idx}>
           <p className="text-sm">
