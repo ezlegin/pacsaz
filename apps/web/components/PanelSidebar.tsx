@@ -71,7 +71,12 @@ export function PanelSidebar() {
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <Link href={item.url}>
+                    <Link
+                      href={item.url}
+                      className={
+                        item.onDevelopment ? "cursor-default" : "cursor-pointer"
+                      }
+                    >
                       <item.icon />
                       <div className="flex gap-2 items-center">
                         <span>{item.title}</span>

@@ -24,7 +24,7 @@ import {
 import { useForm } from "@workspace/ui/index";
 import { UserType } from "../onboarding/Onboarding";
 import { userTypes } from "../onboarding/Step1";
-import { isUserIndividual } from "@/lib/isUserIndividual";
+import { isUserIndividual } from "@/utils/isUserIndividual";
 
 export function ProfileForm() {
   const form = useForm<ProfileFormSchema>({

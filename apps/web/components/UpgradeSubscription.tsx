@@ -1,28 +1,29 @@
 "use client";
 
+import { PlanKey, plans } from "@/data/subscription";
 import { testUser } from "@/data/user";
+import { useUpgradeSubscriptionCheckout } from "@/hooks/useSubscriptionCheckout";
 import { Button } from "@workspace/ui/components/button";
+import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import {
   RadioGroup,
   RadioGroupItem,
 } from "@workspace/ui/components/radio-group";
-import { SquareArrowOutUpRight, Zap } from "lucide-react";
+import { Separator } from "@workspace/ui/components/separator";
+import { SquareArrowOutUpRight } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
 import Card from "./Card";
 import PeriodSwitch from "./PeriodSwitch";
 import Price from "./Price";
-import { SubPeriod } from "./SubscriptionList";
-import { PlanKey } from "@/data/subscription";
-import { plans } from "@/data/subscription";
 
 const UpgradeSubscription = () => {
-  const [plan, setPlan] = useState<PlanKey>(
-    (plans.find((p) => p.level === testUser.plan.level + 1)?.key as PlanKey) ||
-      "standard"
-  );
-  const [period, setPeriod] = useState<SubPeriod>("monthly");
+  const { paymentInfo, setPeriod, setPlan, period, plan, total } =
+    useUpgradeSubscriptionCheckout({ user: testUser });
+
+  const onStartPayment = () => {
+    console.log("Payment Started");
+  };
 
   return (
     <div className="space-y-6">
@@ -69,10 +70,7 @@ const UpgradeSubscription = () => {
             </Label>
           </Card>
         ))}
-      </RadioGroup>
-
-      <div>
-        <Link target="_blank" href={"/subscription"}>
+        <Link target="_blank" href={"/subscription"} className="w-fit">
           <Button
             size={"sm"}
             variant={"link"}
@@ -82,16 +80,45 @@ const UpgradeSubscription = () => {
             مشاهده ویژگی پلن ها
           </Button>
         </Link>
-      </div>
+      </RadioGroup>
 
-      <div>
-        <Link href={`/payment?plan=${plan}&period=${period}`}>
-          <Button size={"lg"} variant={"gradient"} className="w-full">
-            <Zap />
-            ارتقا اشتراک
+      <Card className="space-y-3">
+        <ul className="text-sm text-muted-foreground space-y-2.5">
+          {paymentInfo.map((p, idx) => (
+            <div
+              key={idx}
+              className="space-y-2.5 last:font-medium last:text-foreground"
+            >
+              <li className="flex justify-between">
+                <span>{p.title}</span>
+                <span>{p.value}</span>
+              </li>
+
+              <Separator />
+            </div>
+          ))}
+        </ul>
+
+        <div className="relative">
+          <Input placeholder="کد تخفیف..." />
+          <Button
+            variant={"ghost"}
+            className="absolute left-0 top-1/2 -translate-y-1/2"
+            size={"sm"}
+          >
+            بررسی
           </Button>
-        </Link>
-      </div>
+        </div>
+
+        <Button
+          onClick={onStartPayment}
+          size={"lg"}
+          className="w-full"
+          variant={"gradient"}
+        >
+          پرداخت {total.toLocaleString("en-US")} تومان
+        </Button>
+      </Card>
     </div>
   );
 };

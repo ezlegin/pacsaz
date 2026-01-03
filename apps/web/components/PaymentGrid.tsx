@@ -1,50 +1,30 @@
 "use client";
 
 import { PlanKey } from "@/data/subscription";
-import { plans } from "@/data/subscription";
-import { mapPeriodLabel } from "@/data/user";
+import { testUser } from "@/data/user";
+import { useUpgradeSubscriptionCheckout } from "@/hooks/useSubscriptionCheckout";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Separator } from "@workspace/ui/components/separator";
-import { useState } from "react";
 import Card from "./Card";
 import { PaymentPlans } from "./PaymentPlans";
 import { SubPeriod } from "./SubscriptionList";
 
+export type PaymentQuery = {
+  plan?: PlanKey | undefined;
+  period?: SubPeriod | undefined;
+};
 interface Props {
-  query: {
-    plan: PlanKey | undefined;
-    period: SubPeriod | undefined;
-  };
+  query: PaymentQuery;
 }
 
 const PaymentGrid = ({ query }: Props) => {
-  const [plan, setPlan] = useState<PlanKey>(query.plan || "pro");
-  const [period, setPeriod] = useState<SubPeriod>(query.period || "monthly");
-
-  const selectedPlan = plans.find((p) => p.key == plan);
-  const monthlyTotal =
-    period === "monthly"
-      ? selectedPlan?.price.monthly!
-      : selectedPlan?.price.monthly! * 12;
-
-  const total =
-    period === "monthly"
-      ? selectedPlan?.price.monthly!
-      : selectedPlan?.price.annual!;
-
-  const discount = monthlyTotal - total;
+  const { paymentInfo, setPeriod, setPlan, period, plan, total } =
+    useUpgradeSubscriptionCheckout({ user: testUser, query });
 
   const onStartPayment = () => {
     console.log("Payment Started");
   };
-
-  const paymentInfo = [
-    { title: "پلن:", value: mapPeriodLabel(period) },
-    { title: "مجموع:", value: monthlyTotal.toLocaleString("en-US") },
-    { title: "تخفیف:", value: discount.toLocaleString("en-US") },
-    { title: "قابل پرداخت:", value: total.toLocaleString("en-US") },
-  ];
 
   return (
     <div className="max-w-7xl mx-auto">

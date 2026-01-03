@@ -20,6 +20,7 @@ type UserType = {
   plan: PlanType;
   fairDownload: number;
   downloaded: number;
+  paid: number;
 };
 
 export const testUser: UserType = {
@@ -40,6 +41,7 @@ export const testUser: UserType = {
     },
     description: "مخصوص مبتدیان و تازه کار",
   },
+  paid: 399000,
   fairDownload: 50,
   downloaded: 39,
 };
