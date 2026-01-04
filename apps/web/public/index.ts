@@ -11,6 +11,7 @@ export const dxfIcon = "/icons/dxf-icon.svg";
 // PATTERNS
 export const watermarkPattern = "/watermark.png";
 export const pacsazPattern = "/pacsaz-pattern.png";
+export const squarePattern = "/square-pattern.png";
 
 // TEMP
 export const tuckEnd = "/tuck-end.png";

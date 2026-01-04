@@ -43,7 +43,13 @@ const tuckEnd: DielineGeneratorProps = {
 
   model({
     developers: { showAnchors, showWatermark, showOverallDimensions },
-    dimensions: { raw: rawDim, resolved, bleedSize, customThickness },
+    dimensions: {
+      raw: rawDim,
+      resolved,
+      bleedSize,
+      customThickness,
+      container,
+    },
     dimensionType,
     selectedMaterial,
   }) {
@@ -237,6 +243,7 @@ const tuckEnd: DielineGeneratorProps = {
       trimModel,
       bleedAmount,
       offsets,
+      container,
       showAnchors,
       watermark: {
         show: showWatermark,

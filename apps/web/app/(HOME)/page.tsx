@@ -1,12 +1,13 @@
-import { Button } from "@workspace/ui/components/button";
+import LandingPage from "@/components/Home/LandingPage";
 
-export default function Page() {
+const page = () => {
   return (
-    <div className="flex items-center justify-center pt-80">
-      <div className="flex flex-col items-center justify-center gap-4">
-        <h1 className="text-2xl font-bold">Hello World</h1>
-        <Button size="sm">Button</Button>
+    <div className="space-y-32">
+      <div className="px-20 mx-auto pt-20">
+        <LandingPage />
       </div>
     </div>
   );
-}
+};
+
+export default page;

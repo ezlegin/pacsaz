@@ -16,9 +16,19 @@ interface Props {
   svg: string;
   isRendering: boolean;
   doCenterSVG: boolean;
+  disablePanning?: boolean;
+  disableWheel?: boolean;
+  showControls?: boolean;
 }
 
-export default function SvgPreview({ svg, isRendering, doCenterSVG }: Props) {
+export default function SvgPreview({
+  svg,
+  isRendering,
+  doCenterSVG,
+  disablePanning = false,
+  disableWheel = false,
+  showControls = true,
+}: Props) {
   const transformRef = useRef<ReactZoomPanPinchRef | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -83,9 +93,9 @@ export default function SvgPreview({ svg, isRendering, doCenterSVG }: Props) {
         limitToBounds={false}
         minScale={0.5}
         maxScale={onDevelepe ? 10 : 1.8}
-        panning={{ disabled: isRendering }}
+        panning={{ disabled: isRendering || disablePanning }}
         wheel={{
-          disabled: isRendering,
+          disabled: isRendering || disableWheel,
           smoothStep: onDevelepe ? 0.002 : 0.0003,
         }}
         velocityAnimation={{ disabled: true }}
@@ -101,7 +111,7 @@ export default function SvgPreview({ svg, isRendering, doCenterSVG }: Props) {
               wrapperStyle={{
                 width: "100%",
                 height: "100%",
-                cursor: "grab",
+                cursor: disablePanning ? "auto" : "grab",
                 overflow: "visible",
               }}
             >
@@ -116,25 +126,27 @@ export default function SvgPreview({ svg, isRendering, doCenterSVG }: Props) {
               </div>
             </TransformComponent>
 
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2">
-              <Card className="flex-row items-center gap-2 p-1 text-muted-foreground">
-                <Button variant="ghost" onClick={() => zoomOut(0.4)}>
-                  <ZoomOut size={20} />
-                </Button>
-                <div className="h-5">
-                  <Separator orientation="vertical" />
-                </div>
-                <Button variant="ghost" onClick={() => centerView(scale)}>
-                  ریست
-                </Button>
-                <div className="h-5">
-                  <Separator orientation="vertical" />
-                </div>
-                <Button variant="ghost" onClick={() => zoomIn(0.4)}>
-                  <ZoomIn size={20} />
-                </Button>
-              </Card>
-            </div>
+            {showControls && (
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2">
+                <Card className="flex-row items-center gap-2 p-1 text-muted-foreground">
+                  <Button variant="ghost" onClick={() => zoomOut(0.4)}>
+                    <ZoomOut size={20} />
+                  </Button>
+                  <div className="h-5">
+                    <Separator orientation="vertical" />
+                  </div>
+                  <Button variant="ghost" onClick={() => centerView(scale)}>
+                    ریست
+                  </Button>
+                  <div className="h-5">
+                    <Separator orientation="vertical" />
+                  </div>
+                  <Button variant="ghost" onClick={() => zoomIn(0.4)}>
+                    <ZoomIn size={20} />
+                  </Button>
+                </Card>
+              </div>
+            )}
           </>
         )}
       </TransformWrapper>

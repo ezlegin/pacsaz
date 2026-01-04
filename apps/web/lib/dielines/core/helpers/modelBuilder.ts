@@ -16,6 +16,7 @@ export function modelBuilder({
   watermark,
   material,
   showOverallDimensions,
+  container: withContainer,
 }: ModelExporter) {
   const bleed = addBleed({
     model,
@@ -26,7 +27,7 @@ export function modelBuilder({
   const container = addContainer({
     model,
     from: trimModel,
-    marginMM: MARGINS.container,
+    marginMM: withContainer ? MARGINS.container : 6,
   });
 
   const { bleedSize, containerSize, trimSize } = getSizes({

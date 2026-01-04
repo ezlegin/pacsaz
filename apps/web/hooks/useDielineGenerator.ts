@@ -6,7 +6,10 @@ import { toPt } from "@/utils/sizeConvertor";
 import { useEffect, useState, useTransition } from "react";
 import { useSize } from "./useSize";
 
-export function useDielineGenerator(dieline: DielineGeneratorProps) {
+export function useDielineGenerator(
+  dieline: DielineGeneratorProps,
+  container?: boolean
+) {
   const [material, setMaterial] = useState<MaterialKey>(
     dieline.materials.default.value as MaterialKey
   );
@@ -42,6 +45,7 @@ export function useDielineGenerator(dieline: DielineGeneratorProps) {
     startTransition(() => {
       const result = dieline.model({
         dimensions: {
+          container: container ?? true,
           customThickness,
           bleedSize,
           raw: { width: widthPT, height: heightPT, length: lengthPT },

@@ -84,6 +84,7 @@ export type DielineModel = (params: {
     showOverallDimensions: boolean;
   };
   dimensions: {
+    container: boolean;
     customThickness?: number;
     bleedSize?: number;
     raw: { width: number; height: number; length: number };
@@ -131,6 +132,7 @@ export type ModelExporter = {
   showOverallDimensions: boolean;
   watermark: Watermark;
   material: MaterialKey;
+  container: boolean;
 };
 
 export type Dust = {
