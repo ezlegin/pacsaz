@@ -33,7 +33,7 @@ const page = () => {
         <HomeSUbFAQ />
       </div>
 
-      <div className="p-20 mx-auto bg-muted/70">
+      <div className="max-w-6xl mx-auto">
         <HomeCourseIntro />
       </div>
     </div>

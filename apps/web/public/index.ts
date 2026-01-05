@@ -17,3 +17,7 @@ export const squarePattern = "/square-pattern.png";
 export const tuckEnd = "/tuck-end.png";
 export const tuckEndModel = "/tuck-end-model.jpg";
 export const loginPic = "/login-pic.png";
+
+// IMAGES
+export const packagingCoursePic = "/packaging-course.png";
+export const alirezaEzleginiPic = "/alireza-ezlegini.png";

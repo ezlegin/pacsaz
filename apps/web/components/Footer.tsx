@@ -54,6 +54,7 @@ const Footer = () => {
 export default Footer;
 
 const menu = [
+  { label: "صفحه اصلی", href: "/" },
   { label: "اشتراک", href: "/subscription" },
   { label: "قوانین و مقررات", href: "/terms" },
   { label: "درباره ما", href: "/about-us" },

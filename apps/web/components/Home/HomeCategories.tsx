@@ -4,16 +4,21 @@ import React from "react";
 import Card from "../Card";
 import Image from "next/image";
 import { tuckEnd } from "@/public";
+import Icon from "../Icon";
+import { LayoutTemplate } from "lucide-react";
 
 const HomeCategories = () => {
   return (
     <div className="space-y-8">
       <div className="flex justify-between">
-        <div>
-          <h2 className="font-semibold text-2xl">دسته بندی قالب‌ها</h2>
-          <p className="text-sm text-muted-foreground">
-            %100 لایه باز و 100% قابل شخصی سازی
-          </p>
+        <div className="flex items-center gap-5">
+          <Icon icon={LayoutTemplate} />
+          <div>
+            <h2 className="font-semibold text-2xl">دسته بندی قالب‌ها</h2>
+            <p className="text-sm text-muted-foreground">
+              %100 لایه باز و 100% قابل شخصی سازی
+            </p>
+          </div>
         </div>
 
         <Link href={"/dielines"}>

@@ -77,9 +77,9 @@ const DielineCard = ({
         <Image
           alt=""
           src={dieline.dielineImg}
-          width={400}
-          height={400}
-          className="w-full aspect-square border rounded-2xl"
+          width={500}
+          height={500}
+          className="w-full aspect-square border rounded-2xl p-6"
         />
         <div className="text-sm text-muted-foreground">{dieline.title}</div>
       </div>
