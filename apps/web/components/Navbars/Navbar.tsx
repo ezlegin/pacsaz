@@ -21,7 +21,7 @@ const Navbar = () => {
                 {item.label}
               </button>
 
-              <div className="w-full h-[1px] bg-accent-foreground absolute -bottom-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="w-full h-px bg-accent-foreground absolute -bottom-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             </Link>
           ))}
         </div>

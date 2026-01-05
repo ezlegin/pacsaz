@@ -8,12 +8,12 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@workspace/ui/components/sidebar";
+} from "@repo/ui/components/sidebar";
 import { Bookmark, CreditCard, Flag, Heart, User, Users } from "lucide-react";
 import Link from "next/link";
 import PacsazLogo from "./PacsazLogo";
 import { isSubscribed } from "@/lib/dielines/core/consts";
-import { Badge } from "@workspace/ui/components/badge";
+import { Badge } from "@repo/ui/components/badge";
 
 const items = [
   {

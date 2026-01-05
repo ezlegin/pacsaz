@@ -1,7 +1,7 @@
 import { SVGModelSizes } from "@/lib/dielines/core/types";
 import { toMm } from "@/utils/sizeConvertor";
-import { CardTitle, CardContent, Card } from "@workspace/ui/components/card";
-import { Switch } from "@workspace/ui/components/switch";
+import { CardTitle, CardContent, Card } from "@repo/ui/components/card";
+import { Switch } from "@repo/ui/components/switch";
 import React from "react";
 
 type booleanSetter = (val: boolean) => void;

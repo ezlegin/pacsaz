@@ -1,7 +1,7 @@
 import { mapUserPlanTitle, PlanKey, testUser } from "@/data/user";
 import { isSubscribed } from "@/lib/dielines/core/consts";
-import { Button } from "@workspace/ui/components/button";
-import { cn } from "@workspace/ui/lib/utils";
+import { Button } from "@repo/ui/components/button";
+import { cn } from "@repo/ui/lib/utils";
 import { LogOut } from "lucide-react";
 
 const PanelNavbar = () => {

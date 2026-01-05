@@ -2,7 +2,7 @@ import React from "react";
 import Card from "../Card";
 import Image from "next/image";
 import { alirezaEzleginiPic, packagingCoursePic } from "@/public";
-import { Button } from "@workspace/ui/components/button";
+import { Button } from "@repo/ui/components/button";
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 

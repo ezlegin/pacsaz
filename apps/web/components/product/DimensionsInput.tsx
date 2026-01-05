@@ -1,8 +1,8 @@
 import { clamp } from "@/hooks/useSize";
 import { DimensionKey } from "@/lib/dielines/core/types";
 import { useState } from "react";
-import { Input } from "@workspace/ui/components/input";
-import { Spinner } from "@workspace/ui/components/spinner";
+import { Input } from "@repo/ui/components/input";
+import { Spinner } from "@repo/ui/components/spinner";
 
 export function DimensionInput({
   label,

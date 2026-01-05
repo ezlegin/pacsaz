@@ -2,23 +2,22 @@
 
 import { otpFormSchema, OTPFormType } from "@/lib/validatoinSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@workspace/ui/components/button";
-import { REGEXP_ONLY_DIGITS } from "@workspace/ui/index";
-
+import { Button } from "@repo/ui/components/button";
+import { REGEXP_ONLY_DIGITS } from "input-otp";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
-} from "@workspace/ui/components/form";
+} from "@repo/ui/components/form";
 import {
   InputOTP,
   InputOTPGroup,
   InputOTPSlot,
-} from "@workspace/ui/components/input-otp";
-import { useForm } from "@workspace/ui/index";
+} from "@repo/ui/components/input-otp";
 import { LoginStep } from "./LoginForm";
 import { useEffect } from "react";
+import { useForm } from "react-hook-form";
 
 interface Props {
   setLoginStep: (val: LoginStep) => void;

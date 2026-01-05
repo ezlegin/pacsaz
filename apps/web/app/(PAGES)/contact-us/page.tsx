@@ -3,7 +3,7 @@
 import PageTitle from "@/components/PageTitle";
 import { contactFormSchema, ContactFormType } from "@/lib/validatoinSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@workspace/ui/components/button";
+import { Button } from "@repo/ui/components/button";
 import {
   Form,
   FormControl,
@@ -11,10 +11,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@workspace/ui/components/form";
-import { Input } from "@workspace/ui/components/input";
-import { Textarea } from "@workspace/ui/components/textarea";
-import { useForm } from "@workspace/ui/index";
+} from "@repo/ui/components/form";
+import { Input } from "@repo/ui/components/input";
+import { Textarea } from "@repo/ui/components/textarea";
+import { useForm } from "@repo/ui/index";
 
 export default function ContactUs() {
   const form = useForm<ContactFormType>({

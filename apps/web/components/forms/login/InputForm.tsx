@@ -2,17 +2,17 @@
 
 import { inputFormSchema, InputFormType } from "@/lib/validatoinSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@workspace/ui/components/button";
+import { Button } from "@repo/ui/components/button";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
-} from "@workspace/ui/components/form";
-import { Input } from "@workspace/ui/components/input";
-import { useForm } from "@workspace/ui/index";
+} from "@repo/ui/components/form";
+import { Input } from "@repo/ui/components/input";
 import { Phone } from "lucide-react";
 import { LoginStep } from "./LoginForm";
+import { useForm } from "react-hook-form";
 
 interface Props {
   setLoginStep: (val: LoginStep) => void;

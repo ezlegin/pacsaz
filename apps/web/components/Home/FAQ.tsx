@@ -3,12 +3,12 @@ import {
   AccordionItem,
   AccordionTrigger,
   AccordionContent,
-} from "@workspace/ui/components/accordion";
-import { Badge } from "@workspace/ui/components/badge";
+} from "@repo/ui/components/accordion";
+import { Badge } from "@repo/ui/components/badge";
 import { CircleQuestionMark } from "lucide-react";
 import React from "react";
 import Card from "../Card";
-import { Button } from "@workspace/ui/components/button";
+import { Button } from "@repo/ui/components/button";
 
 const FAQ = () => {
   return (

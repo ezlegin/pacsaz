@@ -1,11 +1,8 @@
 "use client";
 
 import { tuckEnd, tuckEndModel } from "@/public";
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@workspace/ui/components/toggle-group";
-import { cn } from "@workspace/ui/lib/utils";
+import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
+import { cn } from "@repo/ui/lib/utils";
 import { Box, Ratio } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";

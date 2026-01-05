@@ -9,7 +9,7 @@ import {
   mapUserPlanTitle,
   Status as StatusType,
 } from "@/data/user";
-import { TableCell, TableRow } from "@workspace/ui/components/table";
+import { TableCell, TableRow } from "@repo/ui/components/table";
 import { formatDate } from "date-fns";
 
 function page() {

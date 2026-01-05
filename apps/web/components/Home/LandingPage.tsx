@@ -1,5 +1,5 @@
-import { Badge } from "@workspace/ui/components/badge";
-import { Button } from "@workspace/ui/components/button";
+import { Badge } from "@repo/ui/components/badge";
+import { Button } from "@repo/ui/components/button";
 import { ChevronDown, ChevronLeft, Zap } from "lucide-react";
 import Link from "next/link";
 import SquarePattern from "../SquarePattern";

@@ -4,13 +4,13 @@ import {
   DialogTrigger,
   DialogContent,
   DialogHeader,
-} from "@workspace/ui/components/dialog";
+} from "@repo/ui/components/dialog";
 import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
-} from "@workspace/ui/components/tooltip";
-import { cn } from "@workspace/ui/lib/utils";
+} from "@repo/ui/components/tooltip";
+import { cn } from "@repo/ui/lib/utils";
 import { Info } from "lucide-react";
 import { JSX } from "react";
 

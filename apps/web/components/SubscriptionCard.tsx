@@ -1,7 +1,7 @@
 import { PlanFeature, SubCardProps } from "@/data/subscription";
-import { Button } from "@workspace/ui/components/button";
-import { Separator } from "@workspace/ui/components/separator";
-import { cn } from "@workspace/ui/lib/utils";
+import { Button } from "@repo/ui/components/button";
+import { Separator } from "@repo/ui/components/separator";
+import { cn } from "@repo/ui/lib/utils";
 import { CircleCheck, Zap } from "lucide-react";
 import Link from "next/link";
 import Price from "./Price";

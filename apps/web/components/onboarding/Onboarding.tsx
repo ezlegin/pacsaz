@@ -4,9 +4,9 @@ import Step1 from "@/components/onboarding/Step1";
 import Step2 from "@/components/onboarding/Step2";
 import Step3 from "@/components/onboarding/Step3";
 import PacsazLogo from "@/components/PacsazLogo";
-import { Button } from "@workspace/ui/components/button";
-import { Card } from "@workspace/ui/components/card";
-import { Separator } from "@workspace/ui/components/separator";
+import { Button } from "@repo/ui/components/button";
+import { Card } from "@repo/ui/components/card";
+import { Separator } from "@repo/ui/components/separator";
 import { useState } from "react";
 import Step4 from "./Step4";
 

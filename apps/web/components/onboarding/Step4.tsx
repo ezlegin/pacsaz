@@ -1,5 +1,5 @@
 import Terms from "../Terms";
-import { ScrollArea } from "@workspace/ui/components/scroll-area";
+import { ScrollArea } from "@repo/ui/components/scroll-area";
 
 const Step4 = () => {
   return (

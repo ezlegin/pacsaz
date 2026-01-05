@@ -1,7 +1,7 @@
 import { testUser } from "@/data/user";
 import { MaterialKey } from "@/lib/dielines/core/consts";
-import { Progress } from "@workspace/ui/components/progress";
-import { TableCell, TableRow } from "@workspace/ui/components/table";
+import { Progress } from "@repo/ui/components/progress";
+import { TableCell, TableRow } from "@repo/ui/components/table";
 import { formatDate } from "date-fns";
 import { Calendar, Download, FolderDown } from "lucide-react";
 import Card from "./Card";

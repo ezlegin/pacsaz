@@ -2,7 +2,7 @@
 
 import PacsazLogo from "@/components/PacsazLogo";
 import Card from "@/components/Card";
-import { Separator } from "@workspace/ui/components/separator";
+import { Separator } from "@repo/ui/components/separator";
 import PageTitle from "@/components/PageTitle";
 
 const AboutPage = () => {

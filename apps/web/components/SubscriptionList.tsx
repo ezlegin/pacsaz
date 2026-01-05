@@ -1,7 +1,7 @@
 "use client";
 
 import { plans } from "@/data/subscription";
-import { Badge } from "@workspace/ui/components/badge";
+import { Badge } from "@repo/ui/components/badge";
 import { Flag } from "lucide-react";
 import { useState } from "react";
 import PeriodSwitch from "./PeriodSwitch";

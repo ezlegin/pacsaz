@@ -1,7 +1,4 @@
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@workspace/ui/components/toggle-group";
+import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import { MostUsage } from "./Onboarding";
 
 const Step3 = ({

@@ -2,8 +2,8 @@ import { mapUserPlanTitle, testUser } from "@/data/user";
 import { isSubscribed } from "@/lib/dielines/core/consts";
 import Diamond from "@/public/icons/Diamond";
 import { calculateRemaningSubscription } from "@/utils/calculateRemaningSubscriptoin";
-import { Badge } from "@workspace/ui/components/badge";
-import { Button } from "@workspace/ui/components/button";
+import { Badge } from "@repo/ui/components/badge";
+import { Button } from "@repo/ui/components/button";
 import { User } from "lucide-react";
 import Link from "next/link";
 
@@ -40,7 +40,7 @@ const NavbarButtons = () => {
       )}
 
       <div>
-        <div className="w-[1px] ml-3 h-6 bg-slate-300" />
+        <div className="w-px ml-3 h-6 bg-slate-300" />
       </div>
       <Link href={isSubscribed ? "/panel" : "/login"}>
         <Button variant={isSubscribed ? "outline" : "default"}>

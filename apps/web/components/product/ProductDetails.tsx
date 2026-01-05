@@ -18,24 +18,21 @@ import {
   MaterialsInput,
   Model,
 } from "@/lib/dielines/core/types";
-import { Badge } from "@workspace/ui/components/badge";
-import { Card } from "@workspace/ui/components/card";
+import { Badge } from "@repo/ui/components/badge";
+import { Card } from "@repo/ui/components/card";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@workspace/ui/components/select";
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@workspace/ui/components/toggle-group";
+} from "@repo/ui/components/select";
+import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@workspace/ui/components/tooltip";
+} from "@repo/ui/components/tooltip";
 import { CircleQuestionMark } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";

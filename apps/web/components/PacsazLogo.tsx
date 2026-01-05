@@ -1,5 +1,5 @@
 import { pacsazLogoIcon, pacsazLogoFull } from "@/public";
-import { cn } from "@workspace/ui/lib/utils";
+import { cn } from "@repo/ui/lib/utils";
 import Image from "next/image";
 import React from "react";
 

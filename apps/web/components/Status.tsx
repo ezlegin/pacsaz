@@ -1,5 +1,5 @@
 import { Status as StatusType } from "@/data/user";
-import { Badge } from "@workspace/ui/components/badge";
+import { Badge } from "@repo/ui/components/badge";
 import React from "react";
 
 const Status = ({ label, status }: { status: StatusType; label: string }) => {

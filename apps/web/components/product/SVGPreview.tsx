@@ -1,9 +1,9 @@
 "use client";
 import { onDevelepe } from "@/lib/dielines/core/consts";
-import { Button } from "@workspace/ui/components/button";
-import { Card } from "@workspace/ui/components/card";
-import { Separator } from "@workspace/ui/components/separator";
-import { Spinner } from "@workspace/ui/components/spinner";
+import { Button } from "@repo/ui/components/button";
+import { Card } from "@repo/ui/components/card";
+import { Separator } from "@repo/ui/components/separator";
+import { Spinner } from "@repo/ui/components/spinner";
 import { ZoomIn, ZoomOut } from "lucide-react";
 import { useLayoutEffect, useRef, useState } from "react";
 import {

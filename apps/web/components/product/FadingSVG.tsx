@@ -1,4 +1,4 @@
-import { cn } from "@workspace/ui/lib/utils";
+import { cn } from "@repo/ui/lib/utils";
 import { useState, useEffect } from "react";
 
 export default function FadingSvg({

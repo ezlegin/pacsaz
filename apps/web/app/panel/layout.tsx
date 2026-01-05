@@ -1,6 +1,6 @@
 import PanelNavbar from "@/components/Navbars/PanelNavbar";
 import { PanelSidebar } from "@/components/PanelSidebar";
-import { SidebarProvider } from "@workspace/ui/components/sidebar";
+import { SidebarProvider } from "@repo/ui/components/sidebar";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (

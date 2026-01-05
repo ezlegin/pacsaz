@@ -2,8 +2,8 @@ import Card from "@/components/Card";
 import Table from "@/components/Table";
 import { MaterialKey } from "@/lib/dielines/core/consts";
 import { DimensionType } from "@/lib/dielines/core/helpers/applyDimensionOffset";
-import { Button } from "@workspace/ui/components/button";
-import { TableCell, TableRow } from "@workspace/ui/components/table";
+import { Button } from "@repo/ui/components/button";
+import { TableCell, TableRow } from "@repo/ui/components/table";
 import { formatDate } from "date-fns";
 import { Pencil } from "lucide-react";
 

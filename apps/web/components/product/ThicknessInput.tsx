@@ -3,10 +3,10 @@ import { isSubscribed } from "@/lib/dielines/core/consts";
 import { formatToFixed } from "@/lib/dielines/core/helpers/format";
 import { getThicknessRange } from "@/lib/dielines/core/helpers/getThicknessRange";
 import { MaterialValue } from "@/lib/dielines/core/types";
-import { Button } from "@workspace/ui/components/button";
-import { Input } from "@workspace/ui/components/input";
-import { Spinner } from "@workspace/ui/components/spinner";
-import { cn } from "@workspace/ui/lib/utils";
+import { Button } from "@repo/ui/components/button";
+import { Input } from "@repo/ui/components/input";
+import { Spinner } from "@repo/ui/components/spinner";
+import { cn } from "@repo/ui/lib/utils";
 import { Minus, Plus } from "lucide-react";
 import React, { useEffect } from "react";
 

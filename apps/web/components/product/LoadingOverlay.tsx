@@ -1,8 +1,8 @@
 "use client";
 
-import { Card } from "@workspace/ui/components/card";
-import { Spinner } from "@workspace/ui/components/spinner";
-import { cn } from "@workspace/ui/lib/utils";
+import { Card } from "@repo/ui/components/card";
+import { Spinner } from "@repo/ui/components/spinner";
+import { cn } from "@repo/ui/lib/utils";
 
 interface LoadingOverlayProps {
   isLoading: boolean;

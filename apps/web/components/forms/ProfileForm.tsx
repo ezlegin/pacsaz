@@ -3,7 +3,7 @@
 import { testUser } from "@/data/user";
 import { profileFormSchema, ProfileFormSchema } from "@/lib/validatoinSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@workspace/ui/components/button";
+import { Button } from "@repo/ui/components/button";
 import {
   Form,
   FormControl,
@@ -11,17 +11,17 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@workspace/ui/components/form";
-import { Input } from "@workspace/ui/components/input";
-import { Label } from "@workspace/ui/components/label";
+} from "@repo/ui/components/form";
+import { Input } from "@repo/ui/components/input";
+import { Label } from "@repo/ui/components/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@workspace/ui/components/select";
-import { useForm } from "@workspace/ui/index";
+} from "@repo/ui/components/select";
+import { useForm } from "@repo/ui/index";
 import { UserType } from "../onboarding/Onboarding";
 import { userTypes } from "../onboarding/Step1";
 import { isUserIndividual } from "@/utils/isUserIndividual";

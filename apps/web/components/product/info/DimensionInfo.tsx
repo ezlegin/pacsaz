@@ -1,7 +1,4 @@
-import {
-  DialogDescription,
-  DialogTitle,
-} from "@workspace/ui/components/dialog";
+import { DialogDescription, DialogTitle } from "@repo/ui/components/dialog";
 import React from "react";
 
 const DimensionInfo = () => {

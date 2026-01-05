@@ -3,14 +3,10 @@ import { downloadPdf } from "@/lib/actions/export/downloader";
 import { isSubscribed } from "@/lib/dielines/core/consts";
 import { Dimensions, FormatsType, Model } from "@/lib/dielines/core/types";
 import Diamond from "@/public/icons/Diamond";
-import { Button } from "@workspace/ui/components/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from "@workspace/ui/components/dialog";
-import { Spinner } from "@workspace/ui/components/spinner";
-import { toast } from "@workspace/ui/index";
+import { Button } from "@repo/ui/components/button";
+import { Dialog, DialogContent, DialogTitle } from "@repo/ui/components/dialog";
+import { Spinner } from "@repo/ui/components/spinner";
+import { toast } from "sonner";
 import { Download } from "lucide-react";
 import { useState } from "react";
 import LoginPopup from "../forms/LoginPopup";

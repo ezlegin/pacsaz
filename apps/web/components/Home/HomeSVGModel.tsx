@@ -4,7 +4,7 @@ import { useDielineGenerator } from "@/hooks/useDielineGenerator";
 import { DIMENSIONS } from "@/lib/dielines/core/consts";
 import { DielineGeneratorProps } from "@/lib/dielines/core/types";
 import { dielines } from "@/lib/dielines/registery";
-import { Card as ShadCard } from "@workspace/ui/components/card";
+import { Card as ShadCard } from "@repo/ui/components/card";
 import { DimensionInput } from "../product/DimensionsInput";
 import SVGPreview from "../product/SVGPreview";
 

@@ -2,13 +2,10 @@ import Card from "@/components/Card";
 import Price from "@/components/Price";
 import { PlanKey } from "@/data/subscription";
 import { plans } from "@/data/subscription";
-import { Label } from "@workspace/ui/components/label";
-import {
-  RadioGroup,
-  RadioGroupItem,
-} from "@workspace/ui/components/radio-group";
-import { Separator } from "@workspace/ui/components/separator";
-import { cn } from "@workspace/ui/lib/utils";
+import { Label } from "@repo/ui/components/label";
+import { RadioGroup, RadioGroupItem } from "@repo/ui/components/radio-group";
+import { Separator } from "@repo/ui/components/separator";
+import { cn } from "@repo/ui/lib/utils";
 import PeriodSwitch from "./PeriodSwitch";
 import { SubPeriod } from "./SubscriptionList";
 

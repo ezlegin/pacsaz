@@ -3,11 +3,8 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@workspace/ui/components/accordion";
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@workspace/ui/components/toggle-group";
+} from "@repo/ui/components/accordion";
+import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import { ChevronLeft } from "lucide-react";
 
 const DielinesSidebar = () => {

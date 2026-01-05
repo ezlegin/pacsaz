@@ -1,5 +1,5 @@
 import Card from "@/components/Card";
-import { Badge } from "@workspace/ui/components/badge";
+import { Badge } from "@repo/ui/components/badge";
 import {
   Ruler,
   Zap,

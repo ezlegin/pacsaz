@@ -1,8 +1,8 @@
 "use client";
 
-import { Button } from "@workspace/ui/components/button";
-import { toast } from "@workspace/ui/index";
-import { cn } from "@workspace/ui/lib/utils";
+import { Button } from "@repo/ui/components/button";
+import { toast } from "sonner";
+import { cn } from "@repo/ui/lib/utils";
 import { Heart } from "lucide-react";
 import { useState } from "react";
 

@@ -10,9 +10,9 @@ import {
   FormField,
   FormItem,
   FormLabel,
-} from "@workspace/ui/components/form";
-import { Input } from "@workspace/ui/components/input";
-import { useForm } from "@workspace/ui/index";
+} from "@repo/ui/components/form";
+import { Input } from "@repo/ui/components/input";
+import { useForm } from "@repo/ui/index";
 import { useEffect } from "react";
 
 const Step2 = ({

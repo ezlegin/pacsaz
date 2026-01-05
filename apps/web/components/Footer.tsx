@@ -1,10 +1,10 @@
-import { cn } from "@workspace/ui/lib/utils";
+import { cn } from "@repo/ui/lib/utils";
 import React from "react";
 import { layoutPaddings } from "./Navbars/Navbar";
 import PacsazLogo from "./PacsazLogo";
 import Image from "next/image";
 import Card from "./Card";
-import { Button } from "@workspace/ui/components/button";
+import { Button } from "@repo/ui/components/button";
 import Link from "next/link";
 
 const Footer = () => {

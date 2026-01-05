@@ -3,14 +3,11 @@
 import { PlanKey, plans } from "@/data/subscription";
 import { testUser } from "@/data/user";
 import { useUpgradeSubscriptionCheckout } from "@/hooks/useSubscriptionCheckout";
-import { Button } from "@workspace/ui/components/button";
-import { Input } from "@workspace/ui/components/input";
-import { Label } from "@workspace/ui/components/label";
-import {
-  RadioGroup,
-  RadioGroupItem,
-} from "@workspace/ui/components/radio-group";
-import { Separator } from "@workspace/ui/components/separator";
+import { Button } from "@repo/ui/components/button";
+import { Input } from "@repo/ui/components/input";
+import { Label } from "@repo/ui/components/label";
+import { RadioGroup, RadioGroupItem } from "@repo/ui/components/radio-group";
+import { Separator } from "@repo/ui/components/separator";
 import { SquareArrowOutUpRight } from "lucide-react";
 import Link from "next/link";
 import Card from "./Card";

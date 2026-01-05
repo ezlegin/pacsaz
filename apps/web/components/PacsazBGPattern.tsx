@@ -1,4 +1,4 @@
-import { cn } from "@workspace/ui/lib/utils";
+import { cn } from "@repo/ui/lib/utils";
 import { ReactNode } from "react";
 
 const PacsazBGPattern = ({

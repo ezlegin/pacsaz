@@ -3,9 +3,9 @@
 import { PlanKey } from "@/data/subscription";
 import { testUser } from "@/data/user";
 import { useUpgradeSubscriptionCheckout } from "@/hooks/useSubscriptionCheckout";
-import { Button } from "@workspace/ui/components/button";
-import { Input } from "@workspace/ui/components/input";
-import { Separator } from "@workspace/ui/components/separator";
+import { Button } from "@repo/ui/components/button";
+import { Input } from "@repo/ui/components/input";
+import { Separator } from "@repo/ui/components/separator";
 import Card from "./Card";
 import { PaymentPlans } from "./PaymentPlans";
 import { SubPeriod } from "./SubscriptionList";

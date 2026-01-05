@@ -1,6 +1,6 @@
-import { Badge } from "@workspace/ui/components/badge";
-import { Label } from "@workspace/ui/components/label";
-import { Switch } from "@workspace/ui/components/switch";
+import { Badge } from "@repo/ui/components/badge";
+import { Label } from "@repo/ui/components/label";
+import { Switch } from "@repo/ui/components/switch";
 import React from "react";
 import { SubPeriod } from "./SubscriptionList";
 

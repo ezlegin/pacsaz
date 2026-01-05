@@ -1,5 +1,5 @@
-import { Separator } from "@workspace/ui/components/separator";
-import { cn } from "@workspace/ui/lib/utils";
+import { Separator } from "@repo/ui/components/separator";
+import { cn } from "@repo/ui/lib/utils";
 import React, { ReactNode } from "react";
 
 const Card = ({
