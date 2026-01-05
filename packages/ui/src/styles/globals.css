@@ -165,3 +165,8 @@ html > body[data-scroll-locked] {
 .custom-scrollbar:hover::-webkit-scrollbar-thumb {
   background-color: #94a3b8;
 }
+
+::selection {
+  background-color: var(--primary);
+  color: white;
+}

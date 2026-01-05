@@ -11,6 +11,13 @@ import {
 import { tuckEndModel } from "@/public";
 import { formatDimensions } from "@/utils/formatDimensions";
 import { toMm } from "@/utils/sizeConvertor";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@repo/ui/components/dialog";
 import Image from "next/image";
 import DeveloperTools from "./DeveloperTools";
 
@@ -150,13 +157,32 @@ const ProductInfo = ({
           ))}
         </div>
 
-        <Image
-          alt=""
-          src={tuckEndModel}
-          width={300}
-          height={300}
-          className="bg-accent rounded-2xl"
-        />
+        <Dialog>
+          <DialogTrigger>
+            <Image
+              alt=""
+              src={tuckEndModel}
+              width={300}
+              height={300}
+              className="bg-accent rounded-2xl cursor-pointer"
+            />
+          </DialogTrigger>
+          <DialogContent
+            showCloseButton={false}
+            className="p-0 bg-transparent border-none sm:max-w-2xl"
+          >
+            <DialogHeader>
+              <DialogTitle className="sr-only" />
+              <Image
+                alt=""
+                src={tuckEndModel}
+                width={700}
+                height={700}
+                className="bg-accent rounded-2xl"
+              />
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
 
         <div className="space-y-1">
           {dimensions.map(
