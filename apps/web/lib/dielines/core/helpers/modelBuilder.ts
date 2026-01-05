@@ -44,7 +44,7 @@ export function modelBuilder({
     show: showOverallDimensions,
   });
 
-  onDevelepe && console.log("Main Model", model);
+  onDevelepe && console.log("Main Model:", model);
   return {
     sizes: {
       container: containerSize,

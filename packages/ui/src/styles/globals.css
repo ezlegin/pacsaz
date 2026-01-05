@@ -131,6 +131,9 @@ html > body[data-scroll-locked] {
   body {
     @apply bg-background text-foreground;
   }
+  p {
+    @apply leading-5.5;
+  }
 }
 
 /* .dark {
