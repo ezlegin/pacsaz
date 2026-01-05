@@ -25,14 +25,16 @@ const postalCard: DielineGeneratorProps = {
   dimensionsType: ["manufacture", "inner", "outer"],
   materials: {
     default: MATERIALS["glossy-cardboard"],
-    included: [
-      MATERIALS["glossy-cardboard"],
-      MATERIALS["f-flute"],
-      MATERIALS["art-paper"],
-    ],
+    included: [MATERIALS["glossy-cardboard"], MATERIALS["art-paper"]],
   },
   model({
-    dimensions: { bleedSize, customThickness, raw: rawDim, resolved },
+    dimensions: {
+      bleedSize,
+      customThickness,
+      raw: rawDim,
+      resolved,
+      container,
+    },
     dimensionType,
     developers: { showAnchors, showOverallDimensions, showWatermark },
     selectedMaterial,
@@ -79,6 +81,7 @@ const postalCard: DielineGeneratorProps = {
     return modelBuilder({
       model,
       trimModel,
+      container,
       bleedAmount,
       showAnchors,
       offsets,

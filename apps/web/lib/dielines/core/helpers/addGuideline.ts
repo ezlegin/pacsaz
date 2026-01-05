@@ -159,7 +159,11 @@ export function addGuideLine(model: M.IModel, options: GuideLineOptions) {
   // text
   const mid: IPoint = [(from[0] + to[0]) / 2, (from[1] + to[1]) / 2];
   const textCarrier = new M.models.ConnectTheDots(false, [[0, 0]]);
-  const caption = M.model.addCaption(textCarrier, `${toMm(value)} mm`, mid);
+  const caption = M.model.addCaption(
+    textCarrier,
+    `${toMm(value).toFixed()} mm`,
+    mid
+  );
 
   addModelToLayer(
     model,

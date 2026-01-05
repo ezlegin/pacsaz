@@ -6,6 +6,7 @@ import { addSeam } from "./addSeam";
 import { cloneMirrorMove } from "./cloneMirrorMove";
 import { getMeasurementOfModel } from "./getWidthAndHeightOfModel";
 import { PointBuilder } from "./pointBuilder";
+import { addFoldLine } from "./addFoldLine";
 
 interface AddDoorParams {
   widthMM: number;
@@ -52,17 +53,22 @@ export function addDoor({
   // ─────────────────────────────────────────
   // Seam
   // ─────────────────────────────────────────
-  const seamHeight = Math.max(mThickness * 2, tuckFlap.seam.h);
+  const seamSize = {
+    w: 8,
+    h: 1.5,
+  };
+
+  const seamHeight = Math.max(mThickness * 2, seamSize.h);
 
   const seamPB = new PointBuilder([
     mThickness,
     lengthMM + topPanelWithFoldOffsetSize + safeFoldOffset,
   ]);
-  const seamPTS = seamPB.right(tuckFlap.seam.w).down(seamHeight).build();
+  const seamPTS = seamPB.right(seamSize.w).down(seamHeight).build();
   const leftSeam = addSeam(seamPTS, false, 2);
 
   const rightSeam = cloneMirrorMove(leftSeam, true, false, [
-    width - toPt(tuckFlap.seam.w + mThickness),
+    width - toPt(seamSize.w + mThickness),
     length + toPt(topPanelWithFoldOffsetSize + safeFoldOffset - seamHeight),
   ]);
 
@@ -78,20 +84,21 @@ export function addDoor({
   // ─────────────────────────────────────────
   // Fold Lines
   // ─────────────────────────────────────────
-  const foldY = length + toPt(heightMM);
-  const seamTotalWidth = tuckFlap.seam.w + mThickness;
+  const foldY =
+    length + toPt(heightMM) - toPt(mThickness) + toPt(safeFoldOffset);
+  const seamTotalWidth = seamSize.w + mThickness;
 
-  const tuckFlapFold = new M.paths.Line([
-    [toPt(seamTotalWidth), foldY],
-    [width - toPt(seamTotalWidth), foldY],
-  ]);
-  M.path.addTo(tuckFlapFold, door, "tuckFlap-fold");
+  addFoldLine(door, {
+    id: "tuckFlap-fold",
+    from: [toPt(seamTotalWidth), foldY],
+    to: [width - toPt(seamTotalWidth), foldY],
+  });
 
-  const topPanelFold = new M.paths.Line([
-    [0, length + toPt(safeFoldOffset)],
-    [width, length + toPt(safeFoldOffset)],
-  ]);
-  M.path.addTo(topPanelFold, door, "topPanel-fold");
+  addFoldLine(door, {
+    id: "topPanel-fold",
+    from: [0, length + toPt(safeFoldOffset)],
+    to: [width, length + toPt(safeFoldOffset)],
+  });
 
   const { height: doorSize } = getMeasurementOfModel(door);
 

@@ -9,7 +9,7 @@ import { DimensionInput } from "../product/DimensionsInput";
 import SVGPreview from "../product/SVGPreview";
 
 const HomeSVGModel = () => {
-  const dieline = dielines["tuck-end"] as DielineGeneratorProps;
+  const dieline = dielines["home-dieline"] as DielineGeneratorProps;
   dieline.dimensions.defaultDimensions.width = 80;
   dieline.dimensions.defaultDimensions.length = 130;
   dieline.dimensions.defaultDimensions.height = 40;

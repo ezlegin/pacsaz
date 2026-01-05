@@ -5,7 +5,7 @@ import { calculateSafeFoldOffset } from "./helpers/calculateSafeFoldOffset";
 export const onDevelepe = process.env.NODE_ENV === "development";
 export const onProduction = process.env.NODE_ENV === "production";
 export const EPS = 0.0001;
-export const isSubscribed = true;
+export const isSubscribed = false;
 
 export const strokeWidth = {
   svg: "0.75",
@@ -59,7 +59,6 @@ export const DOOR = {
       if (width >= 60) return 13; // 60 - 99
       return 11; // < 60
     },
-    indent: 1,
     seam: {
       w: 8,
       h: 1.5,
@@ -68,25 +67,6 @@ export const DOOR = {
   foldOffset: 1,
 };
 export type TuckFlap = typeof DOOR.tuckFlap;
-
-export const DUST = {
-  size: (widthMM: number, dustSize: number, heightMM: number): number => {
-    return widthMM <= dustSize * 2 ? heightMM / 2 : dustSize;
-  },
-  height: {
-    l: 6,
-    r: {
-      inner: 12,
-      outer: 8,
-    },
-  },
-  indent: {
-    bl: 4,
-    tl: 2,
-    tr: 6,
-    br: 3,
-  },
-};
 
 export const zero = [0, 0];
 
@@ -120,7 +100,7 @@ export const MATERIALS = {
     value: "glossy-cardboard",
     label: "مقوا گلاسه",
     color: "bg-white",
-    thickness: 0.4,
+    thickness: 0.5,
     get safeFoldOffset() {
       return calculateSafeFoldOffset(this.thickness);
     },

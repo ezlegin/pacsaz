@@ -2,7 +2,7 @@ import { toPt } from "@/utils/sizeConvertor";
 import type { IModel } from "makerjs";
 import { MARGINS } from "../consts";
 import { getMeasurementOfModel } from "./getWidthAndHeightOfModel";
-import { addGuideLine } from "./guidelineGenerator";
+import { addGuideLine } from "./addGuideline";
 
 interface AddOverallDimensionGuidesOptions {
   model: IModel;

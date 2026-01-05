@@ -22,7 +22,7 @@ export interface SubCardProps {
   features: PlanFeature[];
 }
 
-export const generals = [
+const generals = [
   { active: true, value: "دسترسی به تمام قالب ها" },
   { active: true, value: "ذخیره نامحدود قالب ها" },
   { active: true, value: "دانلود فرمت دلخواه" },
@@ -30,6 +30,15 @@ export const generals = [
   { active: true, value: "انتخاب نوع ابعاد" },
   { active: true, value: "دریافت فایل بدون واترمارک" },
 ];
+
+const paids = [
+  { active: true, value: "تنظیم ضخامت سفارشی متریال" },
+  { active: true, value: "انتخاب میزان بلید" },
+  { active: true, value: "مشاهده ابعاد کامل دایلاین" },
+  { active: true, value: "هشدار خطای برش در ابعاد غیر متعارف" },
+  { active: true, value: "امکان ذخیره قالب با نام دلخواه و استفاده مجدد" },
+];
+
 export const plans: SubCardProps[] = [
   {
     title: "استاندارد",
@@ -51,11 +60,7 @@ export const plans: SubCardProps[] = [
     level: 1,
     features: [
       ...generals,
-      { active: false, value: "تنظیم ضخامت سفارشی متریال" },
-      { active: false, value: "انتخاب میزان بلید" },
-      { active: false, value: "مشاهده ابعاد کامل دایلاین" },
-      { active: false, value: "هشدار خطای برش در ابعاد غیر متعارف" },
-      { active: false, value: "امکان ذخیره قالب با نام دلخواه و استفاده مجدد" },
+      ...paids.map((feature) => ({ ...feature, active: false })),
     ],
   },
   {
@@ -76,14 +81,7 @@ export const plans: SubCardProps[] = [
       annual: 5868000,
     },
     level: 2,
-    features: [
-      ...generals,
-      { active: true, value: "تنظیم ضخامت سفارشی متریال" },
-      { active: true, value: "انتخاب میزان بلید" },
-      { active: true, value: "مشاهده ابعاد کامل دایلاین" },
-      { active: true, value: "هشدار خطای برش در ابعاد غیر متعارف" },
-      { active: true, value: "امکان ذخیره قالب با نام دلخواه و استفاده مجدد" },
-    ],
+    features: [...generals, ...paids],
   },
   {
     title: "سازمانی",
@@ -92,7 +90,7 @@ export const plans: SubCardProps[] = [
     description:
       "مناسب چاپخانه‌ها و تیم‌های طراحی بزرگ که به تولید نامحدود، دقت صنعتی و جریان کاری پایدار نیاز دارند.",
     fairDownload: {
-      monthly: 300,
+      monthly: 400,
       get annual() {
         return this.monthly * 12;
       },
@@ -103,13 +101,6 @@ export const plans: SubCardProps[] = [
       annual: 11748000,
     },
     level: 3,
-    features: [
-      ...generals,
-      { active: true, value: "تنظیم ضخامت سفارشی متریال" },
-      { active: true, value: "انتخاب میزان بلید" },
-      { active: true, value: "مشاهده ابعاد کامل دایلاین" },
-      { active: true, value: "هشدار خطای برش در ابعاد غیر متعارف" },
-      { active: true, value: "امکان ذخیره قالب با نام دلخواه و استفاده مجدد" },
-    ],
+    features: [...generals, ...paids],
   },
 ];
