@@ -17,8 +17,10 @@ const Card = ({
     <div
       className={cn(
         title ? "py-5 pt-3" : "p-5",
-        primaryTheme && "bg-primary-foreground border-primary",
-        "border rounded-2xl bg-accent/30",
+        primaryTheme
+          ? "bg-primary-foreground border border-primary"
+          : "border bg-accent/30",
+        "rounded-2xl",
         className
       )}
     >

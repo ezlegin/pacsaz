@@ -12,7 +12,7 @@ import { Button } from "@workspace/ui/components/button";
 
 const FAQ = () => {
   return (
-    <div className="px-20 flex gap-10 max-w-7xl mx-auto ">
+    <div className="flex gap-10">
       <div className="space-y-3 w-1/2">
         <Badge variant={"primaryForeground"}>
           Frequently Asked Questions
