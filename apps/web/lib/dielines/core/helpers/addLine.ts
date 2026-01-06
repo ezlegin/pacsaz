@@ -1,14 +1,19 @@
 import M from "makerjs";
-import { addFillet } from "./addFillet";
+import { addFillet, addFilletAt } from "./addFillet";
 
 export function addLine(
   pts: M.IPoint[],
   closed?: boolean,
-  filletRaduis?: number
+  filletRaduis?: number,
+  indices?: number[]
 ) {
   const drawnLine = new M.models.ConnectTheDots(closed ?? false, pts);
 
-  addFillet(drawnLine, filletRaduis);
+  if (indices) {
+    return addFilletAt(drawnLine, indices, filletRaduis);
+  } else {
+    addFillet(drawnLine, filletRaduis);
+  }
 
   return drawnLine;
 }
