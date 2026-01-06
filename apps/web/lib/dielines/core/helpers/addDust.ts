@@ -5,11 +5,7 @@ import { addHoleArc } from "./addHoleArc";
 import { addLine } from "./addLine";
 import { calculateTuckflapSize } from "./calculateTuckflapSize";
 import { getDistanceOfFirstAndLastPoint } from "./getDistance";
-import {
-  getLastPointFromModel,
-  getLastPointFromPath,
-  getLastPointMm,
-} from "./getLastPoint";
+import { getLastPointFromModel, getLastPointFromPath } from "./getLastPoint";
 import { PointBuilder } from "./pointBuilder";
 
 interface AddDustParams {
@@ -94,25 +90,12 @@ export function addDust({
     )
     .draw(indent.tl, verticalMoveToTop)
     .right(
-      heightMM / 2 -
+      heightMM -
+        indent.br -
         bottomLeftIndent -
         indent.tl -
-        (considerDustHole ? toMm(dustHoleWidth) : 0)
-    )
-    .build();
-
-  const dustP1 = addLine(dustP1_PTS, false);
-
-  // ─────────────────────────────────────────
-  // Dust part 2
-  // ─────────────────────────────────────────
-  // Point construction
-  const dustP2_PB = new PointBuilder(getLastPointMm(dustP1_PTS));
-  const dustP2_PTS = dustP2_PB
-    .right(
-      heightMM / 2 -
-        indent.br -
         indent.tr -
+        (considerDustHole ? toMm(dustHoleWidth) : 0) -
         (considerOuterIndent ? materialThickness : 0)
     )
     .draw(indent.tr, -mappedDustSize + height.r.inner)
@@ -120,13 +103,14 @@ export function addDust({
     .down(height.r.outer)
     .right(considerOuterIndent ? materialThickness : 0)
     .build();
-  const dustP2 = addLine(dustP2_PTS, false, 30);
+
+  const dustP1 = addLine(dustP1_PTS, false, 35, [3]);
 
   // Adding models and paths to dust model
   M.model.addModel(
     dust,
     {
-      models: { dustP1, dustP2 },
+      models: { dustP1 },
       paths: considerDustHole ? { dustHoleArc } : {},
     },
     "trim"

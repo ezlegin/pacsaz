@@ -48,7 +48,7 @@ export function addDoor({
     .down(topPanelWithFoldOffsetSize)
     .build();
 
-  const doorLine = addLine(pts, false, 25);
+  const doorLine = addLine(pts, false, 25, [3, 4]);
 
   // ─────────────────────────────────────────
   // Seam
