@@ -31,7 +31,7 @@ const NavbarButtons = () => {
           )}
         </Badge>
       ) : (
-        <Link href={"/panel"}>
+        <Link href={isSubscribed ? "/panel" : "/subscription"}>
           <Button variant={"ghost"}>
             <Diamond />
             اشتراک

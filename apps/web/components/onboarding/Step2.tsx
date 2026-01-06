@@ -12,8 +12,8 @@ import {
   FormLabel,
 } from "@repo/ui/components/form";
 import { Input } from "@repo/ui/components/input";
-import { useForm } from "@repo/ui/index";
 import { useEffect } from "react";
+import { useForm } from "react-hook-form";
 
 const Step2 = ({
   isIndividual,

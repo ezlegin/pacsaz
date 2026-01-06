@@ -7,12 +7,12 @@ interface AddFoldLineOptions {
 }
 
 export function addFoldLine(
-  foldModel: M.IModel,
+  model: M.IModel,
   { id, from, to }: AddFoldLineOptions
 ) {
   const foldLine = new M.paths.Line([from, to]);
 
-  M.path.addTo(foldLine, foldModel, id);
+  M.path.addTo(foldLine, model, id);
 
   return foldLine;
 }

@@ -59,8 +59,8 @@ export function drawGuideLines(
     },
     length: {
       type: "length",
-      from: [width + height + width / 4, 0],
-      to: [width + height + width / 4, length],
+      from: [width * 2 + height + height / 2, 0],
+      to: [width * 2 + height + height / 2, length],
     },
   };
 
