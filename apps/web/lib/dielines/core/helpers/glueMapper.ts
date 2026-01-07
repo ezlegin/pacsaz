@@ -7,13 +7,13 @@ export function glueMapper(widthMM: number, heightMM: number) {
   let glue: number;
 
   switch (true) {
-    case total < 100:
+    case total < 140:
       glue = GLUES.sm;
       break;
-    case total < 200:
+    case total < 250:
       glue = GLUES.md;
       break;
-    case total < 300:
+    case total < 350:
       glue = GLUES.lg;
       break;
     case total < 450:

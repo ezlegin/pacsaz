@@ -21,6 +21,18 @@ export function addSnapLock({
 }) {
   const snapLock: IModel = { models: {} };
 
+  function mapTabWidth() {
+    let tabWidth: number = widthMM / 3;
+
+    if (widthMM >= 70) tabWidth = widthMM / 4;
+    if (widthMM >= 140) tabWidth = widthMM / 5;
+    if (widthMM >= 230) tabWidth = widthMM / 6;
+
+    const maxTabWidth = lockHeightRaw - tabHeight;
+
+    return Math.min(maxTabWidth, tabWidth);
+  }
+
   const fitInOffset = {
     x: materialThickness < 1.5 ? 0.5 : 1,
     y: materialThickness,
@@ -31,9 +43,10 @@ export function addSnapLock({
   const lockHeightRaw = heightMM * 0.75;
   const lockHeight = lockHeightRaw - toMm(baseOffset);
   const tabHeight = lockHeightRaw / 3;
-  const tabWidthRaw = heightMM / 2;
+  const tabWidthRaw = mapTabWidth();
   const tabWidth = tabWidthRaw - arcRadiusMM;
   const toungeWidth = widthMM - tabWidth * 2 - arcRadiusMM * 2;
+  const lockHorizon = lockHeightRaw - tabHeight;
   const lockerIndent = 5;
   const partsRoundness = 10;
   const { disOfWidth: foldOffset } = addHole({
@@ -108,12 +121,12 @@ export function addSnapLock({
     );
     const pts = pb
       .draw(
-        tabWidthRaw - (considerStarterHole ? toMm(disOfWidth) : 0),
+        lockHorizon - (considerStarterHole ? toMm(disOfWidth) : 0),
         -tabWidthRaw
       )
       .draw(-lockerIndent, -tabHeight)
-      .right(heightMM - tabWidthRaw + lockerIndent - arcRadiusMM)
-      .up(lockHeight)
+      .right(lockerIndent + heightMM - lockHorizon - arcRadiusMM)
+      .up(tabWidthRaw + tabHeight - toMm(baseOffset))
       .build();
 
     const line = addLine(pts, false, lockerRoundness, [2]);
@@ -162,11 +175,11 @@ export function addSnapLock({
 
     const pb = new PointBuilder(pointToMm(startArcPoints[0]!));
     const pts = pb
-      .draw(tabWidth + difOfArcs, -tabWidthRaw)
+      .draw(tabWidth + difOfArcs, -lockHorizon)
       .down(tabHeight)
       .right(toungeWidth)
       .up(tabHeight)
-      .draw(tabWidth + difOfArcs, tabWidthRaw)
+      .draw(tabWidth + difOfArcs, lockHorizon)
       .build();
 
     const line = addLine(pts, false, partsRoundness, [2, 3]);
@@ -208,7 +221,7 @@ export function addSnapLock({
 
     const part4Model = cloneMirrorMove(part2Model_dup, true, false, [
       toPt(widthMM * 2 + heightMM),
-      -toPt(lockHeight) - baseOffset,
+      -toPt(tabWidthRaw + tabHeight),
     ]);
 
     // FOLD
