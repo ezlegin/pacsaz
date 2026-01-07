@@ -1,17 +1,17 @@
 import { toPt } from "@/utils/sizeConvertor";
-import { BLEED, DOOR, MATERIALS, zero } from "../../core/consts";
+import { BLEED, DOOR, MATERIALS } from "../../core/consts";
 import { addDoor } from "../../core/helpers/addDoor";
 import { addDust } from "../../core/helpers/addDust";
+import { addGlue } from "../../core/helpers/addGlue";
+import { addSnapLock } from "../../core/helpers/addSnapLock";
 import { cloneMirrorMove } from "../../core/helpers/cloneMirrorMove";
 import { drawFoldLines } from "../../core/helpers/drawFoldLines";
 import { drawGuideLines } from "../../core/helpers/drawGuideLines";
 import { drawSingleLines } from "../../core/helpers/drawSingleLines";
-import { addGlue } from "../../core/helpers/glueGenerator";
 import { initiateModel } from "../../core/helpers/initiateModels";
 import { modelBuilder } from "../../core/helpers/modelBuilder";
 import { pushModelSeparatly } from "../../core/helpers/pushModelSeparatly";
 import { DielineGeneratorProps } from "../../core/types";
-import { addSnapLock } from "../../core/helpers/addSnapLock";
 
 const tuckEndSnapLock: DielineGeneratorProps = {
   slug: "tuck-end-snap-lock",
@@ -77,12 +77,14 @@ const tuckEndSnapLock: DielineGeneratorProps = {
     //! -------------- TRIM --------------
 
     // GLUE ----------------------------
-    const glueMargin = 10;
     const { size: glueSize } = addGlue(trimModel, {
       heightMM,
       widthMM,
-      normal: { lengthMM, margin: glueMargin },
-      safeFoldOffset: safeFoldOffset,
+      customPoints: {
+        from: [0, safeFoldOffset / 2],
+        to: [0, lengthMM - safeFoldOffset / 2],
+      },
+      safeFoldOffset,
     });
 
     // DOOR ----------------------------
@@ -135,9 +137,9 @@ const tuckEndSnapLock: DielineGeneratorProps = {
 
     const { snapLock } = addSnapLock({
       heightMM,
-      lengthMM,
       widthMM,
       materialThickness,
+      safeFoldOffset,
     });
     pushModelSeparatly(trimModel, foldModel, snapLock, "snapLock");
 
@@ -160,18 +162,22 @@ const tuckEndSnapLock: DielineGeneratorProps = {
     ]);
 
     //! -------------- FOLD --------------
+    const foldOffsetToSnapLock = toPt(safeFoldOffset) / 2;
     const safeOffset = toPt(safeFoldOffset);
     drawFoldLines(foldModel, {
       verticals: [
-        { from: zero, to: [0, length] },
-        { from: [width, length + safeOffset], to: [width, 0] },
+        { from: [0, foldOffsetToSnapLock], to: [0, length] },
+        {
+          from: [width, length + safeOffset],
+          to: [width, foldOffsetToSnapLock],
+        },
         {
           from: [width + height, length],
-          to: [width + height, -safeOffset],
+          to: [width + height, foldOffsetToSnapLock],
         },
         {
           from: [width * 2 + height, length],
-          to: [width * 2 + height, -safeOffset],
+          to: [width * 2 + height, foldOffsetToSnapLock],
         },
       ],
     });

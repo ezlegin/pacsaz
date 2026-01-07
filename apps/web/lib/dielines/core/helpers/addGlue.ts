@@ -1,5 +1,5 @@
 import { IModel, IPoint } from "makerjs";
-import { PointBuilder } from "../helpers/pointBuilder";
+import { PointBuilder } from "./pointBuilder";
 import { addLine } from "./addLine";
 import { glueMapper } from "./glueMapper";
 import M from "makerjs";
@@ -7,36 +7,39 @@ import M from "makerjs";
 export function addGlue(
   trimModel: IModel,
   {
-    customPoints = [
-      [0, 0],
-      [100, 100],
-    ],
+    customPoints,
     heightMM,
     widthMM,
-    normal,
+    lengthMM,
     safeFoldOffset,
   }: {
     widthMM: number;
     heightMM: number;
-    normal?: {
-      margin: number;
-      lengthMM: number;
+    lengthMM?: number;
+    customPoints?: {
+      from: IPoint;
+      to: IPoint;
     };
-    customPoints?: IPoint[];
     safeFoldOffset: number;
   }
 ) {
-  const pb = new PointBuilder();
+  const pb = new PointBuilder(customPoints?.from ?? undefined);
   const size = glueMapper(widthMM, heightMM);
+  const glueMargin = 8;
 
-  const pts = normal
+  const pts = lengthMM
     ? pb
-        .draw(-size, normal.margin)
-        .up(normal.lengthMM - normal.margin * 2)
-        .draw(size, normal.margin)
+        .draw(-size, glueMargin)
+        .up(lengthMM - glueMargin * 2)
+        .draw(size, glueMargin)
         .up(safeFoldOffset)
         .build()
-    : customPoints;
+    : pb
+        .draw(-size, glueMargin)
+        .up(customPoints?.to[1]! - glueMargin * 2)
+        .draw(size, glueMargin)
+        .up(safeFoldOffset)
+        .build();
 
   const glue = addLine(pts, false);
 

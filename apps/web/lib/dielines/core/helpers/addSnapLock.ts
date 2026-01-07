@@ -1,91 +1,283 @@
-import { toPt } from "@/utils/sizeConvertor";
-import M, { IModel } from "makerjs";
-import { zero } from "../consts";
-import { addFoldLine } from "./addFoldLine";
+import { pointToMm, toMm, toPt } from "@/utils/sizeConvertor";
+import M, { IModel, IPoint } from "makerjs";
 import { addLine } from "./addLine";
 import { cloneMirrorMove } from "./cloneMirrorMove";
+import { getDistanceOfFirstAndLastPoint } from "./getDistance";
 import { getLastPointFromModel } from "./getLastPoint";
 import { PointBuilder } from "./pointBuilder";
+import { addFoldLine } from "./addFoldLine";
+import { zero } from "../consts";
 
 export function addSnapLock({
   heightMM,
   widthMM,
   materialThickness,
+  safeFoldOffset,
 }: {
   widthMM: number;
   heightMM: number;
-  lengthMM: number;
   materialThickness: number;
+  safeFoldOffset: number;
 }) {
   const snapLock: IModel = { models: {} };
 
-  // PART 1 --------------------------------
   const fitInOffset = {
     x: materialThickness < 1.5 ? 0.5 : 1,
     y: materialThickness,
   };
-  const lockHorizon = heightMM / 2;
-  const lockHeight = heightMM * 0.75; // 3/4
-  const tabWidth = heightMM / 2;
-  const tabHeight = lockHeight / 3;
-  const toungeWidth = widthMM - tabWidth * 2;
-
-  const part1_pb = new PointBuilder(zero);
-  const part1_pts = part1_pb
-    .down(lockHeight)
-    .right(tabWidth - fitInOffset.x)
-    .up(tabHeight + fitInOffset.y)
-    .right(toungeWidth + fitInOffset.x * 2)
-    .down(tabHeight + fitInOffset.y)
-    .right(tabWidth - fitInOffset.x)
-    .up(lockHeight)
-    .build();
-  const part1 = addLine(part1_pts, false, 10, [2, 5]);
-
-  // PART 2 --------------------------------
+  const arcRadiusPT = toPt(safeFoldOffset);
+  const arcRadiusMM = safeFoldOffset;
+  const baseOffset = arcRadiusPT / 2;
+  const lockHeightRaw = heightMM * 0.75;
+  const lockHeight = lockHeightRaw - toMm(baseOffset);
+  const tabHeight = lockHeightRaw / 3;
+  const tabWidthRaw = heightMM / 2;
+  const tabWidth = tabWidthRaw - arcRadiusMM;
+  const toungeWidth = widthMM - tabWidth * 2 - arcRadiusMM * 2;
   const lockerIndent = 5;
-
-  const part2_pb = new PointBuilder(getLastPointFromModel(part1, "mm"));
-  const part2_pts = part2_pb
-    .draw(tabWidth, -lockHorizon)
-    .draw(-lockerIndent, -tabHeight)
-    .right(heightMM - tabWidth + lockerIndent)
-    .up(lockHeight)
-    .build();
-
-  const part2 = addLine(part2_pts, false, 10, [2]);
-
-  // PART 3 --------------------------------
-
-  const part3_pb = new PointBuilder(getLastPointFromModel(part2, "mm"));
-  const part3_pts = part3_pb
-    .draw(tabWidth, -lockHorizon)
-    .down(tabHeight)
-    .right(toungeWidth)
-    .up(tabHeight)
-    .draw(tabWidth, lockHorizon)
-    .build();
-
-  const part3 = addLine(part3_pts, false, 10, [2, 3]);
-
-  // PART 4 --------------------------------
-  const part4 = cloneMirrorMove(part2, true, false, [
-    toPt(widthMM * 2 + heightMM),
-    toPt(-lockHeight),
-  ]);
-
-  addFoldLine(snapLock, {
-    id: "snapLock-fold",
-    from: zero,
-    to: [toPt(widthMM * 2 + heightMM * 2), 0],
+  const partsRoundness = 10;
+  const { disOfWidth: foldOffset } = addHole({
+    origin: zero,
+    arcRadius: arcRadiusPT,
+    direction: "right",
+    type: "three-quarter",
   });
 
-  // Layaring ---------------------------------
+  //! PART 1 --------------------------------
+  function part1() {
+    const { arc: startArc, arcPoints: startArcPoints } = addHole({
+      origin: [0, -baseOffset],
+      arcRadius: arcRadiusPT,
+      direction: "right",
+      type: "quarter",
+    });
+
+    const pb = new PointBuilder(pointToMm(startArcPoints[0]!));
+    const pts = pb
+      .down(lockHeight)
+      .right(tabWidth - fitInOffset.x)
+      .up(tabHeight + fitInOffset.y)
+      .right(toungeWidth + fitInOffset.x * 2)
+      .down(tabHeight + fitInOffset.y)
+      .right(tabWidth - fitInOffset.x)
+      .up(lockHeight)
+      .build();
+
+    const line = addLine(pts, false, partsRoundness, [2, 5]);
+
+    const { arc: endArc, arcPoints: endArcPoints } = addHole({
+      origin: geOriginArcFromLine(line, arcRadiusPT),
+      arcRadius: arcRadiusPT,
+      direction: "left",
+      type: "quarter",
+    });
+
+    // FOLD
+    addFoldLine(snapLock, {
+      id: "part1-fold",
+      from: [foldOffset, 0],
+      to: [toPt(widthMM) - foldOffset, 0],
+    });
+
+    const part1Model: IModel = {
+      models: { line },
+      paths: { startArc, endArc },
+    };
+    return { part1Model, lastPointOfPart1: endArcPoints[0]! };
+  }
+
+  const { part1Model, lastPointOfPart1 } = part1();
+
+  //! PART 2 --------------------------------
+  const lockerRoundness = 8;
+
+  function part2({ considerStarterHole }: { considerStarterHole: boolean }) {
+    const {
+      arc: startArc,
+      arcPoints: startArcPoints,
+      disOfWidth,
+    } = addHole({
+      origin: [lastPointOfPart1[0]!, lastPointOfPart1[1]! - arcRadiusPT],
+      arcRadius: arcRadiusPT,
+      direction: "right",
+      type: "three-quarter",
+    });
+
+    const pb = new PointBuilder(
+      considerStarterHole ? pointToMm(startArcPoints[0]!) : [widthMM, 0]
+    );
+    const pts = pb
+      .draw(
+        tabWidthRaw - (considerStarterHole ? toMm(disOfWidth) : 0),
+        -tabWidthRaw
+      )
+      .draw(-lockerIndent, -tabHeight)
+      .right(heightMM - tabWidthRaw + lockerIndent - arcRadiusMM)
+      .up(lockHeight)
+      .build();
+
+    const line = addLine(pts, false, lockerRoundness, [2]);
+
+    const { arc: endArc, arcPoints: endArcPoints } = addHole({
+      origin: geOriginArcFromLine(line, arcRadiusPT),
+      arcRadius: arcRadiusPT,
+      direction: "left",
+      type: "quarter",
+    });
+
+    const part2Model: IModel = {
+      models: { line },
+      paths: considerStarterHole ? { startArc, endArc } : { endArc },
+    };
+
+    // FOLD
+    addFoldLine(snapLock, {
+      id: "part1-fold",
+      from: [toPt(widthMM) + foldOffset, 0],
+      to: [toPt(widthMM + heightMM) - foldOffset, 0],
+    });
+
+    return { part2Model, lastPointOfPart2: endArcPoints[0]! };
+  }
+
+  const { part2Model, lastPointOfPart2 } = part2({
+    considerStarterHole: true,
+  });
+
+  //! PART 3 --------------------------------
+  function part3() {
+    const {
+      arc: startArc,
+      arcPoints: startArcPoints,
+      disOfWidth,
+      disOfHeight,
+    } = addHole({
+      origin: [lastPointOfPart2[0]!, lastPointOfPart2[1]! - arcRadiusPT],
+      arcRadius: arcRadiusPT,
+      direction: "right",
+      type: "three-quarter",
+    });
+
+    const difOfArcs = toMm(arcRadiusPT - disOfWidth);
+
+    const pb = new PointBuilder(pointToMm(startArcPoints[0]!));
+    const pts = pb
+      .draw(tabWidth + difOfArcs, -tabWidthRaw)
+      .down(tabHeight)
+      .right(toungeWidth)
+      .up(tabHeight)
+      .draw(tabWidth + difOfArcs, tabWidthRaw)
+      .build();
+
+    const line = addLine(pts, false, partsRoundness, [2, 3]);
+
+    const lastPointOfLine = getLastPointFromModel(line, "pt");
+    const { arc: endArc, arcPoints: endArcPoints } = addHole({
+      origin: [
+        lastPointOfLine[0]! + arcRadiusPT - toPt(difOfArcs),
+        lastPointOfLine[1]! - arcRadiusPT + disOfHeight,
+      ],
+      arcRadius: arcRadiusPT,
+      direction: "left",
+      type: "three-quarter",
+    });
+
+    const part3Model: IModel = {
+      models: { line },
+      paths: { startArc, endArc },
+    };
+
+    // FOLD
+    addFoldLine(snapLock, {
+      id: "part1-fold",
+      from: [toPt(widthMM + heightMM) + foldOffset, 0],
+      to: [toPt(widthMM * 2 + heightMM) - foldOffset, 0],
+    });
+
+    return { part3Model, lastPointOfPart3: endArcPoints[0]! };
+  }
+
+  const { part3Model } = part3();
+
+  //! PART 4 --------------------------------
+
+  function part4() {
+    const { part2Model: part2Model_dup } = part2({
+      considerStarterHole: false,
+    });
+
+    const part4Model = cloneMirrorMove(part2Model_dup, true, false, [
+      toPt(widthMM * 2 + heightMM),
+      -toPt(lockHeight) - baseOffset,
+    ]);
+
+    // FOLD
+    addFoldLine(snapLock, {
+      id: "part4-fold",
+      from: [toPt(widthMM * 2 + heightMM) + foldOffset, 0],
+      to: [toPt(widthMM * 2 + heightMM * 2), 0],
+    });
+
+    return { part4Model };
+  }
+
+  const { part4Model } = part4();
+
   M.model.addModel(
     snapLock,
-    { models: { part1, part2, part3, part4 } },
+    { models: { part1Model, part2Model, part3Model, part4Model } },
     "trim"
   );
-
   return { snapLock };
+}
+
+function addHole({
+  origin,
+  arcRadius,
+  type,
+  direction,
+}: {
+  origin: IPoint;
+  arcRadius: number;
+  direction: "left" | "right";
+  type: "semi" | "quarter" | "three-quarter";
+}) {
+  const startAngle =
+    type === "semi"
+      ? 0
+      : type === "quarter"
+        ? direction === "right"
+          ? 0
+          : 90
+        : direction === "right"
+          ? 30
+          : 90;
+
+  const endAngle =
+    type === "semi"
+      ? 180
+      : type === "quarter"
+        ? direction === "right"
+          ? 90
+          : 180
+        : direction === "right"
+          ? 90
+          : 150;
+
+  const arc = new M.paths.Arc(origin, arcRadius, startAngle, endAngle);
+
+  const arcPoints = M.point.fromArc(arc);
+  const { disOfWidth, disOfHeight } = getDistanceOfFirstAndLastPoint(
+    arc,
+    "path"
+  );
+
+  return { arc, arcPoints, disOfWidth, disOfHeight };
+}
+
+function geOriginArcFromLine(lineModel: IModel, arcRadiusPT: number) {
+  const lastPointOfLine = getLastPointFromModel(lineModel, "pt");
+  const origin = [lastPointOfLine[0]! + arcRadiusPT, lastPointOfLine[1]!];
+
+  return origin;
 }
