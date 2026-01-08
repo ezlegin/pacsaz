@@ -1,4 +1,4 @@
-import { toPt } from "../utils/sizeConvertor";
+import { toPt } from "../../utils/sizeConvertor";
 import { BLEED, DOOR, MATERIALS, zero } from "../../core/consts";
 import { addDoor } from "../../core/helpers/addDoor";
 import { addDust } from "../../core/helpers/addDust";
@@ -79,11 +79,10 @@ const homeDieline: DielineGeneratorProps = {
     //! -------------- TRIM --------------
 
     // GLUE ----------------------------
-    const glueMargin = 10;
     addGlue(trimModel, {
       heightMM,
       widthMM,
-      normal: { lengthMM, margin: glueMargin },
+      lengthMM,
       safeFoldOffset: safeFoldOffset,
     });
 

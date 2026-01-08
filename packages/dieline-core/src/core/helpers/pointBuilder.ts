@@ -1,5 +1,5 @@
-import { toPt } from "../utils/sizeConvertor";
 import { IPoint } from "makerjs";
+import { toPt } from "../../utils/sizeConvertor";
 
 export class PointBuilder {
   private pts: IPoint[] = [];

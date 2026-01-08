@@ -1,7 +1,5 @@
 import { useLoading } from "@/hooks/useLoading";
 import { downloadPdf } from "@/lib/actions/export/downloader";
-import { isSubscribed } from "@/lib/dielines/core/consts";
-import { Dimensions, FormatsType, Model } from "@/lib/dielines/core/types";
 import Diamond from "@/public/icons/Diamond";
 import { Button } from "@repo/ui/components/button";
 import { Dialog, DialogContent, DialogTitle } from "@repo/ui/components/dialog";
@@ -10,6 +8,8 @@ import { toast } from "sonner";
 import { Download } from "lucide-react";
 import { useState } from "react";
 import LoginPopup from "../forms/LoginPopup";
+import { Dimensions, FormatsType, Model } from "@repo/dieline-core/types";
+import { isSubscribed } from "@repo/dieline-core/consts";
 
 interface Props {
   format: FormatsType;

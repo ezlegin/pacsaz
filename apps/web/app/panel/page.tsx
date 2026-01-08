@@ -1,6 +1,6 @@
 import PanelDashboard from "@/components/PanelDashboard";
 import SubscriptionList from "@/components/SubscriptionList";
-import { isSubscribed } from "@/lib/dielines/core/consts";
+import { isSubscribed } from "@repo/dieline-core/consts";
 
 const Page = () => {
   return !isSubscribed ? (

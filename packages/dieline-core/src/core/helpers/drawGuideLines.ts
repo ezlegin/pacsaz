@@ -1,8 +1,8 @@
 import { IModel, IPoint } from "makerjs";
 import { DimensionKey, Offsets } from "../types";
 import { addModelToLayer } from "./addModelToLayer";
-import { DimensionType } from "./applyDimensionOffset";
 import { addGuideLine } from "./addGuideline";
+import { DimensionType } from "../../utils/applyDimensionOffset";
 
 type Orientation = "horizontal" | "vertical";
 

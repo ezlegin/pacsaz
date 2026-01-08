@@ -1,22 +1,3 @@
-import {
-  BLEED,
-  DIMENSIONS,
-  DIMENSIONS_TYPE,
-  isSubscribed,
-  MaterialKey,
-  MATERIALS,
-} from "@/lib/dielines/core/consts";
-import { DimensionType } from "@/lib/dielines/core/helpers/applyDimensionOffset";
-import { isPackagingSizeLogical } from "@/lib/dielines/core/helpers/isPackagingSizeLogical";
-import {
-  DielineDimensions,
-  DimensionKey,
-  Dimensions,
-  DimensionsType,
-  FormatsType,
-  MaterialsInput,
-  Model,
-} from "@/lib/dielines/core/types";
 import { Badge } from "@repo/ui/components/badge";
 import { Card } from "@repo/ui/components/card";
 import {
@@ -41,6 +22,25 @@ import { DimensionInput } from "./DimensionsInput";
 import DimensionInfo from "./info/DimensionInfo";
 import ThicknessInput from "./ThicknessInput";
 import { pdfIcon, aiIcon, dxfIcon } from "@/public";
+import {
+  MaterialKey,
+  MATERIALS,
+  BLEED,
+  DIMENSIONS,
+  isSubscribed,
+  DIMENSIONS_TYPE,
+} from "@repo/dieline-core/consts";
+import {
+  DielineDimensions,
+  MaterialsInput,
+  DimensionsType,
+  DimensionKey,
+  Model,
+  Dimensions,
+  FormatsType,
+} from "@repo/dieline-core/types";
+import { isPackagingSizeLogical } from "@repo/dieline-core/utils/isPackagingSizeLogical";
+import { DimensionType } from "@repo/dieline-core/utils/applyDimensionOffset";
 
 export interface SVGSizeProps {
   width: number;

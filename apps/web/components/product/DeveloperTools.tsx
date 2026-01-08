@@ -1,5 +1,5 @@
-import { SVGModelSizes } from "@/lib/dielines/core/types";
-import { toMm } from "@/utils/sizeConvertor";
+import { SVGModelSizes } from "@repo/dieline-core/types";
+import { toMm } from "@repo/dieline-core/utils/sizeConvertor";
 import { CardTitle, CardContent, Card } from "@repo/ui/components/card";
 import { Switch } from "@repo/ui/components/switch";
 import React from "react";

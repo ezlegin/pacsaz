@@ -1,5 +1,5 @@
 import DielineGenerator from "@/components/product/DielineGenerator";
-import { dielines, DielineSlug } from "@/lib/dielines/registery";
+import { dielines, DielineSlug } from "@repo/dieline-core/registery";
 import { notFound } from "next/navigation";
 
 interface Props {

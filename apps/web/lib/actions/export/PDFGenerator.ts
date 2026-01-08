@@ -1,8 +1,8 @@
 "use server";
 
-import { COLORS } from "@/lib/dielines/core/consts";
-import { Model } from "@/lib/dielines/core/types";
-import { toMm } from "@/utils/sizeConvertor";
+import { COLORS } from "@repo/dieline-core/consts";
+import { Model } from "@repo/dieline-core/types";
+import { toMm } from "@repo/dieline-core/utils/sizeConvertor";
 import path from "path";
 import PDFDocument from "pdfkit";
 import SVGtoPDF from "svg-to-pdfkit";

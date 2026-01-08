@@ -1,4 +1,4 @@
-import { pointToMm, toMm, toPt } from "../utils/sizeConvertor";
+import { pointToMm, toMm, toPt } from "../../utils/sizeConvertor";
 import M, { IModel, IPoint } from "makerjs";
 import { addLine } from "./addLine";
 import { cloneMirrorMove } from "./cloneMirrorMove";

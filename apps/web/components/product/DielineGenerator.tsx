@@ -1,13 +1,13 @@
 "use client";
 
-import { useDielineGenerator } from "@/hooks/useDielineGenerator";
-import { DielineGeneratorProps } from "@/lib/dielines/core/types";
-import { dielines, DielineSlug } from "@/lib/dielines/registery";
 import { useEffect, useState } from "react";
 import LoadingOverlay from "./LoadingOverlay";
 import ProductDetails from "./ProductDetails";
 import ProductInfo from "./ProductInfo";
 import SVGPreview from "./SVGPreview";
+import { dielines, DielineSlug } from "@repo/dieline-core/registery";
+import { DielineGeneratorProps } from "@repo/dieline-core/types";
+import { useDielineGenerator } from "@repo/dieline-core/hooks/useDielineGenerator";
 
 const DielineGenerator = ({ slug }: { slug: string }) => {
   const dieline = dielines[slug as DielineSlug] as DielineGeneratorProps;

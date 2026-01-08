@@ -1,4 +1,3 @@
-import { PersonaData } from "@/app/login/onboarding/page";
 import {
   onboardingStep2Schema,
   OnboardingStep2Type,
@@ -14,6 +13,7 @@ import {
 import { Input } from "@repo/ui/components/input";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { PersonaData } from "./Onboarding";
 
 const Step2 = ({
   isIndividual,

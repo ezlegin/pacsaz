@@ -1,12 +1,10 @@
-import { Dimensions, FormatsType, Model } from "@/lib/dielines/core/types";
+import { Dimensions, FormatsType, Model } from "@repo/dieline-core/types";
 import { PDFGenerator } from "./PDFGenerator";
-import { mapDimensions } from "@/lib/dielines/core/helpers/mapDimensions";
-
-type NewType = FormatsType;
+import { mapDimensions } from "@repo/dieline-core/utils/mapDimensions";
 
 interface ExportPdfParams {
   svg: Model;
-  format: NewType;
+  format: FormatsType;
   slug: string;
   dimensions: Dimensions;
 }

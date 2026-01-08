@@ -1,5 +1,5 @@
-import { toMm } from "../utils/sizeConvertor";
 import M, { IModel, IPath, IPoint } from "makerjs";
+import { toMm } from "../../utils/sizeConvertor";
 
 export function getLastPointMm(points: IPoint[]): IPoint {
   const pt = points[points.length - 1];

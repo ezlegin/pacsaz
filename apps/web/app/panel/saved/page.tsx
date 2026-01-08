@@ -1,7 +1,7 @@
 import Card from "@/components/Card";
 import Table from "@/components/Table";
-import { MaterialKey } from "@/lib/dielines/core/consts";
-import { DimensionType } from "@/lib/dielines/core/helpers/applyDimensionOffset";
+import { MaterialKey } from "@repo/dieline-core/consts";
+import { DimensionType } from "@repo/dieline-core/utils/applyDimensionOffset";
 import { Button } from "@repo/ui/components/button";
 import { TableCell, TableRow } from "@repo/ui/components/table";
 import { formatDate } from "date-fns";

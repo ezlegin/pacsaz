@@ -6,8 +6,10 @@
   "types": "dist/index.d.ts",
   "exports": {
     "./registery": "./src/registery.ts",
+    "./consts": "./src/core/consts.ts",
+    "./types": "./src/core/types.ts",
     "./hooks/*": "./src/hooks/*.ts",
-    "./consts/*": "./src/core/consts.ts"
+    "./utils/*": "./src/utils/*.ts"
   },
   "scripts": {
     "build": "tsc -b",

@@ -1,4 +1,4 @@
-import { PlanPrice } from "@/data/user";
+import { PlanPrice } from "@/data/subscription";
 import { cn } from "@repo/ui/lib/utils";
 
 const Price = ({

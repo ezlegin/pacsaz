@@ -14,7 +14,7 @@ import {
 } from "@repo/ui/components/form";
 import { Input } from "@repo/ui/components/input";
 import { Textarea } from "@repo/ui/components/textarea";
-import { useForm } from "@repo/ui/index";
+import { useForm } from "react-hook-form";
 
 export default function ContactUs() {
   const form = useForm<ContactFormType>({

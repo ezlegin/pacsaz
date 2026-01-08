@@ -1,5 +1,5 @@
 import ProductNavbar from "@/components/Navbars/ProductNavbar";
-import { dielines, DielineSlug } from "@/lib/dielines/registery";
+import { dielines, DielineSlug } from "@repo/dieline-core/registery";
 import { notFound } from "next/navigation";
 
 export default async function Layout({

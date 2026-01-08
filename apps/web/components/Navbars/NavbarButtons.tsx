@@ -1,5 +1,5 @@
 import { mapUserPlanTitle, testUser } from "@/data/user";
-import { isSubscribed } from "@/lib/dielines/core/consts";
+import { isSubscribed } from "@repo/dieline-core/consts";
 import Diamond from "@/public/icons/Diamond";
 import { calculateRemaningSubscription } from "@/utils/calculateRemaningSubscriptoin";
 import { Badge } from "@repo/ui/components/badge";

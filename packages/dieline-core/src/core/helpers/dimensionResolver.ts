@@ -1,5 +1,8 @@
-import { toPt } from "../utils/sizeConvertor";
-import { applyDimensionOffset, DimensionType } from "./applyDimensionOffset";
+import {
+  applyDimensionOffset,
+  DimensionType,
+} from "../../utils/applyDimensionOffset";
+import { toPt } from "../../utils/sizeConvertor";
 
 type MaterialLike = {
   offset: {

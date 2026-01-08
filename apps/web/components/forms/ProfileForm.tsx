@@ -21,10 +21,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@repo/ui/components/select";
-import { useForm } from "@repo/ui/index";
 import { UserType } from "../onboarding/Onboarding";
 import { userTypes } from "../onboarding/Step1";
 import { isUserIndividual } from "@/utils/isUserIndividual";
+import { useForm } from "react-hook-form";
 
 export function ProfileForm() {
   const form = useForm<ProfileFormSchema>({

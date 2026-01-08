@@ -1,4 +1,4 @@
-import { toPt } from "../utils/sizeConvertor";
+import { toPt } from "../../utils/sizeConvertor";
 import M from "makerjs";
 import { addModelToLayer } from "./addModelToLayer";
 

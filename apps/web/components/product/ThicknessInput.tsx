@@ -1,8 +1,8 @@
 import { useLoading } from "@/hooks/useLoading";
-import { isSubscribed } from "@/lib/dielines/core/consts";
-import { formatToFixed } from "@/lib/dielines/core/helpers/format";
-import { getThicknessRange } from "@/lib/dielines/core/helpers/getThicknessRange";
-import { MaterialValue } from "@/lib/dielines/core/types";
+import { isSubscribed } from "@repo/dieline-core/consts";
+import { MaterialValue } from "@repo/dieline-core/types";
+import { formatToFixed } from "@repo/dieline-core/utils/format";
+import { getThicknessRange } from "@repo/dieline-core/utils/getThicknessRange";
 import { Button } from "@repo/ui/components/button";
 import { Input } from "@repo/ui/components/input";
 import { Spinner } from "@repo/ui/components/spinner";
