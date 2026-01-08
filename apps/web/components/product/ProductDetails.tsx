@@ -2,7 +2,6 @@ import {
   BLEED,
   DIMENSIONS,
   DIMENSIONS_TYPE,
-  FORMATS,
   isSubscribed,
   MaterialKey,
   MATERIALS,
@@ -41,6 +40,7 @@ import DielineDownloadButton from "./DielineDownloadButton";
 import { DimensionInput } from "./DimensionsInput";
 import DimensionInfo from "./info/DimensionInfo";
 import ThicknessInput from "./ThicknessInput";
+import { pdfIcon, aiIcon, dxfIcon } from "@/public";
 
 export interface SVGSizeProps {
   width: number;
@@ -317,3 +317,9 @@ export default function ProductDetails({
     </div>
   );
 }
+
+export const FORMATS = [
+  { value: "pdf", icon: pdfIcon },
+  { value: "ai", icon: aiIcon },
+  { value: "dxf", icon: dxfIcon },
+] as const;

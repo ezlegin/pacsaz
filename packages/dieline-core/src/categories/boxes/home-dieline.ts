@@ -1,4 +1,4 @@
-import { toPt } from "@/utils/sizeConvertor";
+import { toPt } from "../utils/sizeConvertor";
 import { BLEED, DOOR, MATERIALS, zero } from "../../core/consts";
 import { addDoor } from "../../core/helpers/addDoor";
 import { addDust } from "../../core/helpers/addDust";
@@ -15,7 +15,7 @@ import { modelBuilder } from "../../core/helpers/modelBuilder";
 import { pushModelSeparatly } from "../../core/helpers/pushModelSeparatly";
 import { DielineGeneratorProps } from "../../core/types";
 
-const tuckEnd: DielineGeneratorProps = {
+const homeDieline: DielineGeneratorProps = {
   slug: "tuck-end",
   title: "جعبه دو طرف درب", //todo: sync to database, not here.
   dimensions: {
@@ -42,7 +42,7 @@ const tuckEnd: DielineGeneratorProps = {
   },
 
   model({
-    developers: { showAnchors, showWatermark, showOverallDimensions },
+    developers: { showAnchors, showOverallDimensions },
     dimensions: {
       raw: rawDim,
       resolved,
@@ -79,10 +79,11 @@ const tuckEnd: DielineGeneratorProps = {
     //! -------------- TRIM --------------
 
     // GLUE ----------------------------
-    const { size: glueSize } = addGlue(trimModel, {
+    const glueMargin = 10;
+    addGlue(trimModel, {
       heightMM,
       widthMM,
-      lengthMM,
+      normal: { lengthMM, margin: glueMargin },
       safeFoldOffset: safeFoldOffset,
     });
 
@@ -245,9 +246,9 @@ const tuckEnd: DielineGeneratorProps = {
       container,
       showAnchors,
       watermark: {
-        show: showWatermark,
+        show: false,
         offset: {
-          x: glueSize,
+          x: 0,
           y: 0,
         },
       },
@@ -257,4 +258,4 @@ const tuckEnd: DielineGeneratorProps = {
   },
 };
 
-export default tuckEnd;
+export default homeDieline;
