@@ -1,4 +1,4 @@
-import { toPt } from "../../utils/sizeConvertor";
+import { toPt } from "@/@/utils/sizeConvertor";
 import M, { IPoint } from "makerjs";
 import { calculateDustHoleSize } from "./calculateDustHoleSize";
 

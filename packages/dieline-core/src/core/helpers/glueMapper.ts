@@ -1,4 +1,4 @@
-import { GLUES } from "../consts";
+import { GLUES } from "@/consts";
 
 export function glueMapper(widthMM: number, heightMM: number) {
   const total = widthMM + heightMM;

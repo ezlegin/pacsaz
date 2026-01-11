@@ -1,9 +1,9 @@
 import M, { IModel } from "makerjs";
-import { MATERIALS } from "../consts";
+import { MATERIALS } from "@/consts";
 import { createDielineContext } from "./contextCreator";
-import { ResolvedDimensions } from "../types";
+import { ResolvedDimensions } from "@/types";
 import { calculateSafeFoldOffset } from "./calculateSafeFoldOffset";
-import { toPt } from "../../utils/sizeConvertor";
+import { toPt } from "@/@/utils/sizeConvertor";
 
 interface InitiateModelsOptions {
   selectedMaterial: keyof typeof MATERIALS;

@@ -1,4 +1,4 @@
-import { pointToMm, toMm, toPt } from "../../utils/sizeConvertor";
+import { pointToMm, toMm, toPt } from "@/@/utils/sizeConvertor";
 import M, { IModel, IPoint } from "makerjs";
 import { addLine } from "./addLine";
 import { cloneMirrorMove } from "./cloneMirrorMove";
@@ -6,7 +6,7 @@ import { getDistanceOfFirstAndLastPoint } from "./getDistance";
 import { getLastPointFromModel } from "./getLastPoint";
 import { PointBuilder } from "./pointBuilder";
 import { addFoldLine } from "./addFoldLine";
-import { zero } from "../consts";
+import { zero } from "@/consts";
 
 export function addSnapLock({
   heightMM,

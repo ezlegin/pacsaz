@@ -1,10 +1,10 @@
-import { MaterialKey, MATERIALS } from "../core/consts";
-import { resolveDimensions } from "../core/helpers/dimensionResolver";
-import { DielineGeneratorProps, Model } from "../core/types";
+import { MaterialKey, MATERIALS } from "@/core/consts";
+import { resolveDimensions } from "@/core/helpers/dimensionResolver";
+import { DielineGeneratorProps, Model } from "@/core/types";
 import { useEffect, useState, useTransition } from "react";
 import { useSize } from "./useSize";
-import { toPt } from "../utils/sizeConvertor";
-import { DimensionType } from "../utils/applyDimensionOffset";
+import { toPt } from "@/utils/sizeConvertor";
+import { DimensionType } from "@/utils/applyDimensionOffset";
 
 export function useDielineGenerator(
   dieline: DielineGeneratorProps,

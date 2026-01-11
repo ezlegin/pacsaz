@@ -1,4 +1,4 @@
-import { toPt } from "../utils/sizeConvertor";
+import { toPt } from "@/utils/sizeConvertor";
 import { calculateSafeFoldOffset } from "./helpers/calculateSafeFoldOffset";
 
 export const onDevelepe = process.env.NODE_ENV === "development";
