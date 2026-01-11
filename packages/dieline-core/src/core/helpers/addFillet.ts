@@ -101,11 +101,18 @@ export function addFilletAt(
     }
 
     const filletChain = M.model.findSingleChain(filletLine);
-    const fillet = M.chain.fillet(filletChain, radius);
 
-    addModelToLayer(filletModel, "fillet", {
-      models: { fillet, filletLine },
-    });
+    let fillet: IModel | null = null;
+    for (let r = radius; r > 0; r--) {
+      fillet = M.chain.fillet(filletChain, r);
+      if (fillet) break;
+    }
+
+    if (fillet) {
+      addModelToLayer(filletModel, "fillet", {
+        models: { fillet, filletLine },
+      });
+    }
 
     cursor = index + 1;
   }

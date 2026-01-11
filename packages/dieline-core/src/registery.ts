@@ -1,7 +1,7 @@
-import homeDieline from "./categories/boxes/home-dieline";
-import tuckEnd from "./categories/boxes/tuck-end";
-import tuckEndSnapLock from "./categories/boxes/tuck-end-snap-lock";
-import postalCard from "./categories/cards/postal-card";
+import homeDieline from "./dielines/boxes/home-dieline";
+import tuckEnd from "./dielines/boxes/tuck-end";
+import tuckEndSnapLock from "./dielines/boxes/tuck-end-snap-lock";
+import postalCard from "./dielines/cards/postal-card";
 
 export const dielines = {
   "postal-card": postalCard,

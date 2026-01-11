@@ -16,7 +16,7 @@ import { pushModelSeparatly } from "../../core/helpers/pushModelSeparatly";
 import { DielineGeneratorProps } from "../../core/types";
 
 const homeDieline: DielineGeneratorProps = {
-  slug: "tuck-end",
+  slug: "home-dieline",
   title: "جعبه دو طرف درب", //todo: sync to database, not here.
   dimensions: {
     defaultDimensions: {

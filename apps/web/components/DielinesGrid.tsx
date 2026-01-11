@@ -92,6 +92,12 @@ const dielines: Dielines[] = [
     modelImg: tuckEndModel,
   },
   {
+    title: "جعبه اسنپ لاک",
+    slug: "tuck-end-snap-lock",
+    dielineImg: tuckEnd,
+    modelImg: tuckEndModel,
+  },
+  {
     title: "جعبه پستی",
     slug: "postal-card",
     dielineImg: tuckEnd,

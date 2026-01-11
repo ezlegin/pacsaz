@@ -2,8 +2,6 @@
   "name": "@repo/dieline-core",
   "version": "0.0.1",
   "private": true,
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
   "exports": {
     "./registery": "./src/registery.ts",
     "./consts": "./src/core/consts.ts",
@@ -12,9 +10,9 @@
     "./utils/*": "./src/utils/*.ts"
   },
   "scripts": {
-    "build": "tsc -b",
-    "dev": "tsc -b --watch",
-    "lint": "eslint ."
+    "lint": "eslint . --max-warnings 0",
+    "generate:component": "turbo gen react-component",
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "makerjs": "^0.18.1"
