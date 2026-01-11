@@ -1,6 +1,6 @@
-import { toPt } from "@/@/utils/sizeConvertor";
+import { toPt } from "../../utils/sizeConvertor";
 import M, { IModel } from "makerjs";
-import { TuckFlap } from "@/consts";
+import { TuckFlap } from "../consts";
 import { addLine } from "./addLine";
 import { addSeam } from "./addSeam";
 import { cloneMirrorMove } from "./cloneMirrorMove";

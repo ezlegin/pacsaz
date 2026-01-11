@@ -1,5 +1,5 @@
-import { MARGINS, onDevelepe } from "@/consts";
-import { ModelExporter } from "@/types";
+import { MARGINS, onDevelepe } from "../consts";
+import { ModelExporter } from "../types";
 import { addAnchor } from "./addAnchor";
 import { addOverallDimensionGuides } from "./addOverallDimensionGuides";
 import { addBleed } from "./bleedGenerator";

@@ -1,4 +1,4 @@
-import { pointToPt, toMm, toPt } from "@/@/utils/sizeConvertor";
+import { pointToPt, toMm, toPt } from "../../utils/sizeConvertor";
 import M, { IModel } from "makerjs";
 import { addFoldLine } from "./addFoldLine";
 import { addHoleArc } from "./addHoleArc";
