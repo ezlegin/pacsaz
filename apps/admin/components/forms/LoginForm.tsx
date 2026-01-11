@@ -1,0 +1,86 @@
+"use client";
+
+import { inputFormSchema, InputFormType } from "@/lib/validatoinSchema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@repo/ui/components/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+} from "@repo/ui/components/form";
+import { Input } from "@repo/ui/components/input";
+import { Lock, Mail } from "lucide-react";
+import { useForm } from "react-hook-form";
+
+export function LoginForm() {
+  const form = useForm<InputFormType>({
+    resolver: zodResolver(inputFormSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  function onSubmit(data: InputFormType) {
+    console.log(data);
+  }
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <div className="relative">
+                  <Input
+                    {...field}
+                    placeholder="email@example.com"
+                    className="pl-10"
+                  />
+                  <Mail
+                    size={18}
+                    className="text-muted-foreground absolute top-1/2 -translate-y-1/2 left-3"
+                  />
+                </div>
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <div className="relative">
+                  <Input
+                    {...field}
+                    placeholder="password"
+                    className="pl-10"
+                    type="password"
+                  />
+                  <Lock
+                    size={18}
+                    className="text-muted-foreground absolute top-1/2 -translate-y-1/2 left-3"
+                  />
+                </div>
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        <Button
+          size={"lg"}
+          disabled={!form.formState.isValid}
+          className="w-full"
+        >
+          Log In
+        </Button>
+      </form>
+    </Form>
+  );
+}
