@@ -1,22 +1,22 @@
-import { toPt } from "../../utils/sizeConvertor";
-import { BLEED, DOOR, MATERIALS, zero } from "../../core/consts";
-import { addDoor } from "../../core/helpers/addDoor";
-import { addDust } from "../../core/helpers/addDust";
+import { toPt } from "../utils/sizeConvertor";
+import { BLEED, DOOR, MATERIALS, zero } from "../core/consts";
+import { addDoor } from "../core/helpers/addDoor";
+import { addDust } from "../core/helpers/addDust";
 import {
   cloneMirrorMove,
   cloneRotateMove,
-} from "../../core/helpers/cloneMirrorMove";
-import { drawFoldLines } from "../../core/helpers/drawFoldLines";
-import { drawGuideLines } from "../../core/helpers/drawGuideLines";
-import { drawSingleLines } from "../../core/helpers/drawSingleLines";
-import { addGlue } from "../../core/helpers/addGlue";
-import { initiateModel } from "../../core/helpers/initiateModels";
-import { modelBuilder } from "../../core/helpers/modelBuilder";
-import { pushModelSeparatly } from "../../core/helpers/pushModelSeparatly";
-import { DielineGeneratorProps } from "../../core/types";
+} from "../core/helpers/cloneMirrorMove";
+import { drawFoldLines } from "../core/helpers/drawFoldLines";
+import { drawGuideLines } from "../core/helpers/drawGuideLines";
+import { drawSingleLines } from "../core/helpers/drawSingleLines";
+import { addGlue } from "../core/helpers/addGlue";
+import { initiateModel } from "../core/helpers/initiateModels";
+import { modelBuilder } from "../core/helpers/modelBuilder";
+import { pushModelSeparatly } from "../core/helpers/pushModelSeparatly";
+import { DielineGeneratorProps } from "../core/types";
 
-const tuckEnd: DielineGeneratorProps = {
-  slug: "tuck-end",
+const homeDieline: DielineGeneratorProps = {
+  slug: "home-dieline",
   title: "جعبه دو طرف درب", //todo: sync to database, not here.
   dimensions: {
     defaultDimensions: {
@@ -42,7 +42,7 @@ const tuckEnd: DielineGeneratorProps = {
   },
 
   model({
-    developers: { showAnchors, showWatermark, showOverallDimensions },
+    developers: { showAnchors, showOverallDimensions },
     dimensions: {
       raw: rawDim,
       resolved,
@@ -79,7 +79,7 @@ const tuckEnd: DielineGeneratorProps = {
     //! -------------- TRIM --------------
 
     // GLUE ----------------------------
-    const { size: glueSize } = addGlue(trimModel, {
+    addGlue(trimModel, {
       heightMM,
       widthMM,
       lengthMM,
@@ -245,9 +245,9 @@ const tuckEnd: DielineGeneratorProps = {
       container,
       showAnchors,
       watermark: {
-        show: showWatermark,
+        show: false,
         offset: {
-          x: glueSize,
+          x: 0,
           y: 0,
         },
       },
@@ -257,4 +257,4 @@ const tuckEnd: DielineGeneratorProps = {
   },
 };
 
-export default tuckEnd;
+export default homeDieline;

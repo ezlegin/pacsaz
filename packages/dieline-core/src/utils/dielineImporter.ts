@@ -1,5 +1,5 @@
-import { dielines, DielineSlug } from "../registery";
+import { dielines } from "../registery";
 
-export function dielineImporter(slug: DielineSlug) {
-  return dielines[slug as DielineSlug];
+export function dielineImporter(slug: string) {
+  return dielines.find((d) => d.slug === slug);
 }

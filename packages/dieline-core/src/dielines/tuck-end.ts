@@ -1,21 +1,23 @@
-import { toPt } from "../../utils/sizeConvertor";
-import { BLEED, DOOR, MATERIALS } from "../../core/consts";
-import { addDoor } from "../../core/helpers/addDoor";
-import { addDust } from "../../core/helpers/addDust";
-import { addGlue } from "../../core/helpers/addGlue";
-import { addSnapLock } from "../../core/helpers/addSnapLock";
-import { cloneMirrorMove } from "../../core/helpers/cloneMirrorMove";
-import { drawFoldLines } from "../../core/helpers/drawFoldLines";
-import { drawGuideLines } from "../../core/helpers/drawGuideLines";
-import { drawSingleLines } from "../../core/helpers/drawSingleLines";
-import { initiateModel } from "../../core/helpers/initiateModels";
-import { modelBuilder } from "../../core/helpers/modelBuilder";
-import { pushModelSeparatly } from "../../core/helpers/pushModelSeparatly";
-import { DielineGeneratorProps } from "../../core/types";
+import { toPt } from "../utils/sizeConvertor";
+import { BLEED, DOOR, MATERIALS, zero } from "../core/consts";
+import { addDoor } from "../core/helpers/addDoor";
+import { addDust } from "../core/helpers/addDust";
+import {
+  cloneMirrorMove,
+  cloneRotateMove,
+} from "../core/helpers/cloneMirrorMove";
+import { drawFoldLines } from "../core/helpers/drawFoldLines";
+import { drawGuideLines } from "../core/helpers/drawGuideLines";
+import { drawSingleLines } from "../core/helpers/drawSingleLines";
+import { addGlue } from "../core/helpers/addGlue";
+import { initiateModel } from "../core/helpers/initiateModels";
+import { modelBuilder } from "../core/helpers/modelBuilder";
+import { pushModelSeparatly } from "../core/helpers/pushModelSeparatly";
+import { DielineGeneratorProps } from "../core/types";
 
-const tuckEndSnapLock: DielineGeneratorProps = {
-  slug: "tuck-end-snap-lock",
-  title: "جعبه اسنپ لاک", //todo: sync to database, not here.
+const tuckEnd: DielineGeneratorProps = {
+  slug: "tuck-end",
+  title: "جعبه دو طرف درب", //todo: sync to database, not here.
   dimensions: {
     defaultDimensions: {
       length: 160,
@@ -80,18 +82,15 @@ const tuckEndSnapLock: DielineGeneratorProps = {
     const { size: glueSize } = addGlue(trimModel, {
       heightMM,
       widthMM,
-      customPoints: {
-        from: [0, safeFoldOffset / 2],
-        to: [0, lengthMM - safeFoldOffset / 2],
-      },
-      safeFoldOffset,
+      lengthMM,
+      safeFoldOffset: safeFoldOffset,
     });
 
     // DOOR ----------------------------
     const { tuckFlap } = DOOR;
     const tuckFlapSize = tuckFlap.size(widthMM);
 
-    const { model: topDoor } = addDoor({
+    const { model: topDoor, doorSize } = addDoor({
       widthMM,
       heightMM,
       lengthMM,
@@ -104,8 +103,15 @@ const tuckEndSnapLock: DielineGeneratorProps = {
 
     pushModelSeparatly(trimModel, foldModel, topDoor, "topDoor");
 
+    const bottomDoor = cloneRotateMove(topDoor, 180, [
+      width + height,
+      -doorSize - toPt(safeFoldOffset),
+    ]);
+
+    pushModelSeparatly(trimModel, foldModel, bottomDoor, "bottomDoor");
+
     // DUST ----------------------------
-    const { model: dustTL } = addDust({
+    const { dustSize, model: dustTL } = addDust({
       drawAfter: topDoor,
       heightMM,
       widthMM,
@@ -135,16 +141,45 @@ const tuckEndSnapLock: DielineGeneratorProps = {
 
     pushModelSeparatly(trimModel, foldModel, dustTR, "dustTR");
 
-    const { snapLock } = addSnapLock({
+    const { model: dustBR_RAW } = addDust({
+      drawAfter: topDoor,
       heightMM,
       widthMM,
+      lengthMM,
+      tuckFlapSize,
+      safeFoldOffset,
+      considerOuterIndent: false,
+      materialThickness,
+    });
+
+    const clonedDustBR = cloneMirrorMove(dustBR_RAW, false, true, [
+      width * 2 + height,
+      0 - toPt(dustSize),
+    ]);
+
+    pushModelSeparatly(trimModel, foldModel, clonedDustBR, "dustBR");
+
+    const { model: dustBL_RAW } = addDust({
+      drawAfter: topDoor,
+      heightMM,
+      widthMM,
+      lengthMM,
+      tuckFlapSize,
       materialThickness,
       safeFoldOffset,
+      considerOuterIndent: true,
     });
-    pushModelSeparatly(trimModel, foldModel, snapLock, "snapLock");
+
+    const dustBL = cloneMirrorMove(dustBL_RAW, true, true, [
+      width,
+      0 - toPt(dustSize),
+    ]);
+
+    pushModelSeparatly(trimModel, foldModel, dustBL, "dustBL");
 
     // SINGLES ----------------------------
     drawSingleLines(trimModel, [
+      { id: "s1", pts: [zero, [width, 0]] },
       {
         id: "s2",
         pts: [
@@ -162,22 +197,18 @@ const tuckEndSnapLock: DielineGeneratorProps = {
     ]);
 
     //! -------------- FOLD --------------
-    const foldOffsetToSnapLock = toPt(safeFoldOffset) / 2;
     const safeOffset = toPt(safeFoldOffset);
     drawFoldLines(foldModel, {
       verticals: [
-        { from: [0, foldOffsetToSnapLock], to: [0, length] },
-        {
-          from: [width, length + safeOffset],
-          to: [width, foldOffsetToSnapLock],
-        },
+        { from: zero, to: [0, length] },
+        { from: [width, length + safeOffset], to: [width, 0] },
         {
           from: [width + height, length],
-          to: [width + height, foldOffsetToSnapLock],
+          to: [width + height, -safeOffset],
         },
         {
           from: [width * 2 + height, length],
-          to: [width * 2 + height, foldOffsetToSnapLock],
+          to: [width * 2 + height, -safeOffset],
         },
       ],
     });
@@ -226,4 +257,4 @@ const tuckEndSnapLock: DielineGeneratorProps = {
   },
 };
 
-export default tuckEndSnapLock;
+export default tuckEnd;

@@ -1,15 +1,17 @@
 "use client";
 
+import { DIMENSIONS } from "@repo/dieline-core/consts";
+import { useDielineGenerator } from "@repo/dieline-core/hooks/useDielineGenerator";
+import { dielineImporter } from "@repo/dieline-core/utils/dielineImporter";
 import { Card as ShadCard } from "@repo/ui/components/card";
 import { DimensionInput } from "../product/DimensionsInput";
 import SVGPreview from "../product/SVGPreview";
-import { DIMENSIONS } from "@repo/dieline-core/consts";
-import { useDielineGenerator } from "@repo/dieline-core/hooks/useDielineGenerator";
-import { dielines } from "@repo/dieline-core/registery";
-import { DielineGeneratorProps } from "@repo/dieline-core/types";
 
 const HomeSVGModel = () => {
-  const dieline = dielines["home-dieline"] as DielineGeneratorProps;
+  const dieline = dielineImporter("home-dieline");
+
+  if (!dieline) return;
+
   dieline.dimensions.defaultDimensions.width = 80;
   dieline.dimensions.defaultDimensions.length = 130;
   dieline.dimensions.defaultDimensions.height = 40;
