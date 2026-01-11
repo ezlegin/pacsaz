@@ -6,7 +6,7 @@ import { CircleCheck, Zap } from "lucide-react";
 import Link from "next/link";
 import Price from "./Price";
 import { SubPeriod } from "./SubscriptionList";
-import Card from "./Card";
+import Card from "@repo/ui/components/custom/Card";
 
 export const SubscriptionCard = ({
   props: {

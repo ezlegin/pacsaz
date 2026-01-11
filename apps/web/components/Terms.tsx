@@ -1,5 +1,5 @@
 import React from "react";
-import Card from "./Card";
+import Card from "@repo/ui/components/custom/Card";
 
 const Terms = ({ style = "styled" }: { style?: "raw" | "styled" }) => {
   return style === "raw" ? (

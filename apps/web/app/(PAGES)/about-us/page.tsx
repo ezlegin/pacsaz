@@ -1,7 +1,7 @@
 "use client";
 
 import PacsazLogo from "@/components/PacsazLogo";
-import Card from "@/components/Card";
+import Card from "@repo/ui/components/custom/Card";
 import { Separator } from "@repo/ui/components/separator";
 import PageTitle from "@/components/PageTitle";
 

@@ -3,9 +3,9 @@ import React from "react";
 import { layoutPaddings } from "./Navbars/Navbar";
 import PacsazLogo from "./PacsazLogo";
 import Image from "next/image";
-import Card from "./Card";
 import { Button } from "@repo/ui/components/button";
 import Link from "next/link";
+import Card from "@repo/ui/components/custom/Card";
 
 const Footer = () => {
   return (

@@ -4,8 +4,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@repo/ui/components/accordion";
-import Card from "../Card";
 import HomeTitle from "./HomeTitle";
+import Card from "@repo/ui/components/custom/Card";
 
 const HomeSUbFAQ = () => {
   return (

@@ -4,10 +4,10 @@ import { Progress } from "@repo/ui/components/progress";
 import { TableCell, TableRow } from "@repo/ui/components/table";
 import { formatDate } from "date-fns";
 import { Calendar, Download, FolderDown } from "lucide-react";
-import Card from "./Card";
+import Card from "@repo/ui/components/custom/Card";
 import { StatCard } from "./StatCard";
-import Table from "./Table";
 import UserSubscriptionCard from "./UserSubscriptionCard";
+import Table from "@repo/ui/components/custom/Table";
 
 type LastDownloads = {
   id: number;

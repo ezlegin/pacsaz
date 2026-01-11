@@ -6,7 +6,7 @@ import { useUpgradeSubscriptionCheckout } from "@/hooks/useSubscriptionCheckout"
 import { Button } from "@repo/ui/components/button";
 import { Input } from "@repo/ui/components/input";
 import { Separator } from "@repo/ui/components/separator";
-import Card from "./Card";
+import Card from "@repo/ui/components/custom/Card";
 import { PaymentPlans } from "./PaymentPlans";
 import { SubPeriod } from "./SubscriptionList";
 

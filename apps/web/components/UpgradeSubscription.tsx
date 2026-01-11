@@ -10,7 +10,7 @@ import { RadioGroup, RadioGroupItem } from "@repo/ui/components/radio-group";
 import { Separator } from "@repo/ui/components/separator";
 import { SquareArrowOutUpRight } from "lucide-react";
 import Link from "next/link";
-import Card from "./Card";
+import Card from "@repo/ui/components/custom/Card";
 import PeriodSwitch from "./PeriodSwitch";
 import Price from "./Price";
 

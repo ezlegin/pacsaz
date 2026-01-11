@@ -1,7 +1,5 @@
-import Card from "@/components/Card";
 import Status from "@/components/Status";
 import { SubPeriod } from "@/components/SubscriptionList";
-import Table from "@/components/Table";
 import { PlanKey } from "@/data/subscription";
 import {
   mapPeriodLabel,
@@ -9,6 +7,8 @@ import {
   mapUserPlanTitle,
   Status as StatusType,
 } from "@/data/user";
+import Card from "@repo/ui/components/custom/Card";
+import Table from "@repo/ui/components/custom/Table";
 import { TableCell, TableRow } from "@repo/ui/components/table";
 import { formatDate } from "date-fns";
 

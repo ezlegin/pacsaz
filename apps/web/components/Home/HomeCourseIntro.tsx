@@ -1,10 +1,10 @@
 import React from "react";
-import Card from "../Card";
 import Image from "next/image";
 import { alirezaEzleginiPic, packagingCoursePic } from "@/public";
 import { Button } from "@repo/ui/components/button";
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
+import Card from "@repo/ui/components/custom/Card";
 
 const HomeCourseIntro = () => {
   return (

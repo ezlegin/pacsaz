@@ -1,4 +1,4 @@
-import Card from "@/components/Card";
+import Card from "@repo/ui/components/custom/Card";
 import Price from "@/components/Price";
 import { PlanKey } from "@/data/subscription";
 import { plans } from "@/data/subscription";

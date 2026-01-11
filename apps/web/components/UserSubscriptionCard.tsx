@@ -5,7 +5,7 @@ import { Button } from "@repo/ui/components/button";
 import { Dialog, DialogContent, DialogTitle } from "@repo/ui/components/dialog";
 import { RotateCw, Zap } from "lucide-react";
 import { useState } from "react";
-import Card from "./Card";
+import Card from "@repo/ui/components/custom/Card";
 import UpgradeSubscription from "./UpgradeSubscription";
 import Link from "next/link";
 

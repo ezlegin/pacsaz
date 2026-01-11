@@ -1,5 +1,5 @@
 import { cn } from "@repo/ui/lib/utils";
-import Card from "./Card";
+import Card from "@repo/ui/components/custom/Card";
 
 export const StatCard = ({
   title,

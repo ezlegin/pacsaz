@@ -1,4 +1,4 @@
-import Card from "@/components/Card";
+import Card from "@repo/ui/components/custom/Card";
 import { Badge } from "@repo/ui/components/badge";
 import {
   Ruler,

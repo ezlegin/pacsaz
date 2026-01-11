@@ -7,8 +7,8 @@ import {
 import { Badge } from "@repo/ui/components/badge";
 import { CircleQuestionMark } from "lucide-react";
 import React from "react";
-import Card from "../Card";
 import { Button } from "@repo/ui/components/button";
+import Card from "@repo/ui/components/custom/Card";
 
 const FAQ = () => {
   return (
