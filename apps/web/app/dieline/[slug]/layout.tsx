@@ -1,5 +1,5 @@
 import ProductNavbar from "@/components/Navbars/ProductNavbar";
-import { dielines, DielineSlug } from "@repo/dieline-core/registery";
+import { dielineImporter } from "@repo/dieline-core/utils/dielineImporter";
 import { notFound } from "next/navigation";
 
 export default async function Layout({
@@ -11,13 +11,12 @@ export default async function Layout({
 }) {
   const { slug } = await params;
 
-  const dieline = dielines[slug as DielineSlug];
+  const dieline = dielineImporter(slug);
   if (!dieline) return notFound();
-  const productName = dieline.title;
 
   return (
     <div className="bg-accent flex flex-col h-screen overflow-hidden">
-      <ProductNavbar productName={productName} />
+      <ProductNavbar productName={dieline.title} />
 
       {children}
     </div>

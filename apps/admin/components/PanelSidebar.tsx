@@ -15,6 +15,7 @@ import {
   Flag,
   Heart,
   Layout,
+  LayoutDashboard,
   Ratio,
   Users,
 } from "lucide-react";
@@ -80,6 +81,11 @@ const menuItems = [
         title: "Dielines",
         url: "/dielines",
         icon: Ratio,
+      },
+      {
+        title: "Categories",
+        url: "/categories",
+        icon: LayoutDashboard,
       },
       {
         title: "Favs",

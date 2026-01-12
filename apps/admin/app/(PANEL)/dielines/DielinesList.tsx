@@ -1,7 +1,14 @@
 import ViewButton from "@/components/ViewButton";
+import { mainURL } from "@/data/envs";
+import { Badge } from "@repo/ui/components/badge";
 import Card from "@repo/ui/components/custom/Card";
 import Table from "@repo/ui/components/custom/Table";
 import { TableCell, TableRow } from "@repo/ui/components/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@repo/ui/components/tooltip";
 
 type Dieline = {
   id: number;
@@ -43,8 +50,29 @@ const DielinesList = () => {
       <TableRow key={data.id}>
         <TableCell>{data.id}</TableCell>
         <TableCell className="text-center">{data.title}</TableCell>
-        <TableCell className="text-center">{data.slug}</TableCell>
-        <TableCell className="text-center">{data.title}</TableCell>
+        <TableCell className="text-center">
+          <a target="_blank" href={`${mainURL}/dieline/${data.slug}`}>
+            {data.slug}
+          </a>
+        </TableCell>
+        <TableCell className="text-center flex gap-2 justify-center items-center">
+          <Tooltip>
+            <TooltipTrigger>
+              <Badge variant={"outline"}>By Usage</Badge>
+            </TooltipTrigger>
+            <TooltipContent>
+              {data.categories.byUsage.join(", ")}
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger>
+              <Badge variant={"outline"}>By Model</Badge>
+            </TooltipTrigger>
+            <TooltipContent>
+              {data.categories.byModel.join(", ")}
+            </TooltipContent>
+          </Tooltip>
+        </TableCell>
         <TableCell className="text-center">{data.downloaded}</TableCell>
         <TableCell>
           <div className="flex justify-end">
