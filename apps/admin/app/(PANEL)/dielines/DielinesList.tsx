@@ -9,7 +9,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@repo/ui/components/tooltip";
-import { Eye } from "lucide-react";
+import { Pencil, Trash } from "lucide-react";
 
 type Dieline = {
   id: number;
@@ -22,30 +22,7 @@ type Dieline = {
   downloaded: number;
 };
 
-const DielinesList = () => {
-  const data: Dieline[] = [
-    {
-      id: 1,
-      title: "جعبه دو طرف درب",
-      slug: "tuck-end",
-      categories: {
-        byUsage: ["medicine", "food"],
-        byModel: ["tuck-end"],
-      },
-      downloaded: 290,
-    },
-    {
-      id: 2,
-      title: "جعبه اسنپ لاک",
-      slug: "tuck-end-snap-lock",
-      categories: {
-        byUsage: ["medicine", "food"],
-        byModel: ["tuck-end"],
-      },
-      downloaded: 373,
-    },
-  ];
-
+const DielinesList = ({ data }: { data: Dieline[] }) => {
   const renderRows = (data: Dieline) => {
     return (
       <TableRow key={data.id}>
@@ -76,8 +53,9 @@ const DielinesList = () => {
         </TableCell>
         <TableCell className="text-center">{data.downloaded}</TableCell>
         <TableCell>
-          <div className="flex justify-end">
-            <ActionButton icon={Eye} />
+          <div className="flex justify-end gap-2">
+            <ActionButton icon={Pencil} />
+            <ActionButton icon={Trash} />
           </div>
         </TableCell>
       </TableRow>
@@ -99,5 +77,5 @@ const columns = [
   { label: "Slug", className: "" },
   { label: "Categories", className: "" },
   { label: "Downloaded", className: "" },
-  { label: "View", className: "" },
+  { label: "Action", className: "" },
 ];

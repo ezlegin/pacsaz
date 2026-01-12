@@ -3,6 +3,8 @@ import NewButton from "@/components/NewButton";
 import PageTitle from "@/components/PageTitle";
 import Search from "@/components/Search";
 import CategoriesList from "./CategoriesList";
+import Pagination from "@repo/ui/components/custom/Pagination";
+import { globalPageSize } from "@/lib/consts";
 
 const page = () => {
   return (
@@ -27,6 +29,12 @@ const page = () => {
         </div>
 
         <CategoriesList data={data} />
+
+        <Pagination
+          pageSize={globalPageSize}
+          totalItems={data.length}
+          paramName="pageByUsage"
+        />
       </div>
 
       <div className="space-y-3">
@@ -49,6 +57,12 @@ const page = () => {
         </div>
 
         <CategoriesList data={data} />
+
+        <Pagination
+          pageSize={globalPageSize}
+          totalItems={data.length}
+          paramName="pageByModel"
+        />
       </div>
     </div>
   );

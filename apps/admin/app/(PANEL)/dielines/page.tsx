@@ -1,9 +1,10 @@
-import React from "react";
-import DielinesList from "./DielinesList";
 import Filter from "@/components/Filter";
-import Search from "@/components/Search";
 import NewButton from "@/components/NewButton";
 import PageTitle from "@/components/PageTitle";
+import Search from "@/components/Search";
+import { globalPageSize } from "@/lib/consts";
+import Pagination from "@repo/ui/components/custom/Pagination";
+import DielinesList from "./DielinesList";
 
 const page = () => {
   return (
@@ -11,9 +12,8 @@ const page = () => {
       <PageTitle title="Dielines" />
 
       <div className="flex justify-between">
-        <Search placeholder="Search By Slug" />
-
         <div className="flex gap-3">
+          <Search placeholder="Search By Slug" />
           <Filter
             options={[
               { label: "Most Download", value: "most-download" },
@@ -22,14 +22,39 @@ const page = () => {
             name="download"
             placeholder="Sort By Download"
           />
-
-          <NewButton title="New Dieline" />
         </div>
+
+        <NewButton title="New Dieline" />
       </div>
 
-      <DielinesList />
+      <DielinesList data={data} />
+
+      <Pagination pageSize={globalPageSize} totalItems={data.length} />
     </div>
   );
 };
 
 export default page;
+
+const data = [
+  {
+    id: 1,
+    title: "جعبه دو طرف درب",
+    slug: "tuck-end",
+    categories: {
+      byUsage: ["medicine", "food"],
+      byModel: ["tuck-end"],
+    },
+    downloaded: 290,
+  },
+  {
+    id: 2,
+    title: "جعبه اسنپ لاک",
+    slug: "tuck-end-snap-lock",
+    categories: {
+      byUsage: ["medicine", "food"],
+      byModel: ["tuck-end"],
+    },
+    downloaded: 373,
+  },
+];
