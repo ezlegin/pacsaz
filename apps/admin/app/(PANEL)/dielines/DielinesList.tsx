@@ -1,4 +1,4 @@
-import ViewButton from "@/components/ViewButton";
+import ActionButton from "@/components/ActionButton";
 import { mainURL } from "@/data/envs";
 import { Badge } from "@repo/ui/components/badge";
 import Card from "@repo/ui/components/custom/Card";
@@ -9,6 +9,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@repo/ui/components/tooltip";
+import { Eye } from "lucide-react";
 
 type Dieline = {
   id: number;
@@ -76,7 +77,7 @@ const DielinesList = () => {
         <TableCell className="text-center">{data.downloaded}</TableCell>
         <TableCell>
           <div className="flex justify-end">
-            <ViewButton />
+            <ActionButton icon={Eye} />
           </div>
         </TableCell>
       </TableRow>

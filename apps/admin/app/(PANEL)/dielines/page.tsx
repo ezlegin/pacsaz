@@ -3,10 +3,13 @@ import DielinesList from "./DielinesList";
 import Filter from "@/components/Filter";
 import Search from "@/components/Search";
 import NewButton from "@/components/NewButton";
+import PageTitle from "@/components/PageTitle";
 
 const page = () => {
   return (
     <div className="space-y-3">
+      <PageTitle title="Dielines" />
+
       <div className="flex justify-between">
         <Search placeholder="Search By Slug" />
 
