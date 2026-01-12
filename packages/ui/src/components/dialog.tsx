@@ -50,7 +50,7 @@ function DialogContent({
   className,
   children,
   overlayClassname,
-  showCloseButton = true,
+  showCloseButton = false,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean;

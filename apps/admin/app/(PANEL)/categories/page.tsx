@@ -1,10 +1,11 @@
 import Filter from "@/components/Filter";
-import NewButton from "@/components/NewButton";
+import { CategoriesForm } from "@/components/forms/CategoriesForm";
 import PageTitle from "@/components/PageTitle";
+import PopupNewDialog from "@/components/PopupNewDialog";
 import Search from "@/components/Search";
-import CategoriesList from "./CategoriesList";
-import Pagination from "@repo/ui/components/custom/Pagination";
 import { globalPageSize } from "@/lib/consts";
+import Pagination from "@repo/ui/components/custom/Pagination";
+import CategoriesList from "./CategoriesList";
 
 const page = () => {
   return (
@@ -25,7 +26,9 @@ const page = () => {
             />
           </div>
 
-          <NewButton title="New" />
+          <PopupNewDialog buttonTitle="New">
+            <CategoriesForm by="usage" />
+          </PopupNewDialog>
         </div>
 
         <CategoriesList data={data} />
@@ -53,7 +56,10 @@ const page = () => {
               placeholder="Sort"
             />
           </div>
-          <NewButton title="New" />
+
+          <PopupNewDialog buttonTitle="New">
+            <CategoriesForm by="model" />
+          </PopupNewDialog>
         </div>
 
         <CategoriesList data={data} />

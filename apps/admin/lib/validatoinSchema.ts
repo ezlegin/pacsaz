@@ -15,3 +15,9 @@ export const dielineFormSchema = z.object({
   }),
 });
 export type DielineFormType = z.infer<typeof dielineFormSchema>;
+
+export const categoriesFormSchema = z.object({
+  title: z.string().min(1),
+  slug: z.string().min(1),
+});
+export type CategoriesFormType = z.infer<typeof categoriesFormSchema>;

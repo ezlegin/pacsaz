@@ -1,6 +1,7 @@
 import Filter from "@/components/Filter";
-import NewButton from "@/components/NewButton";
+import { DielineForm } from "@/components/forms/DielineForm";
 import PageTitle from "@/components/PageTitle";
+import PopupNewDialog from "@/components/PopupNewDialog";
 import Search from "@/components/Search";
 import { globalPageSize } from "@/lib/consts";
 import Pagination from "@repo/ui/components/custom/Pagination";
@@ -24,7 +25,9 @@ const page = () => {
           />
         </div>
 
-        <NewButton title="New Dieline" />
+        <PopupNewDialog buttonTitle="New Dieline">
+          <DielineForm />
+        </PopupNewDialog>
       </div>
 
       <DielinesList data={data} />
