@@ -1,5 +1,15 @@
 import z from "zod";
 
+export const userType = [
+  "student",
+  "designer",
+  "designStudio",
+  "printHouse",
+  "dielineMaker",
+  "packagingFactory",
+  "other",
+] as const;
+
 export const inputFormSchema = z.object({
   email: z.string().email(),
   password: z.string(),
@@ -28,3 +38,11 @@ export const tarrifFormSchema = z.object({
   annual: z.string(),
 });
 export type TarrifFormType = z.infer<typeof tarrifFormSchema>;
+
+export const userFormSchema = z.object({
+  fullName: z.string(),
+  email: z.string().email(),
+  phoneNumber: z.string(),
+  userType: z.enum(userType),
+});
+export type UserFormType = z.infer<typeof userFormSchema>;
