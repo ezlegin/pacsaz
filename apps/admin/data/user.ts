@@ -1,13 +1,10 @@
 import { UserType as UserTypes } from "@/components/onboarding/Onboarding";
-import { SubPeriod } from "@/components/SubscriptionList";
-import { PlanTitle, PlanLevel, PlanKey } from "./subscription";
+import { PlanKey, PlanLevel, PlanPeriod } from "./subscription";
 
 export type PlanType = {
-  title: PlanTitle;
   level: PlanLevel;
-  description: string;
   key: PlanKey;
-  period: SubPeriod;
+  period: PlanPeriod;
 };
 
 type UserType = {
@@ -33,22 +30,14 @@ export const testUser: UserType = {
   plan: {
     period: "monthly",
     key: "standard",
-    get title() {
-      return mapUserPlanTitle(this.key);
-    },
     get level() {
       return mapUserPlanLevel(this.key);
     },
-    description: "مخصوص مبتدیان و تازه کار",
   },
   paid: 399000,
   fairDownload: 50,
   downloaded: 39,
 };
-
-export function mapUserType(userType: UserTypes) {
-  if (userType === "student") return "دانشجو/دانش‌آموز";
-}
 
 export function mapUserPlanTitle(userPlan: PlanKey) {
   if (userPlan === "standard") return "استاندارد";
@@ -60,16 +49,4 @@ function mapUserPlanLevel(userPlan: PlanKey) {
   if (userPlan === "standard") return 1;
   if (userPlan === "pro") return 2;
   return 3;
-}
-
-export function mapPeriodLabel(period: SubPeriod) {
-  if (period === "monthly") return "ماهیانه";
-  return "سالیانه";
-}
-
-export type Status = "success" | "failed" | "canceled";
-export function mapStatusLable(status: Status) {
-  if (status === "failed") return "ناموفق";
-  if (status === "success") return "موفق";
-  return "کنسل شده";
 }

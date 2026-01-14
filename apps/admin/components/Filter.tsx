@@ -51,7 +51,7 @@ const Filter: React.FC<SelectProps> = ({
       <SelectTrigger className="w-45">
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent position="item-aligned">
         <SelectItem value={"all"}>{placeholder}</SelectItem>
         {options.map((option) => (
           <SelectItem

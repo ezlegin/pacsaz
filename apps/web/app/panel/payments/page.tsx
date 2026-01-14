@@ -1,13 +1,14 @@
-import Status from "@/components/Status";
 import { SubPeriod } from "@/components/SubscriptionList";
 import { PlanKey } from "@/data/subscription";
 import {
+  mapPaymentStatusLable,
   mapPeriodLabel,
-  mapStatusLable,
   mapUserPlanTitle,
-  Status as StatusType,
 } from "@/data/user";
 import Card from "@repo/ui/components/custom/Card";
+import PaymentStatus, {
+  PaymentStatusType,
+} from "@repo/ui/components/custom/PaymentStatus";
 import Table from "@repo/ui/components/custom/Table";
 import { TableCell, TableRow } from "@repo/ui/components/table";
 import { formatDate } from "date-fns";
@@ -41,7 +42,7 @@ function page() {
     {
       id: 4,
       date: new Date("2026-01-01"),
-      status: "success",
+      status: "pending",
       amount: 399000,
       plan: "standard",
       period: "monthly",
@@ -64,15 +65,9 @@ function page() {
           {formatDate(data.date, "PPP")}
         </TableCell>
         <TableCell className="text-center">
-          <Status
-            label={mapStatusLable(data.status as StatusType)}
-            status={
-              data.status === "success"
-                ? "success"
-                : data.status === "failed"
-                  ? "failed"
-                  : "canceled"
-            }
+          <PaymentStatus
+            label={mapPaymentStatusLable(data.status as PaymentStatusType)}
+            status={data.status as PaymentStatusType}
           />
         </TableCell>
         <TableCell className="text-center">

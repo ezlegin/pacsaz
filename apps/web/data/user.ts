@@ -1,6 +1,7 @@
 import { UserType as UserTypes } from "@/components/onboarding/Onboarding";
 import { SubPeriod } from "@/components/SubscriptionList";
 import { PlanTitle, PlanLevel, PlanKey } from "./subscription";
+import { PaymentStatusType } from "@repo/ui/components/custom/PaymentStatus";
 
 export type PlanType = {
   title: PlanTitle;
@@ -67,9 +68,9 @@ export function mapPeriodLabel(period: SubPeriod) {
   return "سالیانه";
 }
 
-export type Status = "success" | "failed" | "canceled";
-export function mapStatusLable(status: Status) {
+export function mapPaymentStatusLable(status: PaymentStatusType) {
   if (status === "failed") return "ناموفق";
   if (status === "success") return "موفق";
+  if (status === "pending") return "در انتظار";
   return "کنسل شده";
 }
