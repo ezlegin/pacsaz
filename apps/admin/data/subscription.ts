@@ -1,5 +1,6 @@
 export type PlanKey = "standard" | "pro" | "organization";
 export type PlanPeriod = "monthly" | "3-month" | "annual";
+export type PlanStatus = "active" | "deactive" | "expired";
 export type PlanTitle = "استاندارد" | "حرفه‌ای" | "سازمانی";
 export type PlanFeature = { active: boolean; value: string };
 export type PlanPrice = {

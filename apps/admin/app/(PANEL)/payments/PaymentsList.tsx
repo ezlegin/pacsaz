@@ -97,5 +97,5 @@ const columns = [
   { label: "discount" },
   { label: "Total" },
   { label: "Plan" },
-  { label: "Action" },
+  { label: "Edit" },
 ];
