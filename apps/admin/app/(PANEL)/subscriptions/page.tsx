@@ -1,16 +1,17 @@
 import Filter from "@/components/Filter";
-import NewButton from "@/components/NewButton";
 import PageTitle from "@/components/PageTitle";
+import PopupNewDialog from "@/components/PopupNewDialog";
 import Search from "@/components/Search";
+import { SubscriptionForm } from "@/components/forms/SubscriptionForm";
 import { globalPageSize } from "@/lib/consts";
 import Pagination from "@repo/ui/components/custom/Pagination";
-import SubscriptionsList, { Subscription } from "./SubscriptionsList";
 import { addMonths, addYears } from "date-fns";
+import SubscriptionsList, { Subscription } from "./SubscriptionsList";
 
 const page = () => {
   return (
     <div className="space-y-3">
-      <PageTitle title="Payments" />
+      <PageTitle title="Subscriptions" />
 
       <div className="flex justify-between">
         <div className="flex gap-3">
@@ -25,7 +26,9 @@ const page = () => {
           />
         </div>
 
-        <NewButton title="New Payment" href="/payments/new" />
+        <PopupNewDialog buttonTitle="New">
+          <SubscriptionForm />
+        </PopupNewDialog>
       </div>
 
       <SubscriptionsList data={data} />

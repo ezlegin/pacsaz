@@ -15,6 +15,7 @@ import {
   Layout,
   LayoutDashboard,
   Ratio,
+  Ticket,
   Users,
 } from "lucide-react";
 import Link from "next/link";
@@ -48,21 +49,31 @@ export function PanelSidebar() {
       ],
     },
     {
-      groupLabel: "Payments",
+      groupLabel: "Subscription",
       items: [
         {
           title: "Subscriptions",
           url: "/subscriptions",
           icon: Flag,
         },
-        {
-          title: "Tarrif",
-          url: "/tarrif",
-          icon: CreditCard,
-        },
+      ],
+    },
+    {
+      groupLabel: "Payments",
+      items: [
         {
           title: "Payments",
           url: "/payments",
+          icon: CreditCard,
+        },
+        {
+          title: "Coupons",
+          url: "/cuopons",
+          icon: Ticket,
+        },
+        {
+          title: "Tarrif",
+          url: "/tarrif",
           icon: CreditCard,
         },
       ],
@@ -109,7 +120,7 @@ export function PanelSidebar() {
                       <SidebarMenuButton asChild>
                         <Link href={item.url}>
                           <item.icon />
-                          {item.title}
+                          <div>{item.title}</div>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>

@@ -3,16 +3,11 @@ export type PlanPeriod = "monthly" | "3-month" | "annual";
 export type PlanStatus = "active" | "deactive" | "expired";
 export type PlanTitle = "استاندارد" | "حرفه‌ای" | "سازمانی";
 export type PlanFeature = { active: boolean; value: string };
-export type PlanPrice = {
-  monthly: number;
-  monthlyOnAnnual: number;
-  annual: number;
-};
 export type PlanLevel = 1 | 2 | 3;
 
 export interface SubCardProps {
   title: PlanTitle;
-  price: PlanPrice;
+  price: number;
   description: string;
   key: PlanKey;
   shortDescription: string;
@@ -54,11 +49,7 @@ export const plans: SubCardProps[] = [
         return this.monthly * 12;
       },
     },
-    price: {
-      monthly: 399000,
-      monthlyOnAnnual: 279000,
-      annual: 3348000,
-    },
+    price: 399000,
     level: 1,
     features: [
       ...generals,
@@ -77,11 +68,7 @@ export const plans: SubCardProps[] = [
         return this.monthly * 12;
       },
     },
-    price: {
-      monthly: 699000,
-      monthlyOnAnnual: 489000,
-      annual: 5868000,
-    },
+    price: 699000,
     level: 2,
     features: [...generals, ...paids],
   },
@@ -97,11 +84,7 @@ export const plans: SubCardProps[] = [
         return this.monthly * 12;
       },
     },
-    price: {
-      monthly: 1399000,
-      monthlyOnAnnual: 979000,
-      annual: 11748000,
-    },
+    price: 1399000,
     level: 3,
     features: [...generals, ...paids],
   },
