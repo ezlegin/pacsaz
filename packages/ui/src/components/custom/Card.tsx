@@ -1,6 +1,6 @@
 import { Separator } from "@repo/ui/components/separator";
 import { cn } from "@repo/ui/lib/utils";
-import React, { ReactNode } from "react";
+import { ReactNode } from "react";
 
 const Card = ({
   children,

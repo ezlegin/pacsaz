@@ -10,7 +10,7 @@ import { Frown } from "lucide-react";
 import { ReactNode } from "react";
 
 interface Props {
-  columns: { label: string; className?: string }[];
+  columns?: { label: string; className?: string }[];
   data: any[];
   renderRows: (item: any, index?: number) => ReactNode;
   noDataMessage?: string;
@@ -27,25 +27,27 @@ const Table = ({
   return (
     <>
       <MyTable>
-        <TableHeader>
-          <TableRow className="text-muted-foreground text-sm text-left bg-accent">
-            {columns.map((column, index) => (
-              <TableHead
-                key={index}
-                className={cn(
-                  dir === "ltr"
-                    ? "first:text-left last:text-right"
-                    : "first:text-right last:text-left",
-                  "h-10",
-                  (index !== 0 || index !== columns.length) && "text-center",
-                  column.className
-                )}
-              >
-                {column.label}
-              </TableHead>
-            ))}
-          </TableRow>
-        </TableHeader>
+        {columns && (
+          <TableHeader>
+            <TableRow className="text-muted-foreground text-sm text-left bg-accent">
+              {columns.map((column, index) => (
+                <TableHead
+                  key={index}
+                  className={cn(
+                    dir === "ltr"
+                      ? "first:text-left last:text-right"
+                      : "first:text-right last:text-left",
+                    "h-10",
+                    (index !== 0 || index !== columns.length) && "text-center",
+                    column.className
+                  )}
+                >
+                  {column.label}
+                </TableHead>
+              ))}
+            </TableRow>
+          </TableHeader>
+        )}
 
         <TableBody>
           {data?.map((data, index) => renderRows(data, index))}

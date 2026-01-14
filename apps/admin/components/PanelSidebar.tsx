@@ -10,10 +10,8 @@ import {
   SidebarMenuItem,
 } from "@repo/ui/components/sidebar";
 import {
-  Bookmark,
   CreditCard,
   Flag,
-  Heart,
   Layout,
   LayoutDashboard,
   Ratio,
@@ -23,6 +21,69 @@ import Link from "next/link";
 import PacsazLogo from "./PacsazLogo";
 
 export function PanelSidebar() {
+  const menuItems = [
+    {
+      groupLabel: "",
+      items: [
+        {
+          title: "Dashboard",
+          url: "/",
+          icon: Layout,
+        },
+      ],
+    },
+    {
+      groupLabel: "Dieline Management",
+      items: [
+        {
+          title: "Dielines",
+          url: "/dielines",
+          icon: Ratio,
+        },
+        {
+          title: "Categories",
+          url: "/categories",
+          icon: LayoutDashboard,
+        },
+      ],
+    },
+    {
+      groupLabel: "Payments",
+      items: [
+        {
+          title: "Subscriptions",
+          url: "/subscriptions",
+          icon: Flag,
+        },
+        {
+          title: "Tarrif",
+          url: "/tarrif",
+          icon: CreditCard,
+        },
+        {
+          title: "Payments",
+          url: "/payments",
+          icon: CreditCard,
+        },
+      ],
+    },
+    {
+      groupLabel: "Usre Management",
+      items: [
+        {
+          title: "Users",
+          url: "/users",
+          icon: Users,
+        },
+        {
+          title: "Customers",
+          url: "/customers",
+          icon: Users,
+        },
+      ],
+    },
+  ];
+
   return (
     <Sidebar>
       <SidebarContent className="p-6 py-5">
@@ -62,76 +123,3 @@ export function PanelSidebar() {
     </Sidebar>
   );
 }
-
-const menuItems = [
-  {
-    groupLabel: "",
-    items: [
-      {
-        title: "Dashboard",
-        url: "/",
-        icon: Layout,
-      },
-    ],
-  },
-  {
-    groupLabel: "Dieline Management",
-    items: [
-      {
-        title: "Dielines",
-        url: "/dielines",
-        icon: Ratio,
-      },
-      {
-        title: "Categories",
-        url: "/categories",
-        icon: LayoutDashboard,
-      },
-      {
-        title: "Favs",
-        url: "/favs",
-        icon: Heart,
-      },
-      {
-        title: "Saved",
-        url: "/saved",
-        icon: Bookmark,
-      },
-    ],
-  },
-  {
-    groupLabel: "Payments",
-    items: [
-      {
-        title: "Subscriptions",
-        url: "/subscriptions",
-        icon: Flag,
-      },
-      {
-        title: "Tarrif",
-        url: "/tarrif",
-        icon: CreditCard,
-      },
-      {
-        title: "Payments",
-        url: "/payments",
-        icon: CreditCard,
-      },
-    ],
-  },
-  {
-    groupLabel: "Usre Management",
-    items: [
-      {
-        title: "Users",
-        url: "/users",
-        icon: Users,
-      },
-      {
-        title: "Customers",
-        url: "/customers",
-        icon: Users,
-      },
-    ],
-  },
-];
