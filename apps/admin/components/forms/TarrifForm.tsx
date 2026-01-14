@@ -1,6 +1,6 @@
 "use client";
 
-import { dielineFormSchema, DielineFormType } from "@/lib/validatoinSchema";
+import { tarrifFormSchema, TarrifFormType } from "@/lib/validatoinSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@repo/ui/components/button";
 import {
@@ -12,35 +12,30 @@ import {
 } from "@repo/ui/components/form";
 import { Input } from "@repo/ui/components/input";
 import { useForm } from "react-hook-form";
-import PageTitle from "../PageTitle";
 
-export function DielineForm() {
-  const form = useForm<DielineFormType>({
-    resolver: zodResolver(dielineFormSchema),
+function TarrifForm() {
+  const form = useForm<TarrifFormType>({
+    resolver: zodResolver(tarrifFormSchema),
     defaultValues: {
-      title: "",
-      slug: "",
-      categories: {
-        byModel: [],
-        byUsage: [],
-      },
+      monthly: "399000",
+      threeMonth: "699000",
+      annual: "1399000",
     },
   });
 
-  function onSubmit(data: DielineFormType) {
+  function onSubmit(data: TarrifFormType) {
     console.log(data);
   }
 
   return (
     <Form {...form}>
-      <PageTitle title="New Dieline" />
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
         <FormField
           control={form.control}
-          name="title"
+          name="monthly"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Title</FormLabel>
+              <FormLabel>Monthly</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>
@@ -50,10 +45,10 @@ export function DielineForm() {
 
         <FormField
           control={form.control}
-          name="slug"
+          name="threeMonth"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Slug</FormLabel>
+              <FormLabel>3-Month</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>
@@ -61,16 +56,29 @@ export function DielineForm() {
           )}
         />
 
-        {/*! //todo: implement rest of code  */}
+        <FormField
+          control={form.control}
+          name="annual"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Annual</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
 
         <Button
           size={"lg"}
-          disabled={!form.formState.isValid}
+          disabled={!form.formState.isValid || !form.formState.isDirty}
           className="w-full"
         >
-          Create
+          Save Tarrif
         </Button>
       </form>
     </Form>
   );
 }
+
+export default TarrifForm;

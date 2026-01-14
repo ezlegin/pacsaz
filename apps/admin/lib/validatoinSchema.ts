@@ -21,3 +21,10 @@ export const categoriesFormSchema = z.object({
   slug: z.string().min(1),
 });
 export type CategoriesFormType = z.infer<typeof categoriesFormSchema>;
+
+export const tarrifFormSchema = z.object({
+  monthly: z.string(),
+  threeMonth: z.string(),
+  annual: z.string(),
+});
+export type TarrifFormType = z.infer<typeof tarrifFormSchema>;
