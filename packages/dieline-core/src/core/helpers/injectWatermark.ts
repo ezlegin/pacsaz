@@ -1,6 +1,6 @@
 import M from "makerjs";
 import { extractPathDs } from "./extractPathDs";
-import { MARGINS } from "../consts";
+import { MARGINS } from "../../data/consts";
 import { toMm, toPt } from "../../utils/sizeConvertor";
 
 export type WatermarkOffset = {

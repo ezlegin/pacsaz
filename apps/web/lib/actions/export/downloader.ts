@@ -1,4 +1,4 @@
-import { Dimensions, FormatsType, Model } from "@repo/dieline-core/types";
+import { Dimensions, FormatsType, Model } from "@repo/dieline-core/data/types";
 import { PDFGenerator } from "./PDFGenerator";
 import { mapDimensions } from "@repo/dieline-core/utils/mapDimensions";
 

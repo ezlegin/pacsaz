@@ -7,7 +7,7 @@ import { useState } from "react";
 import PeriodSwitch from "./PeriodSwitch";
 import { SubscriptionCard } from "./SubscriptionCard";
 
-export type SubPeriod = "monthly" | "annual";
+export type SubPeriod = "monthly" | "3-month" | "annual";
 
 export const discountFactor = 0.35;
 

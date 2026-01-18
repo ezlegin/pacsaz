@@ -29,7 +29,7 @@ import {
   DIMENSIONS,
   isSubscribed,
   DIMENSIONS_TYPE,
-} from "@repo/dieline-core/consts";
+} from "@repo/dieline-core/data/consts";
 import {
   DielineDimensions,
   MaterialsInput,
@@ -38,7 +38,7 @@ import {
   Model,
   Dimensions,
   FormatsType,
-} from "@repo/dieline-core/types";
+} from "@repo/dieline-core/data/types";
 import { isPackagingSizeLogical } from "@repo/dieline-core/utils/isPackagingSizeLogical";
 import { DimensionType } from "@repo/dieline-core/utils/applyDimensionOffset";
 

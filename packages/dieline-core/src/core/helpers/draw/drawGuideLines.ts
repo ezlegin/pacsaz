@@ -1,8 +1,8 @@
 import { IModel, IPoint } from "makerjs";
-import { DimensionKey, Offsets } from "../types";
-import { addModelToLayer } from "./addModelToLayer";
-import { addGuideLine } from "./addGuideline";
-import { DimensionType } from "../../utils/applyDimensionOffset";
+import { DimensionKey, Offsets } from "../../../data/types";
+import { addModelToLayer } from "../add/addModelToLayer";
+import { addGuideLine } from "../add/addGuideline";
+import { DimensionType } from "../../../utils/applyDimensionOffset";
 
 type Orientation = "horizontal" | "vertical";
 
@@ -36,7 +36,7 @@ export function drawGuideLines(
   {
     width,
     length,
-    height = 0,
+    height,
     rawDim,
     offsets,
     dimensionType,
@@ -59,8 +59,8 @@ export function drawGuideLines(
     },
     length: {
       type: "length",
-      from: [width * 2 + height + height / 2, 0],
-      to: [width * 2 + height + height / 2, length],
+      from: [height ? width * 2 + height + height / 2 : width / 4, 0],
+      to: [height ? width * 2 + height + height / 2 : width / 4, length],
     },
   };
 

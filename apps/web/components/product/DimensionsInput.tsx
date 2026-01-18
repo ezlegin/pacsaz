@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Input } from "@repo/ui/components/input";
 import { Spinner } from "@repo/ui/components/spinner";
-import { DimensionKey } from "@repo/dieline-core/types";
+import { DimensionKey } from "@repo/dieline-core/data/types";
 import { clamp } from "@repo/dieline-core/hooks/useSize";
 
 export function DimensionInput({

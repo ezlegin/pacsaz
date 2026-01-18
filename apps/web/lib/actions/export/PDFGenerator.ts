@@ -1,7 +1,7 @@
 "use server";
 
-import { COLORS } from "@repo/dieline-core/consts";
-import { Model } from "@repo/dieline-core/types";
+import { COLORS } from "@repo/dieline-core/data/consts";
+import { Model } from "@repo/dieline-core/data/types";
 import { toMm } from "@repo/dieline-core/utils/sizeConvertor";
 import path from "path";
 import PDFDocument from "pdfkit";

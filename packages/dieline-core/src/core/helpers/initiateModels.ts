@@ -1,8 +1,8 @@
 import M, { IModel } from "makerjs";
-import { MATERIALS } from "../consts";
+import { MATERIALS } from "../../data/consts";
 import { createDielineContext } from "./contextCreator";
-import { ResolvedDimensions } from "../types";
-import { calculateSafeFoldOffset } from "./calculateSafeFoldOffset";
+import { ResolvedDimensions } from "../../data/types";
+import { calculateSafeFoldOffset } from "./calculate/calculateSafeFoldOffset";
 import { toPt } from "../../utils/sizeConvertor";
 
 interface InitiateModelsOptions {

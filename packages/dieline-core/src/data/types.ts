@@ -1,6 +1,6 @@
 import { IModel } from "makerjs";
 import { MaterialKey } from "./consts";
-import { Watermark } from "./helpers/injectWatermark";
+import { Watermark } from "../core/helpers/injectWatermark";
 import { DimensionType } from "../utils/applyDimensionOffset";
 
 export type Dimensions = {

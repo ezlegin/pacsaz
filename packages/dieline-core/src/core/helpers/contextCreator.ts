@@ -1,5 +1,5 @@
 import { toMm } from "../../utils/sizeConvertor";
-import { Offsets } from "../types";
+import { Offsets } from "../../data/types";
 
 export function createDielineContext({
   length,

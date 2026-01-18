@@ -1,11 +1,11 @@
 import M from "makerjs";
-import { BLEED, MATERIALS } from "../core/consts";
-import { drawFoldLines } from "../core/helpers/drawFoldLines";
-import { drawGuideLines } from "../core/helpers/drawGuideLines";
+import { BLEED, MATERIALS } from "../data/consts";
+import { drawFoldLines } from "../core/helpers/draw/drawFoldLines";
+import { drawGuideLines } from "../core/helpers/draw/drawGuideLines";
 import { initiateModel } from "../core/helpers/initiateModels";
 import { modelBuilder } from "../core/helpers/modelBuilder";
-import { DielineGeneratorProps } from "../core/types";
-import { addModelToLayer } from "../core/helpers/addModelToLayer";
+import { DielineGeneratorProps } from "../data/types";
+import { addModelToLayer } from "../core/helpers/add/addModelToLayer";
 
 const postalCard: DielineGeneratorProps = {
   slug: "postal-card",

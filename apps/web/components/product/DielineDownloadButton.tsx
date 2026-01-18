@@ -8,8 +8,8 @@ import { toast } from "sonner";
 import { Download } from "lucide-react";
 import { useState } from "react";
 import LoginPopup from "../forms/LoginPopup";
-import { Dimensions, FormatsType, Model } from "@repo/dieline-core/types";
-import { isSubscribed } from "@repo/dieline-core/consts";
+import { isSubscribed } from "@repo/dieline-core/data/consts";
+import { FormatsType, Model, Dimensions } from "@repo/dieline-core/data/types";
 
 interface Props {
   format: FormatsType;

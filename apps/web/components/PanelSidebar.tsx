@@ -13,7 +13,7 @@ import { Bookmark, CreditCard, Flag, Heart, User, Users } from "lucide-react";
 import Link from "next/link";
 import PacsazLogo from "./PacsazLogo";
 import { Badge } from "@repo/ui/components/badge";
-import { isSubscribed } from "@repo/dieline-core/consts";
+import { isSubscribed } from "@repo/dieline-core/data/consts";
 
 const items = [
   {

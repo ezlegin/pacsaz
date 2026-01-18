@@ -1,5 +1,5 @@
 import M, { IModel } from "makerjs";
-import { addLine } from "./addLine";
+import { addLine } from "../add/addLine";
 
 type Lines = {
   id: string;

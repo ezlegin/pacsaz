@@ -1,7 +1,6 @@
-import Card from "@repo/ui/components/custom/Card";
 import Price from "@/components/Price";
-import { PlanKey } from "@/data/subscription";
-import { plans } from "@/data/subscription";
+import { PlanKey, plans } from "@/data/subscription";
+import Card from "@repo/ui/components/custom/Card";
 import { Label } from "@repo/ui/components/label";
 import { RadioGroup, RadioGroupItem } from "@repo/ui/components/radio-group";
 import { Separator } from "@repo/ui/components/separator";
@@ -11,7 +10,7 @@ import { SubPeriod } from "./SubscriptionList";
 
 interface Props {
   plan: PlanKey;
-  period: "monthly" | "annual";
+  period: SubPeriod;
   setPeriod: (val: SubPeriod) => void;
   setPlan: (val: PlanKey) => void;
 }
@@ -19,7 +18,7 @@ interface Props {
 export const PaymentPlans = ({ plan, setPeriod, setPlan, period }: Props) => {
   return (
     <Card className="w-full space-y-5">
-      <PeriodSwitch isAnnual={period === "annual"} setPeriod={setPeriod} />
+      <PeriodSwitch setPeriod={setPeriod} period={period} />
 
       <RadioGroup
         defaultValue={plan}
@@ -53,11 +52,7 @@ export const PaymentPlans = ({ plan, setPeriod, setPlan, period }: Props) => {
               <div className="flex justify-between items-end">
                 <span className="text-xs text-muted-foreground">تعرفه:</span>
 
-                <Price
-                  isAnnual={period === "annual"}
-                  price={p.price}
-                  size="sm"
-                />
+                <Price period={period} price={p.price} size="sm" />
               </div>
 
               <div>

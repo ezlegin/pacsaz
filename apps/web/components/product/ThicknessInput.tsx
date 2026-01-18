@@ -1,6 +1,6 @@
 import { useLoading } from "@/hooks/useLoading";
-import { isSubscribed } from "@repo/dieline-core/consts";
-import { MaterialValue } from "@repo/dieline-core/types";
+import { isSubscribed } from "@repo/dieline-core/data/consts";
+import { MaterialValue } from "@repo/dieline-core/data/types";
 import { formatToFixed } from "@repo/dieline-core/utils/format";
 import { getThicknessRange } from "@repo/dieline-core/utils/getThicknessRange";
 import { Button } from "@repo/ui/components/button";

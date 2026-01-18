@@ -1,12 +1,12 @@
-import { toPt } from "../../utils/sizeConvertor";
+import { toPt } from "../../../utils/sizeConvertor";
 import M, { IModel } from "makerjs";
-import { TuckFlap } from "../consts";
+import { TuckFlap } from "../../../data/consts";
 import { addLine } from "./addLine";
 import { addSeam } from "./addSeam";
-import { cloneMirrorMove } from "./cloneMirrorMove";
-import { getMeasurementOfModel } from "./getWidthAndHeightOfModel";
-import { PointBuilder } from "./pointBuilder";
+import { getMeasurementOfModel } from "../getWidthAndHeightOfModel";
+import { PointBuilder } from "../pointBuilder";
 import { addFoldLine } from "./addFoldLine";
+import { cloneMirrorMove } from "../clone";
 
 interface AddDoorParams {
   widthMM: number;

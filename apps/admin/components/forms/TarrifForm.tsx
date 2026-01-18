@@ -17,9 +17,9 @@ function TarrifForm() {
   const form = useForm<TarrifFormType>({
     resolver: zodResolver(tarrifFormSchema),
     defaultValues: {
-      monthly: "399000",
-      threeMonth: "699000",
-      annual: "1399000",
+      standard: "399000",
+      pro: "699000",
+      organization: "1399000",
     },
   });
 
@@ -32,10 +32,10 @@ function TarrifForm() {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
         <FormField
           control={form.control}
-          name="monthly"
+          name="standard"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Monthly</FormLabel>
+              <FormLabel>Standard</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>
@@ -45,10 +45,10 @@ function TarrifForm() {
 
         <FormField
           control={form.control}
-          name="threeMonth"
+          name="pro"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>3-Month</FormLabel>
+              <FormLabel>Pro</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>
@@ -58,10 +58,10 @@ function TarrifForm() {
 
         <FormField
           control={form.control}
-          name="annual"
+          name="organization"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Annual</FormLabel>
+              <FormLabel>Organization</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>

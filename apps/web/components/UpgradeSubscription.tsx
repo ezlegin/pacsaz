@@ -2,7 +2,7 @@
 
 import { PlanKey, plans } from "@/data/subscription";
 import { testUser } from "@/data/user";
-import { useUpgradeSubscriptionCheckout } from "@/hooks/useSubscriptionCheckout";
+import { useSubscriptionCheckout } from "@/hooks/useSubscriptionCheckout";
 import { Button } from "@repo/ui/components/button";
 import { Input } from "@repo/ui/components/input";
 import { Label } from "@repo/ui/components/label";
@@ -16,7 +16,7 @@ import Price from "./Price";
 
 const UpgradeSubscription = () => {
   const { paymentInfo, setPeriod, setPlan, period, plan, total } =
-    useUpgradeSubscriptionCheckout({ user: testUser });
+    useSubscriptionCheckout({ user: testUser });
 
   const onStartPayment = () => {
     console.log("Payment Started");
@@ -24,7 +24,7 @@ const UpgradeSubscription = () => {
 
   return (
     <div className="space-y-6">
-      <PeriodSwitch isAnnual={period === "annual"} setPeriod={setPeriod} />
+      <PeriodSwitch period={period} setPeriod={setPeriod} />
 
       <RadioGroup
         defaultValue={plan}
@@ -57,11 +57,7 @@ const UpgradeSubscription = () => {
                 <div className="text-xs text-primary ">(پلن فعال)</div>
               ) : (
                 <div>
-                  <Price
-                    isAnnual={period === "annual"}
-                    price={p.price}
-                    size="sm"
-                  />
+                  <Price period={period} price={p.price} size="sm" />
                 </div>
               )}
             </Label>

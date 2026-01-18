@@ -42,9 +42,9 @@ export const categoriesFormSchema = z.object({
 export type CategoriesFormType = z.infer<typeof categoriesFormSchema>;
 
 export const tarrifFormSchema = z.object({
-  monthly: z.string().min(1),
-  threeMonth: z.string().min(1),
-  annual: z.string(),
+  standard: z.string().min(1),
+  pro: z.string().min(1),
+  organization: z.string(),
 });
 export type TarrifFormType = z.infer<typeof tarrifFormSchema>;
 

@@ -1,21 +1,22 @@
-import { PlanPrice } from "@/data/subscription";
 import { cn } from "@repo/ui/lib/utils";
+import { SubPeriod } from "./SubscriptionList";
+import { periodMultiplier } from "@/hooks/useSubscriptionCheckout";
 
 const Price = ({
-  isAnnual,
   price,
   size = "lg",
+  period,
 }: {
-  isAnnual: boolean;
-  price: PlanPrice;
+  price: number;
   size?: "sm" | "lg";
+  period: SubPeriod;
 }) => {
-  const chosenPrice = isAnnual ? price.monthlyOnAnnual : price.monthly;
+  const finalPrice = periodMultiplier(period, price, period === "annual");
 
   return (
     <div className="space-x-1">
       <span className={size === "sm" ? "font-semibold" : "text-3xl font-bold"}>
-        {(chosenPrice / 1000).toLocaleString("en-US")} تومان
+        {(finalPrice / 1000).toLocaleString("en-US")} تومان
       </span>
       <span
         className={cn(

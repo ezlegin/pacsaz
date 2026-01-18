@@ -5,7 +5,7 @@ import {
   isSubscribed,
   MaterialKey,
   strokeWidth,
-} from "../consts";
+} from "../../data/consts";
 import { injectWatermark, Watermark } from "./injectWatermark";
 
 type SvgExporterParams = {

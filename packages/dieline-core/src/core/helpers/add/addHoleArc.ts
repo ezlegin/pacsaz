@@ -1,6 +1,6 @@
-import { toPt } from "../../utils/sizeConvertor";
+import { toPt } from "../../../utils/sizeConvertor";
 import M, { IPoint } from "makerjs";
-import { calculateDustHoleSize } from "./calculateDustHoleSize";
+import { calculateDustHoleSize } from "../calculate/calculateDustHoleSize";
 
 interface CreateDustHoleParams {
   startPoint: IPoint;

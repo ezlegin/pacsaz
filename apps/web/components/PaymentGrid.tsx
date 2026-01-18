@@ -1,12 +1,14 @@
 "use client";
 
 import { PlanKey } from "@/data/subscription";
-import { testUser } from "@/data/user";
-import { useUpgradeSubscriptionCheckout } from "@/hooks/useSubscriptionCheckout";
+import { usePaymentCheckout } from "@/hooks/useSubscriptionCheckout";
+import { formatPrice } from "@/utils/formatPrice";
 import { Button } from "@repo/ui/components/button";
+import Card from "@repo/ui/components/custom/Card";
 import { Input } from "@repo/ui/components/input";
 import { Separator } from "@repo/ui/components/separator";
-import Card from "@repo/ui/components/custom/Card";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { PaymentPlans } from "./PaymentPlans";
 import { SubPeriod } from "./SubscriptionList";
 
@@ -19,12 +21,38 @@ interface Props {
 }
 
 const PaymentGrid = ({ query }: Props) => {
-  const { paymentInfo, setPeriod, setPlan, period, plan, total } =
-    useUpgradeSubscriptionCheckout({ user: testUser, query });
+  const [plan, setPlan] = useState<PlanKey>(query?.plan || "pro");
+  const [period, setPeriod] = useState<SubPeriod>(query?.period || "monthly");
+  const [discountCode, setDiscountCode] = useState("");
+  const [paymentInfo, setPaymentInfo] = useState<{
+    amount: number;
+    discountAmount: number;
+    total: number;
+  }>({ amount: 0, discountAmount: 0, total: 0 });
 
   const onStartPayment = () => {
     console.log("Payment Started");
   };
+
+  useEffect(() => {
+    const checkout = usePaymentCheckout({
+      plan,
+      period,
+      discountCode,
+    });
+
+    if (checkout.error) {
+      toast.error(checkout.error);
+    }
+
+    if (checkout.paymentInfo) setPaymentInfo(checkout.paymentInfo);
+  }, [plan, period, discountCode]);
+
+  const checkout = [
+    { title: "مجموع:", value: formatPrice(paymentInfo.amount) },
+    { title: "تخفیف:", value: formatPrice(paymentInfo.discountAmount) },
+    { title: "قابل پرداخت:", value: formatPrice(paymentInfo.total) },
+  ];
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -38,7 +66,7 @@ const PaymentGrid = ({ query }: Props) => {
 
         <Card className="w-1/3 h-fit space-y-3">
           <ul className="text-sm text-muted-foreground space-y-2.5">
-            {paymentInfo.map((p, idx) => (
+            {checkout.map((p, idx) => (
               <div
                 key={idx}
                 className="space-y-2.5 last:font-medium last:text-foreground"
@@ -72,7 +100,7 @@ const PaymentGrid = ({ query }: Props) => {
             className="w-full"
             variant={"gradient"}
           >
-            پرداخت {total.toLocaleString("en-US")} تومان
+            پرداخت {paymentInfo.total.toLocaleString("en-US")} تومان
           </Button>
         </Card>
       </div>

@@ -1,5 +1,5 @@
 import { testUser } from "@/data/user";
-import { MaterialKey } from "@repo/dieline-core/consts";
+import { MaterialKey } from "@repo/dieline-core/data/consts";
 import { Progress } from "@repo/ui/components/progress";
 import { TableCell, TableRow } from "@repo/ui/components/table";
 import { formatDate } from "date-fns";

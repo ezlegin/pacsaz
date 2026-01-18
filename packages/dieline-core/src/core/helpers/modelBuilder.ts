@@ -1,9 +1,9 @@
-import { MARGINS, onDevelepe } from "../consts";
-import { ModelExporter } from "../types";
-import { addAnchor } from "./addAnchor";
-import { addOverallDimensionGuides } from "./addOverallDimensionGuides";
-import { addBleed } from "./bleedGenerator";
-import { addContainer } from "./containerGenerator";
+import { MARGINS, onDevelepe } from "../../data/consts";
+import { ModelExporter } from "../../data/types";
+import { addAnchor } from "./add/addAnchor";
+import { addContainer } from "./add/addContainer";
+import { addOverallDimensionGuides } from "./add/addOverallDimensionGuides";
+import { addBleed } from "./add/addBleed";
 import { getSizes } from "./getSizes";
 import { svgExporter } from "./svgExporter";
 

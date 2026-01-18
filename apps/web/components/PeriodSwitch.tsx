@@ -1,36 +1,39 @@
 import { Badge } from "@repo/ui/components/badge";
 import { Label } from "@repo/ui/components/label";
-import { Switch } from "@repo/ui/components/switch";
-import React from "react";
+import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import { SubPeriod } from "./SubscriptionList";
 
 const PeriodSwitch = ({
-  isAnnual,
   setPeriod,
+  period,
 }: {
-  isAnnual: boolean;
   setPeriod: (val: SubPeriod) => void;
+  period: SubPeriod;
 }) => {
   return (
     <div className="flex gap-2 items-center mx-auto w-fit">
-      <Label className="w-32 flex justify-end">
-        <Badge dir="ltr" variant={"destructive"}>
-          -30%
-        </Badge>
-        سالیانه
-      </Label>
-      <Switch
-        onCheckedChange={(val: boolean) => {
-          if (val) {
-            setPeriod("annual");
-          } else {
-            setPeriod("monthly");
-          }
+      <ToggleGroup
+        spacing={2}
+        variant={"outline"}
+        dir="rtl"
+        value={period}
+        type="single"
+        onValueChange={(val: SubPeriod | "") => {
+          if (val === "") return;
+          setPeriod(val);
         }}
-        checked={isAnnual}
-        dir="ltr"
-      />
-      <Label className="w-32">ماهیانه</Label>
+      >
+        <ToggleGroupItem value={"monthly"}>ماهیانه</ToggleGroupItem>
+        <ToggleGroupItem value={"3-month"}>3 ماهه</ToggleGroupItem>
+        <ToggleGroupItem value={"annual"}>
+          <Label className="flex justify-end">
+            سالیانه
+            <Badge dir="ltr" variant={"destructive"}>
+              -30%
+            </Badge>
+          </Label>
+        </ToggleGroupItem>
+      </ToggleGroup>
     </div>
   );
 };

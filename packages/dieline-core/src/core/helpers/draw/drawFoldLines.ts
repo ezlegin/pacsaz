@@ -1,5 +1,5 @@
 import { IModel, IPoint } from "makerjs";
-import { addFoldLine } from "./addFoldLine";
+import { addFoldLine } from "../add/addFoldLine";
 
 type Coordinates = { from: IPoint; to: IPoint }[];
 

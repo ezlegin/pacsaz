@@ -9,12 +9,12 @@ import {
 } from "@repo/ui/components/dialog";
 import Image from "next/image";
 import DeveloperTools from "./DeveloperTools";
-import { onDevelepe } from "@repo/dieline-core/consts";
+import { onDevelepe } from "@repo/dieline-core/data/consts";
 import {
   Dimensions,
   DimensionsType,
   SVGModelSizes,
-} from "@repo/dieline-core/types";
+} from "@repo/dieline-core/data/types";
 import { toMm } from "@repo/dieline-core/utils/sizeConvertor";
 import { formatDimensions } from "@/utils/formatDimensions";
 import {

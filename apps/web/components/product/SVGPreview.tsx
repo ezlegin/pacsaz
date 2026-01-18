@@ -1,5 +1,5 @@
 "use client";
-import { onDevelepe } from "@repo/dieline-core/consts";
+import { onDevelepe } from "@repo/dieline-core/data/consts";
 import { Button } from "@repo/ui/components/button";
 import { Card } from "@repo/ui/components/card";
 import { Separator } from "@repo/ui/components/separator";

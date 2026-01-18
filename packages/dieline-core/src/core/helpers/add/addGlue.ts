@@ -1,7 +1,7 @@
 import { IModel, IPoint } from "makerjs";
-import { PointBuilder } from "./pointBuilder";
+import { PointBuilder } from "../pointBuilder";
 import { addLine } from "./addLine";
-import { glueMapper } from "./glueMapper";
+import { glueMapper } from "../glueMapper";
 import M from "makerjs";
 
 export function addGlue(

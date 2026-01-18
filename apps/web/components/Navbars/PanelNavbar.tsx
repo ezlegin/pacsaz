@@ -1,5 +1,5 @@
 import { mapUserPlanTitle, testUser } from "@/data/user";
-import { isSubscribed } from "@repo/dieline-core/consts";
+import { isSubscribed } from "@repo/dieline-core/data/consts";
 import { Button } from "@repo/ui/components/button";
 import { cn } from "@repo/ui/lib/utils";
 import { LogOut } from "lucide-react";

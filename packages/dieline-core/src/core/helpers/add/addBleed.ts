@@ -1,6 +1,6 @@
 import M from "makerjs";
 import { addModelToLayer } from "./addModelToLayer";
-import { EPS } from "../consts";
+import { EPS } from "../../../data/consts";
 
 export type ConnectorLine = {
   from: M.IPoint;

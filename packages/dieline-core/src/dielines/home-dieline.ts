@@ -1,19 +1,16 @@
 import { toPt } from "../utils/sizeConvertor";
-import { BLEED, DOOR, MATERIALS, zero } from "../core/consts";
-import { addDoor } from "../core/helpers/addDoor";
-import { addDust } from "../core/helpers/addDust";
-import {
-  cloneMirrorMove,
-  cloneRotateMove,
-} from "../core/helpers/cloneMirrorMove";
-import { drawFoldLines } from "../core/helpers/drawFoldLines";
-import { drawGuideLines } from "../core/helpers/drawGuideLines";
-import { drawSingleLines } from "../core/helpers/drawSingleLines";
-import { addGlue } from "../core/helpers/addGlue";
+import { BLEED, DOOR, MATERIALS, zero } from "../data/consts";
+import { addDoor } from "../core/helpers/add/addDoor";
+import { addDust } from "../core/helpers/add/addDust";
+import { drawFoldLines } from "../core/helpers/draw/drawFoldLines";
+import { drawGuideLines } from "../core/helpers/draw/drawGuideLines";
+import { drawSingleLines } from "../core/helpers/draw/drawSingleLines";
+import { addGlue } from "../core/helpers/add/addGlue";
 import { initiateModel } from "../core/helpers/initiateModels";
 import { modelBuilder } from "../core/helpers/modelBuilder";
 import { pushModelSeparatly } from "../core/helpers/pushModelSeparatly";
-import { DielineGeneratorProps } from "../core/types";
+import { DielineGeneratorProps } from "../data/types";
+import { cloneRotateMove, cloneMirrorMove } from "../core/helpers/clone";
 
 const homeDieline: DielineGeneratorProps = {
   slug: "home-dieline",

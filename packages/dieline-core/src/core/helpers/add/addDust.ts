@@ -1,12 +1,12 @@
-import { pointToPt, toMm, toPt } from "../../utils/sizeConvertor";
+import { pointToPt, toMm, toPt } from "../../../utils/sizeConvertor";
 import M, { IModel } from "makerjs";
 import { addFoldLine } from "./addFoldLine";
 import { addHoleArc } from "./addHoleArc";
 import { addLine } from "./addLine";
-import { calculateTuckflapSize } from "./calculateTuckflapSize";
-import { getDistanceOfFirstAndLastPoint } from "./getDistance";
-import { getLastPointFromModel, getLastPointFromPath } from "./getLastPoint";
-import { PointBuilder } from "./pointBuilder";
+import { calculateTuckflapSize } from "../calculate/calculateTuckflapSize";
+import { getDistanceOfFirstAndLastPoint } from "../getDistance";
+import { getLastPointFromModel, getLastPointFromPath } from "../getLastPoint";
+import { PointBuilder } from "../pointBuilder";
 
 interface AddDustParams {
   drawAfter: IModel;

@@ -1,7 +1,7 @@
 import { mapUserPlanTitle, testUser } from "@/data/user";
-import { isSubscribed } from "@repo/dieline-core/consts";
 import Diamond from "@/public/icons/Diamond";
 import { calculateRemaningSubscription } from "@/utils/calculateRemaningSubscriptoin";
+import { isSubscribed } from "@repo/dieline-core/data/consts";
 import { Badge } from "@repo/ui/components/badge";
 import { Button } from "@repo/ui/components/button";
 import { User } from "lucide-react";

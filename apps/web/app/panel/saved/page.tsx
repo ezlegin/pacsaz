@@ -1,5 +1,5 @@
 import Card from "@repo/ui/components/custom/Card";
-import { MaterialKey } from "@repo/dieline-core/consts";
+import { MaterialKey } from "@repo/dieline-core/data/consts";
 import { DimensionType } from "@repo/dieline-core/utils/applyDimensionOffset";
 import { Button } from "@repo/ui/components/button";
 import Table from "@repo/ui/components/custom/Table";
