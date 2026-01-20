@@ -3,13 +3,7 @@ import SubscriptionList from "@/components/SubscriptionList";
 import { isSubscribed } from "@repo/dieline-core/data/consts";
 
 const Page = () => {
-  return !isSubscribed ? (
-    <div>
-      <SubscriptionList />
-    </div>
-  ) : (
-    <PanelDashboard />
-  );
+  return !isSubscribed ? <SubscriptionList /> : <PanelDashboard />;
 };
 
 export default Page;

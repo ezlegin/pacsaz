@@ -2,25 +2,33 @@
 
 import { PlanKey, plans } from "@/data/plan";
 import { testUser } from "@/data/user";
-import { useSubscriptionCheckout } from "@/hooks/usePaymentCheckout";
+import { usePaymentCheckout } from "@/hooks/usePaymentCheckout";
+import { formatPrice } from "@/utils/formatPrice";
+import { mapPaymentData } from "@/utils/mapPaymentData";
 import { Button } from "@repo/ui/components/button";
-import { Input } from "@repo/ui/components/input";
+import Card from "@repo/ui/components/custom/Card";
 import { Label } from "@repo/ui/components/label";
 import { RadioGroup, RadioGroupItem } from "@repo/ui/components/radio-group";
 import { Separator } from "@repo/ui/components/separator";
 import { SquareArrowOutUpRight } from "lucide-react";
 import Link from "next/link";
-import Card from "@repo/ui/components/custom/Card";
+import DiscountForm from "./forms/DiscountForm";
 import PeriodSwitch from "./PeriodSwitch";
 import Price from "./Price";
+import { useState } from "react";
 
 const UpgradeSubscription = () => {
-  const { paymentInfo, setPeriod, setPlan, period, plan, total } =
-    useSubscriptionCheckout({ user: testUser });
+  const [appliedDiscountCode, setAppliedDiscountCode] = useState<
+    string | undefined
+  >(undefined);
+  const { checkoutInfo, setPeriod, setPlan, period, plan, discountInfo } =
+    usePaymentCheckout({ discountCode: appliedDiscountCode });
 
   const onStartPayment = () => {
     console.log("Payment Started");
   };
+
+  const paymentData = mapPaymentData(period, plan, checkoutInfo);
 
   return (
     <div className="space-y-6">
@@ -77,7 +85,7 @@ const UpgradeSubscription = () => {
 
       <Card className="space-y-3">
         <ul className="text-sm text-muted-foreground space-y-2.5">
-          {paymentInfo.map((p, idx) => (
+          {paymentData.map((p, idx) => (
             <div
               key={idx}
               className="space-y-2.5 last:font-medium last:text-foreground"
@@ -92,16 +100,11 @@ const UpgradeSubscription = () => {
           ))}
         </ul>
 
-        <div className="relative">
-          <Input placeholder="کد تخفیف..." />
-          <Button
-            variant={"ghost"}
-            className="absolute left-0 top-1/2 -translate-y-1/2"
-            size={"sm"}
-          >
-            بررسی
-          </Button>
-        </div>
+        <DiscountForm
+          appliedDiscountCode={appliedDiscountCode}
+          setAppliedDiscountCode={setAppliedDiscountCode}
+          discountInfo={discountInfo}
+        />
 
         <Button
           onClick={onStartPayment}
@@ -109,7 +112,7 @@ const UpgradeSubscription = () => {
           className="w-full"
           variant={"gradient"}
         >
-          پرداخت {total.toLocaleString("en-US")} تومان
+          پرداخت {formatPrice(checkoutInfo.total, true)}
         </Button>
       </Card>
     </div>

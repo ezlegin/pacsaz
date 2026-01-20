@@ -3,6 +3,18 @@ import { SubPeriod } from "@/components/SubscriptionList";
 import { annualPlanDisocunt, PlanKey, plans } from "@/data/plan";
 import { useState } from "react";
 
+export type CheckoutInfo = {
+  amount: number;
+  discountAmount: number;
+  total: number;
+};
+
+export type DiscountInfo = {
+  error: string | null;
+  success: string | null;
+  code: string | undefined;
+};
+
 export function usePaymentCheckout({
   discountCode,
   query,
@@ -36,13 +48,21 @@ export function usePaymentCheckout({
     }
   }
 
+  const checkoutInfo: CheckoutInfo = {
+    amount: baseAmount,
+    discountAmount: baseAmount - total,
+    total,
+  };
+
+  const discountInfo: DiscountInfo = {
+    error,
+    success,
+    code: discountCode,
+  };
+
   return {
-    checkoutInfo: {
-      amount: baseAmount,
-      discountAmount: baseAmount - total,
-      total,
-    },
-    discount: { error, success },
+    checkoutInfo,
+    discountInfo,
     plan,
     period,
     setPlan,

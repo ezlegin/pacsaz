@@ -11,6 +11,21 @@ const PeriodSwitch = ({
   setPeriod: (val: SubPeriod) => void;
   period: SubPeriod;
 }) => {
+  const items = [
+    { label: <div>ماهیانه</div>, value: "monthly" },
+    { label: <div>3 ماهه</div>, value: "3-month" },
+    {
+      label: (
+        <div className="flex justify-end gap-1">
+          <Label className="cursor-pointer">سالیانه</Label>
+          <Badge dir="ltr" variant={"destructive"}>
+            -{annualPlanDisocunt * 100}%
+          </Badge>
+        </div>
+      ),
+      value: "annual",
+    },
+  ];
   return (
     <div className="flex gap-2 items-center mx-auto w-fit">
       <ToggleGroup
@@ -24,16 +39,11 @@ const PeriodSwitch = ({
           setPeriod(val);
         }}
       >
-        <ToggleGroupItem value={"monthly"}>ماهیانه</ToggleGroupItem>
-        <ToggleGroupItem value={"3-month"}>3 ماهه</ToggleGroupItem>
-        <ToggleGroupItem value={"annual"}>
-          <Label className="flex justify-end">
-            سالیانه
-            <Badge dir="ltr" variant={"destructive"}>
-              -{annualPlanDisocunt * 100}%
-            </Badge>
-          </Label>
-        </ToggleGroupItem>
+        {items.map((i, idx) => (
+          <ToggleGroupItem className="cursor-pointer" key={idx} value={i.value}>
+            {i.label}
+          </ToggleGroupItem>
+        ))}
       </ToggleGroup>
     </div>
   );

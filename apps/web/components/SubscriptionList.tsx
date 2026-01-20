@@ -31,7 +31,7 @@ const SubscriptionList = () => {
         </p>
       </div>
 
-      <PeriodSwitch isAnnual={period === "annual"} setPeriod={setPeriod} />
+      <PeriodSwitch period={period} setPeriod={setPeriod} />
 
       <div className="flex gap-5">
         {plans.map((p, idx) => (

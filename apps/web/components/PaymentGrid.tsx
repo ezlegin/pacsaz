@@ -1,26 +1,16 @@
 "use client";
 
 import { PlanKey } from "@/data/plan";
-import { mapPeriodLabel, mapUserPlanTitle } from "@/data/user";
 import { usePaymentCheckout } from "@/hooks/usePaymentCheckout";
-import { DiscountFormType, discountFormSchema } from "@/lib/validatoinSchema";
 import { formatPrice } from "@/utils/formatPrice";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { mapPaymentData } from "@/utils/mapPaymentData";
 import { Button } from "@repo/ui/components/button";
 import Card from "@repo/ui/components/custom/Card";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-} from "@repo/ui/components/form";
-import { Input } from "@repo/ui/components/input";
 import { Separator } from "@repo/ui/components/separator";
-import { useEffect, useMemo, useState } from "react";
-import { useForm, useWatch } from "react-hook-form";
-import { toast } from "sonner";
+import { useState } from "react";
 import { PaymentPlans } from "./PaymentPlans";
 import { SubPeriod } from "./SubscriptionList";
+import DiscountForm from "./forms/DiscountForm";
 
 export type PaymentQuery = {
   plan?: PlanKey | undefined;
@@ -28,73 +18,28 @@ export type PaymentQuery = {
 };
 
 const PaymentGrid = ({ query }: { query: PaymentQuery }) => {
-  // HOOKS
   const [appliedDiscountCode, setAppliedDiscountCode] = useState<
     string | undefined
   >(undefined);
-  const form = useForm<DiscountFormType>({
-    resolver: zodResolver(discountFormSchema),
-    defaultValues: {
-      discountCode: "",
-    },
-  });
 
-  const { discount, checkoutInfo, period, plan, setPeriod, setPlan } =
+  const { discountInfo, checkoutInfo, period, plan, setPeriod, setPlan } =
     usePaymentCheckout({
       discountCode: appliedDiscountCode,
       query,
     });
-
-  useEffect(() => {
-    if (discount.error) {
-      toast.error(discount.error);
-    }
-    if (discount.success) {
-      toast.success(discount.success);
-    }
-  }, [checkoutInfo]);
-
-  const discountCode = useWatch({
-    control: form.control,
-    name: "discountCode",
-  });
-
-  const applyDiscountCode = () => {
-    if (appliedDiscountCode) {
-      setAppliedDiscountCode(undefined);
-      form.resetField("discountCode");
-      toast.info("کد تخفیف حذف شد.");
-    } else if (discountCode) {
-      setAppliedDiscountCode(discountCode);
-    }
-  };
 
   const onStartPayment = () => {
     const data = {
       total: checkoutInfo.total,
       amount: checkoutInfo.amount,
       discountAmount: checkoutInfo.discountAmount,
-      discountCode,
+      discountCode: discountInfo.code,
     };
 
     console.log(data);
   };
 
-  const paymentData = useMemo(
-    () => [
-      {
-        title: "اشتراک:",
-        value: `${mapPeriodLabel(period)} | ${mapUserPlanTitle(plan)}`,
-      },
-      { title: "مجموع:", value: formatPrice(checkoutInfo.amount, true) },
-      {
-        title: "تخفیف:",
-        value: formatPrice(checkoutInfo.discountAmount, true),
-      },
-      { title: "قابل پرداخت:", value: formatPrice(checkoutInfo.total, true) },
-    ],
-    [plan, period, checkoutInfo]
-  );
+  const paymentData = mapPaymentData(period, plan, checkoutInfo);
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -121,37 +66,11 @@ const PaymentGrid = ({ query }: { query: PaymentQuery }) => {
             ))}
           </ul>
 
-          <Form {...form}>
-            <form className="space-y-5">
-              <FormField
-                control={form.control}
-                name="discountCode"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <div className="relative">
-                        <Input
-                          placeholder="کد تخفیف..."
-                          disabled={!!appliedDiscountCode}
-                          {...field}
-                        />
-                        <Button
-                          type="button"
-                          variant={"ghost"}
-                          size={"sm"}
-                          className="absolute left-1 top-1/2 -translate-y-1/2"
-                          onClick={applyDiscountCode}
-                          disabled={!form.formState.isValid}
-                        >
-                          {appliedDiscountCode ? "حذف" : "بررسی"}
-                        </Button>
-                      </div>
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-            </form>
-          </Form>
+          <DiscountForm
+            appliedDiscountCode={appliedDiscountCode}
+            setAppliedDiscountCode={setAppliedDiscountCode}
+            discountInfo={discountInfo}
+          />
 
           <Button
             onClick={onStartPayment}
