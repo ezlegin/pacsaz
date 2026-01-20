@@ -1,3 +1,5 @@
+import { calculateFairDownload } from "@/utils/calculateFairDownload";
+
 export type PlanKey = "standard" | "pro" | "organization";
 export type PlanTitle = "استاندارد" | "حرفه‌ای" | "سازمانی";
 export type PlanFeature = { active: boolean; value: string };
@@ -17,6 +19,7 @@ export interface SubCardProps {
   level: 1 | 2 | 3;
   fairDownload: {
     monthly: number;
+    threeMonth: number;
     annual: number;
   };
   features: PlanFeature[];
@@ -39,6 +42,8 @@ const paids = [
   { active: true, value: "امکان ذخیره قالب با نام دلخواه و استفاده مجدد" },
 ];
 
+export const annualPlanDisocunt = 0.2;
+
 export const plans: SubCardProps[] = [
   {
     title: "استاندارد",
@@ -46,11 +51,8 @@ export const plans: SubCardProps[] = [
     shortDescription: "مخصوص مبتدیان و تازه کاران",
     description:
       "مناسب طراحان تازه‌کار و دانشجویانی که می‌خواهند بدون دردسر، دایلاین‌های آماده و دقیق برای پروژه‌های خود بسازند.",
-    fairDownload: {
-      monthly: 45,
-      get annual() {
-        return this.monthly * 12;
-      },
+    get fairDownload() {
+      return calculateFairDownload({ monthly: 40 });
     },
     price: 399000,
     level: 1,
@@ -65,11 +67,8 @@ export const plans: SubCardProps[] = [
     shortDescription: "مخصوص حرفه‌ای ها و متخصص ها",
     description:
       "بهترین انتخاب برای طراحان حرفه‌ای و فریلنسرها؛ دسترسی گسترده‌تر، آزادی عمل بیشتر و سرعت بالاتر در آماده‌سازی دایلاین‌ها.",
-    fairDownload: {
-      monthly: 100,
-      get annual() {
-        return this.monthly * 12;
-      },
+    get fairDownload() {
+      return calculateFairDownload({ monthly: 100 });
     },
     price: 699000,
     level: 2,
@@ -81,11 +80,8 @@ export const plans: SubCardProps[] = [
     shortDescription: "مخصوص سازمان ها و تیم ها",
     description:
       "مناسب چاپخانه‌ها و تیم‌های طراحی بزرگ که به تولید نامحدود، دقت صنعتی و جریان کاری پایدار نیاز دارند.",
-    fairDownload: {
-      monthly: 400,
-      get annual() {
-        return this.monthly * 12;
-      },
+    get fairDownload() {
+      return calculateFairDownload({ monthly: 500 });
     },
     price: 1399000,
     level: 3,

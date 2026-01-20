@@ -1,8 +1,8 @@
 "use client";
 
-import { PlanKey, plans } from "@/data/subscription";
+import { PlanKey, plans } from "@/data/plan";
 import { testUser } from "@/data/user";
-import { useSubscriptionCheckout } from "@/hooks/useSubscriptionCheckout";
+import { useSubscriptionCheckout } from "@/hooks/usePaymentCheckout";
 import { Button } from "@repo/ui/components/button";
 import { Input } from "@repo/ui/components/input";
 import { Label } from "@repo/ui/components/label";

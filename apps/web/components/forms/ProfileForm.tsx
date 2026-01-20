@@ -1,7 +1,7 @@
 "use client";
 
 import { testUser } from "@/data/user";
-import { profileFormSchema, ProfileFormSchema } from "@/lib/validatoinSchema";
+import { profileFormSchema, ProfileFormType } from "@/lib/validatoinSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@repo/ui/components/button";
 import {
@@ -27,7 +27,7 @@ import { isUserIndividual } from "@/utils/isUserIndividual";
 import { useForm } from "react-hook-form";
 
 export function ProfileForm() {
-  const form = useForm<ProfileFormSchema>({
+  const form = useForm<ProfileFormType>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
       fullName: testUser.fullName,
@@ -35,7 +35,7 @@ export function ProfileForm() {
     },
   });
 
-  function onSubmit(data: ProfileFormSchema) {
+  function onSubmit(data: ProfileFormType) {
     console.log(data);
   }
 

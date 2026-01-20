@@ -1,6 +1,6 @@
 import { UserType as UserTypes } from "@/components/onboarding/Onboarding";
 import { SubPeriod } from "@/components/SubscriptionList";
-import { PlanTitle, PlanLevel, PlanKey } from "./subscription";
+import { PlanTitle, PlanLevel, PlanKey } from "./plan";
 import { PaymentStatusType } from "@repo/ui/components/custom/PaymentStatus";
 
 export type PlanType = {
@@ -65,6 +65,7 @@ function mapUserPlanLevel(userPlan: PlanKey) {
 
 export function mapPeriodLabel(period: SubPeriod) {
   if (period === "monthly") return "ماهیانه";
+  if (period === "3-month") return "3 ماهه";
   return "سالیانه";
 }
 

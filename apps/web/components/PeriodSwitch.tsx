@@ -2,6 +2,7 @@ import { Badge } from "@repo/ui/components/badge";
 import { Label } from "@repo/ui/components/label";
 import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import { SubPeriod } from "./SubscriptionList";
+import { annualPlanDisocunt } from "@/data/plan";
 
 const PeriodSwitch = ({
   setPeriod,
@@ -29,7 +30,7 @@ const PeriodSwitch = ({
           <Label className="flex justify-end">
             سالیانه
             <Badge dir="ltr" variant={"destructive"}>
-              -30%
+              -{annualPlanDisocunt * 100}%
             </Badge>
           </Label>
         </ToggleGroupItem>

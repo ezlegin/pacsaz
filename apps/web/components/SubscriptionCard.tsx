@@ -1,4 +1,4 @@
-import { PlanFeature, SubCardProps } from "@/data/subscription";
+import { PlanFeature, SubCardProps } from "@/data/plan";
 import { Button } from "@repo/ui/components/button";
 import { Separator } from "@repo/ui/components/separator";
 import { cn } from "@repo/ui/lib/utils";

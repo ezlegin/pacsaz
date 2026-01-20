@@ -1,6 +1,6 @@
 import PaymentGrid from "@/components/PaymentGrid";
 import { SubPeriod } from "@/components/SubscriptionList";
-import { PlanKey } from "@/data/subscription";
+import { PlanKey } from "@/data/plan";
 
 interface Props {
   searchParams: Promise<{ plan: PlanKey; period: SubPeriod }>;

@@ -1,5 +1,5 @@
 import { SubPeriod } from "@/components/SubscriptionList";
-import { PlanKey } from "@/data/subscription";
+import { PlanKey } from "@/data/plan";
 import {
   mapPaymentStatusLable,
   mapPeriodLabel,

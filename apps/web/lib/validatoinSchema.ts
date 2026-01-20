@@ -35,4 +35,10 @@ export const profileFormSchema = z.object({
   userType: z.string(),
 });
 
-export type ProfileFormSchema = z.infer<typeof profileFormSchema>;
+export type ProfileFormType = z.infer<typeof profileFormSchema>;
+
+export const discountFormSchema = z.object({
+  discountCode: z.string().min(1),
+});
+
+export type DiscountFormType = z.infer<typeof discountFormSchema>;

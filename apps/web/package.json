@@ -28,7 +28,8 @@
     "react-resizable-panels": "^4.2.1",
     "react-zoom-pan-pinch": "^3.7.0",
     "svg-to-pdfkit": "^0.1.8",
-    "zod": "^3.25.76"
+    "zod": "^3.25.76",
+    "react-hook-form": "^7.69.0"
   },
   "devDependencies": {
     "@repo/eslint-config": "*",

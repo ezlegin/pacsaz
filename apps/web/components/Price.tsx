@@ -1,6 +1,7 @@
 import { cn } from "@repo/ui/lib/utils";
 import { SubPeriod } from "./SubscriptionList";
-import { periodMultiplier } from "@/hooks/useSubscriptionCheckout";
+import { periodMultiplier } from "@/hooks/usePaymentCheckout";
+import { mapPeriodLabel } from "@/data/user";
 
 const Price = ({
   price,
@@ -24,7 +25,7 @@ const Price = ({
           "text-muted-foreground"
         )}
       >
-        / ماهانه
+        / {mapPeriodLabel(period)}
       </span>
     </div>
   );

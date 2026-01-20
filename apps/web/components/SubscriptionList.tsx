@@ -1,6 +1,6 @@
 "use client";
 
-import { plans } from "@/data/subscription";
+import { plans } from "@/data/plan";
 import { Badge } from "@repo/ui/components/badge";
 import { Flag } from "lucide-react";
 import { useState } from "react";

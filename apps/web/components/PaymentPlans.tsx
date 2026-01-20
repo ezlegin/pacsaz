@@ -1,5 +1,5 @@
 import Price from "@/components/Price";
-import { PlanKey, plans } from "@/data/subscription";
+import { PlanKey, plans } from "@/data/plan";
 import Card from "@repo/ui/components/custom/Card";
 import { Label } from "@repo/ui/components/label";
 import { RadioGroup, RadioGroupItem } from "@repo/ui/components/radio-group";
@@ -67,7 +67,9 @@ export const PaymentPlans = ({ plan, setPeriod, setPlan, period }: Props) => {
                 <span className="text-foreground font-medium text-sm">
                   {period === "annual"
                     ? p.fairDownload.annual
-                    : p.fairDownload.monthly}{" "}
+                    : period === "3-month"
+                      ? p.fairDownload.threeMonth
+                      : p.fairDownload.monthly}{" "}
                   دانلود
                 </span>
               </div>
