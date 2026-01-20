@@ -27,7 +27,7 @@ export function modelBuilder({
   const container = addContainer({
     model,
     from: trimModel,
-    marginMM: withContainer ? MARGINS.container : 6,
+    marginMM: withContainer ? MARGINS.container : 6, // 6 is the minimum amount to avoid clipping view
   });
 
   const { bleedSize, containerSize, trimSize } = getSizes({

@@ -53,7 +53,7 @@ export function svgExporter({
       guideText: {
         stroke: "none",
         fill: COLORS.guides.text,
-        cssStyle: `direction: ltr; font-size: 16px`,
+        cssStyle: `direction: ltr; font-size: 20px`,
       },
       guideTextOverall: {
         stroke: "none",

@@ -129,7 +129,7 @@ export default function ProductDetails({
   const isPackagingLogical = isPackagingSizeLogical(height, width);
 
   return (
-    <Card className="h-full flex flex-col justify-between p-6">
+    <Card className="h-full flex flex-col justify-between p-6 z-10">
       <div className="space-y-5">
         <Section title="ابعاد" infoContent={<DimensionInfo />}>
           <div className="grid grid-cols-2 gap-4">

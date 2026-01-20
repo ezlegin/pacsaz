@@ -51,7 +51,7 @@ export function addGuideLine(model: M.IModel, options: GuideLineOptions) {
   const dist = M.measure.pointDistance(from, to);
 
   if (orientation === "horizontal") {
-    const textBoxSize = 32;
+    const textBoxSize = 40;
 
     const offset =
       dimensionType === "inner" ? widthOffset.inner / 2 : widthOffset.outer / 2;
@@ -97,7 +97,7 @@ export function addGuideLine(model: M.IModel, options: GuideLineOptions) {
     ]);
   } else {
     // vertical
-    const textBoxSize = 10;
+    const textBoxSize = 15;
 
     const offset =
       dimensionType === "inner"

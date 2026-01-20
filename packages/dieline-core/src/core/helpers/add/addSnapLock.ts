@@ -145,7 +145,7 @@ export function addSnapLock({
 
     // FOLD
     addFoldLine(snapLock, {
-      id: "part1-fold",
+      id: "part2-fold",
       from: [toPt(widthMM) + foldOffset, 0],
       to: [toPt(widthMM + heightMM) - foldOffset, 0],
     });
@@ -202,7 +202,7 @@ export function addSnapLock({
 
     // FOLD
     addFoldLine(snapLock, {
-      id: "part1-fold",
+      id: "part3-fold",
       from: [toPt(widthMM + heightMM) + foldOffset, 0],
       to: [toPt(widthMM * 2 + heightMM) - foldOffset, 0],
     });

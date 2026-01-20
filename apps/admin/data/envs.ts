@@ -1,4 +1,4 @@
-import { onDevelepe } from "@repo/dieline-core/consts";
+import { onDevelepe } from "@repo/dieline-core/data/consts";
 
 export const mainURL = onDevelepe
   ? "http://localhost:3000/"

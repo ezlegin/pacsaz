@@ -21,7 +21,6 @@ export type DielineDimensions = {
 export type MaterialValue = {
   value: string;
   label: string;
-  color: string;
   thickness: number;
 };
 

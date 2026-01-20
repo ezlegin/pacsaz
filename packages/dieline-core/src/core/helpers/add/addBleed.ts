@@ -1,6 +1,5 @@
 import M from "makerjs";
 import { addModelToLayer } from "./addModelToLayer";
-import { EPS } from "../../../data/consts";
 
 export type ConnectorLine = {
   from: M.IPoint;
@@ -31,7 +30,9 @@ export function addBleed({
   const chain = M.model.findSingleChain(cloned);
   const newTrimModel = M.chain.toNewModel(chain);
 
-  const bleed = M.model.outline(newTrimModel, bleedAmount + EPS, 1);
+  const bleed = M.model.outline(newTrimModel, bleedAmount, 1, false, {
+    pointMatchingDistance: 2,
+  });
 
   addModelToLayer(model, "bleed", bleed, "bleed");
   model.models = { bleed, ...model.models };

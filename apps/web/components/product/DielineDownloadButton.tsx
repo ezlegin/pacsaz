@@ -93,7 +93,10 @@ const DielineDownloadButton = ({
           onClick={onDownload}
           variant={isSubscribed ? "green" : "default"}
           size="lg"
-          className="col-span-5 gap-2 font-medium"
+          className={cn(
+            isSubscribed ? "col-span-5" : "col-span-6",
+            "gap-2 font-medium"
+          )}
         >
           {isLoading || isRendering ? (
             <Spinner />
@@ -104,15 +107,17 @@ const DielineDownloadButton = ({
             </div>
           )}
         </Button>
-        <Button
-          disabled={isRendering || isLoading}
-          onClick={onSave}
-          variant={"secondary"}
-          size="lg"
-          className=""
-        >
-          <BookmarkPlus />
-        </Button>
+        {isSubscribed && (
+          <Button
+            disabled={isRendering || isLoading}
+            onClick={onSave}
+            variant={"secondary"}
+            size="lg"
+            className=""
+          >
+            <BookmarkPlus />
+          </Button>
+        )}
       </div>
     </>
   );

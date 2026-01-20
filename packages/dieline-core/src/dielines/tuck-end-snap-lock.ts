@@ -1,26 +1,26 @@
-import { toPt } from "../utils/sizeConvertor";
-import { BLEED, DOOR, MATERIALS } from "../data/consts";
 import { addDoor } from "../core/helpers/add/addDoor";
 import { addDust } from "../core/helpers/add/addDust";
 import { addGlue } from "../core/helpers/add/addGlue";
 import { addSnapLock } from "../core/helpers/add/addSnapLock";
+import { cloneMirrorMove } from "../core/helpers/clone";
 import { drawFoldLines } from "../core/helpers/draw/drawFoldLines";
 import { drawGuideLines } from "../core/helpers/draw/drawGuideLines";
 import { drawSingleLines } from "../core/helpers/draw/drawSingleLines";
 import { initiateModel } from "../core/helpers/initiateModels";
 import { modelBuilder } from "../core/helpers/modelBuilder";
 import { pushModelSeparatly } from "../core/helpers/pushModelSeparatly";
+import { BLEED, DOOR, MATERIALS } from "../data/consts";
 import { DielineGeneratorProps } from "../data/types";
-import { cloneMirrorMove } from "../core/helpers/clone";
+import { toPt } from "../utils/sizeConvertor";
 
 const tuckEndSnapLock: DielineGeneratorProps = {
   slug: "tuck-end-snap-lock",
-  title: "جعبه اسنپ لاک", //todo: sync to database, not here.
+  title: "جعبه اسنپ لاک",
   dimensions: {
     defaultDimensions: {
-      length: 160,
-      width: 90,
-      height: 50,
+      length: 230,
+      width: 160,
+      height: 80,
     },
     minDimensions: {
       length: 50,
