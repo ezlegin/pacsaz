@@ -42,6 +42,7 @@ import DielineDownloadButton from "./DielineDownloadButton";
 import { DimensionInput } from "./DimensionsInput";
 import DimensionInfo from "./info/DimensionInfo";
 import ThicknessInput from "./ThicknessInput";
+import { cn } from "@repo/ui/lib/utils";
 
 export interface SVGSizeProps {
   width: number;
@@ -123,7 +124,6 @@ export default function ProductDetails({
     "bg-slate-400",
     "bg-slate-500",
     "bg-slate-600",
-    "bg-slate-700",
   ];
 
   const isPackagingLogical = isPackagingSizeLogical(height, width);
@@ -194,7 +194,13 @@ export default function ProductDetails({
                   value={item.value}
                 >
                   <span
-                    className={`h-5 w-5 rounded-full border ${item.color}`}
+                    className={cn(
+                      item.value === "glossy-cardboard" ||
+                        item.value === "art-paper"
+                        ? "bg-white"
+                        : "bg-orange-100",
+                      `size-5 rounded-full border`
+                    )}
                   />
                   {item.label}
                 </SelectItem>
@@ -263,19 +269,22 @@ export default function ProductDetails({
             onValueChange={(val) => {
               if (val) setDimensionType(val as DimensionType);
             }}
+            className="w-full"
           >
-            {DIMENSIONS_TYPE.map(
-              ({ label, key }) =>
-                dimensionsType.includes(key) && (
-                  <ToggleGroupItem
-                    key={key}
-                    value={key}
-                    className="cursor-pointer data-[state=on]:border-primary data-[state=on]:bg-transparent hover:border-primary hover:bg-transparent"
-                  >
-                    <p className="font-normal text-xs">{label}</p>
-                  </ToggleGroupItem>
-                )
-            )}
+            <div className="grid grid-cols-3 w-full gap-2">
+              {DIMENSIONS_TYPE.map(
+                ({ label, key }) =>
+                  dimensionsType.includes(key) && (
+                    <ToggleGroupItem
+                      key={key}
+                      value={key}
+                      className="cursor-pointer data-[state=on]:border-primary data-[state=on]:bg-transparent hover:border-primary hover:bg-transparent"
+                    >
+                      <p className="font-normal text-xs">{label}</p>
+                    </ToggleGroupItem>
+                  )
+              )}
+            </div>
           </ToggleGroup>
         </Section>
       </div>
@@ -287,24 +296,27 @@ export default function ProductDetails({
             size="lg"
             dir="rtl"
             variant="outline"
-            spacing={2}
+            spacing={1}
             value={format}
             onValueChange={(val) => {
               if (val) setFormat(val as FormatsType);
             }}
+            className="w-full"
           >
-            {FORMATS.map(({ value, icon }) => (
-              <ToggleGroupItem
-                key={value}
-                value={value}
-                className="cursor-pointer w-1/3 data-[state=on]:border-primary data-[state=on]:bg-transparent hover:border-primary hover:bg-transparent"
-              >
-                <div className="flex items-center justify-center gap-2">
-                  <span className="pt-1 text-muted-foreground">{value}</span>
-                  <Image src={icon} alt={value} width={20} height={22} />
-                </div>
-              </ToggleGroupItem>
-            ))}
+            <div className="grid grid-cols-3 w-full gap-2">
+              {FORMATS.map(({ value, icon }) => (
+                <ToggleGroupItem
+                  key={value}
+                  value={value}
+                  className="cursor-pointer data-[state=on]:border-primary data-[state=on]:bg-transparent hover:border-primary hover:bg-transparent"
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="pt-1 text-muted-foreground">{value}</span>
+                    <Image src={icon} alt={value} width={20} height={22} />
+                  </div>
+                </ToggleGroupItem>
+              ))}
+            </div>
           </ToggleGroup>
         </Section>
         <DielineDownloadButton

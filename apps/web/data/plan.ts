@@ -41,6 +41,7 @@ const paids = [
   { active: true, value: "مشاهده ابعاد کامل دایلاین" },
   { active: true, value: "هشدار خطای برش در ابعاد غیر متعارف" },
   { active: true, value: "امکان ذخیره قالب با نام دلخواه و استفاده مجدد" },
+  { active: true, value: "اضافه کردن مشتریان" },
 ];
 
 export const annualPlanDisocunt = 0.2;

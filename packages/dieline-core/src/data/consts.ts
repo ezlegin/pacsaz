@@ -92,7 +92,6 @@ export const MATERIALS = {
   "glossy-cardboard": {
     value: "glossy-cardboard",
     label: "مقوا گلاسه",
-    color: "bg-white",
     thickness: 0.5,
     get safeFoldOffset() {
       return calculateSafeFoldOffset(this.thickness);
@@ -107,7 +106,6 @@ export const MATERIALS = {
   "f-flute": {
     value: "f-flute",
     label: "کارتن فلوت F",
-    color: "bg-orange-100/70",
     thickness: 1.2,
     get safeFoldOffset() {
       return calculateSafeFoldOffset(this.thickness);
@@ -122,7 +120,6 @@ export const MATERIALS = {
   "e-flute": {
     value: "e-flute",
     label: "کارتن فلوت E",
-    color: "bg-orange-100",
     thickness: 2,
     get safeFoldOffset() {
       return calculateSafeFoldOffset(this.thickness);
@@ -137,7 +134,6 @@ export const MATERIALS = {
   "b-flute": {
     value: "b-flute",
     label: "کارتن فلوت B",
-    color: "bg-orange-200",
     thickness: 3,
     get safeFoldOffset() {
       return calculateSafeFoldOffset(this.thickness);
@@ -152,7 +148,6 @@ export const MATERIALS = {
   "c-flute": {
     value: "c-flute",
     label: "کارتن فلوت C",
-    color: "bg-orange-300",
     thickness: 4,
     get safeFoldOffset() {
       return calculateSafeFoldOffset(this.thickness);
@@ -167,7 +162,6 @@ export const MATERIALS = {
   "be-flute": {
     value: "be-flute",
     label: "کارتن فلوت BE",
-    color: "bg-orange-400",
     thickness: 5,
     get safeFoldOffset() {
       return calculateSafeFoldOffset(this.thickness);
@@ -182,7 +176,6 @@ export const MATERIALS = {
   "bc-flute": {
     value: "bc-flute",
     label: "کارتن فلوت BC",
-    color: "bg-orange-500",
     thickness: 7,
     get safeFoldOffset() {
       return calculateSafeFoldOffset(this.thickness);
@@ -197,7 +190,6 @@ export const MATERIALS = {
   "ab-flute": {
     value: "ab-flute",
     label: "کارتن فلوت AB",
-    color: "bg-orange-500",
     thickness: 7,
     get safeFoldOffset() {
       return calculateSafeFoldOffset(this.thickness);
@@ -212,7 +204,6 @@ export const MATERIALS = {
   "art-paper": {
     value: "art-paper",
     label: "کاغذ گلاسه",
-    color: "bg-white",
     thickness: 0.2,
     get safeFoldOffset() {
       return calculateSafeFoldOffset(this.thickness);
