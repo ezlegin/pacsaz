@@ -38,9 +38,9 @@ const SubscriptionList = () => {
           <SubscriptionCard
             key={idx}
             props={p}
-            isAnnual={period === "annual"}
             features={p.features}
             index={idx}
+            period={period}
           />
         ))}
       </div>

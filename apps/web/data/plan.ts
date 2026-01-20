@@ -10,6 +10,11 @@ export type PlanPrice = {
 };
 export type PlanLevel = 1 | 2 | 3;
 
+export type PlanFairDownload = {
+  monthly: number;
+  threeMonth: number;
+  annual: number;
+};
 export interface SubCardProps {
   title: PlanTitle;
   price: number;
@@ -17,11 +22,7 @@ export interface SubCardProps {
   key: PlanKey;
   shortDescription: string;
   level: 1 | 2 | 3;
-  fairDownload: {
-    monthly: number;
-    threeMonth: number;
-    annual: number;
-  };
+  fairDownload: PlanFairDownload;
   features: PlanFeature[];
 }
 

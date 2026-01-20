@@ -1,35 +1,27 @@
 import { PlanFeature, SubCardProps } from "@/data/plan";
+import { mapFiarDownload } from "@/utils/mapFiarDownload";
 import { Button } from "@repo/ui/components/button";
+import Card from "@repo/ui/components/custom/Card";
 import { Separator } from "@repo/ui/components/separator";
 import { cn } from "@repo/ui/lib/utils";
 import { CircleCheck, Zap } from "lucide-react";
 import Link from "next/link";
 import Price from "./Price";
 import { SubPeriod } from "./SubscriptionList";
-import Card from "@repo/ui/components/custom/Card";
 
 export const SubscriptionCard = ({
-  props: {
-    key,
-    description,
-    fairDownload: { annual, monthly },
-    price,
-    title,
-  },
+  props: { key, description, fairDownload, price, title },
+  period,
   index,
-  isAnnual,
   features,
 }: {
   props: SubCardProps;
   index: number;
   features: PlanFeature[];
-  isAnnual: boolean;
+  period: SubPeriod;
 }) => {
-  const fairDownload = isAnnual ? annual : monthly;
-  const period: SubPeriod = isAnnual ? "annual" : "monthly";
-
   return (
-    <div className="even:bg-gradient-to-r even:from-violet-500 even:to-purple-500 p-1 rounded-2xl group">
+    <div className="even:bg-linear-to-r even:from-violet-500 even:to-purple-500 p-1 rounded-2xl group">
       {index === 1 && (
         <div className="flex justify-center items-center gap-1 text-sm pt-1.5 font-medium text-primary-foreground">
           <Zap size={16} fill="#8c38fe" />
@@ -45,7 +37,7 @@ export const SubscriptionCard = ({
       >
         <div className="flex flex-col gap-3">
           <span className="font-semibold">{title}</span>
-          <Price isAnnual={isAnnual} price={price} />
+          <Price period={period} price={price} />
           <p className="text-xs text-muted-foreground">{description}</p>
         </div>
 
@@ -60,7 +52,7 @@ export const SubscriptionCard = ({
 
         <div className="space-y-3 text-sm font-medium">
           <Separator />
-          <div>دانلود منصفانه: {fairDownload} عدد</div>
+          <div>دانلود منصفانه: {mapFiarDownload(fairDownload, period)} عدد</div>
           <Separator />
           <ul className="text-xs text-muted-foreground space-y-1.5">
             {features.map((i, idx) => (
