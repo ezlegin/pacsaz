@@ -1,5 +1,5 @@
 import M, { IModel } from "makerjs";
-import { MATERIALS } from "../../data/consts";
+import { BLEED, MATERIALS } from "../../data/consts";
 import { createDielineContext } from "./contextCreator";
 import { ResolvedDimensions } from "../../data/types";
 import { calculateSafeFoldOffset } from "./calculate/calculateSafeFoldOffset";
@@ -10,14 +10,14 @@ interface InitiateModelsOptions {
   customThickness?: number;
   bleedSize?: number;
   resolved: ResolvedDimensions;
-  defaultBleed: number;
+  defaultBleed?: number;
 }
 
 export function initiateModel({
   selectedMaterial,
   customThickness,
   bleedSize,
-  defaultBleed,
+  defaultBleed = BLEED.default,
   resolved,
 }: InitiateModelsOptions) {
   const { safeFoldOffset: mSafeFoldOffset, thickness } =

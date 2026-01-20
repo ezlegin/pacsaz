@@ -34,6 +34,7 @@ const DielineGenerator = ({ slug }: { slug: string }) => {
     setShowWatermark,
     setCustomThickness,
     setDoCenterSVG,
+    dielineData,
   } = useDielineGenerator(dieline);
 
   const [isRenderingLoading, setIsRenderingLoading] = useState(true);
@@ -42,54 +43,57 @@ const DielineGenerator = ({ slug }: { slug: string }) => {
   }, [svg]);
 
   return (
-    <div className="h-full grid grid-cols-[320px_1fr_300px] p-3">
+    <div className="h-full">
       <LoadingOverlay isLoading={isRenderingLoading} />
 
-      <ProductDetails
-        defaultDimensions={dieline.dimensions}
-        dimensionsType={dieline.dimensionsType}
-        setDimension={setDimension}
-        setMaterial={setMaterial}
-        setDimensionType={setDimensionType}
-        setBleedAmount={setBleedSize}
-        setCustomThickness={setCustomThickness}
-        svg={svg}
-        dimensionType={dimensionType}
-        slug={dieline.slug}
-        materials={dieline.materials}
-        material={material}
-        isRendering={isRendering}
-        resolvedSizes={resolved}
-        dimension={size}
-      />
+      <div className="h-full grid grid-cols-[320px_1fr_300px] p-3">
+        <ProductDetails
+          defaultDimensions={dieline.dimensions}
+          dimensionsType={dieline.dimensionsType}
+          setDimension={setDimension}
+          setMaterial={setMaterial}
+          setDimensionType={setDimensionType}
+          setBleedAmount={setBleedSize}
+          setCustomThickness={setCustomThickness}
+          svg={svg}
+          dimensionType={dimensionType}
+          slug={dieline.slug}
+          materials={dieline.materials}
+          material={material}
+          isRendering={isRendering}
+          resolvedSizes={resolved}
+          dimension={size}
+          dielineData={dielineData}
+        />
 
-      <div className="relative">
-        <div className="absolute top-1/2 right-1/2 -translate-y-1/2 translate-x-1/2 h-full w-full pb-10">
-          {svg && (
-            <SVGPreview
-              svg={svg.model}
-              isRendering={isRendering}
-              doCenterSVG={doCenterSVG}
-            />
-          )}
+        <div className="relative">
+          <div className="absolute top-1/2 right-1/2 -translate-y-1/2 translate-x-1/2 h-full w-full pb-10">
+            {svg && (
+              <SVGPreview
+                svg={svg.model}
+                isRendering={isRendering}
+                doCenterSVG={doCenterSVG}
+              />
+            )}
+          </div>
         </div>
-      </div>
 
-      <ProductInfo
-        dimension={size}
-        dimensionType={dimensionType}
-        dimensionsType={dieline.dimensionsType}
-        sizes={svg?.sizes}
-        slug={dieline.slug}
-        showAnchors={showAnchors}
-        showWatermark={showWatermark}
-        showOverallDimensions={showOverallDimensions}
-        doCenterSVG={doCenterSVG}
-        setShowAnchors={setShowAnchors}
-        setShowWatermark={setShowWatermark}
-        setShowOverallDimensions={setShowOverallDimensions}
-        setDoCenterSVG={setDoCenterSVG}
-      />
+        <ProductInfo
+          dimension={size}
+          dimensionType={dimensionType}
+          dimensionsType={dieline.dimensionsType}
+          sizes={svg?.sizes}
+          slug={dieline.slug}
+          showAnchors={showAnchors}
+          showWatermark={showWatermark}
+          showOverallDimensions={showOverallDimensions}
+          doCenterSVG={doCenterSVG}
+          setShowAnchors={setShowAnchors}
+          setShowWatermark={setShowWatermark}
+          setShowOverallDimensions={setShowOverallDimensions}
+          setDoCenterSVG={setDoCenterSVG}
+        />
+      </div>
     </div>
   );
 };

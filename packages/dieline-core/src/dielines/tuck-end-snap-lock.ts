@@ -28,6 +28,7 @@ const tuckEndSnapLock: DielineGeneratorProps = {
       height: 50,
     },
   },
+  defaultBleed: BLEED.default,
   dimensionsType: ["manufacture", "inner", "outer"],
   materials: {
     default: MATERIALS["glossy-cardboard"],
@@ -71,7 +72,6 @@ const tuckEndSnapLock: DielineGeneratorProps = {
       customThickness,
       bleedSize,
       resolved,
-      defaultBleed: BLEED.default,
     });
 
     //! -------------- TRIM --------------

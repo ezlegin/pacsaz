@@ -18,7 +18,7 @@ export default function LoadingOverlay({
   return (
     <div
       className={cn(
-        "absolute inset-0 z-20 flex items-center justify-center bg-accent/20 backdrop-blur-[4px] transition-opacity duration-700 ease-in-out",
+        "absolute inset-0 z-20 flex items-center justify-center bg-accent/20 backdrop-blur-xs transition-opacity duration-700 ease-in-out",
         isLoading ? "opacity-100" : "opacity-0 pointer-events-none",
         className
       )}

@@ -1,15 +1,22 @@
 import { useLoading } from "@/hooks/useLoading";
 import { downloadPdf } from "@/lib/actions/export/downloader";
 import Diamond from "@/public/icons/Diamond";
+import { isSubscribed } from "@repo/dieline-core/data/consts";
+import {
+  DielineData,
+  Dimensions,
+  FormatsType,
+  Model,
+} from "@repo/dieline-core/data/types";
 import { Button } from "@repo/ui/components/button";
 import { Dialog, DialogContent, DialogTitle } from "@repo/ui/components/dialog";
 import { Spinner } from "@repo/ui/components/spinner";
-import { toast } from "sonner";
-import { Download } from "lucide-react";
+import { BookmarkPlus, Download } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import LoginPopup from "../forms/LoginPopup";
-import { isSubscribed } from "@repo/dieline-core/data/consts";
-import { FormatsType, Model, Dimensions } from "@repo/dieline-core/data/types";
+import SaveDielineForm from "../forms/SaveDielineForm";
+import { cn } from "@repo/ui/lib/utils";
 
 interface Props {
   format: FormatsType;
@@ -17,6 +24,7 @@ interface Props {
   slug: string;
   isRendering: boolean;
   dimensions: Dimensions;
+  dielineData: DielineData;
 }
 
 const DielineDownloadButton = ({
@@ -25,13 +33,14 @@ const DielineDownloadButton = ({
   slug,
   isRendering,
   dimensions,
+  dielineData,
 }: Props) => {
   const { startLoading, stopLoading, isLoading } = useLoading();
-  const [openLoginPopup, setOpenLoginPopup] = useState(false);
+  const [openPopup, setOpenPopup] = useState<"login" | "save" | null>(null);
 
   const onDownload = async () => {
     if (!isSubscribed) {
-      setOpenLoginPopup(true);
+      setOpenPopup("login");
       return;
     }
 
@@ -52,35 +61,59 @@ const DielineDownloadButton = ({
     stopLoading();
   };
 
+  const onSave = () => {
+    startLoading();
+    setOpenPopup("save");
+    stopLoading();
+  };
+
   return (
     <>
-      <Dialog open={openLoginPopup} onOpenChange={setOpenLoginPopup}>
+      <Dialog open={!!openPopup} onOpenChange={() => setOpenPopup(null)}>
         <DialogContent
           overlayClassname="bg-accent/20 backdrop-blur-[4px]"
           showCloseButton={false}
-          className="p-0 border-none sm:max-w-2xl"
+          className={cn(
+            openPopup === "login" ? "sm:max-w-2xl" : "sm:max-w-lg",
+            "p-0 border-none"
+          )}
         >
           <DialogTitle className="sr-only" />
-          <LoginPopup />
+          {openPopup === "login" ? (
+            <LoginPopup />
+          ) : (
+            <SaveDielineForm dielineData={dielineData} />
+          )}
         </DialogContent>
       </Dialog>
 
-      <Button
-        disabled={isRendering || isLoading}
-        onClick={onDownload}
-        variant={isSubscribed ? "green" : "default"}
-        size="lg"
-        className="mt-4 w-full gap-2 font-medium"
-      >
-        {isLoading || isRendering ? (
-          <Spinner />
-        ) : (
-          <div className="flex gap-1.5 items-center">
-            {isSubscribed ? <Download /> : <Diamond />}
-            دانلود فایل
-          </div>
-        )}
-      </Button>
+      <div className="grid grid-cols-6 gap-2">
+        <Button
+          disabled={isRendering || isLoading}
+          onClick={onDownload}
+          variant={isSubscribed ? "green" : "default"}
+          size="lg"
+          className="col-span-5 gap-2 font-medium"
+        >
+          {isLoading || isRendering ? (
+            <Spinner />
+          ) : (
+            <div className="flex gap-1.5 items-center">
+              {isSubscribed ? <Download /> : <Diamond />}
+              دانلود فایل
+            </div>
+          )}
+        </Button>
+        <Button
+          disabled={isRendering || isLoading}
+          onClick={onSave}
+          variant={"secondary"}
+          size="lg"
+          className=""
+        >
+          <BookmarkPlus />
+        </Button>
+      </div>
     </>
   );
 };

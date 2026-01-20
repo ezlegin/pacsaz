@@ -1,5 +1,5 @@
 import { resolveDimensions } from "../core/helpers/dimensionResolver";
-import { DielineGeneratorProps, Model } from "../data/types";
+import { DielineData, DielineGeneratorProps, Model } from "../data/types";
 import { useEffect, useState, useTransition } from "react";
 import { useSize } from "./useSize";
 import { toPt } from "../utils/sizeConvertor";
@@ -15,7 +15,7 @@ export function useDielineGenerator(
   );
   const [dimensionType, setDimensionType] =
     useState<DimensionType>("manufacture");
-  const [bleedSize, setBleedSize] = useState<number | undefined>();
+  const [bleedSize, setBleedSize] = useState<number>(dieline.defaultBleed);
   const [showAnchors, setShowAnchors] = useState(false);
   const [showWatermark, setShowWatermark] = useState(true);
   const [showOverallDimensions, setShowOverallDimensions] = useState(false);
@@ -72,7 +72,16 @@ export function useDielineGenerator(
     dieline,
   ]);
 
+  const dielineData: DielineData = {
+    size,
+    material,
+    dimensionType,
+    bleedSize,
+    customThickness,
+  };
+
   return {
+    dielineData,
     size,
     resolved,
     svg,

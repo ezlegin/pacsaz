@@ -12,6 +12,8 @@ import { modelBuilder } from "../core/helpers/modelBuilder";
 import { pushModelSeparatly } from "../core/helpers/pushModelSeparatly";
 import { DielineGeneratorProps } from "../data/types";
 
+const defaultBleed = BLEED.default;
+
 const tuckEnd: DielineGeneratorProps = {
   slug: "tuck-end",
   title: "جعبه دو طرف درب", //todo: sync to database, not here.
@@ -27,6 +29,7 @@ const tuckEnd: DielineGeneratorProps = {
       height: 50,
     },
   },
+  defaultBleed,
   dimensionsType: ["manufacture", "inner", "outer"],
   materials: {
     default: MATERIALS["glossy-cardboard"],
@@ -70,7 +73,7 @@ const tuckEnd: DielineGeneratorProps = {
       customThickness,
       bleedSize,
       resolved,
-      defaultBleed: BLEED.default,
+      defaultBleed,
     });
 
     //! -------------- TRIM --------------

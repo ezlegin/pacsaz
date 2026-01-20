@@ -98,6 +98,7 @@ export interface DielineGeneratorProps {
   slug: string;
   title: string;
   dimensions: DielineDimensions;
+  defaultBleed: number;
   dimensionsType: DimensionsType;
   materials: MaterialsInput;
   model: DielineModel;
@@ -150,4 +151,12 @@ export type Dust = {
       outer: number;
     };
   };
+};
+
+export type DielineData = {
+  size: Dimensions;
+  material: MaterialKey;
+  dimensionType: DimensionType;
+  bleedSize: number;
+  customThickness: number | undefined;
 };
