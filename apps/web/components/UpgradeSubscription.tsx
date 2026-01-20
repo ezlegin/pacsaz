@@ -21,8 +21,12 @@ const UpgradeSubscription = () => {
   const [appliedDiscountCode, setAppliedDiscountCode] = useState<
     string | undefined
   >(undefined);
+  const defaultPlan = plans.find(
+    (p) => p.level === testUser.plan.level + 1
+  )?.key; //todo: replace with DB
+
   const { checkoutInfo, setPeriod, setPlan, period, plan, discountInfo } =
-    usePaymentCheckout({ discountCode: appliedDiscountCode });
+    usePaymentCheckout({ discountCode: appliedDiscountCode, defaultPlan });
 
   const onStartPayment = () => {
     console.log("Payment Started");
