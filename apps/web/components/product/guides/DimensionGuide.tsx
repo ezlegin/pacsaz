@@ -16,7 +16,7 @@ const DimensionGuide = () => {
         </span>
       </DialogDescription>
       <DialogDescription className="text-right">
-        <h3 className="font-semibold text-foreground block">عرض</h3>
+        <span className="font-semibold text-foreground block">عرض</span>
         <span className="text-xs">
           عرض فاصله بین دو طرف کناری جعبه است و معمولاً عمود بر طول اندازه‌گیری
           می‌شود. این مقدار نقش مهمی در پایداری جعبه و نحوه چیدمان محصول در داخل
@@ -24,7 +24,7 @@ const DimensionGuide = () => {
         </span>
       </DialogDescription>
       <DialogDescription className="text-right">
-        <h3 className="font-semibold text-foreground block">ارتفاع</h3>
+        <span className="font-semibold text-foreground block">ارتفاع</span>
         <span className="text-xs">
           ارتفاع فاصله بین کف و درِ جعبه است. این اندازه مشخص می‌کند که جعبه چه
           مقدار از زمین بلند می‌شود و برای محصولاتی با ضخامت یا حجم عمودی اهمیت

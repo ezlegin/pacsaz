@@ -77,7 +77,7 @@ const SaveDielineForm = ({ dielineData }: { dielineData: DielineData }) => {
           <li>
             ضخامت:{" "}
             {data.customThickness
-              ? `${data.customThickness}mm (سفارشی)`
+              ? `${data.customThickness.toFixed(1)}mm (سفارشی)`
               : `${data.thickness}mm (پیش‌فرض)`}
           </li>
         </div>

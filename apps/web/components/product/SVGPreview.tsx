@@ -34,6 +34,8 @@ export default function SvgPreview({
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState<number>();
 
+  console.log(doCenterSVG);
+
   useLayoutEffect(() => {
     if (!contentRef.current || !wrapperRef.current) return;
 
@@ -87,7 +89,7 @@ export default function SvgPreview({
       className="h-full flex items-center justify-center"
     >
       <TransformWrapper
-        key={doCenterSVG ? svg : undefined}
+        // key={doCenterSVG ? svg : undefined}
         ref={transformRef}
         centerOnInit
         limitToBounds={false}
