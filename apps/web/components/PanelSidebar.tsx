@@ -1,4 +1,5 @@
 import { testUser } from "@/data/user";
+import { isSubscribed } from "@repo/dieline-core/data/consts";
 import {
   Sidebar,
   SidebarContent,
@@ -12,8 +13,6 @@ import {
 import { Bookmark, CreditCard, Flag, Heart, User, Users } from "lucide-react";
 import Link from "next/link";
 import PacsazLogo from "./PacsazLogo";
-import { Badge } from "@repo/ui/components/badge";
-import { isSubscribed } from "@repo/dieline-core/data/consts";
 
 const items = [
   {
@@ -33,9 +32,8 @@ const items = [
   },
   {
     title: "مشتری‌ها",
-    url: "#",
+    url: "/panel/customers",
     icon: Users,
-    onDevelopment: true,
   },
   {
     title: "پرداخت ها",
@@ -71,19 +69,9 @@ export function PanelSidebar() {
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <Link
-                      href={item.url}
-                      className={
-                        item.onDevelopment ? "cursor-default" : "cursor-pointer"
-                      }
-                    >
+                    <Link href={item.url}>
                       <item.icon />
-                      <div className="flex gap-2 items-center">
-                        <span>{item.title}</span>
-                        {item.onDevelopment && (
-                          <Badge variant={"primaryForeground"}>بزودی</Badge>
-                        )}
-                      </div>
+                      {item.title}
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

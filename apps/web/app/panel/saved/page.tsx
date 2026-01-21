@@ -83,12 +83,7 @@ const page = () => {
 
   return (
     <Card title="قالب‌های ذخیره شده" className="col-span-6">
-      <Table
-        columns={columns}
-        data={data}
-        renderRows={renderRows}
-        noDataMessage=""
-      />
+      <Table columns={columns} data={data} renderRows={renderRows} />
     </Card>
   );
 };

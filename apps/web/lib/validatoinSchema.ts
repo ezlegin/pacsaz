@@ -50,3 +50,15 @@ export const saveDielineFormSchema = z.object({
 });
 
 export type SaveDielineFormType = z.infer<typeof saveDielineFormSchema>;
+
+export const customerFormSchema = z.object({
+  fullName: z.string().min(1),
+  phoneNumber: z
+    .string()
+    .regex(/^09\d{9}$/)
+    .optional(),
+  email: z.string().email().optional(),
+  address: z.string().optional(),
+});
+
+export type CustomerFormType = z.infer<typeof customerFormSchema>;
