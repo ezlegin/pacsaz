@@ -21,3 +21,8 @@ export const loginPic = "/login-pic.png";
 // IMAGES
 export const packagingCoursePic = "/packaging-course.png";
 export const alirezaEzleginiPic = "/alireza-ezlegini.png";
+// ------ guide
+export const dimGuide = "/guides/dim.png";
+export const bleedGuide = "/guides/bleed.png";
+export const thicknessGuide = "/guides/thickness.png";
+export const dimensionTypeGuide = "/guides/dimensionType.png";

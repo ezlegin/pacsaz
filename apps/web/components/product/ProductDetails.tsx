@@ -40,9 +40,14 @@ import { useEffect, useState } from "react";
 import { Section } from "./DetailsSection";
 import DielineDownloadButton from "./DielineDownloadButton";
 import { DimensionInput } from "./DimensionsInput";
-import DimensionInfo from "./info/DimensionInfo";
+import DimensionGuide from "./guides/DimensionGuide";
 import ThicknessInput from "./ThicknessInput";
 import { cn } from "@repo/ui/lib/utils";
+import MeterialGuide from "./guides/materialGuide";
+import BleedGuide from "./guides/BleedGuide";
+import ThicknessGuide from "./guides/ThicknessGuide";
+import DimensionTypeGuide from "./guides/DimensionTypeGuide";
+import FormatGuide from "./guides/FormatGuide";
 
 export interface SVGSizeProps {
   width: number;
@@ -131,7 +136,7 @@ export default function ProductDetails({
   return (
     <Card className="h-full flex flex-col justify-between p-6 z-10">
       <div className="space-y-5">
-        <Section title="ابعاد" infoContent={<DimensionInfo />}>
+        <Section title="ابعاد" infoContent={<DimensionGuide />}>
           <div className="grid grid-cols-2 gap-4">
             {DIMENSIONS.map(({ key, label }) => (
               <DimensionInput
@@ -176,7 +181,7 @@ export default function ProductDetails({
           )}
         </Section>
 
-        <Section title="متریال چاپ" infoContent={<DimensionInfo />}>
+        <Section title="متریال چاپ" infoContent={<MeterialGuide />}>
           <Select
             onValueChange={onSelectMaterial}
             dir="rtl"
@@ -212,7 +217,7 @@ export default function ProductDetails({
         <Section
           isPremium={!isSubscribed}
           title="اندازه بلید"
-          infoContent={<DimensionInfo />}
+          infoContent={<BleedGuide />}
         >
           <Select
             disabled={!isSubscribed}
@@ -245,7 +250,7 @@ export default function ProductDetails({
         <Section
           isPremium={!isSubscribed}
           title="ضخامت"
-          infoContent={<DimensionInfo />}
+          infoContent={<ThicknessGuide />}
         >
           <ThicknessInput
             isRendering={isRendering}
@@ -257,7 +262,7 @@ export default function ProductDetails({
           />
         </Section>
 
-        <Section title="نوع ابعاد" infoContent={<DimensionInfo />}>
+        <Section title="نوع ابعاد" infoContent={<DimensionTypeGuide />}>
           <ToggleGroup
             type="single"
             variant="outline"
@@ -290,7 +295,7 @@ export default function ProductDetails({
       </div>
 
       <div className="space-y-4">
-        <Section title="فرمت" infoContent={<DimensionInfo />}>
+        <Section title="فرمت" infoContent={<FormatGuide />}>
           <ToggleGroup
             type="single"
             size="lg"

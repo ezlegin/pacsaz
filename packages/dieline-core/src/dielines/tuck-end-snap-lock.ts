@@ -18,7 +18,7 @@ const tuckEndSnapLock: DielineGeneratorProps = {
   title: "جعبه اسنپ لاک",
   dimensions: {
     defaultDimensions: {
-      length: 230,
+      length: 250,
       width: 160,
       height: 80,
     },
