@@ -1,25 +1,20 @@
+import { ResolvedDimensions } from "../../data/types";
 import { toMm } from "../../utils/sizeConvertor";
-import { Offsets } from "../../data/types";
 
 export function createDielineContext({
   length,
   width,
   height,
   offsets,
-}: {
-  width: number;
-  length: number;
-  height?: number;
-  offsets: Offsets;
-}) {
+}: ResolvedDimensions) {
   const widthMM = toMm(width);
   const lengthMM = toMm(length);
-  const heightMM = toMm(height ?? 0);
+  const heightMM = toMm(height ?? -1);
 
   return {
     width,
     length,
-    height: height ?? 0,
+    height: height ?? -1,
 
     widthMM,
     lengthMM,

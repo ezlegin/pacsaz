@@ -42,21 +42,13 @@ const tuckEndSnapLock: DielineGeneratorProps = {
 
   model({
     developers: { showAnchors, showWatermark, showOverallDimensions },
-    dimensions: {
-      raw: rawDim,
-      resolved,
-      bleedSize,
-      customThickness,
-      container,
-    },
+    dimensions: { raw: rawDim, resolved, customThickness, container },
     dimensionType,
     selectedMaterial,
-    isSubscribed,
   }) {
     const {
       materialThickness,
       safeFoldOffset,
-      bleedAmount,
       height,
       width,
       model,
@@ -71,7 +63,6 @@ const tuckEndSnapLock: DielineGeneratorProps = {
     } = initiateModel({
       selectedMaterial,
       customThickness,
-      bleedSize,
       resolved,
     });
 
@@ -210,7 +201,6 @@ const tuckEndSnapLock: DielineGeneratorProps = {
     return modelBuilder({
       model,
       trimModel,
-      bleedAmount,
       offsets,
       container,
       showAnchors,
@@ -223,7 +213,6 @@ const tuckEndSnapLock: DielineGeneratorProps = {
       },
       material: selectedMaterial,
       showOverallDimensions,
-      isSubscribed,
     });
   },
 };

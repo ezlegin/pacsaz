@@ -15,7 +15,6 @@ export function modelBuilder({
   offsets,
   showAnchors,
   watermark,
-  material,
   showOverallDimensions,
   container: withContainer,
 }: ModelExporter) {
@@ -69,7 +68,6 @@ export function modelBuilder({
       bleedModel: bleed,
       bleedAmount,
       watermark,
-      material: material,
     }),
   };
 }

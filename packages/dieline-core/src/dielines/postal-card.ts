@@ -1,11 +1,11 @@
 import M from "makerjs";
-import { BLEED, materials } from "../data/consts";
+import { addModelToLayer } from "../core/helpers/add/addModelToLayer";
 import { drawFoldLines } from "../core/helpers/draw/drawFoldLines";
 import { drawGuideLines } from "../core/helpers/draw/drawGuideLines";
 import { initiateModel } from "../core/helpers/initiateModels";
 import { modelBuilder } from "../core/helpers/modelBuilder";
+import { BLEED, materials } from "../data/consts";
 import { DielineGeneratorProps } from "../data/types";
-import { addModelToLayer } from "../core/helpers/add/addModelToLayer";
 
 const postalCard: DielineGeneratorProps = {
   slug: "postal-card",
@@ -29,33 +29,14 @@ const postalCard: DielineGeneratorProps = {
     included: [materials["glossy-cardboard"], materials["art-paper"]],
   },
   model({
-    dimensions: {
-      bleedSize,
-      customThickness,
-      raw: rawDim,
-      resolved,
-      container,
-    },
+    dimensions: { raw: rawDim, resolved, container },
     dimensionType,
     developers: { showAnchors, showOverallDimensions, showWatermark },
-    selectedMaterial,
-    isSubscribed,
   }) {
-    const {
-      bleedAmount,
-      width,
-      model,
-      foldModel,
-      trimModel,
-      guideModel,
-      length,
-      offsets,
-    } = initiateModel({
-      selectedMaterial,
-      customThickness,
-      bleedSize,
-      resolved,
-    });
+    const { model, foldModel, trimModel, guideModel, offsets, width, length } =
+      initiateModel({
+        resolved,
+      });
 
     //! TRIM
     const rect = new M.models.Rectangle(width * 2, length);
@@ -81,15 +62,13 @@ const postalCard: DielineGeneratorProps = {
 
     return modelBuilder({
       model,
-      isSubscribed,
       trimModel,
-      container,
-      bleedAmount,
-      showAnchors,
+      container, //dev
+      showAnchors, //dev
       offsets,
-      material: selectedMaterial,
-      showOverallDimensions,
+      showOverallDimensions, //dev
       watermark: {
+        //dep
         show: showWatermark,
         offset: {
           x: 0,

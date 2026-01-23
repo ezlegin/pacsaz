@@ -77,13 +77,10 @@ export type DielineModel = (params: {
   };
   dimensions: {
     container: boolean;
-    customThickness?: number;
-    bleedSize?: number;
     raw: { width: number; height: number; length: number };
     resolved: ResolvedDimensions;
   };
   dimensionType: DimensionType;
-  selectedMaterial: MaterialKey;
 }) => Model;
 
 export interface DielineGeneratorProps {
@@ -123,7 +120,6 @@ export type ModelExporter = {
   showAnchors: boolean;
   showOverallDimensions: boolean;
   watermark: Watermark;
-  material: MaterialKey;
   container: boolean;
 };
 

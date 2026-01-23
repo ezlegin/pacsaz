@@ -37,23 +37,25 @@ export function useDielineGenerator(
     setThickness(material.thickness);
   }, []);
 
-  const widthPT = toPt(dimension.width);
-  const lengthPT = toPt(dimension.length);
-  const heightPT = toPt(dimension.height);
+  const { height, length, width } = {
+    width: toPt(dimension.width),
+    length: toPt(dimension.length),
+    height: toPt(dimension.height),
+  };
 
   const resolved = resolveDimensions({
-    width: widthPT,
-    length: lengthPT,
-    height: heightPT,
+    width,
+    length,
+    height,
     dimensionType,
     material,
     customThickness,
   });
 
   const deps = [
-    widthPT,
-    lengthPT,
-    heightPT,
+    width,
+    length,
+    height,
     dimensionType,
     material,
     showAnchors,
@@ -79,14 +81,11 @@ export function useDielineGenerator(
       const result = dieline.model({
         dimensions: {
           container: container ?? true,
-          customThickness,
-          bleedSize: bleed,
-          raw: { width: widthPT, height: heightPT, length: lengthPT },
+          raw: { height, length, width },
           resolved,
         },
         developers: { showAnchors, showWatermark, showOverallDimensions },
         dimensionType,
-        selectedMaterial: material.value,
       });
 
       setSvg(result);

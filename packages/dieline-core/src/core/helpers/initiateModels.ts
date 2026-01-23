@@ -1,34 +1,23 @@
+import { getCTX } from "@repo/store/dieline/context.store";
 import M, { IModel } from "makerjs";
-import { BLEED, materials } from "../../data/consts";
-import { createDielineContext } from "./contextCreator";
 import { ResolvedDimensions } from "../../data/types";
 import { calculateSafeFoldOffset } from "./calculate/calculateSafeFoldOffset";
-import { toPt } from "../../utils/sizeConvertor";
+import { createDielineContext } from "./contextCreator";
 
 interface InitiateModelsOptions {
-  selectedMaterial: keyof typeof materials;
-  customThickness?: number;
-  bleedSize?: number;
   resolved: ResolvedDimensions;
-  defaultBleed?: number;
 }
 
-export function initiateModel({
-  selectedMaterial,
-  customThickness,
-  bleedSize,
-  defaultBleed = BLEED.default,
-  resolved,
-}: InitiateModelsOptions) {
-  const { safeFoldOffset: mSafeFoldOffset, thickness } =
-    materials[selectedMaterial];
+export function initiateModel({ resolved }: InitiateModelsOptions) {
+  const { customThickness, material } = getCTX();
+
+  const { safeFoldOffset: mSafeFoldOffset, thickness } = material;
 
   const safeFoldOffset = customThickness
     ? calculateSafeFoldOffset(customThickness)
     : mSafeFoldOffset;
 
   const materialThickness = customThickness ?? thickness;
-  const bleedAmount = bleedSize ? toPt(bleedSize) : toPt(defaultBleed);
 
   const { height, heightMM, length, lengthMM, width, widthMM, offsets } =
     createDielineContext(resolved);
@@ -38,7 +27,6 @@ export function initiateModel({
   return {
     materialThickness,
     safeFoldOffset,
-    bleedAmount,
     height,
     heightMM,
     length,

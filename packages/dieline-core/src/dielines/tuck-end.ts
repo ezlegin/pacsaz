@@ -43,20 +43,13 @@ const tuckEnd: DielineGeneratorProps = {
 
   model({
     developers: { showAnchors, showWatermark, showOverallDimensions },
-    dimensions: {
-      raw: rawDim,
-      resolved,
-      bleedSize,
-      customThickness,
-      container,
-    },
+    dimensions: { raw: rawDim, resolved, customThickness, container },
     dimensionType,
     selectedMaterial,
   }) {
     const {
       materialThickness,
       safeFoldOffset,
-      bleedAmount,
       height,
       width,
       model,
@@ -71,9 +64,7 @@ const tuckEnd: DielineGeneratorProps = {
     } = initiateModel({
       selectedMaterial,
       customThickness,
-      bleedSize,
       resolved,
-      defaultBleed,
     });
 
     //! -------------- TRIM --------------
@@ -240,7 +231,6 @@ const tuckEnd: DielineGeneratorProps = {
     return modelBuilder({
       model,
       trimModel,
-      bleedAmount,
       offsets,
       container,
       showAnchors,

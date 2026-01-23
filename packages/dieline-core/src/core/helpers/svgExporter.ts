@@ -1,7 +1,7 @@
 import { isSubscribed } from "@repo/store/app/user.store";
+import { getCTX } from "@repo/store/dieline/context.store";
 import M from "makerjs";
 import { COLORS, GUIDES, strokeWidth } from "../../data/consts";
-import { MaterialKey } from "../../data/types";
 import { injectWatermark, Watermark } from "./injectWatermark";
 
 type SvgExporterParams = {
@@ -9,7 +9,6 @@ type SvgExporterParams = {
   bleedModel: M.IModel;
   bleedAmount: number;
   watermark: Watermark;
-  material: MaterialKey;
 };
 
 export function svgExporter({
@@ -17,8 +16,8 @@ export function svgExporter({
   bleedModel,
   bleedAmount,
   watermark,
-  material,
 }: SvgExporterParams) {
+  const material = getCTX().material.value;
   const isCardboard =
     material === "glossy-cardboard" || material === "art-paper";
 
