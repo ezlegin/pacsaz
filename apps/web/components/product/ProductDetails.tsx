@@ -47,6 +47,7 @@ import FormatGuide from "./guides/FormatGuide";
 import MeterialGuide from "./guides/materialGuide";
 import ThicknessGuide from "./guides/ThicknessGuide";
 import ThicknessInput from "./ThicknessInput";
+import { useDimensionTypeStore } from "@repo/dieline-core/store/dimenstionType.store";
 
 export interface SVGSizeProps {
   width: number;
@@ -57,8 +58,6 @@ interface Props {
   defaultDimensions: DielineDimensions;
   materialsInput: MaterialsInput;
   dimensionsType: DimensionsType;
-  setDimensionType: (value: DimensionType) => void;
-  dimensionType: DimensionType;
   svg: Model | null;
   slug: string;
   isRendering: boolean;
@@ -72,8 +71,6 @@ interface Props {
 
 export default function ProductDetails({
   defaultDimensions,
-  setDimensionType,
-  dimensionType,
   dimensionsType,
   resolvedSizes: { height, width },
   svg,
@@ -85,6 +82,7 @@ export default function ProductDetails({
   const [format, setFormat] = useState<FormatsType>("pdf");
   const { setMaterial } = useMaterialStore();
   const { bleed, setBleed } = useBleedStore();
+  const { dimensionType, setDimensionType } = useDimensionTypeStore();
 
   const onSelectMaterial = (val: string) => {
     const material = materialsInput.included.find((m) => m.value === val)

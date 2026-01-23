@@ -6,20 +6,18 @@ import {
   MaterialKey,
   Model,
 } from "../data/types";
-import { DimensionType } from "../utils/applyDimensionOffset";
-import { toPt } from "../utils/sizeConvertor";
-import { useDimensionStore } from "../store/dimension.store";
-import { useMaterialStore } from "../store/material.store";
 import { useBleedStore } from "../store/bleed.store";
+import { useDimensionStore } from "../store/dimension.store";
+import { useDimensionTypeStore } from "../store/dimenstionType.store";
+import { useMaterialStore } from "../store/material.store";
 import { useThicknessStore } from "../store/thickness.store";
+import { toPt } from "../utils/sizeConvertor";
 
 export function useDielineGenerator(
   dieline: DielineGeneratorProps,
   container?: boolean
 ) {
   const { material, setMaterial } = useMaterialStore();
-  const [dimensionType, setDimensionType] =
-    useState<DimensionType>("manufacture");
   const [showAnchors, setShowAnchors] = useState(false);
   const [showWatermark, setShowWatermark] = useState(true);
   const [showOverallDimensions, setShowOverallDimensions] = useState(false);
@@ -27,6 +25,7 @@ export function useDielineGenerator(
   const { dimension, setDefaultDimension } = useDimensionStore();
   const { bleed, setBleed } = useBleedStore();
   const { setThickness, customThickness } = useThicknessStore();
+  const { dimensionType } = useDimensionTypeStore();
 
   useEffect(() => {
     setDefaultDimension(dieline.dimensions.defaultDimensions);
@@ -96,12 +95,10 @@ export function useDielineGenerator(
     resolved,
     svg,
     isRendering,
-    dimensionType,
     showAnchors,
     showWatermark,
     showOverallDimensions,
     doCenterSVG,
-    setDimensionType,
     setShowAnchors,
     setShowWatermark,
     setShowOverallDimensions,

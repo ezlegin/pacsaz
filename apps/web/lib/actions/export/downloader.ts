@@ -1,20 +1,17 @@
-import { Dimensions, FormatsType, Model } from "@repo/dieline-core/data/types";
-import { PDFGenerator } from "./PDFGenerator";
+import { FormatsType, Model } from "@repo/dieline-core/data/types";
+import { useDimensionStore } from "@repo/dieline-core/store/dimension.store";
 import { mapDimensions } from "@repo/dieline-core/utils/mapDimensions";
+import { PDFGenerator } from "./PDFGenerator";
 
 interface ExportPdfParams {
   svg: Model;
   format: FormatsType;
   slug: string;
-  dimensions: Dimensions;
 }
 
-export async function downloadPdf({
-  format,
-  svg,
-  slug,
-  dimensions,
-}: ExportPdfParams) {
+export async function downloadPdf({ format, svg, slug }: ExportPdfParams) {
+  const { dimension } = useDimensionStore();
+
   const pdf = await PDFGenerator({
     svg,
     slug,
@@ -33,9 +30,9 @@ export async function downloadPdf({
   const url = URL.createObjectURL(blob);
 
   const dim = mapDimensions(
-    dimensions.width,
-    dimensions.length,
-    dimensions.height
+    dimension.width,
+    dimension.length,
+    dimension.height
   );
   const fileName = `${slug}-dieline__${dim}`;
 

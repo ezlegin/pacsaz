@@ -18,10 +18,10 @@ import {
 } from "@repo/ui/components/dialog";
 import Image from "next/image";
 import DeveloperTools from "./DeveloperTools";
+import { useDimensionTypeStore } from "@repo/dieline-core/store/dimenstionType.store";
 
 interface Props {
   dimensionsType: DimensionsType;
-  dimensionType: DimensionType;
   sizes: SVGModelSizes | undefined;
   slug: string | undefined;
   showWatermark: boolean;
@@ -36,7 +36,6 @@ interface Props {
 
 const ProductInfo = ({
   dimensionsType,
-  dimensionType,
   sizes,
   slug,
   showWatermark,
@@ -51,6 +50,8 @@ const ProductInfo = ({
   const {
     dimension: { height, length, width },
   } = useDimensionStore();
+
+  const { dimensionType } = useDimensionTypeStore();
 
   const calcManufacture = (value: number, axis: "width" | "length") =>
     applyDimensionOffset(

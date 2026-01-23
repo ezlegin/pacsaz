@@ -17,14 +17,12 @@ const DielineGenerator = ({ slug }: { slug: string }) => {
   const {
     svg,
     isRendering,
-    dimensionType,
     showWatermark,
     doCenterSVG,
     showAnchors,
     showOverallDimensions,
     resolved,
     setShowOverallDimensions,
-    setDimensionType,
     setShowAnchors,
     setShowWatermark,
     setDoCenterSVG,
@@ -44,9 +42,7 @@ const DielineGenerator = ({ slug }: { slug: string }) => {
         <ProductDetails
           defaultDimensions={dieline.dimensions}
           dimensionsType={dieline.dimensionsType}
-          setDimensionType={setDimensionType}
           svg={svg}
-          dimensionType={dimensionType}
           slug={dieline.slug}
           materialsInput={dieline.materials}
           isRendering={isRendering}
@@ -67,7 +63,6 @@ const DielineGenerator = ({ slug }: { slug: string }) => {
         </div>
 
         <ProductInfo
-          dimensionType={dimensionType}
           dimensionsType={dieline.dimensionsType}
           sizes={svg?.sizes}
           slug={dieline.slug}

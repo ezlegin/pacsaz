@@ -23,7 +23,7 @@ const postalCard: DielineGeneratorProps = {
     },
   },
   defaultBleed: BLEED.default,
-  dimensionsType: ["manufacture", "inner", "outer"],
+  dimensionsType: ["manufacture"],
   materials: {
     default: materials["glossy-cardboard"],
     included: [materials["glossy-cardboard"], materials["art-paper"]],

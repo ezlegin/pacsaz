@@ -3,7 +3,6 @@ import { downloadPdf } from "@/lib/actions/export/downloader";
 import Diamond from "@/public/icons/Diamond";
 import { isSubscribed } from "@repo/dieline-core/data/consts";
 import { DielineData, FormatsType, Model } from "@repo/dieline-core/data/types";
-import { useDimensionStore } from "@repo/dieline-core/store/dimension.store";
 import { Button } from "@repo/ui/components/button";
 import { Dialog, DialogContent, DialogTitle } from "@repo/ui/components/dialog";
 import { Spinner } from "@repo/ui/components/spinner";
@@ -31,7 +30,6 @@ const DielineDownloadButton = ({
 }: Props) => {
   const { startLoading, stopLoading, isLoading } = useLoading();
   const [openPopup, setOpenPopup] = useState<"login" | "save" | null>(null);
-  const { dimension } = useDimensionStore();
 
   const onDownload = async () => {
     if (!isSubscribed) {
@@ -49,7 +47,6 @@ const DielineDownloadButton = ({
       svg,
       format,
       slug,
-      dimensions: dimension,
     });
     toast.success("فایل با موفقیت تولید شد.");
 
