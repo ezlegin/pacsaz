@@ -1,25 +1,31 @@
 "use client";
 
+import { useSVGStore } from "@repo/dieline-core/store/svg.store";
 import { Card } from "@repo/ui/components/card";
 import { Spinner } from "@repo/ui/components/spinner";
 import { cn } from "@repo/ui/lib/utils";
+import { useState, useEffect } from "react";
 
 interface LoadingOverlayProps {
-  isLoading: boolean;
   message?: string;
   className?: string;
 }
 
-export default function LoadingOverlay({
-  isLoading,
+export default function ProductLoadingOverlay({
   message = "در حال تولید...",
   className,
 }: LoadingOverlayProps) {
+  const { svg } = useSVGStore();
+
+  const [isRenderingLoading, setIsRenderingLoading] = useState(true);
+  useEffect(() => {
+    if (svg) setIsRenderingLoading(false);
+  }, [svg]);
   return (
     <div
       className={cn(
         "absolute inset-0 z-20 flex items-center justify-center bg-accent/20 backdrop-blur-xs transition-opacity duration-700 ease-in-out",
-        isLoading ? "opacity-100" : "opacity-0 pointer-events-none",
+        isRenderingLoading ? "opacity-100" : "opacity-0 pointer-events-none",
         className
       )}
     >

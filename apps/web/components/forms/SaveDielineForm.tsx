@@ -7,9 +7,11 @@ import {
 } from "@/lib/validatoinSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DIMENSIONS_TYPE } from "@repo/dieline-core/data/consts";
-import { DielineData } from "@repo/dieline-core/data/types";
 import { useBleedStore } from "@repo/dieline-core/store/bleed.store";
+import { useDimensionStore } from "@repo/dieline-core/store/dimension.store";
+import { useDimensionTypeStore } from "@repo/dieline-core/store/dimenstionType.store";
 import { useMaterialStore } from "@repo/dieline-core/store/material.store";
+import { useThicknessStore } from "@repo/dieline-core/store/thickness.store";
 import { Button } from "@repo/ui/components/button";
 import { DialogTitle } from "@repo/ui/components/dialog";
 import {
@@ -22,10 +24,13 @@ import { Input } from "@repo/ui/components/input";
 import { Separator } from "@repo/ui/components/separator";
 import { useForm } from "react-hook-form";
 
-const SaveDielineForm = ({ dielineData }: { dielineData: DielineData }) => {
+const SaveDielineForm = () => {
+  const { dimension } = useDimensionStore();
   const { material } = useMaterialStore();
   const { isLoading, startLoading, stopLoading } = useLoading();
   const { bleed } = useBleedStore();
+  const { thickness, customThickness } = useThicknessStore();
+  const { dimensionType } = useDimensionTypeStore();
   const form = useForm<SaveDielineFormType>({
     resolver: zodResolver(saveDielineFormSchema),
     defaultValues: {
@@ -39,25 +44,29 @@ const SaveDielineForm = ({ dielineData }: { dielineData: DielineData }) => {
     startLoading();
     const finalData = {
       ...data,
-      ...dielineData,
+      bleed,
+      thickness: customThickness ?? thickness,
+      dimensionType,
+      material,
+      dimension,
     };
     console.log(finalData);
     stopLoading();
   };
 
   const selectedDimensionType = DIMENSIONS_TYPE.find(
-    (d) => d.key === dielineData.dimensionType
+    (d) => d.key === dimensionType
   );
 
   const data = {
-    width: dielineData.size.width,
-    length: dielineData.size.length,
-    height: dielineData.size.height,
+    width: dimension.width,
+    length: dimension.length,
+    height: dimension.height,
     bleedSize: bleed,
     material: material.label,
-    dimensionType: selectedDimensionType?.label,
-    thickness: material.thickness,
-    customThickness: dielineData.customThickness,
+    dimensionType: selectedDimensionType,
+    thickness: thickness,
+    customThickness: customThickness,
   };
 
   return (
@@ -65,16 +74,16 @@ const SaveDielineForm = ({ dielineData }: { dielineData: DielineData }) => {
       <DialogTitle>ذخیره قالب</DialogTitle>
 
       <ul className="text-sm text-muted-foreground space-y-2 border p-3 rounded-md px-0">
-        <div className="flex gap-4 px-3">
+        <div className="flex justify-between px-3">
           <li>عرض: {data.width}mm</li>
           <li>طول: {data.length}mm</li>
           <li>ارتفاع: {data.height}mm</li>
-          <li>نوع ابعاد: {data.dimensionType}</li>
+          <li>نوع ابعاد: {data.dimensionType?.label}</li>
         </div>
 
         <Separator />
 
-        <div className="flex gap-4 px-3">
+        <div className="flex justify-between px-3">
           <li>بلید: {data.bleedSize}mm</li>
           <li>متریال: {data.material}</li>
           <li>

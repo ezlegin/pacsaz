@@ -19,10 +19,10 @@ import {
 import Image from "next/image";
 import DeveloperTools from "./DeveloperTools";
 import { useDimensionTypeStore } from "@repo/dieline-core/store/dimenstionType.store";
+import { useSVGStore } from "@repo/dieline-core/store/svg.store";
 
 interface Props {
   dimensionsType: DimensionsType;
-  sizes: SVGModelSizes | undefined;
   slug: string | undefined;
   showWatermark: boolean;
   showOverallDimensions: boolean;
@@ -36,7 +36,6 @@ interface Props {
 
 const ProductInfo = ({
   dimensionsType,
-  sizes,
   slug,
   showWatermark,
   showOverallDimensions,
@@ -47,6 +46,9 @@ const ProductInfo = ({
   setShowOverallDimensions,
   setDoCenterSVG,
 }: Props) => {
+  const { svg } = useSVGStore();
+  const sizes = svg?.sizes;
+
   const {
     dimension: { height, length, width },
   } = useDimensionStore();

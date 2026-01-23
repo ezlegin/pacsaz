@@ -1,5 +1,6 @@
 "use client";
 import { onDevelepe } from "@repo/dieline-core/data/consts";
+import { useSVGStore } from "@repo/dieline-core/store/svg.store";
 import { Button } from "@repo/ui/components/button";
 import { Card } from "@repo/ui/components/card";
 import { Separator } from "@repo/ui/components/separator";
@@ -13,7 +14,6 @@ import {
 } from "react-zoom-pan-pinch";
 
 interface Props {
-  svg: string;
   isRendering: boolean;
   doCenterSVG: boolean;
   disablePanning?: boolean;
@@ -22,13 +22,15 @@ interface Props {
 }
 
 export default function SvgPreview({
-  svg,
   isRendering,
   doCenterSVG,
   disablePanning = false,
   disableWheel = false,
   showControls = true,
 }: Props) {
+  const { svg: svgModel } = useSVGStore();
+  const svg = svgModel?.model;
+
   const transformRef = useRef<ReactZoomPanPinchRef | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -87,7 +89,6 @@ export default function SvgPreview({
       className="h-full flex items-center justify-center"
     >
       <TransformWrapper
-        // key={doCenterSVG ? svg : undefined}
         ref={transformRef}
         centerOnInit
         limitToBounds={false}
@@ -120,7 +121,7 @@ export default function SvgPreview({
                   <Spinner className="scale-200 text-primary absolute top-1/2 -translate-y-1/2 left-1/2 translate-x-1/2" />
                 )}
                 <div
-                  dangerouslySetInnerHTML={{ __html: svg }}
+                  dangerouslySetInnerHTML={{ __html: svg! }}
                   className={isRendering ? "opacity-50" : "opacity-100"}
                 />
               </div>

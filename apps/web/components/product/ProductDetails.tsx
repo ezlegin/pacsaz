@@ -6,17 +6,17 @@ import {
   isSubscribed,
 } from "@repo/dieline-core/data/consts";
 import {
-  DielineData,
   DielineDimensions,
   DimensionsType,
   FormatsType,
   MaterialKey,
   MaterialsInput,
-  Model,
 } from "@repo/dieline-core/data/types";
 import { useBleedStore } from "@repo/dieline-core/store/bleed.store";
 import { useDimensionTypeStore } from "@repo/dieline-core/store/dimenstionType.store";
+import { useFormatStore } from "@repo/dieline-core/store/format.store";
 import { useMaterialStore } from "@repo/dieline-core/store/material.store";
+import { useSVGStore } from "@repo/dieline-core/store/svg.store";
 import { DimensionType } from "@repo/dieline-core/utils/applyDimensionOffset";
 import { isPackagingSizeLogical } from "@repo/dieline-core/utils/isPackagingSizeLogical";
 import { Badge } from "@repo/ui/components/badge";
@@ -47,7 +47,6 @@ import FormatGuide from "./guides/FormatGuide";
 import MeterialGuide from "./guides/materialGuide";
 import ThicknessGuide from "./guides/ThicknessGuide";
 import ThicknessInput from "./ThicknessInput";
-import { useFormatStore } from "@repo/dieline-core/store/format.store";
 
 export interface SVGSizeProps {
   width: number;
@@ -58,7 +57,6 @@ interface Props {
   defaultDimensions: DielineDimensions;
   materialsInput: MaterialsInput;
   dimensionsType: DimensionsType;
-  svg: Model | null;
   slug: string;
   isRendering: boolean;
   resolvedSizes: {
@@ -66,19 +64,17 @@ interface Props {
     height: number;
     length: number;
   };
-  dielineData: DielineData;
 }
 
 export default function ProductDetails({
   defaultDimensions,
   dimensionsType,
   resolvedSizes: { height, width },
-  svg,
   slug,
   materialsInput,
   isRendering,
-  dielineData,
 }: Props) {
+  const { svg } = useSVGStore();
   const { format, setFormat } = useFormatStore();
   const { setMaterial } = useMaterialStore();
   const { bleed, setBleed } = useBleedStore();
@@ -296,7 +292,6 @@ export default function ProductDetails({
           isRendering={isRendering}
           slug={slug}
           svg={svg}
-          dielineData={dielineData}
         />
       </div>
     </Card>

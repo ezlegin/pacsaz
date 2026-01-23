@@ -1,15 +1,11 @@
 import { useEffect, useState, useTransition } from "react";
 import { resolveDimensions } from "../core/helpers/dimensionResolver";
-import {
-  DielineData,
-  DielineGeneratorProps,
-  MaterialKey,
-  Model,
-} from "../data/types";
+import { DielineGeneratorProps, MaterialKey } from "../data/types";
 import { useBleedStore } from "../store/bleed.store";
 import { useDimensionStore } from "../store/dimension.store";
 import { useDimensionTypeStore } from "../store/dimenstionType.store";
 import { useMaterialStore } from "../store/material.store";
+import { useSVGStore } from "../store/svg.store";
 import { useThicknessStore } from "../store/thickness.store";
 import { toPt } from "../utils/sizeConvertor";
 
@@ -49,7 +45,7 @@ export function useDielineGenerator(
     customThickness,
   });
 
-  const [svg, setSvg] = useState<Model | null>(null);
+  const { setSvg } = useSVGStore();
   const [isRendering, startTransition] = useTransition();
 
   useEffect(() => {
@@ -83,17 +79,8 @@ export function useDielineGenerator(
     dieline,
   ]);
 
-  const dielineData: DielineData = {
-    size: dimension,
-    dimensionType,
-    bleedSize: bleed,
-    customThickness,
-  };
-
   return {
-    dielineData,
     resolved,
-    svg,
     isRendering,
     showAnchors,
     showWatermark,

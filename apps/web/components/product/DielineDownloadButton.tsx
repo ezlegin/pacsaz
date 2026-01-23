@@ -2,7 +2,7 @@ import { useLoading } from "@/hooks/useLoading";
 import { downloadPdf } from "@/lib/actions/export/downloader";
 import Diamond from "@/public/icons/Diamond";
 import { isSubscribed } from "@repo/dieline-core/data/consts";
-import { DielineData, Model } from "@repo/dieline-core/data/types";
+import { Model } from "@repo/dieline-core/data/types";
 import { Button } from "@repo/ui/components/button";
 import { Dialog, DialogContent, DialogTitle } from "@repo/ui/components/dialog";
 import { Spinner } from "@repo/ui/components/spinner";
@@ -12,20 +12,16 @@ import { useState } from "react";
 import { toast } from "sonner";
 import LoginPopup from "../forms/LoginPopup";
 import SaveDielineForm from "../forms/SaveDielineForm";
+import { useSVGStore } from "@repo/dieline-core/store/svg.store";
 
 interface Props {
   svg: Model | null;
   slug: string;
   isRendering: boolean;
-  dielineData: DielineData;
 }
 
-const DielineDownloadButton = ({
-  svg,
-  slug,
-  isRendering,
-  dielineData,
-}: Props) => {
+const DielineDownloadButton = ({ slug, isRendering }: Props) => {
+  const { svg } = useSVGStore();
   const { startLoading, stopLoading, isLoading } = useLoading();
   const [openPopup, setOpenPopup] = useState<"login" | "save" | null>(null);
 
@@ -68,11 +64,7 @@ const DielineDownloadButton = ({
           )}
         >
           <DialogTitle className="sr-only" />
-          {openPopup === "login" ? (
-            <LoginPopup />
-          ) : (
-            <SaveDielineForm dielineData={dielineData} />
-          )}
+          {openPopup === "login" ? <LoginPopup /> : <SaveDielineForm />}
         </DialogContent>
       </Dialog>
 
