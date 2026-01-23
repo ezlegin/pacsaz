@@ -10,6 +10,7 @@ import { DimensionType } from "../utils/applyDimensionOffset";
 import { toPt } from "../utils/sizeConvertor";
 import { useDimensionStore } from "../store/dimension.store";
 import { useMaterialStore } from "../store/material.store";
+import { useBleedStore } from "../store/bleed.store";
 
 export function useDielineGenerator(
   dieline: DielineGeneratorProps,
@@ -18,17 +19,18 @@ export function useDielineGenerator(
   const { material, setMaterial } = useMaterialStore();
   const [dimensionType, setDimensionType] =
     useState<DimensionType>("manufacture");
-  const [bleedSize, setBleedSize] = useState<number>(dieline.defaultBleed);
   const [showAnchors, setShowAnchors] = useState(false);
   const [showWatermark, setShowWatermark] = useState(true);
   const [showOverallDimensions, setShowOverallDimensions] = useState(false);
   const [doCenterSVG, setDoCenterSVG] = useState(true);
   const [customThickness, setCustomThickness] = useState<number | undefined>();
   const { dimension, setDefaultDimension } = useDimensionStore();
+  const { bleed, setBleed } = useBleedStore();
 
   useEffect(() => {
     setDefaultDimension(dieline.dimensions.defaultDimensions);
     setMaterial(dieline.materials.default.value as MaterialKey);
+    setBleed(dieline.defaultBleed);
   }, []);
 
   const selectedMaterial = material;
@@ -55,7 +57,7 @@ export function useDielineGenerator(
         dimensions: {
           container: container ?? true,
           customThickness,
-          bleedSize,
+          bleedSize: bleed,
           raw: { width: widthPT, height: heightPT, length: lengthPT },
           resolved,
         },
@@ -75,7 +77,7 @@ export function useDielineGenerator(
     showAnchors,
     showWatermark,
     showOverallDimensions,
-    bleedSize,
+    bleed,
     customThickness,
     dieline,
   ]);
@@ -83,7 +85,7 @@ export function useDielineGenerator(
   const dielineData: DielineData = {
     size: dimension,
     dimensionType,
-    bleedSize,
+    bleedSize: bleed,
     customThickness,
   };
 
@@ -93,13 +95,11 @@ export function useDielineGenerator(
     svg,
     isRendering,
     dimensionType,
-    bleedSize,
     showAnchors,
     showWatermark,
     showOverallDimensions,
     doCenterSVG,
     setDimensionType,
-    setBleedSize,
     setShowAnchors,
     setShowWatermark,
     setCustomThickness,

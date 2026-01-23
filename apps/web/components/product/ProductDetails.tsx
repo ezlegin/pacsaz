@@ -14,9 +14,10 @@ import {
   MaterialsInput,
   Model,
 } from "@repo/dieline-core/data/types";
+import { useBleedStore } from "@repo/dieline-core/store/bleed.store";
+import { useMaterialStore } from "@repo/dieline-core/store/material.store";
 import { DimensionType } from "@repo/dieline-core/utils/applyDimensionOffset";
 import { isPackagingSizeLogical } from "@repo/dieline-core/utils/isPackagingSizeLogical";
-import { useMaterialStore } from "@repo/dieline-core/store/material.store";
 import { Badge } from "@repo/ui/components/badge";
 import { Card } from "@repo/ui/components/card";
 import {
@@ -57,7 +58,6 @@ interface Props {
   materialsInput: MaterialsInput;
   dimensionsType: DimensionsType;
   setDimensionType: (value: DimensionType) => void;
-  setBleedAmount: (value: number) => void;
   setCustomThickness: (value: number | undefined) => void;
   dimensionType: DimensionType;
   svg: Model | null;
@@ -74,7 +74,6 @@ interface Props {
 export default function ProductDetails({
   defaultDimensions,
   setDimensionType,
-  setBleedAmount,
   setCustomThickness,
   dimensionType,
   dimensionsType,
@@ -87,6 +86,7 @@ export default function ProductDetails({
 }: Props) {
   const [format, setFormat] = useState<FormatsType>("pdf");
   const { material, setMaterial } = useMaterialStore();
+  const { bleed, setBleed } = useBleedStore();
 
   const onSelectMaterial = (val: string) => {
     const material = materialsInput.included.find((m) => m.value === val)
@@ -210,8 +210,8 @@ export default function ProductDetails({
         >
           <Select
             disabled={!isSubscribed}
-            defaultValue={dielineData.bleedSize.toString()}
-            onValueChange={(val: string) => setBleedAmount(+val)}
+            defaultValue={bleed.toString()}
+            onValueChange={(val: string) => setBleed(+val)}
             dir="rtl"
           >
             <SelectTrigger className="w-full">

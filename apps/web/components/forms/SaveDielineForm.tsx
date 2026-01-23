@@ -6,8 +6,9 @@ import {
   saveDielineFormSchema,
 } from "@/lib/validatoinSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { DIMENSIONS_TYPE, materials } from "@repo/dieline-core/data/consts";
+import { DIMENSIONS_TYPE } from "@repo/dieline-core/data/consts";
 import { DielineData } from "@repo/dieline-core/data/types";
+import { useBleedStore } from "@repo/dieline-core/store/bleed.store";
 import { useMaterialStore } from "@repo/dieline-core/store/material.store";
 import { Button } from "@repo/ui/components/button";
 import { DialogTitle } from "@repo/ui/components/dialog";
@@ -24,6 +25,7 @@ import { useForm } from "react-hook-form";
 const SaveDielineForm = ({ dielineData }: { dielineData: DielineData }) => {
   const { material } = useMaterialStore();
   const { isLoading, startLoading, stopLoading } = useLoading();
+  const { bleed } = useBleedStore();
   const form = useForm<SaveDielineFormType>({
     resolver: zodResolver(saveDielineFormSchema),
     defaultValues: {
@@ -51,7 +53,7 @@ const SaveDielineForm = ({ dielineData }: { dielineData: DielineData }) => {
     width: dielineData.size.width,
     length: dielineData.size.length,
     height: dielineData.size.height,
-    bleedSize: dielineData.bleedSize,
+    bleedSize: bleed,
     material: material.label,
     dimensionType: selectedDimensionType?.label,
     thickness: material.thickness,

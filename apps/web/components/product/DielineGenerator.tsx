@@ -25,7 +25,6 @@ const DielineGenerator = ({ slug }: { slug: string }) => {
     resolved,
     setShowOverallDimensions,
     setDimensionType,
-    setBleedSize,
     setShowAnchors,
     setShowWatermark,
     setCustomThickness,
@@ -47,7 +46,6 @@ const DielineGenerator = ({ slug }: { slug: string }) => {
           defaultDimensions={dieline.dimensions}
           dimensionsType={dieline.dimensionsType}
           setDimensionType={setDimensionType}
-          setBleedAmount={setBleedSize}
           setCustomThickness={setCustomThickness}
           svg={svg}
           dimensionType={dimensionType}
