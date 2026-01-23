@@ -3,7 +3,6 @@
 import { otpFormSchema, OTPFormType } from "@/lib/validatoinSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@repo/ui/components/button";
-import { REGEXP_ONLY_DIGITS } from "input-otp";
 import {
   Form,
   FormControl,
@@ -61,12 +60,7 @@ export function OTPForm({ setLoginStep, phoneNumber }: Props) {
                     <p className="text-center text-sm text-muted-foreground">
                       لطفا کد ارسال شده به {phoneNumber} را وارد کنید.
                     </p>
-                    <InputOTP
-                      autoFocus
-                      maxLength={5}
-                      {...field}
-                      pattern={REGEXP_ONLY_DIGITS}
-                    >
+                    <InputOTP autoFocus maxLength={5} {...field}>
                       <InputOTPGroup
                         dir="ltr"
                         autoFocus

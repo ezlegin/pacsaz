@@ -10,13 +10,11 @@
     "./utils/*": "./src/utils/*.ts",
     "./data/*": "./src/data/*.ts"
   },
-  "scripts": {
-    "lint": "eslint . --max-warnings 0",
-    "generate:component": "turbo gen react-component",
-    "check-types": "tsc --noEmit"
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*"
   },
   "dependencies": {
-    "@repo/store": "*",
     "makerjs": "^0.18.1"
   }
 }

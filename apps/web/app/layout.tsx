@@ -1,7 +1,7 @@
 import { pacsazLogoIcon } from "@/public";
+import { Toaster } from "@repo/ui/components/sonner";
 import "@repo/ui/globals.css";
 import "./fonts.css";
-import { Toaster } from "@repo/ui/components/sonner";
 
 export default function RootLayout({
   children,
