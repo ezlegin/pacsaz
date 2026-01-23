@@ -16,3 +16,5 @@ export const useBleedStore = create<BleedStore>((set) => ({
   bleed: bleed.default,
   setBleed: (bleed) => set(() => ({ bleed })),
 }));
+
+export const getBleed = () => useBleedStore.getState().bleed;

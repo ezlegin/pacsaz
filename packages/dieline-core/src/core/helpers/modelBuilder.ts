@@ -1,24 +1,25 @@
+import { getCTX } from "@repo/store/dieline/context.store";
 import { MARGINS, onDevelepe } from "../../data/consts";
 import { ModelExporter } from "../../data/types";
+import { toPt } from "../../utils/sizeConvertor";
 import { addAnchor } from "./add/addAnchor";
+import { addBleed } from "./add/addBleed";
 import { addContainer } from "./add/addContainer";
 import { addOverallDimensionGuides } from "./add/addOverallDimensionGuides";
-import { addBleed } from "./add/addBleed";
 import { getSizes } from "./getSizes";
 import { svgExporter } from "./svgExporter";
 
 export function modelBuilder({
   model,
   trimModel,
-  bleedAmount,
   offsets,
   showAnchors,
   watermark,
   material,
   showOverallDimensions,
   container: withContainer,
-  isSubscribed,
 }: ModelExporter) {
+  const bleedAmount = toPt(getCTX().bleed);
   const bleed = addBleed({
     model,
     trimModel,
@@ -64,7 +65,6 @@ export function modelBuilder({
       },
     },
     model: svgExporter({
-      isSubscribed,
       model,
       bleedModel: bleed,
       bleedAmount,

@@ -50,3 +50,5 @@ export const useUserStore = create<UserStore>((set) => ({
   isPremium: !!user?.plan && user.plan.level > 1,
   setUser: (user) => set(() => ({ user })),
 }));
+
+export const isSubscribed = useUserStore.getState().isSubscribed;

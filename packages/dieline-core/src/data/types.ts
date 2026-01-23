@@ -82,7 +82,6 @@ export type DielineModel = (params: {
     raw: { width: number; height: number; length: number };
     resolved: ResolvedDimensions;
   };
-  isSubscribed: Boolean;
   dimensionType: DimensionType;
   selectedMaterial: MaterialKey;
 }) => Model;
@@ -111,8 +110,6 @@ export type OffsetObject = {
 export type ModelExporter = {
   model: IModel;
   trimModel: IModel;
-  isSubscribed: Boolean;
-  bleedAmount: number;
   offsets: {
     width: {
       inner: number;

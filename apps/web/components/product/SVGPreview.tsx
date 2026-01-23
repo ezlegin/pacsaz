@@ -28,8 +28,8 @@ export default function SvgPreview({
   disableWheel = false,
   showControls = true,
 }: Props) {
-  const { svg: svgModel } = useSVGStore();
-  const svg = svgModel?.model;
+  const svg = useSVGStore((s) => s.svg?.model);
+  if (!svg) return;
 
   const transformRef = useRef<ReactZoomPanPinchRef | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);

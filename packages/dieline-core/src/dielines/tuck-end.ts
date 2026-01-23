@@ -52,7 +52,6 @@ const tuckEnd: DielineGeneratorProps = {
     },
     dimensionType,
     selectedMaterial,
-    isSubscribed,
   }) {
     const {
       materialThickness,
@@ -244,7 +243,6 @@ const tuckEnd: DielineGeneratorProps = {
       bleedAmount,
       offsets,
       container,
-      isSubscribed,
       showAnchors,
       watermark: {
         show: showWatermark,

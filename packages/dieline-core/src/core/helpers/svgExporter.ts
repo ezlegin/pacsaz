@@ -1,3 +1,4 @@
+import { isSubscribed } from "@repo/store/app/user.store";
 import M from "makerjs";
 import { COLORS, GUIDES, strokeWidth } from "../../data/consts";
 import { MaterialKey } from "../../data/types";
@@ -9,7 +10,6 @@ type SvgExporterParams = {
   bleedAmount: number;
   watermark: Watermark;
   material: MaterialKey;
-  isSubscribed: Boolean;
 };
 
 export function svgExporter({
@@ -18,7 +18,6 @@ export function svgExporter({
   bleedAmount,
   watermark,
   material,
-  isSubscribed,
 }: SvgExporterParams) {
   const isCardboard =
     material === "glossy-cardboard" || material === "art-paper";
