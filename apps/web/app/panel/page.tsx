@@ -1,9 +1,11 @@
 import PanelDashboard from "@/components/PanelDashboard";
 import SubscriptionList from "@/components/SubscriptionList";
-import { isSubscribed } from "@repo/dieline-core/data/consts";
+import { isUserSubscribed } from "@/data/user";
 
-const Page = () => {
-  return !isSubscribed ? <SubscriptionList /> : <PanelDashboard />;
+const Page = async () => {
+  const isUserSubscribed = await isUserSubscribed;
+
+  return !isUserSubscribed ? <SubscriptionList /> : <PanelDashboard />;
 };
 
 export default Page;

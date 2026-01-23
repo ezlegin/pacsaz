@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { DimensionType } from "../utils/applyDimensionOffset";
+import { DimensionType } from "../../../dieline-core/src/utils/applyDimensionOffset";
 
 type DimensionTypeStore = {
   dimensionType: DimensionType;

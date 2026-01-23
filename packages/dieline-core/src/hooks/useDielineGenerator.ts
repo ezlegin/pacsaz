@@ -1,13 +1,14 @@
 import { useEffect, useState, useTransition } from "react";
 import { resolveDimensions } from "../core/helpers/dimensionResolver";
 import { DielineGeneratorProps, MaterialKey } from "../data/types";
-import { useBleedStore } from "../store/bleed.store";
-import { useDimensionStore } from "../store/dimension.store";
-import { useDimensionTypeStore } from "../store/dimenstionType.store";
-import { useMaterialStore } from "../store/material.store";
-import { useSVGStore } from "../store/svg.store";
-import { useThicknessStore } from "../store/thickness.store";
+import { useBleedStore } from "@repo/store/dieline/bleed.store";
+import { useDimensionStore } from "@repo/store/dieline/dimension.store";
+import { useDimensionTypeStore } from "@repo/store/dieline/dimenstionType.store";
+import { useMaterialStore } from "@repo/store/dieline/material.store";
+import { useSVGStore } from "@repo/store/dieline/svg.store";
+import { useThicknessStore } from "@repo/store/dieline/thickness.store";
 import { toPt } from "../utils/sizeConvertor";
+import { useUserStore } from "@repo/store/app/user.store";
 
 export function useDielineGenerator(
   dieline: DielineGeneratorProps,
@@ -22,6 +23,7 @@ export function useDielineGenerator(
   const { bleed, setBleed } = useBleedStore();
   const { setThickness, customThickness } = useThicknessStore();
   const { dimensionType } = useDimensionTypeStore();
+  const { isSubscribed } = useUserStore();
 
   useEffect(() => {
     setDefaultDimension(dieline.dimensions.defaultDimensions);
@@ -61,6 +63,7 @@ export function useDielineGenerator(
         developers: { showAnchors, showWatermark, showOverallDimensions },
         dimensionType,
         selectedMaterial: material.value,
+        isSubscribed,
       });
 
       setSvg(result);
@@ -77,6 +80,7 @@ export function useDielineGenerator(
     bleed,
     customThickness,
     dieline,
+    isSubscribed,
   ]);
 
   return {

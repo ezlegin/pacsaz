@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { FormatsType } from "../data/types";
+import { FormatsType } from "../../../dieline-core/src/data/types";
 
 type FormatStore = {
   format: FormatsType;

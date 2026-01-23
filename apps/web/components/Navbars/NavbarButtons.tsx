@@ -1,7 +1,6 @@
-import { mapUserPlanTitle, testUser } from "@/data/user";
+import { isUserSubscribed, mapUserPlanTitle, testUser } from "@/data/user";
 import Diamond from "@/public/icons/Diamond";
 import { calculateRemaningSubscription } from "@/utils/calculateRemaningSubscriptoin";
-import { isSubscribed } from "@repo/dieline-core/data/consts";
 import { Badge } from "@repo/ui/components/badge";
 import { Button } from "@repo/ui/components/button";
 import { User } from "lucide-react";
@@ -10,6 +9,7 @@ import Link from "next/link";
 const NavbarButtons = () => {
   const remainingDays = calculateRemaningSubscription();
   const isCloseToExpiry = remainingDays < 7;
+  const isSubscribed = isUserSubscribed;
 
   return (
     <div className="flex gap-3 items-center">

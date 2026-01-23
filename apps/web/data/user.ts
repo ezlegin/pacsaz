@@ -47,6 +47,8 @@ export const testUser: UserType = {
   downloaded: 39,
 };
 
+export const isUserSubscribed = !!testUser.plan;
+
 export function mapUserType(userType: UserTypes) {
   if (userType === "student") return "دانشجو/دانش‌آموز";
 }
@@ -57,9 +59,9 @@ export function mapUserPlanTitle(userPlan: PlanKey) {
   return "سازمانی";
 }
 
-function mapUserPlanLevel(userPlan: PlanKey) {
-  if (userPlan === "standard") return 1;
-  if (userPlan === "pro") return 2;
+function mapUserPlanLevel(planKey: PlanKey) {
+  if (planKey === "standard") return 1;
+  if (planKey === "pro") return 2;
   return 3;
 }
 

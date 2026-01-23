@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { Model } from "../data/types";
+import { Model } from "../../../dieline-core/src/data/types";
 
 type SVGStore = {
   svg: Model | null;

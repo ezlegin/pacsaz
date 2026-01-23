@@ -1,6 +1,6 @@
 "use client";
 
-import { useSVGStore } from "@repo/dieline-core/store/svg.store";
+import { useSVGStore } from "@repo/store/dieline/svg.store";
 import { Card } from "@repo/ui/components/card";
 import { Spinner } from "@repo/ui/components/spinner";
 import { cn } from "@repo/ui/lib/utils";

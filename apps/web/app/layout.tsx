@@ -2,6 +2,7 @@ import { pacsazLogoIcon } from "@/public";
 import { Toaster } from "@repo/ui/components/sonner";
 import "@repo/ui/globals.css";
 import "./fonts.css";
+import UserProvider from "@/components/UserProvider";
 
 export default function RootLayout({
   children,
@@ -9,10 +10,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const fontFamily = "KalamehWebFaNum";
+  const user = null; //todo: DB Fetch
+
   return (
     <html lang="fa" dir="rtl" suppressHydrationWarning>
       <body style={{ fontFamily }} className="antialiased">
-        {children}
+        <UserProvider user={user}>{children}</UserProvider>
         <Toaster
           richColors
           theme="light"

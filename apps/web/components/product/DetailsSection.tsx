@@ -45,7 +45,7 @@ export function Section({
           </Dialog>
         </p>
 
-        {isPremium && (
+        {isPremium !== undefined && !isPremium && (
           <div>
             <Tooltip>
               <TooltipTrigger>

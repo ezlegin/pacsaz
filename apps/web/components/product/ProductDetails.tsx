@@ -3,7 +3,6 @@ import {
   BLEED,
   DIMENSIONS,
   DIMENSIONS_TYPE,
-  isSubscribed,
 } from "@repo/dieline-core/data/consts";
 import {
   DielineDimensions,
@@ -12,13 +11,14 @@ import {
   MaterialKey,
   MaterialsInput,
 } from "@repo/dieline-core/data/types";
-import { useBleedStore } from "@repo/dieline-core/store/bleed.store";
-import { useDimensionTypeStore } from "@repo/dieline-core/store/dimenstionType.store";
-import { useFormatStore } from "@repo/dieline-core/store/format.store";
-import { useMaterialStore } from "@repo/dieline-core/store/material.store";
-import { useSVGStore } from "@repo/dieline-core/store/svg.store";
+import { useBleedStore } from "@repo/store/dieline/bleed.store";
+import { useDimensionTypeStore } from "@repo/store/dieline/dimenstionType.store";
+import { useFormatStore } from "@repo/store/dieline/format.store";
+import { useMaterialStore } from "@repo/store/dieline/material.store";
+import { useSVGStore } from "@repo/store/dieline/svg.store";
 import { DimensionType } from "@repo/dieline-core/utils/applyDimensionOffset";
 import { isPackagingSizeLogical } from "@repo/dieline-core/utils/isPackagingSizeLogical";
+import { useUserStore } from "@repo/store/app/user.store";
 import { Badge } from "@repo/ui/components/badge";
 import { Card } from "@repo/ui/components/card";
 import {
@@ -79,6 +79,7 @@ export default function ProductDetails({
   const { setMaterial } = useMaterialStore();
   const { bleed, setBleed } = useBleedStore();
   const { dimensionType, setDimensionType } = useDimensionTypeStore();
+  const { isPremium } = useUserStore();
 
   const onSelectMaterial = (val: string) => {
     const material = materialsInput.included.find((m) => m.value === val)
@@ -183,12 +184,12 @@ export default function ProductDetails({
         </Section>
 
         <Section
-          isPremium={!isSubscribed}
+          isPremium={isPremium}
           title="اندازه بلید"
           infoContent={<BleedGuide />}
         >
           <Select
-            disabled={!isSubscribed}
+            disabled={!isPremium}
             defaultValue={bleed.toString()}
             onValueChange={(val: string) => setBleed(+val)}
             dir="rtl"
@@ -216,7 +217,7 @@ export default function ProductDetails({
         </Section>
 
         <Section
-          isPremium={!isSubscribed}
+          isPremium={isPremium}
           title="ضخامت"
           infoContent={<ThicknessGuide />}
         >

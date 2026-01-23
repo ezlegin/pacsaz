@@ -1,11 +1,6 @@
 import M from "makerjs";
-import {
-  COLORS,
-  GUIDES,
-  isSubscribed,
-  MaterialKey,
-  strokeWidth,
-} from "../../data/consts";
+import { COLORS, GUIDES, strokeWidth } from "../../data/consts";
+import { MaterialKey } from "../../data/types";
 import { injectWatermark, Watermark } from "./injectWatermark";
 
 type SvgExporterParams = {
@@ -14,6 +9,7 @@ type SvgExporterParams = {
   bleedAmount: number;
   watermark: Watermark;
   material: MaterialKey;
+  isSubscribed: Boolean;
 };
 
 export function svgExporter({
@@ -22,6 +18,7 @@ export function svgExporter({
   bleedAmount,
   watermark,
   material,
+  isSubscribed,
 }: SvgExporterParams) {
   const isCardboard =
     material === "glossy-cardboard" || material === "art-paper";
@@ -65,9 +62,9 @@ export function svgExporter({
     },
   });
 
-  return watermark.show
-    ? !isSubscribed
-      ? injectWatermark(svg, bleedModel, bleedAmount, watermark.offset)
-      : svg
-    : svg;
+  if (!watermark.show || isSubscribed) {
+    return svg;
+  }
+
+  return injectWatermark(svg, bleedModel, bleedAmount, watermark.offset);
 }

@@ -1,6 +1,6 @@
 "use client";
 import { onDevelepe } from "@repo/dieline-core/data/consts";
-import { useSVGStore } from "@repo/dieline-core/store/svg.store";
+import { useSVGStore } from "@repo/store/dieline/svg.store";
 import { Button } from "@repo/ui/components/button";
 import { Card } from "@repo/ui/components/card";
 import { Separator } from "@repo/ui/components/separator";

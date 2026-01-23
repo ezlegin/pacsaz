@@ -51,6 +51,7 @@ const tuckEndSnapLock: DielineGeneratorProps = {
     },
     dimensionType,
     selectedMaterial,
+    isSubscribed,
   }) {
     const {
       materialThickness,
@@ -222,6 +223,7 @@ const tuckEndSnapLock: DielineGeneratorProps = {
       },
       material: selectedMaterial,
       showOverallDimensions,
+      isSubscribed,
     });
   },
 };

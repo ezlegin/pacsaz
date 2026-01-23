@@ -5,7 +5,7 @@ import { Material } from "./types";
 export const onDevelepe = process.env.NODE_ENV === "development";
 export const onProduction = process.env.NODE_ENV === "production";
 export const EPS = 0.0001;
-export const isSubscribed = true;
+// export const isSubscribed = false;
 
 export const strokeWidth = {
   svg: "0.75",

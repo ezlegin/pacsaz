@@ -1,7 +1,6 @@
 import { useLoading } from "@/hooks/useLoading";
 import { downloadPdf } from "@/lib/actions/export/downloader";
 import Diamond from "@/public/icons/Diamond";
-import { isSubscribed } from "@repo/dieline-core/data/consts";
 import { Model } from "@repo/dieline-core/data/types";
 import { Button } from "@repo/ui/components/button";
 import { Dialog, DialogContent, DialogTitle } from "@repo/ui/components/dialog";
@@ -12,7 +11,8 @@ import { useState } from "react";
 import { toast } from "sonner";
 import LoginPopup from "../forms/LoginPopup";
 import SaveDielineForm from "../forms/SaveDielineForm";
-import { useSVGStore } from "@repo/dieline-core/store/svg.store";
+import { useSVGStore } from "@repo/store/dieline/svg.store";
+import { useUserStore } from "@repo/store/app/user.store";
 
 interface Props {
   svg: Model | null;
@@ -24,6 +24,7 @@ const DielineDownloadButton = ({ slug, isRendering }: Props) => {
   const { svg } = useSVGStore();
   const { startLoading, stopLoading, isLoading } = useLoading();
   const [openPopup, setOpenPopup] = useState<"login" | "save" | null>(null);
+  const { isSubscribed } = useUserStore();
 
   const onDownload = async () => {
     if (!isSubscribed) {
@@ -46,7 +47,7 @@ const DielineDownloadButton = ({ slug, isRendering }: Props) => {
     stopLoading();
   };
 
-  const onSave = () => {
+  const onOpenSavePopup = () => {
     startLoading();
     setOpenPopup("save");
     stopLoading();
@@ -91,7 +92,7 @@ const DielineDownloadButton = ({ slug, isRendering }: Props) => {
         {isSubscribed && (
           <Button
             disabled={isRendering || isLoading}
-            onClick={onSave}
+            onClick={onOpenSavePopup}
             variant={"secondary"}
             size="lg"
             className=""

@@ -43,12 +43,12 @@ const LandingPage = () => {
 
           <div className="flex gap-2">
             <Link href={"/dieline/tuck-end"}>
-              <Button className="w-[140px]" variant={"gradient"}>
+              <Button className="w-35" variant={"gradient"}>
                 ساخت اولین قالب
               </Button>
             </Link>
             <a href={"#subscription"}>
-              <Button className="w-[140px]" variant={"secondary"}>
+              <Button className="w-35" variant={"secondary"}>
                 تعرفه <ChevronDown />
               </Button>
             </a>

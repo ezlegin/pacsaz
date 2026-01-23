@@ -81,6 +81,9 @@ importers:
       '@repo/dieline-core':
         specifier: workspace:*
         version: link:../../packages/dieline-core
+      '@repo/store':
+        specifier: workspace:*
+        version: link:../../packages/store
       '@repo/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -163,12 +166,18 @@ importers:
 
   packages/dieline-core:
     dependencies:
+      '@repo/store':
+        specifier: workspace:*
+        version: link:../store
       makerjs:
         specifier: ^0.18.1
         version: 0.18.2
       react:
         specifier: 19.2.0
         version: 19.2.0
+      react-dom:
+        specifier: 19.2.0
+        version: 19.2.0(react@19.2.0)
       zustand:
         specifier: ^5.0.10
         version: 5.0.10(@types/react@19.2.2)(react@19.2.0)
@@ -218,6 +227,19 @@ importers:
       typescript-eslint:
         specifier: ^8.50.0
         version: 8.50.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.2)
+
+  packages/store:
+    dependencies:
+      zustand:
+        specifier: ^5.0.10
+        version: 5.0.10(@types/react@19.2.2)(react@19.2.0)
+    devDependencies:
+      '@repo/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
 
   packages/typescript-config: {}
 

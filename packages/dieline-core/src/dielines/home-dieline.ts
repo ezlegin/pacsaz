@@ -230,6 +230,8 @@ const homeDieline: DielineGeneratorProps = {
         {
           type: "length",
           orientation: "vertical",
+          from: [width + height + width / 2, 0],
+          to: [width + height + width / 2, length],
         },
       ],
     });

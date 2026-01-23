@@ -17,6 +17,7 @@ export function modelBuilder({
   material,
   showOverallDimensions,
   container: withContainer,
+  isSubscribed,
 }: ModelExporter) {
   const bleed = addBleed({
     model,
@@ -63,6 +64,7 @@ export function modelBuilder({
       },
     },
     model: svgExporter({
+      isSubscribed,
       model,
       bleedModel: bleed,
       bleedAmount,

@@ -1,6 +1,6 @@
 import { Model } from "@repo/dieline-core/data/types";
-import { useDimensionStore } from "@repo/dieline-core/store/dimension.store";
-import { useFormatStore } from "@repo/dieline-core/store/format.store";
+import { useDimensionStore } from "@repo/store/dieline/dimension.store";
+import { useFormatStore } from "@repo/store/dieline/format.store";
 import { mapDimensions } from "@repo/dieline-core/utils/mapDimensions";
 import { PDFGenerator } from "./PDFGenerator";
 

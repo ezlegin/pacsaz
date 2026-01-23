@@ -7,11 +7,11 @@ import {
 } from "@/lib/validatoinSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DIMENSIONS_TYPE } from "@repo/dieline-core/data/consts";
-import { useBleedStore } from "@repo/dieline-core/store/bleed.store";
-import { useDimensionStore } from "@repo/dieline-core/store/dimension.store";
-import { useDimensionTypeStore } from "@repo/dieline-core/store/dimenstionType.store";
-import { useMaterialStore } from "@repo/dieline-core/store/material.store";
-import { useThicknessStore } from "@repo/dieline-core/store/thickness.store";
+import { useBleedStore } from "@repo/store/dieline/bleed.store";
+import { useDimensionStore } from "@repo/store/dieline/dimension.store";
+import { useDimensionTypeStore } from "@repo/store/dieline/dimenstionType.store";
+import { useMaterialStore } from "@repo/store/dieline/material.store";
+import { useThicknessStore } from "@repo/store/dieline/thickness.store";
 import { Button } from "@repo/ui/components/button";
 import { DialogTitle } from "@repo/ui/components/dialog";
 import {

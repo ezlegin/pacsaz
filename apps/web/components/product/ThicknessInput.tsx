@@ -1,9 +1,9 @@
 import { useLoading } from "@/hooks/useLoading";
-import { isSubscribed } from "@repo/dieline-core/data/consts";
 import { MaterialValue } from "@repo/dieline-core/data/types";
-import { useMaterialStore } from "@repo/dieline-core/store/material.store";
-import { useThicknessStore } from "@repo/dieline-core/store/thickness.store";
+import { useMaterialStore } from "@repo/store/dieline/material.store";
+import { useThicknessStore } from "@repo/store/dieline/thickness.store";
 import { formatToFixed } from "@repo/dieline-core/utils/format";
+import { useUserStore } from "@repo/store/app/user.store";
 import { Button } from "@repo/ui/components/button";
 import { Input } from "@repo/ui/components/input";
 import { Spinner } from "@repo/ui/components/spinner";
@@ -16,6 +16,7 @@ interface Props {
   materialsIncluded: MaterialValue[];
 }
 const ThicknessInput = ({ isRendering, materialsIncluded }: Props) => {
+  const { isPremium } = useUserStore();
   const [localCustomThickness, setLocalCustomThickness] = useState<
     string | undefined
   >();
@@ -55,25 +56,19 @@ const ThicknessInput = ({ isRendering, materialsIncluded }: Props) => {
     if (isRendering === false) stopMThicknessLoading();
   }, [isRendering]);
 
+  const disabledInputs = isRendering && isMThicknessLoading;
+
   return (
     <div>
-      {thickness}
-      <div
-        className={cn(
-          isRendering &&
-            isMThicknessLoading &&
-            "opacity-50 pointer-events-none",
-          !isSubscribed && "pointer-events-none opacity-40",
-          "relative"
-        )}
-      >
+      <div className={cn(!isPremium && "cursor-not-allowed", "relative")}>
         {isRendering && isMThicknessLoading && (
           <Spinner className="text-primary absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 opacity-100" />
         )}
         <Input
+          disabled={!isPremium || disabledInputs}
           dir="ltr"
           value={formatToFixed(localCustomThickness ?? thickness.toString())}
-          className={"text-center"}
+          className="text-center"
           onFocus={(e) => e.currentTarget.select()}
           onChange={(e) => {
             const val = e.target.value;
@@ -105,7 +100,9 @@ const ThicknessInput = ({ isRendering, materialsIncluded }: Props) => {
           className="absolute left-0 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
           onClick={() => handleThicknessChange("dec")}
           disabled={
-            (+(localCustomThickness ?? 0) || material.thickness) <= mMinThick
+            (+(localCustomThickness ?? 0) || material.thickness) <= mMinThick ||
+            !isPremium ||
+            disabledInputs
           }
         >
           <Minus />
@@ -116,7 +113,9 @@ const ThicknessInput = ({ isRendering, materialsIncluded }: Props) => {
           className="absolute right-0 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
           onClick={() => handleThicknessChange("inc")}
           disabled={
-            (+(localCustomThickness ?? 0) || material.thickness) >= mMaxThick
+            (+(localCustomThickness ?? 0) || material.thickness) >= mMaxThick ||
+            !isPremium ||
+            disabledInputs
           }
         >
           <Plus />

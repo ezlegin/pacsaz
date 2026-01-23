@@ -39,6 +39,7 @@ const postalCard: DielineGeneratorProps = {
     dimensionType,
     developers: { showAnchors, showOverallDimensions, showWatermark },
     selectedMaterial,
+    isSubscribed,
   }) {
     const {
       bleedAmount,
@@ -80,6 +81,7 @@ const postalCard: DielineGeneratorProps = {
 
     return modelBuilder({
       model,
+      isSubscribed,
       trimModel,
       container,
       bleedAmount,

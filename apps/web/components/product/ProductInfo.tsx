@@ -2,13 +2,15 @@ import { tuckEndModel } from "@/public";
 
 import { formatDimensions } from "@/utils/formatDimensions";
 import { onDevelepe } from "@repo/dieline-core/data/consts";
-import { DimensionsType, SVGModelSizes } from "@repo/dieline-core/data/types";
+import { DimensionsType } from "@repo/dieline-core/data/types";
+import { useDimensionStore } from "@repo/store/dieline/dimension.store";
+import { useDimensionTypeStore } from "@repo/store/dieline/dimenstionType.store";
+import { useSVGStore } from "@repo/store/dieline/svg.store";
 import {
   applyDimensionOffset,
   DimensionType,
 } from "@repo/dieline-core/utils/applyDimensionOffset";
 import { toMm } from "@repo/dieline-core/utils/sizeConvertor";
-import { useDimensionStore } from "@repo/dieline-core/store/dimension.store";
 import {
   Dialog,
   DialogContent,
@@ -18,8 +20,6 @@ import {
 } from "@repo/ui/components/dialog";
 import Image from "next/image";
 import DeveloperTools from "./DeveloperTools";
-import { useDimensionTypeStore } from "@repo/dieline-core/store/dimenstionType.store";
-import { useSVGStore } from "@repo/dieline-core/store/svg.store";
 
 interface Props {
   dimensionsType: DimensionsType;

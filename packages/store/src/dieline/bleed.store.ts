@@ -1,5 +1,11 @@
 import { create } from "zustand";
-import { BLEED } from "../data/consts";
+
+export const bleed = {
+  sm: 3,
+  default: 5, // md
+  lg: 7,
+  xl: 10,
+};
 
 type BleedStore = {
   bleed: number;
@@ -7,6 +13,6 @@ type BleedStore = {
 };
 
 export const useBleedStore = create<BleedStore>((set) => ({
-  bleed: BLEED.default,
+  bleed: bleed.default,
   setBleed: (bleed) => set(() => ({ bleed })),
 }));
