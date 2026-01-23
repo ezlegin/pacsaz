@@ -9,7 +9,7 @@ interface AddContainerOptions {
 }
 
 export function addContainer({ model, from, marginMM }: AddContainerOptions) {
-  const { low, high } = M.measure.modelExtents(from);
+  const { low, high } = M.measure.modelExtents(from)!;
 
   const marginPt = toPt(marginMM);
 
@@ -26,7 +26,8 @@ export function addContainer({ model, from, marginMM }: AddContainerOptions) {
       [minX, maxY],
     ]),
     marginPt,
-    1
+    1,
+    false
   );
 
   addModelToLayer(model, "container", container, "container");

@@ -1,10 +1,10 @@
-import { resolveDimensions } from "../core/helpers/dimensionResolver";
-import { DielineData, DielineGeneratorProps, Model } from "../data/types";
+import { useDimensionStore } from "@repo/store/dimension.store";
 import { useEffect, useState, useTransition } from "react";
-import { useSize } from "./useSize";
-import { toPt } from "../utils/sizeConvertor";
-import { DimensionType } from "../utils/applyDimensionOffset";
+import { resolveDimensions } from "../core/helpers/dimensionResolver";
 import { MaterialKey, MATERIALS } from "../data/consts";
+import { DielineData, DielineGeneratorProps, Model } from "../data/types";
+import { DimensionType } from "../utils/applyDimensionOffset";
+import { toPt } from "../utils/sizeConvertor";
 
 export function useDielineGenerator(
   dieline: DielineGeneratorProps,
@@ -20,14 +20,18 @@ export function useDielineGenerator(
   const [showWatermark, setShowWatermark] = useState(true);
   const [showOverallDimensions, setShowOverallDimensions] = useState(false);
   const [doCenterSVG, setDoCenterSVG] = useState(true);
-  const { size, setDimension } = useSize(dieline.dimensions);
   const [customThickness, setCustomThickness] = useState<number | undefined>();
+  const { dimension, setDimension, setDefaultDimension } = useDimensionStore();
+
+  useEffect(() => {
+    setDefaultDimension(dieline.dimensions.defaultDimensions);
+  }, []);
 
   const selectedMaterial = MATERIALS[material];
 
-  const widthPT = toPt(size.width);
-  const lengthPT = toPt(size.length);
-  const heightPT = toPt(size.height);
+  const widthPT = toPt(dimension.width);
+  const lengthPT = toPt(dimension.length);
+  const heightPT = toPt(dimension.height);
 
   const resolved = resolveDimensions({
     width: widthPT,
@@ -73,7 +77,7 @@ export function useDielineGenerator(
   ]);
 
   const dielineData: DielineData = {
-    size,
+    size: dimension,
     material,
     dimensionType,
     bleedSize,
@@ -82,7 +86,7 @@ export function useDielineGenerator(
 
   return {
     dielineData,
-    size,
+    size: dimension,
     resolved,
     svg,
     isRendering,

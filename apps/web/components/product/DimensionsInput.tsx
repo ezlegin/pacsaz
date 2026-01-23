@@ -1,35 +1,40 @@
-import { useState } from "react";
-import { Input } from "@repo/ui/components/input";
-import { Spinner } from "@repo/ui/components/spinner";
 import { DimensionKey } from "@repo/dieline-core/data/types";
 import { clamp } from "@repo/dieline-core/hooks/useSize";
+import { useDimensionStore } from "@repo/store/dimension.store";
+import { Input } from "@repo/ui/components/input";
+import { Spinner } from "@repo/ui/components/spinner";
+import { useEffect, useState } from "react";
 
 export function DimensionInput({
   label,
-  value,
   min,
-  onChange,
   dimKey,
   isRendering,
 }: {
   label: string;
-  value: number;
   min: number;
   dimKey: DimensionKey;
-  onChange: (value: number) => void;
   isRendering: boolean;
 }) {
-  const [localValue, setLocalValue] = useState(value);
+  const { dimension, setDimension } = useDimensionStore();
+  const value = dimension[dimKey];
+  const [localValue, setLocalValue] = useState<number | null>(null);
   const [blurredInput, setBlurredInput] = useState<DimensionKey | null>(null);
 
-  if (value === 0) return null;
+  useEffect(() => {
+    if (!localValue) {
+      setLocalValue(value);
+    }
+  }, [value]);
 
   const handleSubmit = () => {
     setBlurredInput(dimKey);
-    const clamped = clamp(localValue, min);
+    const clamped = clamp(localValue ?? 0, min);
     setLocalValue(clamped);
-    onChange(clamped);
+    setDimension(dimKey, clamped);
   };
+
+  if (value === 0) return null;
 
   return (
     <div className="space-y-1">
@@ -38,7 +43,7 @@ export function DimensionInput({
         <Input
           disabled={isRendering && dimKey === blurredInput}
           dir="ltr"
-          value={localValue}
+          value={localValue ?? 0}
           onFocus={(e) => e.target.select()}
           onChange={(e) => setLocalValue(Number(e.target.value))}
           onBlur={handleSubmit}

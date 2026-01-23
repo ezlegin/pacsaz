@@ -166,9 +166,18 @@ importers:
 
   packages/dieline-core:
     dependencies:
+      '@repo/store':
+        specifier: workspace:*
+        version: link:../store
+      '@types/react':
+        specifier: 19.2.2
+        version: 19.2.2
       makerjs:
         specifier: ^0.18.1
         version: 0.18.2
+      react:
+        specifier: 19.2.0
+        version: 19.2.0
     devDependencies:
       '@repo/eslint-config':
         specifier: workspace:*
@@ -214,6 +223,10 @@ importers:
         version: 8.50.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.2)
 
   packages/store:
+    dependencies:
+      zustand:
+        specifier: ^5.0.10
+        version: 5.0.10(@types/react@19.2.2)(react@19.2.0)
     devDependencies:
       '@repo/eslint-config':
         specifier: workspace:*
@@ -3485,6 +3498,24 @@ packages:
 
   zod@3.25.76:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
+
+  zustand@5.0.10:
+    resolution: {integrity: sha512-U1AiltS1O9hSy3rul+Ub82ut2fqIAefiSuwECWt6jlMVUGejvf+5omLcRBSzqbRagSM3hQZbtzdeRc6QVScXTg==}
+    engines: {node: '>=12.20.0'}
+    peerDependencies:
+      '@types/react': '>=18.0.0'
+      immer: '>=9.0.6'
+      react: '>=18.0.0'
+      use-sync-external-store: '>=1.2.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      immer:
+        optional: true
+      react:
+        optional: true
+      use-sync-external-store:
+        optional: true
 
 snapshots:
 
@@ -6912,3 +6943,8 @@ snapshots:
   yocto-queue@0.1.0: {}
 
   zod@3.25.76: {}
+
+  zustand@5.0.10(@types/react@19.2.2)(react@19.2.0):
+    optionalDependencies:
+      '@types/react': 19.2.2
+      react: 19.2.0

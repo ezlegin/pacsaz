@@ -34,8 +34,6 @@ export default function SvgPreview({
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState<number>();
 
-  console.log(doCenterSVG);
-
   useLayoutEffect(() => {
     if (!contentRef.current || !wrapperRef.current) return;
 

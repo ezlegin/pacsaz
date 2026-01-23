@@ -10,7 +10,6 @@ import {
 import {
   DielineData,
   DielineDimensions,
-  DimensionKey,
   Dimensions,
   DimensionsType,
   FormatsType,
@@ -34,20 +33,20 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@repo/ui/components/tooltip";
+import { cn } from "@repo/ui/lib/utils";
 import { CircleQuestionMark } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Section } from "./DetailsSection";
 import DielineDownloadButton from "./DielineDownloadButton";
 import { DimensionInput } from "./DimensionsInput";
-import DimensionGuide from "./guides/DimensionGuide";
-import ThicknessInput from "./ThicknessInput";
-import { cn } from "@repo/ui/lib/utils";
-import MeterialGuide from "./guides/materialGuide";
 import BleedGuide from "./guides/BleedGuide";
-import ThicknessGuide from "./guides/ThicknessGuide";
+import DimensionGuide from "./guides/DimensionGuide";
 import DimensionTypeGuide from "./guides/DimensionTypeGuide";
 import FormatGuide from "./guides/FormatGuide";
+import MeterialGuide from "./guides/materialGuide";
+import ThicknessGuide from "./guides/ThicknessGuide";
+import ThicknessInput from "./ThicknessInput";
 
 export interface SVGSizeProps {
   width: number;
@@ -58,7 +57,6 @@ interface Props {
   defaultDimensions: DielineDimensions;
   materials: MaterialsInput;
   dimensionsType: DimensionsType;
-  setDimension: (key: DimensionKey, value: number) => void;
   setMaterial: (mat: MaterialKey) => void;
   setDimensionType: (value: DimensionType) => void;
   setBleedAmount: (value: number) => void;
@@ -79,7 +77,6 @@ interface Props {
 
 export default function ProductDetails({
   defaultDimensions,
-  setDimension,
   setDimensionType,
   setMaterial,
   setBleedAmount,
@@ -142,9 +139,7 @@ export default function ProductDetails({
               <DimensionInput
                 key={key}
                 label={label}
-                value={defaultDimensions.defaultDimensions[key]}
                 min={defaultDimensions.minDimensions[key]}
-                onChange={(value) => setDimension(key, value)}
                 dimKey={key}
                 isRendering={isRendering}
               />

@@ -26,7 +26,6 @@ const DielineGenerator = ({ slug }: { slug: string }) => {
     showOverallDimensions,
     resolved,
     setShowOverallDimensions,
-    setDimension,
     setMaterial,
     setDimensionType,
     setBleedSize,
@@ -50,7 +49,6 @@ const DielineGenerator = ({ slug }: { slug: string }) => {
         <ProductDetails
           defaultDimensions={dieline.dimensions}
           dimensionsType={dieline.dimensionsType}
-          setDimension={setDimension}
           setMaterial={setMaterial}
           setDimensionType={setDimensionType}
           setBleedAmount={setBleedSize}

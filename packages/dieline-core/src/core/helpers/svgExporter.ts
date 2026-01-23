@@ -60,7 +60,7 @@ export function svgExporter({
         fill: "black",
         cssStyle: `direction: ltr`,
       },
-      container: { stroke: "none" },
+      container: { stroke: "black" },
       anchor: { stroke: "none", fill: "black" },
     },
   });
