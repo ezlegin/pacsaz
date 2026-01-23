@@ -1,18 +1,21 @@
-import { useDimensionStore } from "@repo/store/dimension.store";
 import { useEffect, useState, useTransition } from "react";
 import { resolveDimensions } from "../core/helpers/dimensionResolver";
-import { MaterialKey, MATERIALS } from "../data/consts";
-import { DielineData, DielineGeneratorProps, Model } from "../data/types";
+import {
+  DielineData,
+  DielineGeneratorProps,
+  MaterialKey,
+  Model,
+} from "../data/types";
 import { DimensionType } from "../utils/applyDimensionOffset";
 import { toPt } from "../utils/sizeConvertor";
+import { useDimensionStore } from "../store/dimension.store";
+import { useMaterialStore } from "../store/material.store";
 
 export function useDielineGenerator(
   dieline: DielineGeneratorProps,
   container?: boolean
 ) {
-  const [material, setMaterial] = useState<MaterialKey>(
-    dieline.materials.default.value as MaterialKey
-  );
+  const { material, setMaterial } = useMaterialStore();
   const [dimensionType, setDimensionType] =
     useState<DimensionType>("manufacture");
   const [bleedSize, setBleedSize] = useState<number>(dieline.defaultBleed);
@@ -21,13 +24,14 @@ export function useDielineGenerator(
   const [showOverallDimensions, setShowOverallDimensions] = useState(false);
   const [doCenterSVG, setDoCenterSVG] = useState(true);
   const [customThickness, setCustomThickness] = useState<number | undefined>();
-  const { dimension, setDimension, setDefaultDimension } = useDimensionStore();
+  const { dimension, setDefaultDimension } = useDimensionStore();
 
   useEffect(() => {
     setDefaultDimension(dieline.dimensions.defaultDimensions);
+    setMaterial(dieline.materials.default.value as MaterialKey);
   }, []);
 
-  const selectedMaterial = MATERIALS[material];
+  const selectedMaterial = material;
 
   const widthPT = toPt(dimension.width);
   const lengthPT = toPt(dimension.length);
@@ -57,7 +61,7 @@ export function useDielineGenerator(
         },
         developers: { showAnchors, showWatermark, showOverallDimensions },
         dimensionType,
-        selectedMaterial: material,
+        selectedMaterial: material.value,
       });
 
       setSvg(result);
@@ -78,7 +82,6 @@ export function useDielineGenerator(
 
   const dielineData: DielineData = {
     size: dimension,
-    material,
     dimensionType,
     bleedSize,
     customThickness,
@@ -86,19 +89,15 @@ export function useDielineGenerator(
 
   return {
     dielineData,
-    size: dimension,
     resolved,
     svg,
     isRendering,
-    material,
     dimensionType,
     bleedSize,
     showAnchors,
     showWatermark,
     showOverallDimensions,
     doCenterSVG,
-    setDimension,
-    setMaterial,
     setDimensionType,
     setBleedSize,
     setShowAnchors,

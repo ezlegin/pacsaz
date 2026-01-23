@@ -2,28 +2,23 @@ import { useLoading } from "@/hooks/useLoading";
 import { downloadPdf } from "@/lib/actions/export/downloader";
 import Diamond from "@/public/icons/Diamond";
 import { isSubscribed } from "@repo/dieline-core/data/consts";
-import {
-  DielineData,
-  Dimensions,
-  FormatsType,
-  Model,
-} from "@repo/dieline-core/data/types";
+import { DielineData, FormatsType, Model } from "@repo/dieline-core/data/types";
+import { useDimensionStore } from "@repo/dieline-core/store/dimension.store";
 import { Button } from "@repo/ui/components/button";
 import { Dialog, DialogContent, DialogTitle } from "@repo/ui/components/dialog";
 import { Spinner } from "@repo/ui/components/spinner";
+import { cn } from "@repo/ui/lib/utils";
 import { BookmarkPlus, Download } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import LoginPopup from "../forms/LoginPopup";
 import SaveDielineForm from "../forms/SaveDielineForm";
-import { cn } from "@repo/ui/lib/utils";
 
 interface Props {
   format: FormatsType;
   svg: Model | null;
   slug: string;
   isRendering: boolean;
-  dimensions: Dimensions;
   dielineData: DielineData;
 }
 
@@ -32,11 +27,11 @@ const DielineDownloadButton = ({
   svg,
   slug,
   isRendering,
-  dimensions,
   dielineData,
 }: Props) => {
   const { startLoading, stopLoading, isLoading } = useLoading();
   const [openPopup, setOpenPopup] = useState<"login" | "save" | null>(null);
+  const { dimension } = useDimensionStore();
 
   const onDownload = async () => {
     if (!isSubscribed) {
@@ -54,7 +49,7 @@ const DielineDownloadButton = ({
       svg,
       format,
       slug,
-      dimensions,
+      dimensions: dimension,
     });
     toast.success("فایل با موفقیت تولید شد.");
 

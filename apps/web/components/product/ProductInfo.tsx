@@ -1,5 +1,14 @@
 import { tuckEndModel } from "@/public";
 
+import { formatDimensions } from "@/utils/formatDimensions";
+import { onDevelepe } from "@repo/dieline-core/data/consts";
+import { DimensionsType, SVGModelSizes } from "@repo/dieline-core/data/types";
+import {
+  applyDimensionOffset,
+  DimensionType,
+} from "@repo/dieline-core/utils/applyDimensionOffset";
+import { toMm } from "@repo/dieline-core/utils/sizeConvertor";
+import { useDimensionStore } from "@repo/dieline-core/store/dimension.store";
 import {
   Dialog,
   DialogContent,
@@ -9,21 +18,8 @@ import {
 } from "@repo/ui/components/dialog";
 import Image from "next/image";
 import DeveloperTools from "./DeveloperTools";
-import { onDevelepe } from "@repo/dieline-core/data/consts";
-import {
-  Dimensions,
-  DimensionsType,
-  SVGModelSizes,
-} from "@repo/dieline-core/data/types";
-import { toMm } from "@repo/dieline-core/utils/sizeConvertor";
-import { formatDimensions } from "@/utils/formatDimensions";
-import {
-  applyDimensionOffset,
-  DimensionType,
-} from "@repo/dieline-core/utils/applyDimensionOffset";
 
 interface Props {
-  dimension: Dimensions;
   dimensionsType: DimensionsType;
   dimensionType: DimensionType;
   sizes: SVGModelSizes | undefined;
@@ -40,7 +36,6 @@ interface Props {
 
 const ProductInfo = ({
   dimensionsType,
-  dimension,
   dimensionType,
   sizes,
   slug,
@@ -53,7 +48,9 @@ const ProductInfo = ({
   setShowOverallDimensions,
   setDoCenterSVG,
 }: Props) => {
-  const { height, length, width } = dimension;
+  const {
+    dimension: { height, length, width },
+  } = useDimensionStore();
 
   const calcManufacture = (value: number, axis: "width" | "length") =>
     applyDimensionOffset(

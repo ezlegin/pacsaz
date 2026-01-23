@@ -1,93 +1,28 @@
-import { toPt } from "../utils/sizeConvertor";
-import { calculateSafeFoldOffset } from "../core/helpers/calculate/calculateSafeFoldOffset";
-import { Material } from "./types";
+import { create } from "zustand";
 
-export const onDevelepe = process.env.NODE_ENV === "development";
-export const onProduction = process.env.NODE_ENV === "production";
-export const EPS = 0.0001;
-export const isSubscribed = true;
+type MaterialKey =
+  | "c-flute"
+  | "be-flute"
+  | "bc-flute"
+  | "ab-flute"
+  | "art-paper"
+  | "glossy-cardboard"
+  | "f-flute"
+  | "e-flute"
+  | "b-flute";
 
-export const strokeWidth = {
-  svg: "0.75",
-  guide: "1",
+type MaterialValue = {
+  value: MaterialKey;
+  label: string;
+  thickness: number;
+  safeFoldOffset: number;
+  offset: {
+    inner: number;
+    outer: number;
+  };
 };
 
-// COLORS
-export const COLORS = {
-  dielines: {
-    bleed: "green",
-    trim: "blue",
-    fold: "red",
-    fill: "white",
-  },
-
-  guides: {
-    box: "white",
-    line: "#1E90FF", // dodgerBlue
-    text: "#1E90FF", // dodgerBlue
-  },
-};
-
-// GUIDES
-export const GUIDES = {
-  foldDasharray: "5,2", // PT
-  textFontSizePT: 12,
-};
-
-export const GLUES = {
-  sm: 12,
-  md: 16,
-  lg: 25,
-  xl: 35,
-  xxl: 50,
-};
-
-//  BLEED
-export const BLEED = {
-  sm: 3,
-  default: 5, // md
-  lg: 7,
-  xl: 10,
-};
-
-export const DOOR = {
-  tuckFlap: {
-    size: (width: number) => {
-      if (width >= 180) return 25; // > 180
-      if (width >= 130) return 20; // 130 - 179
-      if (width >= 100) return 15; // 100 - 129
-      if (width >= 60) return 13; // 60 - 99
-      return 11; // < 60
-    },
-    seam: {
-      w: 8,
-      h: 1.5,
-    },
-  },
-  foldOffset: 1,
-};
-export type TuckFlap = typeof DOOR.tuckFlap;
-
-export const zero = [0, 0];
-
-export const MARGINS = {
-  container: 30,
-  dimensionGuide: 20,
-};
-
-export const DimensionsTypeOffset = toPt(1.4);
-
-export const DIMENSIONS = [
-  { key: "length", label: "طول" },
-  { key: "width", label: "عرض" },
-  { key: "height", label: "ارتفاع" },
-] as const;
-
-export const DIMENSIONS_TYPE = [
-  { key: "manufacture", label: "ابعاد تولید" },
-  { key: "inner", label: "ابعاد داخلی" },
-  { key: "outer", label: "ابعاد خارجی" },
-] as const;
+type Material = Record<MaterialKey, MaterialValue>;
 
 export const materials: Material = {
   "glossy-cardboard": {
@@ -217,3 +152,35 @@ export const materials: Material = {
     },
   },
 };
+
+function calculateSafeFoldOffset(materialThickness: number) {
+  if (materialThickness <= 1.5) return materialThickness; // 0 - 1.5
+
+  if (materialThickness < 3) return 1.5; // 1.6 - 2.9
+
+  if (materialThickness < 4) return 2; // 3 - 3.9
+
+  if (materialThickness < 5) return 3.5; // 4 - 4.9
+
+  if (materialThickness < 6) return 4; // 5 - 5.9
+
+  if (materialThickness >= 6) return 5; // 5 - 5.9
+
+  return materialThickness;
+}
+
+type MaterialStore = {
+  materials: Material;
+  material: MaterialValue;
+  setMaterial: (key: MaterialKey) => void;
+};
+
+export const useMaterialStore = create<MaterialStore>((set) => ({
+  materials,
+  material: materials["glossy-cardboard"],
+
+  setMaterial: (key) =>
+    set((state) => ({
+      material: state.materials[key],
+    })),
+}));

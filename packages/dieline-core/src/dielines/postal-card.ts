@@ -1,5 +1,5 @@
 import M from "makerjs";
-import { BLEED, MATERIALS } from "../data/consts";
+import { BLEED, materials } from "../data/consts";
 import { drawFoldLines } from "../core/helpers/draw/drawFoldLines";
 import { drawGuideLines } from "../core/helpers/draw/drawGuideLines";
 import { initiateModel } from "../core/helpers/initiateModels";
@@ -25,8 +25,8 @@ const postalCard: DielineGeneratorProps = {
   defaultBleed: BLEED.default,
   dimensionsType: ["manufacture", "inner", "outer"],
   materials: {
-    default: MATERIALS["glossy-cardboard"],
-    included: [MATERIALS["glossy-cardboard"], MATERIALS["art-paper"]],
+    default: materials["glossy-cardboard"],
+    included: [materials["glossy-cardboard"], materials["art-paper"]],
   },
   model({
     dimensions: {

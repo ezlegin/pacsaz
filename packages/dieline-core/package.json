@@ -8,7 +8,8 @@
     "./types": "./src/core/types.ts",
     "./hooks/*": "./src/hooks/*.ts",
     "./utils/*": "./src/utils/*.ts",
-    "./data/*": "./src/data/*.ts"
+    "./data/*": "./src/data/*.ts",
+    "./store/*": "./src/store/*.ts"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
@@ -16,8 +17,8 @@
     "@types/react": "19.2.2"
   },
   "dependencies": {
-    "@repo/store": "workspace:*",
     "makerjs": "^0.18.1",
-    "react": "19.2.0"
+    "react": "19.2.0",
+    "zustand": "^5.0.10"
   }
 }

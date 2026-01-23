@@ -6,8 +6,9 @@ import {
   saveDielineFormSchema,
 } from "@/lib/validatoinSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { DIMENSIONS_TYPE, MATERIALS } from "@repo/dieline-core/data/consts";
+import { DIMENSIONS_TYPE, materials } from "@repo/dieline-core/data/consts";
 import { DielineData } from "@repo/dieline-core/data/types";
+import { useMaterialStore } from "@repo/dieline-core/store/material.store";
 import { Button } from "@repo/ui/components/button";
 import { DialogTitle } from "@repo/ui/components/dialog";
 import {
@@ -21,6 +22,7 @@ import { Separator } from "@repo/ui/components/separator";
 import { useForm } from "react-hook-form";
 
 const SaveDielineForm = ({ dielineData }: { dielineData: DielineData }) => {
+  const { material } = useMaterialStore();
   const { isLoading, startLoading, stopLoading } = useLoading();
   const form = useForm<SaveDielineFormType>({
     resolver: zodResolver(saveDielineFormSchema),
@@ -41,7 +43,6 @@ const SaveDielineForm = ({ dielineData }: { dielineData: DielineData }) => {
     stopLoading();
   };
 
-  const selectedMaterial = MATERIALS[dielineData.material];
   const selectedDimensionType = DIMENSIONS_TYPE.find(
     (d) => d.key === dielineData.dimensionType
   );
@@ -51,9 +52,9 @@ const SaveDielineForm = ({ dielineData }: { dielineData: DielineData }) => {
     length: dielineData.size.length,
     height: dielineData.size.height,
     bleedSize: dielineData.bleedSize,
-    material: selectedMaterial.label,
+    material: material.label,
     dimensionType: selectedDimensionType?.label,
-    thickness: selectedMaterial.thickness,
+    thickness: material.thickness,
     customThickness: dielineData.customThickness,
   };
 

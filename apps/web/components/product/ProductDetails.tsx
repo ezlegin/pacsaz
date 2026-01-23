@@ -4,20 +4,19 @@ import {
   DIMENSIONS,
   DIMENSIONS_TYPE,
   isSubscribed,
-  MaterialKey,
-  MATERIALS,
 } from "@repo/dieline-core/data/consts";
 import {
   DielineData,
   DielineDimensions,
-  Dimensions,
   DimensionsType,
   FormatsType,
+  MaterialKey,
   MaterialsInput,
   Model,
 } from "@repo/dieline-core/data/types";
 import { DimensionType } from "@repo/dieline-core/utils/applyDimensionOffset";
 import { isPackagingSizeLogical } from "@repo/dieline-core/utils/isPackagingSizeLogical";
+import { useMaterialStore } from "@repo/dieline-core/store/material.store";
 import { Badge } from "@repo/ui/components/badge";
 import { Card } from "@repo/ui/components/card";
 import {
@@ -55,17 +54,14 @@ export interface SVGSizeProps {
 
 interface Props {
   defaultDimensions: DielineDimensions;
-  materials: MaterialsInput;
+  materialsInput: MaterialsInput;
   dimensionsType: DimensionsType;
-  setMaterial: (mat: MaterialKey) => void;
   setDimensionType: (value: DimensionType) => void;
   setBleedAmount: (value: number) => void;
   setCustomThickness: (value: number | undefined) => void;
   dimensionType: DimensionType;
   svg: Model | null;
   slug: string;
-  dimension: Dimensions;
-  material: MaterialKey;
   isRendering: boolean;
   resolvedSizes: {
     width: number;
@@ -78,24 +74,22 @@ interface Props {
 export default function ProductDetails({
   defaultDimensions,
   setDimensionType,
-  setMaterial,
   setBleedAmount,
   setCustomThickness,
   dimensionType,
-  dimension,
   dimensionsType,
   resolvedSizes: { height, width },
   svg,
   slug,
-  materials,
-  material,
+  materialsInput,
   isRendering,
   dielineData,
 }: Props) {
   const [format, setFormat] = useState<FormatsType>("pdf");
+  const { material, setMaterial } = useMaterialStore();
 
   const onSelectMaterial = (val: string) => {
-    const material = materials.included.find((m) => m.value === val)
+    const material = materialsInput.included.find((m) => m.value === val)
       ?.value as MaterialKey;
 
     if (!material) return;
@@ -103,7 +97,7 @@ export default function ProductDetails({
     setMaterial(material);
   };
 
-  const selectedMaterial = MATERIALS[material];
+  const selectedMaterial = material;
 
   const [localCustomThickness, setLocalCustomThickness] = useState<
     string | undefined
@@ -180,14 +174,14 @@ export default function ProductDetails({
           <Select
             onValueChange={onSelectMaterial}
             dir="rtl"
-            defaultValue={materials.default.value}
+            defaultValue={materialsInput.default.value}
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="انتخاب متریال" />
             </SelectTrigger>
 
             <SelectContent position="popper">
-              {materials.included.map((item) => (
+              {materialsInput.included.map((item) => (
                 <SelectItem
                   className="py-2.5"
                   key={item.value}
@@ -251,7 +245,7 @@ export default function ProductDetails({
             isRendering={isRendering}
             localCustomThickness={localCustomThickness}
             setLocalCustomThickness={setLocalCustomThickness}
-            materialsIncluded={materials.included}
+            materialsIncluded={materialsInput.included}
             selectedMaterialThickness={selectedMaterial.thickness}
             setCustomThickness={setCustomThickness}
           />
@@ -324,7 +318,6 @@ export default function ProductDetails({
           isRendering={isRendering}
           slug={slug}
           svg={svg}
-          dimensions={dimension}
           dielineData={dielineData}
         />
       </div>

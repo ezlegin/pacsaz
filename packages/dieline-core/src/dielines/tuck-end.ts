@@ -1,5 +1,5 @@
 import { toPt } from "../utils/sizeConvertor";
-import { BLEED, DOOR, MATERIALS, zero } from "../data/consts";
+import { BLEED, DOOR, materials, zero } from "../data/consts";
 import { addDoor } from "../core/helpers/add/addDoor";
 import { addDust } from "../core/helpers/add/addDust";
 import { cloneMirrorMove, cloneRotateMove } from "../core/helpers/clone";
@@ -32,12 +32,12 @@ const tuckEnd: DielineGeneratorProps = {
   defaultBleed,
   dimensionsType: ["manufacture", "inner", "outer"],
   materials: {
-    default: MATERIALS["glossy-cardboard"],
+    default: materials["glossy-cardboard"],
     included: [
-      MATERIALS["glossy-cardboard"],
-      MATERIALS["f-flute"],
-      MATERIALS["e-flute"],
-      MATERIALS["b-flute"],
+      materials["glossy-cardboard"],
+      materials["f-flute"],
+      materials["e-flute"],
+      materials["b-flute"],
     ],
   },
 

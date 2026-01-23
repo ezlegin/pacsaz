@@ -1,5 +1,4 @@
 import { IModel } from "makerjs";
-import { MaterialKey } from "./consts";
 import { Watermark } from "../core/helpers/injectWatermark";
 import { DimensionType } from "../utils/applyDimensionOffset";
 
@@ -16,12 +15,6 @@ export type FormatsType = "pdf" | "ai" | "dxf";
 export type DielineDimensions = {
   defaultDimensions: Dimensions;
   minDimensions: Dimensions;
-};
-
-export type MaterialValue = {
-  value: string;
-  label: string;
-  thickness: number;
 };
 
 export type MaterialsInput = {
@@ -154,8 +147,31 @@ export type Dust = {
 
 export type DielineData = {
   size: Dimensions;
-  material: MaterialKey;
   dimensionType: DimensionType;
   bleedSize: number;
   customThickness: number | undefined;
 };
+
+export type MaterialKey =
+  | "c-flute"
+  | "be-flute"
+  | "bc-flute"
+  | "ab-flute"
+  | "art-paper"
+  | "glossy-cardboard"
+  | "f-flute"
+  | "e-flute"
+  | "b-flute";
+
+export type MaterialValue = {
+  value: MaterialKey;
+  label: string;
+  thickness: number;
+  safeFoldOffset: number;
+  offset: {
+    inner: number;
+    outer: number;
+  };
+};
+
+export type Material = Record<MaterialKey, MaterialValue>;

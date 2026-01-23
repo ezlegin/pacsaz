@@ -1,6 +1,6 @@
 "use client";
 
-import { useDimensionStore } from "@repo/store/dimension.store";
+import { useDimensionStore } from "@repo/dieline-core/store/material.store";
 
 const DimTest = () => {
   const { dimension } = useDimensionStore();

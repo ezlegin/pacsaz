@@ -9,7 +9,7 @@ import { drawSingleLines } from "../core/helpers/draw/drawSingleLines";
 import { initiateModel } from "../core/helpers/initiateModels";
 import { modelBuilder } from "../core/helpers/modelBuilder";
 import { pushModelSeparatly } from "../core/helpers/pushModelSeparatly";
-import { BLEED, DOOR, MATERIALS } from "../data/consts";
+import { BLEED, DOOR, materials } from "../data/consts";
 import { DielineGeneratorProps } from "../data/types";
 import { toPt } from "../utils/sizeConvertor";
 
@@ -31,12 +31,12 @@ const tuckEndSnapLock: DielineGeneratorProps = {
   defaultBleed: BLEED.default,
   dimensionsType: ["manufacture", "inner", "outer"],
   materials: {
-    default: MATERIALS["glossy-cardboard"],
+    default: materials["glossy-cardboard"],
     included: [
-      MATERIALS["glossy-cardboard"],
-      MATERIALS["f-flute"],
-      MATERIALS["e-flute"],
-      MATERIALS["b-flute"],
+      materials["glossy-cardboard"],
+      materials["f-flute"],
+      materials["e-flute"],
+      materials["b-flute"],
     ],
   },
 
