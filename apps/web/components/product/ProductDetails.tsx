@@ -15,6 +15,7 @@ import {
   Model,
 } from "@repo/dieline-core/data/types";
 import { useBleedStore } from "@repo/dieline-core/store/bleed.store";
+import { useDimensionTypeStore } from "@repo/dieline-core/store/dimenstionType.store";
 import { useMaterialStore } from "@repo/dieline-core/store/material.store";
 import { DimensionType } from "@repo/dieline-core/utils/applyDimensionOffset";
 import { isPackagingSizeLogical } from "@repo/dieline-core/utils/isPackagingSizeLogical";
@@ -36,7 +37,6 @@ import {
 import { cn } from "@repo/ui/lib/utils";
 import { CircleQuestionMark } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
 import { Section } from "./DetailsSection";
 import DielineDownloadButton from "./DielineDownloadButton";
 import { DimensionInput } from "./DimensionsInput";
@@ -47,7 +47,7 @@ import FormatGuide from "./guides/FormatGuide";
 import MeterialGuide from "./guides/materialGuide";
 import ThicknessGuide from "./guides/ThicknessGuide";
 import ThicknessInput from "./ThicknessInput";
-import { useDimensionTypeStore } from "@repo/dieline-core/store/dimenstionType.store";
+import { useFormatStore } from "@repo/dieline-core/store/format.store";
 
 export interface SVGSizeProps {
   width: number;
@@ -79,7 +79,7 @@ export default function ProductDetails({
   isRendering,
   dielineData,
 }: Props) {
-  const [format, setFormat] = useState<FormatsType>("pdf");
+  const { format, setFormat } = useFormatStore();
   const { setMaterial } = useMaterialStore();
   const { bleed, setBleed } = useBleedStore();
   const { dimensionType, setDimensionType } = useDimensionTypeStore();
@@ -293,7 +293,6 @@ export default function ProductDetails({
           </ToggleGroup>
         </Section>
         <DielineDownloadButton
-          format={format}
           isRendering={isRendering}
           slug={slug}
           svg={svg}

@@ -2,7 +2,7 @@ import { useLoading } from "@/hooks/useLoading";
 import { downloadPdf } from "@/lib/actions/export/downloader";
 import Diamond from "@/public/icons/Diamond";
 import { isSubscribed } from "@repo/dieline-core/data/consts";
-import { DielineData, FormatsType, Model } from "@repo/dieline-core/data/types";
+import { DielineData, Model } from "@repo/dieline-core/data/types";
 import { Button } from "@repo/ui/components/button";
 import { Dialog, DialogContent, DialogTitle } from "@repo/ui/components/dialog";
 import { Spinner } from "@repo/ui/components/spinner";
@@ -14,7 +14,6 @@ import LoginPopup from "../forms/LoginPopup";
 import SaveDielineForm from "../forms/SaveDielineForm";
 
 interface Props {
-  format: FormatsType;
   svg: Model | null;
   slug: string;
   isRendering: boolean;
@@ -22,7 +21,6 @@ interface Props {
 }
 
 const DielineDownloadButton = ({
-  format,
   svg,
   slug,
   isRendering,
@@ -45,7 +43,6 @@ const DielineDownloadButton = ({
 
     await downloadPdf({
       svg,
-      format,
       slug,
     });
     toast.success("فایل با موفقیت تولید شد.");
