@@ -36,7 +36,7 @@ import {
 import { cn } from "@repo/ui/lib/utils";
 import { CircleQuestionMark } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Section } from "./DetailsSection";
 import DielineDownloadButton from "./DielineDownloadButton";
 import { DimensionInput } from "./DimensionsInput";
@@ -58,7 +58,6 @@ interface Props {
   materialsInput: MaterialsInput;
   dimensionsType: DimensionsType;
   setDimensionType: (value: DimensionType) => void;
-  setCustomThickness: (value: number | undefined) => void;
   dimensionType: DimensionType;
   svg: Model | null;
   slug: string;
@@ -74,7 +73,6 @@ interface Props {
 export default function ProductDetails({
   defaultDimensions,
   setDimensionType,
-  setCustomThickness,
   dimensionType,
   dimensionsType,
   resolvedSizes: { height, width },
@@ -85,7 +83,7 @@ export default function ProductDetails({
   dielineData,
 }: Props) {
   const [format, setFormat] = useState<FormatsType>("pdf");
-  const { material, setMaterial } = useMaterialStore();
+  const { setMaterial } = useMaterialStore();
   const { bleed, setBleed } = useBleedStore();
 
   const onSelectMaterial = (val: string) => {
@@ -96,19 +94,6 @@ export default function ProductDetails({
 
     setMaterial(material);
   };
-
-  const selectedMaterial = material;
-
-  const [localCustomThickness, setLocalCustomThickness] = useState<
-    string | undefined
-  >();
-
-  useEffect(() => {
-    if (!localCustomThickness) return;
-
-    setCustomThickness(undefined);
-    setLocalCustomThickness(selectedMaterial?.thickness.toFixed());
-  }, [selectedMaterial]);
 
   const bleeds = Object.entries(BLEED).map(([type, size]) => ({
     type,
@@ -243,11 +228,7 @@ export default function ProductDetails({
         >
           <ThicknessInput
             isRendering={isRendering}
-            localCustomThickness={localCustomThickness}
-            setLocalCustomThickness={setLocalCustomThickness}
             materialsIncluded={materialsInput.included}
-            selectedMaterialThickness={selectedMaterial.thickness}
-            setCustomThickness={setCustomThickness}
           />
         </Section>
 

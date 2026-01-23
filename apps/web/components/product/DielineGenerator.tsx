@@ -27,7 +27,6 @@ const DielineGenerator = ({ slug }: { slug: string }) => {
     setDimensionType,
     setShowAnchors,
     setShowWatermark,
-    setCustomThickness,
     setDoCenterSVG,
     dielineData,
   } = useDielineGenerator(dieline);
@@ -46,7 +45,6 @@ const DielineGenerator = ({ slug }: { slug: string }) => {
           defaultDimensions={dieline.dimensions}
           dimensionsType={dieline.dimensionsType}
           setDimensionType={setDimensionType}
-          setCustomThickness={setCustomThickness}
           svg={svg}
           dimensionType={dimensionType}
           slug={dieline.slug}

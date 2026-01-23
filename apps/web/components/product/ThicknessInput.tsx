@@ -1,31 +1,28 @@
 import { useLoading } from "@/hooks/useLoading";
 import { isSubscribed } from "@repo/dieline-core/data/consts";
 import { MaterialValue } from "@repo/dieline-core/data/types";
+import { useMaterialStore } from "@repo/dieline-core/store/material.store";
+import { useThicknessStore } from "@repo/dieline-core/store/thickness.store";
 import { formatToFixed } from "@repo/dieline-core/utils/format";
-import { getThicknessRange } from "@repo/dieline-core/utils/getThicknessRange";
 import { Button } from "@repo/ui/components/button";
 import { Input } from "@repo/ui/components/input";
 import { Spinner } from "@repo/ui/components/spinner";
 import { cn } from "@repo/ui/lib/utils";
 import { Minus, Plus } from "lucide-react";
-import React, { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 interface Props {
-  localCustomThickness: string | undefined;
-  selectedMaterialThickness: number;
-  setLocalCustomThickness: (val: string) => void;
-  setCustomThickness: (val: number) => void;
   isRendering: boolean;
   materialsIncluded: MaterialValue[];
 }
-const ThicknessInput = ({
-  selectedMaterialThickness,
-  localCustomThickness,
-  setLocalCustomThickness,
-  setCustomThickness,
-  isRendering,
-  materialsIncluded,
-}: Props) => {
+const ThicknessInput = ({ isRendering, materialsIncluded }: Props) => {
+  const [localCustomThickness, setLocalCustomThickness] = useState<
+    string | undefined
+  >();
+
+  const { material } = useMaterialStore();
+  const { setCustomThickness, thickness, getThicknessRange, setThickness } =
+    useThicknessStore();
   const { min: mMinThick, max: mMaxThick } =
     getThicknessRange(materialsIncluded);
 
@@ -35,10 +32,16 @@ const ThicknessInput = ({
     isLoading: isMThicknessLoading,
   } = useLoading();
 
+  useEffect(() => {
+    setThickness(material.thickness);
+    setLocalCustomThickness(material.thickness.toFixed(1));
+    setCustomThickness(undefined);
+  }, [material]);
+
   const handleThicknessChange = (type: "inc" | "dec") => {
     startMThicknessLoading();
 
-    const thickness = localCustomThickness ?? selectedMaterialThickness;
+    const thickness = localCustomThickness ?? material.thickness;
 
     const newThickness = +thickness + (type === "inc" ? 0.1 : -0.1);
 
@@ -54,6 +57,7 @@ const ThicknessInput = ({
 
   return (
     <div>
+      {thickness}
       <div
         className={cn(
           isRendering &&
@@ -68,9 +72,7 @@ const ThicknessInput = ({
         )}
         <Input
           dir="ltr"
-          value={formatToFixed(
-            localCustomThickness ?? selectedMaterialThickness.toString()
-          )}
+          value={formatToFixed(localCustomThickness ?? thickness.toString())}
           className={"text-center"}
           onFocus={(e) => e.currentTarget.select()}
           onChange={(e) => {
@@ -103,8 +105,7 @@ const ThicknessInput = ({
           className="absolute left-0 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
           onClick={() => handleThicknessChange("dec")}
           disabled={
-            (+(localCustomThickness ?? 0) || selectedMaterialThickness) <=
-            mMinThick
+            (+(localCustomThickness ?? 0) || material.thickness) <= mMinThick
           }
         >
           <Minus />
@@ -115,8 +116,7 @@ const ThicknessInput = ({
           className="absolute right-0 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
           onClick={() => handleThicknessChange("inc")}
           disabled={
-            (+(localCustomThickness ?? 0) || selectedMaterialThickness) >=
-            mMaxThick
+            (+(localCustomThickness ?? 0) || material.thickness) >= mMaxThick
           }
         >
           <Plus />
