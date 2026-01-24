@@ -22,11 +22,6 @@ export type MaterialsInput = {
   included: MaterialValue[];
 };
 
-export type SizesProps = {
-  width: number;
-  height: number;
-} | null; //todo: check why this is null
-
 export type OffsetType = {
   width: {
     inner: number;
@@ -39,9 +34,6 @@ export type OffsetType = {
 };
 
 export type SVGModelSizes = {
-  container: SizesProps;
-  trim: SizesProps;
-  bleed: SizesProps;
   offset: OffsetType;
 };
 
@@ -70,7 +62,6 @@ export type ResolvedDimensions = {
 
 export type DielineModel = (params: {
   dimensions: {
-    raw: { width: number; height: number; length: number };
     resolved: ResolvedDimensions;
   };
   dimensionType: DimensionType;

@@ -3,6 +3,7 @@ import M, { IModel } from "makerjs";
 import { ResolvedDimensions } from "../../data/types";
 import { calculateSafeFoldOffset } from "./calculate/calculateSafeFoldOffset";
 import { createDielineContext } from "./contextCreator";
+import { toPt } from "../../utils/sizeConvertor";
 
 interface InitiateModelsOptions {
   resolved: ResolvedDimensions;
@@ -24,7 +25,15 @@ export function initiateModel({ resolved }: InitiateModelsOptions) {
 
   const { model, foldModel, trimModel, guideModel } = arrangeModels();
 
+  const { dimension } = getDielineCTX();
+  const rawDim = {
+    width: toPt(dimension.width),
+    length: toPt(dimension.length),
+    height: toPt(dimension.height),
+  };
+
   return {
+    rawDim,
     materialThickness,
     safeFoldOffset,
     height,

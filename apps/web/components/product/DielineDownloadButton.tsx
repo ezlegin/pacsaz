@@ -38,10 +38,17 @@ const DielineDownloadButton = ({ slug, isRendering }: Props) => {
     }
     startLoading();
 
-    await downloadPdf({
+    const res = await downloadPdf({
       svg,
       slug,
     });
+
+    if (!res.success) {
+      toast.error("خطایی رخ داد. لطفا لحظاتی بعد مجددا تلاش کنید.");
+      stopLoading();
+      return;
+    }
+
     toast.success("فایل با موفقیت تولید شد.");
 
     stopLoading();

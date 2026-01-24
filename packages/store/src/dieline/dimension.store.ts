@@ -34,3 +34,5 @@ export const useDimensionStore = create<DimensionStore>((set) => ({
       dimension,
     })),
 }));
+
+export const getDimension = () => useDimensionStore.getState().dimension;

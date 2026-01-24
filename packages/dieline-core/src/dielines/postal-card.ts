@@ -28,11 +28,19 @@ const postalCard: DielineGeneratorProps = {
     default: materials["glossy-cardboard"],
     included: [materials["glossy-cardboard"], materials["art-paper"]],
   },
-  model({ dimensions: { raw: rawDim, resolved }, dimensionType }) {
-    const { model, foldModel, trimModel, guideModel, offsets, width, length } =
-      initiateModel({
-        resolved,
-      });
+  model({ dimensions: { resolved }, dimensionType }) {
+    const {
+      model,
+      foldModel,
+      trimModel,
+      guideModel,
+      offsets,
+      width,
+      length,
+      rawDim,
+    } = initiateModel({
+      resolved,
+    });
 
     //! TRIM
     const rect = new M.models.Rectangle(width * 2, length);
