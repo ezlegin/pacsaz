@@ -41,7 +41,7 @@ const tuckEnd: DielineGeneratorProps = {
     ],
   },
 
-  model({ dimensions: { raw: rawDim, resolved }, dimensionType }) {
+  model({ dimensions: { resolved } }) {
     const {
       materialThickness,
       safeFoldOffset,
@@ -56,6 +56,8 @@ const tuckEnd: DielineGeneratorProps = {
       lengthMM,
       offsets,
       widthMM,
+      rawDim,
+      dimensionType,
     } = initiateModel({
       resolved,
     });
@@ -224,7 +226,6 @@ const tuckEnd: DielineGeneratorProps = {
     return modelBuilder({
       model,
       trimModel,
-      offsets,
       watermark: {
         offset: {
           x: glueSize,

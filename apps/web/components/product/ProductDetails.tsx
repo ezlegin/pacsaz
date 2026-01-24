@@ -216,16 +216,19 @@ export default function ProductDetails({
           </Select>
         </Section>
 
-        <Section
-          isPremium={isPremium}
-          title="ضخامت"
-          infoContent={<ThicknessGuide />}
-        >
-          <ThicknessInput
-            isRendering={isRendering}
-            materialsIncluded={materialsInput.included}
-          />
-        </Section>
+        {dimensionsType.includes("inner") ||
+          (dimensionsType.includes("outer") && (
+            <Section
+              isPremium={isPremium}
+              title="ضخامت"
+              infoContent={<ThicknessGuide />}
+            >
+              <ThicknessInput
+                isRendering={isRendering}
+                materialsIncluded={materialsInput.included}
+              />
+            </Section>
+          ))}
 
         <Section title="نوع ابعاد" infoContent={<DimensionTypeGuide />}>
           <ToggleGroup

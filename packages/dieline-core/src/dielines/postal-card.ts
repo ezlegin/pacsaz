@@ -9,7 +9,7 @@ import { DielineGeneratorProps } from "../data/types";
 
 const postalCard: DielineGeneratorProps = {
   slug: "postal-card",
-  title: "کارت پستال تا شو", //todo: sync to database, not here.
+  title: "کارت پستال تا شو",
   dimensions: {
     defaultDimensions: {
       length: 160,
@@ -23,21 +23,21 @@ const postalCard: DielineGeneratorProps = {
     },
   },
   defaultBleed: BLEED.default,
-  dimensionsType: ["manufacture"],
+  dimensionsType: ["manufacture", "inner", "outer"],
   materials: {
     default: materials["glossy-cardboard"],
     included: [materials["glossy-cardboard"], materials["art-paper"]],
   },
-  model({ dimensions: { resolved }, dimensionType }) {
+  model({ dimensions: { resolved } }) {
     const {
       model,
       foldModel,
       trimModel,
       guideModel,
-      offsets,
       width,
       length,
       rawDim,
+      dimensionType,
     } = initiateModel({
       resolved,
     });
@@ -55,7 +55,6 @@ const postalCard: DielineGeneratorProps = {
     drawGuideLines(guideModel, {
       dimensionType,
       length,
-      offsets,
       rawDim,
       width,
       guides: [
@@ -67,7 +66,6 @@ const postalCard: DielineGeneratorProps = {
     return modelBuilder({
       model,
       trimModel,
-      offsets,
       watermark: {
         offset: {
           x: 0,

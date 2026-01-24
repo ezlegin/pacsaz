@@ -1,9 +1,8 @@
 import { create } from "zustand";
-import { Model } from "../../../dieline-core/src/data/types";
 
 type SVGStore = {
-  svg: Model | null;
-  setSvg: (svg: Model) => void;
+  svg: string | null;
+  setSvg: (svg: string) => void;
 };
 
 export const useSVGStore = create<SVGStore>((set) => ({

@@ -27,7 +27,7 @@ export default function SvgPreview({
   disableWheel = false,
   showControls = true,
 }: Props) {
-  const svg = useSVGStore((s) => s.svg?.model);
+  const svg = useSVGStore((s) => s.svg);
   const {
     ctx: { doCenterSVG },
   } = useDeveloperToolsStore();

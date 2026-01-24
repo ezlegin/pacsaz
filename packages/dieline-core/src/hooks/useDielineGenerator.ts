@@ -8,9 +8,11 @@ import { useSVGStore } from "@repo/store/dieline/svg.store";
 import { useThicknessStore } from "@repo/store/dieline/thickness.store";
 import { useDeveloperToolsStore } from "@repo/store/dieline/useDeveloperToolsStore";
 import { useEffect, useTransition } from "react";
-import { resolveDimensions } from "../core/helpers/dimensionResolver";
+import { resolveDimensions } from "../utils/dimensionResolver";
 import { DielineGeneratorProps, MaterialKey } from "../data/types";
 import { toPt } from "../utils/sizeConvertor";
+import { resolveOffsets } from "../utils/offsetResolver";
+import { useOffsetStore } from "@repo/store/dieline/offset.store";
 
 export function useDielineGenerator(dieline: DielineGeneratorProps) {
   const { material, setMaterial } = useMaterialStore();
@@ -25,6 +27,7 @@ export function useDielineGenerator(dieline: DielineGeneratorProps) {
   const {
     ctx: { showAnchors, showOverallDimensions, showWatermark },
   } = useDeveloperToolsStore();
+  const { setOffset } = useOffsetStore();
 
   // set defaults
   useEffect(() => {
@@ -40,30 +43,19 @@ export function useDielineGenerator(dieline: DielineGeneratorProps) {
     height: toPt(dimension.height),
   };
 
+  const offsets = resolveOffsets();
+
   const resolved = resolveDimensions({
     width,
     length,
     height,
     dimensionType,
-    material,
-    customThickness,
+    offsets,
   });
 
-  const deps = [
-    width,
-    length,
-    height,
-    dimensionType,
-    material,
-    showAnchors,
-    showWatermark,
-    showOverallDimensions,
-    bleed,
-    customThickness,
-    dieline,
-  ];
-
   useEffect(() => {
+    setOffset(offsets);
+
     setContext({
       bleed,
       dimension,
@@ -77,15 +69,25 @@ export function useDielineGenerator(dieline: DielineGeneratorProps) {
     startTransition(() => {
       const result = dieline.model({
         dimensions: {
-          raw: { height, length, width },
           resolved,
         },
-        dimensionType,
       });
 
       setSvg(result);
     });
-  }, deps);
+  }, [
+    width,
+    length,
+    height,
+    dimensionType,
+    material,
+    showAnchors,
+    showWatermark,
+    showOverallDimensions,
+    bleed,
+    customThickness,
+    dieline,
+  ]);
 
   return {
     resolved,

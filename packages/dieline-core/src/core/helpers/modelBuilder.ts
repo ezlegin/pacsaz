@@ -11,12 +11,7 @@ import { addContainer } from "./add/addContainer";
 import { addOverallDimensionGuides } from "./add/addOverallDimensionGuides";
 import { svgExporter } from "./svgExporter";
 
-export function modelBuilder({
-  model,
-  trimModel,
-  offsets,
-  watermark,
-}: ModelExporter) {
+export function modelBuilder({ model, trimModel, watermark }: ModelExporter) {
   const { showAnchors, showContainer, showOverallDimensions } = getDevCTX();
 
   const bleedAmount = toPt(getDielineCTX().bleed);
@@ -53,23 +48,9 @@ export function modelBuilder({
   });
 
   onDevelepe && console.log("Main Model:", model);
-  return {
-    sizes: {
-      offset: {
-        width: {
-          inner: offsets.width.inner,
-          outer: offsets.width.outer,
-        },
-        length: {
-          inner: offsets.length.inner,
-          outer: offsets.length.outer,
-        },
-      },
-    },
-    model: svgExporter({
-      model,
-      bleedModel: bleed,
-      watermark,
-    }),
-  };
+  return svgExporter({
+    model,
+    bleedModel: bleed,
+    watermark,
+  });
 }

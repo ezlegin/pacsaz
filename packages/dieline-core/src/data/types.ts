@@ -37,11 +37,6 @@ export type SVGModelSizes = {
   offset: OffsetType;
 };
 
-export type Model = {
-  model: string;
-  sizes: SVGModelSizes;
-};
-
 export type Offsets = {
   width: {
     inner: number;
@@ -57,15 +52,13 @@ export type ResolvedDimensions = {
   width: number;
   length: number;
   height?: number;
-  offsets: Offsets;
 };
 
 export type DielineModel = (params: {
   dimensions: {
     resolved: ResolvedDimensions;
   };
-  dimensionType: DimensionType;
-}) => Model;
+}) => string;
 
 export interface DielineGeneratorProps {
   slug: string;
@@ -91,16 +84,6 @@ export type OffsetObject = {
 export type ModelExporter = {
   model: IModel;
   trimModel: IModel;
-  offsets: {
-    width: {
-      inner: number;
-      outer: number;
-    };
-    length: {
-      inner: number;
-      outer: number;
-    };
-  };
   watermark: Watermark;
 };
 

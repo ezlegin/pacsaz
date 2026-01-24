@@ -1,8 +1,9 @@
+import { getOffset } from "@repo/store/dieline/offset.store";
 import { IModel, IPoint } from "makerjs";
-import { DimensionKey, Offsets } from "../../../data/types";
-import { addModelToLayer } from "../add/addModelToLayer";
-import { addGuideLine } from "../add/addGuideline";
+import { DimensionKey } from "../../../data/types";
 import { DimensionType } from "../../../utils/applyDimensionOffset";
+import { addGuideLine } from "../add/addGuideline";
+import { addModelToLayer } from "../add/addModelToLayer";
 
 type Orientation = "horizontal" | "vertical";
 
@@ -10,17 +11,12 @@ type DrawGuideLinesParams = {
   width: number;
   length: number;
   height?: number;
-
   rawDim: {
     width: number;
     height: number;
     length: number;
   };
-
-  offsets: Offsets;
-
   dimensionType: DimensionType;
-
   guides: GuideConfig[];
 };
 
@@ -33,16 +29,10 @@ type GuideConfig = {
 
 export function drawGuideLines(
   model: IModel,
-  {
-    width,
-    length,
-    height,
-    rawDim,
-    offsets,
-    dimensionType,
-    guides,
-  }: DrawGuideLinesParams
+  { width, length, height, rawDim, dimensionType, guides }: DrawGuideLinesParams
 ) {
+  const offsets = getOffset();
+  if (!offsets) throw new Error("Offsets Are not provided. [drawGuideline]");
   const guidesModel: IModel = { models: {} };
   addModelToLayer(model, "guides", guidesModel);
 
