@@ -1,16 +1,16 @@
-import { toPt } from "../utils/sizeConvertor";
-import { BLEED, DOOR, materials, zero } from "../data/consts";
 import { addDoor } from "../core/helpers/add/addDoor";
 import { addDust } from "../core/helpers/add/addDust";
+import { addGlue } from "../core/helpers/add/addGlue";
+import { cloneMirrorMove, cloneRotateMove } from "../core/helpers/clone";
 import { drawFoldLines } from "../core/helpers/draw/drawFoldLines";
 import { drawGuideLines } from "../core/helpers/draw/drawGuideLines";
 import { drawSingleLines } from "../core/helpers/draw/drawSingleLines";
-import { addGlue } from "../core/helpers/add/addGlue";
 import { initiateModel } from "../core/helpers/initiateModels";
 import { modelBuilder } from "../core/helpers/modelBuilder";
 import { pushModelSeparatly } from "../core/helpers/pushModelSeparatly";
+import { DOOR, materials, zero } from "../data/consts";
 import { DielineGeneratorProps } from "../data/types";
-import { cloneRotateMove, cloneMirrorMove } from "../core/helpers/clone";
+import { toPt } from "../utils/sizeConvertor";
 
 const homeDieline: DielineGeneratorProps = {
   slug: "home-dieline",
@@ -30,30 +30,12 @@ const homeDieline: DielineGeneratorProps = {
   dimensionsType: ["manufacture", "inner", "outer"],
   materials: {
     default: materials["glossy-cardboard"],
-    included: [
-      materials["glossy-cardboard"],
-      materials["f-flute"],
-      materials["e-flute"],
-      materials["b-flute"],
-    ],
+    included: [materials["glossy-cardboard"]],
   },
-
-  model({
-    developers: { showAnchors, showOverallDimensions },
-    dimensions: {
-      raw: rawDim,
-      resolved,
-      bleedSize,
-      customThickness,
-      container,
-    },
-    dimensionType,
-    selectedMaterial,
-  }) {
+  model({ dimensions: { raw: rawDim, resolved }, dimensionType }) {
     const {
       materialThickness,
       safeFoldOffset,
-      bleedAmount,
       height,
       width,
       model,
@@ -66,11 +48,7 @@ const homeDieline: DielineGeneratorProps = {
       offsets,
       widthMM,
     } = initiateModel({
-      selectedMaterial,
-      customThickness,
-      bleedSize,
       resolved,
-      defaultBleed: BLEED.default,
     });
 
     //! -------------- TRIM --------------
@@ -239,19 +217,13 @@ const homeDieline: DielineGeneratorProps = {
     return modelBuilder({
       model,
       trimModel,
-      bleedAmount,
       offsets,
-      container,
-      showAnchors,
       watermark: {
-        show: false,
         offset: {
           x: 0,
           y: 0,
         },
       },
-      material: selectedMaterial,
-      showOverallDimensions,
     });
   },
 };

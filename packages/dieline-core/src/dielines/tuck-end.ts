@@ -41,12 +41,7 @@ const tuckEnd: DielineGeneratorProps = {
     ],
   },
 
-  model({
-    developers: { showAnchors, showWatermark, showOverallDimensions },
-    dimensions: { raw: rawDim, resolved, customThickness, container },
-    dimensionType,
-    selectedMaterial,
-  }) {
+  model({ dimensions: { raw: rawDim, resolved }, dimensionType }) {
     const {
       materialThickness,
       safeFoldOffset,
@@ -62,8 +57,6 @@ const tuckEnd: DielineGeneratorProps = {
       offsets,
       widthMM,
     } = initiateModel({
-      selectedMaterial,
-      customThickness,
       resolved,
     });
 
@@ -232,17 +225,12 @@ const tuckEnd: DielineGeneratorProps = {
       model,
       trimModel,
       offsets,
-      container,
-      showAnchors,
       watermark: {
-        show: showWatermark,
         offset: {
           x: glueSize,
           y: 0,
         },
       },
-      material: selectedMaterial,
-      showOverallDimensions,
     });
   },
 };

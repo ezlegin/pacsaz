@@ -1,6 +1,6 @@
 import M, { IModel } from "makerjs";
 
-export function getSizes({
+export function getOverallSizes({
   bleed,
   container,
   trimModel,

@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { bleed } from "./bleed.store";
+import { bleeds } from "./bleed.store";
 import {
   Dimensions,
   FormatsType,
@@ -24,7 +24,7 @@ type ContextStore = {
 };
 
 const defualts: CTX = {
-  bleed: bleed.default,
+  bleed: bleeds.default,
   dimension: {
     width: 0,
     length: 0,
@@ -42,4 +42,4 @@ export const useContextStore = create<ContextStore>((set) => ({
   setContext: (ctx) => set(() => ({ ctx })),
 }));
 
-export const getCTX = () => useContextStore.getState().ctx;
+export const getDielineCTX = () => useContextStore.getState().ctx;

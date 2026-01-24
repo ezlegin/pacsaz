@@ -1,9 +1,9 @@
 import PanelDashboard from "@/components/PanelDashboard";
 import SubscriptionList from "@/components/SubscriptionList";
-import { isUserSubscribed } from "@/data/user";
+import { isSubscribed } from "@repo/store/app/user.store";
 
 const Page = async () => {
-  const isUserSubscribed = await isUserSubscribed;
+  const isUserSubscribed = await isSubscribed;
 
   return !isUserSubscribed ? <SubscriptionList /> : <PanelDashboard />;
 };

@@ -1,5 +1,4 @@
 import { testUser } from "@/data/user";
-import { isSubscribed } from "@repo/dieline-core/data/consts";
 import {
   Sidebar,
   SidebarContent,
@@ -13,6 +12,7 @@ import {
 import { Bookmark, CreditCard, Flag, Heart, User, Users } from "lucide-react";
 import Link from "next/link";
 import PacsazLogo from "./PacsazLogo";
+import { isSubscribed } from "@repo/store/app/user.store";
 
 const items = [
   {

@@ -1,5 +1,5 @@
-import { isSubscribed } from "@repo/store/app/user.store";
-import { getCTX } from "@repo/store/dieline/context.store";
+import { getDielineCTX } from "@repo/store/dieline/context.store";
+import { getDevCTX } from "@repo/store/dieline/useDeveloperToolsStore";
 import M from "makerjs";
 import { COLORS, GUIDES, strokeWidth } from "../../data/consts";
 import { injectWatermark, Watermark } from "./injectWatermark";
@@ -7,17 +7,16 @@ import { injectWatermark, Watermark } from "./injectWatermark";
 type SvgExporterParams = {
   model: M.IModel;
   bleedModel: M.IModel;
-  bleedAmount: number;
   watermark: Watermark;
 };
 
 export function svgExporter({
   model,
   bleedModel,
-  bleedAmount,
   watermark,
 }: SvgExporterParams) {
-  const material = getCTX().material.value;
+  const { showWatermark } = getDevCTX();
+  const material = getDielineCTX().material.value;
   const isCardboard =
     material === "glossy-cardboard" || material === "art-paper";
 
@@ -60,9 +59,7 @@ export function svgExporter({
     },
   });
 
-  if (!watermark.show || isSubscribed) {
-    return svg;
-  }
-
-  return injectWatermark(svg, bleedModel, bleedAmount, watermark.offset);
+  return showWatermark
+    ? injectWatermark(svg, bleedModel, watermark.offset)
+    : svg;
 }

@@ -7,6 +7,8 @@ import { DIMENSIONS } from "../../../../packages/dieline-core/src/data/consts";
 import { DimensionInput } from "../product/DimensionsInput";
 import SVGPreview from "../product/SVGPreview";
 import ProductLoadingOverlay from "../product/ProductLoadingOverlay";
+import { useEffect } from "react";
+import { useDeveloperToolsStore } from "@repo/store/dieline/useDeveloperToolsStore";
 
 const HomeSVGModel = () => {
   const dieline = dielineImporter("home-dieline");
@@ -16,8 +18,13 @@ const HomeSVGModel = () => {
   dieline.dimensions.defaultDimensions.width = 80;
   dieline.dimensions.defaultDimensions.length = 130;
   dieline.dimensions.defaultDimensions.height = 40;
-  dieline.dimensions.minDimensions.height = 30;
-  const { isRendering, doCenterSVG } = useDielineGenerator(dieline, false);
+  const { isRendering } = useDielineGenerator(dieline);
+  const { setDeveloperToolsCTX } = useDeveloperToolsStore();
+
+  useEffect(() => {
+    setDeveloperToolsCTX("showWatermark", false);
+    setDeveloperToolsCTX("showContainer", false);
+  }, []);
 
   return (
     <div className="relative p-0">
@@ -26,7 +33,6 @@ const HomeSVGModel = () => {
       <div className="h-175 max-w-225 min-w-225">
         <SVGPreview
           isRendering={isRendering}
-          doCenterSVG={doCenterSVG}
           showControls={false}
           disablePanning
           disableWheel

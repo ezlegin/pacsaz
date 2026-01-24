@@ -1,16 +1,15 @@
 import { tuckEndModel } from "@/public";
 
 import { formatDimensions } from "@/utils/formatDimensions";
-import { onDevelepe } from "@repo/dieline-core/data/consts";
 import { DimensionsType } from "@repo/dieline-core/data/types";
-import { useDimensionStore } from "@repo/store/dieline/dimension.store";
-import { useDimensionTypeStore } from "@repo/store/dieline/dimenstionType.store";
-import { useSVGStore } from "@repo/store/dieline/svg.store";
 import {
   applyDimensionOffset,
   DimensionType,
 } from "@repo/dieline-core/utils/applyDimensionOffset";
 import { toMm } from "@repo/dieline-core/utils/sizeConvertor";
+import { useDimensionStore } from "@repo/store/dieline/dimension.store";
+import { useDimensionTypeStore } from "@repo/store/dieline/dimenstionType.store";
+import { useSVGStore } from "@repo/store/dieline/svg.store";
 import {
   Dialog,
   DialogContent,
@@ -24,28 +23,9 @@ import DeveloperTools from "./DeveloperTools";
 interface Props {
   dimensionsType: DimensionsType;
   slug: string | undefined;
-  showWatermark: boolean;
-  showOverallDimensions: boolean;
-  doCenterSVG: boolean;
-  showAnchors: boolean;
-  setShowOverallDimensions: (val: boolean) => void;
-  setShowAnchors: (val: boolean) => void;
-  setShowWatermark: (val: boolean) => void;
-  setDoCenterSVG: (val: boolean) => void;
 }
 
-const ProductInfo = ({
-  dimensionsType,
-  slug,
-  showWatermark,
-  showOverallDimensions,
-  doCenterSVG,
-  showAnchors,
-  setShowAnchors,
-  setShowWatermark,
-  setShowOverallDimensions,
-  setDoCenterSVG,
-}: Props) => {
+const ProductInfo = ({ dimensionsType }: Props) => {
   const { svg } = useSVGStore();
   const sizes = svg?.sizes;
 
@@ -212,20 +192,7 @@ const ProductInfo = ({
         </ul>
       </div>
 
-      {onDevelepe && sizes && (
-        <DeveloperTools
-          doCenterSVG={doCenterSVG}
-          setDoCenterSVG={setDoCenterSVG}
-          setShowAnchors={setShowAnchors}
-          setShowOverallDimensions={setShowOverallDimensions}
-          setShowWatermark={setShowWatermark}
-          showAnchors={showAnchors}
-          showOverallDimensions={showOverallDimensions}
-          showWatermark={showWatermark}
-          sizes={sizes}
-          slug={slug}
-        />
-      )}
+      <DeveloperTools />
     </div>
   );
 };

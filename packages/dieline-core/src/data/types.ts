@@ -25,7 +25,7 @@ export type MaterialsInput = {
 export type SizesProps = {
   width: number;
   height: number;
-};
+} | null; //todo: check why this is null
 
 export type OffsetType = {
   width: {
@@ -42,7 +42,6 @@ export type SVGModelSizes = {
   container: SizesProps;
   trim: SizesProps;
   bleed: SizesProps;
-  bleedAmount: number;
   offset: OffsetType;
 };
 
@@ -70,13 +69,7 @@ export type ResolvedDimensions = {
 };
 
 export type DielineModel = (params: {
-  developers: {
-    showAnchors: boolean;
-    showWatermark: boolean;
-    showOverallDimensions: boolean;
-  };
   dimensions: {
-    container: boolean;
     raw: { width: number; height: number; length: number };
     resolved: ResolvedDimensions;
   };
@@ -87,7 +80,7 @@ export interface DielineGeneratorProps {
   slug: string;
   title: string;
   dimensions: DielineDimensions;
-  defaultBleed: number;
+  defaultBleed?: number;
   dimensionsType: DimensionsType;
   materials: MaterialsInput;
   model: DielineModel;
@@ -117,10 +110,7 @@ export type ModelExporter = {
       outer: number;
     };
   };
-  showAnchors: boolean;
-  showOverallDimensions: boolean;
   watermark: Watermark;
-  container: boolean;
 };
 
 export type Dust = {

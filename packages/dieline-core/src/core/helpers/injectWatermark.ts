@@ -1,7 +1,9 @@
 import M from "makerjs";
-import { extractPathDs } from "./extractPathDs";
-import { MARGINS } from "../../data/consts";
+import { MARGINS, onProduction } from "../../data/consts";
 import { toMm, toPt } from "../../utils/sizeConvertor";
+import { extractPathDs } from "./extractPathDs";
+import { isSubscribed } from "@repo/store/app/user.store";
+import { getBleed } from "@repo/store/dieline/bleed.store";
 
 export type WatermarkOffset = {
   x: number;
@@ -9,16 +11,17 @@ export type WatermarkOffset = {
 };
 
 export type Watermark = {
-  show: boolean;
   offset: WatermarkOffset;
 };
 
 export function injectWatermark(
   svg: string,
   clippingModel: M.IModel,
-  bleedAmount: number,
   offset?: WatermarkOffset
 ) {
+  if (isSubscribed && onProduction) return svg;
+  const bleedAmount = toPt(getBleed());
+
   const clipD = extractPathDs(M.exporter.toSVG(clippingModel));
 
   const bleedAmountMM = toMm(bleedAmount);

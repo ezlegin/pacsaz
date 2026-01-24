@@ -1,6 +1,7 @@
 "use client";
 import { onDevelepe } from "@repo/dieline-core/data/consts";
 import { useSVGStore } from "@repo/store/dieline/svg.store";
+import { useDeveloperToolsStore } from "@repo/store/dieline/useDeveloperToolsStore";
 import { Button } from "@repo/ui/components/button";
 import { Card } from "@repo/ui/components/card";
 import { Separator } from "@repo/ui/components/separator";
@@ -15,7 +16,6 @@ import {
 
 interface Props {
   isRendering: boolean;
-  doCenterSVG: boolean;
   disablePanning?: boolean;
   disableWheel?: boolean;
   showControls?: boolean;
@@ -23,12 +23,14 @@ interface Props {
 
 export default function SvgPreview({
   isRendering,
-  doCenterSVG,
   disablePanning = false,
   disableWheel = false,
   showControls = true,
 }: Props) {
   const svg = useSVGStore((s) => s.svg?.model);
+  const {
+    ctx: { doCenterSVG },
+  } = useDeveloperToolsStore();
 
   const transformRef = useRef<ReactZoomPanPinchRef | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);

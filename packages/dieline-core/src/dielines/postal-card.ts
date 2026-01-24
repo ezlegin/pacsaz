@@ -28,11 +28,7 @@ const postalCard: DielineGeneratorProps = {
     default: materials["glossy-cardboard"],
     included: [materials["glossy-cardboard"], materials["art-paper"]],
   },
-  model({
-    dimensions: { raw: rawDim, resolved, container },
-    dimensionType,
-    developers: { showAnchors, showOverallDimensions, showWatermark },
-  }) {
+  model({ dimensions: { raw: rawDim, resolved }, dimensionType }) {
     const { model, foldModel, trimModel, guideModel, offsets, width, length } =
       initiateModel({
         resolved,
@@ -63,13 +59,8 @@ const postalCard: DielineGeneratorProps = {
     return modelBuilder({
       model,
       trimModel,
-      container, //dev
-      showAnchors, //dev
       offsets,
-      showOverallDimensions, //dev
       watermark: {
-        //dep
-        show: showWatermark,
         offset: {
           x: 0,
           y: 0,

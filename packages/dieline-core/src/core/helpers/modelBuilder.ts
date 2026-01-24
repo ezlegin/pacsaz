@@ -1,4 +1,5 @@
-import { getCTX } from "@repo/store/dieline/context.store";
+import { getDielineCTX } from "@repo/store/dieline/context.store";
+import { getDevCTX } from "@repo/store/dieline/useDeveloperToolsStore";
 import { MARGINS, onDevelepe } from "../../data/consts";
 import { ModelExporter } from "../../data/types";
 import { toPt } from "../../utils/sizeConvertor";
@@ -6,19 +7,18 @@ import { addAnchor } from "./add/addAnchor";
 import { addBleed } from "./add/addBleed";
 import { addContainer } from "./add/addContainer";
 import { addOverallDimensionGuides } from "./add/addOverallDimensionGuides";
-import { getSizes } from "./getSizes";
+import { getOverallSizes } from "./getSizes";
 import { svgExporter } from "./svgExporter";
 
 export function modelBuilder({
   model,
   trimModel,
   offsets,
-  showAnchors,
   watermark,
-  showOverallDimensions,
-  container: withContainer,
 }: ModelExporter) {
-  const bleedAmount = toPt(getCTX().bleed);
+  const { showAnchors, showContainer, showOverallDimensions } = getDevCTX();
+
+  const bleedAmount = toPt(getDielineCTX().bleed);
   const bleed = addBleed({
     model,
     trimModel,
@@ -28,10 +28,10 @@ export function modelBuilder({
   const container = addContainer({
     model,
     from: trimModel,
-    marginMM: withContainer ? MARGINS.container : 6, // 6 is the minimum amount to avoid clipping view
+    marginMM: showContainer ? MARGINS.container : 6, // 6 is the minimum amount to avoid clipping view
   });
 
-  const { bleedSize, containerSize, trimSize } = getSizes({
+  const { bleedSize, containerSize, trimSize } = getOverallSizes({
     bleed,
     container,
     trimModel,
@@ -51,7 +51,6 @@ export function modelBuilder({
       container: containerSize,
       trim: trimSize,
       bleed: bleedSize,
-      bleedAmount,
       offset: {
         width: {
           inner: offsets.width.inner,
@@ -66,7 +65,6 @@ export function modelBuilder({
     model: svgExporter({
       model,
       bleedModel: bleed,
-      bleedAmount,
       watermark,
     }),
   };

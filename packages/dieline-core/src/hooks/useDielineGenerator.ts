@@ -1,25 +1,19 @@
 import { useBleedStore } from "@repo/store/dieline/bleed.store";
+import { useContextStore } from "@repo/store/dieline/context.store";
 import { useDimensionStore } from "@repo/store/dieline/dimension.store";
 import { useDimensionTypeStore } from "@repo/store/dieline/dimenstionType.store";
+import { useFormatStore } from "@repo/store/dieline/format.store";
 import { useMaterialStore } from "@repo/store/dieline/material.store";
 import { useSVGStore } from "@repo/store/dieline/svg.store";
 import { useThicknessStore } from "@repo/store/dieline/thickness.store";
-import { useEffect, useState, useTransition } from "react";
+import { useDeveloperToolsStore } from "@repo/store/dieline/useDeveloperToolsStore";
+import { useEffect, useTransition } from "react";
 import { resolveDimensions } from "../core/helpers/dimensionResolver";
 import { DielineGeneratorProps, MaterialKey } from "../data/types";
 import { toPt } from "../utils/sizeConvertor";
-import { useContextStore } from "@repo/store/dieline/context.store";
-import { useFormatStore } from "@repo/store/dieline/format.store";
 
-export function useDielineGenerator(
-  dieline: DielineGeneratorProps,
-  container?: boolean
-) {
+export function useDielineGenerator(dieline: DielineGeneratorProps) {
   const { material, setMaterial } = useMaterialStore();
-  const [showAnchors, setShowAnchors] = useState(false);
-  const [showWatermark, setShowWatermark] = useState(true);
-  const [showOverallDimensions, setShowOverallDimensions] = useState(false);
-  const [doCenterSVG, setDoCenterSVG] = useState(true);
   const { dimension, setDefaultDimension } = useDimensionStore();
   const { bleed, setBleed } = useBleedStore();
   const { setThickness, customThickness, thickness } = useThicknessStore();
@@ -28,6 +22,9 @@ export function useDielineGenerator(
   const { format } = useFormatStore();
   const { setSvg } = useSVGStore();
   const [isRendering, startTransition] = useTransition();
+  const {
+    ctx: { showAnchors, showOverallDimensions, showWatermark },
+  } = useDeveloperToolsStore();
 
   // set defaults
   useEffect(() => {
@@ -80,11 +77,9 @@ export function useDielineGenerator(
     startTransition(() => {
       const result = dieline.model({
         dimensions: {
-          container: container ?? true,
           raw: { height, length, width },
           resolved,
         },
-        developers: { showAnchors, showWatermark, showOverallDimensions },
         dimensionType,
       });
 
@@ -95,13 +90,5 @@ export function useDielineGenerator(
   return {
     resolved,
     isRendering,
-    showAnchors,
-    showWatermark,
-    showOverallDimensions,
-    doCenterSVG,
-    setShowAnchors,
-    setShowWatermark,
-    setShowOverallDimensions,
-    setDoCenterSVG,
   };
 }
