@@ -3,7 +3,7 @@
 import { useDielineGenerator } from "@repo/dieline-core/hooks/useDielineGenerator";
 import { dielineImporter } from "@repo/dieline-core/utils/dielineImporter";
 import { notFound } from "next/navigation";
-import ProductDetails from "./ProductDetails";
+import DielineSettings from "./DielineSettings";
 import ProductInfo from "./ProductInfo";
 import ProductLoadingOverlay from "./ProductLoadingOverlay";
 import SVGPreview from "./SVGPreview";
@@ -28,7 +28,7 @@ const DielineGenerator = ({ slug }: { slug: string }) => {
       <ProductLoadingOverlay />
 
       <div className="h-full grid grid-cols-[320px_1fr_300px] p-3">
-        <ProductDetails
+        <DielineSettings
           defaultDimensions={dieline.dimensions}
           dimensionsType={dieline.dimensionsType}
           slug={dieline.slug}

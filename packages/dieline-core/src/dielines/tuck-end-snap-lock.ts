@@ -40,12 +40,7 @@ const tuckEndSnapLock: DielineGeneratorProps = {
     ],
   },
 
-  model({
-    developers: { showAnchors, showWatermark, showOverallDimensions },
-    dimensions: { raw: rawDim, resolved, customThickness, container },
-    dimensionType,
-    selectedMaterial,
-  }) {
+  model() {
     const {
       materialThickness,
       safeFoldOffset,
@@ -58,13 +53,8 @@ const tuckEndSnapLock: DielineGeneratorProps = {
       heightMM,
       length,
       lengthMM,
-      offsets,
       widthMM,
-    } = initiateModel({
-      selectedMaterial,
-      customThickness,
-      resolved,
-    });
+    } = initiateModel();
 
     //! -------------- TRIM --------------
 
@@ -176,11 +166,8 @@ const tuckEndSnapLock: DielineGeneratorProps = {
 
     //! -------------- GUIDES --------------
     drawGuideLines(guideModel, {
-      dimensionType,
       height,
       length,
-      offsets,
-      rawDim,
       width,
       guides: [
         {
@@ -201,18 +188,12 @@ const tuckEndSnapLock: DielineGeneratorProps = {
     return modelBuilder({
       model,
       trimModel,
-      offsets,
-      container,
-      showAnchors,
       watermark: {
-        show: showWatermark,
         offset: {
           x: glueSize,
           y: 0,
         },
       },
-      material: selectedMaterial,
-      showOverallDimensions,
     });
   },
 };

@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { resolveDimension } from "../utils/dimensionResolver";
+import { toPt } from "../../../dieline-core/src/utils/sizeConvertor";
 
 export type DimensionKey = "width" | "length" | "height";
 
@@ -9,14 +10,21 @@ type Dimension = {
   height: number;
 };
 
-export type Dimensions = Record<
-  "raw" | "resolved",
-  {
+type Unit = {
+  pt: number;
+  mm: number;
+};
+
+type Resolved = Record<DimensionKey, Unit>;
+
+export type Dimensions = {
+  raw: {
     width: number;
     length: number;
     height: number;
-  }
->;
+  };
+  resolved: Resolved;
+};
 
 type DimensionStore = {
   dimension: Dimensions;
@@ -24,17 +32,21 @@ type DimensionStore = {
   setDefaultDimension: (dimension: Dimension) => void;
 };
 
-const dimDefaults = {
-  width: 0,
-  length: 0,
-  height: 0,
-};
-
 // all units in MM
 export const useDimensionStore = create<DimensionStore>((set) => ({
+  // used for UI
   dimension: {
-    raw: dimDefaults, // used for UI
-    resolved: dimDefaults, // used for dieline generation
+    raw: {
+      width: 0,
+      length: 0,
+      height: 0,
+    },
+    // used for dieline generation
+    resolved: {
+      width: { pt: 0, mm: 0 },
+      length: { mm: 0, pt: 0 },
+      height: { mm: 0, pt: 0 },
+    },
   },
 
   setDimension: (key, value) =>
@@ -46,7 +58,10 @@ export const useDimensionStore = create<DimensionStore>((set) => ({
         },
         resolved: {
           ...state.dimension.resolved,
-          [key]: resolveDimension(key, value),
+          [key]: {
+            pt: toPt(resolveDimension(key, value)!), //todo: import toPt from correct path
+            mm: resolveDimension(key, value),
+          },
         },
       },
     })),
@@ -62,10 +77,14 @@ export const useDimensionStore = create<DimensionStore>((set) => ({
 
 export const getDimension = () => useDimensionStore.getState().dimension;
 
-function resolveDimensions(dimension: Dimension): Dimension {
+function resolveDimensions(dimension: Dimension): Resolved {
+  const widthResolved = resolveDimension("width", dimension.width)!;
+  const lengthResolved = resolveDimension("length", dimension.length)!;
+  const heightResolved = resolveDimension("height", dimension.height)!;
+
   return {
-    width: resolveDimension("width", dimension.width)!,
-    length: resolveDimension("length", dimension.length)!,
-    height: resolveDimension("height", dimension.height)!,
+    width: { mm: widthResolved, pt: toPt(widthResolved) },
+    length: { mm: lengthResolved, pt: toPt(lengthResolved) },
+    height: { mm: heightResolved, pt: toPt(heightResolved) },
   };
 }

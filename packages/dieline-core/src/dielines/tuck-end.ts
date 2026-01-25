@@ -55,7 +55,6 @@ const tuckEnd: DielineGeneratorProps = {
       length,
       lengthMM,
       widthMM,
-      dimensionType,
     } = initiateModel();
 
     //! -------------- TRIM --------------
@@ -197,7 +196,6 @@ const tuckEnd: DielineGeneratorProps = {
 
     //! -------------- GUIDES --------------
     drawGuideLines(guideModel, {
-      dimensionType,
       height,
       length,
       width,

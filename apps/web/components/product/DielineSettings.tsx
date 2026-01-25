@@ -64,7 +64,7 @@ interface Props {
   isRendering: boolean;
 }
 
-export default function ProductDetails({
+export default function DielineSettings({
   defaultDimensions,
   dimensionsType,
   slug,
@@ -107,11 +107,6 @@ export default function ProductDetails({
 
   return (
     <Card className="h-full flex flex-col justify-between p-6 z-10">
-      <div>
-        <div>{dimension.resolved.width}</div>
-        <div>{dimension.resolved.length}</div>
-        <div>{dimension.resolved.height}</div>
-      </div>
       <div className="space-y-5">
         <Section title="ابعاد" infoContent={<DimensionGuide />}>
           <div className="grid grid-cols-2 gap-4">
@@ -222,19 +217,16 @@ export default function ProductDetails({
           </Select>
         </Section>
 
-        {dimensionsType.includes("inner") ||
-          (dimensionsType.includes("outer") && (
-            <Section
-              isPremium={isPremium}
-              title="ضخامت"
-              infoContent={<ThicknessGuide />}
-            >
-              <ThicknessInput
-                isRendering={isRendering}
-                materialsIncluded={materialsInput.included}
-              />
-            </Section>
-          ))}
+        <Section
+          isPremium={isPremium}
+          title="ضخامت"
+          infoContent={<ThicknessGuide />}
+        >
+          <ThicknessInput
+            isRendering={isRendering}
+            materialsIncluded={materialsInput.included}
+          />
+        </Section>
 
         <Section title="نوع ابعاد" infoContent={<DimensionTypeGuide />}>
           <ToggleGroup

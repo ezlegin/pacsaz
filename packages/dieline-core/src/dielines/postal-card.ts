@@ -29,15 +29,8 @@ const postalCard: DielineGeneratorProps = {
     included: [materials["glossy-cardboard"], materials["art-paper"]],
   },
   model() {
-    const {
-      model,
-      foldModel,
-      trimModel,
-      guideModel,
-      width,
-      length,
-      dimensionType,
-    } = initiateModel();
+    const { model, foldModel, trimModel, guideModel, width, length } =
+      initiateModel();
 
     //! TRIM
     const rect = new M.models.Rectangle(width * 2, length);
@@ -50,7 +43,6 @@ const postalCard: DielineGeneratorProps = {
 
     //! GUIDES
     drawGuideLines(guideModel, {
-      dimensionType,
       length,
       width,
       guides: [
