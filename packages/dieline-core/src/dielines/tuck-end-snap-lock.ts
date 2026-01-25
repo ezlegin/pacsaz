@@ -10,10 +10,10 @@ import { initiateModel } from "../core/helpers/initiateModels";
 import { modelBuilder } from "../core/helpers/modelBuilder";
 import { pushModelSeparatly } from "../core/helpers/pushModelSeparatly";
 import { BLEED, DOOR, materials } from "../data/consts";
-import { DielineGeneratorProps } from "../data/types";
+import { Dieline } from "../data/types";
 import { toPt } from "../utils/sizeConvertor";
 
-const tuckEndSnapLock: DielineGeneratorProps = {
+const tuckEndSnapLock: Dieline = {
   slug: "tuck-end-snap-lock",
   title: "جعبه اسنپ لاک",
   dimensions: {

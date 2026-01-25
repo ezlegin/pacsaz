@@ -7,15 +7,16 @@ import {
 import {
   DielineDimensions,
   DimensionsType,
-  FormatsType,
-  MaterialKey,
-  MaterialsInput,
+  MaterialsType,
 } from "@repo/dieline-core/data/types";
 import { isPackagingSizeLogical } from "@repo/dieline-core/utils/isPackagingSizeLogical";
 import { useUserStore } from "@repo/store/app/user.store";
 import { useBleedStore } from "@repo/store/dieline/bleed.store";
-import { useFormatStore } from "@repo/store/dieline/format.store";
-import { useMaterialStore } from "@repo/store/dieline/material.store";
+import { Format, useFormatStore } from "@repo/store/dieline/format.store";
+import {
+  MaterialKey,
+  useMaterialStore,
+} from "@repo/store/dieline/material.store";
 import { useSVGStore } from "@repo/store/dieline/svg.store";
 import { Badge } from "@repo/ui/components/badge";
 import { Card } from "@repo/ui/components/card";
@@ -58,7 +59,7 @@ export interface SVGSizeProps {
 
 interface Props {
   defaultDimensions: DielineDimensions;
-  materialsInput: MaterialsInput;
+  materialsInput: MaterialsType;
   dimensionsType: DimensionsType;
   slug: string;
   isRendering: boolean;
@@ -270,7 +271,7 @@ export default function DielineSettings({
             spacing={1}
             value={format}
             onValueChange={(val) => {
-              if (val) setFormat(val as FormatsType);
+              if (val) setFormat(val as Format);
             }}
             className="w-full"
           >

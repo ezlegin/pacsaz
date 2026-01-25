@@ -1,15 +1,21 @@
 import { getDielineCTX } from "@repo/store/dieline/context.store";
 import { setOverallSize } from "@repo/store/dieline/overallSize.store";
 import { getDevCTX } from "@repo/store/dieline/useDeveloperToolsStore";
-import M from "makerjs";
+import M, { IModel } from "makerjs";
 import { MARGINS, onDevelepe } from "../../data/consts";
-import { ModelExporter } from "../../data/types";
 import { toPt } from "../../utils/sizeConvertor";
 import { addAnchor } from "./add/addAnchor";
 import { addBleed } from "./add/addBleed";
 import { addContainer } from "./add/addContainer";
 import { addOverallDimensionGuides } from "./add/addOverallDimensionGuides";
 import { svgExporter } from "./svgExporter";
+import { Watermark } from "./injectWatermark";
+
+type ModelExporter = {
+  model: IModel;
+  trimModel: IModel;
+  watermark: Watermark;
+};
 
 export function modelBuilder({ model, trimModel, watermark }: ModelExporter) {
   const { showAnchors, showContainer, showOverallDimensions } = getDevCTX();

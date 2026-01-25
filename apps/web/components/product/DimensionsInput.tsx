@@ -1,6 +1,8 @@
-import { DimensionKey } from "@repo/dieline-core/data/types";
-import { clamp } from "@repo/dieline-core/hooks/useSize";
-import { useDimensionStore } from "@repo/store/dieline/dimension.store";
+import { clamp } from "@/utils/clamp";
+import {
+  DimensionKey,
+  useDimensionStore,
+} from "@repo/store/dieline/dimension.store";
 import { Input } from "@repo/ui/components/input";
 import { Spinner } from "@repo/ui/components/spinner";
 import { useEffect, useState } from "react";

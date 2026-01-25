@@ -1,6 +1,6 @@
 import { create } from "zustand";
-import { MaterialValue } from "../../../dieline-core/src/data/types";
 import { getThicknessRange } from "../utils/getThicknessRange";
+import { MaterialValue } from "./material.store";
 
 type ThicknessStore = {
   thickness: number;

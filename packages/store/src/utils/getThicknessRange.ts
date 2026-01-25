@@ -1,4 +1,4 @@
-import { MaterialValue } from "../data/types";
+import { MaterialValue } from "../dieline/material.store";
 
 export function getThicknessRange(MATERIALS: MaterialValue[]) {
   const thicknesses = Object.values(MATERIALS).map(

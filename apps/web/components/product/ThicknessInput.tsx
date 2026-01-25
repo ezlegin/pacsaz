@@ -1,6 +1,8 @@
 import { useLoading } from "@/hooks/useLoading";
-import { MaterialValue } from "@repo/dieline-core/data/types";
-import { useMaterialStore } from "@repo/store/dieline/material.store";
+import {
+  MaterialValue,
+  useMaterialStore,
+} from "@repo/store/dieline/material.store";
 import { useThicknessStore } from "@repo/store/dieline/thickness.store";
 import { formatToFixed } from "@repo/dieline-core/utils/format";
 import { useUserStore } from "@repo/store/app/user.store";

@@ -1,13 +1,15 @@
 import { create } from "zustand";
 import { bleeds } from "./bleed.store";
-import { Dimensions } from "./dimension.store";
+import { Dimension } from "./dimension.store";
 import { DimensionType } from "./dimensionType.store";
 import { Format } from "./format.store";
 import { materials, MaterialValue } from "./material.store";
 
 type CTX = {
   bleed: number;
-  dimension: Dimensions;
+  dimension: {
+    raw: Dimension;
+  };
   material: MaterialValue;
   thickness: number;
   customThickness?: number;
@@ -24,11 +26,6 @@ const defualts: CTX = {
   bleed: bleeds.default,
   dimension: {
     raw: {
-      width: 0,
-      length: 0,
-      height: 0,
-    },
-    resolved: {
       width: 0,
       length: 0,
       height: 0,

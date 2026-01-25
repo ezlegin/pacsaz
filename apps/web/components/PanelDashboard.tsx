@@ -1,5 +1,4 @@
 import { testUser } from "@/data/user";
-import { MaterialKey } from "@repo/dieline-core/data/consts";
 import { Progress } from "@repo/ui/components/progress";
 import { TableCell, TableRow } from "@repo/ui/components/table";
 import { formatDate } from "date-fns";
@@ -8,6 +7,7 @@ import Card from "@repo/ui/components/custom/Card";
 import { StatCard } from "./StatCard";
 import UserSubscriptionCard from "./UserSubscriptionCard";
 import Table from "@repo/ui/components/custom/Table";
+import { MaterialKey } from "@repo/store/dieline/material.store";
 
 type LastDownloads = {
   id: number;

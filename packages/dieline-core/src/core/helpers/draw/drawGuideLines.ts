@@ -1,8 +1,10 @@
 import { getDielineCTX } from "@repo/store/dieline/context.store";
-import { getDimension } from "@repo/store/dieline/dimension.store";
+import {
+  DimensionKey,
+  getDimension,
+} from "@repo/store/dieline/dimension.store";
 import { getOffset } from "@repo/store/dieline/offset.store";
 import { IModel, IPoint } from "makerjs";
-import { DimensionKey } from "../../../data/types";
 import { addGuideLine } from "../add/addGuideline";
 import { addModelToLayer } from "../add/addModelToLayer";
 

@@ -4,7 +4,7 @@ import { toPt } from "../../../dieline-core/src/utils/sizeConvertor";
 
 export type DimensionKey = "width" | "length" | "height";
 
-type Dimension = {
+export type Dimension = {
   width: number;
   length: number;
   height: number;

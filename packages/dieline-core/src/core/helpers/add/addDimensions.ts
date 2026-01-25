@@ -1,10 +1,8 @@
 import M, { IPoint } from "makerjs";
 import { OffsetObject } from "../../../data/types";
-import {
-  DimensionType,
-  applyDimensionOffset,
-} from "../../../utils/applyDimensionOffset";
+import { applyDimensionOffset } from "../../../utils/applyDimensionOffset";
 import { toMm } from "../../../utils/sizeConvertor";
+import { DimensionType } from "@repo/store/dieline/dimensionType.store";
 
 export interface GuideLineOptions {
   type: "width" | "length" | "height";

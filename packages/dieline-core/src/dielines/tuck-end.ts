@@ -9,12 +9,12 @@ import { initiateModel } from "../core/helpers/initiateModels";
 import { modelBuilder } from "../core/helpers/modelBuilder";
 import { pushModelSeparatly } from "../core/helpers/pushModelSeparatly";
 import { BLEED, DOOR, materials, zero } from "../data/consts";
-import { DielineGeneratorProps } from "../data/types";
+import { Dieline } from "../data/types";
 import { toPt } from "../utils/sizeConvertor";
 
 const defaultBleed = BLEED.default;
 
-const tuckEnd: DielineGeneratorProps = {
+const tuckEnd: Dieline = {
   slug: "tuck-end",
   title: "جعبه دو طرف درب", //todo: sync to database, not here.
   dimensions: {

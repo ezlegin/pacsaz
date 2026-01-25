@@ -1,11 +1,11 @@
 import Card from "@repo/ui/components/custom/Card";
-import { MaterialKey } from "@repo/dieline-core/data/consts";
-import { DimensionType } from "@repo/dieline-core/utils/applyDimensionOffset";
 import { Button } from "@repo/ui/components/button";
 import Table from "@repo/ui/components/custom/Table";
 import { TableCell, TableRow } from "@repo/ui/components/table";
 import { formatDate } from "date-fns";
 import { Pencil } from "lucide-react";
+import { MaterialKey } from "@repo/store/dieline/material.store";
+import { DimensionType } from "@repo/store/dieline/dimensionType.store";
 
 type LastDownloads = {
   id: number;

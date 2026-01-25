@@ -5,9 +5,9 @@ import { drawGuideLines } from "../core/helpers/draw/drawGuideLines";
 import { initiateModel } from "../core/helpers/initiateModels";
 import { modelBuilder } from "../core/helpers/modelBuilder";
 import { BLEED, materials } from "../data/consts";
-import { DielineGeneratorProps } from "../data/types";
+import { Dieline } from "../data/types";
 
-const postalCard: DielineGeneratorProps = {
+const postalCard: Dieline = {
   slug: "postal-card",
   title: "کارت پستال تا شو",
   dimensions: {

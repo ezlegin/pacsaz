@@ -9,10 +9,10 @@ import { initiateModel } from "../core/helpers/initiateModels";
 import { modelBuilder } from "../core/helpers/modelBuilder";
 import { pushModelSeparatly } from "../core/helpers/pushModelSeparatly";
 import { DOOR, materials, zero } from "../data/consts";
-import { DielineGeneratorProps } from "../data/types";
+import { Dieline } from "../data/types";
 import { toPt } from "../utils/sizeConvertor";
 
-const homeDieline: DielineGeneratorProps = {
+const homeDieline: Dieline = {
   slug: "home-dieline",
   title: "جعبه دو طرف درب", //todo: sync to database, not here.
   dimensions: {
@@ -32,7 +32,7 @@ const homeDieline: DielineGeneratorProps = {
     default: materials["glossy-cardboard"],
     included: [materials["glossy-cardboard"]],
   },
-  model({ dimensions: { raw: rawDim, resolved }, dimensionType }) {
+  model() {
     const {
       materialThickness,
       safeFoldOffset,
@@ -45,11 +45,8 @@ const homeDieline: DielineGeneratorProps = {
       heightMM,
       length,
       lengthMM,
-      offsets,
       widthMM,
-    } = initiateModel({
-      resolved,
-    });
+    } = initiateModel();
 
     //! -------------- TRIM --------------
 
@@ -190,11 +187,8 @@ const homeDieline: DielineGeneratorProps = {
 
     //! -------------- GUIDES --------------
     drawGuideLines(guideModel, {
-      dimensionType,
       height,
       length,
-      offsets,
-      rawDim,
       width,
       guides: [
         {
@@ -217,7 +211,6 @@ const homeDieline: DielineGeneratorProps = {
     return modelBuilder({
       model,
       trimModel,
-      offsets,
       watermark: {
         offset: {
           x: 0,

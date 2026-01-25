@@ -1,11 +1,10 @@
 import { toPt } from "../utils/sizeConvertor";
 import { calculateSafeFoldOffset } from "../core/helpers/calculate/calculateSafeFoldOffset";
-import { Material } from "./types";
+import { Material } from "@repo/store/dieline/material.store";
 
 export const onDevelepe = process.env.NODE_ENV === "development";
 export const onProduction = process.env.NODE_ENV === "production";
 export const EPS = 0.0001;
-// export const isSubscribed = false;
 
 export const strokeWidth = {
   svg: "0.75",

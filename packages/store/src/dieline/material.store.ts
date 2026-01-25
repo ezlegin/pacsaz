@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-type MaterialKey =
+export type MaterialKey =
   | "c-flute"
   | "be-flute"
   | "bc-flute"
@@ -22,7 +22,7 @@ export type MaterialValue = {
   };
 };
 
-type Material = Record<MaterialKey, MaterialValue>;
+export type Material = Record<MaterialKey, MaterialValue>;
 
 export const materials: Material = {
   "glossy-cardboard": {

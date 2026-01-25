@@ -1,7 +1,6 @@
 import { useLoading } from "@/hooks/useLoading";
 import { downloadPdf } from "@/lib/actions/export/downloader";
 import Diamond from "@/public/icons/Diamond";
-import { Model } from "@repo/dieline-core/data/types";
 import { Button } from "@repo/ui/components/button";
 import { Dialog, DialogContent, DialogTitle } from "@repo/ui/components/dialog";
 import { Spinner } from "@repo/ui/components/spinner";
@@ -15,7 +14,7 @@ import { useSVGStore } from "@repo/store/dieline/svg.store";
 import { useUserStore } from "@repo/store/app/user.store";
 
 interface Props {
-  svg: Model | null;
+  svg: string | null;
   slug: string;
   isRendering: boolean;
 }

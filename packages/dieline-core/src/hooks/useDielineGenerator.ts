@@ -3,16 +3,19 @@ import { useContextStore } from "@repo/store/dieline/context.store";
 import { useDimensionStore } from "@repo/store/dieline/dimension.store";
 import { useDimensionTypeStore } from "@repo/store/dieline/dimensionType.store";
 import { useFormatStore } from "@repo/store/dieline/format.store";
-import { useMaterialStore } from "@repo/store/dieline/material.store";
+import {
+  MaterialKey,
+  useMaterialStore,
+} from "@repo/store/dieline/material.store";
 import { useOffsetStore } from "@repo/store/dieline/offset.store";
 import { useSVGStore } from "@repo/store/dieline/svg.store";
 import { useThicknessStore } from "@repo/store/dieline/thickness.store";
 import { useDeveloperToolsStore } from "@repo/store/dieline/useDeveloperToolsStore";
 import { useEffect, useTransition } from "react";
-import { DielineGeneratorProps, MaterialKey } from "../data/types";
+import { Dieline } from "../data/types";
 import { resolveOffsets } from "../utils/offsetResolver";
 
-export function useDielineGenerator(dieline: DielineGeneratorProps) {
+export function useDielineGenerator(dieline: Dieline) {
   const { material, setMaterial } = useMaterialStore();
   const { dimension, setDefaultDimension } = useDimensionStore();
   const { bleed, setBleed } = useBleedStore();
