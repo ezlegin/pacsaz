@@ -1,18 +1,16 @@
 import { useBleedStore } from "@repo/store/dieline/bleed.store";
 import { useContextStore } from "@repo/store/dieline/context.store";
 import { useDimensionStore } from "@repo/store/dieline/dimension.store";
-import { useDimensionTypeStore } from "@repo/store/dieline/dimenstionType.store";
+import { useDimensionTypeStore } from "@repo/store/dieline/dimensionType.store";
 import { useFormatStore } from "@repo/store/dieline/format.store";
 import { useMaterialStore } from "@repo/store/dieline/material.store";
+import { useOffsetStore } from "@repo/store/dieline/offset.store";
 import { useSVGStore } from "@repo/store/dieline/svg.store";
 import { useThicknessStore } from "@repo/store/dieline/thickness.store";
 import { useDeveloperToolsStore } from "@repo/store/dieline/useDeveloperToolsStore";
 import { useEffect, useTransition } from "react";
-import { resolveDimensions } from "../utils/dimensionResolver";
 import { DielineGeneratorProps, MaterialKey } from "../data/types";
-import { toPt } from "../utils/sizeConvertor";
 import { resolveOffsets } from "../utils/offsetResolver";
-import { useOffsetStore } from "@repo/store/dieline/offset.store";
 
 export function useDielineGenerator(dieline: DielineGeneratorProps) {
   const { material, setMaterial } = useMaterialStore();
@@ -28,31 +26,18 @@ export function useDielineGenerator(dieline: DielineGeneratorProps) {
     ctx: { showAnchors, showOverallDimensions, showWatermark },
   } = useDeveloperToolsStore();
   const { setOffset } = useOffsetStore();
+  const offsets = resolveOffsets();
 
   // set defaults
   useEffect(() => {
+    setOffset(offsets);
     setDefaultDimension(dieline.dimensions.defaultDimensions);
     setMaterial(dieline.materials.default.value as MaterialKey);
     setBleed(dieline.defaultBleed);
     setThickness(material.thickness);
   }, []);
 
-  const { height, length, width } = {
-    width: toPt(dimension.width),
-    length: toPt(dimension.length),
-    height: toPt(dimension.height),
-  };
-
-  const offsets = resolveOffsets();
-
-  const resolved = resolveDimensions({
-    width,
-    length,
-    height,
-    dimensionType,
-    offsets,
-  });
-
+  // set on change
   useEffect(() => {
     setOffset(offsets);
 
@@ -67,30 +52,23 @@ export function useDielineGenerator(dieline: DielineGeneratorProps) {
     });
 
     startTransition(() => {
-      const result = dieline.model({
-        dimensions: {
-          resolved,
-        },
-      });
-
+      const result = dieline.model();
       setSvg(result);
     });
   }, [
-    width,
-    length,
-    height,
+    dimension,
     dimensionType,
     material,
+    bleed,
+    dieline,
+    customThickness,
+
     showAnchors,
     showWatermark,
     showOverallDimensions,
-    bleed,
-    customThickness,
-    dieline,
   ]);
 
   return {
-    resolved,
     isRendering,
   };
 }

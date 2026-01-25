@@ -1,5 +1,5 @@
+import { DimensionType } from "@repo/store/dieline/dimensionType.store";
 import { Offset, OffsetVal } from "@repo/store/dieline/offset.store";
-import { applyDimensionOffset, DimensionType } from "./applyDimensionOffset";
 
 type ResolveDimensionsParams = {
   width: number;
@@ -38,4 +38,19 @@ function resolveSingleDimension(
     dimensionType,
     dimensionType === "inner" ? offset.inner : offset.outer
   );
+}
+
+function applyDimensionOffset(
+  value: number,
+  dimensionType: DimensionType,
+  offset: number
+) {
+  switch (dimensionType) {
+    case "inner":
+      return value + offset;
+    case "outer":
+      return value - offset;
+    default:
+      return value;
+  }
 }

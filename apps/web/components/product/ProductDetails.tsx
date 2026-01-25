@@ -11,11 +11,9 @@ import {
   MaterialKey,
   MaterialsInput,
 } from "@repo/dieline-core/data/types";
-import { DimensionType } from "@repo/dieline-core/utils/applyDimensionOffset";
 import { isPackagingSizeLogical } from "@repo/dieline-core/utils/isPackagingSizeLogical";
 import { useUserStore } from "@repo/store/app/user.store";
 import { useBleedStore } from "@repo/store/dieline/bleed.store";
-import { useDimensionTypeStore } from "@repo/store/dieline/dimenstionType.store";
 import { useFormatStore } from "@repo/store/dieline/format.store";
 import { useMaterialStore } from "@repo/store/dieline/material.store";
 import { useSVGStore } from "@repo/store/dieline/svg.store";
@@ -47,6 +45,11 @@ import FormatGuide from "./guides/FormatGuide";
 import MeterialGuide from "./guides/materialGuide";
 import ThicknessGuide from "./guides/ThicknessGuide";
 import ThicknessInput from "./ThicknessInput";
+import { useDimensionStore } from "@repo/store/dieline/dimension.store";
+import {
+  DimensionType,
+  useDimensionTypeStore,
+} from "@repo/store/dieline/dimensionType.store";
 
 export interface SVGSizeProps {
   width: number;
@@ -59,17 +62,11 @@ interface Props {
   dimensionsType: DimensionsType;
   slug: string;
   isRendering: boolean;
-  resolvedSizes: {
-    width: number;
-    height: number;
-    length: number;
-  };
 }
 
 export default function ProductDetails({
   defaultDimensions,
   dimensionsType,
-  resolvedSizes: { height, width },
   slug,
   materialsInput,
   isRendering,
@@ -80,6 +77,7 @@ export default function ProductDetails({
   const { bleed, setBleed } = useBleedStore();
   const { dimensionType, setDimensionType } = useDimensionTypeStore();
   const { isPremium } = useUserStore();
+  const { dimension } = useDimensionStore();
 
   const onSelectMaterial = (val: string) => {
     const material = materialsInput.included.find((m) => m.value === val)
@@ -102,10 +100,18 @@ export default function ProductDetails({
     "bg-slate-600",
   ];
 
-  const isPackagingLogical = isPackagingSizeLogical(height, width);
+  const isPackagingLogical = isPackagingSizeLogical(
+    dimension.raw.height,
+    dimension.raw.width
+  );
 
   return (
     <Card className="h-full flex flex-col justify-between p-6 z-10">
+      <div>
+        <div>{dimension.resolved.width}</div>
+        <div>{dimension.resolved.length}</div>
+        <div>{dimension.resolved.height}</div>
+      </div>
       <div className="space-y-5">
         <Section title="ابعاد" infoContent={<DimensionGuide />}>
           <div className="grid grid-cols-2 gap-4">

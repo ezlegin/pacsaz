@@ -1,21 +1,18 @@
+import { DimensionType } from "@repo/store/dieline/dimensionType.store";
 import M, { IPoint } from "makerjs";
-import { toMm } from "../../../utils/sizeConvertor";
 import { OffsetObject } from "../../../data/types";
+import { applyDimensionOffset } from "../../../utils/applyDimensionOffset";
 import { addModelToLayer } from "./addModelToLayer";
-import {
-  applyDimensionOffset,
-  DimensionType,
-} from "../../../utils/applyDimensionOffset";
 
 export interface GuideLineOptions {
   type: "width" | "length" | "height";
   from: IPoint;
   to: IPoint;
-  value: number;
   orientation: "horizontal" | "vertical";
   dimensionType: DimensionType;
   dimensionTypeOffset: OffsetObject;
   dimType: "overall" | "partly";
+  value: number;
 }
 
 export function addGuideLine(model: M.IModel, options: GuideLineOptions) {
@@ -162,11 +159,7 @@ export function addGuideLine(model: M.IModel, options: GuideLineOptions) {
   // text
   const mid: IPoint = [(from[0] + to[0]) / 2, (from[1] + to[1]) / 2];
   const textCarrier = new M.models.ConnectTheDots(false, [[0, 0]]);
-  const caption = M.model.addCaption(
-    textCarrier,
-    `${toMm(value).toFixed()} mm`,
-    mid
-  );
+  const caption = M.model.addCaption(textCarrier, `${value.toFixed()} mm`, mid);
 
   addModelToLayer(
     model,

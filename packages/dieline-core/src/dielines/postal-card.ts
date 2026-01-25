@@ -28,7 +28,7 @@ const postalCard: DielineGeneratorProps = {
     default: materials["glossy-cardboard"],
     included: [materials["glossy-cardboard"], materials["art-paper"]],
   },
-  model({ dimensions: { resolved } }) {
+  model() {
     const {
       model,
       foldModel,
@@ -36,11 +36,8 @@ const postalCard: DielineGeneratorProps = {
       guideModel,
       width,
       length,
-      rawDim,
       dimensionType,
-    } = initiateModel({
-      resolved,
-    });
+    } = initiateModel();
 
     //! TRIM
     const rect = new M.models.Rectangle(width * 2, length);
@@ -55,7 +52,6 @@ const postalCard: DielineGeneratorProps = {
     drawGuideLines(guideModel, {
       dimensionType,
       length,
-      rawDim,
       width,
       guides: [
         { orientation: "vertical", type: "length" },

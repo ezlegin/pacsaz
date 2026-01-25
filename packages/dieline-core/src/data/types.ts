@@ -1,6 +1,6 @@
 import { IModel } from "makerjs";
 import { Watermark } from "../core/helpers/injectWatermark";
-import { DimensionType } from "../utils/applyDimensionOffset";
+import { DimensionType } from "@repo/store/dieline/dimensionType.store";
 
 export type Dimensions = {
   width: number;
@@ -54,11 +54,7 @@ export type ResolvedDimensions = {
   height?: number;
 };
 
-export type DielineModel = (params: {
-  dimensions: {
-    resolved: ResolvedDimensions;
-  };
-}) => string;
+export type DielineModel = () => string; //todo: remove safely
 
 export interface DielineGeneratorProps {
   slug: string;
@@ -67,7 +63,7 @@ export interface DielineGeneratorProps {
   defaultBleed?: number;
   dimensionsType: DimensionsType;
   materials: MaterialsInput;
-  model: DielineModel;
+  model: () => string;
 }
 
 export type OffsetObjectParams = {

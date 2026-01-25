@@ -1,16 +1,16 @@
-import { toPt } from "../utils/sizeConvertor";
-import { BLEED, DOOR, materials, zero } from "../data/consts";
 import { addDoor } from "../core/helpers/add/addDoor";
 import { addDust } from "../core/helpers/add/addDust";
+import { addGlue } from "../core/helpers/add/addGlue";
 import { cloneMirrorMove, cloneRotateMove } from "../core/helpers/clone";
 import { drawFoldLines } from "../core/helpers/draw/drawFoldLines";
 import { drawGuideLines } from "../core/helpers/draw/drawGuideLines";
 import { drawSingleLines } from "../core/helpers/draw/drawSingleLines";
-import { addGlue } from "../core/helpers/add/addGlue";
 import { initiateModel } from "../core/helpers/initiateModels";
 import { modelBuilder } from "../core/helpers/modelBuilder";
 import { pushModelSeparatly } from "../core/helpers/pushModelSeparatly";
+import { BLEED, DOOR, materials, zero } from "../data/consts";
 import { DielineGeneratorProps } from "../data/types";
+import { toPt } from "../utils/sizeConvertor";
 
 const defaultBleed = BLEED.default;
 
@@ -41,7 +41,7 @@ const tuckEnd: DielineGeneratorProps = {
     ],
   },
 
-  model({ dimensions: { resolved } }) {
+  model() {
     const {
       materialThickness,
       safeFoldOffset,
@@ -54,13 +54,9 @@ const tuckEnd: DielineGeneratorProps = {
       heightMM,
       length,
       lengthMM,
-      offsets,
       widthMM,
-      rawDim,
       dimensionType,
-    } = initiateModel({
-      resolved,
-    });
+    } = initiateModel();
 
     //! -------------- TRIM --------------
 
@@ -204,8 +200,6 @@ const tuckEnd: DielineGeneratorProps = {
       dimensionType,
       height,
       length,
-      offsets,
-      rawDim,
       width,
       guides: [
         {

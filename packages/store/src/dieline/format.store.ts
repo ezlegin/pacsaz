@@ -1,9 +1,10 @@
 import { create } from "zustand";
-import { FormatsType } from "../../../dieline-core/src/data/types";
+
+export type Format = "ai" | "pdf" | "dxf";
 
 type FormatStore = {
-  format: FormatsType;
-  setFormat: (format: FormatsType) => void;
+  format: Format;
+  setFormat: (format: Format) => void;
 };
 
 export const useFormatStore = create<FormatStore>((set) => ({

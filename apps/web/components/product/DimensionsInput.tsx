@@ -17,7 +17,7 @@ export function DimensionInput({
   isRendering: boolean;
 }) {
   const { dimension, setDimension } = useDimensionStore();
-  const value = dimension[dimKey];
+  const value = dimension.raw[dimKey];
   const [localValue, setLocalValue] = useState<number | null>(null);
   const [blurredInput, setBlurredInput] = useState<DimensionKey | null>(null);
 

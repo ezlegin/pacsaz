@@ -11,7 +11,7 @@ type MaterialKey =
   | "e-flute"
   | "b-flute";
 
-type MaterialValue = {
+export type MaterialValue = {
   value: MaterialKey;
   label: string;
   thickness: number;

@@ -16,11 +16,11 @@ const DielineGenerator = ({ slug }: { slug: string }) => {
 
   if (!dieline) return notFound();
 
-  const { isRendering, resolved } = useDielineGenerator(dieline);
+  const { isRendering } = useDielineGenerator(dieline);
 
   useEffect(() => {
     setDeveloperToolsCTX("showContainer", true);
-    // this is because if the use comes dierectly from home screen, doesn't get container.
+    // this is because: if the use comes dierectly from home screen, doesn't get container.
   }, []);
 
   return (
@@ -34,7 +34,6 @@ const DielineGenerator = ({ slug }: { slug: string }) => {
           slug={dieline.slug}
           materialsInput={dieline.materials}
           isRendering={isRendering}
-          resolvedSizes={resolved}
         />
 
         <div className="relative">

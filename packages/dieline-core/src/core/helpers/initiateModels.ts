@@ -1,17 +1,14 @@
 import { getDielineCTX } from "@repo/store/dieline/context.store";
+import { getDimension } from "@repo/store/dieline/dimension.store";
 import M, { IModel } from "makerjs";
-import { ResolvedDimensions } from "../../data/types";
-import { toPt } from "../../utils/sizeConvertor";
+import { toMm } from "../../utils/sizeConvertor";
 import { calculateSafeFoldOffset } from "./calculate/calculateSafeFoldOffset";
-import { createDielineContext } from "./contextCreator";
 
-interface InitiateModelsOptions {
-  resolved: ResolvedDimensions;
-}
-
-export function initiateModel({ resolved }: InitiateModelsOptions) {
-  const { customThickness, material, dimension, dimensionType } =
-    getDielineCTX();
+export function initiateModel() {
+  const {
+    resolved: { height, length, width },
+  } = getDimension();
+  const { customThickness, material, dimensionType } = getDielineCTX();
 
   const { safeFoldOffset: mSafeFoldOffset, thickness } = material;
 
@@ -21,28 +18,23 @@ export function initiateModel({ resolved }: InitiateModelsOptions) {
 
   const materialThickness = customThickness ?? thickness;
 
-  const { height, heightMM, length, lengthMM, width, widthMM } =
-    createDielineContext(resolved);
+  const widthMM = toMm(width);
+  const lengthMM = toMm(length);
+  const heightMM = toMm(height ?? -1);
 
   const { model, foldModel, trimModel, guideModel } = arrangeModels();
 
-  const rawDim = {
-    width: toPt(dimension.width),
-    length: toPt(dimension.length),
-    height: toPt(dimension.height),
-  };
-
   return {
-    dimensionType,
-    rawDim,
-    materialThickness,
-    safeFoldOffset,
-    height,
-    heightMM,
-    length,
-    lengthMM,
     width,
     widthMM,
+    length,
+    lengthMM,
+    height,
+    heightMM,
+
+    dimensionType,
+    materialThickness,
+    safeFoldOffset,
     model,
     foldModel,
     trimModel,

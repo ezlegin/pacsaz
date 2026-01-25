@@ -1,12 +1,9 @@
 import { create } from "zustand";
 import { bleeds } from "./bleed.store";
-import {
-  Dimensions,
-  FormatsType,
-  MaterialValue,
-} from "../../../dieline-core/src/data/types";
-import { materials } from "./material.store";
-import { DimensionType } from "../../../dieline-core/src/utils/applyDimensionOffset";
+import { Dimensions } from "./dimension.store";
+import { DimensionType } from "./dimensionType.store";
+import { Format } from "./format.store";
+import { materials, MaterialValue } from "./material.store";
 
 type CTX = {
   bleed: number;
@@ -15,7 +12,7 @@ type CTX = {
   thickness: number;
   customThickness?: number;
   dimensionType: DimensionType;
-  format: FormatsType;
+  format: Format;
 };
 
 type ContextStore = {
@@ -26,9 +23,16 @@ type ContextStore = {
 const defualts: CTX = {
   bleed: bleeds.default,
   dimension: {
-    width: 0,
-    length: 0,
-    height: -1,
+    raw: {
+      width: 0,
+      length: 0,
+      height: 0,
+    },
+    resolved: {
+      width: 0,
+      length: 0,
+      height: 0,
+    },
   },
   material: materials["glossy-cardboard"],
   thickness: materials["glossy-cardboard"].thickness,

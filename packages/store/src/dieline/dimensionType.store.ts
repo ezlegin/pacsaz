@@ -1,5 +1,6 @@
 import { create } from "zustand";
-import { DimensionType } from "../../../dieline-core/src/utils/applyDimensionOffset";
+
+export type DimensionType = "manufacture" | "inner" | "outer";
 
 type DimensionTypeStore = {
   dimensionType: DimensionType;

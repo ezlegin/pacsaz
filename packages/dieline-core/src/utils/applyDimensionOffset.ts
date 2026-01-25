@@ -1,4 +1,4 @@
-export type DimensionType = "manufacture" | "inner" | "outer";
+import { DimensionType } from "@repo/store/dieline/dimensionType.store";
 
 export function applyDimensionOffset(
   value: number,

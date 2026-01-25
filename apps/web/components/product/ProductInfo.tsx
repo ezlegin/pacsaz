@@ -2,14 +2,13 @@ import { tuckEndModel } from "@/public";
 
 import { formatDimensions } from "@/utils/formatDimensions";
 import { DimensionsType } from "@repo/dieline-core/data/types";
-import {
-  applyDimensionOffset,
-  DimensionType,
-} from "@repo/dieline-core/utils/applyDimensionOffset";
-import { toMm } from "@repo/dieline-core/utils/sizeConvertor";
+import { applyDimensionOffset } from "@repo/dieline-core/utils/applyDimensionOffset";
 import { useDimensionStore } from "@repo/store/dieline/dimension.store";
-import { useDimensionTypeStore } from "@repo/store/dieline/dimenstionType.store";
-import { useSVGStore } from "@repo/store/dieline/svg.store";
+import {
+  DimensionType,
+  useDimensionTypeStore,
+} from "@repo/store/dieline/dimensionType.store";
+import { getOffset } from "@repo/store/dieline/offset.store";
 import {
   Dialog,
   DialogContent,
@@ -26,11 +25,12 @@ interface Props {
 }
 
 const ProductInfo = ({ dimensionsType }: Props) => {
-  const { svg } = useSVGStore();
-  const sizes = svg?.sizes;
+  const offset = getOffset();
 
   const {
-    dimension: { height, length, width },
+    dimension: {
+      raw: { height, length, width },
+    },
   } = useDimensionStore();
 
   const { dimensionType } = useDimensionTypeStore();
@@ -40,8 +40,8 @@ const ProductInfo = ({ dimensionsType }: Props) => {
       value,
       dimensionType,
       dimensionType === "inner"
-        ? toMm(sizes?.offset[axis].inner ?? 0)
-        : toMm(sizes?.offset[axis].outer ?? 0)
+        ? (offset?.[axis].inner ?? 0)
+        : (offset?.[axis].outer ?? 0)
     );
 
   const calcInner = (
@@ -54,11 +54,7 @@ const ProductInfo = ({ dimensionsType }: Props) => {
     const fromType: DimensionType =
       dimensionType === "inner" ? "manufacture" : "outer";
 
-    return applyDimensionOffset(
-      base,
-      fromType,
-      toMm(sizes?.offset[axis].inner ?? 0)
-    );
+    return applyDimensionOffset(base, fromType, offset?.[axis].inner ?? 0);
   };
 
   const calcOuter = (
@@ -71,11 +67,7 @@ const ProductInfo = ({ dimensionsType }: Props) => {
     const fromType: DimensionType =
       dimensionType === "outer" ? "manufacture" : "inner";
 
-    return applyDimensionOffset(
-      base,
-      fromType,
-      toMm(sizes?.offset[axis].outer ?? 0)
-    );
+    return applyDimensionOffset(base, fromType, offset?.[axis].outer ?? 0);
   };
 
   // manufacture dims
