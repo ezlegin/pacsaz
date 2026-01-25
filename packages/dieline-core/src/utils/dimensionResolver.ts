@@ -1,56 +1,54 @@
-import { DimensionType } from "@repo/store/dieline/dimensionType.store";
-import { Offset, OffsetVal } from "@repo/store/dieline/offset.store";
+import {
+  Dimension,
+  DimensionType,
+  DimensionUnit,
+  Resolved,
+} from "@repo/store/data/types";
+import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
+import { Offset, OffsetValue } from "./offsetResolver";
+import { toPt } from "./sizeConvertor";
 
-type ResolveDimensionsParams = {
-  width: number;
-  length: number;
-  height?: number;
-  dimensionType: DimensionType;
-  offsets: Offset;
-};
+export function resolveDimension(value: number, offset: OffsetValue) {
+  const { dimensionType } = getDielineSettings();
 
-export function resolveDimensions({
-  width,
-  length,
-  height,
-  dimensionType,
-  offsets,
-}: ResolveDimensionsParams) {
-  if (!offsets)
-    throw new Error("Offsets Are not provided. [DimensionResolver]");
-
-  return {
-    width: resolveSingleDimension(width, dimensionType, offsets.width),
-    length: resolveSingleDimension(length, dimensionType, offsets.length),
-    height: resolveSingleDimension(height || 0, dimensionType, offsets.height),
-  };
-}
-
-function resolveSingleDimension(
-  value: number,
-  dimensionType: DimensionType,
-  offset: OffsetVal
-) {
   if (dimensionType === "manufacture") return value;
 
-  return applyDimensionOffset(
-    value,
-    dimensionType,
-    dimensionType === "inner" ? offset.inner : offset.outer
-  );
+  return applyDimensionOffset(value, dimensionType, offset.inner, offset.outer);
 }
 
 function applyDimensionOffset(
   value: number,
   dimensionType: DimensionType,
-  offset: number
+  innerOffset: number,
+  outerOffset: number
 ) {
-  switch (dimensionType) {
-    case "inner":
-      return value + offset;
-    case "outer":
-      return value - offset;
-    default:
-      return value;
+  if (dimensionType === "inner") {
+    return value + innerOffset;
+  } else if (dimensionType === "outer") {
+    return value - outerOffset;
   }
+}
+
+export function resolveDimensions(
+  dimension: Dimension,
+  offsets: Offset
+): Resolved {
+  const widthResolved = resolveDimension(dimension.width, offsets.width)!;
+  const lengthResolved = resolveDimension(dimension.length, offsets.length)!;
+  const heightResolved = resolveDimension(dimension.height, offsets.height)!;
+
+  return {
+    width: { mm: widthResolved, pt: toPt(widthResolved) },
+    length: { mm: lengthResolved, pt: toPt(lengthResolved) },
+    height: { mm: heightResolved, pt: toPt(heightResolved) },
+  };
+}
+
+export function resolveSingleDimension(
+  value: number,
+  offset: OffsetValue
+): DimensionUnit {
+  const resolved = resolveDimension(value, offset)!;
+
+  return { mm: resolved, pt: toPt(resolved) };
 }

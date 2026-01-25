@@ -5,7 +5,8 @@
   "description": "",
   "exports": {
     "./dieline/*": "./src/dieline/*.ts",
-    "./app/*": "./src/app/*.ts"
+    "./app/*": "./src/app/*.ts",
+    "./data/*": "./src/data/*.ts"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",

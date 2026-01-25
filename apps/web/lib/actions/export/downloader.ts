@@ -1,8 +1,7 @@
 import { mapDimensions } from "@repo/dieline-core/utils/mapDimensions";
-import { getDielineCTX } from "@repo/store/dieline/context.store";
-import { PDFGenerator } from "./PDFGenerator";
+import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
 import { getOverallSizes } from "@repo/store/dieline/overallSize.store";
-import { getBleed } from "@repo/store/dieline/bleed.store";
+import { PDFGenerator } from "./PDFGenerator";
 
 interface ExportPdfParams {
   svg: string;
@@ -17,15 +16,15 @@ export async function downloadPdf({
   svg,
   slug,
 }: ExportPdfParams): Promise<DownloadPdfResult> {
-  const { dimension, format } = getDielineCTX();
+  const { dimension, format, bleed } = getDielineSettings();
+
   const overallSizes = getOverallSizes();
-  const bleedAmount = getBleed();
 
   const pdf = await PDFGenerator({
     svg,
     slug,
     overallSizes: overallSizes,
-    bleedAmount,
+    bleedAmount: bleed,
   });
 
   if (!pdf.success) {

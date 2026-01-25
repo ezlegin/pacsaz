@@ -1,9 +1,9 @@
+import { isSubscribed } from "@repo/store/app/user.store";
+import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
 import M from "makerjs";
 import { MARGINS, onProduction } from "../../data/consts";
-import { toMm, toPt } from "../../utils/sizeConvertor";
+import { toPt } from "../../utils/sizeConvertor";
 import { extractPathDs } from "./extractPathDs";
-import { isSubscribed } from "@repo/store/app/user.store";
-import { getBleed } from "@repo/store/dieline/bleed.store";
 
 export type WatermarkOffset = {
   x: number;
@@ -20,11 +20,9 @@ export function injectWatermark(
   offset?: WatermarkOffset
 ) {
   if (isSubscribed && onProduction) return svg;
-  const bleedAmount = toPt(getBleed());
+  const { bleed } = getDielineSettings();
 
   const clipD = extractPathDs(M.exporter.toSVG(clippingModel));
-
-  const bleedAmountMM = toMm(bleedAmount);
 
   return svg.replace(
     "</svg>",
@@ -48,8 +46,8 @@ export function injectWatermark(
     <clipPath
       id="watermarkClip"
       transform="translate(${toPt(
-        MARGINS.container - bleedAmountMM + (offset?.x ?? 0)
-      )}, ${toPt(MARGINS.container - bleedAmountMM + (offset?.y ?? 0))})"
+        MARGINS.container - bleed + (offset?.x ?? 0)
+      )}, ${toPt(MARGINS.container - bleed + (offset?.y ?? 0))})"
     >
       <path d="${clipD[0]}" />
     </clipPath>

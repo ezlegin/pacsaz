@@ -3,6 +3,7 @@ import {
   BLEED,
   DIMENSIONS,
   DIMENSIONS_TYPE,
+  materials,
 } from "@repo/dieline-core/data/consts";
 import {
   DielineDimensions,
@@ -11,12 +12,7 @@ import {
 } from "@repo/dieline-core/data/types";
 import { isPackagingSizeLogical } from "@repo/dieline-core/utils/isPackagingSizeLogical";
 import { useUserStore } from "@repo/store/app/user.store";
-import { useBleedStore } from "@repo/store/dieline/bleed.store";
-import { Format, useFormatStore } from "@repo/store/dieline/format.store";
-import {
-  MaterialKey,
-  useMaterialStore,
-} from "@repo/store/dieline/material.store";
+import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
 import { useSVGStore } from "@repo/store/dieline/svg.store";
 import { Badge } from "@repo/ui/components/badge";
 import { Card } from "@repo/ui/components/card";
@@ -46,11 +42,7 @@ import FormatGuide from "./guides/FormatGuide";
 import MeterialGuide from "./guides/materialGuide";
 import ThicknessGuide from "./guides/ThicknessGuide";
 import ThicknessInput from "./ThicknessInput";
-import { useDimensionStore } from "@repo/store/dieline/dimension.store";
-import {
-  DimensionType,
-  useDimensionTypeStore,
-} from "@repo/store/dieline/dimensionType.store";
+import { DimensionType, Format, MaterialKey } from "@repo/store/data/types";
 
 export interface SVGSizeProps {
   width: number;
@@ -73,12 +65,15 @@ export default function DielineSettings({
   isRendering,
 }: Props) {
   const { svg } = useSVGStore();
-  const { format, setFormat } = useFormatStore();
-  const { setMaterial } = useMaterialStore();
-  const { bleed, setBleed } = useBleedStore();
-  const { dimensionType, setDimensionType } = useDimensionTypeStore();
   const { isPremium } = useUserStore();
-  const { dimension } = useDimensionStore();
+  const {
+    setSetting: setSettings,
+    settings: { bleed, dimensionType, format },
+  } = useDielineSettingsStore();
+
+  const {
+    settings: { dimension },
+  } = useDielineSettingsStore();
 
   const onSelectMaterial = (val: string) => {
     const material = materialsInput.included.find((m) => m.value === val)
@@ -86,7 +81,7 @@ export default function DielineSettings({
 
     if (!material) return;
 
-    setMaterial(material);
+    setSettings("material", materials[material]);
   };
 
   const bleeds = Object.entries(BLEED).map(([type, size]) => ({
@@ -192,8 +187,8 @@ export default function DielineSettings({
         >
           <Select
             disabled={!isPremium}
-            defaultValue={bleed.toString()}
-            onValueChange={(val: string) => setBleed(+val)}
+            defaultValue={bleed?.toString()}
+            onValueChange={(val: string) => setSettings("bleed", +val)}
             dir="rtl"
           >
             <SelectTrigger className="w-full">
@@ -239,7 +234,7 @@ export default function DielineSettings({
             dir="rtl"
             value={dimensionType}
             onValueChange={(val) => {
-              if (val) setDimensionType(val as DimensionType);
+              if (val) setSettings("dimensionType", val as DimensionType);
             }}
             className="w-full"
           >
@@ -271,7 +266,7 @@ export default function DielineSettings({
             spacing={1}
             value={format}
             onValueChange={(val) => {
-              if (val) setFormat(val as Format);
+              if (val) setSettings("format", val as Format);
             }}
             className="w-full"
           >

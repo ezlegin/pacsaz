@@ -1,12 +1,11 @@
-import { Dimension } from "@repo/store/dieline/dimension.store";
-import { MaterialValue } from "@repo/store/dieline/material.store";
+import { Dimension, MaterialValue } from "@repo/store/data/types";
 
 export type DimensionsType = ["manufacture"?, "inner"?, "outer"?];
-export type DielineDimensions = {
+type DielineDimensions = {
   defaultDimensions: Dimension;
   minDimensions: Dimension;
 };
-export type MaterialsType = {
+type MaterialsType = {
   default: MaterialValue;
   included: MaterialValue[];
 };
@@ -20,13 +19,10 @@ export interface Dieline {
   model: () => string;
 }
 
-export type OffsetObjectParams = {
-  inner: number;
-  outer: number;
-};
-
-export type OffsetObject = {
-  widthOffset: OffsetObjectParams;
-  lengthOffset: OffsetObjectParams;
-  heightOffset?: OffsetObjectParams;
-};
+export type OffsetObject = Record<
+  "widthOffset" | "lengthOffset" | "heightOffset",
+  {
+    inner: number;
+    outer: number;
+  }
+>;

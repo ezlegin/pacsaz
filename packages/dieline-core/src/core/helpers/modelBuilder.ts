@@ -1,15 +1,14 @@
-import { getDielineCTX } from "@repo/store/dieline/context.store";
+import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
 import { setOverallSize } from "@repo/store/dieline/overallSize.store";
 import { getDevCTX } from "@repo/store/dieline/useDeveloperToolsStore";
 import M, { IModel } from "makerjs";
 import { MARGINS, onDevelepe } from "../../data/consts";
-import { toPt } from "../../utils/sizeConvertor";
 import { addAnchor } from "./add/addAnchor";
 import { addBleed } from "./add/addBleed";
 import { addContainer } from "./add/addContainer";
 import { addOverallDimensionGuides } from "./add/addOverallDimensionGuides";
-import { svgExporter } from "./svgExporter";
 import { Watermark } from "./injectWatermark";
+import { svgExporter } from "./svgExporter";
 
 type ModelExporter = {
   model: IModel;
@@ -20,7 +19,8 @@ type ModelExporter = {
 export function modelBuilder({ model, trimModel, watermark }: ModelExporter) {
   const { showAnchors, showContainer, showOverallDimensions } = getDevCTX();
 
-  const bleedAmount = toPt(getDielineCTX().bleed);
+  const bleedAmount = getDielineSettings().bleed;
+  if (!bleedAmount) throw new Error("Bleed is not provided. [modelBuilder]");
   const bleed = addBleed({
     model,
     trimModel,

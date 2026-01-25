@@ -1,6 +1,6 @@
 import { toPt } from "../utils/sizeConvertor";
 import { calculateSafeFoldOffset } from "../core/helpers/calculate/calculateSafeFoldOffset";
-import { Materials } from "@repo/store/dieline/material.store";
+import { Materials } from "@repo/store/data/types";
 
 export const onDevelepe = process.env.NODE_ENV === "development";
 export const onProduction = process.env.NODE_ENV === "production";

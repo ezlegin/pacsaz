@@ -1,12 +1,9 @@
-import { getDielineCTX } from "@repo/store/dieline/context.store";
-import {
-  DimensionKey,
-  getDimension,
-} from "@repo/store/dieline/dimension.store";
-import { getOffset } from "@repo/store/dieline/offset.store";
 import { IModel, IPoint } from "makerjs";
 import { addGuideLine } from "../add/addGuideline";
 import { addModelToLayer } from "../add/addModelToLayer";
+import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
+import { resolveOffsets } from "../../../utils/offsetResolver";
+import { DimensionKey } from "@repo/store/data/types";
 
 type Orientation = "horizontal" | "vertical";
 
@@ -28,10 +25,15 @@ export function drawGuideLines(
   model: IModel,
   { width, length, height, guides }: DrawGuideLinesParams
 ) {
-  const offsets = getOffset();
-  const { raw } = getDimension();
-  const { dimensionType } = getDielineCTX();
-  if (!offsets) throw new Error("Offsets Are not provided. [drawGuideline]");
+  const {
+    dimension: { raw },
+  } = getDielineSettings();
+
+  const offsets = resolveOffsets();
+
+  const { dimensionType } = getDielineSettings();
+  if (!dimensionType)
+    throw new Error("Settings Not Provided. [drawGuidelines]");
 
   const guidesModel: IModel = { models: {} };
   addModelToLayer(model, "guides", guidesModel);

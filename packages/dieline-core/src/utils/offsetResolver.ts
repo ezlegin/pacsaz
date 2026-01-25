@@ -1,7 +1,13 @@
-import { getDielineCTX } from "@repo/store/dieline/context.store";
+import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
 
-export function resolveOffsets() {
-  const { material, customThickness } = getDielineCTX();
+type OffsetKey = "width" | "length" | "height";
+export type OffsetValue = { inner: number; outer: number };
+
+export type Offset = Record<OffsetKey, OffsetValue>;
+
+export function resolveOffsets(): Offset {
+  const { material, customThickness } = getDielineSettings();
+  if (!material) throw new Error("Settings Not Provided. [offsetResolver]");
 
   const inner = material.offset.inner * 2;
   const outer = (customThickness ?? material.offset.outer) * 2;

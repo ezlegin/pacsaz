@@ -4,8 +4,7 @@ import Table from "@repo/ui/components/custom/Table";
 import { TableCell, TableRow } from "@repo/ui/components/table";
 import { formatDate } from "date-fns";
 import { Pencil } from "lucide-react";
-import { MaterialKey } from "@repo/store/dieline/material.store";
-import { DimensionType } from "@repo/store/dieline/dimensionType.store";
+import { DimensionType, MaterialKey } from "@repo/store/data/types";
 
 type LastDownloads = {
   id: number;

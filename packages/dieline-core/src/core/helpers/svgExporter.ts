@@ -1,8 +1,8 @@
-import { getDielineCTX } from "@repo/store/dieline/context.store";
 import { getDevCTX } from "@repo/store/dieline/useDeveloperToolsStore";
 import M from "makerjs";
 import { COLORS, GUIDES, strokeWidth } from "../../data/consts";
 import { injectWatermark, Watermark } from "./injectWatermark";
+import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
 
 type SvgExporterParams = {
   model: M.IModel;
@@ -16,7 +16,8 @@ export function svgExporter({
   watermark,
 }: SvgExporterParams) {
   const { showWatermark } = getDevCTX();
-  const material = getDielineCTX().material.value;
+  const material = getDielineSettings().material?.value;
+
   const isCardboard =
     material === "glossy-cardboard" || material === "art-paper";
 

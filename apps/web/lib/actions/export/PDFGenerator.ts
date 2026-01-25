@@ -30,7 +30,7 @@ export async function PDFGenerator({
 
     const { bleed, container, trim } = overallSizes;
     if (!trim || !bleed || !container) {
-      throw new Error("Overall sizes are not provided.");
+      throw new Error("Overall sizes are not provided. [PDFGenerator]");
     }
 
     const sizes = {

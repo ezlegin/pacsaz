@@ -1,4 +1,4 @@
-import { DimensionType } from "@repo/store/dieline/dimensionType.store";
+import { DimensionType } from "@repo/store/data/types";
 
 export function applyDimensionOffset(
   value: number,

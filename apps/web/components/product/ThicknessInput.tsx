@@ -1,17 +1,14 @@
 import { useLoading } from "@/hooks/useLoading";
-import {
-  MaterialValue,
-  useMaterialStore,
-} from "@repo/store/dieline/material.store";
-import { useThicknessStore } from "@repo/store/dieline/thickness.store";
-import { formatToFixed } from "@repo/dieline-core/utils/format";
+import { getThicknessRange } from "@/utils/getThicknessRange";
 import { useUserStore } from "@repo/store/app/user.store";
+import { MaterialValue } from "@repo/store/data/types";
+import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
 import { Button } from "@repo/ui/components/button";
 import { Input } from "@repo/ui/components/input";
 import { Spinner } from "@repo/ui/components/spinner";
 import { cn } from "@repo/ui/lib/utils";
 import { Minus, Plus } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 interface Props {
   isRendering: boolean;
@@ -19,13 +16,12 @@ interface Props {
 }
 const ThicknessInput = ({ isRendering, materialsIncluded }: Props) => {
   const { isPremium } = useUserStore();
-  const [localCustomThickness, setLocalCustomThickness] = useState<
-    string | undefined
-  >();
 
-  const { material } = useMaterialStore();
-  const { setCustomThickness, thickness, getThicknessRange, setThickness } =
-    useThicknessStore();
+  const {
+    setSetting,
+    settings: { customThickness, material },
+  } = useDielineSettingsStore();
+
   const { min: mMinThick, max: mMaxThick } =
     getThicknessRange(materialsIncluded);
 
@@ -36,22 +32,19 @@ const ThicknessInput = ({ isRendering, materialsIncluded }: Props) => {
   } = useLoading();
 
   useEffect(() => {
-    setThickness(material.thickness);
-    setLocalCustomThickness(material.thickness.toFixed(1));
-    setCustomThickness(undefined);
+    setSetting("customThickness", undefined);
   }, [material]);
 
   const handleThicknessChange = (type: "inc" | "dec") => {
     startMThicknessLoading();
 
-    const thickness = localCustomThickness ?? material.thickness;
+    const thickness = customThickness ?? material.thickness;
 
     const newThickness = +thickness + (type === "inc" ? 0.1 : -0.1);
 
     if (+newThickness < mMinThick || +newThickness > mMaxThick) return;
 
-    setLocalCustomThickness(newThickness.toString());
-    setCustomThickness(+newThickness);
+    setSetting("customThickness", newThickness);
   };
 
   useEffect(() => {
@@ -69,31 +62,24 @@ const ThicknessInput = ({ isRendering, materialsIncluded }: Props) => {
         <Input
           disabled={!isPremium || disabledInputs}
           dir="ltr"
-          value={formatToFixed(localCustomThickness ?? thickness.toString())}
+          defaultValue={
+            customThickness?.toString() ?? material.thickness.toString()
+          }
           className="text-center"
           onFocus={(e) => e.currentTarget.select()}
-          onChange={(e) => {
-            const val = e.target.value;
-            if (!/^\d*\.?\d*$/.test(val)) return;
-
-            setLocalCustomThickness(val);
-          }}
           onBlur={(e) => {
             const val = e.target.value;
 
             if (+val < mMinThick) {
-              setLocalCustomThickness(mMinThick.toString());
-              setCustomThickness(mMinThick);
+              setSetting("customThickness", mMinThick);
               return;
             }
             if (+val > mMaxThick) {
-              setLocalCustomThickness(mMaxThick.toString());
-              setCustomThickness(mMaxThick);
+              setSetting("customThickness", mMaxThick);
               return;
             }
 
-            setLocalCustomThickness(val);
-            setCustomThickness(+val);
+            setSetting("customThickness", +val);
           }}
         />
         <Button
@@ -102,7 +88,7 @@ const ThicknessInput = ({ isRendering, materialsIncluded }: Props) => {
           className="absolute left-0 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
           onClick={() => handleThicknessChange("dec")}
           disabled={
-            (+(localCustomThickness ?? 0) || material.thickness) <= mMinThick ||
+            (+(customThickness ?? 0) || material.thickness) <= mMinThick ||
             !isPremium ||
             disabledInputs
           }
@@ -115,7 +101,7 @@ const ThicknessInput = ({ isRendering, materialsIncluded }: Props) => {
           className="absolute right-0 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
           onClick={() => handleThicknessChange("inc")}
           disabled={
-            (+(localCustomThickness ?? 0) || material.thickness) >= mMaxThick ||
+            (+(customThickness ?? 0) || material.thickness) >= mMaxThick ||
             !isPremium ||
             disabledInputs
           }

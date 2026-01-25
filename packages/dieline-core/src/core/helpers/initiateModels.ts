@@ -1,11 +1,13 @@
-import { getDielineCTX } from "@repo/store/dieline/context.store";
-import { getDimension } from "@repo/store/dieline/dimension.store";
+import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
 import M, { IModel } from "makerjs";
 import { calculateSafeFoldOffset } from "./calculate/calculateSafeFoldOffset";
 
 export function initiateModel() {
-  const { resolved } = getDimension();
-  const { customThickness, material } = getDielineCTX();
+  const {
+    customThickness,
+    material,
+    dimension: { resolved },
+  } = getDielineSettings();
 
   const { safeFoldOffset: mSafeFoldOffset, thickness } = material;
 

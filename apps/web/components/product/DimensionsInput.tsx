@@ -1,8 +1,8 @@
 import { clamp } from "@/utils/clamp";
-import {
-  DimensionKey,
-  useDimensionStore,
-} from "@repo/store/dieline/dimension.store";
+import { resolveSingleDimension } from "@repo/dieline-core/utils/dimensionResolver";
+import { resolveOffsets } from "@repo/dieline-core/utils/offsetResolver";
+import { DimensionKey } from "@repo/store/data/types";
+import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
 import { Input } from "@repo/ui/components/input";
 import { Spinner } from "@repo/ui/components/spinner";
 import { useEffect, useState } from "react";
@@ -18,7 +18,10 @@ export function DimensionInput({
   dimKey: DimensionKey;
   isRendering: boolean;
 }) {
-  const { dimension, setDimension } = useDimensionStore();
+  const {
+    settings: { dimension },
+    setSetting,
+  } = useDielineSettingsStore();
   const value = dimension.raw[dimKey];
   const [localValue, setLocalValue] = useState<number | null>(null);
   const [blurredInput, setBlurredInput] = useState<DimensionKey | null>(null);
@@ -29,11 +32,23 @@ export function DimensionInput({
     }
   }, [value]);
 
+  const offsets = resolveOffsets();
+
   const handleSubmit = () => {
     setBlurredInput(dimKey);
     const clamped = clamp(localValue ?? 0, min);
     setLocalValue(clamped);
-    setDimension(dimKey, clamped);
+
+    setSetting("dimension", {
+      raw: {
+        ...dimension.raw,
+        [dimKey]: clamped,
+      },
+      resolved: {
+        ...dimension.resolved,
+        [dimKey]: resolveSingleDimension(clamped, offsets[dimKey]),
+      },
+    });
   };
 
   if (value === 0) return null;

@@ -1,5 +1,6 @@
 import M from "makerjs";
 import { addModelToLayer } from "./addModelToLayer";
+import { toPt } from "../../../utils/sizeConvertor";
 
 export type ConnectorLine = {
   from: M.IPoint;
@@ -30,7 +31,7 @@ export function addBleed({
   const chain = M.model.findSingleChain(cloned);
   const newTrimModel = M.chain.toNewModel(chain);
 
-  const bleed = M.model.outline(newTrimModel, bleedAmount, 1, false, {
+  const bleed = M.model.outline(newTrimModel, toPt(bleedAmount), 1, false, {
     pointMatchingDistance: 2,
   });
 

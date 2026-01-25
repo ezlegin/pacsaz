@@ -3,12 +3,6 @@ import { tuckEndModel } from "@/public";
 import { formatDimensions } from "@/utils/formatDimensions";
 import { DimensionsType } from "@repo/dieline-core/data/types";
 import { applyDimensionOffset } from "@repo/dieline-core/utils/applyDimensionOffset";
-import { useDimensionStore } from "@repo/store/dieline/dimension.store";
-import {
-  DimensionType,
-  useDimensionTypeStore,
-} from "@repo/store/dieline/dimensionType.store";
-import { getOffset } from "@repo/store/dieline/offset.store";
 import {
   Dialog,
   DialogContent,
@@ -18,6 +12,9 @@ import {
 } from "@repo/ui/components/dialog";
 import Image from "next/image";
 import DeveloperTools from "./DeveloperTools";
+import { DimensionType } from "@repo/store/data/types";
+import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
+import { resolveOffsets } from "@repo/dieline-core/utils/offsetResolver";
 
 interface Props {
   dimensionsType: DimensionsType;
@@ -25,15 +22,18 @@ interface Props {
 }
 
 const ProductInfo = ({ dimensionsType }: Props) => {
-  const offset = getOffset();
+  const offset = resolveOffsets();
 
   const {
-    dimension: {
-      raw: { height, length, width },
+    settings: {
+      dimension: {
+        raw: { height, length, width },
+      },
     },
-  } = useDimensionStore();
-
-  const { dimensionType } = useDimensionTypeStore();
+  } = useDielineSettingsStore();
+  const {
+    settings: { dimensionType },
+  } = useDielineSettingsStore();
 
   const calcManufacture = (value: number, axis: "width" | "length") =>
     applyDimensionOffset(

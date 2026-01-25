@@ -7,7 +7,7 @@ import Card from "@repo/ui/components/custom/Card";
 import { StatCard } from "./StatCard";
 import UserSubscriptionCard from "./UserSubscriptionCard";
 import Table from "@repo/ui/components/custom/Table";
-import { MaterialKey } from "@repo/store/dieline/material.store";
+import { MaterialKey } from "@repo/store/data/types";
 
 type LastDownloads = {
   id: number;

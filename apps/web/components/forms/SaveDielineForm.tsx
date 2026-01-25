@@ -7,11 +7,10 @@ import {
 } from "@/lib/validatoinSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DIMENSIONS_TYPE } from "@repo/dieline-core/data/consts";
-import { useBleedStore } from "@repo/store/dieline/bleed.store";
-import { useDimensionStore } from "@repo/store/dieline/dimension.store";
-import { useDimensionTypeStore } from "@repo/store/dieline/dimensionType.store";
-import { useMaterialStore } from "@repo/store/dieline/material.store";
-import { useThicknessStore } from "@repo/store/dieline/thickness.store";
+import {
+  getDielineSettings,
+  useDielineSettingsStore,
+} from "@repo/store/dieline/dielineSettings.store";
 import { Button } from "@repo/ui/components/button";
 import { DialogTitle } from "@repo/ui/components/dialog";
 import {
@@ -25,12 +24,13 @@ import { Separator } from "@repo/ui/components/separator";
 import { useForm } from "react-hook-form";
 
 const SaveDielineForm = () => {
-  const { dimension } = useDimensionStore();
-  const { material } = useMaterialStore();
+  const {
+    settings: { dimension },
+  } = useDielineSettingsStore();
   const { isLoading, startLoading, stopLoading } = useLoading();
-  const { bleed } = useBleedStore();
-  const { thickness, customThickness } = useThicknessStore();
-  const { dimensionType } = useDimensionTypeStore();
+  const { customThickness, bleed, dimensionType, material } =
+    getDielineSettings();
+
   const form = useForm<SaveDielineFormType>({
     resolver: zodResolver(saveDielineFormSchema),
     defaultValues: {
@@ -45,7 +45,7 @@ const SaveDielineForm = () => {
     const finalData = {
       ...data,
       bleed,
-      thickness: customThickness ?? thickness,
+      thickness: customThickness ?? material.thickness,
       dimensionType,
       material,
       dimension,
@@ -65,7 +65,7 @@ const SaveDielineForm = () => {
     bleedSize: bleed,
     material: material.label,
     dimensionType: selectedDimensionType,
-    thickness: thickness,
+    thickness: material.thickness,
     customThickness: customThickness,
   };
 

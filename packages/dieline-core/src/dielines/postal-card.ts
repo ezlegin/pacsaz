@@ -4,7 +4,7 @@ import { drawFoldLines } from "../core/helpers/draw/drawFoldLines";
 import { drawGuideLines } from "../core/helpers/draw/drawGuideLines";
 import { initiateModel } from "../core/helpers/initiateModels";
 import { modelBuilder } from "../core/helpers/modelBuilder";
-import { BLEED, materials } from "../data/consts";
+import { materials } from "../data/consts";
 import { Dieline } from "../data/types";
 
 const postalCard: Dieline = {
@@ -22,7 +22,6 @@ const postalCard: Dieline = {
       height: 0,
     },
   },
-  defaultBleed: BLEED.default,
   dimensionsType: ["manufacture", "inner", "outer"],
   materials: {
     default: materials["glossy-cardboard"],
