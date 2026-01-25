@@ -1,6 +1,6 @@
 import { toPt } from "../utils/sizeConvertor";
 import { calculateSafeFoldOffset } from "../core/helpers/calculate/calculateSafeFoldOffset";
-import { Material } from "@repo/store/dieline/material.store";
+import { Materials } from "@repo/store/dieline/material.store";
 
 export const onDevelepe = process.env.NODE_ENV === "development";
 export const onProduction = process.env.NODE_ENV === "production";
@@ -88,7 +88,7 @@ export const DIMENSIONS_TYPE = [
   { key: "outer", label: "ابعاد خارجی" },
 ] as const;
 
-export const materials: Material = {
+export const materials: Materials = {
   "glossy-cardboard": {
     value: "glossy-cardboard",
     label: "مقوا گلاسه",

@@ -19,7 +19,7 @@ export function useDielineGenerator(dieline: Dieline) {
   const { material, setMaterial } = useMaterialStore();
   const { dimension, setDefaultDimension } = useDimensionStore();
   const { bleed, setBleed } = useBleedStore();
-  const { setThickness, customThickness, thickness } = useThicknessStore();
+  const { setThickness, customThickness } = useThicknessStore();
   const { dimensionType } = useDimensionTypeStore();
   const { setContext } = useContextStore();
   const { format } = useFormatStore();
@@ -49,7 +49,6 @@ export function useDielineGenerator(dieline: Dieline) {
       dimension,
       material,
       customThickness,
-      thickness,
       dimensionType,
       format,
     });

@@ -22,9 +22,9 @@ export type MaterialValue = {
   };
 };
 
-export type Material = Record<MaterialKey, MaterialValue>;
+export type Materials = Record<MaterialKey, MaterialValue>;
 
-export const materials: Material = {
+export const materials: Materials = {
   "glossy-cardboard": {
     value: "glossy-cardboard",
     label: "مقوا گلاسه",
@@ -170,7 +170,7 @@ function calculateSafeFoldOffset(materialThickness: number) {
 }
 
 type MaterialStore = {
-  materials: Material;
+  materials: Materials;
   material: MaterialValue;
   setMaterial: (key: MaterialKey) => void;
 };

@@ -11,7 +11,6 @@ type CTX = {
     raw: Dimension;
   };
   material: MaterialValue;
-  thickness: number;
   customThickness?: number;
   dimensionType: DimensionType;
   format: Format;
@@ -32,7 +31,6 @@ const defualts: CTX = {
     },
   },
   material: materials["glossy-cardboard"],
-  thickness: materials["glossy-cardboard"].thickness,
   customThickness: undefined,
   dimensionType: "manufacture",
   format: "pdf",
