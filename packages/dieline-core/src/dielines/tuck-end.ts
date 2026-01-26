@@ -51,7 +51,6 @@ const tuckEnd: Dieline = {
         height,
         width,
         length,
-        safeFoldOffset: safeFoldOffset,
       });
 
       // DOOR ----------------------------
@@ -63,7 +62,6 @@ const tuckEnd: Dieline = {
         height,
         length,
         tuckFlap,
-        safeFoldOffset,
       });
 
       pushModelSeparatly(trimModel, foldModel, topDoor, "topDoor");
@@ -82,7 +80,6 @@ const tuckEnd: Dieline = {
         width,
         length,
         tuckFlapSize,
-        safeFoldOffset,
       });
 
       pushModelSeparatly(trimModel, foldModel, dustTL, "dustTL");
@@ -93,7 +90,6 @@ const tuckEnd: Dieline = {
         width,
         length,
         tuckFlapSize,
-        safeFoldOffset,
         considerDustHole: false,
       });
 
@@ -110,7 +106,6 @@ const tuckEnd: Dieline = {
         width,
         length,
         tuckFlapSize,
-        safeFoldOffset,
         considerOuterIndent: false,
       });
 
@@ -127,7 +122,6 @@ const tuckEnd: Dieline = {
         width,
         length,
         tuckFlapSize,
-        safeFoldOffset,
         considerOuterIndent: true,
       });
 

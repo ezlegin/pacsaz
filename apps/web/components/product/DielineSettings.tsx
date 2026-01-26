@@ -1,9 +1,5 @@
 import { aiIcon, dxfIcon, pdfIcon } from "@/public";
-import {
-  DIMENSIONS,
-  DIMENSIONS_TYPE,
-  materials,
-} from "@repo/dieline-core/data/consts";
+import { DIMENSIONS, DIMENSIONS_TYPE } from "@repo/dieline-core/data/consts";
 import {
   DielineDimensions,
   DielineMaterials,
@@ -12,7 +8,7 @@ import {
 import { isPackagingSizeLogical } from "@repo/dieline-core/utils/isPackagingSizeLogical";
 import { useUserStore } from "@repo/store/app/user.store";
 import { bleeds as BLEEDS } from "@repo/store/data/dieline";
-import { DimensionType, Format, MaterialKey } from "@repo/store/data/types";
+import { DimensionType, Format } from "@repo/store/data/types";
 import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
 import { useSVGStore } from "@repo/store/dieline/svg.store";
 import { Badge } from "@repo/ui/components/badge";
@@ -30,7 +26,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@repo/ui/components/tooltip";
-import { cn } from "@repo/ui/lib/utils";
 import { CircleQuestionMark } from "lucide-react";
 import Image from "next/image";
 import { Section } from "./DetailsSection";
@@ -42,6 +37,7 @@ import DimensionTypeGuide from "./guides/DimensionTypeGuide";
 import FormatGuide from "./guides/FormatGuide";
 import MeterialGuide from "./guides/materialGuide";
 import ThicknessGuide from "./guides/ThicknessGuide";
+import MaterialInput from "./MaterialInput";
 import ThicknessInput from "./ThicknessInput";
 
 interface Props {
@@ -62,22 +58,13 @@ export default function DielineSettings({
   const { svg } = useSVGStore();
   const { isPremium } = useUserStore();
   const {
-    setSetting: setSettings,
+    setSetting,
     settings: { bleed, dimensionType, format },
   } = useDielineSettingsStore();
 
   const {
     settings: { dimension },
   } = useDielineSettingsStore();
-
-  const onSelectMaterial = (val: string) => {
-    const material = materialsInput.included.find((m) => m.value === val)
-      ?.value as MaterialKey;
-
-    if (!material) return;
-
-    setSettings("material", materials[material]);
-  };
 
   const bleeds = Object.entries(BLEEDS).map(([type, size]) => ({
     type,
@@ -143,36 +130,7 @@ export default function DielineSettings({
         </Section>
 
         <Section title="متریال چاپ" infoContent={<MeterialGuide />}>
-          <Select
-            onValueChange={onSelectMaterial}
-            dir="rtl"
-            defaultValue={materialsInput.default.value}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="انتخاب متریال" />
-            </SelectTrigger>
-
-            <SelectContent position="popper">
-              {materialsInput.included.map((item) => (
-                <SelectItem
-                  className="py-2.5"
-                  key={item.value}
-                  value={item.value}
-                >
-                  <span
-                    className={cn(
-                      item.value === "glossy-cardboard" ||
-                        item.value === "art-paper"
-                        ? "bg-white"
-                        : "bg-orange-100",
-                      `size-5 rounded-full border`
-                    )}
-                  />
-                  {item.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <MaterialInput materialsInput={materialsInput} />
         </Section>
 
         <Section
@@ -183,7 +141,7 @@ export default function DielineSettings({
           <Select
             disabled={!isPremium}
             defaultValue={bleed?.toString()}
-            onValueChange={(val: string) => setSettings("bleed", +val)}
+            onValueChange={(val: string) => setSetting("bleed", +val)}
             dir="rtl"
           >
             <SelectTrigger className="w-full">
@@ -229,7 +187,7 @@ export default function DielineSettings({
             dir="rtl"
             value={dimensionType}
             onValueChange={(val) => {
-              if (val) setSettings("dimensionType", val as DimensionType);
+              if (val) setSetting("dimensionType", val as DimensionType);
             }}
             className="w-full"
           >
@@ -261,7 +219,7 @@ export default function DielineSettings({
             spacing={1}
             value={format}
             onValueChange={(val) => {
-              if (val) setSettings("format", val as Format);
+              if (val) setSetting("format", val as Format);
             }}
             className="w-full"
           >

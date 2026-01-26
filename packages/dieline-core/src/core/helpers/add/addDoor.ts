@@ -13,18 +13,11 @@ interface AddDoorParams {
   height: number;
   length: number;
   tuckFlap: TuckFlap;
-  safeFoldOffset: number;
 }
 
-export function addDoor({
-  width,
-  height,
-  length,
-  tuckFlap,
-  safeFoldOffset,
-}: AddDoorParams) {
+export function addDoor({ width, height, length, tuckFlap }: AddDoorParams) {
   const door: IModel = {};
-  const { thickness } = getDielineSettings();
+  const { thickness, safeFoldOffset } = getDielineSettings();
 
   // ─────────────────────────────────────────
   // Top door panel

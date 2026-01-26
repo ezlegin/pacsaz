@@ -2,7 +2,6 @@ import { Dimension } from "@repo/store/data/types";
 import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
 import { IModel } from "makerjs";
 import { initiateModels } from "./initiateModels";
-import { calculateSafeFoldOffset } from "./calculate/calculateSafeFoldOffset";
 
 type ModelSettings = {
   dimension: Dimension;
@@ -25,13 +24,13 @@ type ModelGenerator = (args: Args) => string;
 
 export const modelGenerator = (callBack: ModelGenerator) => () => {
   const dimension = getDielineSettings().dimension.resolved;
-  const thickness = getDielineSettings().thickness;
+  const safeFoldOffset = getDielineSettings().safeFoldOffset;
   const models = initiateModels();
 
   return callBack({
     settings: {
       dimension,
-      safeFoldOffset: calculateSafeFoldOffset(thickness),
+      safeFoldOffset,
     },
     models,
   });

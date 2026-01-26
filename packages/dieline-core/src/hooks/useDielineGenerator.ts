@@ -36,6 +36,7 @@ export function useDielineGenerator(dieline: Dieline) {
       format: "pdf",
       material: dieline.materials.default,
       thickness: dieline.materials.default.thickness,
+      safeFoldOffset: dieline.materials.default.safeFoldOffset,
     });
   }, []);
 

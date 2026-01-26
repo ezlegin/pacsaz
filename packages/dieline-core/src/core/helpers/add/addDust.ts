@@ -16,7 +16,6 @@ interface AddDustParams {
   tuckFlapSize: number;
   considerOuterIndent?: boolean;
   considerDustHole?: boolean;
-  safeFoldOffset: number;
 }
 
 export function addDust({
@@ -27,9 +26,8 @@ export function addDust({
   tuckFlapSize,
   considerOuterIndent = true,
   considerDustHole = true,
-  safeFoldOffset,
 }: AddDustParams) {
-  const { thickness } = getDielineSettings();
+  const { thickness, safeFoldOffset } = getDielineSettings();
   const doorSize = height + tuckFlapSize;
   const dustSize = doorSize / 2;
   const mappedDustSize = calculateTuckflapSize(width, dustSize, height);

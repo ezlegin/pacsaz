@@ -3,6 +3,7 @@ import { PointBuilder } from "../pointBuilder";
 import { addLine } from "./addLine";
 import { glueMapper } from "../glueMapper";
 import M from "makerjs";
+import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
 
 export function addGlue(
   trimModel: IModel,
@@ -11,7 +12,6 @@ export function addGlue(
     height,
     width,
     length,
-    safeFoldOffset,
   }: {
     width: number;
     height: number;
@@ -20,12 +20,12 @@ export function addGlue(
       from: IPoint;
       to: IPoint;
     };
-    safeFoldOffset: number;
   }
 ) {
   const pb = new PointBuilder(customPoints?.from ?? undefined);
   const size = glueMapper(width, height);
   const glueMargin = 8;
+  const { safeFoldOffset } = getDielineSettings();
 
   const pts = length
     ? pb

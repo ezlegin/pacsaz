@@ -46,7 +46,6 @@ const homeDieline: Dieline = {
         height,
         width,
         length,
-        safeFoldOffset: safeFoldOffset,
       });
 
       // DOOR ----------------------------
@@ -58,7 +57,6 @@ const homeDieline: Dieline = {
         height,
         length,
         tuckFlap,
-        safeFoldOffset,
       });
 
       pushModelSeparatly(trimModel, foldModel, topDoor, "topDoor");
@@ -77,7 +75,6 @@ const homeDieline: Dieline = {
         width,
         length,
         tuckFlapSize,
-        safeFoldOffset,
       });
 
       pushModelSeparatly(trimModel, foldModel, dustTL, "dustTL");
@@ -88,7 +85,6 @@ const homeDieline: Dieline = {
         width,
         length,
         tuckFlapSize,
-        safeFoldOffset,
         considerDustHole: false,
       });
 
@@ -105,7 +101,6 @@ const homeDieline: Dieline = {
         width,
         length,
         tuckFlapSize,
-        safeFoldOffset,
         considerOuterIndent: false,
       });
 
@@ -122,7 +117,6 @@ const homeDieline: Dieline = {
         width,
         length,
         tuckFlapSize,
-        safeFoldOffset,
         considerOuterIndent: true,
       });
 
@@ -153,18 +147,17 @@ const homeDieline: Dieline = {
       ]);
 
       //! -------------- FOLD --------------
-      const safeOffset = safeFoldOffset;
       drawFoldLines(foldModel, {
         verticals: [
           { from: zero, to: [0, length] },
-          { from: [width, length + safeOffset], to: [width, 0] },
+          { from: [width, length + safeFoldOffset], to: [width, 0] },
           {
             from: [width + height, length],
-            to: [width + height, -safeOffset],
+            to: [width + height, -safeFoldOffset],
           },
           {
             from: [width * 2 + height, length],
-            to: [width * 2 + height, -safeOffset],
+            to: [width * 2 + height, -safeFoldOffset],
           },
         ],
       });

@@ -8,7 +8,8 @@ import { Input } from "@repo/ui/components/input";
 import { Spinner } from "@repo/ui/components/spinner";
 import { cn } from "@repo/ui/lib/utils";
 import { Minus, Plus } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { calculateSafeFoldOffset } from "../../../../packages/store/src/utils/calculateSafeFoldOffset"; // todo
 
 interface Props {
   isRendering: boolean;
@@ -16,10 +17,11 @@ interface Props {
 }
 const ThicknessInput = ({ isRendering, materialsIncluded }: Props) => {
   const { isPremium } = useUserStore();
+  const [localInput, setLocalInput] = useState<string | undefined>();
 
   const {
     setSetting,
-    settings: { thickness, material },
+    settings: { thickness },
   } = useDielineSettingsStore();
 
   const { min: mMinThick, max: mMaxThick } =
@@ -31,18 +33,28 @@ const ThicknessInput = ({ isRendering, materialsIncluded }: Props) => {
     isLoading: isMThicknessLoading,
   } = useLoading();
 
-  useEffect(() => {
-    setSetting("thickness", material.thickness);
-  }, [material]);
-
-  const handleThicknessChange = (type: "inc" | "dec") => {
-    startMThicknessLoading();
-
-    const newThickness = +thickness + (type === "inc" ? 0.1 : -0.1);
-
-    if (+newThickness < mMinThick || +newThickness > mMaxThick) return;
-
-    setSetting("thickness", newThickness);
+  const handleThicknessChange = (
+    type: "inc" | "dec" | "custom",
+    val: number
+  ) => {
+    if (type !== "custom") {
+      startMThicknessLoading();
+      const newThickness = val + (type === "inc" ? 0.1 : -0.1);
+      if (newThickness < mMinThick || newThickness > mMaxThick) return;
+      setSetting("thickness", newThickness);
+      setSetting("safeFoldOffset", calculateSafeFoldOffset(newThickness));
+    } else {
+      if (val < mMinThick) {
+        setSetting("thickness", mMinThick);
+        return;
+      }
+      if (val > mMaxThick) {
+        setSetting("thickness", mMaxThick);
+        return;
+      }
+      setSetting("thickness", val);
+      setSetting("safeFoldOffset", calculateSafeFoldOffset(val));
+    }
   };
 
   useEffect(() => {
@@ -60,29 +72,31 @@ const ThicknessInput = ({ isRendering, materialsIncluded }: Props) => {
         <Input
           disabled={!isPremium || disabledInputs}
           dir="ltr"
-          defaultValue={thickness.toString()}
           className="text-center"
+          value={(localInput ?? thickness).toString()}
+          onChange={(e) => {
+            const val = e.target.value;
+
+            if (/^\d*\.?\d*$/.test(val)) {
+              setLocalInput(val);
+            }
+          }}
           onFocus={(e) => e.currentTarget.select()}
           onBlur={(e) => {
             const val = e.target.value;
+            setLocalInput(undefined);
 
-            if (+val < mMinThick) {
-              setSetting("thickness", mMinThick);
-              return;
+            const num = parseFloat(val);
+            if (!Number.isNaN(num)) {
+              handleThicknessChange("custom", num);
             }
-            if (+val > mMaxThick) {
-              setSetting("thickness", mMaxThick);
-              return;
-            }
-
-            setSetting("thickness", +val);
           }}
         />
         <Button
           variant={"ghost"}
           size={"icon"}
           className="absolute left-0 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-          onClick={() => handleThicknessChange("dec")}
+          onClick={() => handleThicknessChange("dec", thickness)}
           disabled={thickness <= mMinThick || !isPremium || disabledInputs}
         >
           <Minus />
@@ -91,7 +105,7 @@ const ThicknessInput = ({ isRendering, materialsIncluded }: Props) => {
           variant={"ghost"}
           size={"icon"}
           className="absolute right-0 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-          onClick={() => handleThicknessChange("inc")}
+          onClick={() => handleThicknessChange("inc", thickness)}
           disabled={thickness >= mMaxThick || !isPremium || disabledInputs}
         >
           <Plus />

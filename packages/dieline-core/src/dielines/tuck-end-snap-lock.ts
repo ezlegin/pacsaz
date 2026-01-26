@@ -47,7 +47,6 @@ const tuckEndSnapLock: Dieline = {
       },
     }) => {
       //! -------------- TRIM --------------
-
       // GLUE ----------------------------
       const { size: glueSize } = addGlue(trimModel, {
         height,
@@ -56,7 +55,6 @@ const tuckEndSnapLock: Dieline = {
           from: [0, safeFoldOffset / 2],
           to: [0, length - safeFoldOffset / 2],
         },
-        safeFoldOffset,
       });
 
       // DOOR ----------------------------
@@ -68,7 +66,6 @@ const tuckEndSnapLock: Dieline = {
         height,
         length,
         tuckFlap,
-        safeFoldOffset,
       });
 
       pushModelSeparatly(trimModel, foldModel, topDoor, "topDoor");
@@ -80,7 +77,6 @@ const tuckEndSnapLock: Dieline = {
         width,
         length,
         tuckFlapSize,
-        safeFoldOffset,
       });
 
       pushModelSeparatly(trimModel, foldModel, dustTL, "dustTL");
@@ -91,7 +87,6 @@ const tuckEndSnapLock: Dieline = {
         width,
         length,
         tuckFlapSize,
-        safeFoldOffset,
         considerDustHole: false,
       });
 

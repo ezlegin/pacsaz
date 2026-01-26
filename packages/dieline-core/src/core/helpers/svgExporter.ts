@@ -30,7 +30,7 @@ export function svgExporter({
     layerOptions: {
       bleed: {
         stroke: svgSettings.colors.dielines.bleed,
-        fill: isCardboard ? svgSettings.colors.dielines.fill : "#f6efe4",
+        fill: isCardboard ? svgSettings.colors.dielines.fill : "#f4efe9",
       },
       trim: {
         stroke: svgSettings.colors.dielines.trim,
