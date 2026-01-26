@@ -59,29 +59,19 @@ const tuckEndSnapLock: Dieline = {
 
       // DOOR ----------------------------
 
-      const { model: topDoor } = addDoor({
-        width,
-        height,
-        length,
-      });
+      const { model: topDoor } = addDoor(); //todo: have a drawAfter here as well
 
       pushModelSeparatly(trimModel, foldModel, topDoor, "topDoor");
 
       // DUST ----------------------------
       const { model: dustTL } = addDust({
         drawAfter: topDoor,
-        height,
-        width,
-        length,
       });
 
       pushModelSeparatly(trimModel, foldModel, dustTL, "dustTL");
 
       const { model: dustTR_RAW } = addDust({
         drawAfter: topDoor,
-        height,
-        width,
-        length,
         considerDustHole: false,
       });
 
@@ -92,11 +82,7 @@ const tuckEndSnapLock: Dieline = {
 
       pushModelSeparatly(trimModel, foldModel, dustTR, "dustTR");
 
-      const { snapLock } = addSnapLock({
-        height,
-        width,
-        safeFoldOffset,
-      });
+      const { snapLock } = addSnapLock();
       pushModelSeparatly(trimModel, foldModel, snapLock, "snapLock");
 
       // SINGLES ----------------------------

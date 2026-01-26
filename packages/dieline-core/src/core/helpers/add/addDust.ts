@@ -11,22 +11,22 @@ import { addLine } from "./addLine";
 
 interface AddDustParams {
   drawAfter: IModel;
-  height: number;
-  width: number;
-  length: number;
   considerOuterIndent?: boolean;
   considerDustHole?: boolean;
 }
 
 export function addDust({
   drawAfter,
-  width,
-  length,
-  height,
   considerOuterIndent = true,
   considerDustHole = true,
 }: AddDustParams) {
-  const { thickness, safeFoldOffset } = getDielineSettings();
+  const {
+    thickness,
+    safeFoldOffset,
+    dimension: {
+      resolved: { height, length, width },
+    },
+  } = getDielineSettings();
   const tuckFlapSize = calcualteTuckFlapSize(width);
   const doorSize = height + tuckFlapSize;
   const dustSize = doorSize / 2;

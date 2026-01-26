@@ -8,15 +8,15 @@ import { addFoldLine } from "./addFoldLine";
 import { addLine } from "./addLine";
 import { addSeam } from "./addSeam";
 
-interface AddDoorParams {
-  width: number;
-  height: number;
-  length: number;
-}
-
-export function addDoor({ width, height, length }: AddDoorParams) {
+export function addDoor() {
   const door: IModel = {};
-  const { thickness, safeFoldOffset } = getDielineSettings();
+  const {
+    thickness,
+    safeFoldOffset,
+    dimension: {
+      resolved: { height, length, width },
+    },
+  } = getDielineSettings();
 
   // ─────────────────────────────────────────
   // Top door panel

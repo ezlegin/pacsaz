@@ -1,3 +1,4 @@
+import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
 import M, { IModel, IPoint } from "makerjs";
 import { zero } from "../../../data/consts";
 import { cloneMirrorMove } from "../clone";
@@ -6,19 +7,16 @@ import { getLastPointFromModel } from "../getLastPoint";
 import { PointBuilder } from "../pointBuilder";
 import { addFoldLine } from "./addFoldLine";
 import { addLine } from "./addLine";
-import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
 
-export function addSnapLock({
-  height,
-  width,
-  safeFoldOffset,
-}: {
-  width: number;
-  height: number;
-  safeFoldOffset: number;
-}) {
+export function addSnapLock() {
   const snapLock: IModel = { models: {} };
-  const { thickness } = getDielineSettings();
+  const {
+    thickness,
+    safeFoldOffset,
+    dimension: {
+      resolved: { height, width },
+    },
+  } = getDielineSettings();
 
   function mapTabWidth() {
     let tabWidth: number = width / 3;

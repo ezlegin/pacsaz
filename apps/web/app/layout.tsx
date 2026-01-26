@@ -9,7 +9,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const fontFamily = "KalamehWebFaNum";
-  const user = null; //todo: DB Fetch
+  const user = null; //todo: AUTH Fetch
 
   return (
     <html lang="fa" dir="rtl" suppressHydrationWarning>

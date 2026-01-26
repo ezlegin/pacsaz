@@ -55,11 +55,7 @@ const tuckEnd: Dieline = {
       });
 
       // DOOR ----------------------------
-      const { model: topDoor, doorSize } = addDoor({
-        width,
-        height,
-        length,
-      });
+      const { model: topDoor, doorSize } = addDoor();
 
       pushModelSeparatly(trimModel, foldModel, topDoor, "topDoor");
 
@@ -73,18 +69,12 @@ const tuckEnd: Dieline = {
       // DUST ----------------------------
       const { dustSize, model: dustTL } = addDust({
         drawAfter: topDoor,
-        height,
-        width,
-        length,
       });
 
       pushModelSeparatly(trimModel, foldModel, dustTL, "dustTL");
 
       const { model: dustTR_RAW } = addDust({
         drawAfter: topDoor,
-        height,
-        width,
-        length,
         considerDustHole: false,
       });
 
@@ -97,9 +87,6 @@ const tuckEnd: Dieline = {
 
       const { model: dustBR_RAW } = addDust({
         drawAfter: topDoor,
-        height,
-        width,
-        length,
         considerOuterIndent: false,
       });
 
@@ -112,9 +99,6 @@ const tuckEnd: Dieline = {
 
       const { model: dustBL_RAW } = addDust({
         drawAfter: topDoor,
-        height,
-        width,
-        length,
         considerOuterIndent: true,
       });
 
