@@ -1,8 +1,6 @@
 "use client";
 
-import { PlanKey, plans } from "@/data/plan";
 import { usePaymentCheckout } from "@/hooks/usePaymentCheckout";
-import { formatPrice } from "@/utils/formatPrice";
 import { mapPaymentData } from "@/utils/mapPaymentData";
 import { Button } from "@repo/ui/components/button";
 import Card from "@repo/ui/components/custom/Card";
@@ -16,6 +14,8 @@ import PeriodSwitch from "./PeriodSwitch";
 import Price from "./Price";
 import { useState } from "react";
 import { sessionUser } from "@repo/store/app/user.store";
+import { formatPrice } from "@repo/lib/utils/formatPrice";
+import { PlanKey, plans } from "@repo/lib/data/plans";
 
 const UpgradeSubscription = () => {
   const userPlan = sessionUser?.plan;

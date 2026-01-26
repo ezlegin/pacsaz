@@ -1,8 +1,8 @@
 import PageTitle from "@/components/PageTitle";
-import { formatPrice } from "@/utils/formatPrice";
 import Card from "@repo/ui/components/custom/Card";
 import TitleIndicator from "@/components/TitleIndicator";
 import MostDielinesList from "@/components/MostDielinesList";
+import { formatPrice } from "@repo/lib/utils/formatPrice";
 
 const page = () => {
   const subscriptionsData = [

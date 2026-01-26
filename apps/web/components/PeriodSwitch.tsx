@@ -1,15 +1,15 @@
 import { Badge } from "@repo/ui/components/badge";
 import { Label } from "@repo/ui/components/label";
 import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
-import { SubPeriod } from "./SubscriptionList";
-import { annualPlanDisocunt } from "@/data/plan";
+import { annualPlanDisocunt } from "@repo/lib/data/consts";
+import { PlanPeriod } from "@repo/lib/data/plans";
 
 const PeriodSwitch = ({
   setPeriod,
   period,
 }: {
-  setPeriod: (val: SubPeriod) => void;
-  period: SubPeriod;
+  setPeriod: (val: PlanPeriod) => void;
+  period: PlanPeriod;
 }) => {
   const items = [
     { label: <div>ماهیانه</div>, value: "monthly" },
@@ -34,7 +34,7 @@ const PeriodSwitch = ({
         dir="rtl"
         value={period}
         type="single"
-        onValueChange={(val: SubPeriod | "") => {
+        onValueChange={(val: PlanPeriod | "") => {
           if (val === "") return;
           setPeriod(val);
         }}

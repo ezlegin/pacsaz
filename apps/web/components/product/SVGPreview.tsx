@@ -1,5 +1,4 @@
 "use client";
-import { onDevelepe } from "@repo/dieline-core/data/consts";
 import { useSVGStore } from "@repo/store/dieline/svg.store";
 import { useDeveloperToolsStore } from "@repo/store/dieline/useDeveloperToolsStore";
 import { Button } from "@repo/ui/components/button";
@@ -8,6 +7,7 @@ import { Separator } from "@repo/ui/components/separator";
 import { Spinner } from "@repo/ui/components/spinner";
 import { ZoomIn, ZoomOut } from "lucide-react";
 import { useLayoutEffect, useRef, useState } from "react";
+import { onDevelepe } from "@repo/lib/data/consts";
 import {
   ReactZoomPanPinchRef,
   TransformComponent,

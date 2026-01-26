@@ -9,7 +9,7 @@ import { Card } from "@repo/ui/components/card";
 import { Separator } from "@repo/ui/components/separator";
 import { useState } from "react";
 import Step4 from "./Step4";
-import { useLoading } from "@/hooks/useLoading";
+import { useLoading } from "@repo/lib/utils/useLoading";
 
 export type UserType =
   | "student"

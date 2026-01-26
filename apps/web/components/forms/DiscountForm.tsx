@@ -1,4 +1,3 @@
-import { useLoading } from "@/hooks/useLoading";
 import { DiscountInfo } from "@/hooks/usePaymentCheckout";
 import { DiscountFormType, discountFormSchema } from "@/lib/validatoinSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,6 +13,7 @@ import { Spinner } from "@repo/ui/components/spinner";
 import { useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
+import { useLoading } from "@repo/lib/utils/useLoading";
 
 interface Props {
   appliedDiscountCode: string | undefined;

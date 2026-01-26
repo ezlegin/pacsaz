@@ -1,12 +1,12 @@
-import { mapPeriodLabel, mapUserPlanTitle } from "@/data/user";
-import { useMemo } from "react";
-import { formatPrice } from "./formatPrice";
-import { SubPeriod } from "@/components/SubscriptionList";
-import { PlanKey } from "@/data/plan";
 import { CheckoutInfo } from "@/hooks/usePaymentCheckout";
+import { PlanKey, PlanPeriod } from "@repo/lib/data/plans";
+import { formatPrice } from "@repo/lib/utils/formatPrice";
+import { useMemo } from "react";
+import { mapUserPlanTitle } from "./mapUserPlanTitle";
+import { mapPeriodLabel } from "./mapPeriodLabel";
 
 export function mapPaymentData(
-  period: SubPeriod,
+  period: PlanPeriod,
   plan: PlanKey,
   checkoutInfo: CheckoutInfo
 ) {

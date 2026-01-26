@@ -1,17 +1,16 @@
 import Price from "@/components/Price";
-import { PlanKey, plans } from "@/data/plan";
 import Card from "@repo/ui/components/custom/Card";
 import { Label } from "@repo/ui/components/label";
 import { RadioGroup, RadioGroupItem } from "@repo/ui/components/radio-group";
 import { Separator } from "@repo/ui/components/separator";
 import { cn } from "@repo/ui/lib/utils";
 import PeriodSwitch from "./PeriodSwitch";
-import { SubPeriod } from "./SubscriptionList";
+import { PlanKey, PlanPeriod, plans } from "@repo/lib/data/plans";
 
 interface Props {
   plan: PlanKey;
-  period: SubPeriod;
-  setPeriod: (val: SubPeriod) => void;
+  period: PlanPeriod;
+  setPeriod: (val: PlanPeriod) => void;
   setPlan: (val: PlanKey) => void;
 }
 

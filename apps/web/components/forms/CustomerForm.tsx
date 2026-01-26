@@ -1,6 +1,6 @@
 "use client";
 
-import { useLoading } from "@/hooks/useLoading";
+import { useLoading } from "@repo/lib/utils/useLoading";
 import { customerFormSchema, CustomerFormType } from "@/lib/validatoinSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@repo/ui/components/button";

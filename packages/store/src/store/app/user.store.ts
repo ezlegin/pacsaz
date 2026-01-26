@@ -5,7 +5,7 @@ type PlanTitle = "استاندارد" | "حرفه‌ای" | "سازمانی";
 type PlanLevel = 1 | 2 | 3;
 type PlanPeriod = "monthly" | "3-month" | "annual";
 
-type Plan = {
+export type Plan = {
   title: PlanTitle;
   level: PlanLevel;
   key: PlanKey;
@@ -24,6 +24,7 @@ export type User = {
   email: string;
   phoneNumber: string;
   plan: Plan | null;
+  joinedAt: Date;
 };
 
 type UserStore = {
@@ -53,6 +54,7 @@ const user: User | null = {
   email: "ezleigni.ir@gmail.com",
   fullName: "علیرضا ازلگینی",
   phoneNumber: "09127452859",
+  joinedAt: new Date("2026-01-01"),
   plan: plan,
 };
 

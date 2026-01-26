@@ -2,13 +2,13 @@ import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
 import { setOverallSize } from "@repo/store/dieline/overallSize.store";
 import { getDevCTX } from "@repo/store/dieline/useDeveloperToolsStore";
 import M, { IModel } from "makerjs";
-import { onDevelepe } from "../../data/consts";
 import { addAnchor } from "./add/addAnchor";
 import { addBleed } from "./add/addBleed";
 import { addContainer } from "./add/addContainer";
 import { addOverallDimensionGuides } from "./add/addOverallDimensionGuides";
 import { Watermark } from "./injectWatermark";
 import { svgExporter, svgSettings } from "./svgExporter";
+import { onDevelepe } from "@repo/lib/data/consts";
 
 type ModelExporter = {
   model: IModel;

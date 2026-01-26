@@ -1,7 +1,6 @@
+import "./styles.css";
 import { pacsazLogoIcon } from "@/public";
 import { Toaster } from "@repo/ui/components/sonner";
-import "@repo/ui/globals.css";
-import "./fonts.css";
 import UserProvider from "@/components/UserProvider";
 
 export default function RootLayout({

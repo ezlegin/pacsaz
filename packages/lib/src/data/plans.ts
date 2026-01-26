@@ -1,27 +1,22 @@
-import { calculateFairDownload } from "@/utils/calculateFairDownload";
+import { calculateFairDownload } from "../utils/calculateFairDownload";
 
 export type PlanKey = "standard" | "pro" | "organization";
 export type PlanTitle = "استاندارد" | "حرفه‌ای" | "سازمانی";
-export type PlanFeature = { active: boolean; value: string };
-export type PlanPrice = {
-  monthly: number;
-  monthlyOnAnnual: number;
-  annual: number;
-};
+export type PlanPeriod = "monthly" | "3-month" | "annual";
 export type PlanLevel = 1 | 2 | 3;
-
+export type PlanFeature = { active: boolean; value: string };
 export type PlanFairDownload = {
   monthly: number;
   threeMonth: number;
   annual: number;
 };
-export interface SubCardProps {
+export interface Plan {
   title: PlanTitle;
   price: number;
   description: string;
   key: PlanKey;
   shortDescription: string;
-  level: 1 | 2 | 3;
+  level: PlanLevel;
   fairDownload: PlanFairDownload;
   features: PlanFeature[];
 }
@@ -44,9 +39,7 @@ const paids = [
   { active: true, value: "اضافه کردن مشتریان" },
 ];
 
-export const annualPlanDisocunt = 0.2;
-
-export const plans: SubCardProps[] = [
+export const plans: Plan[] = [
   {
     title: "استاندارد",
     key: "standard",

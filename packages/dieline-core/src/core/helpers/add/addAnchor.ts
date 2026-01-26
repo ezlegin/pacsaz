@@ -1,6 +1,6 @@
 import M from "makerjs";
 import { addModelToLayer } from "./addModelToLayer";
-import { onProduction } from "../../../data/consts";
+import { onProduction } from "@repo/lib/data/consts";
 
 export function addAnchor(
   model: M.IModel,

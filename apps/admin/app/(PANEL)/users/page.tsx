@@ -1,10 +1,11 @@
 import { UserForm } from "@/components/forms/UserForm";
 import PageTitle from "@/components/PageTitle";
-import PopupNewDialog from "@/components/PopupNewDialog";
 import Search from "@/components/Search";
-import { globalPageSize } from "@/lib/consts";
 import Pagination from "@repo/ui/components/custom/Pagination";
 import UsersList from "./UsersList";
+import { globalPageSize } from "@repo/lib/data/consts";
+import PopupNewDialog from "@repo/ui/components/custom/PopupNewDialog";
+import { User } from "@repo/store/app/user.store";
 
 const page = () => {
   return (
@@ -28,12 +29,13 @@ const page = () => {
 
 export default page;
 
-const data = [
+const data: User[] = [
   {
     id: 1,
     fullName: "علیرضا ازلگینی",
     phoneNumber: "09127452859",
     email: "ezlegini.ir@gmail.com",
     joinedAt: new Date(),
+    plan: null,
   },
 ];

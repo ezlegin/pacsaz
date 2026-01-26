@@ -1,20 +1,19 @@
 "use client";
 
-import { PlanKey } from "@/data/plan";
 import { usePaymentCheckout } from "@/hooks/usePaymentCheckout";
-import { formatPrice } from "@/utils/formatPrice";
 import { mapPaymentData } from "@/utils/mapPaymentData";
 import { Button } from "@repo/ui/components/button";
 import Card from "@repo/ui/components/custom/Card";
 import { Separator } from "@repo/ui/components/separator";
 import { useState } from "react";
 import { PaymentPlans } from "./PaymentPlans";
-import { SubPeriod } from "./SubscriptionList";
 import DiscountForm from "./forms/DiscountForm";
+import { formatPrice } from "@repo/lib/utils/formatPrice";
+import { PlanKey, PlanPeriod } from "@repo/lib/data/plans";
 
 export type PaymentQuery = {
   plan?: PlanKey | undefined;
-  period?: SubPeriod | undefined;
+  period?: PlanPeriod | undefined;
 };
 
 const PaymentGrid = ({ query }: { query: PaymentQuery }) => {

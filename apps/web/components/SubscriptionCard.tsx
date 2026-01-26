@@ -1,4 +1,3 @@
-import { PlanFeature, SubCardProps } from "@/data/plan";
 import { mapFiarDownload } from "@/utils/mapFiarDownload";
 import { Button } from "@repo/ui/components/button";
 import Card from "@repo/ui/components/custom/Card";
@@ -7,7 +6,7 @@ import { cn } from "@repo/ui/lib/utils";
 import { CircleCheck, Zap } from "lucide-react";
 import Link from "next/link";
 import Price from "./Price";
-import { SubPeriod } from "./SubscriptionList";
+import { PlanFeature, PlanPeriod, SubCardProps } from "@repo/lib/data/plans";
 
 export const SubscriptionCard = ({
   props: { key, description, fairDownload, price, title },
@@ -18,7 +17,7 @@ export const SubscriptionCard = ({
   props: SubCardProps;
   index: number;
   features: PlanFeature[];
-  period: SubPeriod;
+  period: PlanPeriod;
 }) => {
   return (
     <div className="even:bg-linear-to-r even:from-violet-500 even:to-purple-500 p-1 rounded-2xl group">

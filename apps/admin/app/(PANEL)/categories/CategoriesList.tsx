@@ -1,5 +1,5 @@
-import ActionButton from "@/components/ActionButton";
 import { mainURL } from "@/data/envs";
+import ActionButton from "@repo/ui/components/custom/ActionButton";
 import Card from "@repo/ui/components/custom/Card";
 import Table from "@repo/ui/components/custom/Table";
 import { TableCell, TableRow } from "@repo/ui/components/table";

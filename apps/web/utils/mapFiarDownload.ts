@@ -1,9 +1,8 @@
-import { SubPeriod } from "@/components/SubscriptionList";
-import { PlanFairDownload } from "@/data/plan";
+import { PlanFairDownload, PlanPeriod } from "@repo/lib/data/plans";
 
 export function mapFiarDownload(
   fairDownload: PlanFairDownload,
-  period: SubPeriod
+  period: PlanPeriod
 ) {
   return period === "annual"
     ? fairDownload.annual

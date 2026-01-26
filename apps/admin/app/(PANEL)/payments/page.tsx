@@ -1,10 +1,10 @@
 import Filter from "@/components/Filter";
-import NewButton from "@/components/NewButton";
 import PageTitle from "@/components/PageTitle";
 import Search from "@/components/Search";
-import { globalPageSize } from "@/lib/consts";
 import Pagination from "@repo/ui/components/custom/Pagination";
 import PaymentsList, { Payment } from "./PaymentsList";
+import { globalPageSize } from "@repo/lib/data/consts";
+import NewButton from "@repo/ui/components/custom/NewButton";
 
 const page = () => {
   return (

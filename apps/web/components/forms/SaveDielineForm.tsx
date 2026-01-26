@@ -1,7 +1,7 @@
 "use client";
 
 import { DIMENSIONS_TYPE } from "@/data/consts";
-import { useLoading } from "@/hooks/useLoading";
+import { useLoading } from "@repo/lib/utils/useLoading";
 import {
   SaveDielineFormType,
   saveDielineFormSchema,

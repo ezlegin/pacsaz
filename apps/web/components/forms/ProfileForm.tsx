@@ -1,6 +1,5 @@
 "use client";
 
-import { testUser } from "@/data/user";
 import { profileFormSchema, ProfileFormType } from "@/lib/validatoinSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@repo/ui/components/button";
@@ -25,13 +24,14 @@ import { UserType } from "../onboarding/Onboarding";
 import { userTypes } from "../onboarding/Step1";
 import { isUserIndividual } from "@/utils/isUserIndividual";
 import { useForm } from "react-hook-form";
+import { sessionUser } from "@repo/store/app/user.store";
 
 export function ProfileForm() {
   const form = useForm<ProfileFormType>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
-      fullName: testUser.fullName,
-      userType: testUser.userType,
+      fullName: sessionUser?.fullName,
+      userType: "student",
     },
   });
 
@@ -69,12 +69,12 @@ export function ProfileForm() {
 
         <div className="space-y-1">
           <Label>شماره تماس</Label>
-          <Input disabled value={testUser.phone} />
+          <Input disabled value={sessionUser?.phoneNumber} />
         </div>
 
         <div className="space-y-1">
           <Label>ایمیل</Label>
-          <Input disabled value={testUser.email} />
+          <Input disabled value={sessionUser?.email} />
         </div>
 
         <FormField

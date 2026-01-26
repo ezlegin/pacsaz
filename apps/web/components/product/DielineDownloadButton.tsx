@@ -1,4 +1,4 @@
-import { useLoading } from "@/hooks/useLoading";
+import { useLoading } from "@repo/lib/utils/useLoading";
 import { downloadPdf } from "@/lib/actions/export/downloader";
 import Diamond from "@/public/icons/Diamond";
 import { Button } from "@repo/ui/components/button";

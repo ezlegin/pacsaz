@@ -1,4 +1,4 @@
-import { onDevelepe } from "@repo/dieline-core/data/consts";
+import { onDevelepe } from "@repo/lib/data/consts";
 import { useDeveloperToolsStore } from "@repo/store/dieline/useDeveloperToolsStore";
 import { Button } from "@repo/ui/components/button";
 import { Card, CardContent, CardTitle } from "@repo/ui/components/card";

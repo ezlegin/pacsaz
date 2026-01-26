@@ -1,5 +1,4 @@
-import "@repo/ui/globals.css";
-import "./fonts.css";
+import "./styles.css";
 import { Toaster } from "@repo/ui/components/sonner";
 import { pacsazLogoIcon } from "@/public";
 

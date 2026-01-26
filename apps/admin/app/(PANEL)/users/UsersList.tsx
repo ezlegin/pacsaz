@@ -1,17 +1,10 @@
-import ActionButton from "@/components/ActionButton";
+import ActionButton from "@repo/ui/components/custom/ActionButton";
 import Card from "@repo/ui/components/custom/Card";
 import Table from "@repo/ui/components/custom/Table";
 import { TableCell, TableRow } from "@repo/ui/components/table";
 import { formatDate } from "date-fns";
 import { Pencil, Trash } from "lucide-react";
-
-type User = {
-  id: number;
-  fullName: string;
-  phoneNumber: string;
-  joinedAt: Date;
-  email: string;
-};
+import { User } from "@repo/store/app/user.store";
 
 const UsersList = ({ data }: { data: User[] }) => {
   const renderRows = (data: User) => {
@@ -42,10 +35,10 @@ const UsersList = ({ data }: { data: User[] }) => {
 export default UsersList;
 
 const columns = [
-  { label: "Id", className: "" },
-  { label: "Full Name", className: "" },
-  { label: "Phone Number", className: "" },
-  { label: "Email", className: "" },
-  { label: "Joined At", className: "" },
-  { label: "Action", className: "" },
+  { label: "Id" },
+  { label: "Full Name" },
+  { label: "Phone Number" },
+  { label: "Email" },
+  { label: "Joined At" },
+  { label: "Action" },
 ];

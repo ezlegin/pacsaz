@@ -1,4 +1,4 @@
-import { useLoading } from "@/hooks/useLoading";
+import { useLoading } from "@repo/lib/utils/useLoading";
 import { getThicknessRange } from "@/utils/getThicknessRange";
 import { useUserStore } from "@repo/store/app/user.store";
 import { MaterialValue } from "@repo/store/data/types";

@@ -1,9 +1,9 @@
 import { isSubscribed } from "@repo/store/app/user.store";
 import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
 import M from "makerjs";
-import { onProduction } from "../../data/consts";
 import { extractPathDs } from "./extractPathDs";
 import { svgSettings } from "./svgExporter";
+import { onProduction } from "@repo/lib/data/consts";
 
 export type WatermarkOffset = {
   x: number;

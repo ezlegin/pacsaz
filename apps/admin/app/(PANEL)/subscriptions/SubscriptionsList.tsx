@@ -1,4 +1,7 @@
-import { PlanType } from "@/data/user";
+import PlanCard from "@/components/PlanCard";
+import SubscriptionStatus from "@/components/SubscriptionStatus";
+import { Plan } from "@repo/store/app/user.store";
+import ActionButton from "@repo/ui/components/custom/ActionButton";
 import Card from "@repo/ui/components/custom/Card";
 import Table from "@repo/ui/components/custom/Table";
 import { TableCell, TableRow } from "@repo/ui/components/table";
@@ -7,16 +10,13 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@repo/ui/components/tooltip";
-import { Info, Pencil } from "lucide-react";
-import SubscriptionStatus from "@/components/SubscriptionStatus";
-import PlanCard from "@/components/PlanCard";
 import { formatDate, formatDistanceToNow } from "date-fns";
-import ActionButton from "@/components/ActionButton";
+import { Info, Pencil } from "lucide-react";
 
 export type Subscription = {
   id: number;
   user: { fullName: string; phoneNumber: string };
-  plan: PlanType;
+  plan: Plan;
   startedAt: Date;
   endsAt: Date;
   downloads: {

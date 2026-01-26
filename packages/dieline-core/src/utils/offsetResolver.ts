@@ -6,11 +6,11 @@ export type OffsetValue = { inner: number; outer: number };
 export type Offset = Record<OffsetKey, OffsetValue>;
 
 export function resolveOffsets(): Offset {
-  const { material, customThickness } = getDielineSettings();
-  if (!material) throw new Error("Settings Not Provided. [offsetResolver]");
+  const { material, thickness } = getDielineSettings();
 
   const inner = material.offset.inner * 2;
-  const outer = (customThickness ?? material.offset.outer) * 2;
+  const outer =
+    (thickness !== material.thickness ? thickness : material.offset.outer) * 2;
 
   const offsets = {
     width: { inner, outer },

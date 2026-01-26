@@ -1,6 +1,6 @@
 "use client";
 
-import { usePaymentCheckout } from "@/hooks/useSubscriptionCheckout";
+import { usePaymentCheckout } from "@/hooks/usePaymentCheckout";
 import {
   paymentStatus,
   planKey,
@@ -29,8 +29,8 @@ import {
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
-import { formatPrice } from "@/utils/formatPrice";
 import Card from "@repo/ui/components/custom/Card";
+import { formatPrice } from "@repo/lib/utils/formatPrice";
 
 export function PaymentForm() {
   const [paymentInfo, setPaymentInfo] = useState<{

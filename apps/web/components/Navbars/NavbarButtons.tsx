@@ -8,7 +8,7 @@ import Link from "next/link";
 
 const NavbarButtons = () => {
   const remainingDays = calculateRemaningSubscription();
-  const isCloseToExpiry = remainingDays < 7;
+  const isCloseToExpiry = (remainingDays ?? 0) < 7;
 
   return (
     <div className="flex gap-3 items-center">

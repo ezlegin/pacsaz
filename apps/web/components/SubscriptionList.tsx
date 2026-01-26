@@ -1,18 +1,16 @@
 "use client";
 
-import { plans } from "@/data/plan";
 import { Badge } from "@repo/ui/components/badge";
 import { Flag } from "lucide-react";
 import { useState } from "react";
 import PeriodSwitch from "./PeriodSwitch";
 import { SubscriptionCard } from "./SubscriptionCard";
-
-export type SubPeriod = "monthly" | "3-month" | "annual";
+import { PlanPeriod, plans } from "@repo/lib/data/plans";
 
 export const discountFactor = 0.35;
 
 const SubscriptionList = () => {
-  const [period, setPeriod] = useState<SubPeriod>("monthly");
+  const [period, setPeriod] = useState<PlanPeriod>("monthly");
 
   return (
     <div className="h-full flex flex-col items-center justify-center gap-6 z-10">

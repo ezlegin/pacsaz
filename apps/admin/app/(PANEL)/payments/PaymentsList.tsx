@@ -1,7 +1,5 @@
-import ActionButton from "@/components/ActionButton";
+import ActionButton from "@repo/ui/components/custom/ActionButton";
 import PlanCard from "@/components/PlanCard";
-import { PlanType } from "@/data/user";
-import { formatPrice } from "@/utils/formatPrice";
 import Card from "@repo/ui/components/custom/Card";
 import PaymentStatus, {
   PaymentStatusType,
@@ -15,6 +13,8 @@ import {
 } from "@repo/ui/components/tooltip";
 import { Info, Pencil } from "lucide-react";
 import Link from "next/link";
+import { formatPrice } from "@repo/lib/utils/formatPrice";
+import { Plan } from "@repo/store/app/user.store";
 
 export type Payment = {
   id: number;
@@ -23,7 +23,7 @@ export type Payment = {
   amount: number;
   discount?: { amount: number; code: string };
   total: number;
-  plan: PlanType;
+  plan: Plan;
 };
 
 const PaymentsList = ({ data }: { data: Payment[] }) => {

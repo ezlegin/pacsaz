@@ -2,6 +2,10 @@
   "name": "@repo/dieline-core",
   "version": "0.0.1",
   "private": true,
+  "scripts": {
+    "lint": "eslint . --max-warnings 0",
+    "check-types": "tsc --noEmit"
+  },
   "exports": {
     "./registery": "./src/registery.ts",
     "./consts": "./src/core/consts.ts",
@@ -18,6 +22,7 @@
   },
   "dependencies": {
     "@repo/store": "workspace:*",
+    "@repo/lib": "workspace:*",
     "makerjs": "^0.18.1",
     "react": "19.2.0",
     "react-dom": "19.2.0",

@@ -1,6 +1,5 @@
 "use client";
 
-import { mapUserPlanTitle } from "@/data/user";
 import { Button } from "@repo/ui/components/button";
 import { Dialog, DialogContent, DialogTitle } from "@repo/ui/components/dialog";
 import { RotateCw, Zap } from "lucide-react";
@@ -9,6 +8,7 @@ import Card from "@repo/ui/components/custom/Card";
 import UpgradeSubscription from "./UpgradeSubscription";
 import Link from "next/link";
 import { sessionUser } from "@repo/store/app/user.store";
+import { mapUserPlanTitle } from "@/utils/mapUserPlanTitle";
 
 const UserSubscriptionCard = () => {
   const [openUpgradeDialog, setOpenUpgradeDialog] = useState(false);

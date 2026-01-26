@@ -1,6 +1,6 @@
-import BackButton from "@/components/BackButton";
 import { PaymentForm } from "@/components/forms/PaymentForm";
 import PageTitle from "@/components/PageTitle";
+import BackButton from "@repo/ui/components/custom/BackButton";
 import React from "react";
 
 const page = () => {

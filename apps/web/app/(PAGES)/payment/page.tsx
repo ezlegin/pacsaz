@@ -1,9 +1,8 @@
 import PaymentGrid from "@/components/PaymentGrid";
-import { SubPeriod } from "@/components/SubscriptionList";
-import { PlanKey } from "@/data/plan";
+import { PlanKey, PlanPeriod } from "@repo/lib/data/plans";
 
 interface Props {
-  searchParams: Promise<{ plan: PlanKey; period: SubPeriod }>;
+  searchParams: Promise<{ plan: PlanKey; period: PlanPeriod }>;
 }
 const page = async ({ searchParams }: Props) => {
   const { period, plan } = await searchParams;

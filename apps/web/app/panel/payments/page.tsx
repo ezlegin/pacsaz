@@ -1,10 +1,7 @@
-import { SubPeriod } from "@/components/SubscriptionList";
-import { PlanKey } from "@/data/plan";
-import {
-  mapPaymentStatusLable,
-  mapPeriodLabel,
-  mapUserPlanTitle,
-} from "@/data/user";
+import { mapPaymentStatusLable } from "@/utils/mapPaymentStatusLable";
+import { mapPeriodLabel } from "@/utils/mapPeriodLabel";
+import { mapUserPlanTitle } from "@/utils/mapUserPlanTitle";
+import { PlanKey, PlanPeriod } from "@repo/lib/data/plans";
 import Card from "@repo/ui/components/custom/Card";
 import PaymentStatus, {
   PaymentStatusType,
@@ -74,7 +71,7 @@ function page() {
           {mapUserPlanTitle(data.plan as PlanKey)}
         </TableCell>
         <TableCell className="text-left">
-          {mapPeriodLabel(data.period as SubPeriod)}
+          {mapPeriodLabel(data.period as PlanPeriod)}
         </TableCell>
       </TableRow>
     );

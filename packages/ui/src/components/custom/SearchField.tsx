@@ -7,7 +7,7 @@ import { cn } from "../../lib/utils";
 interface SearchFieldProps<T> {
   placeholder?: string;
   onSelect: (item: T | undefined) => void;
-  fetchResults: (query: string) => Promise<T[]>;
+  fetchResults: any; //todo: replace with: (query: string) => Promise<T[]>;
   getItemLabel: (item: T) => string;
   renderItem?: (item: T) => React.ReactNode;
   defaultItem?: T;

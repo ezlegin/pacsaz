@@ -1,6 +1,5 @@
 "use client";
 
-import { UserType } from "@/data/user";
 import { userFormSchema, UserFormType } from "@/lib/validatoinSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@repo/ui/components/button";
@@ -22,6 +21,7 @@ import {
 } from "@repo/ui/components/select";
 import { useForm } from "react-hook-form";
 import PageTitle from "../PageTitle";
+import { UserType } from "@repo/lib/data/types";
 
 export function UserForm() {
   const form = useForm<UserFormType>({

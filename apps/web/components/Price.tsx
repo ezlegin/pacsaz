@@ -1,7 +1,7 @@
 import { cn } from "@repo/ui/lib/utils";
-import { SubPeriod } from "./SubscriptionList";
-import { periodMultiplier } from "@/hooks/usePaymentCheckout";
-import { mapPeriodLabel } from "@/data/user";
+import { periodMultiplier } from "@repo/lib/utils/periodMultiplier";
+import { PlanPeriod } from "@repo/lib/data/plans";
+import { mapPeriodLabel } from "@/utils/mapPeriodLabel";
 
 const Price = ({
   price,
@@ -10,7 +10,7 @@ const Price = ({
 }: {
   price: number;
   size?: "sm" | "lg";
-  period: SubPeriod;
+  period: PlanPeriod;
 }) => {
   const finalPrice = periodMultiplier(period, price, period === "annual");
 
