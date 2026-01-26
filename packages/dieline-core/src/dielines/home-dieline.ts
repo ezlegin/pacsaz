@@ -10,7 +10,7 @@ import { modelBuilder } from "../core/helpers/modelBuilder";
 import { pushModelSeparatly } from "../core/helpers/pushModelSeparatly";
 import { DOOR, materials, zero } from "../data/consts";
 import { Dieline } from "../data/types";
-import { toPt } from "../utils/sizeConvertor";
+import {} from "../utils/sizeConvertor";
 
 const homeDieline: Dieline = {
   slug: "home-dieline",
@@ -42,31 +42,26 @@ const homeDieline: Dieline = {
       foldModel,
       trimModel,
       guideModel,
-      heightMM,
       length,
-      lengthMM,
-      widthMM,
     } = initiateModel();
 
     //! -------------- TRIM --------------
 
     // GLUE ----------------------------
     addGlue(trimModel, {
-      heightMM,
-      widthMM,
-      lengthMM,
+      height,
+      width,
+      length,
       safeFoldOffset: safeFoldOffset,
     });
 
     // DOOR ----------------------------
     const { tuckFlap } = DOOR;
-    const tuckFlapSize = tuckFlap.size(widthMM);
+    const tuckFlapSize = tuckFlap.size(width);
 
     const { model: topDoor, doorSize } = addDoor({
-      widthMM,
-      heightMM,
-      lengthMM,
       width,
+      height,
       length,
       tuckFlap,
       materialThickness,
@@ -77,7 +72,7 @@ const homeDieline: Dieline = {
 
     const bottomDoor = cloneRotateMove(topDoor, 180, [
       width + height,
-      -doorSize - toPt(safeFoldOffset),
+      -doorSize - safeFoldOffset,
     ]);
 
     pushModelSeparatly(trimModel, foldModel, bottomDoor, "bottomDoor");
@@ -85,9 +80,9 @@ const homeDieline: Dieline = {
     // DUST ----------------------------
     const { dustSize, model: dustTL } = addDust({
       drawAfter: topDoor,
-      heightMM,
-      widthMM,
-      lengthMM,
+      height,
+      width,
+      length,
       tuckFlapSize,
       safeFoldOffset,
       materialThickness,
@@ -97,9 +92,9 @@ const homeDieline: Dieline = {
 
     const { model: dustTR_RAW } = addDust({
       drawAfter: topDoor,
-      heightMM,
-      widthMM,
-      lengthMM,
+      height,
+      width,
+      length,
       tuckFlapSize,
       safeFoldOffset,
       considerDustHole: false,
@@ -115,9 +110,9 @@ const homeDieline: Dieline = {
 
     const { model: dustBR_RAW } = addDust({
       drawAfter: topDoor,
-      heightMM,
-      widthMM,
-      lengthMM,
+      height,
+      width,
+      length,
       tuckFlapSize,
       safeFoldOffset,
       considerOuterIndent: false,
@@ -126,16 +121,16 @@ const homeDieline: Dieline = {
 
     const clonedDustBR = cloneMirrorMove(dustBR_RAW, false, true, [
       width * 2 + height,
-      0 - toPt(dustSize),
+      0 - dustSize,
     ]);
 
     pushModelSeparatly(trimModel, foldModel, clonedDustBR, "dustBR");
 
     const { model: dustBL_RAW } = addDust({
       drawAfter: topDoor,
-      heightMM,
-      widthMM,
-      lengthMM,
+      height,
+      width,
+      length,
       tuckFlapSize,
       materialThickness,
       safeFoldOffset,
@@ -144,7 +139,7 @@ const homeDieline: Dieline = {
 
     const dustBL = cloneMirrorMove(dustBL_RAW, true, true, [
       width,
-      0 - toPt(dustSize),
+      0 - dustSize,
     ]);
 
     pushModelSeparatly(trimModel, foldModel, dustBL, "dustBL");
@@ -169,7 +164,7 @@ const homeDieline: Dieline = {
     ]);
 
     //! -------------- FOLD --------------
-    const safeOffset = toPt(safeFoldOffset);
+    const safeOffset = safeFoldOffset;
     drawFoldLines(foldModel, {
       verticals: [
         { from: zero, to: [0, length] },

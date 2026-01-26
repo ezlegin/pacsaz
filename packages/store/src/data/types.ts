@@ -25,22 +25,6 @@ export type MaterialValue = {
 export type Materials = Record<MaterialKey, MaterialValue>;
 
 //! Dimensions ---------------------------------
-export type DimensionUnit = {
-  pt: number;
-  mm: number;
-};
-export type Resolved = Record<DimensionKey, DimensionUnit>;
 export type DimensionKey = "width" | "length" | "height";
-export type Dimension = {
-  width: number;
-  length: number;
-  height: number;
-};
-export type Dimensions = {
-  raw: {
-    width: number;
-    length: number;
-    height: number;
-  };
-  resolved: Resolved;
-};
+export type Dimension = Record<DimensionKey, number>;
+export type Dimensions = Record<"raw" | "resolved", Dimension>;

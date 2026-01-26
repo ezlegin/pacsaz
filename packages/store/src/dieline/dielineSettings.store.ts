@@ -34,9 +34,9 @@ export const useDielineSettingsStore = create<DielineSettingsStore>((set) => ({
         height: 0,
       },
       resolved: {
-        width: { pt: 0, mm: 0 },
-        length: { mm: 0, pt: 0 },
-        height: { mm: 0, pt: 0 },
+        width: 0,
+        length: 0,
+        height: 0,
       },
     },
     bleed: bleeds.default,

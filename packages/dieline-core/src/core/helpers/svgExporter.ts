@@ -1,8 +1,8 @@
+import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
 import { getDevCTX } from "@repo/store/dieline/useDeveloperToolsStore";
 import M from "makerjs";
-import { COLORS, GUIDES, strokeWidth } from "../../data/consts";
+import { toMm } from "../../utils/sizeConvertor";
 import { injectWatermark, Watermark } from "./injectWatermark";
-import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
 
 type SvgExporterParams = {
   model: M.IModel;
@@ -22,39 +22,41 @@ export function svgExporter({
     material === "glossy-cardboard" || material === "art-paper";
 
   const svg = M.exporter.toSVG(model, {
-    cssStyle: "stroke-linecap: butt;",
+    strokeLineCap: svgSettings.svg.strokeLineCap,
+    units: svgSettings.unit,
+    strokeWidth: svgSettings.svg.strokeWidth.main,
+    fontSize: svgSettings.fontSize,
+    scalingStroke: true,
     layerOptions: {
       bleed: {
-        stroke: COLORS.dielines.bleed,
-        fill: isCardboard ? COLORS.dielines.fill : "#f6efe4",
-        strokeWidth: strokeWidth.svg,
+        stroke: svgSettings.colors.dielines.bleed,
+        fill: isCardboard ? svgSettings.colors.dielines.fill : "#f6efe4",
       },
       trim: {
-        stroke: COLORS.dielines.trim,
-        strokeWidth: strokeWidth.svg,
+        stroke: svgSettings.colors.dielines.trim,
       },
       fold: {
-        stroke: COLORS.dielines.fold,
-        strokeWidth: strokeWidth.svg,
-        cssStyle: `stroke-dasharray:${GUIDES.foldDasharray}`,
+        stroke: svgSettings.colors.dielines.fold,
+        cssStyle: `stroke-dasharray:${svgSettings.svg.guides.foldDasharray}`,
       },
-      guideBox: { fill: COLORS.guides.box, stroke: "none" },
+
       guideLine: {
-        stroke: COLORS.guides.line,
-        strokeWidth: strokeWidth.guide,
+        stroke: svgSettings.colors.guides.line,
+        strokeWidth: svgSettings.svg.strokeWidth.guide,
       },
-      pointer: { stroke: "none", fill: COLORS.guides.line },
+      pointer: { stroke: "none", fill: svgSettings.colors.guides.line },
       pointerOverall: { stroke: "none", fill: "black" },
       guideText: {
         stroke: "none",
-        fill: COLORS.guides.text,
-        cssStyle: `direction: ltr; font-size: 20px`,
+        fill: svgSettings.colors.guides.text,
+        cssStyle: `direction: ltr;`,
       },
       guideTextOverall: {
         stroke: "none",
         fill: "black",
         cssStyle: `direction: ltr`,
       },
+
       container: { stroke: "none" },
       anchor: { stroke: "none", fill: "black" },
     },
@@ -64,3 +66,35 @@ export function svgExporter({
     ? injectWatermark(svg, bleedModel, watermark.offset)
     : svg;
 }
+
+export const svgSettings = {
+  unit: "mm",
+  fontSize: toMm(20).toString(),
+  svg: {
+    strokeLineCap: "butt",
+    strokeWidth: {
+      main: toMm(1).toString(),
+      guide: toMm(1.25).toString(),
+    },
+    guides: {
+      foldDasharray: [toMm(5), toMm(4)].join(","),
+    },
+  },
+  colors: {
+    dielines: {
+      bleed: "green",
+      trim: "blue",
+      fold: "red",
+      fill: "white",
+      perforation: "orange",
+    },
+    guides: {
+      line: "#1E90FF",
+      text: "#1E90FF",
+    },
+  },
+  margins: {
+    container: 30,
+    dimensionGuide: 20,
+  },
+};

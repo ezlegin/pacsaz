@@ -1,5 +1,5 @@
 import { clamp } from "@/utils/clamp";
-import { resolveSingleDimension } from "@repo/dieline-core/utils/dimensionResolver";
+import { resolveDimension } from "@repo/dieline-core/utils/dimensionResolver";
 import { resolveOffsets } from "@repo/dieline-core/utils/offsetResolver";
 import { DimensionKey } from "@repo/store/data/types";
 import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
@@ -46,7 +46,7 @@ export function DimensionInput({
       },
       resolved: {
         ...dimension.resolved,
-        [dimKey]: resolveSingleDimension(clamped, offsets[dimKey]),
+        [dimKey]: resolveDimension(clamped, offsets[dimKey]),
       },
     });
   };

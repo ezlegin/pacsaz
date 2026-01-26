@@ -1,4 +1,3 @@
-import { toPt } from "../../../utils/sizeConvertor";
 import M, { IPoint } from "makerjs";
 import { calculateDustHoleSize } from "../calculate/calculateDustHoleSize";
 
@@ -15,11 +14,11 @@ export function addHoleArc({
     calculateDustHoleSize(safeFoldOffset);
 
   const arcStartPoint: [number, number] = [
-    startPoint[0]! + toPt(holeRadius),
+    startPoint[0]! + holeRadius,
     startPoint[1]!,
   ];
 
-  const arc = new M.paths.Arc(arcStartPoint, toPt(holeRadius), 180, endAngle);
+  const arc = new M.paths.Arc(arcStartPoint, holeRadius, 180, endAngle);
 
   return {
     hole: arc,

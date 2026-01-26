@@ -1,17 +1,14 @@
-import { toPt } from "../../../utils/sizeConvertor";
 import M from "makerjs";
 import { addModelToLayer } from "./addModelToLayer";
 
 interface AddContainerOptions {
   model: M.IModel;
   from: M.IModel;
-  marginMM: number;
+  margin: number;
 }
 
-export function addContainer({ model, from, marginMM }: AddContainerOptions) {
+export function addContainer({ model, from, margin }: AddContainerOptions) {
   const { low, high } = M.measure.modelExtents(from)!;
-
-  const marginPt = toPt(marginMM);
 
   const minX = low[0]!;
   const minY = low[1]!;
@@ -25,7 +22,7 @@ export function addContainer({ model, from, marginMM }: AddContainerOptions) {
       [maxX, maxY],
       [minX, maxY],
     ]),
-    marginPt,
+    margin,
     1,
     false
   );

@@ -1,18 +1,17 @@
-import { pointToPt, toMm, toPt } from "../../../utils/sizeConvertor";
 import M, { IModel } from "makerjs";
-import { addFoldLine } from "./addFoldLine";
-import { addHoleArc } from "./addHoleArc";
-import { addLine } from "./addLine";
 import { calculateTuckflapSize } from "../calculate/calculateTuckflapSize";
 import { getDistanceOfFirstAndLastPoint } from "../getDistance";
 import { getLastPointFromModel, getLastPointFromPath } from "../getLastPoint";
 import { PointBuilder } from "../pointBuilder";
+import { addFoldLine } from "./addFoldLine";
+import { addHoleArc } from "./addHoleArc";
+import { addLine } from "./addLine";
 
 interface AddDustParams {
   drawAfter: IModel;
-  heightMM: number;
-  widthMM: number;
-  lengthMM: number;
+  height: number;
+  width: number;
+  length: number;
   tuckFlapSize: number;
   considerOuterIndent?: boolean;
   considerDustHole?: boolean;
@@ -22,21 +21,21 @@ interface AddDustParams {
 
 export function addDust({
   drawAfter,
-  heightMM,
-  widthMM,
-  lengthMM,
+  width,
+  length,
+  height,
   tuckFlapSize,
   considerOuterIndent = true,
   considerDustHole = true,
   materialThickness,
   safeFoldOffset,
 }: AddDustParams) {
-  const doorSize = heightMM + tuckFlapSize;
+  const doorSize = height + tuckFlapSize;
   const dustSize = doorSize / 2;
-  const mappedDustSize = calculateTuckflapSize(widthMM, dustSize, heightMM);
+  const mappedDustSize = calculateTuckflapSize(width, dustSize, height);
   const dust: IModel = { models: {} };
-  const startPoint = getLastPointFromModel(drawAfter, "mm");
-  const height = {
+  const startPoint = getLastPointFromModel(drawAfter);
+  const dustHeight = {
     r: {
       inner: 9,
       outer: 6,
@@ -53,7 +52,7 @@ export function addDust({
   // Dust Hole
   // ─────────────────────────────────────────
   const { hole: dustHoleArc } = addHoleArc({
-    startPoint: pointToPt(startPoint),
+    startPoint: startPoint,
     safeFoldOffset,
   });
 
@@ -66,7 +65,7 @@ export function addDust({
 
   // Indent calculations (bottom-left)
   const bottomLeftIndent = considerDustHole
-    ? Math.max(0, indent.bl - toMm(dustHoleWidth))
+    ? Math.max(0, indent.bl - dustHoleWidth)
     : indent.bl;
 
   // Vertical movement calculation
@@ -75,10 +74,10 @@ export function addDust({
     : mappedDustSize - indent.bl;
 
   // Base-to-hole vertical compensation
-  const baseToHoleEndOffset = safeFoldOffset - toMm(dustHoleOuterHeight);
+  const baseToHoleEndOffset = safeFoldOffset - dustHoleOuterHeight;
 
   const dustStartPoint = considerDustHole
-    ? getLastPointFromPath(dustHoleArc, "mm")
+    ? getLastPointFromPath(dustHoleArc)
     : [startPoint[0]!, startPoint[1]! - safeFoldOffset];
 
   // Point construction
@@ -90,17 +89,17 @@ export function addDust({
     )
     .draw(indent.tl, verticalMoveToTop)
     .right(
-      heightMM -
+      height -
         indent.br -
         bottomLeftIndent -
         indent.tl -
         indent.tr -
-        (considerDustHole ? toMm(dustHoleWidth) : 0) -
+        (considerDustHole ? dustHoleWidth : 0) -
         (considerOuterIndent ? materialThickness : 0)
     )
-    .draw(indent.tr, -mappedDustSize + height.r.inner)
-    .draw(indent.br, -(height.r.inner - height.r.outer))
-    .down(height.r.outer)
+    .draw(indent.tr, -mappedDustSize + dustHeight.r.inner)
+    .draw(indent.br, -(dustHeight.r.inner - dustHeight.r.outer))
+    .down(dustHeight.r.outer)
     .right(considerOuterIndent ? materialThickness : 0)
     .build();
 
@@ -120,10 +119,10 @@ export function addDust({
   // Folds
   // ─────────────────────────────────────────
   const foldPoints = {
-    from: [toPt(widthMM), toPt(lengthMM)],
+    from: [width, length],
     to: [
-      toPt(widthMM + heightMM - (considerOuterIndent ? materialThickness : 0)),
-      toPt(lengthMM),
+      width + height - (considerOuterIndent ? materialThickness : 0),
+      length,
     ],
   };
   const foldTemp = new M.paths.Line([foldPoints.from, foldPoints.to]);

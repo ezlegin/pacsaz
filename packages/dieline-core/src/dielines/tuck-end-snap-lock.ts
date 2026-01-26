@@ -9,9 +9,8 @@ import { drawSingleLines } from "../core/helpers/draw/drawSingleLines";
 import { initiateModel } from "../core/helpers/initiateModels";
 import { modelBuilder } from "../core/helpers/modelBuilder";
 import { pushModelSeparatly } from "../core/helpers/pushModelSeparatly";
-import { BLEED, DOOR, materials } from "../data/consts";
+import { DOOR, materials } from "../data/consts";
 import { Dieline } from "../data/types";
-import { toPt } from "../utils/sizeConvertor";
 
 const tuckEndSnapLock: Dieline = {
   slug: "tuck-end-snap-lock",
@@ -28,7 +27,6 @@ const tuckEndSnapLock: Dieline = {
       height: 50,
     },
   },
-  defaultBleed: BLEED.default,
   dimensionsType: ["manufacture", "inner", "outer"],
   materials: {
     default: materials["glossy-cardboard"],
@@ -50,34 +48,29 @@ const tuckEndSnapLock: Dieline = {
       foldModel,
       trimModel,
       guideModel,
-      heightMM,
       length,
-      lengthMM,
-      widthMM,
     } = initiateModel();
 
     //! -------------- TRIM --------------
 
     // GLUE ----------------------------
     const { size: glueSize } = addGlue(trimModel, {
-      heightMM,
-      widthMM,
+      height,
+      width,
       customPoints: {
         from: [0, safeFoldOffset / 2],
-        to: [0, lengthMM - safeFoldOffset / 2],
+        to: [0, length - safeFoldOffset / 2],
       },
       safeFoldOffset,
     });
 
     // DOOR ----------------------------
     const { tuckFlap } = DOOR;
-    const tuckFlapSize = tuckFlap.size(widthMM);
+    const tuckFlapSize = tuckFlap.size(width);
 
     const { model: topDoor } = addDoor({
-      widthMM,
-      heightMM,
-      lengthMM,
       width,
+      height,
       length,
       tuckFlap,
       materialThickness,
@@ -89,9 +82,9 @@ const tuckEndSnapLock: Dieline = {
     // DUST ----------------------------
     const { model: dustTL } = addDust({
       drawAfter: topDoor,
-      heightMM,
-      widthMM,
-      lengthMM,
+      height,
+      width,
+      length,
       tuckFlapSize,
       safeFoldOffset,
       materialThickness,
@@ -101,9 +94,9 @@ const tuckEndSnapLock: Dieline = {
 
     const { model: dustTR_RAW } = addDust({
       drawAfter: topDoor,
-      heightMM,
-      widthMM,
-      lengthMM,
+      height,
+      width,
+      length,
       tuckFlapSize,
       safeFoldOffset,
       considerDustHole: false,
@@ -118,8 +111,8 @@ const tuckEndSnapLock: Dieline = {
     pushModelSeparatly(trimModel, foldModel, dustTR, "dustTR");
 
     const { snapLock } = addSnapLock({
-      heightMM,
-      widthMM,
+      height,
+      width,
       materialThickness,
       safeFoldOffset,
     });
@@ -144,13 +137,12 @@ const tuckEndSnapLock: Dieline = {
     ]);
 
     //! -------------- FOLD --------------
-    const foldOffsetToSnapLock = toPt(safeFoldOffset) / 2;
-    const safeOffset = toPt(safeFoldOffset);
+    const foldOffsetToSnapLock = safeFoldOffset / 2;
     drawFoldLines(foldModel, {
       verticals: [
         { from: [0, foldOffsetToSnapLock], to: [0, length] },
         {
-          from: [width, length + safeOffset],
+          from: [width, length + safeFoldOffset],
           to: [width, foldOffsetToSnapLock],
         },
         {

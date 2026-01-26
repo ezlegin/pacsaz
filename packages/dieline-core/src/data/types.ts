@@ -1,11 +1,11 @@
 import { Dimension, MaterialValue } from "@repo/store/data/types";
 
 export type DimensionsType = ["manufacture"?, "inner"?, "outer"?];
-type DielineDimensions = {
+export type DielineDimensions = {
   defaultDimensions: Dimension;
   minDimensions: Dimension;
 };
-type MaterialsType = {
+export type DielineMaterials = {
   default: MaterialValue;
   included: MaterialValue[];
 };
@@ -15,7 +15,7 @@ export interface Dieline {
   dimensions: DielineDimensions;
   defaultBleed?: number;
   dimensionsType: DimensionsType;
-  materials: MaterialsType;
+  materials: DielineMaterials;
   model: () => string;
 }
 

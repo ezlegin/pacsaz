@@ -1,32 +1,31 @@
-import { pointToMm, toMm, toPt } from "../../../utils/sizeConvertor";
 import M, { IModel, IPoint } from "makerjs";
-import { addLine } from "./addLine";
+import { zero } from "../../../data/consts";
 import { cloneMirrorMove } from "../clone";
 import { getDistanceOfFirstAndLastPoint } from "../getDistance";
 import { getLastPointFromModel } from "../getLastPoint";
 import { PointBuilder } from "../pointBuilder";
 import { addFoldLine } from "./addFoldLine";
-import { zero } from "../../../data/consts";
+import { addLine } from "./addLine";
 
 export function addSnapLock({
-  heightMM,
-  widthMM,
+  height,
+  width,
   materialThickness,
   safeFoldOffset,
 }: {
-  widthMM: number;
-  heightMM: number;
+  width: number;
+  height: number;
   materialThickness: number;
   safeFoldOffset: number;
 }) {
   const snapLock: IModel = { models: {} };
 
   function mapTabWidth() {
-    let tabWidth: number = widthMM / 3;
+    let tabWidth: number = width / 3;
 
-    if (widthMM >= 70) tabWidth = widthMM / 4;
-    if (widthMM >= 140) tabWidth = widthMM / 5;
-    if (widthMM >= 230) tabWidth = widthMM / 6;
+    if (width >= 70) tabWidth = width / 4;
+    if (width >= 140) tabWidth = width / 5;
+    if (width >= 230) tabWidth = width / 6;
 
     const maxTabWidth = lockHeightRaw - tabHeight;
 
@@ -37,15 +36,15 @@ export function addSnapLock({
     x: materialThickness < 1.5 ? 0.5 : 1,
     y: materialThickness,
   };
-  const arcRadiusPT = toPt(safeFoldOffset);
+  const arcRadiusPT = safeFoldOffset;
   const arcRadiusMM = safeFoldOffset;
   const baseOffset = arcRadiusPT / 2;
-  const lockHeightRaw = heightMM * 0.75;
-  const lockHeight = lockHeightRaw - toMm(baseOffset);
+  const lockHeightRaw = height * 0.75;
+  const lockHeight = lockHeightRaw - baseOffset;
   const tabHeight = lockHeightRaw / 3;
   const tabWidthRaw = mapTabWidth();
   const tabWidth = tabWidthRaw - arcRadiusMM;
-  const toungeWidth = widthMM - tabWidth * 2 - arcRadiusMM * 2;
+  const toungeWidth = width - tabWidth * 2 - arcRadiusMM * 2;
   const lockHorizon = lockHeightRaw - tabHeight;
   const lockerIndent = 5;
   const partsRoundness = 10;
@@ -65,7 +64,7 @@ export function addSnapLock({
       type: "quarter",
     });
 
-    const pb = new PointBuilder(pointToMm(startArcPoints[0]!));
+    const pb = new PointBuilder(startArcPoints[0]!);
     const pts = pb
       .down(lockHeight)
       .right(tabWidth - fitInOffset.x)
@@ -89,7 +88,7 @@ export function addSnapLock({
     addFoldLine(snapLock, {
       id: "part1-fold",
       from: [foldOffset, 0],
-      to: [toPt(widthMM) - foldOffset, 0],
+      to: [width - foldOffset, 0],
     });
 
     const part1Model: IModel = {
@@ -117,16 +116,13 @@ export function addSnapLock({
     });
 
     const pb = new PointBuilder(
-      considerStarterHole ? pointToMm(startArcPoints[0]!) : [widthMM, 0]
+      considerStarterHole ? startArcPoints[0]! : [width, 0]
     );
     const pts = pb
-      .draw(
-        lockHorizon - (considerStarterHole ? toMm(disOfWidth) : 0),
-        -tabWidthRaw
-      )
+      .draw(lockHorizon - (considerStarterHole ? disOfWidth : 0), -tabWidthRaw)
       .draw(-lockerIndent, -tabHeight)
-      .right(lockerIndent + heightMM - lockHorizon - arcRadiusMM)
-      .up(tabWidthRaw + tabHeight - toMm(baseOffset))
+      .right(lockerIndent + height - lockHorizon - arcRadiusMM)
+      .up(tabWidthRaw + tabHeight - baseOffset)
       .build();
 
     const line = addLine(pts, false, lockerRoundness, [2]);
@@ -146,8 +142,8 @@ export function addSnapLock({
     // FOLD
     addFoldLine(snapLock, {
       id: "part2-fold",
-      from: [toPt(widthMM) + foldOffset, 0],
-      to: [toPt(widthMM + heightMM) - foldOffset, 0],
+      from: [width + foldOffset, 0],
+      to: [width + height - foldOffset, 0],
     });
 
     return { part2Model, lastPointOfPart2: endArcPoints[0]! };
@@ -171,9 +167,9 @@ export function addSnapLock({
       type: "three-quarter",
     });
 
-    const difOfArcs = toMm(arcRadiusPT - disOfWidth);
+    const difOfArcs = arcRadiusPT - disOfWidth;
 
-    const pb = new PointBuilder(pointToMm(startArcPoints[0]!));
+    const pb = new PointBuilder(startArcPoints[0]!);
     const pts = pb
       .draw(tabWidth + difOfArcs, -lockHorizon)
       .down(tabHeight)
@@ -184,10 +180,10 @@ export function addSnapLock({
 
     const line = addLine(pts, false, partsRoundness, [2, 3]);
 
-    const lastPointOfLine = getLastPointFromModel(line, "pt");
+    const lastPointOfLine = getLastPointFromModel(line);
     const { arc: endArc, arcPoints: endArcPoints } = addHole({
       origin: [
-        lastPointOfLine[0]! + arcRadiusPT - toPt(difOfArcs),
+        lastPointOfLine[0]! + arcRadiusPT - difOfArcs,
         lastPointOfLine[1]! - arcRadiusPT + disOfHeight,
       ],
       arcRadius: arcRadiusPT,
@@ -203,8 +199,8 @@ export function addSnapLock({
     // FOLD
     addFoldLine(snapLock, {
       id: "part3-fold",
-      from: [toPt(widthMM + heightMM) + foldOffset, 0],
-      to: [toPt(widthMM * 2 + heightMM) - foldOffset, 0],
+      from: [width + height + foldOffset, 0],
+      to: [width * 2 + height - foldOffset, 0],
     });
 
     return { part3Model, lastPointOfPart3: endArcPoints[0]! };
@@ -220,15 +216,15 @@ export function addSnapLock({
     });
 
     const part4Model = cloneMirrorMove(part2Model_dup, true, false, [
-      toPt(widthMM * 2 + heightMM),
-      -toPt(tabWidthRaw + tabHeight),
+      width * 2 + height,
+      -(tabWidthRaw + tabHeight),
     ]);
 
     // FOLD
     addFoldLine(snapLock, {
       id: "part4-fold",
-      from: [toPt(widthMM * 2 + heightMM) + foldOffset, 0],
-      to: [toPt(widthMM * 2 + heightMM * 2), 0],
+      from: [width * 2 + height + foldOffset, 0],
+      to: [width * 2 + height * 2, 0],
     });
 
     return { part4Model };
@@ -289,7 +285,7 @@ function addHole({
 }
 
 function geOriginArcFromLine(lineModel: IModel, arcRadiusPT: number) {
-  const lastPointOfLine = getLastPointFromModel(lineModel, "pt");
+  const lastPointOfLine = getLastPointFromModel(lineModel);
   const origin = [lastPointOfLine[0]! + arcRadiusPT, lastPointOfLine[1]!];
 
   return origin;

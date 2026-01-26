@@ -1,36 +1,17 @@
-import { toPt } from "../utils/sizeConvertor";
+import { toMm } from "../utils/sizeConvertor";
 import { calculateSafeFoldOffset } from "../core/helpers/calculate/calculateSafeFoldOffset";
 import { Materials } from "@repo/store/data/types";
+import { IPoint } from "makerjs";
 
 export const onDevelepe = process.env.NODE_ENV === "development";
 export const onProduction = process.env.NODE_ENV === "production";
 export const EPS = 0.0001;
-
-export const strokeWidth = {
-  svg: "0.75",
-  guide: "1",
-};
-
-// COLORS
-export const COLORS = {
-  dielines: {
-    bleed: "green",
-    trim: "blue",
-    fold: "red",
-    fill: "white",
-  },
-
-  guides: {
-    box: "white",
-    line: "#1E90FF", // dodgerBlue
-    text: "#1E90FF", // dodgerBlue
-  },
-};
+export const zero: IPoint = [0, 0];
 
 // GUIDES
 export const GUIDES = {
-  foldDasharray: "5,2", // PT
-  textFontSizePT: 12,
+  foldDasharray: [toMm(5), toMm(4)].join(","), // PT
+  textFontSizePT: toMm(20).toString(),
 };
 
 export const GLUES = {
@@ -39,14 +20,6 @@ export const GLUES = {
   lg: 25,
   xl: 35,
   xxl: 50,
-};
-
-//  BLEED
-export const BLEED = {
-  sm: 3,
-  default: 5, // md
-  lg: 7,
-  xl: 10,
 };
 
 export const DOOR = {
@@ -66,15 +39,6 @@ export const DOOR = {
   foldOffset: 1,
 };
 export type TuckFlap = typeof DOOR.tuckFlap;
-
-export const zero = [0, 0];
-
-export const MARGINS = {
-  container: 30,
-  dimensionGuide: 20,
-};
-
-export const DimensionsTypeOffset = toPt(1.4);
 
 export const DIMENSIONS = [
   { key: "length", label: "طول" },

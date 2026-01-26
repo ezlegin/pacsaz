@@ -8,14 +8,14 @@ export function addGlue(
   trimModel: IModel,
   {
     customPoints,
-    heightMM,
-    widthMM,
-    lengthMM,
+    height,
+    width,
+    length,
     safeFoldOffset,
   }: {
-    widthMM: number;
-    heightMM: number;
-    lengthMM?: number;
+    width: number;
+    height: number;
+    length?: number;
     customPoints?: {
       from: IPoint;
       to: IPoint;
@@ -24,13 +24,13 @@ export function addGlue(
   }
 ) {
   const pb = new PointBuilder(customPoints?.from ?? undefined);
-  const size = glueMapper(widthMM, heightMM);
+  const size = glueMapper(width, height);
   const glueMargin = 8;
 
-  const pts = lengthMM
+  const pts = length
     ? pb
         .draw(-size, glueMargin)
-        .up(lengthMM - glueMargin * 2)
+        .up(length - glueMargin * 2)
         .draw(size, glueMargin)
         .up(safeFoldOffset)
         .build()

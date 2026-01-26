@@ -8,11 +8,8 @@ import { drawSingleLines } from "../core/helpers/draw/drawSingleLines";
 import { initiateModel } from "../core/helpers/initiateModels";
 import { modelBuilder } from "../core/helpers/modelBuilder";
 import { pushModelSeparatly } from "../core/helpers/pushModelSeparatly";
-import { BLEED, DOOR, materials, zero } from "../data/consts";
+import { DOOR, materials, zero } from "../data/consts";
 import { Dieline } from "../data/types";
-import { toPt } from "../utils/sizeConvertor";
-
-const defaultBleed = BLEED.default;
 
 const tuckEnd: Dieline = {
   slug: "tuck-end",
@@ -29,7 +26,6 @@ const tuckEnd: Dieline = {
       height: 50,
     },
   },
-  defaultBleed,
   dimensionsType: ["manufacture", "inner", "outer"],
   materials: {
     default: materials["glossy-cardboard"],
@@ -51,31 +47,26 @@ const tuckEnd: Dieline = {
       foldModel,
       trimModel,
       guideModel,
-      heightMM,
       length,
-      lengthMM,
-      widthMM,
     } = initiateModel();
 
     //! -------------- TRIM --------------
 
     // GLUE ----------------------------
     const { size: glueSize } = addGlue(trimModel, {
-      heightMM,
-      widthMM,
-      lengthMM,
+      height,
+      width,
+      length,
       safeFoldOffset: safeFoldOffset,
     });
 
     // DOOR ----------------------------
     const { tuckFlap } = DOOR;
-    const tuckFlapSize = tuckFlap.size(widthMM);
+    const tuckFlapSize = tuckFlap.size(width);
 
     const { model: topDoor, doorSize } = addDoor({
-      widthMM,
-      heightMM,
-      lengthMM,
       width,
+      height,
       length,
       tuckFlap,
       materialThickness,
@@ -86,7 +77,7 @@ const tuckEnd: Dieline = {
 
     const bottomDoor = cloneRotateMove(topDoor, 180, [
       width + height,
-      -doorSize - toPt(safeFoldOffset),
+      -doorSize - safeFoldOffset,
     ]);
 
     pushModelSeparatly(trimModel, foldModel, bottomDoor, "bottomDoor");
@@ -94,9 +85,9 @@ const tuckEnd: Dieline = {
     // DUST ----------------------------
     const { dustSize, model: dustTL } = addDust({
       drawAfter: topDoor,
-      heightMM,
-      widthMM,
-      lengthMM,
+      height,
+      width,
+      length,
       tuckFlapSize,
       safeFoldOffset,
       materialThickness,
@@ -106,9 +97,9 @@ const tuckEnd: Dieline = {
 
     const { model: dustTR_RAW } = addDust({
       drawAfter: topDoor,
-      heightMM,
-      widthMM,
-      lengthMM,
+      height,
+      width,
+      length,
       tuckFlapSize,
       safeFoldOffset,
       considerDustHole: false,
@@ -124,9 +115,9 @@ const tuckEnd: Dieline = {
 
     const { model: dustBR_RAW } = addDust({
       drawAfter: topDoor,
-      heightMM,
-      widthMM,
-      lengthMM,
+      height,
+      width,
+      length,
       tuckFlapSize,
       safeFoldOffset,
       considerOuterIndent: false,
@@ -135,16 +126,16 @@ const tuckEnd: Dieline = {
 
     const clonedDustBR = cloneMirrorMove(dustBR_RAW, false, true, [
       width * 2 + height,
-      0 - toPt(dustSize),
+      0 - dustSize,
     ]);
 
     pushModelSeparatly(trimModel, foldModel, clonedDustBR, "dustBR");
 
     const { model: dustBL_RAW } = addDust({
       drawAfter: topDoor,
-      heightMM,
-      widthMM,
-      lengthMM,
+      height,
+      width,
+      length,
       tuckFlapSize,
       materialThickness,
       safeFoldOffset,
@@ -153,7 +144,7 @@ const tuckEnd: Dieline = {
 
     const dustBL = cloneMirrorMove(dustBL_RAW, true, true, [
       width,
-      0 - toPt(dustSize),
+      0 - dustSize,
     ]);
 
     pushModelSeparatly(trimModel, foldModel, dustBL, "dustBL");
@@ -178,18 +169,17 @@ const tuckEnd: Dieline = {
     ]);
 
     //! -------------- FOLD --------------
-    const safeOffset = toPt(safeFoldOffset);
     drawFoldLines(foldModel, {
       verticals: [
         { from: zero, to: [0, length] },
-        { from: [width, length + safeOffset], to: [width, 0] },
+        { from: [width, length + safeFoldOffset], to: [width, 0] },
         {
           from: [width + height, length],
-          to: [width + height, -safeOffset],
+          to: [width + height, -safeFoldOffset],
         },
         {
           from: [width * 2 + height, length],
-          to: [width * 2 + height, -safeOffset],
+          to: [width * 2 + height, -safeFoldOffset],
         },
       ],
     });

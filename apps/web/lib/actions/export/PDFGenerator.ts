@@ -1,8 +1,7 @@
 "use server";
 
 import { handleServerError } from "@/utils/handleServerError";
-import { COLORS } from "@repo/dieline-core/data/consts";
-import { toMm } from "@repo/dieline-core/utils/sizeConvertor";
+import { toPt } from "@repo/dieline-core/utils/sizeConvertor";
 import { OverallSizes } from "@repo/store/dieline/overallSize.store";
 import path from "path";
 import PDFDocument from "pdfkit";
@@ -35,12 +34,12 @@ export async function PDFGenerator({
 
     const sizes = {
       trim: {
-        width: toMm(trim.width).toFixed(1),
-        height: toMm(trim.height).toFixed(1),
+        width: trim.width.toFixed(1),
+        height: trim.height.toFixed(1),
       },
       bleed: {
-        width: toMm(bleed.width).toFixed(1),
-        height: toMm(bleed.height).toFixed(1),
+        width: bleed.width.toFixed(1),
+        height: bleed.height.toFixed(1),
       },
       container: {
         width: container.width,
@@ -48,8 +47,8 @@ export async function PDFGenerator({
       },
     };
 
-    const docWidth = sizes.container.width;
-    const docHeight = sizes.container.height;
+    const docWidth = toPt(sizes.container.width);
+    const docHeight = toPt(sizes.container.height);
 
     const doc = new PDFDocument({
       size: [docWidth, docHeight],
@@ -71,7 +70,7 @@ export async function PDFGenerator({
     const offset = 10;
     doc
       .fontSize(9)
-      .fillColor(COLORS.guides.text)
+      .fillColor("#1E90FF") //todo: get this from svgSettings in svgExporter
       .text(guideText, offset, offset, { lineGap: 3 });
 
     const imageWidth = 30;
@@ -80,7 +79,7 @@ export async function PDFGenerator({
       width: imageWidth,
     });
 
-    SVGtoPDF(doc, svg, 0, 0, { assumePt: true });
+    SVGtoPDF(doc, svg, 0, 0);
 
     doc.end();
 

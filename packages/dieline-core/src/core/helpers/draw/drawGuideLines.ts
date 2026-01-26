@@ -67,6 +67,7 @@ export function drawGuideLines(
       dimensionTypeOffset: {
         widthOffset: offsets.width,
         lengthOffset: offsets.length,
+        heightOffset: offsets.height,
       },
       value: raw[guide.type],
     });

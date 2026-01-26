@@ -1,11 +1,10 @@
 import { IPoint } from "makerjs";
-import { toPt } from "../../utils/sizeConvertor";
 
 export class PointBuilder {
   private pts: IPoint[] = [];
 
   constructor(start: IPoint = [0, 0]) {
-    this.pts.push([toPt(start[0]!), toPt(start[1]!)]);
+    this.pts.push([start[0]!, start[1]!]);
   }
 
   // relative move
@@ -17,19 +16,19 @@ export class PointBuilder {
 
   // alias for readability
   draw(x: number, y: number) {
-    return this.pointBuilder(toPt(x), toPt(y));
+    return this.pointBuilder(x, y);
   }
   down(n: number) {
-    return this.pointBuilder(0, toPt(-n));
+    return this.pointBuilder(0, -n);
   }
   up(n: number) {
-    return this.pointBuilder(0, toPt(n));
+    return this.pointBuilder(0, n);
   }
   right(n: number) {
-    return this.pointBuilder(toPt(n), 0);
+    return this.pointBuilder(n, 0);
   }
   left(n: number) {
-    return this.pointBuilder(toPt(-n), 0);
+    return this.pointBuilder(-n, 0);
   }
 
   build() {
