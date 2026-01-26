@@ -1,5 +1,4 @@
 import { aiIcon, dxfIcon, pdfIcon } from "@/public";
-import { DIMENSIONS, DIMENSIONS_TYPE } from "@repo/dieline-core/data/consts";
 import {
   DielineDimensions,
   DielineMaterials,
@@ -39,6 +38,7 @@ import MeterialGuide from "./guides/materialGuide";
 import ThicknessGuide from "./guides/ThicknessGuide";
 import MaterialInput from "./MaterialInput";
 import ThicknessInput from "./ThicknessInput";
+import { DIMENSIONS, DIMENSIONS_TYPE } from "@/data/consts";
 
 interface Props {
   defaultDimensions: DielineDimensions;

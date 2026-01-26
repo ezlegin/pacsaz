@@ -1,5 +1,6 @@
 "use client";
 
+import { DIMENSIONS_TYPE } from "@/data/consts";
 import { useLoading } from "@/hooks/useLoading";
 import {
   SaveDielineFormType,
@@ -7,7 +8,6 @@ import {
 } from "@/lib/validatoinSchema";
 import Diamond from "@/public/icons/Diamond";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { DIMENSIONS_TYPE } from "@repo/dieline-core/data/consts";
 import { useUserStore } from "@repo/store/app/user.store";
 import {
   getDielineSettings,

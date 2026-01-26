@@ -1,19 +1,19 @@
+import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
 import M, { IModel } from "makerjs";
-import { calculateTuckflapSize } from "../calculate/calculateTuckflapSize";
+import { calcualteTuckFlapSize } from "../../../utils/calculate/calculateTuckFlapSize";
+import { mapDustSize } from "../../../utils/calculate/mapDustSize";
 import { getDistanceOfFirstAndLastPoint } from "../getDistance";
 import { getLastPointFromModel, getLastPointFromPath } from "../getLastPoint";
 import { PointBuilder } from "../pointBuilder";
 import { addFoldLine } from "./addFoldLine";
 import { addHoleArc } from "./addHoleArc";
 import { addLine } from "./addLine";
-import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
 
 interface AddDustParams {
   drawAfter: IModel;
   height: number;
   width: number;
   length: number;
-  tuckFlapSize: number;
   considerOuterIndent?: boolean;
   considerDustHole?: boolean;
 }
@@ -23,14 +23,14 @@ export function addDust({
   width,
   length,
   height,
-  tuckFlapSize,
   considerOuterIndent = true,
   considerDustHole = true,
 }: AddDustParams) {
   const { thickness, safeFoldOffset } = getDielineSettings();
+  const tuckFlapSize = calcualteTuckFlapSize(width);
   const doorSize = height + tuckFlapSize;
   const dustSize = doorSize / 2;
-  const mappedDustSize = calculateTuckflapSize(width, dustSize, height);
+  const mappedDustSize = mapDustSize(width, dustSize, height);
   const dust: IModel = { models: {} };
   const startPoint = getLastPointFromModel(drawAfter);
   const dustHeight = {

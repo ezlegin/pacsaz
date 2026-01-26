@@ -4,8 +4,8 @@ import { drawFoldLines } from "../core/helpers/draw/drawFoldLines";
 import { drawGuideLines } from "../core/helpers/draw/drawGuideLines";
 import { modelBuilder } from "../core/helpers/modelBuilder";
 import { modelGenerator } from "../core/helpers/modelGenerator";
-import { materials } from "../data/consts";
 import { Dieline } from "../data/types";
+import { materials } from "@repo/store/data/dieline";
 
 const postalCard: Dieline = {
   slug: "postal-card",

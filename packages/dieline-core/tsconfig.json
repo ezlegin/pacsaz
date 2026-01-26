@@ -3,6 +3,6 @@
   "compilerOptions": {
     "rootDir": "src"
   },
-  "include": ["src"],
+  "include": ["src", "../store/src/utils/calculateSafeFoldOffset.ts"],
   "exclude": ["node_modules"]
 }

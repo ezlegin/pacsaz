@@ -1,11 +1,11 @@
 import { create } from "zustand";
-import { bleeds, materials } from "../data/dieline";
 import {
   Dimensions,
   DimensionType,
   Format,
   MaterialValue,
-} from "../data/types";
+} from "../../data/types";
+import { materials, bleeds } from "../../data/dieline";
 
 export type DielineSettings = {
   dimension: Dimensions;

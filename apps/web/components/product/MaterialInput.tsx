@@ -1,4 +1,3 @@
-import { materials } from "@repo/dieline-core/data/consts";
 import { DielineMaterials } from "@repo/dieline-core/data/types";
 import { MaterialKey } from "@repo/store/data/types";
 import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
@@ -11,6 +10,7 @@ import {
 } from "@repo/ui/components/select";
 import { cn } from "@repo/ui/lib/utils";
 import { calculateSafeFoldOffset } from "../../../../packages/store/src/utils/calculateSafeFoldOffset";
+import { materials } from "@repo/store/data/dieline";
 
 const MaterialInput = ({
   materialsInput,

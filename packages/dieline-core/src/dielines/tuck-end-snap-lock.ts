@@ -1,3 +1,4 @@
+import { materials } from "@repo/store/data/dieline";
 import { addDoor } from "../core/helpers/add/addDoor";
 import { addDust } from "../core/helpers/add/addDust";
 import { addGlue } from "../core/helpers/add/addGlue";
@@ -9,7 +10,6 @@ import { drawSingleLines } from "../core/helpers/draw/drawSingleLines";
 import { modelBuilder } from "../core/helpers/modelBuilder";
 import { modelGenerator } from "../core/helpers/modelGenerator";
 import { pushModelSeparatly } from "../core/helpers/pushModelSeparatly";
-import { DOOR, materials } from "../data/consts";
 import { Dieline } from "../data/types";
 
 const tuckEndSnapLock: Dieline = {
@@ -58,14 +58,11 @@ const tuckEndSnapLock: Dieline = {
       });
 
       // DOOR ----------------------------
-      const { tuckFlap } = DOOR;
-      const tuckFlapSize = tuckFlap.size(width);
 
       const { model: topDoor } = addDoor({
         width,
         height,
         length,
-        tuckFlap,
       });
 
       pushModelSeparatly(trimModel, foldModel, topDoor, "topDoor");
@@ -76,7 +73,6 @@ const tuckEndSnapLock: Dieline = {
         height,
         width,
         length,
-        tuckFlapSize,
       });
 
       pushModelSeparatly(trimModel, foldModel, dustTL, "dustTL");
@@ -86,7 +82,6 @@ const tuckEndSnapLock: Dieline = {
         height,
         width,
         length,
-        tuckFlapSize,
         considerDustHole: false,
       });
 

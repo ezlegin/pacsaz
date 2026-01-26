@@ -4,8 +4,8 @@
   "private": true,
   "description": "",
   "exports": {
-    "./dieline/*": "./src/dieline/*.ts",
-    "./app/*": "./src/app/*.ts",
+    "./dieline/*": "./src/store/dieline/*.ts",
+    "./app/*": "./src/store/app/*.ts",
     "./data/*": "./src/data/*.ts"
   },
   "devDependencies": {

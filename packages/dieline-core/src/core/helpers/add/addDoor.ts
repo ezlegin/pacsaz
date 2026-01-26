@@ -1,28 +1,27 @@
+import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
 import M, { IModel } from "makerjs";
-import { TuckFlap } from "../../../data/consts";
+import { calcualteTuckFlapSize } from "../../../utils/calculate/calculateTuckFlapSize";
 import { cloneMirrorMove } from "../clone";
 import { getMeasurementOfModel } from "../getWidthAndHeightOfModel";
 import { PointBuilder } from "../pointBuilder";
 import { addFoldLine } from "./addFoldLine";
 import { addLine } from "./addLine";
 import { addSeam } from "./addSeam";
-import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
 
 interface AddDoorParams {
   width: number;
   height: number;
   length: number;
-  tuckFlap: TuckFlap;
 }
 
-export function addDoor({ width, height, length, tuckFlap }: AddDoorParams) {
+export function addDoor({ width, height, length }: AddDoorParams) {
   const door: IModel = {};
   const { thickness, safeFoldOffset } = getDielineSettings();
 
   // ─────────────────────────────────────────
   // Top door panel
   // ─────────────────────────────────────────
-  const tuckFlapSize = tuckFlap.size(width) - thickness;
+  const tuckFlapSize = calcualteTuckFlapSize(width);
   const pb = new PointBuilder([0, length + safeFoldOffset]);
 
   const pts = pb

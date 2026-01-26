@@ -3,12 +3,12 @@
 import { useDielineGenerator } from "@repo/dieline-core/hooks/useDielineGenerator";
 import { dielineImporter } from "@repo/dieline-core/utils/dielineImporter";
 import { Card as ShadCard } from "@repo/ui/components/card";
-import { DIMENSIONS } from "../../../../packages/dieline-core/src/data/consts";
 import { DimensionInput } from "../product/DimensionsInput";
 import SVGPreview from "../product/SVGPreview";
 import ProductLoadingOverlay from "../product/ProductLoadingOverlay";
 import { useEffect } from "react";
 import { useDeveloperToolsStore } from "@repo/store/dieline/useDeveloperToolsStore";
+import { DIMENSIONS } from "@/data/consts";
 
 const HomeSVGModel = () => {
   const dieline = dielineImporter("home-dieline");
