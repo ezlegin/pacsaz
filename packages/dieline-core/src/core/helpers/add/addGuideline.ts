@@ -40,8 +40,8 @@ export function addGuideLine(model: M.IModel, options: GuideLineOptions) {
   }
 
   const isOverall = dimType === "overall";
-  const pointerRadius = isOverall ? 1.5 : 2;
-  const indicatorLength = 2;
+  const pointerRadius = isOverall ? 1.5 : 1.7;
+  const indicatorLength = 1.7;
 
   const basePointer = new M.models.Polygon(3, pointerRadius);
   const startPointer = M.cloneObject(basePointer);

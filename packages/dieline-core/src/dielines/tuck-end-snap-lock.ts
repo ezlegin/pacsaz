@@ -6,8 +6,8 @@ import { cloneMirrorMove } from "../core/helpers/clone";
 import { drawFoldLines } from "../core/helpers/draw/drawFoldLines";
 import { drawGuideLines } from "../core/helpers/draw/drawGuideLines";
 import { drawSingleLines } from "../core/helpers/draw/drawSingleLines";
-import { initiateModel } from "../core/helpers/initiateModels";
 import { modelBuilder } from "../core/helpers/modelBuilder";
+import { modelGenerator } from "../core/helpers/modelGenerator";
 import { pushModelSeparatly } from "../core/helpers/pushModelSeparatly";
 import { DOOR, materials } from "../data/consts";
 import { Dieline } from "../data/types";
@@ -38,156 +38,148 @@ const tuckEndSnapLock: Dieline = {
     ],
   },
 
-  model() {
-    const {
-      materialThickness,
-      safeFoldOffset,
-      height,
-      width,
-      model,
-      foldModel,
-      trimModel,
-      guideModel,
-      length,
-    } = initiateModel();
-
-    //! -------------- TRIM --------------
-
-    // GLUE ----------------------------
-    const { size: glueSize } = addGlue(trimModel, {
-      height,
-      width,
-      customPoints: {
-        from: [0, safeFoldOffset / 2],
-        to: [0, length - safeFoldOffset / 2],
+  model: modelGenerator(
+    ({
+      models: { foldModel, guideModel, model, trimModel },
+      settings: {
+        dimension: { height, length, width },
+        safeFoldOffset,
       },
-      safeFoldOffset,
-    });
+    }) => {
+      //! -------------- TRIM --------------
 
-    // DOOR ----------------------------
-    const { tuckFlap } = DOOR;
-    const tuckFlapSize = tuckFlap.size(width);
+      // GLUE ----------------------------
+      const { size: glueSize } = addGlue(trimModel, {
+        height,
+        width,
+        customPoints: {
+          from: [0, safeFoldOffset / 2],
+          to: [0, length - safeFoldOffset / 2],
+        },
+        safeFoldOffset,
+      });
 
-    const { model: topDoor } = addDoor({
-      width,
-      height,
-      length,
-      tuckFlap,
-      materialThickness,
-      safeFoldOffset,
-    });
+      // DOOR ----------------------------
+      const { tuckFlap } = DOOR;
+      const tuckFlapSize = tuckFlap.size(width);
 
-    pushModelSeparatly(trimModel, foldModel, topDoor, "topDoor");
+      const { model: topDoor } = addDoor({
+        width,
+        height,
+        length,
+        tuckFlap,
+        safeFoldOffset,
+      });
 
-    // DUST ----------------------------
-    const { model: dustTL } = addDust({
-      drawAfter: topDoor,
-      height,
-      width,
-      length,
-      tuckFlapSize,
-      safeFoldOffset,
-      materialThickness,
-    });
+      pushModelSeparatly(trimModel, foldModel, topDoor, "topDoor");
 
-    pushModelSeparatly(trimModel, foldModel, dustTL, "dustTL");
+      // DUST ----------------------------
+      const { model: dustTL } = addDust({
+        drawAfter: topDoor,
+        height,
+        width,
+        length,
+        tuckFlapSize,
+        safeFoldOffset,
+      });
 
-    const { model: dustTR_RAW } = addDust({
-      drawAfter: topDoor,
-      height,
-      width,
-      length,
-      tuckFlapSize,
-      safeFoldOffset,
-      considerDustHole: false,
-      materialThickness,
-    });
+      pushModelSeparatly(trimModel, foldModel, dustTL, "dustTL");
 
-    const dustTR = cloneMirrorMove(dustTR_RAW, true, false, [
-      width * 2 + height,
-      length,
-    ]);
+      const { model: dustTR_RAW } = addDust({
+        drawAfter: topDoor,
+        height,
+        width,
+        length,
+        tuckFlapSize,
+        safeFoldOffset,
+        considerDustHole: false,
+      });
 
-    pushModelSeparatly(trimModel, foldModel, dustTR, "dustTR");
+      const dustTR = cloneMirrorMove(dustTR_RAW, true, false, [
+        width * 2 + height,
+        length,
+      ]);
 
-    const { snapLock } = addSnapLock({
-      height,
-      width,
-      materialThickness,
-      safeFoldOffset,
-    });
-    pushModelSeparatly(trimModel, foldModel, snapLock, "snapLock");
+      pushModelSeparatly(trimModel, foldModel, dustTR, "dustTR");
 
-    // SINGLES ----------------------------
-    drawSingleLines(trimModel, [
-      {
-        id: "s2",
-        pts: [
-          [width + height, length],
-          [width + height + width, length],
+      const { snapLock } = addSnapLock({
+        height,
+        width,
+        safeFoldOffset,
+      });
+      pushModelSeparatly(trimModel, foldModel, snapLock, "snapLock");
+
+      // SINGLES ----------------------------
+      drawSingleLines(trimModel, [
+        {
+          id: "s2",
+          pts: [
+            [width + height, length],
+            [width + height + width, length],
+          ],
+        },
+        {
+          id: "s3",
+          pts: [
+            [width * 2 + height * 2, length],
+            [width * 2 + height * 2, 0],
+          ],
+        },
+      ]);
+
+      //! -------------- FOLD --------------
+      const foldOffsetToSnapLock = safeFoldOffset / 2;
+      drawFoldLines(foldModel, {
+        verticals: [
+          { from: [0, foldOffsetToSnapLock], to: [0, length] },
+          {
+            from: [width, length + safeFoldOffset],
+            to: [width, foldOffsetToSnapLock],
+          },
+          {
+            from: [width + height, length],
+            to: [width + height, foldOffsetToSnapLock],
+          },
+          {
+            from: [width * 2 + height, length],
+            to: [width * 2 + height, foldOffsetToSnapLock],
+          },
         ],
-      },
-      {
-        id: "s3",
-        pts: [
-          [width * 2 + height * 2, length],
-          [width * 2 + height * 2, 0],
+      });
+
+      //! -------------- GUIDES --------------
+      drawGuideLines(guideModel, {
+        height,
+        length,
+        width,
+        guides: [
+          {
+            type: "height",
+            orientation: "horizontal",
+          },
+          {
+            type: "width",
+            orientation: "horizontal",
+          },
+          {
+            type: "length",
+            orientation: "vertical",
+          },
         ],
-      },
-    ]);
+      });
 
-    //! -------------- FOLD --------------
-    const foldOffsetToSnapLock = safeFoldOffset / 2;
-    drawFoldLines(foldModel, {
-      verticals: [
-        { from: [0, foldOffsetToSnapLock], to: [0, length] },
-        {
-          from: [width, length + safeFoldOffset],
-          to: [width, foldOffsetToSnapLock],
+      return modelBuilder({
+        model,
+        trimModel,
+        watermark: {
+          offset: {
+            x: glueSize,
+            y: 0,
+          },
         },
-        {
-          from: [width + height, length],
-          to: [width + height, foldOffsetToSnapLock],
-        },
-        {
-          from: [width * 2 + height, length],
-          to: [width * 2 + height, foldOffsetToSnapLock],
-        },
-      ],
-    });
-
-    //! -------------- GUIDES --------------
-    drawGuideLines(guideModel, {
-      height,
-      length,
-      width,
-      guides: [
-        {
-          type: "height",
-          orientation: "horizontal",
-        },
-        {
-          type: "width",
-          orientation: "horizontal",
-        },
-        {
-          type: "length",
-          orientation: "vertical",
-        },
-      ],
-    });
-
-    return modelBuilder({
-      model,
-      trimModel,
-      watermark: {
-        offset: {
-          x: glueSize,
-          y: 0,
-        },
-      },
-    });
-  },
+      });
+    }
+  ),
 };
 
 export default tuckEndSnapLock;

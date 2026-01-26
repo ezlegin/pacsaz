@@ -17,16 +17,14 @@ export function useDielineGenerator(dieline: Dieline) {
 
   const {
     setDefaultSettings,
-    settings: { bleed, dimensionType, material, customThickness, dimension },
+    settings: { bleed, dimensionType, material, thickness, dimension },
   } = useDielineSettingsStore();
-
   const offsets = resolveOffsets();
 
   // set defaults
   useEffect(() => {
     setDefaultSettings({
       bleed: dieline.defaultBleed ?? bleeds.default,
-      customThickness: undefined,
       dimension: {
         raw: dieline.dimensions.defaultDimensions,
         resolved: resolveDimensions(
@@ -37,6 +35,7 @@ export function useDielineGenerator(dieline: Dieline) {
       dimensionType: "manufacture",
       format: "pdf",
       material: dieline.materials.default,
+      thickness: dieline.materials.default.thickness,
     });
   }, []);
 
@@ -52,7 +51,7 @@ export function useDielineGenerator(dieline: Dieline) {
     material,
     bleed,
     dieline,
-    customThickness,
+    thickness,
 
     showAnchors,
     showWatermark,

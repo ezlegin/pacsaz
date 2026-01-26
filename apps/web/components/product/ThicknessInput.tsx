@@ -19,7 +19,7 @@ const ThicknessInput = ({ isRendering, materialsIncluded }: Props) => {
 
   const {
     setSetting,
-    settings: { customThickness, material },
+    settings: { thickness, material },
   } = useDielineSettingsStore();
 
   const { min: mMinThick, max: mMaxThick } =
@@ -32,19 +32,17 @@ const ThicknessInput = ({ isRendering, materialsIncluded }: Props) => {
   } = useLoading();
 
   useEffect(() => {
-    setSetting("customThickness", undefined);
+    setSetting("thickness", material.thickness);
   }, [material]);
 
   const handleThicknessChange = (type: "inc" | "dec") => {
     startMThicknessLoading();
 
-    const thickness = customThickness ?? material.thickness;
-
     const newThickness = +thickness + (type === "inc" ? 0.1 : -0.1);
 
     if (+newThickness < mMinThick || +newThickness > mMaxThick) return;
 
-    setSetting("customThickness", newThickness);
+    setSetting("thickness", newThickness);
   };
 
   useEffect(() => {
@@ -62,24 +60,22 @@ const ThicknessInput = ({ isRendering, materialsIncluded }: Props) => {
         <Input
           disabled={!isPremium || disabledInputs}
           dir="ltr"
-          defaultValue={
-            customThickness?.toString() ?? material.thickness.toString()
-          }
+          defaultValue={thickness.toString()}
           className="text-center"
           onFocus={(e) => e.currentTarget.select()}
           onBlur={(e) => {
             const val = e.target.value;
 
             if (+val < mMinThick) {
-              setSetting("customThickness", mMinThick);
+              setSetting("thickness", mMinThick);
               return;
             }
             if (+val > mMaxThick) {
-              setSetting("customThickness", mMaxThick);
+              setSetting("thickness", mMaxThick);
               return;
             }
 
-            setSetting("customThickness", +val);
+            setSetting("thickness", +val);
           }}
         />
         <Button
@@ -87,11 +83,7 @@ const ThicknessInput = ({ isRendering, materialsIncluded }: Props) => {
           size={"icon"}
           className="absolute left-0 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
           onClick={() => handleThicknessChange("dec")}
-          disabled={
-            (+(customThickness ?? 0) || material.thickness) <= mMinThick ||
-            !isPremium ||
-            disabledInputs
-          }
+          disabled={thickness <= mMinThick || !isPremium || disabledInputs}
         >
           <Minus />
         </Button>
@@ -100,11 +92,7 @@ const ThicknessInput = ({ isRendering, materialsIncluded }: Props) => {
           size={"icon"}
           className="absolute right-0 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
           onClick={() => handleThicknessChange("inc")}
-          disabled={
-            (+(customThickness ?? 0) || material.thickness) >= mMaxThick ||
-            !isPremium ||
-            disabledInputs
-          }
+          disabled={thickness >= mMaxThick || !isPremium || disabledInputs}
         >
           <Plus />
         </Button>

@@ -31,8 +31,7 @@ const SaveDielineForm = () => {
     settings: { dimension },
   } = useDielineSettingsStore();
   const { isLoading, startLoading, stopLoading } = useLoading();
-  const { customThickness, bleed, dimensionType, material } =
-    getDielineSettings();
+  const { thickness, bleed, dimensionType, material } = getDielineSettings();
   const { isPremium } = useUserStore();
 
   const form = useForm<SaveDielineFormType>({
@@ -49,7 +48,7 @@ const SaveDielineForm = () => {
     const finalData = {
       ...data,
       bleed,
-      thickness: customThickness ?? material.thickness,
+      thickness,
       dimensionType,
       material,
       dimension,
@@ -69,8 +68,7 @@ const SaveDielineForm = () => {
     bleedSize: bleed,
     material: material.label,
     dimensionType: selectedDimensionType,
-    thickness: material.thickness,
-    customThickness: customThickness,
+    thickness,
   };
 
   return (
@@ -99,10 +97,8 @@ const SaveDielineForm = () => {
           <li>بلید: {data.bleedSize}mm</li>
           <li>متریال: {data.material}</li>
           <li>
-            ضخامت:{" "}
-            {data.customThickness
-              ? `${data.customThickness.toFixed(1)}mm (سفارشی)`
-              : `${data.thickness}mm (پیش‌فرض)`}
+            ضخامت:
+            {thickness}mm
           </li>
         </div>
       </ul>

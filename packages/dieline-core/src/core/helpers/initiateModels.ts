@@ -1,60 +1,25 @@
-import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
 import M, { IModel } from "makerjs";
-import { calculateSafeFoldOffset } from "./calculate/calculateSafeFoldOffset";
+import { Models } from "./modelGenerator";
 
-export function initiateModel() {
-  const {
-    customThickness,
-    material,
-    dimension: { resolved },
-  } = getDielineSettings();
-
-  const { safeFoldOffset: mSafeFoldOffset, thickness } = material;
-
-  const safeFoldOffset = customThickness
-    ? calculateSafeFoldOffset(customThickness)
-    : mSafeFoldOffset;
-
-  const materialThickness = customThickness ?? thickness;
-
-  const { model, foldModel, trimModel, guideModel } = arrangeModels();
-
-  return {
-    settings: {
-      width: resolved.width,
-      length: resolved.length,
-      height: resolved.height,
-      materialThickness,
-      safeFoldOffset,
-    },
-
-    models: {
-      model,
-      foldModel,
-      trimModel,
-      guideModel,
-    },
-  };
-}
-
-export function arrangeModels() {
+export function initiateModels(): Models {
   const model: IModel = { models: {} };
 
-  const dieline: IModel = {};
-  M.model.addModel(model, dieline, "dieline");
+  const dielineModel: IModel = {};
+  M.model.addModel(model, dielineModel, "dieline");
 
   const foldModel: IModel = {};
-  M.model.addModel(dieline, foldModel, "fold");
+  M.model.addModel(dielineModel, foldModel, "fold");
   M.model.layer(foldModel, "fold");
 
   const trimModel: IModel = {};
-  M.model.addModel(dieline, trimModel, "trim");
+  M.model.addModel(dielineModel, trimModel, "trim");
   M.model.layer(trimModel, "trim");
+
+  const perforationModel: IModel = {};
+  M.model.addModel(dielineModel, perforationModel, "perforation");
 
   const guideModel: IModel = {};
   M.model.addModel(model, guideModel, "guides");
 
-  //todo: add perforation model as well
-
-  return { model, guideModel, trimModel, foldModel };
+  return { model, guideModel, trimModel, foldModel, perforationModel };
 }

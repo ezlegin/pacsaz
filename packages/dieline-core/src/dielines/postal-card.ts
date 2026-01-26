@@ -2,8 +2,8 @@ import M from "makerjs";
 import { addModelToLayer } from "../core/helpers/add/addModelToLayer";
 import { drawFoldLines } from "../core/helpers/draw/drawFoldLines";
 import { drawGuideLines } from "../core/helpers/draw/drawGuideLines";
-import { initiateModel } from "../core/helpers/initiateModels";
 import { modelBuilder } from "../core/helpers/modelBuilder";
+import { modelGenerator } from "../core/helpers/modelGenerator";
 import { materials } from "../data/consts";
 import { Dieline } from "../data/types";
 
@@ -27,40 +27,44 @@ const postalCard: Dieline = {
     default: materials["glossy-cardboard"],
     included: [materials["glossy-cardboard"], materials["art-paper"]],
   },
-  model() {
-    const { model, foldModel, trimModel, guideModel, width, length } =
-      initiateModel();
-
-    //! TRIM
-    const rect = new M.models.Rectangle(width * 2, length);
-    addModelToLayer(trimModel, "trim", rect);
-
-    //! FOLD
-    drawFoldLines(foldModel, {
-      verticals: [{ from: [width, 0], to: [width, length] }],
-    });
-
-    //! GUIDES
-    drawGuideLines(guideModel, {
-      length,
-      width,
-      guides: [
-        { orientation: "vertical", type: "length" },
-        { orientation: "horizontal", type: "width" },
-      ],
-    });
-
-    return modelBuilder({
-      model,
-      trimModel,
-      watermark: {
-        offset: {
-          x: 0,
-          y: 0,
-        },
+  model: modelGenerator(
+    ({
+      models: { foldModel, guideModel, model, trimModel },
+      settings: {
+        dimension: { length, width },
       },
-    });
-  },
+    }) => {
+      //! TRIM
+      const rect = new M.models.Rectangle(width * 2, length);
+      addModelToLayer(trimModel, "trim", rect);
+
+      //! FOLD
+      drawFoldLines(foldModel, {
+        verticals: [{ from: [width, 0], to: [width, length] }],
+      });
+
+      //! GUIDES
+      drawGuideLines(guideModel, {
+        length,
+        width,
+        guides: [
+          { orientation: "vertical", type: "length" },
+          { orientation: "horizontal", type: "width" },
+        ],
+      });
+
+      return modelBuilder({
+        model,
+        trimModel,
+        watermark: {
+          offset: {
+            x: 0,
+            y: 0,
+          },
+        },
+      });
+    }
+  ),
 };
 
 export default postalCard;

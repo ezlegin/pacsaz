@@ -6,13 +6,13 @@ import { PointBuilder } from "../pointBuilder";
 import { addFoldLine } from "./addFoldLine";
 import { addLine } from "./addLine";
 import { addSeam } from "./addSeam";
+import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
 
 interface AddDoorParams {
   width: number;
   height: number;
   length: number;
   tuckFlap: TuckFlap;
-  materialThickness: number;
   safeFoldOffset: number;
 }
 
@@ -21,24 +21,24 @@ export function addDoor({
   height,
   length,
   tuckFlap,
-  materialThickness: mThickness,
   safeFoldOffset,
 }: AddDoorParams) {
   const door: IModel = {};
+  const { thickness } = getDielineSettings();
 
   // ─────────────────────────────────────────
   // Top door panel
   // ─────────────────────────────────────────
-  const tuckFlapSize = tuckFlap.size(width) - mThickness;
+  const tuckFlapSize = tuckFlap.size(width) - thickness;
   const pb = new PointBuilder([0, length + safeFoldOffset]);
 
   const pts = pb
     .up(height)
-    .right(mThickness)
+    .right(thickness)
     .up(tuckFlapSize)
-    .right(width - mThickness * 2)
+    .right(width - thickness * 2)
     .down(tuckFlapSize)
-    .right(mThickness)
+    .right(thickness)
     .down(height)
     .build();
 
@@ -52,17 +52,17 @@ export function addDoor({
     h: 1.5,
   };
 
-  const seamHeight = Math.max(mThickness * 2, seamSize.h);
+  const seamHeight = Math.max(thickness * 2, seamSize.h);
 
   const seamPB = new PointBuilder([
-    mThickness,
+    thickness,
     length + height + safeFoldOffset,
   ]);
   const seamPTS = seamPB.right(seamSize.w).down(seamHeight).build();
   const leftSeam = addSeam(seamPTS, false, 2);
 
   const rightSeam = cloneMirrorMove(leftSeam, true, false, [
-    width - (seamSize.w + mThickness),
+    width - (seamSize.w + thickness),
     length + (height + safeFoldOffset - seamHeight),
   ]);
 
@@ -78,8 +78,8 @@ export function addDoor({
   // ─────────────────────────────────────────
   // Fold Lines
   // ─────────────────────────────────────────
-  const foldY = length + height - mThickness + safeFoldOffset;
-  const seamTotalWidth = seamSize.w + mThickness;
+  const foldY = length + height - thickness + safeFoldOffset;
+  const seamTotalWidth = seamSize.w + thickness;
 
   addFoldLine(door, {
     id: "tuckFlap-fold",

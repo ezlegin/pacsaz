@@ -6,6 +6,7 @@ import { PointBuilder } from "../pointBuilder";
 import { addFoldLine } from "./addFoldLine";
 import { addHoleArc } from "./addHoleArc";
 import { addLine } from "./addLine";
+import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
 
 interface AddDustParams {
   drawAfter: IModel;
@@ -15,7 +16,6 @@ interface AddDustParams {
   tuckFlapSize: number;
   considerOuterIndent?: boolean;
   considerDustHole?: boolean;
-  materialThickness: number;
   safeFoldOffset: number;
 }
 
@@ -27,9 +27,9 @@ export function addDust({
   tuckFlapSize,
   considerOuterIndent = true,
   considerDustHole = true,
-  materialThickness,
   safeFoldOffset,
 }: AddDustParams) {
+  const { thickness } = getDielineSettings();
   const doorSize = height + tuckFlapSize;
   const dustSize = doorSize / 2;
   const mappedDustSize = calculateTuckflapSize(width, dustSize, height);
@@ -42,8 +42,8 @@ export function addDust({
     },
   };
   const indent = {
-    bl: materialThickness + 3,
-    tl: materialThickness < 1.6 ? 1 : 2,
+    bl: thickness + 3,
+    tl: thickness < 1.6 ? 1 : 2,
     tr: 5,
     br: 3,
   };
@@ -95,12 +95,12 @@ export function addDust({
         indent.tl -
         indent.tr -
         (considerDustHole ? dustHoleWidth : 0) -
-        (considerOuterIndent ? materialThickness : 0)
+        (considerOuterIndent ? thickness : 0)
     )
     .draw(indent.tr, -mappedDustSize + dustHeight.r.inner)
     .draw(indent.br, -(dustHeight.r.inner - dustHeight.r.outer))
     .down(dustHeight.r.outer)
-    .right(considerOuterIndent ? materialThickness : 0)
+    .right(considerOuterIndent ? thickness : 0)
     .build();
 
   const dustP1 = addLine(dustP1_PTS, false, 35, [3]);
@@ -120,10 +120,7 @@ export function addDust({
   // ─────────────────────────────────────────
   const foldPoints = {
     from: [width, length],
-    to: [
-      width + height - (considerOuterIndent ? materialThickness : 0),
-      length,
-    ],
+    to: [width + height - (considerOuterIndent ? thickness : 0), length],
   };
   const foldTemp = new M.paths.Line([foldPoints.from, foldPoints.to]);
   const int = M.path.intersection(foldTemp, dustHoleArc) ?? {};

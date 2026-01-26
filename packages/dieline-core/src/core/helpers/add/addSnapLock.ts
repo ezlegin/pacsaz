@@ -6,19 +6,19 @@ import { getLastPointFromModel } from "../getLastPoint";
 import { PointBuilder } from "../pointBuilder";
 import { addFoldLine } from "./addFoldLine";
 import { addLine } from "./addLine";
+import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
 
 export function addSnapLock({
   height,
   width,
-  materialThickness,
   safeFoldOffset,
 }: {
   width: number;
   height: number;
-  materialThickness: number;
   safeFoldOffset: number;
 }) {
   const snapLock: IModel = { models: {} };
+  const { thickness } = getDielineSettings();
 
   function mapTabWidth() {
     let tabWidth: number = width / 3;
@@ -33,8 +33,8 @@ export function addSnapLock({
   }
 
   const fitInOffset = {
-    x: materialThickness < 1.5 ? 0.5 : 1,
-    y: materialThickness,
+    x: thickness < 1.5 ? 0.5 : 1,
+    y: thickness,
   };
   const arcRadiusPT = safeFoldOffset;
   const arcRadiusMM = safeFoldOffset;

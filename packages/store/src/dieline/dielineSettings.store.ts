@@ -11,7 +11,7 @@ export type DielineSettings = {
   dimension: Dimensions;
   material: MaterialValue;
   bleed: number;
-  customThickness: number | undefined;
+  thickness: number;
   dimensionType: DimensionType;
   format: Format;
 };
@@ -25,6 +25,7 @@ type DielineSettingsStore = {
   setDefaultSettings: (settings: DielineSettings) => void;
 };
 
+export const defaultMaterial = materials["glossy-cardboard"];
 export const useDielineSettingsStore = create<DielineSettingsStore>((set) => ({
   settings: {
     dimension: {
@@ -40,10 +41,10 @@ export const useDielineSettingsStore = create<DielineSettingsStore>((set) => ({
       },
     },
     bleed: bleeds.default,
-    customThickness: undefined,
     dimensionType: "manufacture",
     format: "pdf",
-    material: materials["glossy-cardboard"],
+    material: defaultMaterial,
+    thickness: defaultMaterial.thickness,
   },
 
   setSetting: (key, value) =>

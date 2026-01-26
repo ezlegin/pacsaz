@@ -1,3 +1,4 @@
+import { defaultMaterial } from "@repo/store/dieline/dielineSettings.store";
 import { addDoor } from "../core/helpers/add/addDoor";
 import { addDust } from "../core/helpers/add/addDust";
 import { addGlue } from "../core/helpers/add/addGlue";
@@ -5,8 +6,8 @@ import { cloneMirrorMove, cloneRotateMove } from "../core/helpers/clone";
 import { drawFoldLines } from "../core/helpers/draw/drawFoldLines";
 import { drawGuideLines } from "../core/helpers/draw/drawGuideLines";
 import { drawSingleLines } from "../core/helpers/draw/drawSingleLines";
-import { initiateModel } from "../core/helpers/initiateModels";
 import { modelBuilder } from "../core/helpers/modelBuilder";
+import { modelGenerator } from "../core/helpers/modelGenerator";
 import { pushModelSeparatly } from "../core/helpers/pushModelSeparatly";
 import { DOOR, materials, zero } from "../data/consts";
 import { Dieline } from "../data/types";
@@ -28,7 +29,7 @@ const tuckEnd: Dieline = {
   },
   dimensionsType: ["manufacture", "inner", "outer"],
   materials: {
-    default: materials["glossy-cardboard"],
+    default: defaultMaterial,
     included: [
       materials["glossy-cardboard"],
       materials["f-flute"],
@@ -36,179 +37,175 @@ const tuckEnd: Dieline = {
       materials["b-flute"],
     ],
   },
-
-  model() {
-    const {
+  model: modelGenerator(
+    ({
       models: { foldModel, guideModel, model, trimModel },
-      settings: { height, length, materialThickness, safeFoldOffset, width },
-    } = initiateModel();
+      settings: {
+        dimension: { height, length, width },
+        safeFoldOffset,
+      },
+    }) => {
+      //! -------------- TRIM --------------
+      // GLUE ----------------------------
+      const { size: glueSize } = addGlue(trimModel, {
+        height,
+        width,
+        length,
+        safeFoldOffset: safeFoldOffset,
+      });
 
-    //! -------------- TRIM --------------
+      // DOOR ----------------------------
+      const { tuckFlap } = DOOR;
+      const tuckFlapSize = tuckFlap.size(width);
 
-    // GLUE ----------------------------
-    const { size: glueSize } = addGlue(trimModel, {
-      height,
-      width,
-      length,
-      safeFoldOffset: safeFoldOffset,
-    });
+      const { model: topDoor, doorSize } = addDoor({
+        width,
+        height,
+        length,
+        tuckFlap,
+        safeFoldOffset,
+      });
 
-    // DOOR ----------------------------
-    const { tuckFlap } = DOOR;
-    const tuckFlapSize = tuckFlap.size(width);
+      pushModelSeparatly(trimModel, foldModel, topDoor, "topDoor");
 
-    const { model: topDoor, doorSize } = addDoor({
-      width,
-      height,
-      length,
-      tuckFlap,
-      materialThickness,
-      safeFoldOffset,
-    });
+      const bottomDoor = cloneRotateMove(topDoor, 180, [
+        width + height,
+        -doorSize - safeFoldOffset,
+      ]);
 
-    pushModelSeparatly(trimModel, foldModel, topDoor, "topDoor");
+      pushModelSeparatly(trimModel, foldModel, bottomDoor, "bottomDoor");
 
-    const bottomDoor = cloneRotateMove(topDoor, 180, [
-      width + height,
-      -doorSize - safeFoldOffset,
-    ]);
+      // DUST ----------------------------
+      const { dustSize, model: dustTL } = addDust({
+        drawAfter: topDoor,
+        height,
+        width,
+        length,
+        tuckFlapSize,
+        safeFoldOffset,
+      });
 
-    pushModelSeparatly(trimModel, foldModel, bottomDoor, "bottomDoor");
+      pushModelSeparatly(trimModel, foldModel, dustTL, "dustTL");
 
-    // DUST ----------------------------
-    const { dustSize, model: dustTL } = addDust({
-      drawAfter: topDoor,
-      height,
-      width,
-      length,
-      tuckFlapSize,
-      safeFoldOffset,
-      materialThickness,
-    });
+      const { model: dustTR_RAW } = addDust({
+        drawAfter: topDoor,
+        height,
+        width,
+        length,
+        tuckFlapSize,
+        safeFoldOffset,
+        considerDustHole: false,
+      });
 
-    pushModelSeparatly(trimModel, foldModel, dustTL, "dustTL");
+      const dustTR = cloneMirrorMove(dustTR_RAW, true, false, [
+        width * 2 + height,
+        length,
+      ]);
 
-    const { model: dustTR_RAW } = addDust({
-      drawAfter: topDoor,
-      height,
-      width,
-      length,
-      tuckFlapSize,
-      safeFoldOffset,
-      considerDustHole: false,
-      materialThickness,
-    });
+      pushModelSeparatly(trimModel, foldModel, dustTR, "dustTR");
 
-    const dustTR = cloneMirrorMove(dustTR_RAW, true, false, [
-      width * 2 + height,
-      length,
-    ]);
+      const { model: dustBR_RAW } = addDust({
+        drawAfter: topDoor,
+        height,
+        width,
+        length,
+        tuckFlapSize,
+        safeFoldOffset,
+        considerOuterIndent: false,
+      });
 
-    pushModelSeparatly(trimModel, foldModel, dustTR, "dustTR");
+      const clonedDustBR = cloneMirrorMove(dustBR_RAW, false, true, [
+        width * 2 + height,
+        0 - dustSize,
+      ]);
 
-    const { model: dustBR_RAW } = addDust({
-      drawAfter: topDoor,
-      height,
-      width,
-      length,
-      tuckFlapSize,
-      safeFoldOffset,
-      considerOuterIndent: false,
-      materialThickness,
-    });
+      pushModelSeparatly(trimModel, foldModel, clonedDustBR, "dustBR");
 
-    const clonedDustBR = cloneMirrorMove(dustBR_RAW, false, true, [
-      width * 2 + height,
-      0 - dustSize,
-    ]);
+      const { model: dustBL_RAW } = addDust({
+        drawAfter: topDoor,
+        height,
+        width,
+        length,
+        tuckFlapSize,
+        safeFoldOffset,
+        considerOuterIndent: true,
+      });
 
-    pushModelSeparatly(trimModel, foldModel, clonedDustBR, "dustBR");
+      const dustBL = cloneMirrorMove(dustBL_RAW, true, true, [
+        width,
+        0 - dustSize,
+      ]);
 
-    const { model: dustBL_RAW } = addDust({
-      drawAfter: topDoor,
-      height,
-      width,
-      length,
-      tuckFlapSize,
-      materialThickness,
-      safeFoldOffset,
-      considerOuterIndent: true,
-    });
+      pushModelSeparatly(trimModel, foldModel, dustBL, "dustBL");
 
-    const dustBL = cloneMirrorMove(dustBL_RAW, true, true, [
-      width,
-      0 - dustSize,
-    ]);
+      // SINGLES ----------------------------
+      drawSingleLines(trimModel, [
+        { id: "s1", pts: [zero, [width, 0]] },
+        {
+          id: "s2",
+          pts: [
+            [width + height, length],
+            [width + height + width, length],
+          ],
+        },
+        {
+          id: "s3",
+          pts: [
+            [width * 2 + height * 2, length],
+            [width * 2 + height * 2, 0],
+          ],
+        },
+      ]);
 
-    pushModelSeparatly(trimModel, foldModel, dustBL, "dustBL");
-
-    // SINGLES ----------------------------
-    drawSingleLines(trimModel, [
-      { id: "s1", pts: [zero, [width, 0]] },
-      {
-        id: "s2",
-        pts: [
-          [width + height, length],
-          [width + height + width, length],
+      //! -------------- FOLD --------------
+      drawFoldLines(foldModel, {
+        verticals: [
+          { from: zero, to: [0, length] },
+          { from: [width, length + safeFoldOffset], to: [width, 0] },
+          {
+            from: [width + height, length],
+            to: [width + height, -safeFoldOffset],
+          },
+          {
+            from: [width * 2 + height, length],
+            to: [width * 2 + height, -safeFoldOffset],
+          },
         ],
-      },
-      {
-        id: "s3",
-        pts: [
-          [width * 2 + height * 2, length],
-          [width * 2 + height * 2, 0],
+      });
+
+      //! -------------- GUIDES --------------
+      drawGuideLines(guideModel, {
+        height,
+        length,
+        width,
+        guides: [
+          {
+            type: "height",
+            orientation: "horizontal",
+          },
+          {
+            type: "width",
+            orientation: "horizontal",
+          },
+          {
+            type: "length",
+            orientation: "vertical",
+          },
         ],
-      },
-    ]);
+      });
 
-    //! -------------- FOLD --------------
-    drawFoldLines(foldModel, {
-      verticals: [
-        { from: zero, to: [0, length] },
-        { from: [width, length + safeFoldOffset], to: [width, 0] },
-        {
-          from: [width + height, length],
-          to: [width + height, -safeFoldOffset],
+      return modelBuilder({
+        model,
+        trimModel,
+        watermark: {
+          offset: {
+            x: glueSize,
+            y: 0,
+          },
         },
-        {
-          from: [width * 2 + height, length],
-          to: [width * 2 + height, -safeFoldOffset],
-        },
-      ],
-    });
-
-    //! -------------- GUIDES --------------
-    drawGuideLines(guideModel, {
-      height,
-      length,
-      width,
-      guides: [
-        {
-          type: "height",
-          orientation: "horizontal",
-        },
-        {
-          type: "width",
-          orientation: "horizontal",
-        },
-        {
-          type: "length",
-          orientation: "vertical",
-        },
-      ],
-    });
-
-    return modelBuilder({
-      model,
-      trimModel,
-      watermark: {
-        offset: {
-          x: glueSize,
-          y: 0,
-        },
-      },
-    });
-  },
+      });
+    }
+  ),
 };
 
 export default tuckEnd;
