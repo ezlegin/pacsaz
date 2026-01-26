@@ -1,17 +1,15 @@
-import { IMeasureWithCenter } from "makerjs"; //todo
 import { create } from "zustand";
+
+type Dimension = Record<"width" | "height", number>;
 
 export type OverallSizes = Record<
   "trim" | "container" | "bleed",
-  IMeasureWithCenter | null
+  Dimension | null
 >;
 
 type OverallSizesStore = {
   overallSizes: OverallSizes;
-  setOverallSize: (
-    key: keyof OverallSizes,
-    size: IMeasureWithCenter | null
-  ) => void;
+  setOverallSize: (key: keyof OverallSizes, size: Dimension | null) => void;
 };
 
 export const useOverallSize = create<OverallSizesStore>((set) => ({

@@ -2,13 +2,13 @@ import Image from "next/image";
 import React from "react";
 import { diamond } from "..";
 
-const Diamond = () => {
+const Diamond = ({ size }: { size?: number }) => {
   return (
     <Image
       alt=""
       src={diamond}
-      width={16}
-      height={16}
+      width={size ?? 16}
+      height={size ?? 16}
       className="pointer-events-none select-none"
     />
   );

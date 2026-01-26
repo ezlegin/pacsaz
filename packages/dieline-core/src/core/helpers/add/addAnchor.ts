@@ -11,6 +11,6 @@ export function addAnchor(
 
   const trimChain = M.model.findSingleChain(from);
   const keyPoints = M.chain.toKeyPoints(trimChain);
-  const holes = new M.models.Holes(1.5, keyPoints);
+  const holes = new M.models.Holes(0.7, keyPoints);
   addModelToLayer(model, "anchor", holes, "anchor");
 }

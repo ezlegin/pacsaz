@@ -1,4 +1,3 @@
-import { testUser } from "@/data/user";
 import { Progress } from "@repo/ui/components/progress";
 import { TableCell, TableRow } from "@repo/ui/components/table";
 import { formatDate } from "date-fns";
@@ -8,6 +7,7 @@ import { StatCard } from "./StatCard";
 import UserSubscriptionCard from "./UserSubscriptionCard";
 import Table from "@repo/ui/components/custom/Table";
 import { MaterialKey } from "@repo/store/data/types";
+import { sessionUser } from "@repo/store/app/user.store";
 
 type LastDownloads = {
   id: number;
@@ -76,6 +76,13 @@ const PanelDashboard = () => {
       </TableRow>
     );
   };
+
+  const fairDownload = sessionUser?.plan?.downloads.fair;
+  const downloaded = sessionUser?.plan?.downloads.downloaded;
+
+  if (!fairDownload || !downloaded)
+    throw new Error("User or User Plan not Provided. [PanelDashboard]");
+
   return (
     <div className="grid grid-cols-6 gap-5">
       <UserSubscriptionCard />
@@ -85,18 +92,16 @@ const PanelDashboard = () => {
 
         <div>
           <div className="flex justify-between text-xs mb-1">
-            <span>{testUser.fairDownload} دانلود</span>
-            <span>{testUser.fairDownload - testUser.downloaded} دانلود</span>
+            <span>{fairDownload} دانلود</span>
+            <span>{fairDownload - downloaded} دانلود</span>
           </div>
-          <Progress
-            value={100 - (testUser.downloaded / testUser.fairDownload) * 100}
-          />
+          <Progress value={100 - (downloaded / fairDownload) * 100} />
         </div>
       </Card>
 
       <StatCard
         title="دانلود این ماه"
-        value={`${testUser.downloaded} دانلود`}
+        value={`${downloaded} دانلود`}
         icon={Download}
         className="col-span-2"
       />
@@ -110,7 +115,7 @@ const PanelDashboard = () => {
 
       <StatCard
         title="پایان اشتراک"
-        value={formatDate(testUser.subscriptionEndsAt, "P")}
+        value={formatDate(sessionUser?.plan?.endsAt!, "P")}
         icon={Calendar}
         className="col-span-2"
       />

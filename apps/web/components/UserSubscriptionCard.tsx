@@ -1,6 +1,6 @@
 "use client";
 
-import { mapUserPlanTitle, testUser } from "@/data/user";
+import { mapUserPlanTitle } from "@/data/user";
 import { Button } from "@repo/ui/components/button";
 import { Dialog, DialogContent, DialogTitle } from "@repo/ui/components/dialog";
 import { RotateCw, Zap } from "lucide-react";
@@ -8,9 +8,14 @@ import { useState } from "react";
 import Card from "@repo/ui/components/custom/Card";
 import UpgradeSubscription from "./UpgradeSubscription";
 import Link from "next/link";
+import { sessionUser } from "@repo/store/app/user.store";
 
 const UserSubscriptionCard = () => {
   const [openUpgradeDialog, setOpenUpgradeDialog] = useState(false);
+
+  const userPlan = sessionUser?.plan;
+  if (!userPlan)
+    throw new Error("User Plan Not Provided. [UpgradeSubscription]");
 
   return (
     <>
@@ -28,7 +33,7 @@ const UserSubscriptionCard = () => {
         <div>
           <div className="text-sm text-muted-foreground">پلن</div>
           <div className="text-2xl font-semibold">
-            {mapUserPlanTitle(testUser.plan.key)}
+            {mapUserPlanTitle(userPlan.key)}
           </div>
           <div className="text-xs text-muted-foreground font-medium">
             36 روز باقی مانده
@@ -37,7 +42,7 @@ const UserSubscriptionCard = () => {
 
         <div className="flex flex-col items-center gap-2">
           <Link
-            href={`/payment?plan=${testUser.plan.key}&period=${testUser.plan.period}`}
+            href={`/payment?plan=${userPlan.key}&period=${userPlan.period}`}
           >
             <Button variant="primaryForeground" className="w-full" size={"sm"}>
               <RotateCw />
@@ -45,7 +50,7 @@ const UserSubscriptionCard = () => {
             </Button>
           </Link>
 
-          {testUser.plan.level !== 3 && (
+          {userPlan.level !== 3 && (
             <Button
               className="w-full"
               variant="gradient"

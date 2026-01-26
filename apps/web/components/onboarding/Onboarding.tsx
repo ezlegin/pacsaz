@@ -9,6 +9,7 @@ import { Card } from "@repo/ui/components/card";
 import { Separator } from "@repo/ui/components/separator";
 import { useState } from "react";
 import Step4 from "./Step4";
+import { useLoading } from "@/hooks/useLoading";
 
 export type UserType =
   | "student"
@@ -36,6 +37,7 @@ const Onboarding = () => {
   const [userType, setUserType] = useState<UserType | null>(null);
   const [personaData, setPersonaData] = useState<PersonaData | null>(null);
   const [usageGoal, setUsageGoal] = useState<MostUsage | null>(null);
+  const { startLoading, stopLoading, isLoading } = useLoading();
 
   const isIndividual = userType === "student" || userType === "designer";
 
@@ -46,7 +48,9 @@ const Onboarding = () => {
   };
 
   const onSubmit = () => {
+    startLoading();
     console.log(data);
+    stopLoading();
   };
 
   const disableButton =
@@ -69,7 +73,7 @@ const Onboarding = () => {
           </div>
           <Button
             variant={disableButton ? "outline" : "default"}
-            disabled={disableButton}
+            disabled={disableButton || isLoading}
             onClick={() =>
               setOnboardingStep((p) => {
                 if (p === 4) {
@@ -81,7 +85,7 @@ const Onboarding = () => {
               })
             }
           >
-            ادامه
+            {onboardingStep === 4 ? "پذیرش و ثبت نام" : "ادامه"}
           </Button>
         </div>
       </div>

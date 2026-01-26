@@ -20,17 +20,20 @@ export function initiateModel() {
   const { model, foldModel, trimModel, guideModel } = arrangeModels();
 
   return {
-    width: resolved.width,
-    length: resolved.length,
-    height: resolved.height,
+    settings: {
+      width: resolved.width,
+      length: resolved.length,
+      height: resolved.height,
+      materialThickness,
+      safeFoldOffset,
+    },
 
-    materialThickness,
-    safeFoldOffset,
-
-    model,
-    foldModel,
-    trimModel,
-    guideModel,
+    models: {
+      model,
+      foldModel,
+      trimModel,
+      guideModel,
+    },
   };
 }
 

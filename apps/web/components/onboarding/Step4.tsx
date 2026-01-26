@@ -1,5 +1,5 @@
-import Terms from "../Terms";
 import { ScrollArea } from "@repo/ui/components/scroll-area";
+import Terms from "../Terms";
 
 const Step4 = () => {
   return (
@@ -11,7 +11,7 @@ const Step4 = () => {
       <ScrollArea
         scrollHideDelay={9999}
         dir="rtl"
-        className="h-[450px] w-full rounded-2xl border p-4"
+        className="h-100 w-full rounded-2xl border p-4"
       >
         <div className="text-muted-foreground">
           <Terms style="raw" />

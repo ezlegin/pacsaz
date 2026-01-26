@@ -10,6 +10,12 @@ type Plan = {
   level: PlanLevel;
   key: PlanKey;
   period: PlanPeriod;
+  startedAt: Date;
+  endsAt: Date;
+  downloads: {
+    fair: number;
+    downloaded: number;
+  };
 };
 
 export type User = {
@@ -29,10 +35,16 @@ type UserStore = {
 
 // todo: DB Fetch (from root layout and set to user)
 const plan: Plan = {
-  title: "استاندارد",
+  title: "حرفه‌ای",
   key: "standard",
   level: 2,
   period: "monthly",
+  startedAt: new Date("2026-01-01"),
+  endsAt: new Date("2026-02-01"),
+  downloads: {
+    fair: 50,
+    downloaded: 13,
+  },
 };
 
 // todo: DB Fetch (from root layout and set to user)
@@ -52,3 +64,4 @@ export const useUserStore = create<UserStore>((set) => ({
 }));
 
 export const isSubscribed = useUserStore.getState().isSubscribed;
+export const sessionUser = useUserStore.getState().user;

@@ -1,8 +1,8 @@
+import { DimensionType } from "@repo/store/data/types";
 import M, { IPoint } from "makerjs";
 import { OffsetObject } from "../../../data/types";
 import { applyDimensionOffset } from "../../../utils/applyDimensionOffset";
 import { addModelToLayer } from "./addModelToLayer";
-import { DimensionType } from "@repo/store/data/types";
 
 export interface GuideLineOptions {
   type: "width" | "length" | "height";
@@ -39,7 +39,8 @@ export function addGuideLine(model: M.IModel, options: GuideLineOptions) {
     to[1] = 0;
   }
 
-  const pointerRadius = 2;
+  const isOverall = dimType === "overall";
+  const pointerRadius = isOverall ? 1.5 : 2;
   const indicatorLength = 2;
 
   const basePointer = new M.models.Polygon(3, pointerRadius);
@@ -48,7 +49,7 @@ export function addGuideLine(model: M.IModel, options: GuideLineOptions) {
   const dist = M.measure.pointDistance(from, to);
 
   if (orientation === "horizontal") {
-    const textBoxSize = 14;
+    const textBoxSize = isOverall ? 11 : 14;
 
     const offset =
       dimensionType === "inner" ? widthOffset.inner / 2 : widthOffset.outer / 2;
@@ -94,7 +95,7 @@ export function addGuideLine(model: M.IModel, options: GuideLineOptions) {
     ]);
   } else {
     // vertical
-    const textBoxSize = 6;
+    const textBoxSize = isOverall ? 4 : 6;
 
     const offset =
       dimensionType === "inner"
@@ -141,7 +142,6 @@ export function addGuideLine(model: M.IModel, options: GuideLineOptions) {
   }
 
   // layers
-  const isOverall = dimType === "overall";
 
   Object.keys(model.models!).forEach((key) => {
     if (key.includes("Indicator") || key.includes("Line")) {

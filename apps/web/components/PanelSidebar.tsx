@@ -1,4 +1,3 @@
-import { testUser } from "@/data/user";
 import {
   Sidebar,
   SidebarContent,
@@ -12,7 +11,7 @@ import {
 import { Bookmark, CreditCard, Flag, Heart, User, Users } from "lucide-react";
 import Link from "next/link";
 import PacsazLogo from "./PacsazLogo";
-import { isSubscribed } from "@repo/store/app/user.store";
+import { isSubscribed, sessionUser } from "@repo/store/app/user.store";
 
 const items = [
   {
@@ -56,9 +55,9 @@ export function PanelSidebar() {
         </Link>
 
         <div>
-          <p className="font-semibold text-lg">{testUser.fullName}</p>
+          <p className="font-semibold text-lg">{sessionUser?.fullName}</p>
           <span className=" text-xs text-muted-foreground font-medium">
-            {testUser.phone}
+            {sessionUser?.phoneNumber}
           </span>
         </div>
 

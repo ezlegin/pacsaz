@@ -16,10 +16,10 @@ export function svgExporter({
   watermark,
 }: SvgExporterParams) {
   const { showWatermark } = getDevCTX();
-  const material = getDielineSettings().material?.value;
+  const materialKey = getDielineSettings().material?.value;
 
   const isCardboard =
-    material === "glossy-cardboard" || material === "art-paper";
+    materialKey === "glossy-cardboard" || materialKey === "art-paper";
 
   const svg = M.exporter.toSVG(model, {
     strokeLineCap: svgSettings.svg.strokeLineCap,
@@ -42,7 +42,10 @@ export function svgExporter({
 
       guideLine: {
         stroke: svgSettings.colors.guides.line,
-        strokeWidth: svgSettings.svg.strokeWidth.guide,
+        strokeWidth: svgSettings.svg.strokeWidth.guide.main,
+      },
+      guideLineOverall: {
+        strokeWidth: svgSettings.svg.strokeWidth.guide.overall,
       },
       pointer: { stroke: "none", fill: svgSettings.colors.guides.line },
       pointerOverall: { stroke: "none", fill: "black" },
@@ -54,7 +57,7 @@ export function svgExporter({
       guideTextOverall: {
         stroke: "none",
         fill: "black",
-        cssStyle: `direction: ltr`,
+        cssStyle: `direction: ltr; font-size: 5`,
       },
 
       container: { stroke: "none" },
@@ -74,7 +77,10 @@ export const svgSettings = {
     strokeLineCap: "butt",
     strokeWidth: {
       main: toMm(1).toString(),
-      guide: toMm(1.25).toString(),
+      guide: {
+        main: toMm(1.25).toString(),
+        overall: toMm(0.5).toString(),
+      },
     },
     guides: {
       foldDasharray: [toMm(5), toMm(4)].join(","),

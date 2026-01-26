@@ -1,7 +1,6 @@
 "use client";
 
 import { PlanKey, plans } from "@/data/plan";
-import { testUser } from "@/data/user";
 import { usePaymentCheckout } from "@/hooks/usePaymentCheckout";
 import { formatPrice } from "@/utils/formatPrice";
 import { mapPaymentData } from "@/utils/mapPaymentData";
@@ -16,14 +15,17 @@ import DiscountForm from "./forms/DiscountForm";
 import PeriodSwitch from "./PeriodSwitch";
 import Price from "./Price";
 import { useState } from "react";
+import { sessionUser } from "@repo/store/app/user.store";
 
 const UpgradeSubscription = () => {
+  const userPlan = sessionUser?.plan;
+  if (!userPlan)
+    throw new Error("User Plan Not Provided. [UpgradeSubscription]");
+
   const [appliedDiscountCode, setAppliedDiscountCode] = useState<
     string | undefined
   >(undefined);
-  const defaultPlan = plans.find(
-    (p) => p.level === testUser.plan.level + 1
-  )?.key; //todo: replace with DB
+  const defaultPlan = plans.find((p) => p.level === userPlan.level + 1)?.key;
 
   const { checkoutInfo, setPeriod, setPlan, period, plan, discountInfo } =
     usePaymentCheckout({ discountCode: appliedDiscountCode, defaultPlan });
@@ -50,7 +52,7 @@ const UpgradeSubscription = () => {
             className="flex items-center p-0 gap-3 px-3"
           >
             <RadioGroupItem
-              disabled={p.level === testUser.plan.level}
+              disabled={p.level === userPlan.level}
               value={p.key}
               id={p.key}
               className="bg-amber-950 p-0"
@@ -65,7 +67,7 @@ const UpgradeSubscription = () => {
                   {p.shortDescription}
                 </div>
               </div>
-              {p.key === testUser.plan.key ? (
+              {p.key === userPlan.key ? (
                 <div className="text-xs text-primary ">(پلن فعال)</div>
               ) : (
                 <div>

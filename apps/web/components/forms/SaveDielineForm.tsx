@@ -5,12 +5,15 @@ import {
   SaveDielineFormType,
   saveDielineFormSchema,
 } from "@/lib/validatoinSchema";
+import Diamond from "@/public/icons/Diamond";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DIMENSIONS_TYPE } from "@repo/dieline-core/data/consts";
+import { useUserStore } from "@repo/store/app/user.store";
 import {
   getDielineSettings,
   useDielineSettingsStore,
 } from "@repo/store/dieline/dielineSettings.store";
+import { Badge } from "@repo/ui/components/badge";
 import { Button } from "@repo/ui/components/button";
 import { DialogTitle } from "@repo/ui/components/dialog";
 import {
@@ -30,6 +33,7 @@ const SaveDielineForm = () => {
   const { isLoading, startLoading, stopLoading } = useLoading();
   const { customThickness, bleed, dimensionType, material } =
     getDielineSettings();
+  const { isPremium } = useUserStore();
 
   const form = useForm<SaveDielineFormType>({
     resolver: zodResolver(saveDielineFormSchema),
@@ -71,7 +75,15 @@ const SaveDielineForm = () => {
 
   return (
     <div className="p-6 space-y-5">
-      <DialogTitle>ذخیره قالب</DialogTitle>
+      <div className="flex justify-between items-center">
+        <DialogTitle>ذخیره قالب</DialogTitle>
+        {!isPremium && (
+          <Badge variant={"lightRed"} className="p-2 px-4">
+            <Diamond />
+            فقط در اشتراک حرفه ای و سازمانی
+          </Badge>
+        )}
+      </div>
 
       <ul className="text-sm text-muted-foreground space-y-2 border p-3 rounded-md px-0">
         <div className="flex justify-between px-3">
@@ -103,7 +115,7 @@ const SaveDielineForm = () => {
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Input {...field} placeholder="عنوان" />
+                  <Input disabled={!isPremium} {...field} placeholder="عنوان" />
                 </FormControl>
               </FormItem>
             )}
@@ -115,7 +127,11 @@ const SaveDielineForm = () => {
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Input {...field} placeholder="توضیح کوتاه" />
+                  <Input
+                    disabled={!isPremium}
+                    {...field}
+                    placeholder="توضیح کوتاه"
+                  />
                 </FormControl>
               </FormItem>
             )}
@@ -127,7 +143,11 @@ const SaveDielineForm = () => {
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Input {...field} placeholder="مشتری (دلخواه)" />
+                  <Input
+                    disabled={!isPremium}
+                    {...field}
+                    placeholder="مشتری (دلخواه)"
+                  />
                 </FormControl>
               </FormItem>
             )}
@@ -135,7 +155,7 @@ const SaveDielineForm = () => {
 
           <Button
             size={"lg"}
-            disabled={!form.formState.isValid || isLoading}
+            disabled={!form.formState.isValid || isLoading || !isPremium}
             className="w-full"
           >
             ذخیره

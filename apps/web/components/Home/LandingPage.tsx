@@ -12,11 +12,11 @@ const LandingPage = () => {
 
       <div className="flex justify-between items-center">
         <div className="space-y-6">
-          <div>
+          <div className="w-fit">
             <Link href={"/dielines"}>
               <Badge
                 variant={"outline"}
-                className="p-1 bg-background flex justify-center items-center gap-1.5 pl-3"
+                className="p-1 bg-background flex justify-center items-center gap-1.5 pl-3 hover:shadow"
               >
                 <Badge variant={"lightPrimary"}>
                   <Zap />

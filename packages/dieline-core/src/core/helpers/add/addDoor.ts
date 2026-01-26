@@ -24,7 +24,6 @@ export function addDoor({
   materialThickness: mThickness,
   safeFoldOffset,
 }: AddDoorParams) {
-  const topPanelWithFoldOffsetSize = height;
   const door: IModel = {};
 
   // ─────────────────────────────────────────
@@ -34,13 +33,13 @@ export function addDoor({
   const pb = new PointBuilder([0, length + safeFoldOffset]);
 
   const pts = pb
-    .up(topPanelWithFoldOffsetSize)
+    .up(height)
     .right(mThickness)
     .up(tuckFlapSize)
     .right(width - mThickness * 2)
     .down(tuckFlapSize)
     .right(mThickness)
-    .down(topPanelWithFoldOffsetSize)
+    .down(height)
     .build();
 
   const doorLine = addLine(pts, false, 25, [3, 4]);
@@ -57,14 +56,14 @@ export function addDoor({
 
   const seamPB = new PointBuilder([
     mThickness,
-    length + topPanelWithFoldOffsetSize + safeFoldOffset,
+    length + height + safeFoldOffset,
   ]);
   const seamPTS = seamPB.right(seamSize.w).down(seamHeight).build();
   const leftSeam = addSeam(seamPTS, false, 2);
 
   const rightSeam = cloneMirrorMove(leftSeam, true, false, [
     width - (seamSize.w + mThickness),
-    length + (topPanelWithFoldOffsetSize + safeFoldOffset - seamHeight),
+    length + (height + safeFoldOffset - seamHeight),
   ]);
 
   const seam: IModel = {

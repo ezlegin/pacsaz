@@ -39,15 +39,8 @@ const tuckEnd: Dieline = {
 
   model() {
     const {
-      materialThickness,
-      safeFoldOffset,
-      height,
-      width,
-      model,
-      foldModel,
-      trimModel,
-      guideModel,
-      length,
+      models: { foldModel, guideModel, model, trimModel },
+      settings: { height, length, materialThickness, safeFoldOffset, width },
     } = initiateModel();
 
     //! -------------- TRIM --------------

@@ -1,6 +1,6 @@
-import { isUserSubscribed, mapUserPlanTitle, testUser } from "@/data/user";
 import Diamond from "@/public/icons/Diamond";
 import { calculateRemaningSubscription } from "@/utils/calculateRemaningSubscriptoin";
+import { sessionUser } from "@repo/store/app/user.store";
 import { Badge } from "@repo/ui/components/badge";
 import { Button } from "@repo/ui/components/button";
 import { User } from "lucide-react";
@@ -9,15 +9,14 @@ import Link from "next/link";
 const NavbarButtons = () => {
   const remainingDays = calculateRemaningSubscription();
   const isCloseToExpiry = remainingDays < 7;
-  const isSubscribed = isUserSubscribed;
 
   return (
     <div className="flex gap-3 items-center">
-      {isSubscribed ? (
+      {sessionUser?.plan ? (
         <Badge
           className="p-2 px-4"
           variant={
-            !isSubscribed
+            !sessionUser.plan
               ? "lightRed"
               : isCloseToExpiry
                 ? "lightYellow"
@@ -27,11 +26,15 @@ const NavbarButtons = () => {
           {isCloseToExpiry ? (
             `تمدید اشتراک در ${remainingDays} روز `
           ) : (
-            <span> پلن: {mapUserPlanTitle(testUser.plan.key)}</span>
+            <span> پلن: {sessionUser.plan.title}</span>
           )}
         </Badge>
       ) : (
-        <Link href={isSubscribed ? "/panel" : "/subscription"}>
+        <Link
+          href={
+            sessionUser?.plan ? "#" : sessionUser ? "/panel" : "/subscription"
+          }
+        >
           <Button variant={"ghost"}>
             <Diamond />
             اشتراک
@@ -42,12 +45,12 @@ const NavbarButtons = () => {
       <div>
         <div className="w-px ml-3 h-6 bg-slate-300" />
       </div>
-      <Link href={isSubscribed ? "/panel" : "/login"}>
-        <Button variant={isSubscribed ? "outline" : "default"}>
-          {isSubscribed ? (
+      <Link href={sessionUser ? "/panel" : "/login"}>
+        <Button variant={sessionUser ? "outline" : "default"}>
+          {sessionUser ? (
             <div className="flex items-center gap-1.5">
               <User />
-              {testUser.fullName}
+              {sessionUser.fullName}
             </div>
           ) : (
             "حساب کاربری"

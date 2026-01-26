@@ -1,5 +1,4 @@
-import { mapUserPlanTitle, testUser } from "@/data/user";
-import { isSubscribed } from "@repo/store/app/user.store";
+import { isSubscribed, sessionUser } from "@repo/store/app/user.store";
 import { Button } from "@repo/ui/components/button";
 import { cn } from "@repo/ui/lib/utils";
 import { LogOut } from "lucide-react";
@@ -17,9 +16,7 @@ const PanelNavbar = () => {
         <span>پلن فعال:</span>
         <span>
           {isSubscribed ? (
-            <span className="font-semibold">
-              {mapUserPlanTitle(testUser.plan.key)}
-            </span>
+            <span className="font-semibold">{sessionUser?.plan?.title}</span>
           ) : (
             "ندارد"
           )}

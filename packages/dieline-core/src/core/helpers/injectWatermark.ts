@@ -31,13 +31,13 @@ export function injectWatermark(
     <pattern
       id="watermarkPattern"
       patternUnits="userSpaceOnUse"
-      width="900"
-      height="900"
+      width="300"
+      height="300"
     >
       <image
         href="/watermark.png"
-        width="900"
-        height="900"
+        width="300"
+        height="300"
         opacity="0.5"
         preserveAspectRatio="xMidYMid meet"
       />
