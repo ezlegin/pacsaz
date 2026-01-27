@@ -1,7 +1,7 @@
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { layoutPaddings } from "../Navbars/Navbar";
-import NavbarButtons from "../Navbars/NavbarButtons";
+import { layoutPaddings } from "./Navbar";
+import NavbarButtons from "./NavbarButtons";
 import PacsazLogo from "../PacsazLogo";
 import FavoriteDieline from "../product/FavoriteDieline";
 

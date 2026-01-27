@@ -2,17 +2,15 @@
 
 import { prisma } from "@repo/db";
 
-//todo: move whole codes to @repo/db
-export const getUserByPhoneNumber = async (phoneNumber: string) => {
+export const getUserByPhoneNumber = async (email: string) => {
   return await prisma.user.findFirst({
     where: {
-      email: phoneNumber, //todo
+      email,
     },
   });
 };
 
 export const getUserById = async (id: number) => {
-  if (!id) return;
   return await prisma.user.findUnique({
     where: {
       id,

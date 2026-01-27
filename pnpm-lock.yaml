@@ -23,6 +23,12 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.2.2
         version: 5.2.2(react-hook-form@7.71.1(react@19.2.0))
+      '@repo/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
+      '@repo/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       '@repo/lib':
         specifier: workspace:*
         version: link:../../packages/lib
@@ -82,7 +88,7 @@ importers:
         specifier: 5.9.2
         version: 5.9.2
 
-  apps/web:
+  apps/client:
     dependencies:
       '@hookform/resolvers':
         specifier: ^5.2.2

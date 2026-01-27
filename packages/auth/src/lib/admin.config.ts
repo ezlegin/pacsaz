@@ -1,6 +1,6 @@
 import { NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { getAdminById, getAdminByEmail } from "../data/admin";
+import { getAdminByEmail, getAdminById } from "@repo/db/admin";
 
 export default {
   pages: {
@@ -39,7 +39,7 @@ export default {
           throw new Error("Invalid Credentials");
         }
 
-        const admin = await getAdminByEmail(email);
+        const admin = await getAdminByEmail(email, true);
         if (!admin) throw new Error("User Not Found");
 
         return { id: admin.id.toString() };

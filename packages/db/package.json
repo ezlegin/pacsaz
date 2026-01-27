@@ -7,7 +7,8 @@
     ".": {
       "types": "./src/lib/prisma.ts",
       "default": "./src/lib/prisma.ts"
-    }
+    },
+    "./*": "./src/data/*.ts"
   },
   "scripts": {
     "prisma:generate": "prisma generate",

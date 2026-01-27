@@ -1,6 +1,6 @@
 import Credentials from "next-auth/providers/credentials";
 import { NextAuthConfig } from "next-auth";
-import { getUserById, getUserByPhoneNumber } from "../data/user";
+import { getUserById, getUserByPhoneNumber } from "@repo/db/user";
 
 export default {
   pages: {
