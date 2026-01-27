@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -28,6 +28,7 @@ model User {
 
   plan      Plan[]
   downloads DownloadRecord[]
+  otp       Otp[]
 }
 
 enum UserType {
@@ -38,6 +39,14 @@ enum UserType {
   dielineMaker
   packagingFactory
   other
+}
+
+model Otp {
+  id        Int      @id @default(autoincrement())
+  otp       String
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
 }
 
 //! PLAN --------------------------------
@@ -123,12 +132,26 @@ model Dimension {
 
 //! DIELINE --------------------------------
 model Dieline {
-  id    Int           @id @default(autoincrement())
-  slug  String
-  title String
-  image DielineImage?
+  id       Int               @id @default(autoincrement())
+  slug     String
+  title    String
+  image    DielineImage?
+  category DielineCategory[]
 
   downloadRecords DownloadRecord[]
+}
+
+model DielineCategory {
+  id      Int          @id @default(autoincrement())
+  title   String
+  slug    String
+  type    CategoryType
+  dieline Dieline[]
+}
+
+enum CategoryType {
+  byUsage
+  byModel
 }
 
 model DielineImage {

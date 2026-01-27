@@ -5,8 +5,10 @@ import HomeFeatures from "@/components/Home/HomeFeatures";
 import HomeSUbFAQ from "@/components/Home/HomeSubFAQ";
 import HomeSubscription from "@/components/Home/HomeSubscription";
 import LandingPage from "@/components/Home/LandingPage";
+import { prisma } from "@repo/db";
 
-const page = () => {
+const page = async () => {
+  const admin = await prisma.admin.findFirst();
   return (
     <div className="space-y-48">
       <div className="px-20 mx-auto pt-20">
@@ -36,6 +38,8 @@ const page = () => {
       <div className="max-w-6xl mx-auto">
         <HomeCourseIntro />
       </div>
+
+      {/* {admin?.fullName} */}
     </div>
   );
 };
