@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -13,18 +7,135 @@ datasource db {
   provider = "mysql"
 }
 
-model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
-  posts Post[]
+//! ADMIN --------------------------------
+model Admin {
+  id          Int    @id @default(autoincrement())
+  fullName    String
+  phoneNumber String
+  email       String
+  password    String
 }
 
-model Post {
-  id        Int     @id @default(autoincrement())
+//! USER --------------------------------
+model User {
+  id                  Int      @id @default(autoincrement())
+  email               String   @unique
+  fullName            String
+  phoneNumber         String
+  onboardingCompleted Boolean
+  joinedAt            DateTime @default(now())
+  type                UserType
+
+  plan      Plan[]
+  downloads DownloadRecord[]
+}
+
+enum UserType {
+  student
+  designer
+  designStudio
+  printHouse
+  dielineMaker
+  packagingFactory
+  other
+}
+
+//! PLAN --------------------------------
+model Plan {
+  id        Int        @id @default(autoincrement())
+  key       PlanKey
   title     String
-  content   String?
-  published Boolean @default(false)
-  author    User    @relation(fields: [authorId], references: [id])
-  authorId  Int
+  level     Int
+  startedAt DateTime   @default(now())
+  endsAt    DateTime
+  period    PlanPeriod
+  type      PlanType
+
+  downloads Download?
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+}
+
+enum PlanPeriod {
+  monthly
+  threeMonth
+  annual
+}
+
+enum PlanType {
+  renewal
+  new
+}
+
+enum PlanKey {
+  standard
+  pro
+  orgnization
+}
+
+//! Download --------------------------------
+model Download {
+  id            Int      @id @default(autoincrement())
+  fair          Int
+  downloaded    Int
+  firstDownload DateTime
+  lastDownload  DateTime
+
+  plan   Plan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  planId Int  @unique
+}
+
+model DownloadRecord {
+  id        Int        @id @default(autoincrement())
+  date      DateTime
+  dimension Dimension?
+  material  Material
+  thickness Int
+  bleed     Int
+
+  dieline   Dieline @relation(fields: [dielineId], references: [id])
+  dielineId Int
+  user      User    @relation(fields: [userId], references: [id])
+  userId    Int
+}
+
+enum Material {
+  bFlute
+  eFlute
+  fFlute
+  cFlute
+  beFlute
+  bcFlute
+  abFlute
+  glossyCardboard
+  artPaper
+}
+
+model Dimension {
+  id     Int @id @default(autoincrement())
+  width  Int
+  length Int
+  height Int
+
+  downloadRecord   DownloadRecord @relation(fields: [downloadRecordId], references: [id])
+  downloadRecordId Int            @unique
+}
+
+//! DIELINE --------------------------------
+model Dieline {
+  id    Int           @id @default(autoincrement())
+  slug  String
+  title String
+  image DielineImage?
+
+  downloadRecords DownloadRecord[]
+}
+
+model DielineImage {
+  id       Int     @id @default(autoincrement())
+  modelImg String?
+  trimImg  String?
+
+  dieline   Dieline @relation(fields: [dielineId], references: [id])
+  dielineId Int     @unique
 }

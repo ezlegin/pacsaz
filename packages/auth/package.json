@@ -1,0 +1,23 @@
+{
+  "name": "@repo/auth",
+  "version": "0.0.0",
+  "exports": {
+    ".": {
+      "default": "./src/auth.ts",
+      "types": "./src/auth.ts"
+    }
+  },
+  "scripts": {
+    "lint": "eslint . --max-warnings 0",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@auth/prisma-adapter": "^2.11.1",
+    "@repo/db": "workspace:*",
+    "next-auth": "5.0.0-beta.30"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@types/node": "^22.15.3"
+  }
+}
