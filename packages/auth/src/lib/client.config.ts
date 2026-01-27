@@ -1,6 +1,6 @@
 import Credentials from "next-auth/providers/credentials";
 import { NextAuthConfig } from "next-auth";
-import { getUserById, getUserByPhoneNumber } from "@repo/db/user";
+import { prisma } from "@repo/db";
 
 export default {
   pages: {
@@ -10,7 +10,9 @@ export default {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        const existingUser = await getUserById(+user.id!);
+        const existingUser = await await prisma.user.findFirst({
+          where: { id: +user.id! },
+        });
         if (!existingUser) return token;
         token.id = user.id;
         return token;
@@ -38,7 +40,7 @@ export default {
           throw new Error("لطفا اطلاعات را وارد کنید.");
         }
 
-        const user = await getUserByPhoneNumber(phoneNumber);
+        const user = await prisma.user.findFirst({ where: { phoneNumber } });
         if (!user) throw new Error("User Not Found");
 
         return { id: user.id.toString() };

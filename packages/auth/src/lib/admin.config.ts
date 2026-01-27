@@ -1,6 +1,6 @@
+import { prisma } from "@repo/db";
 import { NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { getAdminByEmail, getAdminById } from "@repo/db/admin";
 
 export default {
   pages: {
@@ -10,7 +10,9 @@ export default {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        const existingUser = await getAdminById(+user.id!);
+        const existingUser = await prisma.admin.findFirst({
+          where: { id: +user.id! },
+        });
         if (!existingUser) return token;
         token.id = user.id;
         return token;
@@ -39,7 +41,7 @@ export default {
           throw new Error("Invalid Credentials");
         }
 
-        const admin = await getAdminByEmail(email, true);
+        const admin = await prisma.admin.findFirst({ where: { email: email } });
         if (!admin) throw new Error("User Not Found");
 
         return { id: admin.id.toString() };

@@ -5,7 +5,8 @@
     ".": {
       "default": "./src/auth.ts",
       "types": "./src/auth.ts"
-    }
+    },
+    "./*": "./src/data/*.ts"
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",
@@ -18,6 +19,7 @@
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
     "@types/node": "^22.15.3"
   }
 }
