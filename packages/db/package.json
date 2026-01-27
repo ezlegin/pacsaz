@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./lib/prisma.ts",
+    ".": "./src/lib/prisma.ts",
     "./data/*": "./src/data/*.ts"
   },
   "scripts": {
@@ -12,7 +12,7 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "prisma:push": "prisma db push",
-    "test": "tsx test.ts",
+    "test": "tsx src/test-script.ts",
     "lint": "eslint . --max-warnings 0",
     "check-types": "tsc --noEmit"
   },
