@@ -66,7 +66,7 @@ export const PaymentPlans = ({ plan, setPeriod, setPlan, period }: Props) => {
                 <span className="text-foreground font-medium text-sm">
                   {period === "annual"
                     ? p.fairDownload.annual
-                    : period === "3-month"
+                    : period === "threeMonth"
                       ? p.fairDownload.threeMonth
                       : p.fairDownload.monthly}{" "}
                   دانلود
@@ -81,8 +81,8 @@ export const PaymentPlans = ({ plan, setPeriod, setPlan, period }: Props) => {
                 <li key={idx} className="flex items-center gap-2">
                   <div
                     className={cn(
-                      !f.active ? "border-2" : "bg-green-500/80",
-                      "w-1.5 h-1.5 rounded-full"
+                      !f.active ? "bg-slate-300" : "bg-green-500/80",
+                      "w-1.5 h-1.5 rounded-full",
                     )}
                   />
                   {f.value}

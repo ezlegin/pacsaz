@@ -1,11 +1,11 @@
-import Filter from "@/components/Filter";
 import { CategoriesForm } from "@/components/forms/CategoriesForm";
 import PageTitle from "@/components/PageTitle";
-import Search from "@/components/Search";
 import Pagination from "@repo/ui/components/custom/Pagination";
 import CategoriesList from "./CategoriesList";
 import PopupNewDialog from "@repo/ui/components/custom/PopupNewDialog";
 import { globalPageSize } from "@repo/lib/data/consts";
+import Search from "@repo/ui/components/custom/Search";
+import Filter from "@repo/ui/components/custom/Filter";
 
 const page = () => {
   return (

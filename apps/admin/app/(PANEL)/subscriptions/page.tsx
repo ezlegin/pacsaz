@@ -1,12 +1,12 @@
-import Filter from "@/components/Filter";
 import PageTitle from "@/components/PageTitle";
-import Search from "@/components/Search";
 import { SubscriptionForm } from "@/components/forms/SubscriptionForm";
 import Pagination from "@repo/ui/components/custom/Pagination";
 import { addMonths, addYears } from "date-fns";
 import SubscriptionsList, { Subscription } from "./SubscriptionsList";
 import PopupNewDialog from "@repo/ui/components/custom/PopupNewDialog";
 import { globalPageSize } from "@repo/lib/data/consts";
+import Search from "@repo/ui/components/custom/Search";
+import Filter from "@repo/ui/components/custom/Filter";
 
 const page = () => {
   return (

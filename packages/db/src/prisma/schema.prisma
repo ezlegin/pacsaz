@@ -120,7 +120,7 @@ model DielineDimension {
 //! DIELINE --------------------------------
 model Dieline {
   id       Int               @id @default(autoincrement())
-  slug     String
+  slug     String            @unique
   title    String
   image    DielineImage?
   category DielineCategory[]

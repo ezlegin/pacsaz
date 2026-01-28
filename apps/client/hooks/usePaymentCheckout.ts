@@ -26,7 +26,7 @@ export function usePaymentCheckout({
   defaultPlan?: PlanKey;
 }) {
   const [plan, setPlan] = useState<PlanKey>(
-    defaultPlan || query?.plan || "pro"
+    defaultPlan || query?.plan || "pro",
   );
   const [period, setPeriod] = useState<PlanPeriod>(query?.period || "monthly");
 

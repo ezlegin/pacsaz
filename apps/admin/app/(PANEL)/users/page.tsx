@@ -1,11 +1,11 @@
 import { UserForm } from "@/components/forms/UserForm";
 import PageTitle from "@/components/PageTitle";
-import Search from "@/components/Search";
 import Pagination from "@repo/ui/components/custom/Pagination";
 import UsersList from "./UsersList";
 import { globalPageSize } from "@repo/lib/data/consts";
 import PopupNewDialog from "@repo/ui/components/custom/PopupNewDialog";
 import { User } from "@repo/store/app/user.store";
+import Search from "@repo/ui/components/custom/Search";
 
 const page = () => {
   return (

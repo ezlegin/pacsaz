@@ -1,11 +1,11 @@
-import Filter from "@/components/Filter";
 import { DielineForm } from "@/components/forms/DielineForm";
 import PageTitle from "@/components/PageTitle";
-import Search from "@/components/Search";
 import Pagination from "@repo/ui/components/custom/Pagination";
 import DielinesList from "./DielinesList";
 import PopupNewDialog from "@repo/ui/components/custom/PopupNewDialog";
 import { globalPageSize } from "@repo/lib/data/consts";
+import Filter from "@repo/ui/components/custom/Filter";
+import Search from "@repo/ui/components/custom/Search";
 
 const page = () => {
   return (

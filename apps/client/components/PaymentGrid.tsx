@@ -33,6 +33,8 @@ const PaymentGrid = ({ query }: { query: PaymentQuery }) => {
       amount: checkoutInfo.amount,
       discountAmount: checkoutInfo.discountAmount,
       discountCode: discountInfo.code,
+      plan,
+      period,
     };
 
     console.log(data);
