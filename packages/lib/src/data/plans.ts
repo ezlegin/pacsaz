@@ -2,7 +2,7 @@ import { calculateFairDownload } from "../utils/calculateFairDownload";
 
 export type PlanKey = "standard" | "pro" | "organization";
 export type PlanTitle = "استاندارد" | "حرفه‌ای" | "سازمانی";
-export type PlanPeriod = "monthly" | "3-month" | "annual";
+export type PlanPeriod = "monthly" | "threeMonth" | "annual";
 export type PlanLevel = 1 | 2 | 3;
 export type PlanFeature = { active: boolean; value: string };
 export type PlanFairDownload = {

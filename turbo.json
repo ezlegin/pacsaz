@@ -7,6 +7,18 @@
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".next/**", "!.next/cache/**"]
     },
+    "prisma:studio": {
+      "cache": false
+    },
+    "prisma:generate": {
+      "cache": false
+    },
+    "prisma:migrate": {
+      "cache": false
+    },
+    "prisma:push": {
+      "cache": false
+    },
     "lint": {
       "dependsOn": ["^lint"]
     },

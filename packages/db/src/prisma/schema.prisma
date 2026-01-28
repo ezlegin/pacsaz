@@ -7,7 +7,7 @@ datasource db {
   provider = "mysql"
 }
 
-//! ADMIN --------------------------------
+//! USERS --------------------------------
 model Admin {
   id          Int    @id @default(autoincrement())
   fullName    String
@@ -16,19 +16,20 @@ model Admin {
   password    String
 }
 
-//! USER --------------------------------
 model User {
   id                  Int      @id @default(autoincrement())
   email               String   @unique
+  phoneNumber         String   @unique
   fullName            String
-  phoneNumber         String
   onboardingCompleted Boolean
   joinedAt            DateTime @default(now())
   type                UserType
 
-  plan      Plan[]
-  downloads DownloadRecord[]
-  otp       Otp[]
+  downloads     DownloadRecord[]
+  otp           Otp[]
+  favedDielines FavedDieline[]
+  savedDielines SavedDieline[]
+  paymentPlans  PaymentPlan[]
 }
 
 enum UserType {
@@ -49,37 +50,23 @@ model Otp {
   userId    Int
 }
 
+model Customer {
+  id            Int            @id @default(autoincrement())
+  fullName      String
+  phoneNumber   String
+  email         String
+  address       String
+  savedDielines SavedDieline[]
+}
+
 //! PLAN --------------------------------
 model Plan {
-  id        Int        @id @default(autoincrement())
-  key       PlanKey
-  title     String
-  level     Int
-  startedAt DateTime   @default(now())
-  endsAt    DateTime
-  period    PlanPeriod
-  type      PlanType
+  id    Int     @id @default(autoincrement())
+  key   PlanKey
+  title String
+  level Int
 
-  downloads Download?
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    Int
-}
-
-enum PlanPeriod {
-  monthly
-  threeMonth
-  annual
-}
-
-enum PlanType {
-  renewal
-  new
-}
-
-enum PlanKey {
-  standard
-  pro
-  orgnization
+  paymentPlans PaymentPlan[]
 }
 
 //! Download --------------------------------
@@ -90,14 +77,13 @@ model Download {
   firstDownload DateTime
   lastDownload  DateTime
 
-  plan   Plan @relation(fields: [planId], references: [id], onDelete: Cascade)
-  planId Int  @unique
+  paymentPlan PaymentPlan[]
 }
 
 model DownloadRecord {
-  id        Int        @id @default(autoincrement())
+  id        Int               @id @default(autoincrement())
   date      DateTime
-  dimension Dimension?
+  dimension DielineDimension?
   material  Material
   thickness Int
   bleed     Int
@@ -120,7 +106,7 @@ enum Material {
   artPaper
 }
 
-model Dimension {
+model DielineDimension {
   id     Int @id @default(autoincrement())
   width  Int
   length Int
@@ -128,6 +114,7 @@ model Dimension {
 
   downloadRecord   DownloadRecord @relation(fields: [downloadRecordId], references: [id])
   downloadRecordId Int            @unique
+  dielineInfos     DielineInfo[]
 }
 
 //! DIELINE --------------------------------
@@ -139,6 +126,8 @@ model Dieline {
   category DielineCategory[]
 
   downloadRecords DownloadRecord[]
+  favedDieline    FavedDieline[]
+  dielineInfos    DielineInfo[]
 }
 
 model DielineCategory {
@@ -161,4 +150,109 @@ model DielineImage {
 
   dieline   Dieline @relation(fields: [dielineId], references: [id])
   dielineId Int     @unique
+}
+
+model FavedDieline {
+  id Int @id @default(autoincrement())
+
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  dieline   Dieline @relation(fields: [dielineId], references: [id], onDelete: Cascade)
+  dielineId Int
+}
+
+model DielineInfo {
+  id            Int           @id @default(autoincrement())
+  material      Material
+  thickness     Int
+  thicknessType ThicknessType
+  bleed         Int
+  dimensionType DimensionType
+
+  dieline            Dieline          @relation(fields: [dielineId], references: [id], onDelete: Cascade)
+  dielineId          Int
+  dimension          DielineDimension @relation(fields: [dielineDimensionId], references: [id])
+  dielineDimensionId Int
+}
+
+enum DimensionType {
+  manufacture
+  inner
+  outer
+}
+
+enum ThicknessType {
+  custom
+  material
+}
+
+model SavedDieline {
+  id               Int      @id @default(autoincrement())
+  title            String
+  shortDescription String
+  createdAt        DateTime @default(now())
+
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  customerId Int
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     Int
+}
+
+//! PAYMENT --------------------------------
+model Payment {
+  id             Int             @id @default(autoincrement())
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  price          Int
+  totalDiscount  Int
+  discountAmount Int
+  discountCode   String
+  total          Int
+  type           PaymentPlanType
+  status         PaymentStatus
+
+  plan          PaymentPlan @relation(fields: [paymentPlanId], references: [id])
+  paymentPlanId Int         @unique
+}
+
+enum PaymentStatus {
+  failed
+  success
+  pending
+  canceled
+}
+
+model PaymentPlan {
+  id        Int             @id @default(autoincrement())
+  key       PlanKey
+  title     String
+  level     Int
+  startedAt DateTime        @default(now())
+  endsAt    DateTime
+  period    PlanPeriod
+  type      PaymentPlanType
+
+  downloads Download[]
+  payments  Payment?
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  plan      Plan       @relation(fields: [planId], references: [id])
+  planId    Int
+}
+
+enum PlanPeriod {
+  monthly
+  threeMonth
+  annual
+}
+
+enum PaymentPlanType {
+  renewal
+  new
+}
+
+enum PlanKey {
+  standard
+  pro
+  orgnization
 }
