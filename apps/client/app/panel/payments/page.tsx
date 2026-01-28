@@ -1,102 +1,53 @@
-import { mapPaymentStatusLable } from "@/utils/mapPaymentStatusLable";
-import { mapPeriodLabel } from "@/utils/mapPeriodLabel";
-import { mapUserPlanTitle } from "@/utils/mapUserPlanTitle";
-import { PlanKey, PlanPeriod } from "@repo/lib/data/plans";
-import Card from "@repo/ui/components/custom/Card";
-import PaymentStatus, {
-  PaymentStatusType,
-} from "@repo/ui/components/custom/PaymentStatus";
-import Table from "@repo/ui/components/custom/Table";
-import { TableCell, TableRow } from "@repo/ui/components/table";
-import { formatDate } from "date-fns";
+import { globalPageSize } from "@repo/lib/data/consts";
+import Pagination from "@repo/ui/components/custom/Pagination";
+import PaymentsList from "./PaymentsList";
 
-function page() {
-  const data = [
-    {
-      id: 1,
-      date: new Date("2026-01-01"),
-      status: "success",
-      amount: 399000,
-      plan: "standard",
-      period: "monthly",
-    },
-    {
-      id: 2,
-      date: new Date("2026-01-01"),
-      status: "failed",
-      amount: 399000,
-      plan: "standard",
-      period: "monthly",
-    },
-    {
-      id: 3,
-      date: new Date("2026-01-01"),
-      status: "canceled",
-      amount: 399000,
-      plan: "standard",
-      period: "monthly",
-    },
-    {
-      id: 4,
-      date: new Date("2026-01-01"),
-      status: "pending",
-      amount: 399000,
-      plan: "standard",
-      period: "monthly",
-    },
-  ];
-
-  const renderRows = (data: {
-    id: number;
-    date: Date;
-    amount: number;
-    status: string;
-    plan: string;
-    period: string;
-  }) => {
-    return (
-      <TableRow key={data.id}>
-        <TableCell>{data.id}</TableCell>
-        <TableCell className="text-center">{data.amount}</TableCell>
-        <TableCell className="text-center">
-          {formatDate(data.date, "PPP")}
-        </TableCell>
-        <TableCell className="text-center">
-          <PaymentStatus
-            label={mapPaymentStatusLable(data.status as PaymentStatusType)}
-            status={data.status as PaymentStatusType}
-          />
-        </TableCell>
-        <TableCell className="text-center">
-          {mapUserPlanTitle(data.plan as PlanKey)}
-        </TableCell>
-        <TableCell className="text-left">
-          {mapPeriodLabel(data.period as PlanPeriod)}
-        </TableCell>
-      </TableRow>
-    );
-  };
-
+const page = () => {
   return (
-    <Card>
-      <Table
-        columns={columns}
-        data={data}
-        renderRows={renderRows}
-        noDataMessage="اطلاعاتی یافت نشد."
-        dir="rtl"
+    <div className="space-y-3">
+      <PaymentsList data={data} />
+      <Pagination
+        pageSize={globalPageSize}
+        totalItems={data.length}
+        lang="fa"
       />
-    </Card>
+    </div>
   );
-}
+};
 
 export default page;
 
-const columns = [
-  { label: "#", className: "" },
-  { label: "قیمت", className: "" },
-  { label: "تاریخ", className: "" },
-  { label: "وضعیت", className: "" },
-  { label: "پلن", className: "" },
-  { label: "دوره", className: "text-right" },
+const data = [
+  {
+    id: 1,
+    date: new Date("2026-01-01"),
+    status: "success",
+    amount: 399000,
+    plan: "standard",
+    period: "monthly",
+  },
+  {
+    id: 2,
+    date: new Date("2026-01-01"),
+    status: "failed",
+    amount: 399000,
+    plan: "standard",
+    period: "monthly",
+  },
+  {
+    id: 3,
+    date: new Date("2026-01-01"),
+    status: "canceled",
+    amount: 399000,
+    plan: "standard",
+    period: "monthly",
+  },
+  {
+    id: 4,
+    date: new Date("2026-01-01"),
+    status: "pending",
+    amount: 399000,
+    plan: "standard",
+    period: "monthly",
+  },
 ];

@@ -1,22 +1,23 @@
 import PopupNewDialog from "@repo/ui/components/custom/PopupNewDialog";
 import CustomersList from "./CustomersList";
 import { CustomerForm } from "@/components/forms/CustomerForm";
+import { globalPageSize } from "@repo/lib/data/consts";
+import Search from "@repo/ui/components/custom/Search";
 import Pagination from "@repo/ui/components/custom/Pagination";
-import { globalPageSize } from "@/data/consts";
 
 const page = () => {
   return (
     <div className="space-y-3">
       <div className="flex justify-between">
-        <div />
-        {/* //todo: add search and sorting */}
+        <Search placeholder="جستجو..." />
+
         <PopupNewDialog buttonTitle="مشتری جدید" icon>
           <CustomerForm />
         </PopupNewDialog>
       </div>
       <CustomersList />
 
-      <Pagination pageSize={globalPageSize} totalItems={30} dir="rtl" />
+      <Pagination pageSize={globalPageSize} totalItems={30} lang="fa" />
     </div>
   );
 };

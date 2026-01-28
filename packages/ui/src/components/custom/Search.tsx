@@ -1,17 +1,17 @@
 "use client";
 
-import React, { useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Input } from "@repo/ui/components/input";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
 } from "@repo/ui/components/form";
+import { Input } from "@repo/ui/components/input";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 
 const searchSchema = z.object({
   search: z.string().optional(),
@@ -35,14 +35,20 @@ const Search = ({
     defaultValues: { search: currentSearch },
   });
 
-  const handleSubmit = (values: SearchFormValues) => {
+  const updateUrl = (searchValue: string | undefined) => {
     const params = new URLSearchParams(Array.from(searchParams.entries()));
-    if (values.search) {
-      params.set("search", values.search);
+
+    if (searchValue && searchValue.trim() !== "") {
+      params.set("search", searchValue.trim());
     } else {
       params.delete("search");
     }
+
     router.push(`?${params.toString()}`);
+  };
+
+  const handleSubmit = (values: SearchFormValues) => {
+    updateUrl(values.search);
   };
 
   useEffect(() => {
@@ -62,6 +68,12 @@ const Search = ({
                   className="h-9"
                   placeholder={placeholder}
                   {...field}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    if (e.target.value === "") {
+                      updateUrl("");
+                    }
+                  }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
                       e.preventDefault();

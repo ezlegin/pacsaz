@@ -1,14 +1,20 @@
 "use client";
 
 import { DIMENSIONS_TYPE } from "@/data/consts";
-import { useLoading } from "@repo/lib/utils/useLoading";
 import {
-  SaveDielineFormType,
   saveDielineFormSchema,
+  SaveDielineFormType,
 } from "@/lib/validatoinSchema";
 import Diamond from "@/public/icons/Diamond";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { FormType } from "@repo/lib/data/types";
+import { useLoading } from "@repo/lib/utils/useLoading";
 import { useUserStore } from "@repo/store/app/user.store";
+import {
+  Dimension,
+  DimensionType,
+  MaterialValue,
+} from "@repo/store/data/types";
 import {
   getDielineSettings,
   useDielineSettingsStore,
@@ -25,8 +31,26 @@ import {
 import { Input } from "@repo/ui/components/input";
 import { Separator } from "@repo/ui/components/separator";
 import { useForm } from "react-hook-form";
+import DeleteButton from "@repo/ui/components/custom/DeleteButton";
 
-const SaveDielineForm = () => {
+interface SavedDieline {
+  bleed: number;
+  thickness: number;
+  dimensionType: DimensionType;
+  material: MaterialValue;
+  dimension: Dimension;
+  title: string;
+  description?: string | undefined;
+  customer?: string | undefined;
+}
+
+const SaveDielineForm = ({
+  type,
+  savedDieline,
+}: {
+  savedDieline?: SavedDieline;
+  type: FormType;
+}) => {
   const {
     settings: { dimension },
   } = useDielineSettingsStore();
@@ -37,44 +61,58 @@ const SaveDielineForm = () => {
   const form = useForm<SaveDielineFormType>({
     resolver: zodResolver(saveDielineFormSchema),
     defaultValues: {
-      title: "",
-      description: "",
-      customer: "",
+      title: savedDieline?.title ?? "",
+      description: savedDieline?.description ?? "",
+      customer: savedDieline?.customer ?? "",
     },
   });
 
   const onSubmit = (data: SaveDielineFormType) => {
     startLoading();
-    const finalData = {
+    const finalData: SavedDieline = {
       ...data,
       bleed,
       thickness,
       dimensionType,
       material,
-      dimension,
+      dimension: dimension.raw,
     };
     console.log(finalData);
     stopLoading();
   };
 
-  const selectedDimensionType = DIMENSIONS_TYPE.find(
-    (d) => d.key === dimensionType
-  );
+  const selectedDimensionType =
+    type === "create"
+      ? DIMENSIONS_TYPE.find((d) => d.key === dimensionType)
+      : DIMENSIONS_TYPE.find((d) => d.key === savedDieline?.dimensionType);
 
-  const data = {
-    width: dimension.raw.width,
-    length: dimension.raw.length,
-    height: dimension.raw.height,
-    bleedSize: bleed,
-    material: material.label,
-    dimensionType: selectedDimensionType,
-    thickness,
-  };
+  const data =
+    type === "create"
+      ? {
+          width: dimension.raw.width,
+          length: dimension.raw.length,
+          height: dimension.raw.height,
+          bleedSize: bleed,
+          material: material.label,
+          dimensionType: selectedDimensionType,
+          thickness,
+        }
+      : {
+          width: savedDieline?.dimension.width,
+          length: savedDieline?.dimension.length,
+          height: savedDieline?.dimension.height,
+          bleedSize: savedDieline?.bleed,
+          material: savedDieline?.material.label,
+          dimensionType: selectedDimensionType,
+          thickness: savedDieline?.thickness,
+        };
 
   return (
-    <div className="p-6 space-y-5">
+    <div className="space-y-5">
       <div className="flex justify-between items-center">
-        <DialogTitle>ذخیره قالب</DialogTitle>
+        <DialogTitle>
+          {type === "update" ? "ویرایش قالب" : "ذخیره قالب"}
+        </DialogTitle>
         {!isPremium && (
           <Badge variant={"lightRed"} className="p-2 px-4">
             <Diamond />
@@ -98,7 +136,7 @@ const SaveDielineForm = () => {
           <li>متریال: {data.material}</li>
           <li>
             ضخامت:
-            {thickness}mm
+            {data.thickness}mm
           </li>
         </div>
       </ul>
@@ -149,13 +187,17 @@ const SaveDielineForm = () => {
             )}
           />
 
-          <Button
-            size={"lg"}
-            disabled={!form.formState.isValid || isLoading || !isPremium}
-            className="w-full"
-          >
-            ذخیره
-          </Button>
+          <div className="flex flex-col gap-3">
+            <Button
+              size={"lg"}
+              disabled={!form.formState.isValid || isLoading || !isPremium}
+              className="w-full"
+            >
+              ذخیره
+            </Button>
+
+            {type === "update" && <DeleteButton lang="fa" />}
+          </div>
         </form>
       </Form>
     </div>

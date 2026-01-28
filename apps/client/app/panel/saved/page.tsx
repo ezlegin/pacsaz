@@ -1,102 +1,45 @@
-import Card from "@repo/ui/components/custom/Card";
-import { Button } from "@repo/ui/components/button";
-import Table from "@repo/ui/components/custom/Table";
-import { TableCell, TableRow } from "@repo/ui/components/table";
-import { formatDate } from "date-fns";
-import { Pencil } from "lucide-react";
-import { DimensionType, MaterialKey } from "@repo/store/data/types";
-
-type LastDownloads = {
-  id: number;
-  title: string;
-  dieline: string;
-  dimensions: string;
-  bleed: number;
-  material: MaterialKey;
-  thickness: number;
-  dimenstionsType: DimensionType;
-  downloadedAt: Date;
-};
+import React from "react";
+import SavedDielinesList, { SavedDielines } from "./SavedDielinesList";
+import Search from "@repo/ui/components/custom/Search";
+import Pagination from "@repo/ui/components/custom/Pagination";
+import { globalPageSize } from "@repo/lib/data/consts";
 
 const page = () => {
-  const data: LastDownloads[] = [
-    {
-      id: 1,
-      bleed: 5,
-      dimensions: "90x160x50 mm",
-      dieline: "tuck-end",
-      dimenstionsType: "manufacture",
-      material: "b-flute",
-      thickness: 3,
-      title: "آقای رحیمی",
-      downloadedAt: new Date(),
-    },
-    {
-      id: 2,
-      bleed: 3,
-      dimensions: "90x160 mm",
-      dieline: "postal-card",
-      dimenstionsType: "manufacture",
-      material: "f-flute",
-      thickness: 1.2,
-      title: "شرکت پک ساز",
-      downloadedAt: new Date(),
-    },
-  ];
-
-  const renderRows = ({
-    bleed,
-    dimensions,
-    dimenstionsType,
-    dieline,
-    id,
-    material,
-    thickness,
-    title,
-    downloadedAt,
-  }: LastDownloads) => {
-    return (
-      <TableRow key={id}>
-        <TableCell>{title}</TableCell>
-        <TableCell className="text-center">{dieline}</TableCell>
-        <TableCell className="text-center">{dimensions}</TableCell>
-        <TableCell className="text-center">{material}</TableCell>
-        <TableCell className="text-center">{thickness}</TableCell>
-        <TableCell className="text-center">{bleed}</TableCell>
-        <TableCell className="text-center">{dimenstionsType}</TableCell>
-        <TableCell className="text-center">
-          {formatDate(downloadedAt, "PP")}
-        </TableCell>
-        <TableCell className="text-left">
-          <Button
-            variant={"outline"}
-            size={"icon"}
-            className="rounded-full size-8"
-          >
-            <Pencil className="scale-90" />
-          </Button>
-        </TableCell>
-      </TableRow>
-    );
-  };
-
   return (
-    <Card title="قالب‌های ذخیره شده" className="col-span-6">
-      <Table columns={columns} data={data} renderRows={renderRows} />
-    </Card>
+    <div className="space-y-3">
+      <div className="flex">
+        <Search placeholder="جستجو..." />
+      </div>
+
+      <SavedDielinesList data={data} />
+      <Pagination pageSize={globalPageSize} totalItems={data.length} />
+    </div>
   );
 };
 
 export default page;
 
-const columns = [
-  { label: "عنوان", className: "" },
-  { label: "قالب", className: "" },
-  { label: "ابعاد", className: "" },
-  { label: "متریال", className: "" },
-  { label: "ضخامت", className: "" },
-  { label: "بلید", className: "" },
-  { label: "نوع ابعاد", className: "" },
-  { label: "تاریخ", className: "" },
-  { label: "ویرایش", className: "" },
+const data: SavedDielines[] = [
+  {
+    id: 1,
+    bleed: 5,
+    dimensions: "90x160x50 mm",
+    dieline: "tuck-end",
+    dimenstionsType: "manufacture",
+    material: "b-flute",
+    thickness: 3,
+    title: "آقای رحیمی",
+    downloadedAt: new Date(),
+  },
+  {
+    id: 2,
+    bleed: 3,
+    dimensions: "90x160 mm",
+    dieline: "postal-card",
+    dimenstionsType: "manufacture",
+    material: "f-flute",
+    thickness: 1.2,
+    title: "شرکت پک ساز",
+    downloadedAt: new Date(),
+  },
 ];

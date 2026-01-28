@@ -1,21 +1,21 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@repo/ui/components/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 interface Props {
   pageSize: number;
   totalItems: number;
   paramName?: string;
-  dir?: "rtl" | "ltr";
+  lang?: "fa" | "en";
 }
 
 const Pagination = ({
   pageSize,
   totalItems,
   paramName,
-  dir = "ltr",
+  lang = "en",
 }: Props) => {
   const pageCount = Math.ceil(totalItems / pageSize);
 
@@ -23,7 +23,8 @@ const Pagination = ({
   const searchParams = useSearchParams();
   const currentPage = parseInt(searchParams.get("page") || "1");
 
-  const changePage = (page: number) => {
+  const pageHandler = (pageAction: PageAction) => {
+    const page = currentPage + (pageAction === "inc" ? 1 : -1);
     const params = new URLSearchParams(Array.from(searchParams.entries()));
     params.set(paramName ?? "page", page.toString());
 
@@ -32,33 +33,65 @@ const Pagination = ({
 
   if (pageCount < 2) return null;
 
-  const isRTL = dir === "rtl";
-
   return (
-    <div dir={dir} className="text-sm flex items-center">
-      <Button
-        size={"icon"}
-        variant={"ghost"}
-        onClick={() => changePage(currentPage + 1)}
-        disabled={currentPage === pageCount}
-      >
-        {isRTL ? <ChevronRight /> : <ChevronLeft />}
-      </Button>
+    <div className="text-sm flex items-center">
+      <PageButton
+        pageAction="dec"
+        pageHandler={pageHandler}
+        chevron="right"
+        currentPage={currentPage}
+      />
 
       <span className="text-gray-500 mx-2">
-        {isRTL ? "صفحه" : "Page"} {currentPage} / {pageCount}
+        {lang === "fa" ? (
+          <span>
+            صفحه {currentPage} از {pageCount}
+          </span>
+        ) : (
+          <span dir="ltr">
+            Page {currentPage} of {pageCount}
+          </span>
+        )}
       </span>
 
-      <Button
-        size={"icon"}
-        variant={"ghost"}
-        onClick={() => changePage(currentPage - 1)}
-        disabled={currentPage === 1}
-      >
-        {isRTL ? <ChevronLeft /> : <ChevronRight />}
-      </Button>
+      <PageButton
+        pageAction="inc"
+        pageHandler={pageHandler}
+        chevron="left"
+        currentPage={currentPage}
+        pageCount={pageCount}
+      />
     </div>
   );
 };
 
 export default Pagination;
+
+type PageAction = "inc" | "dec";
+
+function PageButton({
+  currentPage,
+  pageHandler,
+  chevron,
+  pageAction,
+  pageCount,
+}: {
+  currentPage: number;
+  chevron: "left" | "right";
+  pageAction: PageAction;
+  pageHandler: (pageAction: PageAction) => void;
+  pageCount?: number;
+}) {
+  return (
+    <Button
+      size={"icon"}
+      variant={"ghost"}
+      onClick={() => pageHandler(pageAction)}
+      disabled={
+        pageAction === "inc" ? currentPage === pageCount : currentPage <= 1
+      }
+    >
+      {chevron === "left" ? <ChevronLeft /> : <ChevronRight />}
+    </Button>
+  );
+}

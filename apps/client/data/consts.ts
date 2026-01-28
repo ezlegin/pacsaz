@@ -1,5 +1,3 @@
-export const globalPageSize = 15;
-
 export const DIMENSIONS_TYPE = [
   { key: "manufacture", label: "ابعاد تولید" },
   { key: "inner", label: "ابعاد داخلی" },

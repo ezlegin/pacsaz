@@ -67,11 +67,15 @@ const DielineDownloadButton = ({ slug, isRendering }: Props) => {
           showCloseButton={false}
           className={cn(
             openPopup === "login" ? "sm:max-w-2xl" : "sm:max-w-lg",
-            "p-0 border-none"
+            "border-none p-6",
           )}
         >
           <DialogTitle className="sr-only" />
-          {openPopup === "login" ? <LoginPopup /> : <SaveDielineForm />}
+          {openPopup === "login" ? (
+            <LoginPopup />
+          ) : (
+            <SaveDielineForm type="create" />
+          )}
         </DialogContent>
       </Dialog>
 
@@ -83,7 +87,7 @@ const DielineDownloadButton = ({ slug, isRendering }: Props) => {
           size="lg"
           className={cn(
             isSubscribed ? "col-span-5" : "col-span-6",
-            "gap-2 font-medium"
+            "gap-2 font-medium",
           )}
         >
           {isLoading || isRendering ? (

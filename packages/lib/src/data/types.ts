@@ -6,3 +6,5 @@ export type UserType =
   | "dielineMaker"
   | "packagingFactory"
   | "other";
+export type FormType = "update" | "create";
+export type Lang = "fa" | "en";

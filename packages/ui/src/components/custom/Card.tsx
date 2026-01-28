@@ -21,12 +21,12 @@ const Card = ({
           ? "bg-primary-foreground border border-primary"
           : "border bg-accent/30",
         "rounded-2xl",
-        className
+        className,
       )}
     >
       {title && (
         <>
-          <div className="px-5 pb-3 text-sm">{title}</div>
+          <div className="px-5 pb-3 text-sm font-medium">{title}</div>
           <Separator />
         </>
       )}
