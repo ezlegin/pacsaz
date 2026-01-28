@@ -1,4 +1,4 @@
-import "./styles.css";
+import "@repo/ui/globals.css";
 import { pacsazLogoIcon } from "@/public";
 import { Toaster } from "@repo/ui/components/sonner";
 import UserProvider from "@/components/UserProvider";

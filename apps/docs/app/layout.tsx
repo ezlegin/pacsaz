@@ -1,6 +1,5 @@
-import "@repo/ui/globals.css";
-import { Toaster } from "@repo/ui/components/sonner";
 import { pacsazLogoIcon } from "@/public";
+import "@repo/ui/globals.css";
 
 export default function RootLayout({
   children,
@@ -12,13 +11,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body style={{ fontFamily }} className="antialiased">
-        {children}
-        <Toaster
-          richColors
-          theme="light"
-          position="top-center"
-          style={{ fontFamily }}
-        />
+        <main>{children}</main>
       </body>
     </html>
   );
