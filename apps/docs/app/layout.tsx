@@ -10,7 +10,7 @@ export default function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <body style={{ fontFamily }} className="antialiased">
+      <body style={{ fontFamily }} className="antialiased dark bg-[#17181c]">
         <main>{children}</main>
       </body>
     </html>
