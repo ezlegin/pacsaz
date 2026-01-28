@@ -25,6 +25,9 @@ const data = [
     amount: 399000,
     plan: "standard",
     period: "monthly",
+    discountCode: "test",
+    discountAmount: 100000,
+    total: 22200000,
   },
   {
     id: 2,
@@ -33,6 +36,7 @@ const data = [
     amount: 399000,
     plan: "standard",
     period: "monthly",
+    total: 22200000,
   },
   {
     id: 3,
@@ -41,6 +45,7 @@ const data = [
     amount: 399000,
     plan: "standard",
     period: "monthly",
+    total: 22200000,
   },
   {
     id: 4,
@@ -49,5 +54,6 @@ const data = [
     amount: 399000,
     plan: "standard",
     period: "monthly",
+    total: 22200000,
   },
 ];

@@ -1,5 +1,5 @@
 import React from "react";
-import SavedDielinesList, { SavedDielines } from "./SavedDielinesList";
+import SavedDielinesList, { SavedDieline } from "./SavedDielinesList";
 import Search from "@repo/ui/components/custom/Search";
 import Pagination from "@repo/ui/components/custom/Pagination";
 import { globalPageSize } from "@repo/lib/data/consts";
@@ -19,7 +19,7 @@ const page = () => {
 
 export default page;
 
-const data: SavedDielines[] = [
+const data: SavedDieline[] = [
   {
     id: 1,
     bleed: 5,

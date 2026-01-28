@@ -2,6 +2,7 @@ import { mapPaymentStatusLable } from "@/utils/mapPaymentStatusLable";
 import { mapPeriodLabel } from "@/utils/mapPeriodLabel";
 import { mapUserPlanTitle } from "@/utils/mapUserPlanTitle";
 import { PlanKey, PlanPeriod } from "@repo/lib/data/plans";
+import { formatPrice } from "@repo/lib/utils/formatPrice";
 import Card from "@repo/ui/components/custom/Card";
 import PaymentStatus, {
   PaymentStatusType,
@@ -17,21 +18,24 @@ type Data = {
   amount: number;
   plan: string;
   period: string;
+  discountCode?: string;
+  discountAmount?: number;
+  total: number;
 };
 
 function PaymentsList({ data }: { data: Data[] }) {
-  const renderRows = (data: {
-    id: number;
-    date: Date;
-    amount: number;
-    status: string;
-    plan: string;
-    period: string;
-  }) => {
+  const renderRows = (data: Data) => {
     return (
       <TableRow key={data.id}>
         <TableCell>{data.id}</TableCell>
-        <TableCell className="text-center">{data.amount}</TableCell>
+        <TableCell className="text-center">
+          {formatPrice(data.amount)}
+        </TableCell>
+        <TableCell className="text-center">
+          {data.discountAmount && formatPrice(data.discountAmount)}
+        </TableCell>
+        <TableCell className="text-center">{data.discountCode}</TableCell>
+        <TableCell className="text-center">{formatPrice(data.total)}</TableCell>
         <TableCell className="text-center">
           {formatDate(data.date, "PPP")}
         </TableCell>
@@ -68,6 +72,9 @@ export default PaymentsList;
 
 const columns = [
   { label: "شناسه" },
+  { label: "مجموع" },
+  { label: "تخفیف" },
+  { label: "کد تخفیف" },
   { label: "قیمت" },
   { label: "تاریخ" },
   { label: "وضعیت" },

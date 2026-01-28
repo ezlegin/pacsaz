@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogTitle } from "@repo/ui/components/dialog";
 import { RotateCw, Zap } from "lucide-react";
 import { useState } from "react";
 import Card from "@repo/ui/components/custom/Card";
-import UpgradeSubscription from "./UpgradeSubscription";
+import UpgradeSubscription from "../../../components/UpgradeSubscription";
 import Link from "next/link";
 import { sessionUser } from "@repo/store/app/user.store";
 import { mapUserPlanTitle } from "@/utils/mapUserPlanTitle";

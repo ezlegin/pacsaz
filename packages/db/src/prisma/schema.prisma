@@ -53,9 +53,9 @@ model Otp {
 model Customer {
   id            Int            @id @default(autoincrement())
   fullName      String
-  phoneNumber   String
-  email         String
-  address       String
+  phoneNumber   String?
+  email         String?
+  address       String?
   savedDielines SavedDieline[]
 }
 
@@ -203,7 +203,7 @@ model Payment {
   id             Int             @id @default(autoincrement())
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
-  price          Int
+  amount         Int
   totalDiscount  Int
   discountAmount Int
   discountCode   String

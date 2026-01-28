@@ -10,7 +10,7 @@ const PanelNavbar = () => {
         <div
           className={cn(
             isSubscribed ? "bg-green-600" : "bg-muted-foreground",
-            "size-2  rounded-full"
+            "size-2  rounded-full",
           )}
         />
         <span>پلن فعال:</span>

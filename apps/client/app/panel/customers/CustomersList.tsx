@@ -1,42 +1,19 @@
+import { CustomerForm } from "@/components/forms/CustomerForm";
+import { Customer } from "@repo/db";
 import ActionButton from "@repo/ui/components/custom/ActionButton";
 import Card from "@repo/ui/components/custom/Card";
 import Table from "@repo/ui/components/custom/Table";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+} from "@repo/ui/components/dialog";
 import { TableCell, TableRow } from "@repo/ui/components/table";
 import { Pencil } from "lucide-react";
 
-type Customer = {
-  id: number;
-  fullName: string;
-  phoneNumber?: string;
-  email?: string;
-  address?: string;
-};
-
-const CustomersList = () => {
-  const data: Customer[] = [
-    {
-      id: 1,
-      fullName: "علیرضا ازلیگنی",
-      address: "زنجان، خیابان فردوسی، کوچه نسترن اول، پلاک 46",
-      email: "ezlegini.ir@gmail.com",
-      phoneNumber: "09127452859",
-    },
-    {
-      id: 2,
-      fullName: "فاطمه احمدی",
-      address: "زنجان، خیابان فردوسی، کوچه نسترن اول، پلاک 46",
-      email: "fa.ahmdi03@gmail.com",
-      phoneNumber: "09392563627",
-    },
-  ];
-
-  const renderRows = ({
-    id,
-    fullName,
-    address,
-    email,
-    phoneNumber,
-  }: Customer) => {
+const CustomersList = ({ data }: { data: Customer[] }) => {
+  const renderRows = (data: Customer) => {
+    const { id, fullName, address, email, phoneNumber } = data;
     return (
       <TableRow key={id}>
         <TableCell>{fullName}</TableCell>
@@ -44,7 +21,14 @@ const CustomersList = () => {
         <TableCell className="text-center">{email}</TableCell>
         <TableCell className="text-center">{address}</TableCell>
         <TableCell className="text-left">
-          <ActionButton icon={Pencil} />
+          <Dialog>
+            <DialogTrigger asChild>
+              <ActionButton icon={Pencil} />
+            </DialogTrigger>
+            <DialogContent>
+              <CustomerForm type="update" customer={data} />
+            </DialogContent>
+          </Dialog>
         </TableCell>
       </TableRow>
     );

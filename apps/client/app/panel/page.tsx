@@ -1,4 +1,4 @@
-import PanelDashboard from "@/components/PanelDashboard";
+import PanelDashboard from "@/app/panel/components/PanelDashboard";
 import SubscriptionList from "@/components/SubscriptionList";
 import { isSubscribed } from "@repo/store/app/user.store";
 

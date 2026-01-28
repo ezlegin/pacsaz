@@ -12,7 +12,7 @@ import { TableCell, TableRow } from "@repo/ui/components/table";
 import { formatDate } from "date-fns";
 import { Pencil } from "lucide-react";
 
-export type SavedDielines = {
+export type SavedDieline = {
   id: number;
   title: string;
   dieline: string;
@@ -24,8 +24,8 @@ export type SavedDielines = {
   downloadedAt: Date;
 };
 
-const SavedDielinesList = ({ data }: { data: SavedDielines[] }) => {
-  const renderRows = (data: SavedDielines) => {
+const SavedDielinesList = ({ data }: { data: SavedDieline[] }) => {
+  const renderRows = (data: SavedDieline) => {
     const {
       bleed,
       dimensions,
@@ -43,8 +43,8 @@ const SavedDielinesList = ({ data }: { data: SavedDielines[] }) => {
         <TableCell className="text-center">{dieline}</TableCell>
         <TableCell className="text-center">{dimensions}</TableCell>
         <TableCell className="text-center">{material}</TableCell>
-        <TableCell className="text-center">{thickness}</TableCell>
-        <TableCell className="text-center">{bleed}</TableCell>
+        <TableCell className="text-center">{thickness}mm</TableCell>
+        <TableCell className="text-center">{bleed}mm</TableCell>
         <TableCell className="text-center">{dimenstionsType}</TableCell>
         <TableCell className="text-center">
           {formatDate(downloadedAt, "PP")}
@@ -54,7 +54,7 @@ const SavedDielinesList = ({ data }: { data: SavedDielines[] }) => {
             <DialogTrigger asChild>
               <ActionButton icon={Pencil} />
             </DialogTrigger>
-            <DialogContent asChild>
+            <DialogContent>
               <SaveDielineForm type="update" />
             </DialogContent>
           </Dialog>

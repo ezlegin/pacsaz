@@ -1,6 +1,5 @@
 "use client";
 
-import { tuckEnd, tuckEndModel } from "@/public";
 import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import { cn } from "@repo/ui/lib/utils";
 import { Box, Ratio } from "lucide-react";
@@ -8,7 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 type ImageType = "model" | "dieline";
-const DielinesGrid = () => {
+const DielinesGrid = ({ dielines }: { dielines: Dielines[] }) => {
   const [imageType, setImageType] = useState<ImageType>("dieline");
 
   return (
@@ -68,7 +67,7 @@ const DielineCard = ({
             imageType === "model"
               ? "opacity-100 hover:opacity-0"
               : "opacity-0 hover:opacity-100",
-            `w-full aspect-square rounded-2xl absolute transition-opacity duration-400`
+            `w-full aspect-square rounded-2xl absolute transition-opacity duration-400`,
           )}
         />
         <Image
@@ -83,72 +82,3 @@ const DielineCard = ({
     </Link>
   );
 };
-
-const dielines: Dielines[] = [
-  {
-    title: "جعبه درب‌دار ساده",
-    slug: "tuck-end",
-    dielineImg: tuckEnd,
-    modelImg: tuckEndModel,
-  },
-  {
-    title: "جعبه اسنپ لاک",
-    slug: "tuck-end-snap-lock",
-    dielineImg: tuckEnd,
-    modelImg: tuckEndModel,
-  },
-  {
-    title: "جعبه پستی",
-    slug: "postal-card",
-    dielineImg: tuckEnd,
-    modelImg: tuckEndModel,
-  },
-  {
-    title: "جعبه استاندارد FEFCO",
-    slug: "fefco-box",
-    dielineImg: tuckEnd,
-    modelImg: tuckEndModel,
-  },
-  {
-    title: "پاکت مقوایی",
-    slug: "paper-envelope",
-    dielineImg: tuckEnd,
-    modelImg: tuckEndModel,
-  },
-  {
-    title: "جعبه سینی‌دار",
-    slug: "tray-box",
-    dielineImg: tuckEnd,
-    modelImg: tuckEndModel,
-  },
-  {
-    title: "جعبه درب‌دار ساده",
-    slug: "tuck-end",
-    dielineImg: tuckEnd,
-    modelImg: tuckEndModel,
-  },
-  {
-    title: "جعبه پستی",
-    slug: "postal-card",
-    dielineImg: tuckEnd,
-    modelImg: tuckEndModel,
-  },
-  {
-    title: "جعبه استاندارد FEFCO",
-    slug: "fefco-box",
-    dielineImg: tuckEnd,
-    modelImg: tuckEndModel,
-  },
-  {
-    title: "پاکت مقوایی",
-    slug: "paper-envelope",
-    dielineImg: tuckEnd,
-    modelImg: tuckEndModel,
-  },
-  {
-    title: "جعبه سینی‌دار",
-    slug: "tray-box",
-    dielineImg: tuckEnd,
-    modelImg: tuckEndModel,
-  },
-];
