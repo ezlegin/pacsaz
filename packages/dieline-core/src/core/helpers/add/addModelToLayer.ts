@@ -1,10 +1,10 @@
 import M, { IModel } from "makerjs";
 
-export function addModelToLayer(
+export function pushModel(
   model: IModel,
   key: string,
   child: IModel,
-  layer?: string
+  layer?: string,
 ) {
   M.model.addModel(model, child, key);
   if (layer) M.model.layer(child, layer);

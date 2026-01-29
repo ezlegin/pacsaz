@@ -1,5 +1,5 @@
 import M, { IModel } from "makerjs";
-import { addModelToLayer } from "./addModelToLayer";
+import Pacsaz from "../../pacsaz";
 
 export function addFillet(model: IModel, radius: number = 0) {
   const chain = M.model.findSingleChain(model);
@@ -13,14 +13,14 @@ export function addFillet(model: IModel, radius: number = 0) {
   }
 
   if (fillet) {
-    addModelToLayer(model, "fillet", fillet);
+    Pacsaz.model.push(model, "fillet", fillet);
   }
 }
 
 export function addFilletAt(
   model: IModel,
   indices: number[],
-  radius: number = 0
+  radius: number = 0,
 ) {
   const filletModel: IModel = { models: {} };
   const lineModel: IModel = { models: {} };
@@ -43,11 +43,11 @@ export function addFilletAt(
     const beforePts = kpts.slice(cursor, index);
     if (beforePts.length >= 2) {
       const line = new M.models.ConnectTheDots(false, beforePts);
-      addModelToLayer(lineModel, "line", line);
+      Pacsaz.model.push(lineModel, "line", line);
     }
 
     const overlappingIndex = sorted.filter(
-      (s) => s === index + 1 || s === index - 1
+      (s) => s === index + 1 || s === index - 1,
     );
 
     let filletLine: IModel = {};
@@ -109,7 +109,7 @@ export function addFilletAt(
     }
 
     if (fillet) {
-      addModelToLayer(filletModel, "fillet", {
+      Pacsaz.model.push(filletModel, "fillet", {
         models: { fillet, filletLine },
       });
     }
@@ -120,7 +120,7 @@ export function addFilletAt(
   const tailPts = kpts.slice(cursor);
   if (tailPts.length >= 2) {
     const tailLine = new M.models.ConnectTheDots(false, tailPts);
-    addModelToLayer(lineModel, "line", tailLine);
+    Pacsaz.model.push(lineModel, "line", tailLine);
   }
 
   return {

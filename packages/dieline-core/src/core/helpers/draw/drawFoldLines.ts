@@ -9,7 +9,7 @@ export function drawFoldLines(
     verticals?: Coordinates;
     horizontals?: Coordinates;
     diagonal?: Coordinates;
-  }
+  },
 ) {
   const typeCounters: Record<string, number> = {};
 

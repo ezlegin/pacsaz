@@ -2,7 +2,7 @@ import { DimensionType } from "@repo/store/data/types";
 import M, { IPoint } from "makerjs";
 import { OffsetObject } from "../../../data/types";
 import { applyDimensionOffset } from "../../../utils/applyDimensionOffset";
-import { addModelToLayer } from "./addModelToLayer";
+import P from "../../pacsaz";
 
 export interface GuideLineOptions {
   type: "width" | "length" | "height";
@@ -63,7 +63,7 @@ export function addGuideLine(model: M.IModel, options: GuideLineOptions) {
       [
         [startX, from[1] + indicatorLength],
         [startX, from[1] - indicatorLength],
-      ]
+      ],
     );
     model.models![`${type}EndIndicator`] = new M.models.ConnectTheDots(false, [
       [endX, to[1] + indicatorLength],
@@ -110,7 +110,7 @@ export function addGuideLine(model: M.IModel, options: GuideLineOptions) {
       [
         [from[0] - indicatorLength, startY],
         [from[0] + indicatorLength, startY],
-      ]
+      ],
     );
 
     model.models![`${type}EndIndicator`] = new M.models.ConnectTheDots(false, [
@@ -148,12 +148,11 @@ export function addGuideLine(model: M.IModel, options: GuideLineOptions) {
       model.models![key]!.layer = isOverall ? "guideLineOverall" : "guideLine";
     }
   });
-
-  addModelToLayer(
+  P.model.push(
     model,
     `${type}StartPointer`,
     { models: { startPointer, endPointer } },
-    isOverall ? "pointerOverall" : "pointer"
+    isOverall ? "pointerOverall" : "pointer",
   );
 
   // text
@@ -161,10 +160,10 @@ export function addGuideLine(model: M.IModel, options: GuideLineOptions) {
   const textCarrier = new M.models.ConnectTheDots(false, [[0, 0]]);
   const caption = M.model.addCaption(textCarrier, `${value.toFixed()} mm`, mid);
 
-  addModelToLayer(
+  P.model.push(
     model,
     `${type}Text`,
     caption,
-    isOverall ? `guideTextOverall` : `guideText`
+    isOverall ? `guideTextOverall` : `guideText`,
   );
 }

@@ -1,5 +1,5 @@
 import M from "makerjs";
-import { addModelToLayer } from "./addModelToLayer";
+import Pacsaz from "../../pacsaz";
 
 export type ConnectorLine = {
   from: M.IPoint;
@@ -25,14 +25,14 @@ export function addBleed({
   const endPoint = keyPoints[0]!;
 
   const line = new M.models.ConnectTheDots(false, [startPoint, endPoint]);
-  M.model.addModel(cloned, line, "connectorLine");
+  Pacsaz.model.push(cloned, "connectorLine", line);
 
   const chain = M.model.findSingleChain(cloned);
   const newTrimModel = M.chain.toNewModel(chain);
 
   const bleed = M.model.outline(newTrimModel, bleedAmount, 1);
 
-  addModelToLayer(model, "bleed", bleed, "bleed");
+  Pacsaz.model.push(model, "bleed", bleed, "bleed");
   model.models = { bleed, ...model.models };
 
   return bleed;

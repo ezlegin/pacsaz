@@ -1,9 +1,9 @@
 import { IModel, IPoint } from "makerjs";
 import { addGuideLine } from "../add/addGuideline";
-import { addModelToLayer } from "../add/addModelToLayer";
 import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
 import { resolveOffsets } from "../../../utils/offsetResolver";
 import { DimensionKey } from "@repo/store/data/types";
+import Pacsaz from "../../pacsaz";
 
 type Orientation = "horizontal" | "vertical";
 
@@ -23,7 +23,7 @@ type GuideConfig = {
 
 export function drawGuideLines(
   model: IModel,
-  { width, length, height, guides }: DrawGuideLinesParams
+  { width, length, height, guides }: DrawGuideLinesParams,
 ) {
   const {
     dimension: { raw },
@@ -36,7 +36,7 @@ export function drawGuideLines(
     throw new Error("Settings Not Provided. [drawGuidelines]");
 
   const guidesModel: IModel = { models: {} };
-  addModelToLayer(model, "guides", guidesModel);
+  Pacsaz.model.push(model, "guides", guidesModel);
 
   const defaults = {
     height: {

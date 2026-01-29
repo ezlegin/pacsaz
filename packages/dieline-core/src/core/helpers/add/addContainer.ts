@@ -1,5 +1,5 @@
 import M from "makerjs";
-import { addModelToLayer } from "./addModelToLayer";
+import Pacsaz from "../../pacsaz";
 
 interface AddContainerOptions {
   model: M.IModel;
@@ -24,10 +24,10 @@ export function addContainer({ model, from, margin }: AddContainerOptions) {
     ]),
     margin,
     1,
-    false
+    false,
   );
 
-  addModelToLayer(model, "container", container, "container");
+  Pacsaz.model.push(model, "container", container, "container");
 
   return container;
 }

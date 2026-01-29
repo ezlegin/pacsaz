@@ -1,15 +1,14 @@
-import M from "makerjs";
+import { materials } from "@repo/store/data/dieline";
+import P from "../core/pacsaz";
 import { drawFoldLines } from "../core/helpers/draw/drawFoldLines";
 import { drawGuideLines } from "../core/helpers/draw/drawGuideLines";
 import { modelBuilder } from "../core/helpers/modelBuilder";
 import { modelGenerator } from "../core/helpers/modelGenerator";
 import { Dieline } from "../data/types";
-import { materials } from "@repo/store/data/dieline";
-import Pacsaz from "../core/pacsaz";
 
-const postalCard: Dieline = {
-  slug: "postal-card",
-  title: "کارت پستال تا شو",
+const dev: Dieline = {
+  slug: "dev",
+  title: "نمونه توسعه دهندگان",
   dimensions: {
     defaultDimensions: {
       length: 160,
@@ -22,7 +21,7 @@ const postalCard: Dieline = {
       height: 0,
     },
   },
-  dimensionsType: ["manufacture"],
+  dimensionsType: ["manufacture", "inner", "outer"],
   materials: {
     default: materials["glossy-cardboard"],
     included: [materials["glossy-cardboard"], materials["art-paper"]],
@@ -35,8 +34,8 @@ const postalCard: Dieline = {
       },
     }) => {
       //! TRIM
-      const rect = new M.models.Rectangle(width * 2, length);
-      Pacsaz.model.push(trimModel, "trim", rect);
+      const rect = new P.shapes.Rectangle(width * 2, length);
+      P.model.push(trimModel, "trim", rect);
 
       //! FOLD
       drawFoldLines(foldModel, {
@@ -67,4 +66,4 @@ const postalCard: Dieline = {
   ),
 };
 
-export default postalCard;
+export default dev;
