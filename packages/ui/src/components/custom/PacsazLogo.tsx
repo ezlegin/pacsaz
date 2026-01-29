@@ -1,7 +1,5 @@
-import { pacsazLogoIcon, pacsazLogoFull } from "@/public";
 import { cn } from "@repo/ui/lib/utils";
 import Image from "next/image";
-import React from "react";
 
 const PacsazLogo = ({
   type = "icon",
@@ -14,12 +12,12 @@ const PacsazLogo = ({
 }) => {
   const styles = cn(
     "select-none",
-    grayout ? "saturate-0 hover:saturate-100 transition-all" : "saturate-100"
+    grayout ? "saturate-0 hover:saturate-100 transition-all" : "saturate-100",
   );
   return type === "icon" ? (
     <Image
       alt="logo"
-      src={pacsazLogoIcon}
+      src={"/logos/pacsaz-logo-icon.svg"}
       width={36 * scale}
       height={36}
       className={styles}
@@ -27,7 +25,7 @@ const PacsazLogo = ({
   ) : (
     <Image
       alt="logo"
-      src={pacsazLogoFull}
+      src={"/logos/pacsaz-logo-full.svg"}
       width={85 * scale}
       height={36}
       className={styles}

@@ -190,6 +190,9 @@ importers:
       '@next/mdx':
         specifier: ^16.1.6
         version: 16.1.6
+      '@repo/dieline-core':
+        specifier: workspace:*
+        version: link:../../packages/dieline-core
       '@repo/lib':
         specifier: workspace:*
         version: link:../../packages/lib

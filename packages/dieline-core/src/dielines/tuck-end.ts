@@ -175,7 +175,7 @@ const tuckEnd: Dieline = {
           },
         },
       });
-    }
+    },
   ),
 };
 

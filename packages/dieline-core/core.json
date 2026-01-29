@@ -1,0 +1,44 @@
+{
+  "Pacsaz": {
+    "dieline": {
+      "addTrim": "",
+      "addTrims": "",
+      "addFold": "",
+      "addFolds": "",
+      "addPerforation": "",
+      "addHole": "",
+      "addFillet": ""
+    },
+    "models": {
+      "addDust": "",
+      "addSnapLock": "",
+      "addDoor": "",
+      "addModelToLayer": "",
+      "addOverallDimensionGuides": "",
+      "addSeam": "",
+      "addGuide": "",
+      "addGuides": "",
+      "addBleed": "",
+      "addGlue": ""
+    },
+    "operaion": {
+      "clone": {
+        "mirror": "",
+        "move": ""
+      },
+      "getPathDistance": "",
+      "getDistance": "",
+      "getLastPoint": "",
+      "getSizes": "",
+      "getWidthAndHeightOfModel": "",
+      "glueMapper": ""
+    },
+    "container": {
+      "addContainer": ""
+    },
+    "dev": {
+      "addAnchor": ""
+    },
+    "data": {}
+  }
+}

@@ -6,7 +6,7 @@ import Link from "next/link";
 
 const page = () => {
   return (
-    <div className="flex justify-center items-center h-screen">
+    <div className="flex justify-center items-center h-full pt-20">
       <div className="flex flex-col items-center gap-5">
         <Image alt="" src={pacsazLogoIcon} width={80} height={50} />
         <div>

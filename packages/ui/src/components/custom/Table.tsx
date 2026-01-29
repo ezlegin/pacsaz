@@ -11,7 +11,7 @@ import { ReactNode } from "react";
 
 interface Props {
   columns?: { label: string; className?: string }[];
-  data: any[];
+  data: unknown[];
   renderRows: (item: any, index?: number) => ReactNode;
   noDataMessage?: string;
   dir?: "ltr" | "rtl";
@@ -39,7 +39,7 @@ const Table = ({
                       : "first:text-right last:text-left",
                     "h-10",
                     (index !== 0 || index !== columns.length) && "text-center",
-                    column.className
+                    column.className,
                   )}
                 >
                   {column.label}
