@@ -1,10 +1,12 @@
 import { materials } from "@repo/store/data/dieline";
-import P from "../core/pacsaz";
+import Pacsaz from "../core/pacsaz";
 import { drawFoldLines } from "../core/helpers/draw/drawFoldLines";
 import { drawGuideLines } from "../core/helpers/draw/drawGuideLines";
 import { modelBuilder } from "../core/helpers/modelBuilder";
 import { modelGenerator } from "../core/helpers/modelGenerator";
 import { Dieline } from "../data/types";
+import M from "makerjs";
+import { zero } from "../data/consts";
 
 const dev: Dieline = {
   slug: "dev",
@@ -34,8 +36,11 @@ const dev: Dieline = {
       },
     }) => {
       //! TRIM
-      const rect = new P.shapes.Rectangle(width * 2, length);
-      P.model.push(trimModel, "trim", rect);
+      const rect = new Pacsaz.shapes.Rectangle(width * 2, length);
+      const line = new Pacsaz.shapes.Line(width * 2, [0, 10]);
+
+      Pacsaz.shape.push(trimModel, "test", rect);
+      Pacsaz.shape.push(foldModel, "test", line);
 
       //! FOLD
       drawFoldLines(foldModel, {

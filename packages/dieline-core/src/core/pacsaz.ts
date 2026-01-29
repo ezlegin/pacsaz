@@ -1,7 +1,10 @@
-import { pushModel } from "./helpers/add/addModelToLayer";
+import { pushModel } from "./helpers/add/push";
+import { Line } from "./shapes/Line";
 import { Rectangle } from "./shapes/rectangle";
 
 export default class Pacsaz {
-  static shapes = { Rectangle };
-  static model = { push: pushModel };
+  static shapes = { Rectangle, Line };
+  static shape = {
+    push: pushModel,
+  };
 }

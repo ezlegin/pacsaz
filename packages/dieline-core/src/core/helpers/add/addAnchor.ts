@@ -12,5 +12,5 @@ export function addAnchor(
   const trimChain = M.model.findSingleChain(from);
   const keyPoints = M.chain.toKeyPoints(trimChain);
   const holes = new M.models.Holes(0.7, keyPoints);
-  Pacsaz.model.push(model, "anchor", holes, "anchor");
+  Pacsaz.shape.push(model, "anchor", holes, "anchor");
 }

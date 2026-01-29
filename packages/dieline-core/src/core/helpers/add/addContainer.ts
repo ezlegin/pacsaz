@@ -27,7 +27,7 @@ export function addContainer({ model, from, margin }: AddContainerOptions) {
     false,
   );
 
-  Pacsaz.model.push(model, "container", container, "container");
+  Pacsaz.shape.push(model, "container", container, "container");
 
   return container;
 }

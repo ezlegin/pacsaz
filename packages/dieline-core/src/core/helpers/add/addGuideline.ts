@@ -148,7 +148,7 @@ export function addGuideLine(model: M.IModel, options: GuideLineOptions) {
       model.models![key]!.layer = isOverall ? "guideLineOverall" : "guideLine";
     }
   });
-  P.model.push(
+  P.shape.push(
     model,
     `${type}StartPointer`,
     { models: { startPointer, endPointer } },
@@ -160,7 +160,7 @@ export function addGuideLine(model: M.IModel, options: GuideLineOptions) {
   const textCarrier = new M.models.ConnectTheDots(false, [[0, 0]]);
   const caption = M.model.addCaption(textCarrier, `${value.toFixed()} mm`, mid);
 
-  P.model.push(
+  P.shape.push(
     model,
     `${type}Text`,
     caption,

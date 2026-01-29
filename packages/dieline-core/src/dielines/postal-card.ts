@@ -36,7 +36,7 @@ const postalCard: Dieline = {
     }) => {
       //! TRIM
       const rect = new M.models.Rectangle(width * 2, length);
-      Pacsaz.model.push(trimModel, "trim", rect);
+      Pacsaz.shape.push(trimModel, "trim", rect);
 
       //! FOLD
       drawFoldLines(foldModel, {

@@ -1,5 +1,5 @@
-import { Side } from "@/data/core.types";
 import M, { IModel } from "makerjs";
+import { Side } from "../../data/core.types";
 
 interface Options {
   deleteSide?: Side;

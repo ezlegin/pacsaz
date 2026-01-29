@@ -36,7 +36,7 @@ export function drawGuideLines(
     throw new Error("Settings Not Provided. [drawGuidelines]");
 
   const guidesModel: IModel = { models: {} };
-  Pacsaz.model.push(model, "guides", guidesModel);
+  Pacsaz.shape.push(model, "guides", guidesModel);
 
   const defaults = {
     height: {

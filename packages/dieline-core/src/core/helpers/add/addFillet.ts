@@ -13,7 +13,7 @@ export function addFillet(model: IModel, radius: number = 0) {
   }
 
   if (fillet) {
-    Pacsaz.model.push(model, "fillet", fillet);
+    Pacsaz.shape.push(model, "fillet", fillet);
   }
 }
 
@@ -43,7 +43,7 @@ export function addFilletAt(
     const beforePts = kpts.slice(cursor, index);
     if (beforePts.length >= 2) {
       const line = new M.models.ConnectTheDots(false, beforePts);
-      Pacsaz.model.push(lineModel, "line", line);
+      Pacsaz.shape.push(lineModel, "line", line);
     }
 
     const overlappingIndex = sorted.filter(
@@ -109,7 +109,7 @@ export function addFilletAt(
     }
 
     if (fillet) {
-      Pacsaz.model.push(filletModel, "fillet", {
+      Pacsaz.shape.push(filletModel, "fillet", {
         models: { fillet, filletLine },
       });
     }
@@ -120,7 +120,7 @@ export function addFilletAt(
   const tailPts = kpts.slice(cursor);
   if (tailPts.length >= 2) {
     const tailLine = new M.models.ConnectTheDots(false, tailPts);
-    Pacsaz.model.push(lineModel, "line", tailLine);
+    Pacsaz.shape.push(lineModel, "line", tailLine);
   }
 
   return {

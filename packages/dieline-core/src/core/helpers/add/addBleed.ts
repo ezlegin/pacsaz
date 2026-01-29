@@ -25,14 +25,14 @@ export function addBleed({
   const endPoint = keyPoints[0]!;
 
   const line = new M.models.ConnectTheDots(false, [startPoint, endPoint]);
-  Pacsaz.model.push(cloned, "connectorLine", line);
+  Pacsaz.shape.push(cloned, "connectorLine", line);
 
   const chain = M.model.findSingleChain(cloned);
   const newTrimModel = M.chain.toNewModel(chain);
 
   const bleed = M.model.outline(newTrimModel, bleedAmount, 1);
 
-  Pacsaz.model.push(model, "bleed", bleed, "bleed");
+  Pacsaz.shape.push(model, "bleed", bleed, "bleed");
   model.models = { bleed, ...model.models };
 
   return bleed;
