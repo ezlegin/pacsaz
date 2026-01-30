@@ -13,7 +13,7 @@ export function addFillet(model: IModel, radius: number = 0) {
   }
 
   if (fillet) {
-    Pacsaz.shape.push(model, "fillet", fillet);
+    return fillet;
   }
 }
 
@@ -101,6 +101,7 @@ export function addFilletAt(
     }
 
     const filletChain = M.model.findSingleChain(filletLine);
+    if (!filletChain) throw new Error("Here");
 
     let fillet: IModel | null = null;
     for (let r = radius; r > 0; r--) {

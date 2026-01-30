@@ -5,12 +5,12 @@ export function addLine(
   pts: M.IPoint[],
   closed?: boolean,
   filletRaduis?: number,
-  indices?: number[]
+  indices?: number[],
 ) {
   const drawnLine = new M.models.ConnectTheDots(closed ?? false, pts);
 
   if (indices) {
-    return addFilletAt(drawnLine, indices, filletRaduis);
+    addFilletAt(drawnLine, indices, filletRaduis);
   } else {
     addFillet(drawnLine, filletRaduis);
   }

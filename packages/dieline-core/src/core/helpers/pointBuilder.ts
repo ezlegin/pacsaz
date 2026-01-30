@@ -7,14 +7,12 @@ export class PointBuilder {
     this.pts.push([start[0]!, start[1]!]);
   }
 
-  // relative move
-  pointBuilder(dx: number, dy: number) {
+  private pointBuilder(dx: number, dy: number) {
     const p = this.pts[this.pts.length - 1];
     this.pts.push([p![0]! + dx, p![1]! + dy]);
     return this;
   }
 
-  // alias for readability
   draw(x: number, y: number) {
     return this.pointBuilder(x, y);
   }
