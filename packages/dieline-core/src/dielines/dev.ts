@@ -4,7 +4,7 @@ import { modelBuilder } from "../core/helpers/modelBuilder";
 import { modelGenerator } from "../core/helpers/modelGenerator";
 import Pacsaz from "../core/pacsaz";
 import { Dieline } from "../data/types";
-import { Circle } from "../core/shapes/circle";
+import { Polygon } from "../core/shapes/polygon";
 
 const dev: Dieline = {
   slug: "dev",
@@ -39,8 +39,9 @@ const dev: Dieline = {
 
       //! FOLD
       const fold = new Pacsaz.shapes.Line(length, [width, 0], 90);
-      const circle = new Pacsaz.shapes.Circle(10, [width, length]);
-      Pacsaz.shape.push(foldModel, "fold", [fold, circle]);
+      const polygon = new Polygon(5, 10).originate([width, length]);
+      console.log("polygon", polygon);
+      Pacsaz.shape.push(foldModel, "fold", [fold, polygon]);
 
       //! GUIDES
       drawGuideLines(guideModel, {

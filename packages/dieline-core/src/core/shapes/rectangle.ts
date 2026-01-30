@@ -1,29 +1,29 @@
-import M, { IModel } from "makerjs";
+import M from "makerjs";
 import { Side } from "../../data/core.types";
+import { Shape } from "./shape";
 
 interface Options {
   deleteSide?: Side;
   radius?: number;
 }
 
-export class Rectangle implements IModel {
+export class Rectangle extends Shape {
   paths?: M.IPathMap | undefined;
 
   constructor(width: number, height: number, options?: Options) {
+    super();
     const rect = new M.models.RoundRectangle(
       width,
       height,
       options?.radius ?? 0,
     );
 
-    if (options) {
-      const { deleteSide } = options;
-      if (deleteSide) delete rect.paths?.[deleteSide];
+    if (options?.deleteSide) {
+      if (options?.deleteSide) delete rect.paths?.[options?.deleteSide];
     }
 
-    this.paths = rect.paths;
+    this.$addToModel(rect, "rectangle");
   }
 }
 
 //todo: When having radius and delete a side, issues come to picture. sovle it.
-// add origin (if needed in future)

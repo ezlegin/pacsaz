@@ -7,6 +7,10 @@ interface Pacsaz extends IModel {
   mirror(x: boolean, y: boolean): this;
   originate(pts: IPoint): this;
   center(): this;
+
+  //todo:
+  scale(): this;
+  rotate(): this;
 }
 
 export abstract class Shape implements Pacsaz {
@@ -70,7 +74,7 @@ export abstract class Shape implements Pacsaz {
     M.model.zero(this.lastModel);
     M.model.moveRelative(this.lastModel, pts);
     return this;
-  }
+  } //todo: use circle originate as default and use this originate only for Line.
 
   zero(): this {
     M.model.zero(this.lastModel);
