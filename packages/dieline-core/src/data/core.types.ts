@@ -1,4 +1,4 @@
-export type Dieline = "trim" | "fold" | "perforation";
+export type Lane = "trim" | "fold" | "perf";
 export type Side = "Top" | "Bottom" | "Right" | "Left";
 export type Layer =
   | "fold"

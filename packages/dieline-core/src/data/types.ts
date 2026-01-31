@@ -1,21 +1,18 @@
-import { Dimension, MaterialValue } from "@repo/store/data/types";
+import {
+  Dimension,
+  DimensionType,
+  MaterialValue,
+} from "@repo/store/data/types";
 
-export type DimensionsType = ["manufacture"?, "inner"?, "outer"?];
-export type DielineDimensions = {
-  defaultDimensions: Dimension;
-  minDimensions: Dimension;
-};
-export type DielineMaterials = {
-  default: MaterialValue;
-  included: MaterialValue[];
-};
+export type DimensionsType = DimensionType[];
 export interface Dieline {
   slug: string;
   title: string;
-  dimensions: DielineDimensions;
+  defaultDimensions: Dimension;
+  minDimensions: Dimension;
   defaultBleed?: number;
   dimensionsType: DimensionsType;
-  materials: DielineMaterials;
+  materials: MaterialValue[];
   model: () => string;
 }
 

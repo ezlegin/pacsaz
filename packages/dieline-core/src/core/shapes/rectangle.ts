@@ -1,6 +1,6 @@
 import M from "makerjs";
 import { Side } from "../../data/core.types";
-import { Shape } from "./shape";
+import { Shape } from "./Shape";
 
 interface Options {
   deleteSide?: Side;

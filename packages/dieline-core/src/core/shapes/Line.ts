@@ -1,24 +1,35 @@
 import M, { IModel, IPoint } from "makerjs";
 import { zero } from "../../data/consts";
 import { addFillet, addFilletAt } from "../helpers/add/addFillet";
-import { Shape } from "./shape";
+import { PointBuilder } from "../utils/PointBuilder";
+import { Shape } from "./Shape";
+
+interface LineChainOption {
+  closed?: boolean;
+  filletRaduis?: number;
+  indices?: number[];
+  startPoint?: IPoint;
+}
 
 export class LineChain extends Shape {
   constructor(
-    pts: M.IPoint[],
-    closed?: boolean,
-    filletRaduis?: number,
-    indices?: number[],
+    buildPoints: (pb: PointBuilder) => void,
+    options?: LineChainOption,
   ) {
     super();
+    const pb = new PointBuilder(options?.startPoint);
+    buildPoints(pb);
+    const pts = pb.build();
 
-    let line: IModel = new M.models.ConnectTheDots(closed ?? false, pts);
+    let line: IModel = new M.models.ConnectTheDots(
+      options?.closed ?? false,
+      pts,
+    );
 
-    if (indices) {
-      line = addFilletAt(line, indices, filletRaduis);
+    if (options?.indices) {
+      line = addFilletAt(line, options.indices, options.filletRaduis);
     } else {
-      const fillet = addFillet(line, filletRaduis);
-      if (fillet) line = fillet;
+      addFillet(line, options?.filletRaduis);
     }
 
     this.$registerModel("line", line);

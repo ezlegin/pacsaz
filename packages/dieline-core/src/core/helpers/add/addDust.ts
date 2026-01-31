@@ -4,7 +4,7 @@ import { calcualteTuckFlapSize } from "../../../utils/calculate/calculateTuckFla
 import { mapDustSize } from "../../../utils/calculate/mapDustSize";
 import { getDistanceOfFirstAndLastPoint } from "../getDistance";
 import { getLastPointFromModel, getLastPointFromPath } from "../getLastPoint";
-import { PointBuilder } from "../pointBuilder";
+import { PointBuilder } from "../../utils/PointBuilder";
 import { addFoldLine } from "./addFoldLine";
 import { addHoleArc } from "./addHoleArc";
 import { addLine } from "./addLine";
@@ -83,7 +83,7 @@ export function addDust({
   const dustP1_PTS = dustP1Builder
     .draw(
       bottomLeftIndent,
-      considerDustHole ? indent.bl - baseToHoleEndOffset : indent.bl
+      considerDustHole ? indent.bl - baseToHoleEndOffset : indent.bl,
     )
     .draw(indent.tl, verticalMoveToTop)
     .right(
@@ -93,7 +93,7 @@ export function addDust({
         indent.tl -
         indent.tr -
         (considerDustHole ? dustHoleWidth : 0) -
-        (considerOuterIndent ? thickness : 0)
+        (considerOuterIndent ? thickness : 0),
     )
     .draw(indent.tr, -mappedDustSize + dustHeight.r.inner)
     .draw(indent.br, -(dustHeight.r.inner - dustHeight.r.outer))
@@ -110,7 +110,7 @@ export function addDust({
       models: { dustP1 },
       paths: considerDustHole ? { dustHoleArc } : {},
     },
-    "trim"
+    "trim",
   );
 
   // ─────────────────────────────────────────

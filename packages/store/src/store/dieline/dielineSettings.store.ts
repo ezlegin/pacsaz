@@ -21,7 +21,7 @@ type DielineSettingsStore = {
   settings: DielineSettings;
   setSetting: <K extends keyof DielineSettings>(
     key: K,
-    value: DielineSettings[K]
+    value: DielineSettings[K],
   ) => void;
   setDefaultSettings: (settings: DielineSettings) => void;
 };

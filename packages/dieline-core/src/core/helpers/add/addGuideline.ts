@@ -2,7 +2,7 @@ import { DimensionType } from "@repo/store/data/types";
 import M, { IPoint } from "makerjs";
 import { OffsetObject } from "../../../data/types";
 import { applyDimensionOffset } from "../../../utils/applyDimensionOffset";
-import P from "../../pacsaz";
+import P from "../../Pacsaz";
 
 export interface GuideLineOptions {
   type: "width" | "length" | "height";

@@ -1,9 +1,7 @@
-import { IModel, IPoint } from "makerjs";
-import { PointBuilder } from "../pointBuilder";
-import { addLine } from "./addLine";
-import { glueMapper } from "../glueMapper";
-import M from "makerjs";
 import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
+import { IModel, IPoint } from "makerjs";
+import Pacsaz from "../../Pacsaz";
+import { glueMapper } from "../glueMapper";
 
 export function addGlue(
   trimModel: IModel,
@@ -20,9 +18,9 @@ export function addGlue(
       from: IPoint;
       to: IPoint;
     };
-  }
+  },
 ) {
-  const pb = new PointBuilder(customPoints?.from ?? undefined);
+  const pb = new Pacsaz.point.Builder(customPoints?.from ?? undefined);
   const size = glueMapper(width, height);
   const glueMargin = 8;
   const { safeFoldOffset } = getDielineSettings();
@@ -41,8 +39,8 @@ export function addGlue(
         .up(safeFoldOffset)
         .build();
 
-  const glue = addLine(pts, false);
+  const glue = new Pacsaz.shapes.LineChain(pts);
 
-  M.model.addModel(trimModel, glue, "glue");
+  Pacsaz.shape.push(trimModel, "glue", glue);
   return { model: glue, size };
 }

@@ -11,8 +11,9 @@ import { useEffect } from "react";
 import { useDeveloperToolsStore } from "@repo/store/dieline/useDeveloperToolsStore";
 
 const DielineGenerator = ({ slug }: { slug: string }) => {
-  const dieline = dielineImporter(slug);
   const { setDeveloperToolsCTX } = useDeveloperToolsStore();
+
+  const dieline = dielineImporter(slug);
 
   if (!dieline) return notFound();
 
@@ -29,10 +30,10 @@ const DielineGenerator = ({ slug }: { slug: string }) => {
 
       <div className="h-full grid grid-cols-[320px_1fr_300px] p-3">
         <DielineSettings
-          defaultDimensions={dieline.dimensions}
+          minDimensions={dieline.minDimensions}
           dimensionsType={dieline.dimensionsType}
           slug={dieline.slug}
-          materialsInput={dieline.materials}
+          materials={dieline.materials}
           isRendering={isRendering}
         />
 

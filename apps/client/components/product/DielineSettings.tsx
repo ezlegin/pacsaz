@@ -1,13 +1,15 @@
+import { DIMENSIONS, DIMENSIONS_TYPE } from "@/data/consts";
 import { aiIcon, dxfIcon, pdfIcon } from "@/public";
-import {
-  DielineDimensions,
-  DielineMaterials,
-  DimensionsType,
-} from "@repo/dieline-core/data/types";
+import { DimensionsType } from "@repo/dieline-core/data/types";
 import { isPackagingSizeLogical } from "@repo/dieline-core/utils/isPackagingSizeLogical";
 import { useUserStore } from "@repo/store/app/user.store";
 import { bleeds as BLEEDS } from "@repo/store/data/dieline";
-import { DimensionType, Format } from "@repo/store/data/types";
+import {
+  Dimension,
+  DimensionType,
+  Format,
+  MaterialValue,
+} from "@repo/store/data/types";
 import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
 import { useSVGStore } from "@repo/store/dieline/svg.store";
 import { Badge } from "@repo/ui/components/badge";
@@ -38,21 +40,20 @@ import MeterialGuide from "./guides/materialGuide";
 import ThicknessGuide from "./guides/ThicknessGuide";
 import MaterialInput from "./MaterialInput";
 import ThicknessInput from "./ThicknessInput";
-import { DIMENSIONS, DIMENSIONS_TYPE } from "@/data/consts";
 
 interface Props {
-  defaultDimensions: DielineDimensions;
-  materialsInput: DielineMaterials;
+  minDimensions: Dimension;
+  materials: MaterialValue[];
   dimensionsType: DimensionsType;
   slug: string;
   isRendering: boolean;
 }
 
 export default function DielineSettings({
-  defaultDimensions,
   dimensionsType,
+  minDimensions,
   slug,
-  materialsInput,
+  materials,
   isRendering,
 }: Props) {
   const { svg } = useSVGStore();
@@ -80,7 +81,7 @@ export default function DielineSettings({
 
   const isPackagingLogical = isPackagingSizeLogical(
     dimension.raw.height,
-    dimension.raw.width
+    dimension.raw.width,
   );
 
   return (
@@ -92,7 +93,7 @@ export default function DielineSettings({
               <DimensionInput
                 key={key}
                 label={label}
-                min={defaultDimensions.minDimensions[key]}
+                min={minDimensions[key]}
                 dimKey={key}
                 isRendering={isRendering}
               />
@@ -130,7 +131,7 @@ export default function DielineSettings({
         </Section>
 
         <Section title="متریال چاپ" infoContent={<MeterialGuide />}>
-          <MaterialInput materialsInput={materialsInput} />
+          <MaterialInput materials={materials} />
         </Section>
 
         <Section
@@ -173,7 +174,7 @@ export default function DielineSettings({
         >
           <ThicknessInput
             isRendering={isRendering}
-            materialsIncluded={materialsInput.included}
+            materialsIncluded={materials}
           />
         </Section>
 
@@ -202,7 +203,7 @@ export default function DielineSettings({
                     >
                       <p className="font-normal text-xs">{label}</p>
                     </ToggleGroupItem>
-                  )
+                  ),
               )}
             </div>
           </ToggleGroup>

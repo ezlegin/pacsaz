@@ -1,6 +1,5 @@
-import { Dieline } from "./data/types";
-import dev from "./dielines/dev";
+import dev from "./dielines/devs/Dev";
 
-export const dielines: Dieline[] = [dev];
+export const dielines = [dev];
 
 export type DielineSlug = keyof typeof dielines;

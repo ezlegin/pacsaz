@@ -18,10 +18,7 @@ export async function Code({
   const highlightedCode = await highlightCode(code);
   return (
     <div
-      className={cn(
-        "bg-[#1f2028] w-fit rounded-md border flex flex-col ",
-        className,
-      )}
+      className={cn("bg-[#1f2028] rounded-md border flex flex-col", className)}
     >
       {title && (
         <span className="p-1.5 px-3 bg-white/5 w-full rounded-t-md">

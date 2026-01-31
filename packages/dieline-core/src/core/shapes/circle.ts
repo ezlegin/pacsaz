@@ -1,5 +1,5 @@
 import M, { IModel, IPoint } from "makerjs";
-import { Shape } from "./shape";
+import { Shape } from "./Shape";
 
 export class Circle extends Shape {
   constructor(radius: number, origin?: IPoint) {

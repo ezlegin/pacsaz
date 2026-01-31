@@ -26,17 +26,14 @@ export function useDielineGenerator(dieline: Dieline) {
     setDefaultSettings({
       bleed: dieline.defaultBleed ?? bleeds.default,
       dimension: {
-        raw: dieline.dimensions.defaultDimensions,
-        resolved: resolveDimensions(
-          dieline.dimensions.defaultDimensions,
-          offsets
-        ),
+        raw: dieline.defaultDimensions,
+        resolved: resolveDimensions(dieline.defaultDimensions, offsets),
       },
       dimensionType: "manufacture",
       format: "pdf",
-      material: dieline.materials.default,
-      thickness: dieline.materials.default.thickness,
-      safeFoldOffset: dieline.materials.default.safeFoldOffset,
+      material: dieline.materials[0]!,
+      thickness: dieline.materials[0]!.thickness,
+      safeFoldOffset: dieline.materials[0]!.safeFoldOffset,
     });
   }, []);
 

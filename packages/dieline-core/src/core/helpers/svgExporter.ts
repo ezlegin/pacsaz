@@ -20,7 +20,7 @@ export function svgExporter({
 
   const isCardboard =
     materialKey === "glossy-cardboard" || materialKey === "art-paper";
-
+  M.exporter.colors;
   const svg = M.exporter.toSVG(model, {
     strokeLineCap: svgSettings.svg.strokeLineCap,
     units: svgSettings.unit,

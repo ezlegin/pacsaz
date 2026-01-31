@@ -1,5 +1,5 @@
-import M, { IModel, IPoint } from "makerjs";
-import { Shape } from "./shape";
+import M, { IPoint } from "makerjs";
+import { Shape } from "./Shape";
 
 export class Polygon extends Shape {
   constructor(sides: number, radius: number) {

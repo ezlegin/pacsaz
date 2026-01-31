@@ -1,5 +1,5 @@
 import M, { IModel } from "makerjs";
-import Pacsaz from "../../pacsaz";
+import Pacsaz from "../../Pacsaz";
 
 export function addFillet(model: IModel, radius: number = 0) {
   const chain = M.model.findSingleChain(model);
@@ -12,9 +12,7 @@ export function addFillet(model: IModel, radius: number = 0) {
     if (fillet) break;
   }
 
-  if (fillet) {
-    return fillet;
-  }
+  if (fillet) Pacsaz.shape.push(model, "fillet", fillet);
 }
 
 export function addFilletAt(

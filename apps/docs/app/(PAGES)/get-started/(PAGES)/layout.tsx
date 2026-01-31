@@ -3,7 +3,7 @@ import { ReactNode } from "react";
 
 const layout = ({ children }: { children: ReactNode }) => {
   return (
-    <div className="grid grid-cols-12 gap-5">
+    <div className="grid grid-cols-12 gap-5 pb-130">
       <div className="col-span-3">
         <Sidebar />
       </div>

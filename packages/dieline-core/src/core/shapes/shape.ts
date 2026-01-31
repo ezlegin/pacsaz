@@ -7,10 +7,9 @@ interface Pacsaz extends IModel {
   mirror(x: boolean, y: boolean): this;
   originate(pts: IPoint): this;
   center(): this;
-
-  //todo:
-  scale(): this;
-  rotate(): this;
+  scale(amount: number): this;
+  rotate(angle: number, rotaionOrigin?: IPoint): this;
+  size: M.IMeasureWithCenter | null;
 }
 
 export abstract class Shape implements Pacsaz {
@@ -84,5 +83,19 @@ export abstract class Shape implements Pacsaz {
   center(): this {
     M.model.center(this.lastModel);
     return this;
+  }
+
+  scale(amount: number): this {
+    M.model.scale(this.lastModel, amount);
+    return this;
+  }
+
+  rotate(angle: number, rotaionOrigin?: IPoint): this {
+    M.model.rotate(this.lastModel, angle, rotaionOrigin ?? this.size?.center);
+    return this;
+  }
+
+  get size(): M.IMeasureWithCenter | null {
+    return M.measure.modelExtents(this.lastModel);
   }
 }

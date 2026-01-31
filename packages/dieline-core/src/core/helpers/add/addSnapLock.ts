@@ -1,10 +1,9 @@
 import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
 import M, { IModel, IPoint } from "makerjs";
 import { zero } from "../../../data/consts";
-import { cloneMirrorMove } from "../clone";
 import { getDistanceOfFirstAndLastPoint } from "../getDistance";
 import { getLastPointFromModel } from "../getLastPoint";
-import { PointBuilder } from "../pointBuilder";
+import { PointBuilder } from "../../utils/PointBuilder";
 import { addFoldLine } from "./addFoldLine";
 import { addLine } from "./addLine";
 
@@ -114,7 +113,7 @@ export function addSnapLock() {
     });
 
     const pb = new PointBuilder(
-      considerStarterHole ? startArcPoints[0]! : [width, 0]
+      considerStarterHole ? startArcPoints[0]! : [width, 0],
     );
     const pts = pb
       .draw(lockHorizon - (considerStarterHole ? disOfWidth : 0), -tabWidthRaw)
@@ -233,7 +232,7 @@ export function addSnapLock() {
   M.model.addModel(
     snapLock,
     { models: { part1Model, part2Model, part3Model, part4Model } },
-    "trim"
+    "trim",
   );
   return { snapLock };
 }
@@ -276,7 +275,7 @@ function addHole({
   const arcPoints = M.point.fromArc(arc);
   const { disOfWidth, disOfHeight } = getDistanceOfFirstAndLastPoint(
     arc,
-    "path"
+    "path",
   );
 
   return { arc, arcPoints, disOfWidth, disOfHeight };

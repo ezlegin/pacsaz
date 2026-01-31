@@ -3,7 +3,7 @@ import { addGuideLine } from "../add/addGuideline";
 import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
 import { resolveOffsets } from "../../../utils/offsetResolver";
 import { DimensionKey } from "@repo/store/data/types";
-import Pacsaz from "../../pacsaz";
+import Pacsaz from "../../Pacsaz";
 
 type Orientation = "horizontal" | "vertical";
 

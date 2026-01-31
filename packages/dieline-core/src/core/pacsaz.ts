@@ -1,8 +1,10 @@
 import { pushModel } from "./helpers/add/push";
-import { PointBuilder } from "./helpers/pointBuilder";
-import { Circle } from "./shapes/circle";
+import { Glue } from "./models/Glue";
+import { Circle } from "./shapes/Circle";
 import { Line, LineChain } from "./shapes/Line";
-import { Rectangle } from "./shapes/rectangle";
+import { Polygon } from "./shapes/Polygon";
+import { Rectangle } from "./shapes/Rectangle";
+import { PointBuilder } from "./utils/PointBuilder";
 
 export default class Pacsaz {
   static shape = {
@@ -14,6 +16,11 @@ export default class Pacsaz {
     Line,
     LineChain,
     Circle,
+    Polygon,
+  };
+
+  static models = {
+    Glue,
   };
 
   static point = {

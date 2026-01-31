@@ -1,12 +1,11 @@
 import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
-import M, { IModel } from "makerjs";
+import { IModel } from "makerjs";
 import { calcualteTuckFlapSize } from "../../../utils/calculate/calculateTuckFlapSize";
-import { cloneMirrorMove } from "../clone";
+import Pacsaz from "../../Pacsaz";
+import { PointBuilder } from "../../utils/PointBuilder";
 import { getMeasurementOfModel } from "../getWidthAndHeightOfModel";
-import { PointBuilder } from "../pointBuilder";
 import { addFoldLine } from "./addFoldLine";
 import { addLine } from "./addLine";
-import { addSeam } from "./addSeam";
 
 export function addDoor() {
   const door: IModel = {};
@@ -46,26 +45,21 @@ export function addDoor() {
 
   const seamHeight = Math.max(thickness * 2, seamSize.h);
 
-  const seamPB = new PointBuilder([
-    thickness,
-    length + height + safeFoldOffset,
-  ]);
-  const seamPTS = seamPB.right(seamSize.w).down(seamHeight).build();
-  const leftSeam = addSeam(seamPTS, false, 2);
-
-  const rightSeam = cloneMirrorMove(leftSeam, true, false, [
-    width - (seamSize.w + thickness),
-    length + (height + safeFoldOffset - seamHeight),
-  ]);
-
-  const seam: IModel = {
-    models: {
-      leftSeam,
-      rightSeam,
+  const seam = new Pacsaz.shapes.LineChain(
+    (pb) => pb.right(seamSize.w).down(seamHeight),
+    {
+      filletRaduis: 2,
+      startPoint: [thickness, length + height + safeFoldOffset],
     },
-  };
+  )
+    .duplicate()
+    .mirror(true, false)
+    .move([
+      width - (seamSize.w + thickness),
+      length + (height + safeFoldOffset - seamHeight),
+    ]);
 
-  M.model.addModel(door, { models: { doorLine, seam } }, "trim");
+  Pacsaz.shape.push(door, "trim", { models: { doorLine, seam } });
 
   // ─────────────────────────────────────────
   // Fold Lines

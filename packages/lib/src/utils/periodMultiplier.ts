@@ -5,9 +5,9 @@ export function periodMultiplier(
   period: PlanPeriod,
   amount: number,
   applyAnnualDiscount: boolean,
-  toFixed?: boolean
+  toFixed?: boolean,
 ) {
-  if (period === "3-month") amount *= 3;
+  if (period === "threeMonth") amount *= 3;
   if (period === "annual")
     amount *= 12 * (applyAnnualDiscount ? 1 - annualPlanDisocunt : 1);
 

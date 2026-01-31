@@ -17,7 +17,7 @@ export type Watermark = {
 export function injectWatermark(
   svg: string,
   clippingModel: M.IModel,
-  offset?: WatermarkOffset
+  offset?: WatermarkOffset,
 ) {
   if (isSubscribed && onProduction) return svg;
   const { bleed } = getDielineSettings();
@@ -60,6 +60,6 @@ export function injectWatermark(
     clip-path="url(#watermarkClip)"
   />
   </svg>
-`
+`,
   );
 }
