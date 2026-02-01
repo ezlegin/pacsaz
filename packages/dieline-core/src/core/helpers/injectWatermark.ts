@@ -2,7 +2,6 @@ import { isSubscribed } from "@repo/store/app/user.store";
 import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
 import M from "makerjs";
 import { extractPathDs } from "./extractPathDs";
-import { svgSettings } from "./svgExporter";
 import { onProduction } from "@repo/lib/data/consts";
 
 export type WatermarkOffset = {
@@ -46,8 +45,8 @@ export function injectWatermark(
     <clipPath
       id="watermarkClip"
       transform="translate(${
-        svgSettings.margins.container - bleed + (offset?.x ?? 0)
-      }, ${svgSettings.margins.container - bleed + (offset?.y ?? 0)})"
+        30 - bleed + (offset?.x ?? 0)
+      }, ${30 - bleed + (offset?.y ?? 0)})"
     >
       <path d="${clipD[0]}" />
     </clipPath>

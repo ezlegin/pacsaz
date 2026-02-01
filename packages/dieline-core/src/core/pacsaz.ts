@@ -5,6 +5,7 @@ import { Line, LineChain } from "./shapes/Line";
 import { Polygon } from "./shapes/Polygon";
 import { Rectangle } from "./shapes/Rectangle";
 import { PointBuilder } from "./utils/PointBuilder";
+import { Text } from "./text/Text";
 
 export default class Pacsaz {
   static shape = {
@@ -17,6 +18,7 @@ export default class Pacsaz {
     LineChain,
     Circle,
     Polygon,
+    Text,
   };
 
   static models = {

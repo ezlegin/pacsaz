@@ -5,6 +5,7 @@ import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
 import { IModel } from "makerjs";
 import { Lane } from "../../data/core.types";
 import { DimensionsType } from "../../data/types";
+import { Ruler } from "../measure/Ruler";
 import Pacsaz from "../Pacsaz";
 import { ComputedLayers } from "./ComputedLayers";
 import { Exporter } from "./Exporter";
@@ -26,7 +27,7 @@ export abstract class Dieline implements IDieline {
   defaultBleed = bleeds.default;
   defaultDimensions = {
     width: 130,
-    length: 230,
+    length: 240,
     height: 60,
   };
   minDimensions = {
@@ -92,5 +93,8 @@ export abstract class Dieline implements IDieline {
       push(this.main, this.dieline, perf, "perf");
     }
     push(this.main, this.dieline, this.trim(), "trim");
+
+    const ruler = new Ruler(this.width, this.length).model;
+    Pacsaz.shape.push(this.main, "ruler", ruler, "ruler", true);
   }
 }

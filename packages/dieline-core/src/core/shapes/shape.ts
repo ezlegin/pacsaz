@@ -1,4 +1,4 @@
-import M, { IModel, IPath, IPoint } from "makerjs";
+import M, { IModel, IPoint } from "makerjs";
 
 interface Pacsaz extends IModel {
   zero(): this;
@@ -9,7 +9,7 @@ interface Pacsaz extends IModel {
   center(): this;
   scale(amount: number): this;
   rotate(angle: number, rotaionOrigin?: IPoint): this;
-  size: M.IMeasureWithCenter | null;
+  size: M.IMeasureWithCenter;
 }
 
 export abstract class Shape implements Pacsaz {
@@ -22,9 +22,6 @@ export abstract class Shape implements Pacsaz {
 
   protected $addToModel(child: IModel, key: string, overwrite?: boolean) {
     M.model.addTo(child, this, key, overwrite);
-  }
-  protected $addPathToModel(child: IPath, key: string, overwrite?: boolean) {
-    M.path.addTo(child, this, key, overwrite);
   }
 
   protected $getOriginForMirror(): IPoint | undefined {
@@ -95,7 +92,9 @@ export abstract class Shape implements Pacsaz {
     return this;
   }
 
-  get size(): M.IMeasureWithCenter | null {
-    return M.measure.modelExtents(this.lastModel);
+  get size(): M.IMeasureWithCenter {
+    const size = M.measure.modelExtents(this.lastModel);
+    if (!size) throw new Error("Size not proccessed. [size()]");
+    return size;
   }
 }

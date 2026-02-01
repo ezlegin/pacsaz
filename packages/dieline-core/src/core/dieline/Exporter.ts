@@ -36,6 +36,14 @@ export class Exporter {
           stroke: "none",
         },
         anchor: { fill: "black" },
+        ruler: {
+          stroke: "#00BFFF",
+          fill: "#00BFFF",
+        },
+        rulerText: {
+          stroke: "none",
+          fill: "#00BFFF",
+        },
       },
     });
 

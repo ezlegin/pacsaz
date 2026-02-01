@@ -63,7 +63,7 @@ export class ComputedLayers {
   applyAnchor() {
     if (!this.devCTX.showAnchors) {
       delete this.main.models?.anchor;
-      return;
+      return this;
     }
 
     const trimChains = M.model.findChains(this.trimModel);
