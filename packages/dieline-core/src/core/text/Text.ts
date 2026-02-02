@@ -1,14 +1,14 @@
-import M, { IModel, IPoint } from "makerjs";
+import M, { IPoint } from "makerjs";
 import Pacsaz from "../Pacsaz";
+import { Shape } from "../shapes/Shape";
 
-export class Text implements IModel {
-  models?: MakerJs.IModelMap | undefined;
-
+export class Text extends Shape {
   constructor(
     private text: string,
     private position: IPoint,
     private textLayer?: string,
   ) {
+    super();
     const textCarrier = new M.models.ConnectTheDots(false, [[0, 0]]);
     const caption = M.model.addCaption(textCarrier, this.text, this.position);
 

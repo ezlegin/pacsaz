@@ -1,18 +1,16 @@
-import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
 import { getDevCTX } from "@repo/store/dieline/useDeveloperToolsStore";
-import M, { IChain, IModel } from "makerjs";
+import M, { IModel } from "makerjs";
 import Pacsaz from "../Pacsaz";
 
 export class ComputedLayers {
   devCTX = getDevCTX();
-  settings = getDielineSettings();
   private trimModel: IModel = {};
 
   constructor(private main: IModel) {
     this.trimModel = this.main.models?.dieline?.models?.trim ?? {};
   }
 
-  applyBleed() {
+  applyBleed(bleedAmount: number) {
     const cloned = M.model.clone(this.trimModel);
     delete cloned.models?.glue;
 
@@ -27,7 +25,7 @@ export class ComputedLayers {
     const chain = M.model.findSingleChain(cloned);
     const newTrimModel = M.chain.toNewModel(chain);
 
-    const bleed = M.model.outline(newTrimModel, this.settings.bleed, 1);
+    const bleed = M.model.outline(newTrimModel, bleedAmount, 1);
 
     this.main.models = { bleed, ...this.main.models };
     Pacsaz.shape.push(this.main, "bleed", bleed, "bleed", true);
@@ -60,22 +58,35 @@ export class ComputedLayers {
     return this;
   }
 
-  applyAnchor() {
-    if (!this.devCTX.showAnchors) {
-      delete this.main.models?.anchor;
-      return this;
-    }
+  // applyAnchor() {
+  //   if (!this.devCTX.showAnchors) {
+  //     delete this.main.models?.anchor;
+  //     return this;
+  //   }
 
-    const trimChains = M.model.findChains(this.trimModel);
+  //   const trimChains = M.model.findChains(this.trimModel);
 
-    const holes: IModel = {};
-    for (const chain of trimChains as IChain[]) {
-      const keyPoints = M.chain.toKeyPoints(chain);
-      const hole = new M.models.Holes(0.5, keyPoints);
-      Pacsaz.shape.push(holes, "anchor", hole);
-    }
-    Pacsaz.shape.push(this.main, `anchor`, holes, `anchor`, true);
+  //   const holes: IModel = {};
+  //   for (const chain of trimChains as IChain[]) {
+  //     const keyPoints = M.chain.toKeyPoints(chain);
+  //     const hole = new M.models.Holes(0.5, keyPoints);
+  //     Pacsaz.shape.push(holes, "anchor", hole);
+  //   }
+  //   Pacsaz.shape.push(this.main, `anchor`, holes, `anchor`, true);
 
-    return this;
+  //   return this;
+  // }
+
+  applyRuler(width: number, length: number) {
+    const dielineRuler = new Pacsaz.ruler.DielineRuler(width, length);
+    const overallRuler = new Pacsaz.ruler.OverallRuler();
+
+    Pacsaz.shape.push(
+      this.main,
+      `ruler`,
+      { models: { dielineRuler, overallRuler } },
+      `ruler`,
+      true,
+    );
   }
 }

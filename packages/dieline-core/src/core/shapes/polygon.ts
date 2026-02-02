@@ -14,7 +14,8 @@ export class Polygon extends Shape {
   }
 
   override originate(pts: IPoint): this {
-    M.model.moveRelative(this.lastModel, pts);
+    M.model.center(this.lastModel);
+    M.model.move(this.lastModel, pts);
     return this;
   }
 }

@@ -13,17 +13,19 @@ interface LineChainOption {
 
 export class LineChain extends Shape {
   constructor(
-    buildPoints: (pb: PointBuilder) => void,
+    points: IPoint[],
+    buildPoints?: (pb: PointBuilder) => void,
     options?: LineChainOption,
   ) {
     super();
+
     const pb = new PointBuilder(options?.startPoint);
-    buildPoints(pb);
+    if (buildPoints) buildPoints(pb);
     const pts = pb.build();
 
     let line: IModel = new M.models.ConnectTheDots(
       options?.closed ?? false,
-      pts,
+      buildPoints ? pts : points,
     );
 
     if (options?.indices) {

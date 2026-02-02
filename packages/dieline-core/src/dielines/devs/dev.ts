@@ -11,6 +11,7 @@ export class Dev extends Dieline {
 
   protected override trim() {
     const rect = new Pacsaz.shapes.Rectangle(this.width * 2, this.length);
+
     return { rect };
   }
 

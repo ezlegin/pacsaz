@@ -5,11 +5,11 @@ import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
 import { IModel } from "makerjs";
 import { Lane } from "../../data/core.types";
 import { DimensionsType } from "../../data/types";
-import { Ruler } from "../measure/Ruler";
 import Pacsaz from "../Pacsaz";
 import { ComputedLayers } from "./ComputedLayers";
 import { Exporter } from "./Exporter";
-import { PostProcess } from "./PostProcess";
+import { setOverallSize } from "@repo/store/dieline/overallSize.store";
+import M from "makerjs";
 
 export interface IDieline {
   defaultDimensions: Dimension;
@@ -48,53 +48,68 @@ export abstract class Dieline implements IDieline {
   // Models
   private main: IModel = {};
   private dieline: IModel = {};
-  // Setting
 
-  private get dimension() {
-    return getDielineSettings().dimension.resolved;
+  protected get settings() {
+    return getDielineSettings();
   }
   protected get width() {
-    return this.dimension.width;
+    return this.settings.dimension.resolved.width;
   }
   protected get length() {
-    return this.dimension.length;
+    return this.settings.dimension.resolved.length;
   }
   protected get height() {
-    return this.dimension.height;
+    return this.settings.dimension.resolved.height;
   }
 
   model() {
-    this.$upateDieline();
-
-    new PostProcess(this.main).setSize();
-    new ComputedLayers(this.main).applyBleed().applyContainer().applyAnchor();
+    this.buildLayers();
 
     onDevelepe && console.log("Main Model:", this.main);
     return new Exporter(this.main).svg();
   }
 
-  private $upateDieline() {
-    function push(
-      main: IModel,
-      dieline: IModel,
-      children: Record<string, IModel> | undefined,
-      key: Lane,
-    ) {
-      Pacsaz.shape.push(dieline, key, { models: children }, key, true);
-      Pacsaz.shape.push(main, "dieline", dieline, "dieline", true);
-    }
-
+  private buildLayers() {
     const fold = this.fold();
     if (fold) {
-      push(this.main, this.dieline, fold, "fold");
+      this.push(fold, "fold");
     }
     const perf = this.perf();
     if (perf) {
-      push(this.main, this.dieline, perf, "perf");
+      this.push(perf, "perf");
     }
-    push(this.main, this.dieline, this.trim(), "trim");
+    this.push(this.trim(), "trim");
 
-    const ruler = new Ruler(this.width, this.length).model;
-    Pacsaz.shape.push(this.main, "ruler", ruler, "ruler", true);
+    this.postProcess();
+
+    new ComputedLayers(this.main)
+      .applyBleed(this.settings.bleed)
+      .applyContainer()
+      .applyRuler(this.width, this.length);
+
+    //todo: devs
+  }
+
+  private postProcess() {
+    const trimModel = this.dieline.models?.trim;
+    if (!trimModel) throw new Error("TrimModel not ready. [postProcess()]");
+
+    const bleedSize = M.measure.modelExtents(this.main.models?.bleed!);
+    const containerSize = M.measure.modelExtents(this.main.models?.container!);
+    const trimSize = M.measure.modelExtents(trimModel);
+    setOverallSize(() => ({
+      overallSizes: {
+        bleed: bleedSize,
+        container: containerSize,
+        trim: trimSize,
+      },
+    }));
+  }
+
+  // --------- UTILS ---------
+
+  private push(children: Record<string, IModel>, key: Lane) {
+    Pacsaz.shape.push(this.dieline, key, { models: children }, key, true);
+    Pacsaz.shape.push(this.main, "dieline", this.dieline, "dieline", true);
   }
 }

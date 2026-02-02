@@ -94,7 +94,7 @@ export abstract class Shape implements Pacsaz {
 
   get size(): M.IMeasureWithCenter {
     const size = M.measure.modelExtents(this.lastModel);
-    if (!size) throw new Error("Size not proccessed. [size()]");
+    if (!size) throw new Error("Size not Processed. [size()]");
     return size;
   }
 }

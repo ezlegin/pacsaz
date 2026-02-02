@@ -36,13 +36,22 @@ export class Exporter {
           stroke: "none",
         },
         anchor: { fill: "black" },
-        ruler: {
+        dielineRuler: {
           stroke: "#00BFFF",
           fill: "#00BFFF",
         },
-        rulerText: {
+        dielineRulerText: {
           stroke: "none",
           fill: "#00BFFF",
+        },
+        overallRuler: {
+          stroke: "gray",
+          fill: "gray",
+        },
+        overallRulerText: {
+          fill: "gray",
+          stroke: "none",
+          cssStyle: `font-size: ${toMm(14)};`,
         },
       },
     });
