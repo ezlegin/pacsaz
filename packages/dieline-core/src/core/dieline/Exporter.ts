@@ -36,9 +36,12 @@ export class Exporter {
           stroke: "none",
         },
         anchor: { fill: "black" },
+
         dielineRuler: {
           stroke: "#00BFFF",
+          strokeWidth: toMm(1.5).toString(),
           fill: "#00BFFF",
+          cssStyle: "stroke-linecap:round",
         },
         dielineRulerText: {
           stroke: "none",

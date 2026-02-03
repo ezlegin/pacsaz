@@ -47,11 +47,8 @@ export class OverallRuler extends Ruler implements IModel {
       .duplicate()
       .move([trimSize.width, 0]);
 
-    Pacsaz.shape.push(
-      this,
-      "overallRuler",
-      { models: { height, width, widthIndicator, heightIndicator } },
-      "overallRuler",
-    );
+    Pacsaz.shape.push(this, "overallRuler", {
+      models: { height, width, widthIndicator, heightIndicator },
+    });
   }
 }

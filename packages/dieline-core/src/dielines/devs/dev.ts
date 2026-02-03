@@ -1,3 +1,4 @@
+import { IModel } from "makerjs";
 import Pacsaz from "../../core/Pacsaz";
 import { Dieline } from "../../core/dieline/Dieline";
 
@@ -9,15 +10,15 @@ export class Dev extends Dieline {
     height: 0,
   };
 
-  protected override trim() {
+  protected override trim(): IModel {
     const rect = new Pacsaz.shapes.Rectangle(this.width * 2, this.length);
 
-    return { rect };
+    return { models: { rect } };
   }
 
-  protected override fold() {
+  protected override fold(): IModel {
     const centerFold = new Pacsaz.shapes.Line(this.length, [this.width, 0], 90);
-    return { centerFold };
+    return { models: { centerFold } };
   }
 }
 
