@@ -17,7 +17,7 @@ export class Exporter {
     const svg = M.exporter.toSVG(this.main, {
       units: "mm",
       strokeLineCap: "butt",
-      fontSize: toMm(20).toString(),
+      fontSize: toMm(18).toString(),
       strokeWidth: toMm(1).toString(),
       scalingStroke: true,
       layerOptions: {

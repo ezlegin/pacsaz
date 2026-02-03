@@ -84,7 +84,7 @@ export abstract class Dieline implements IDieline {
     // Main Layers
     const bleed = new Pacsaz.layer.Bleed(trim, this.settings.bleed);
     const container = new Pacsaz.layer.Container(trim);
-    const dielineRuler = new Pacsaz.ruler.DielineRuler(this.width, this.length);
+    const dielineRuler = this.dielineRuler();
     const overallRuler = new Pacsaz.ruler.OverallRuler();
 
     // Dev Layers
@@ -98,6 +98,11 @@ export abstract class Dieline implements IDieline {
       overallRuler,
       anchor,
     });
+  }
+
+  protected dielineRuler(): IModel {
+    const dielineRuler = new Pacsaz.ruler.DielineRuler(this.width, this.length);
+    return dielineRuler;
   }
 
   // -------------- Post Process --------------

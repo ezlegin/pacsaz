@@ -2,7 +2,9 @@ import { Anchor } from "./dieline/Anchor";
 import { Bleed } from "./dieline/Bleed";
 import { Container } from "./dieline/Container";
 import { pushModel } from "./helpers/add/push";
+import { Measure } from "./measure";
 import { Glue } from "./models/Glue";
+import { CustomRuler } from "./ruler/CustomRuler";
 import { DielineRuler } from "./ruler/DielineRuler";
 import { OverallRuler } from "./ruler/OverallRuler";
 import { Circle } from "./shapes/Circle";
@@ -35,6 +37,7 @@ export default class Pacsaz {
   };
 
   static ruler = {
+    CustomRuler,
     DielineRuler,
     OverallRuler,
   };
@@ -44,4 +47,6 @@ export default class Pacsaz {
     Container,
     Anchor,
   };
+
+  static measure = Measure;
 }
