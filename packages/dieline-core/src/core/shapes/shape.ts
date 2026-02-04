@@ -44,7 +44,7 @@ export abstract class Shape implements Pacsaz {
 
   duplicate(): this {
     const cloned = M.model.clone(this.lastModel);
-    this.$addToModel(cloned, "line");
+    this.$addToModel(cloned, "duplicate");
     return this;
   }
 

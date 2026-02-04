@@ -1,24 +1,26 @@
 import { IModel } from "makerjs";
-import Pacsaz from "../../core/Pacsaz";
 import { Dieline } from "../../core/dieline/Dieline";
+import { Door } from "../../core/models/Door";
+import Pacsaz from "../../core/Pacsaz";
 
 export class Dev extends Dieline {
   override slug = "dev";
   override defaultDimensions = {
     width: 130,
     length: 230,
-    height: 0,
+    height: 90,
   };
 
-  protected override trim(): IModel {
-    const rect = new Pacsaz.shapes.Rectangle(this.width * 2, this.length);
+  protected override trim() {
+    const line = new Pacsaz.models.Glue(this.width, this.length, this.height);
+    const door = new Door().move([0, this.length]);
 
-    return { models: { rect } };
+    this.$pushDielineModels({ door });
+    Pacsaz.shape.push(this.trimModel, "trim", line);
   }
 
-  protected override fold(): IModel {
-    const centerFold = new Pacsaz.shapes.Line(this.length, [this.width, 0], 90);
-    return { models: { centerFold } };
+  protected override dielineRuler(): IModel {
+    return {};
   }
 }
 

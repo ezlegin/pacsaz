@@ -60,7 +60,10 @@ export class Exporter {
     });
 
     const bleed = this.main.models?.bleed;
-    if (!bleed) throw new Error("Bleed Not Provided. [exporter()]");
+    if (!bleed) {
+      console.error("Bleed Not Provided. [exporter()]");
+      return svg;
+    }
 
     return showWatermark ? injectWatermark(svg, bleed, { x: 0, y: 0 }) : svg; //todo
   }

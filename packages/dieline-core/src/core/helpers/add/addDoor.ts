@@ -2,7 +2,7 @@ import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
 import { IModel } from "makerjs";
 import { calcualteTuckFlapSize } from "../../../utils/calculate/calculateTuckFlapSize";
 import Pacsaz from "../../Pacsaz";
-import { PointBuilder } from "../../utils/PointBuilder";
+import { PointBuilder } from "../../point/PointBuilder";
 import { getMeasurementOfModel } from "../getWidthAndHeightOfModel";
 import { addFoldLine } from "./addFoldLine";
 import { addLine } from "./addLine";
@@ -46,6 +46,7 @@ export function addDoor() {
   const seamHeight = Math.max(thickness * 2, seamSize.h);
 
   const seam = new Pacsaz.shapes.LineChain(
+    [],
     (pb) => pb.right(seamSize.w).down(seamHeight),
     {
       filletRaduis: 2,

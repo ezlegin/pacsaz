@@ -4,7 +4,7 @@ import { calcualteTuckFlapSize } from "../../../utils/calculate/calculateTuckFla
 import { mapDustSize } from "../../../utils/calculate/mapDustSize";
 import { getDistanceOfFirstAndLastPoint } from "../getDistance";
 import { getLastPointFromModel, getLastPointFromPath } from "../getLastPoint";
-import { PointBuilder } from "../../utils/PointBuilder";
+import { PointBuilder } from "../../point/PointBuilder";
 import { addFoldLine } from "./addFoldLine";
 import { addHoleArc } from "./addHoleArc";
 import { addLine } from "./addLine";

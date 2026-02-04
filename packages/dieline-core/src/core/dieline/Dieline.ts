@@ -21,6 +21,9 @@ export interface IDieline {
 export abstract class Dieline implements IDieline {
   // -------------- Models --------------
   private main: IModel = {};
+  protected trimModel: IModel = { layer: "trim" };
+  protected foldModel: IModel = { layer: "fold" };
+
   // -------------- Defaults --------------
   abstract slug: string;
   abstract defaultDimensions: Dimension;
@@ -37,9 +40,9 @@ export abstract class Dieline implements IDieline {
     materials["f-flute"],
   ];
   // -------------- Dieline Factory --------------
-  protected abstract trim(): IModel;
-  protected fold(): IModel | void {}
-  protected perf(): IModel | void {}
+  protected abstract trim(): void;
+  protected fold(): void {}
+  protected perf(): void {}
 
   // -------------- Settings --------------
 
@@ -60,7 +63,6 @@ export abstract class Dieline implements IDieline {
 
   model() {
     this.buildLayers();
-    console.log("main", this.main);
     this.postProcess();
 
     onDevelepe && console.log("Main Model:", this.main);
@@ -70,32 +72,37 @@ export abstract class Dieline implements IDieline {
   // -------------- Layers --------------
 
   private buildLayers() {
+    // Reset
     this.main = {};
+    this.trimModel = { layer: "trim" };
+    this.foldModel = { layer: "fold" };
 
     // Dieline Layers
-    const trim = this.trim();
-    M.model.layer(trim, "trim");
-    const fold = this.fold() ?? {};
-    M.model.layer(fold, "fold");
+    this.trim();
+    console.log("this.trimModel", this.trimModel);
+    this.fold();
     const perf = this.perf() ?? {};
     M.model.layer(perf, "perf");
-    const dieline = { models: { trim, fold, perf } };
+
+    const dieline = {
+      models: { trim: this.trimModel, fold: this.foldModel, perf },
+    };
 
     // Main Layers
-    const bleed = new Pacsaz.layer.Bleed(trim, this.settings.bleed);
-    const container = new Pacsaz.layer.Container(trim);
+    const bleed = new Pacsaz.layer.Bleed(this.trimModel, this.settings.bleed);
+    const container = new Pacsaz.layer.Container(this.trimModel);
     const dielineRuler = this.dielineRuler();
     const overallRuler = new Pacsaz.ruler.OverallRuler();
 
     // Dev Layers
-    const anchor = new Pacsaz.layer.Anchor(this.main, trim);
+    const anchor = new Pacsaz.layer.Anchor(this.main, this.trimModel);
 
     this.$pushLayers({
       bleed,
-      dieline,
       container,
       dielineRuler,
       overallRuler,
+      dieline,
       anchor,
     });
   }
@@ -133,6 +140,25 @@ export abstract class Dieline implements IDieline {
   private $pushLayers(layers: Record<string, IModel>) {
     for (const l in layers) {
       Pacsaz.shape.push(this.main, l, layers[l]!, l);
+    }
+  }
+
+  protected $pushDielineModels(models: Record<string, IModel>) {
+    for (const m in models) {
+      const model = models[m]!;
+
+      const origin = model.origin;
+      const trims: IModel = {
+        models: model.models?.trims!.models,
+        origin,
+      };
+      const folds: IModel = {
+        models: model.models?.folds?.models,
+        origin,
+      };
+
+      Pacsaz.shape.push(this.trimModel, m, trims);
+      Pacsaz.shape.push(this.foldModel, m, folds);
     }
   }
 }

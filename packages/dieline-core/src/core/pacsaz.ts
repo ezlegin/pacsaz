@@ -2,7 +2,7 @@ import { Anchor } from "./dieline/Anchor";
 import { Bleed } from "./dieline/Bleed";
 import { Container } from "./dieline/Container";
 import { pushModel } from "./helpers/add/push";
-import { Measure } from "./measure";
+import { Measure } from "./measure/measure";
 import { Glue } from "./models/Glue";
 import { CustomRuler } from "./ruler/CustomRuler";
 import { DielineRuler } from "./ruler/DielineRuler";
@@ -12,7 +12,7 @@ import { Line, LineChain } from "./shapes/Line";
 import { Polygon } from "./shapes/Polygon";
 import { Rectangle } from "./shapes/Rectangle";
 import { Text } from "./shapes/Text";
-import { PointBuilder } from "./utils/PointBuilder";
+import { PointBuilder } from "./point/PointBuilder";
 
 export default class Pacsaz {
   static shape = {

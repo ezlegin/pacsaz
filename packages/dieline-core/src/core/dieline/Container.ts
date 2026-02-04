@@ -4,6 +4,11 @@ import Pacsaz from "../Pacsaz";
 
 export class Container implements IModel {
   constructor(trimModel: IModel) {
+    if (!trimModel) {
+      console.error("Trim Model not Available.");
+      return;
+    }
+
     const { low, high } = M.measure.modelExtents(trimModel)!;
 
     const minX = low[0]!;

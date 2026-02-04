@@ -1,7 +1,7 @@
 import M, { IModel, IPoint } from "makerjs";
 import { zero } from "../../data/consts";
 import { addFillet, addFilletAt } from "../helpers/add/addFillet";
-import { PointBuilder } from "../utils/PointBuilder";
+import { PointBuilder } from "../point/PointBuilder";
 import { Shape } from "./Shape";
 
 interface LineChainOption {

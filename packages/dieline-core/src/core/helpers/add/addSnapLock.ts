@@ -3,7 +3,7 @@ import M, { IModel, IPoint } from "makerjs";
 import { zero } from "../../../data/consts";
 import { getDistanceOfFirstAndLastPoint } from "../getDistance";
 import { getLastPointFromModel } from "../getLastPoint";
-import { PointBuilder } from "../../utils/PointBuilder";
+import { PointBuilder } from "../../point/PointBuilder";
 import { addFoldLine } from "./addFoldLine";
 import { addLine } from "./addLine";
 
