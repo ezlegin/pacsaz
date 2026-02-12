@@ -3,68 +3,71 @@ import Pacsaz from "../Pacsaz";
 import { Model } from "./Model";
 
 export class Door extends Model {
+  fingerSpace = this.seamSize.h / 2;
+  tuckFlap = {
+    indent: this.thickness,
+    w: this.width - this.thickness * 2,
+    h: calcualteTuckFlapSize(this.width) - this.fingerSpace,
+  };
+  topPanelHeight = this.height;
+
   constructor() {
     super();
 
-    // ─────────────────────────────────────────
-    // Top door panel
-    // ─────────────────────────────────────────
+    this.$pushModel(this.trim(), this.fold());
+  }
 
-    const tuckFlapSize = calcualteTuckFlapSize(this.width);
-
+  private trim() {
     const doorLine = new Pacsaz.shapes.LineChain(
       [],
       (pb) =>
         pb
-          .up(this.height)
+          .up(this.topPanelHeight)
           .right(this.thickness)
-          .up(tuckFlapSize)
-          .right(this.width - this.thickness * 2)
-          .down(tuckFlapSize)
+          .up(this.tuckFlap.h)
+          .right(this.tuckFlap.w)
+          .down(this.tuckFlap.h)
           .right(this.thickness)
-          .down(this.height),
+          .down(this.topPanelHeight),
       {
-        filletRaduis: 25,
+        filletRaduis: 20,
       },
     );
 
-    // ─────────────────────────────────────────
-    // Seam
-    // ─────────────────────────────────────────
-    const seamSize = {
-      w: 8,
-      h: 1.5,
-    };
-
-    const seamHeight = Math.max(this.thickness * 2, seamSize.h);
-
     const seam = new Pacsaz.shapes.LineChain(
       [],
-      (pb) => pb.right(seamSize.w).down(seamHeight),
+      (pb) => pb.right(this.seamSize.w).down(this.seamSize.h),
       {
         filletRaduis: 2,
-        startPoint: [this.thickness, this.height],
+        startPoint: [this.tuckFlap.indent, this.topPanelHeight],
       },
     )
       .duplicate()
       .mirror(true, false)
-      .move([this.width - this.thickness * 2, 0]);
+      .move([this.tuckFlap.w, 0]);
 
-    // ─────────────────────────────────────────
-    // Fold Lines
-    // ─────────────────────────────────────────
-    const foldY = this.height - this.thickness;
+    return { doorLine, seam };
+  }
 
+  private fold() {
     const tuckFlapFold = new Pacsaz.shapes.Line(
-      this.width - seamSize.w * 2 - this.thickness * 2,
-      [this.thickness + seamSize.w, foldY],
+      this.width - this.seamSize.w * 2 - this.thickness * 2,
+      [
+        this.thickness + this.seamSize.w,
+        this.topPanelHeight - this.fingerSpace,
+      ],
     );
+    console.log("tuckFlapFold", tuckFlapFold);
 
-    const doorFold = new Pacsaz.shapes.Line(this.width, [
-      0,
-      this.safeFoldOffset,
-    ]);
+    const doorFold = new Pacsaz.shapes.Line(this.width);
 
-    this.$pushModel({ doorLine, seam }, { doorFold, tuckFlapFold });
+    return { doorFold, tuckFlapFold };
+  }
+
+  get seamSize() {
+    return {
+      w: 8,
+      h: this.thickness * 2,
+    };
   }
 }

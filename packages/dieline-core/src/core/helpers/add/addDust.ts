@@ -27,6 +27,7 @@ export function addDust({
       resolved: { height, length, width },
     },
   } = getDielineSettings();
+
   const tuckFlapSize = calcualteTuckFlapSize(width);
   const doorSize = height + tuckFlapSize;
   const dustSize = doorSize / 2;

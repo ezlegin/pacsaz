@@ -7,7 +7,7 @@ export function addFillet(model: IModel, radius: number = 0) {
 
   let fillet: IModel | null = null;
 
-  for (let r = radius; r > 0; r--) {
+  for (let r = radius; r > 0; r -= 0.2) {
     fillet = M.chain.fillet(chain, r);
     if (fillet) break;
   }

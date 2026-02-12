@@ -58,6 +58,9 @@ export abstract class Dieline implements IDieline {
   protected get height() {
     return this.settings.dimension.resolved.height;
   }
+  protected get safeFoldOffset() {
+    return this.settings.safeFoldOffset;
+  }
 
   // -------------- Model Generator --------------
 
@@ -79,13 +82,12 @@ export abstract class Dieline implements IDieline {
 
     // Dieline Layers
     this.trim();
-    console.log("this.trimModel", this.trimModel);
     this.fold();
     const perf = this.perf() ?? {};
     M.model.layer(perf, "perf");
 
     const dieline = {
-      models: { trim: this.trimModel, fold: this.foldModel, perf },
+      models: { fold: this.foldModel, perf, trim: this.trimModel },
     };
 
     // Main Layers

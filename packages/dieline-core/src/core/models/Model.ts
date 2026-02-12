@@ -1,8 +1,8 @@
 import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
-import { Shape } from "../shapes/Shape";
 import M, { IModel } from "makerjs";
+import { Shape } from "../shapes/Shape";
 
-export class Model extends Shape {
+export abstract class Model extends Shape {
   protected get settings() {
     return getDielineSettings();
   }

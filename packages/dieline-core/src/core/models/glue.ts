@@ -1,20 +1,17 @@
 import Pacsaz from "../Pacsaz";
-import { Shape } from "../shapes/Shape";
+import { Model } from "./Model";
 
-export class Glue extends Shape {
-  constructor(
-    private width: number,
-    length: number,
-    private height: number,
-  ) {
+export class Glue extends Model {
+  constructor() {
     super();
     const margin = 8;
 
     const glue = new Pacsaz.shapes.LineChain([], (pb) =>
       pb
         .draw(-this.glueSize, margin)
-        .up(length - margin * 2)
-        .draw(this.glueSize, margin),
+        .up(this.length - margin * 2)
+        .draw(this.glueSize, margin)
+        .up(this.safeFoldOffset),
     );
 
     Pacsaz.shape.push(this, "glue", glue);

@@ -13,6 +13,8 @@ import { Polygon } from "./shapes/Polygon";
 import { Rectangle } from "./shapes/Rectangle";
 import { Text } from "./shapes/Text";
 import { PointBuilder } from "./point/PointBuilder";
+import { Door } from "./models/Door";
+import { Dust } from "./models/Dust";
 
 export default class Pacsaz {
   static shape = {
@@ -30,6 +32,8 @@ export default class Pacsaz {
 
   static models = {
     Glue,
+    Door,
+    Dust,
   };
 
   static point = {
