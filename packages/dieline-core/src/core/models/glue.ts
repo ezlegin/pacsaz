@@ -1,20 +1,28 @@
+import { IModelMap } from "makerjs";
 import Pacsaz from "../Pacsaz";
 import { Model } from "./Model";
 
 export class Glue extends Model {
   constructor() {
     super();
+
+    this.$pushModel("glue", this.trim());
+  }
+
+  protected override trim(): IModelMap {
     const margin = 8;
 
-    const glue = new Pacsaz.shapes.LineChain([], (pb) =>
-      pb
-        .draw(-this.glueSize, margin)
-        .up(this.length - margin * 2)
-        .draw(this.glueSize, margin)
-        .up(this.safeFoldOffset),
-    );
+    const pb = new Pacsaz.point.Builder();
+    const pts = pb
+      .draw(-this.glueSize, margin)
+      .up(this.length - margin * 2)
+      .draw(this.glueSize, margin)
+      .up(this.safeFoldOffset)
+      .build();
 
-    Pacsaz.shape.push(this, "glue", glue);
+    const glue = new Pacsaz.shapes.Lines(pts);
+
+    return { glue };
   }
 
   private get glueSize() {

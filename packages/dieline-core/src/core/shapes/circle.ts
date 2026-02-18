@@ -13,17 +13,13 @@ export class Circle extends Shape {
 
   override mirror(): this {
     throw new Error(
-      "Mirror function is non-sensical for Circle. [Circle Class]",
+      "Mirror function is nonesense for circle. If you want to mirror it, just duplicate it and move to the opposite direction.",
     );
   }
 }
 
 export class SemiCircle extends Shape {
-  constructor(
-    radius: number,
-    side?: "left" | "right" | "top" | "bottom",
-    origin: IPoint = zero,
-  ) {
+  constructor(radius: number, side?: "left" | "right" | "top" | "bottom") {
     super();
 
     let startAngle = 0;
@@ -44,8 +40,8 @@ export class SemiCircle extends Shape {
         break;
     }
 
-    const semiCircle = new M.paths.Arc(origin, radius, startAngle, endAngle);
-    const model: IModel = { paths: { semiCircle }, origin };
+    const semiCircle = new M.paths.Arc(zero, radius, startAngle, endAngle);
+    const model: IModel = { paths: { semiCircle }, origin: zero };
 
     this.$addToModel(model, "semi-circle");
   }

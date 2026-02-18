@@ -3,15 +3,11 @@ import Pacsaz from "../Pacsaz";
 import { Shape } from "./Shape";
 
 export class Text extends Shape {
-  constructor(
-    private text: string,
-    private position: IPoint,
-    private textLayer?: string,
-  ) {
+  constructor(text: string, position: IPoint, textLayer?: string) {
     super();
     const textCarrier = new M.models.ConnectTheDots(false, [[0, 0]]);
-    const caption = M.model.addCaption(textCarrier, this.text, this.position);
+    const caption = M.model.addCaption(textCarrier, text, position);
 
-    Pacsaz.shape.push(this, "text", caption, this.textLayer ?? "text");
+    Pacsaz.shape.push(this, "text", caption, textLayer ?? "text");
   }
 }

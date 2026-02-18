@@ -4,7 +4,7 @@ import { addFillet, addFilletAt } from "../helpers/add/addFillet";
 import { Shape } from "./Shape";
 
 export class Line extends Shape {
-  constructor(length: number, origin?: IPoint, angle?: number) {
+  constructor(length: number, angle?: number) {
     super();
     if (angle && (angle > 180 || angle < -180))
       throw new Error("Angle should be: -180 > angle < 180 . [Line Class]");
@@ -12,7 +12,6 @@ export class Line extends Shape {
     const arc = new M.paths.Arc(zero, length, 0, angle ?? 0);
     const arcPoints = M.point.fromArc(arc);
     const line = new M.models.ConnectTheDots(false, [zero, arcPoints[1]!]);
-    M.model.move(line, origin ?? zero);
 
     this.$registerModel("line", line);
   }

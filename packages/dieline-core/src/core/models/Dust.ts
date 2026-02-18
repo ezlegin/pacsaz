@@ -1,4 +1,4 @@
-import M from "makerjs";
+import M, { IModel, IPath } from "makerjs";
 import { getDistanceOfFirstAndLastPoint } from "../helpers/getDistance";
 import { getLastPointFromPath } from "../helpers/getLastPoint";
 import Pacsaz from "../Pacsaz";
@@ -6,21 +6,19 @@ import { Model } from "./Model";
 
 export class Dust extends Model {
   constructor(
-    doorSize: number,
-    considerDustHole: boolean,
-    considerOuterIndent: boolean,
+    private doorSize: number,
+    private considerDustHole: boolean,
+    private considerOuterIndent: boolean,
   ) {
     super();
-    this.$pushModel({}, {});
 
-    this.safeFoldOffset;
-    this.thickness;
-    this.width;
-    this.length;
-    this.height;
+    this.$pushModel("dust", this.trim(), this.fold());
+  }
 
-    const dustSize = doorSize / 2;
-    const mappedDustSize = this.$mapDustSize(this.width, dustSize, this.height);
+  protected override trim(): M.IModelMap {
+    const dustSize = this.doorSize / 2;
+    const mappedDustSize =
+      this.width <= dustSize * 2 ? this.height / 2 : dustSize;
 
     const dustHeight = {
       r: {
@@ -35,9 +33,83 @@ export class Dust extends Model {
       br: 3,
     };
 
-    // ─────────────────────────────────────────
-    // Dust Hole
-    // ─────────────────────────────────────────
+    // Dust hole geometry measurements
+    const { disOfHeight: dustHoleOuterHeight, disOfWidth: dustHoleWidth } =
+      getDistanceOfFirstAndLastPoint(this.arc, "path");
+
+    // Indent calculations (bottom-left)
+    const bottomLeftIndent = this.considerDustHole
+      ? Math.max(0, indent.bl - dustHoleWidth)
+      : indent.bl;
+
+    // Vertical movement calculation
+    const verticalMoveToTop = this.considerDustHole
+      ? mappedDustSize - indent.bl
+      : mappedDustSize - indent.bl;
+
+    // Base-to-hole vertical compensation
+    const baseToHoleEndOffset = this.safeFoldOffset - dustHoleOuterHeight;
+
+    const dustStartPoint = this.considerDustHole
+      ? getLastPointFromPath(this.arc)
+      : [0, -this.safeFoldOffset];
+
+    const pb = new Pacsaz.point.Builder(dustStartPoint);
+    const dust = new Pacsaz.shapes.Lines(
+      pb
+        .draw(
+          bottomLeftIndent,
+          this.considerDustHole ? indent.bl - baseToHoleEndOffset : indent.bl,
+        )
+        .draw(indent.tl, verticalMoveToTop)
+        .right(
+          this.height -
+            indent.br -
+            bottomLeftIndent -
+            indent.tl -
+            indent.tr -
+            (this.considerDustHole ? dustHoleWidth : 0) -
+            (this.considerOuterIndent ? this.thickness : 0),
+        )
+        .draw(indent.tr, -mappedDustSize + dustHeight.r.inner)
+        .draw(indent.br, -(dustHeight.r.inner - dustHeight.r.outer))
+        .down(dustHeight.r.outer)
+        .right(this.considerOuterIndent ? this.thickness : 0)
+        .build(),
+      {
+        filletRadius: 10,
+        indices: [3],
+      },
+    );
+
+    const trim: IModel = {
+      models: { dust },
+    };
+    if (this.considerDustHole) trim.paths = { arc: this.arc };
+
+    return { trim };
+  }
+
+  protected override fold() {
+    const Y = -this.safeFoldOffset;
+
+    const temp = new M.paths.Line([
+      [0, Y],
+      [this.height, Y],
+    ]);
+
+    const { intersectionPoints } = M.path.intersection(this.arc, temp);
+
+    const fold = new Pacsaz.shapes.Lines([
+      intersectionPoints[1]!,
+      [this.height - this.thickness, Y],
+    ]);
+
+    return { fold };
+  }
+
+  // ──────────────────── ARC ────────────────────
+  private get arc(): IPath {
     const { holeRadius, endAngle } = this.$calculateDustHoleSize(
       this.safeFoldOffset,
     );
@@ -46,72 +118,10 @@ export class Dust extends Model {
 
     const arc = new M.paths.Arc(arcStartPoint, holeRadius, 180, endAngle);
 
-    // ─────────────────────────────────────────
-    // Dust part 1
-    // ─────────────────────────────────────────
-    // Dust hole geometry measurements
-    const { disOfHeight: dustHoleOuterHeight, disOfWidth: dustHoleWidth } =
-      getDistanceOfFirstAndLastPoint(arc, "path");
-
-    // Indent calculations (bottom-left)
-    const bottomLeftIndent = considerDustHole
-      ? Math.max(0, indent.bl - dustHoleWidth)
-      : indent.bl;
-
-    // Vertical movement calculation
-    const verticalMoveToTop = considerDustHole
-      ? mappedDustSize - indent.bl
-      : mappedDustSize - indent.bl;
-
-    // Base-to-hole vertical compensation
-    const baseToHoleEndOffset = this.safeFoldOffset - dustHoleOuterHeight;
-
-    const dustStartPoint = considerDustHole
-      ? getLastPointFromPath(arc)
-      : [0, -this.safeFoldOffset];
-
-    const dust = new Pacsaz.shapes.LineChain(
-      [],
-      (pb) =>
-        pb
-          .draw(
-            bottomLeftIndent,
-            considerDustHole ? indent.bl - baseToHoleEndOffset : indent.bl,
-          )
-          .draw(indent.tl, verticalMoveToTop)
-          .right(
-            this.height -
-              indent.br -
-              bottomLeftIndent -
-              indent.tl -
-              indent.tr -
-              (considerDustHole ? dustHoleWidth : 0) -
-              (considerOuterIndent ? this.thickness : 0),
-          )
-          .draw(indent.tr, -mappedDustSize + dustHeight.r.inner)
-          .draw(indent.br, -(dustHeight.r.inner - dustHeight.r.outer))
-          .down(dustHeight.r.outer)
-          .right(considerOuterIndent ? this.thickness : 0),
-      {
-        filletRaduis: 10,
-        indices: [3],
-        startPoint: dustStartPoint,
-      },
-    );
-
-    const trim = {
-      models: { dust },
-      paths: { arc },
-    };
-
-    this.$pushModel({ trim });
+    return arc;
   }
 
   // ──────────────────── Utils ────────────────────
-
-  private $mapDustSize(width: number, dustSize: number, height: number) {
-    return width <= dustSize * 2 ? height / 2 : dustSize;
-  }
 
   private $calculateDustHoleSize(safeFoldOffset: number) {
     const addLineToHole = safeFoldOffset < 2;

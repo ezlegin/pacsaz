@@ -1,7 +1,7 @@
 import M, { IModel, IPoint } from "makerjs";
 
 type MirrorRefPoint = "top" | "bottom" | "left" | "right";
-type RotateRefPoint =
+export type RotateRefPoint =
   | "top"
   | "top-left"
   | "top-right"
@@ -17,11 +17,6 @@ export abstract class Shape implements IModel {
   dup(): this {
     const duplicated = M.model.clone(this.lastModel);
     this.$addToModel(duplicated, "dup");
-    return this;
-  }
-
-  moveTo(pts: IPoint): this {
-    M.model.move(this.lastModel, pts);
     return this;
   }
 
@@ -57,7 +52,12 @@ export abstract class Shape implements IModel {
   move(pts: IPoint): this {
     M.model.moveRelative(this.lastModel, pts);
     return this;
-  } //todo: use circle originate as default and use this originate only for Line.
+  }
+
+  moveTo(pts: IPoint): this {
+    M.model.move(this.lastModel, pts);
+    return this;
+  }
 
   zero(): this {
     M.model.zero(this.lastModel);

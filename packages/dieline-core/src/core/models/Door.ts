@@ -14,49 +14,48 @@ export class Door extends Model {
   constructor() {
     super();
 
-    this.$pushModel(this.trim(), this.fold());
+    this.$pushModel("door", this.trim(), this.fold());
   }
 
-  private trim() {
-    const doorLine = new Pacsaz.shapes.LineChain(
-      [],
-      (pb) =>
-        pb
-          .up(this.topPanelHeight)
-          .right(this.thickness)
-          .up(this.tuckFlap.h)
-          .right(this.tuckFlap.w)
-          .down(this.tuckFlap.h)
-          .right(this.thickness)
-          .down(this.topPanelHeight),
-      {
-        filletRaduis: 20,
-      },
+  protected override trim() {
+    const pb = new Pacsaz.point.Builder();
+    const doorLine = new Pacsaz.shapes.Lines(
+      pb
+        .up(this.topPanelHeight)
+        .right(this.thickness)
+        .up(this.tuckFlap.h)
+        .right(this.tuckFlap.w)
+        .down(this.tuckFlap.h)
+        .right(this.thickness)
+        .down(this.topPanelHeight)
+        .build(),
+      { filletRadius: 20 },
     );
 
-    const seam = new Pacsaz.shapes.LineChain(
-      [],
-      (pb) => pb.right(this.seamSize.w).down(this.seamSize.h),
+    const seam_pb = new Pacsaz.point.Builder([
+      this.tuckFlap.indent,
+      this.topPanelHeight,
+    ]);
+    const seam = new Pacsaz.shapes.Lines(
+      seam_pb.right(this.seamSize.w).down(this.seamSize.h).build(),
       {
-        filletRaduis: 2,
-        startPoint: [this.tuckFlap.indent, this.topPanelHeight],
+        filletRadius: 2,
       },
     )
       .dup()
-      .mirror(true, false)
-      .moveTo([this.tuckFlap.w, 0]);
+      .mirror(true, false, "left")
+      .move([this.tuckFlap.w, 0]);
 
     return { doorLine, seam };
   }
 
-  private fold() {
+  protected override fold() {
     const tuckFlapFold = new Pacsaz.shapes.Line(
       this.width - this.seamSize.w * 2 - this.thickness * 2,
-      [
-        this.thickness + this.seamSize.w,
-        this.topPanelHeight - this.fingerSpace,
-      ],
-    );
+    ).move([
+      this.thickness + this.seamSize.w,
+      this.topPanelHeight - this.fingerSpace,
+    ]);
 
     const doorFold = new Pacsaz.shapes.Line(this.width);
 

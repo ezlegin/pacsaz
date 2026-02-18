@@ -1,17 +1,11 @@
-import M, { IPoint } from "makerjs";
+import M from "makerjs";
 import { Shape } from "./Shape";
 
 export class Polygon extends Shape {
-  constructor(sides: number, radius: number, firstCornerAngle?: number) {
+  constructor(radius: number, sides: number = 5, firstCornerAngle?: number) {
     super();
 
     const polygon = new M.models.Polygon(sides, radius, firstCornerAngle ?? 90);
     this.$addToModel(polygon, "polygon");
-  }
-
-  override move(pts: IPoint): this {
-    M.model.center(this.lastModel);
-    M.model.move(this.lastModel, pts);
-    return this;
   }
 }

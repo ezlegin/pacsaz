@@ -1,8 +1,13 @@
 import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
-import M, { IModel } from "makerjs";
+import { IModelMap } from "makerjs";
+import { zero } from "../../data/consts";
 import { Shape } from "../shapes/Shape";
 
 export abstract class Model extends Shape {
+  protected abstract trim(): IModelMap;
+  protected fold(): IModelMap | void {}
+  protected perf(): IModelMap | void {}
+
   protected get settings() {
     return getDielineSettings();
   }
@@ -22,17 +27,15 @@ export abstract class Model extends Shape {
     return this.settings.thickness;
   }
 
-  override moveTo(pts: MakerJs.IPoint): this {
-    M.model.moveRelative(this, pts);
-    return this;
-  }
-
-  override rotate(angle: number, rotaionOrigin?: M.IPoint): this {
-    M.model.rotate(this, angle, rotaionOrigin ?? this.size?.center);
-    return this;
-  }
-
-  $pushModel(trims: Record<string, IModel>, folds?: Record<string, IModel>) {
-    this.models = { trims: { models: trims }, folds: { models: folds } };
+  $pushModel(key: string, trims: IModelMap, folds?: IModelMap) {
+    this.models = {
+      [key]: {
+        models: {
+          trims: { models: trims },
+          folds: { models: folds },
+        },
+        origin: zero,
+      },
+    };
   }
 }

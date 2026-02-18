@@ -3,7 +3,7 @@ import { bleeds, materials } from "@repo/store/data/dieline";
 import { Dimension, MaterialValue } from "@repo/store/data/types";
 import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
 import { setOverallSize } from "@repo/store/dieline/overallSize.store";
-import M, { IModel } from "makerjs";
+import M, { IModel, IModelMap } from "makerjs";
 import { DimensionsType } from "../../data/types";
 import Pacsaz from "../Pacsaz";
 import { Exporter } from "./Exporter";
@@ -141,35 +141,36 @@ export abstract class Dieline implements IDieline {
 
   // -------------- Utils --------------
 
-  private $pushLayers(layers: Record<string, IModel>) {
+  private $pushLayers(layers: IModelMap) {
     for (const l in layers) {
       Pacsaz.shape.push(this.main, l, layers[l]!, l);
     }
   }
 
-  protected $pushModels(models: Record<string, IModel>) {
+  protected $pushModels(models: IModelMap) {
     for (const m in models) {
-      const model = models[m]!;
+      const parentModel = models[m]!;
 
-      const origin = model.origin;
-      const trims: IModel = {
-        models: model.models?.trims!.models,
-        origin,
-      };
-      const folds: IModel = {
-        models: model.models?.folds?.models,
-        origin,
-      };
+      for (const key in parentModel.models) {
+        const childModel = parentModel.models[key]!;
+        const origin = childModel.origin;
 
-      Pacsaz.shape.push(this.trimModel, m, trims);
-      Pacsaz.shape.push(this.foldModel, m, folds);
+        const trims: IModel = {
+          models: childModel.models?.trims!.models,
+          origin,
+        };
+        const folds: IModel = {
+          models: childModel.models?.folds?.models,
+          origin,
+        };
+
+        Pacsaz.shape.push(this.trimModel, m, trims);
+        Pacsaz.shape.push(this.foldModel, m, folds);
+      }
     }
   }
 
-  protected $pushShapes(
-    models: Record<string, IModel>,
-    to: "trimModel" | "foldModel",
-  ) {
+  protected $pushShapes(models: IModelMap, to: "trimModel" | "foldModel") {
     for (const m in models) {
       const model = models[m]!;
       Pacsaz.shape.push(this[to], m, model);
