@@ -1,5 +1,6 @@
 import { Dieline } from "../../core/dieline/Dieline";
 import Pacsaz from "../../core/Pacsaz";
+import { zero } from "../../data/consts";
 
 export class Dev extends Dieline {
   override slug = "dev";
@@ -24,21 +25,23 @@ export class Dev extends Dieline {
       this.width + this.height,
       this.length,
     ]);
-    const s2 = new Pacsaz.shapes.Line(this.width);
+    const s2 = new Pacsaz.shapes.Line(this.width, zero);
     const s3 = new Pacsaz.shapes.Line(
       this.length,
       [this.width * 2 + this.height * 2, 0],
       90,
     );
 
-    const line = new Pacsaz.shapes.Line(15, [10, 30], 45)
-      .dup()
-      .mirror(true, true);
+    // const line = new Pacsaz.shapes.Line(15, zero, 45).dup().mirror(true, true);
 
-    console.log("line", line);
+    const circle = new Pacsaz.shapes.SemiCircle(20)
+      .dup()
+      .mirror(false, true, "top");
+
+    console.log("circle", circle);
 
     // this.$pushModels({ door, dust });
-    this.$pushShapes({ s1, s2, s3, line }, "trimModel");
+    this.$pushShapes({ s1, s2, s3, circle }, "trimModel");
   }
 
   protected override fold(): void {

@@ -9,10 +9,6 @@ export class Polygon extends Shape {
     this.$addToModel(polygon, "polygon");
   }
 
-  protected override $getOriginForMirror(): IPoint | undefined {
-    return this.lastModel.origin;
-  }
-
   override move(pts: IPoint): this {
     M.model.center(this.lastModel);
     M.model.move(this.lastModel, pts);

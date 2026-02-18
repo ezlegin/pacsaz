@@ -1,5 +1,6 @@
 import M, { IModel, IPoint } from "makerjs";
 import { Shape } from "./Shape";
+import { zero } from "../../data/consts";
 
 export class Circle extends Shape {
   constructor(radius: number, origin?: IPoint) {
@@ -10,12 +11,42 @@ export class Circle extends Shape {
     this.$addToModel(model, "circle");
   }
 
-  protected override $getOriginForMirror(): IPoint | undefined {
-    return this.lastModel.paths?.circle?.origin;
+  override mirror(): this {
+    throw new Error(
+      "Mirror function is non-sensical for Circle. [Circle Class]",
+    );
   }
+}
 
-  override move(pts: IPoint): this {
-    M.model.move(this.lastModel, pts);
-    return this;
+export class SemiCircle extends Shape {
+  constructor(
+    radius: number,
+    side?: "left" | "right" | "top" | "bottom",
+    origin: IPoint = zero,
+  ) {
+    super();
+
+    let startAngle = 0;
+    let endAngle = 180;
+
+    switch (side) {
+      case "bottom":
+        startAngle = 180;
+        endAngle = 360;
+        break;
+      case "left":
+        startAngle = 90;
+        endAngle = 270;
+        break;
+      case "right":
+        startAngle = 270;
+        endAngle = 90;
+        break;
+    }
+
+    const semiCircle = new M.paths.Arc(origin, radius, startAngle, endAngle);
+    const model: IModel = { paths: { semiCircle }, origin };
+
+    this.$addToModel(model, "semi-circle");
   }
 }

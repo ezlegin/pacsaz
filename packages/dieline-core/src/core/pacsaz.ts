@@ -7,8 +7,8 @@ import { Glue } from "./models/Glue";
 import { CustomRuler } from "./ruler/CustomRuler";
 import { DielineRuler } from "./ruler/DielineRuler";
 import { OverallRuler } from "./ruler/OverallRuler";
-import { Circle } from "./shapes/Circle";
-import { Line, LineChain } from "./shapes/Line";
+import { Circle, SemiCircle } from "./shapes/Circle";
+import { Line, Lines } from "./shapes/Line";
 import { Polygon } from "./shapes/Polygon";
 import { Rectangle } from "./shapes/Rectangle";
 import { Text } from "./shapes/Text";
@@ -24,8 +24,9 @@ export default class Pacsaz {
   static shapes = {
     Rectangle,
     Line,
-    LineChain,
+    Lines,
     Circle,
+    SemiCircle,
     Polygon,
     Text,
   };

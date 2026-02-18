@@ -1,8 +1,17 @@
 import M, { IModel, IPoint } from "makerjs";
 
-type RefPoint = "top" | "bottom" | "left" | "right";
+type MirrorRefPoint = "top" | "bottom" | "left" | "right";
+type RotateRefPoint =
+  | "top"
+  | "top-left"
+  | "top-right"
+  | "bottom"
+  | "bottom-left"
+  | "bottom-right"
+  | "left"
+  | "right";
 
-export abstract class Shape {
+export abstract class Shape implements IModel {
   models: M.IModelMap = {};
 
   dup(): this {
@@ -16,7 +25,7 @@ export abstract class Shape {
     return this;
   }
 
-  mirror(x: boolean, y: boolean, refPoint?: RefPoint): this {
+  mirror(x: boolean, y: boolean, refPoint?: MirrorRefPoint): this {
     const origin = this.lastModel?.origin;
     if (!origin) throw new Error("Origin not provided. [mirror()]");
 
@@ -65,8 +74,39 @@ export abstract class Shape {
     return this;
   }
 
-  rotate(angle: number, origin?: IPoint): this {
-    M.model.rotate(this.lastModel, angle, origin ?? this.size?.center);
+  rotate(angle: number, refPoint?: RotateRefPoint): this {
+    let referencePoint: IPoint = [0, 0];
+    switch (refPoint) {
+      case "bottom-right":
+        referencePoint = [this.size.high[0]!, this.size.low[1]!];
+        break;
+      case "bottom-left":
+        referencePoint = [this.size.low[0]!, this.size.low[1]!];
+        break;
+      case "top-right":
+        referencePoint = [this.size.high[0]!, this.size.high[1]!];
+        break;
+      case "top-left":
+        referencePoint = [this.size.low[0]!, this.size.high[1]!];
+        break;
+      case "bottom":
+        referencePoint = [this.size.center[0]!, this.size.low[1]!];
+        break;
+      case "top":
+        referencePoint = [this.size.center[0]!, this.size.high[1]!];
+        break;
+      case "left":
+        referencePoint = [this.size.low[0]!, this.size.center[1]!];
+        break;
+      case "right":
+        referencePoint = [this.size.high[0]!, this.size.center[1]!];
+        break;
+      default:
+        referencePoint = this.size?.center;
+        break;
+    }
+
+    M.model.rotate(this.lastModel, angle, referencePoint);
     return this;
   }
 

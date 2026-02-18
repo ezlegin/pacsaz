@@ -1,42 +1,7 @@
 import M, { IModel, IPoint } from "makerjs";
 import { zero } from "../../data/consts";
 import { addFillet, addFilletAt } from "../helpers/add/addFillet";
-import { PointBuilder } from "../point/PointBuilder";
 import { Shape } from "./Shape";
-
-interface LineChainOption {
-  closed?: boolean;
-  filletRaduis?: number;
-  indices?: number[];
-  startPoint?: IPoint;
-}
-
-export class LineChain extends Shape {
-  constructor(
-    points: IPoint[],
-    buildPoints?: (pb: PointBuilder) => void,
-    options?: LineChainOption,
-  ) {
-    super();
-
-    const pb = new PointBuilder(options?.startPoint);
-    if (buildPoints) buildPoints(pb);
-    const pts = pb.build();
-
-    let line: IModel = new M.models.ConnectTheDots(
-      options?.closed ?? false,
-      buildPoints ? pts : points,
-    );
-
-    if (options?.indices) {
-      line = addFilletAt(line, options.indices, options.filletRaduis);
-    } else {
-      addFillet(line, options?.filletRaduis);
-    }
-
-    this.$registerModel("line", line);
-  }
-}
 
 export class Line extends Shape {
   constructor(length: number, origin?: IPoint, angle?: number) {
@@ -47,7 +12,35 @@ export class Line extends Shape {
     const arc = new M.paths.Arc(zero, length, 0, angle ?? 0);
     const arcPoints = M.point.fromArc(arc);
     const line = new M.models.ConnectTheDots(false, [zero, arcPoints[1]!]);
-    if (origin) M.model.move(line, origin);
+    M.model.move(line, origin ?? zero);
+
+    this.$registerModel("line", line);
+  }
+}
+
+interface LineChainOption {
+  closed?: boolean;
+  filletRadius?: number;
+  indices?: number[];
+}
+
+export class Lines extends Shape {
+  constructor(points: IPoint[], options?: LineChainOption) {
+    super();
+
+    let line: IModel = new M.models.ConnectTheDots(
+      options?.closed ?? false,
+      points,
+    );
+
+    if (options?.indices) {
+      line = addFilletAt(line, options.indices, options.filletRadius);
+    } else {
+      addFillet(line, options?.filletRadius);
+    }
+
+    // this is used by mirror function to calculate the origin point.
+    M.model.originate(line, points[0]!);
 
     this.$registerModel("line", line);
   }
