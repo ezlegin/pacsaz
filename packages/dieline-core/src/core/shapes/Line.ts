@@ -44,12 +44,10 @@ export class Line extends Shape {
     if (angle && (angle > 180 || angle < -180))
       throw new Error("Angle should be: -180 > angle < 180 . [Line Class]");
 
-    const arc = new M.paths.Arc(origin ?? zero, length, 0, angle ?? 0);
+    const arc = new M.paths.Arc(zero, length, 0, angle ?? 0);
     const arcPoints = M.point.fromArc(arc);
-    const line = new M.models.ConnectTheDots(false, [
-      origin ?? zero,
-      arcPoints[1]!,
-    ]);
+    const line = new M.models.ConnectTheDots(false, [zero, arcPoints[1]!]);
+    if (origin) M.model.move(line, origin);
 
     this.$registerModel("line", line);
   }

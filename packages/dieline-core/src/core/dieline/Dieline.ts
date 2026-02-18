@@ -65,10 +65,12 @@ export abstract class Dieline implements IDieline {
   // -------------- Model Generator --------------
 
   model() {
+    console.group("Dieline");
     this.buildLayers();
     this.postProcess();
+    onDevelepe && console.log("Main:", this.main);
+    console.groupEnd();
 
-    onDevelepe && console.log("Main Model:", this.main);
     return new Exporter(this.main).svg();
   }
 
@@ -145,7 +147,7 @@ export abstract class Dieline implements IDieline {
     }
   }
 
-  protected $pushDielineModels(models: Record<string, IModel>) {
+  protected $pushModels(models: Record<string, IModel>) {
     for (const m in models) {
       const model = models[m]!;
 
@@ -161,6 +163,16 @@ export abstract class Dieline implements IDieline {
 
       Pacsaz.shape.push(this.trimModel, m, trims);
       Pacsaz.shape.push(this.foldModel, m, folds);
+    }
+  }
+
+  protected $pushShapes(
+    models: Record<string, IModel>,
+    to: "trimModel" | "foldModel",
+  ) {
+    for (const m in models) {
+      const model = models[m]!;
+      Pacsaz.shape.push(this[to], m, model);
     }
   }
 }

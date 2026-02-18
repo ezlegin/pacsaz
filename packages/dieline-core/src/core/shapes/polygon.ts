@@ -13,7 +13,7 @@ export class Polygon extends Shape {
     return this.lastModel.origin;
   }
 
-  override originate(pts: IPoint): this {
+  override move(pts: IPoint): this {
     M.model.center(this.lastModel);
     M.model.move(this.lastModel, pts);
     return this;

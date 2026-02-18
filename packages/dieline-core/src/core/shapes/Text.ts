@@ -1,6 +1,6 @@
 import M, { IPoint } from "makerjs";
 import Pacsaz from "../Pacsaz";
-import { Shape } from "../shapes/Shape";
+import { Shape } from "./Shape";
 
 export class Text extends Shape {
   constructor(

@@ -22,7 +22,7 @@ export abstract class Model extends Shape {
     return this.settings.thickness;
   }
 
-  override move(pts: MakerJs.IPoint): this {
+  override moveTo(pts: MakerJs.IPoint): this {
     M.model.moveRelative(this, pts);
     return this;
   }

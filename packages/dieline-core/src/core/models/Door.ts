@@ -42,9 +42,9 @@ export class Door extends Model {
         startPoint: [this.tuckFlap.indent, this.topPanelHeight],
       },
     )
-      .duplicate()
+      .dup()
       .mirror(true, false)
-      .move([this.tuckFlap.w, 0]);
+      .moveTo([this.tuckFlap.w, 0]);
 
     return { doorLine, seam };
   }
@@ -57,7 +57,6 @@ export class Door extends Model {
         this.topPanelHeight - this.fingerSpace,
       ],
     );
-    console.log("tuckFlapFold", tuckFlapFold);
 
     const doorFold = new Pacsaz.shapes.Line(this.width);
 

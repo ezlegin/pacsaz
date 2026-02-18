@@ -1,73 +1,51 @@
 import M, { IModel, IPoint } from "makerjs";
 
-interface Pacsaz extends IModel {
-  zero(): this;
-  duplicate(): this;
-  move(pts: IPoint): this;
-  mirror(x: boolean, y: boolean): this;
-  originate(pts: IPoint): this;
-  center(): this;
-  scale(amount: number): this;
-  rotate(angle: number, rotaionOrigin?: IPoint): this;
-  size: M.IMeasureWithCenter;
-}
+type RefPoint = "top" | "bottom" | "left" | "right";
 
-export abstract class Shape implements Pacsaz {
-  models?: M.IModelMap = {};
+export abstract class Shape {
+  models: M.IModelMap = {};
 
-  protected $registerModel(key: string, model: IModel) {
-    if (!this.models) this.models = {};
-    this.models[key] = model;
-  }
-
-  protected $addToModel(child: IModel, key: string, overwrite?: boolean) {
-    M.model.addTo(child, this, key, overwrite);
-  }
-
-  protected $getOriginForMirror(): IPoint | undefined {
-    return (
-      this.lastModel?.paths?.ShapeLine1?.origin ??
-      this.lastModel?.paths?.line?.origin ??
-      undefined
-    );
-  }
-
-  protected get lastModelKey(): string {
-    if (!this.models) throw new Error("Model not initialized.");
-    const keys = Object.keys(this.models);
-    return keys.at(-1)!;
-  }
-
-  protected get lastModel(): any {
-    return this.models![this.lastModelKey];
-  }
-
-  duplicate(): this {
-    const cloned = M.model.clone(this.lastModel);
-    this.$addToModel(cloned, "duplicate");
+  dup(): this {
+    const duplicated = M.model.clone(this.lastModel);
+    this.$addToModel(duplicated, "dup");
     return this;
   }
 
-  move(pts: IPoint): this {
-    M.model.moveRelative(this.lastModel, pts);
+  moveTo(pts: IPoint): this {
+    M.model.move(this.lastModel, pts);
     return this;
   }
 
-  mirror(x: boolean, y: boolean): this {
-    const origin = this.$getOriginForMirror();
+  mirror(x: boolean, y: boolean, refPoint?: RefPoint): this {
+    const origin = this.lastModel?.origin;
     if (!origin) throw new Error("Origin not provided. [mirror()]");
 
-    const mirrored = M.model.move(M.model.mirror(this.lastModel, x, y), [
-      x ? origin[0]! * 2 : 0,
-      y ? origin[1]! * 2 : 0,
-    ]);
+    const mirrored = M.model.mirror(this.lastModel, x, y);
+    M.model.center(mirrored);
+    M.model.moveRelative(mirrored, this.size.center);
+
+    let moveTo: IPoint = [0, 0];
+    switch (refPoint) {
+      case "right":
+        moveTo = x ? [this.size.width, 0] : [0, 0];
+        break;
+      case "left":
+        moveTo = x ? [-this.size.width, 0] : [0, 0];
+        break;
+      case "top":
+        moveTo = y ? [0, this.size.height] : [0, 0];
+        break;
+      case "bottom":
+        moveTo = y ? [0, -this.size.height] : [0, 0];
+        break;
+    }
+    M.model.moveRelative(mirrored, moveTo);
 
     this.$addToModel(mirrored, this.lastModelKey, true);
     return this;
   }
 
-  originate(pts: IPoint): this {
-    M.model.zero(this.lastModel);
+  move(pts: IPoint): this {
     M.model.moveRelative(this.lastModel, pts);
     return this;
   } //todo: use circle originate as default and use this originate only for Line.
@@ -87,14 +65,40 @@ export abstract class Shape implements Pacsaz {
     return this;
   }
 
-  rotate(angle: number, rotaionOrigin?: IPoint): this {
-    M.model.rotate(this.lastModel, angle, rotaionOrigin ?? this.size?.center);
+  rotate(angle: number, origin?: IPoint): this {
+    M.model.rotate(this.lastModel, angle, origin ?? this.size?.center);
     return this;
   }
 
   get size(): M.IMeasureWithCenter {
     const size = M.measure.modelExtents(this.lastModel);
-    if (!size) throw new Error("Size not Processed. [size()]");
+    if (!size) throw new Error("Size could not Processed. [size()]");
     return size;
+  }
+
+  // -------------------- UTILS --------------------
+
+  protected $registerModel(key: string, model: IModel) {
+    if (!this.models) this.models = {};
+    this.models[key] = model;
+  }
+
+  protected $addToModel(child: IModel, key: string, overwrite?: boolean) {
+    M.model.addTo(child, this, key, overwrite);
+  }
+
+  protected get lastModelKey() {
+    if (!this.models)
+      throw new Error("Model not initialized. [lastModelKey()]");
+
+    const modelsKeys = Object.keys(this.models);
+    const duppedKeys = modelsKeys.filter((k) => k.includes("dup"));
+    const lastKey = (duppedKeys.length === 0 ? modelsKeys : duppedKeys).at(-1)!;
+
+    return lastKey;
+  }
+
+  protected get lastModel() {
+    return this.models![this.lastModelKey]!;
   }
 }

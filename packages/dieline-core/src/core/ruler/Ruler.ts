@@ -25,11 +25,11 @@ export abstract class Ruler implements IModel {
     // Pointer
     const pointerRadius = 1.8;
     const pointerB = new Pacsaz.shapes.Polygon(3, pointerRadius)
-      .originate([to[0]!, to[1]! - pointerRadius])
+      .move([to[0]!, to[1]! - pointerRadius])
       .rotate(-(90 - this.rulerAngle), to);
 
     const pointerA = new Pacsaz.shapes.Polygon(3, pointerRadius, -90)
-      .originate([from[0]!, from[1]! + pointerRadius])
+      .move([from[0]!, from[1]! + pointerRadius])
       .rotate(-(90 - this.rulerAngle), from);
 
     // Indicator
@@ -48,12 +48,12 @@ export abstract class Ruler implements IModel {
   private indicator(start: IPoint, end: IPoint): IModel {
     const startIdcr = new Pacsaz.shapes.Line(4, [0, 0])
       .center()
-      .move(start)
+      .moveTo(start)
       .rotate(-(90 - this.rulerAngle), start);
 
     const endIdcr = new Pacsaz.shapes.Line(4, [0, 0])
       .center()
-      .move(end)
+      .moveTo(end)
       .rotate(-(90 - this.rulerAngle), end);
 
     return { models: { startIdcr, endIdcr } };

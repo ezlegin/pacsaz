@@ -53,9 +53,9 @@ export function addDoor() {
       startPoint: [thickness, length + height + safeFoldOffset],
     },
   )
-    .duplicate()
+    .dup()
     .mirror(true, false)
-    .move([
+    .moveTo([
       width - (seamSize.w + thickness),
       length + (height + safeFoldOffset - seamHeight),
     ]);

@@ -14,7 +14,7 @@ export class Circle extends Shape {
     return this.lastModel.paths?.circle?.origin;
   }
 
-  override originate(pts: IPoint): this {
+  override move(pts: IPoint): this {
     M.model.move(this.lastModel, pts);
     return this;
   }

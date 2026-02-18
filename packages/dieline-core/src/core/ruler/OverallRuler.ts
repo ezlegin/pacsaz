@@ -29,8 +29,8 @@ export class OverallRuler extends Ruler implements IModel {
     );
 
     const heightIndicator = new Pacsaz.shapes.Line(padding, [-padding - 2, 0])
-      .duplicate()
-      .move([0, trimSize.height]);
+      .dup()
+      .moveTo([0, trimSize.height]);
 
     const width = this.ruler(
       [0, -padding],
@@ -44,8 +44,8 @@ export class OverallRuler extends Ruler implements IModel {
       [0, -padding - 2],
       90,
     )
-      .duplicate()
-      .move([trimSize.width, 0]);
+      .dup()
+      .moveTo([trimSize.width, 0]);
 
     Pacsaz.shape.push(this, "overallRuler", {
       models: { height, width, widthIndicator, heightIndicator },

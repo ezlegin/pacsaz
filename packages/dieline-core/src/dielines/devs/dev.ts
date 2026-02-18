@@ -1,6 +1,4 @@
 import { Dieline } from "../../core/dieline/Dieline";
-import { Door } from "../../core/models/Door";
-import { Dust } from "../../core/models/Dust";
 import Pacsaz from "../../core/Pacsaz";
 
 export class Dev extends Dieline {
@@ -12,23 +10,35 @@ export class Dev extends Dieline {
   };
 
   protected override trim() {
-    const line = new Pacsaz.models.Glue();
-    const door = new Door().move([0, this.length + this.safeFoldOffset]);
-
-    const dust = new Dust(door.size.height, true, true).move([
-      this.width,
-      this.length + this.safeFoldOffset,
-    ]);
+    // const glue = new Pacsaz.models.Glue();
+    // const door = new Pacsaz.models.Door().moveTo([
+    //   0,
+    //   this.length + this.safeFoldOffset,
+    // ]);
+    // const dust = new Pacsaz.models.Dust(door.size.height, true, true).moveTo([
+    //   this.width,
+    //   this.length + this.safeFoldOffset,
+    // ]);
 
     const s1 = new Pacsaz.shapes.Line(this.width, [
       this.width + this.height,
       this.length,
     ]);
-
     const s2 = new Pacsaz.shapes.Line(this.width);
+    const s3 = new Pacsaz.shapes.Line(
+      this.length,
+      [this.width * 2 + this.height * 2, 0],
+      90,
+    );
 
-    this.$pushDielineModels({ door, dust });
-    Pacsaz.shape.push(this.trimModel, "trim", [line, s1, s2]);
+    const line = new Pacsaz.shapes.Line(15, [10, 30], 45)
+      .dup()
+      .mirror(true, true);
+
+    console.log("line", line);
+
+    // this.$pushModels({ door, dust });
+    this.$pushShapes({ s1, s2, s3, line }, "trimModel");
   }
 
   protected override fold(): void {
@@ -47,9 +57,9 @@ export class Dev extends Dieline {
     Pacsaz.shape.push(this.foldModel, "fold", [f1, f2, f3, f4]);
   }
 
-  // protected override dielineRuler(): IModel {
-  //   return {};
-  // }
+  protected override dielineRuler(): MakerJs.IModel {
+    return {};
+  }
 }
 
 export default new Dev();
