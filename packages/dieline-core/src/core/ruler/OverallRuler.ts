@@ -1,12 +1,9 @@
-import { getDevCTX } from "@repo/store/dieline/useDeveloperToolsStore";
-import M, { IModel } from "makerjs";
-import Pacsaz from "../Pacsaz";
 import { getOverallSizes } from "@repo/store/dieline/overallSize.store";
+import { getDevCTX } from "@repo/store/dieline/useDeveloperToolsStore";
+import Pacsaz from "../Pacsaz";
 import { Ruler } from "./Ruler";
 
-export class OverallRuler extends Ruler implements IModel {
-  models?: M.IModelMap | undefined;
-
+export class OverallRuler extends Ruler {
   constructor() {
     super();
 
@@ -21,18 +18,19 @@ export class OverallRuler extends Ruler implements IModel {
 
     const padding = 20;
 
-    const height = this.ruler(
+    const heightRuler = this.ruler(
       [-padding, 0],
       [-padding, trimSize.height],
       trimSize.height,
       "overallRulerText",
     );
 
-    const heightIndicator = new Pacsaz.shapes.Line(padding, [-padding - 2, 0])
+    const heightIndicator = new Pacsaz.shapes.Line(padding)
+      .move([-padding - 2, 0])
       .dup()
       .moveTo([0, trimSize.height]);
 
-    const width = this.ruler(
+    const widthRuler = this.ruler(
       [0, -padding],
       [trimSize.width, -padding],
       trimSize.width,
@@ -41,14 +39,20 @@ export class OverallRuler extends Ruler implements IModel {
 
     const widthIndicator = new Pacsaz.shapes.Line(
       padding,
-      [0, -padding - 2],
+
       90,
     )
+      .move([0, -padding - 2])
       .dup()
       .moveTo([trimSize.width, 0]);
 
     Pacsaz.shape.push(this, "overallRuler", {
-      models: { height, width, widthIndicator, heightIndicator },
+      models: {
+        widthRuler,
+        widthIndicator,
+        heightRuler,
+        heightIndicator,
+      },
     });
   }
 }

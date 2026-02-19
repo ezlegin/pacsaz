@@ -1,46 +1,73 @@
 import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
 import Pacsaz from "../Pacsaz";
 import { Ruler } from "./Ruler";
+import { DimensionType } from "@repo/store/data/types";
 
 export class DielineRuler extends Ruler {
   constructor(
     private width: number,
     private length: number,
+    private height?: number,
   ) {
     super();
     const { dimensionType } = getDielineSettings();
     const offset = this.$offset(dimensionType);
 
-    const points = {
+    const widthY = this.length / 4;
+    const heightY = this.length / 1.5;
+    const lengthX = this.width * 2 + (this.height ?? 0) * 1.5;
+
+    const coordinates = {
       length: {
-        from: [this.width / 4, offset],
-        to: [this.width / 4, this.length - offset],
+        from: [lengthX, offset],
+        to: [lengthX, this.length - offset],
       },
       width: {
-        from: [offset, this.length / 4],
-        to: [this.width - offset, this.length / 4],
+        from: [offset, widthY],
+        to: [this.width - offset, widthY],
+      },
+      height: {
+        from: [this.width + offset, heightY],
+        to: [this.width + (this.height ?? 0) - offset, heightY],
       },
       //todo: add height
     };
 
-    const lengthRuler = this.ruler(
-      points.length.from,
-      points.length.to,
-      this.length,
-    );
-
     const widthRuler = this.ruler(
-      points.width.from,
-      points.width.to,
+      coordinates.width.from,
+      coordinates.width.to,
       this.width,
     );
 
+    const lengthRuler = this.ruler(
+      coordinates.length.from,
+      coordinates.length.to,
+      this.length,
+    );
+
     Pacsaz.shape.push(this, "dielineRuler", {
-      models: { lengthRuler, widthRuler },
+      models: { widthRuler, lengthRuler },
     });
+
+    if (this.height) {
+      const heightRuler = this.ruler(
+        coordinates.height.from,
+        coordinates.height.to,
+        this.height,
+      );
+      this.models!["heightRuler"] = heightRuler;
+    }
   }
 
-  protected override get offsetAmount(): number {
-    return this.width * 0.02;
+  protected $offset(dimensionType: DimensionType) {
+    const offsetAmount = this.width * 0.02;
+    switch (dimensionType) {
+      case "manufacture":
+        return 0;
+      case "inner":
+        return offsetAmount;
+      case "outer":
+        return -offsetAmount;
+    }
   }
 }

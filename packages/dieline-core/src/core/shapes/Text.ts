@@ -1,5 +1,4 @@
 import M, { IPoint } from "makerjs";
-import Pacsaz from "../Pacsaz";
 import { Shape } from "./Shape";
 
 export class Text extends Shape {
@@ -8,6 +7,6 @@ export class Text extends Shape {
     const textCarrier = new M.models.ConnectTheDots(false, [[0, 0]]);
     const caption = M.model.addCaption(textCarrier, text, position);
 
-    Pacsaz.shape.push(this, "text", caption, textLayer ?? "text");
+    this.$pushShape("text", caption, textLayer ?? "text");
   }
 }

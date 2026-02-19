@@ -39,9 +39,11 @@ export class Exporter {
 
         dielineRuler: {
           stroke: "#00BFFF",
-          strokeWidth: toMm(1.5).toString(),
           fill: "#00BFFF",
-          cssStyle: "stroke-linecap:round",
+        },
+        dielinePointer: {
+          stroke: "none",
+          fill: "#00BFFF",
         },
         dielineRulerText: {
           stroke: "none",

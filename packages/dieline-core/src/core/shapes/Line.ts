@@ -13,7 +13,7 @@ export class Line extends Shape {
     const arcPoints = M.point.fromArc(arc);
     const line = new M.models.ConnectTheDots(false, [zero, arcPoints[1]!]);
 
-    this.$registerModel("line", line);
+    this.$pushShape("line", line);
   }
 }
 
@@ -41,6 +41,6 @@ export class Lines extends Shape {
     // this is used by mirror function to calculate the origin point.
     M.model.originate(line, points[0]!);
 
-    this.$registerModel("line", line);
+    this.$pushShape("line", line);
   }
 }

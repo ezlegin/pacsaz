@@ -56,10 +56,6 @@ export class Dev extends Dieline {
     ]);
     this.$pushShapes({ fold1, fold2, fold3, fold4 }, "foldModel");
   }
-
-  protected override dielineRuler(): MakerJs.IModel {
-    return {};
-  }
 }
 
 export default new Dev();

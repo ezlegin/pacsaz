@@ -20,7 +20,7 @@ export class Rectangle extends Shape {
       if (options?.deleteSide) delete rect.paths?.[options?.deleteSide];
     }
 
-    this.$addToModel(rect, "rectangle");
+    this.$pushShape("rectangle", rect);
   }
 }
 

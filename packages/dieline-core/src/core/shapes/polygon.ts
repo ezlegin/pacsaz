@@ -6,6 +6,6 @@ export class Polygon extends Shape {
     super();
 
     const polygon = new M.models.Polygon(sides, radius, firstCornerAngle ?? 90);
-    this.$addToModel(polygon, "polygon");
+    this.$pushShape("polygon", polygon);
   }
 }

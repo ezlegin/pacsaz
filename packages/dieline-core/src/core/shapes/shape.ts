@@ -1,4 +1,5 @@
 import M, { IModel, IPoint } from "makerjs";
+import Pacsaz from "../Pacsaz";
 
 type MirrorRefPoint = "top" | "bottom" | "left" | "right";
 export type RotateRefPoint =
@@ -16,7 +17,7 @@ export abstract class Shape implements IModel {
 
   dup(): this {
     const duplicated = M.model.clone(this.lastModel);
-    this.$addToModel(duplicated, "dup");
+    this.$pushShape("dup", duplicated);
     return this;
   }
 
@@ -45,7 +46,7 @@ export abstract class Shape implements IModel {
     }
     M.model.moveRelative(mirrored, moveTo);
 
-    this.$addToModel(mirrored, this.lastModelKey, true);
+    this.$pushShape(this.lastModelKey, mirrored, undefined, true);
     return this;
   }
 
@@ -118,13 +119,13 @@ export abstract class Shape implements IModel {
 
   // -------------------- UTILS --------------------
 
-  protected $registerModel(key: string, model: IModel) {
-    if (!this.models) this.models = {};
-    this.models[key] = model;
-  }
-
-  protected $addToModel(child: IModel, key: string, overwrite?: boolean) {
-    M.model.addTo(child, this, key, overwrite);
+  protected $pushShape(
+    key: string,
+    child: IModel,
+    layer?: string,
+    overwrite?: boolean,
+  ) {
+    Pacsaz.shape.push(this, key, child, layer, overwrite);
   }
 
   protected get lastModelKey() {

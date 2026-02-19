@@ -8,21 +8,12 @@ import { DimensionsType } from "../../data/types";
 import Pacsaz from "../Pacsaz";
 import { Exporter } from "./Exporter";
 
-export interface IDieline {
-  defaultDimensions: Dimension;
-  minDimensions: Dimension;
-  defaultBleed: number;
-  dimensionsType: DimensionsType;
-  materials: MaterialValue[];
-  slug: string;
-  model: () => string;
-}
-
-export abstract class Dieline implements IDieline {
+export abstract class Dieline {
   // -------------- Models --------------
   private main: IModel = {};
   protected trimModel: IModel = { layer: "trim" };
   protected foldModel: IModel = { layer: "fold" };
+  protected perfModel: IModel = { layer: "perf" };
 
   // -------------- Defaults --------------
   abstract slug: string;
@@ -85,11 +76,14 @@ export abstract class Dieline implements IDieline {
     // Dieline Layers
     this.trim();
     this.fold();
-    const perf = this.perf() ?? {};
-    M.model.layer(perf, "perf");
+    this.perf();
 
-    const dieline = {
-      models: { fold: this.foldModel, perf, trim: this.trimModel },
+    const dieline: IModel = {
+      models: {
+        fold: this.foldModel,
+        perf: this.perfModel,
+        trim: this.trimModel,
+      },
     };
 
     // Main Layers
@@ -104,15 +98,19 @@ export abstract class Dieline implements IDieline {
     this.$pushLayers({
       bleed,
       container,
+      dieline,
       dielineRuler,
       overallRuler,
-      dieline,
       anchor,
     });
   }
 
   protected dielineRuler(): IModel {
-    const dielineRuler = new Pacsaz.ruler.DielineRuler(this.width, this.length);
+    const dielineRuler = new Pacsaz.ruler.DielineRuler(
+      this.width,
+      this.length,
+      this.height,
+    );
     return dielineRuler;
   }
 

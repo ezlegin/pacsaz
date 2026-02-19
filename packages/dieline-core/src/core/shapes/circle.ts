@@ -8,7 +8,7 @@ export class Circle extends Shape {
     const circle = new M.paths.Circle(radius);
     const model: IModel = { paths: { circle } };
     if (origin) M.model.move(model, origin);
-    this.$addToModel(model, "circle");
+    this.$pushShape("circle", model);
   }
 
   override mirror(): this {
@@ -43,6 +43,6 @@ export class SemiCircle extends Shape {
     const semiCircle = new M.paths.Arc(zero, radius, startAngle, endAngle);
     const model: IModel = { paths: { semiCircle }, origin: zero };
 
-    this.$addToModel(model, "semi-circle");
+    this.$pushShape("semi-circle", model);
   }
 }

@@ -1,65 +1,90 @@
 import M, { IModel, IPoint } from "makerjs";
 import Pacsaz from "../Pacsaz";
-import { DimensionType } from "@repo/store/data/types";
 
 export abstract class Ruler implements IModel {
   models?: M.IModelMap | undefined;
   private rulerAngle: number = 0;
 
   ruler(from: IPoint, to: IPoint, value: number, textLayer?: string): IModel {
-    // Calcs
+    const line = this.line(from, to);
+    const indicator = this.indicator(from, to);
+    const text = this.text(from, to, value, textLayer);
+    const pointer = this.pointer(from, to);
+
+    return {
+      models: {
+        line,
+        pointer,
+        indicator,
+        text,
+      },
+    };
+  }
+
+  private line(from: IPoint, to: IPoint): IModel {
     const temp = new M.paths.Line([from, to]);
     this.rulerAngle = M.angle.ofLineInDegrees(temp);
     const center = M.measure.modelExtents({ paths: { temp } })!.center;
-    const padding = this.$padding(this.rulerAngle);
+    const padding = this.$textPadding(this.rulerAngle);
     const circle = new M.paths.Circle(padding);
     M.model.move(circle, center);
     const intersections = M.path.intersection(temp, circle);
     const beforEnds = intersections.intersectionPoints[0]!;
     const startBegins = intersections.intersectionPoints[1]!;
 
-    // Line
-    const lineA = new Pacsaz.shapes.LineChain([from, beforEnds]);
-    const lineB = new Pacsaz.shapes.LineChain([startBegins, to]);
+    const lineA = new Pacsaz.shapes.Lines([from, beforEnds]);
+    const lineB = new Pacsaz.shapes.Lines([startBegins, to]);
 
-    // Pointer
-    const pointerRadius = 1.8;
-    const pointerB = new Pacsaz.shapes.Polygon(3, pointerRadius)
-      .move([to[0]!, to[1]! - pointerRadius])
-      .rotate(-(90 - this.rulerAngle), to);
+    return { models: { lineA, lineB } };
+  }
 
-    const pointerA = new Pacsaz.shapes.Polygon(3, pointerRadius, -90)
-      .move([from[0]!, from[1]! + pointerRadius])
-      .rotate(-(90 - this.rulerAngle), from);
+  private text(
+    from: IPoint,
+    to: IPoint,
+    value: number,
+    textLayer?: string,
+  ): IModel {
+    const temp = new M.paths.Line([from, to]);
+    const center = M.measure.modelExtents({ paths: { temp } })!.center;
 
-    // Indicator
-    const indicator = this.indicator(from, to);
-
-    // Text
     const text = new Pacsaz.shapes.Text(
       `${value} mm`,
       center,
       textLayer ?? "dielineRulerText",
     );
 
-    return { models: { lineA, lineB, pointerA, pointerB, indicator, text } };
+    return { models: { text } };
   }
 
-  private indicator(start: IPoint, end: IPoint): IModel {
-    const startIdcr = new Pacsaz.shapes.Line(4, [0, 0])
-      .center()
-      .moveTo(start)
-      .rotate(-(90 - this.rulerAngle), start);
+  private pointer(from: IPoint, to: IPoint): IModel {
+    const pointerRadius = 1.8;
+    const pointerA = new Pacsaz.shapes.Polygon(pointerRadius, 3, -90)
+      .move([from[0]!, from[1]! + pointerRadius])
+      .rotate(-(90 - this.rulerAngle), "bottom");
 
-    const endIdcr = new Pacsaz.shapes.Line(4, [0, 0])
-      .center()
-      .moveTo(end)
-      .rotate(-(90 - this.rulerAngle), end);
+    const pointerB = new Pacsaz.shapes.Polygon(pointerRadius, 3)
+      .move([to[0]!, to[1]! - pointerRadius])
+      .rotate(-(90 - this.rulerAngle), "top");
 
-    return { models: { startIdcr, endIdcr } };
+    return { models: { pointerA, pointerB }, layer: "dielinePointer" };
   }
 
-  private $padding(angle: number) {
+  private indicator(from: IPoint, to: IPoint): IModel {
+    const indicatorSize = 3;
+    const IdcrA = new Pacsaz.shapes.Line(indicatorSize)
+      .center()
+      .move(from)
+      .rotate(-(90 - this.rulerAngle));
+
+    const IdcrB = new Pacsaz.shapes.Line(indicatorSize)
+      .center()
+      .move(to)
+      .rotate(-(90 - this.rulerAngle));
+
+    return { models: { IdcrA, IdcrB } };
+  }
+
+  private $textPadding(angle: number) {
     if (angle < 20) {
       return 15;
     }
@@ -70,20 +95,5 @@ export abstract class Ruler implements IModel {
       return 9;
     }
     return 7;
-  }
-
-  protected get offsetAmount() {
-    return 0;
-  }
-
-  protected $offset(dimensionType: DimensionType) {
-    switch (dimensionType) {
-      case "manufacture":
-        return 0;
-      case "inner":
-        return this.offsetAmount;
-      case "outer":
-        return -this.offsetAmount;
-    }
   }
 }
