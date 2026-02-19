@@ -1,10 +1,10 @@
-import { getOverallSizes } from "@repo/store/dieline/overallSize.store";
 import { getDevCTX } from "@repo/store/dieline/useDeveloperToolsStore";
+import M, { IModel } from "makerjs";
 import Pacsaz from "../Pacsaz";
 import { Ruler } from "./Ruler";
 
 export class OverallRuler extends Ruler {
-  constructor() {
+  constructor(private trimModel: IModel) {
     super();
 
     const { showOverallDimensions } = getDevCTX();
@@ -13,45 +13,42 @@ export class OverallRuler extends Ruler {
       return this;
     }
 
-    const trimSize = getOverallSizes().trim;
-    if (!trimSize) throw new Error("Trim size not available. [overallRuler()]");
+    const trimSize = M.measure.modelExtents(this.trimModel);
+    if (!trimSize) throw new Error("Sizes not available. [OverallRuler]");
 
     const padding = 20;
+    const indctrOffset = 3;
 
     const heightRuler = this.ruler(
-      [-padding, 0],
-      [-padding, trimSize.height],
-      trimSize.height,
+      [trimSize.low[0]! - padding, trimSize.low[1]!],
+      [trimSize.low[0]! - padding, trimSize.high[1]!],
+      +trimSize.height.toFixed(1),
       "overallRulerText",
     );
 
-    const heightIndicator = new Pacsaz.shapes.Line(padding)
-      .move([-padding - 2, 0])
+    const heightIndctr = new Pacsaz.shapes.Line(padding)
+      .moveTo([trimSize.low[0]! - padding + indctrOffset, trimSize.low[1]!])
       .dup()
-      .moveTo([0, trimSize.height]);
+      .moveTo([trimSize.low[0]! - padding + indctrOffset, trimSize.high[1]!]);
 
     const widthRuler = this.ruler(
-      [0, -padding],
-      [trimSize.width, -padding],
-      trimSize.width,
+      [trimSize.low[0]!, trimSize.low[1]! - padding],
+      [trimSize.high[0]!, trimSize.low[1]! - padding],
+      +trimSize.height.toFixed(1),
       "overallRulerText",
     );
 
-    const widthIndicator = new Pacsaz.shapes.Line(
-      padding,
-
-      90,
-    )
-      .move([0, -padding - 2])
+    const widthIndctr = new Pacsaz.shapes.Line(padding, 90)
+      .moveTo([trimSize.low[0]!, trimSize.low[1]! - padding + indctrOffset])
       .dup()
-      .moveTo([trimSize.width, 0]);
+      .moveTo([trimSize.high[0]!, trimSize.low[1]! - padding + indctrOffset]);
 
     Pacsaz.shape.push(this, "overallRuler", {
       models: {
-        widthRuler,
-        widthIndicator,
         heightRuler,
-        heightIndicator,
+        heightIndctr,
+        widthRuler,
+        widthIndctr,
       },
     });
   }

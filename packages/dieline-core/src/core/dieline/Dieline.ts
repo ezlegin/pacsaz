@@ -6,6 +6,7 @@ import { setOverallSize } from "@repo/store/dieline/overallSize.store";
 import M, { IModel, IModelMap } from "makerjs";
 import { DimensionsType } from "../../data/types";
 import Pacsaz from "../Pacsaz";
+import { DielineRuler } from "../ruler/DielineRuler";
 import { Exporter } from "./Exporter";
 
 export abstract class Dieline {
@@ -89,8 +90,10 @@ export abstract class Dieline {
     // Main Layers
     const bleed = new Pacsaz.layer.Bleed(this.trimModel, this.settings.bleed);
     const container = new Pacsaz.layer.Container(this.trimModel);
-    const dielineRuler = this.dielineRuler();
-    const overallRuler = new Pacsaz.ruler.OverallRuler();
+    const widthRuler = this.widthRuler();
+    const lengthRuler = this.lengthRuler();
+    const heightRuler = this.heightRuler();
+    const overallRuler = new Pacsaz.ruler.OverallRuler(this.trimModel);
 
     // Dev Layers
     const anchor = new Pacsaz.layer.Anchor(this.main, this.trimModel);
@@ -99,19 +102,42 @@ export abstract class Dieline {
       bleed,
       container,
       dieline,
-      dielineRuler,
+      widthRuler,
+      lengthRuler,
+      heightRuler,
       overallRuler,
       anchor,
     });
   }
 
-  protected dielineRuler(): IModel {
-    const dielineRuler = new Pacsaz.ruler.DielineRuler(
+  // -------------- Rulers --------------
+  protected get rulerOffset() {
+    return this.width * 0.02;
+  }
+  protected widthRuler() {
+    return new DielineRuler(
+      [0, this.length / 4],
+      [this.width, this.length / 4],
       this.width,
-      this.length,
-      this.height,
+      this.rulerOffset,
     );
-    return dielineRuler;
+  }
+  protected lengthRuler() {
+    return new DielineRuler(
+      [this.width * 2 + this.height * 1.5, 0],
+      [this.width * 2 + this.height * 1.5, this.length],
+      this.length,
+      this.rulerOffset,
+    );
+  }
+  protected heightRuler() {
+    if (this.height === 0) return {};
+    return new DielineRuler(
+      [this.width, this.length / 1.5],
+      [this.width + this.height, this.length / 1.5],
+      this.height,
+      this.rulerOffset,
+    );
   }
 
   // -------------- Post Process --------------

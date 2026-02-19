@@ -1,9 +1,9 @@
 import M, { IModel, IPoint } from "makerjs";
 import Pacsaz from "../Pacsaz";
 
-export abstract class Ruler implements IModel {
+export class Ruler implements IModel {
   models?: M.IModelMap | undefined;
-  private rulerAngle: number = 0;
+  protected rulerAngle: number = 0;
 
   ruler(from: IPoint, to: IPoint, value: number, textLayer?: string): IModel {
     const line = this.line(from, to);
@@ -83,6 +83,8 @@ export abstract class Ruler implements IModel {
 
     return { models: { IdcrA, IdcrB } };
   }
+
+  // -------------- UTILS --------------
 
   private $textPadding(angle: number) {
     if (angle < 20) {
