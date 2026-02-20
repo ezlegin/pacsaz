@@ -1,4 +1,4 @@
-import { getDevCTX } from "@repo/store/dieline/useDeveloperToolsStore";
+import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
 import M, { IModel } from "makerjs";
 import Pacsaz from "../Pacsaz";
 import { Ruler } from "./Ruler";
@@ -7,8 +7,8 @@ export class OverallRuler extends Ruler {
   constructor(private trimModel: IModel) {
     super();
 
-    const { showOverallDimensions } = getDevCTX();
-    if (!showOverallDimensions) {
+    const { showOverallRulers } = getDielineSettings();
+    if (!showOverallRulers) {
       delete this.models?.overallRuler;
       return this;
     }

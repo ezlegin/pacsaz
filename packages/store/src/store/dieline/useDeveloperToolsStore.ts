@@ -4,7 +4,6 @@ import { isSubscribed } from "../app/user.store";
 type DeveloperToolsCTX = {
   showContainer: boolean;
   showAnchors: boolean;
-  showOverallDimensions: boolean;
   showWatermark: boolean;
   doCenterSVG: boolean;
 };
@@ -18,7 +17,6 @@ export const useDeveloperToolsStore = create<DeveloperToolsStore>((set) => ({
   ctx: {
     showContainer: true,
     showAnchors: false,
-    showOverallDimensions: false,
     showWatermark: !isSubscribed,
     doCenterSVG: true,
   },

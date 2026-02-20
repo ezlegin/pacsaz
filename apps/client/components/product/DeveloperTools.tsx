@@ -9,7 +9,7 @@ import { useState } from "react";
 
 const DeveloperTools = () => {
   const {
-    ctx: { showAnchors, showOverallDimensions, doCenterSVG, showWatermark },
+    ctx: { showAnchors, doCenterSVG, showWatermark },
     setDeveloperToolsCTX,
   } = useDeveloperToolsStore();
   const [open, setOpen] = useState(false);
@@ -18,8 +18,8 @@ const DeveloperTools = () => {
     onDevelepe && (
       <div
         className={cn(
-          open ? "translate-x-0" : "-translate-x-65",
-          "absolute flex items-center left-0 bottom-0 w-fit m-3 transition-all"
+          open ? "translate-x-0" : "-translate-x-55",
+          "absolute flex items-center left-0 bottom-0 w-fit m-3 transition-all",
         )}
       >
         <Button
@@ -48,15 +48,6 @@ const DeveloperTools = () => {
                 checked={showWatermark}
                 onCheckedChange={(val) =>
                   setDeveloperToolsCTX("showWatermark", val)
-                }
-              />
-            </div>
-            <div className="flex justify-between">
-              <p>Show Overall Dimensions</p>
-              <Switch
-                checked={showOverallDimensions}
-                onCheckedChange={(val) =>
-                  setDeveloperToolsCTX("showOverallDimensions", val)
                 }
               />
             </div>

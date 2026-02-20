@@ -12,12 +12,19 @@ export function useDielineGenerator(dieline: Dieline) {
   const [isRendering, startTransition] = useTransition();
 
   const {
-    ctx: { showAnchors, showOverallDimensions, showWatermark },
+    ctx: { showAnchors, showWatermark },
   } = useDeveloperToolsStore();
 
   const {
     setDefaultSettings,
-    settings: { bleed, dimensionType, material, thickness, dimension },
+    settings: {
+      bleed,
+      dimensionType,
+      material,
+      thickness,
+      dimension,
+      showOverallRulers,
+    },
   } = useDielineSettingsStore();
   const offsets = resolveOffsets();
 
@@ -34,6 +41,7 @@ export function useDielineGenerator(dieline: Dieline) {
       material: dieline.materials[0]!,
       thickness: dieline.materials[0]!.thickness,
       safeFoldOffset: dieline.materials[0]!.safeFoldOffset,
+      showOverallRulers: false,
     });
   }, []);
 
@@ -53,7 +61,7 @@ export function useDielineGenerator(dieline: Dieline) {
 
     showAnchors,
     showWatermark,
-    showOverallDimensions,
+    showOverallRulers,
   ]);
 
   return {

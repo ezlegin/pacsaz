@@ -5,7 +5,7 @@ import { Button } from "@repo/ui/components/button";
 import { Card } from "@repo/ui/components/card";
 import { Separator } from "@repo/ui/components/separator";
 import { Spinner } from "@repo/ui/components/spinner";
-import { ZoomIn, ZoomOut } from "lucide-react";
+import { Ruler, ZoomIn, ZoomOut } from "lucide-react";
 import { useLayoutEffect, useRef, useState } from "react";
 import { onDevelepe } from "@repo/lib/data/consts";
 import {
@@ -13,6 +13,8 @@ import {
   TransformComponent,
   TransformWrapper,
 } from "react-zoom-pan-pinch";
+import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
+import { cn } from "@repo/ui/lib/utils";
 
 interface Props {
   isRendering: boolean;
@@ -36,6 +38,7 @@ export default function SvgPreview({
   const contentRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState<number>();
+  const { setSetting, settings } = useDielineSettingsStore();
 
   useLayoutEffect(() => {
     if (!contentRef.current || !wrapperRef.current) return;
@@ -78,10 +81,14 @@ export default function SvgPreview({
     return () => {
       resizeObserver.disconnect();
       images.forEach((img) =>
-        img.removeEventListener("load", measureAndCenter)
+        img.removeEventListener("load", measureAndCenter),
       );
     };
   }, [svg, doCenterSVG]);
+
+  const handleRulers = () => {
+    setSetting("showOverallRulers", !settings.showOverallRulers);
+  };
 
   return (
     <div
@@ -129,7 +136,22 @@ export default function SvgPreview({
             </TransformComponent>
 
             {showControls && (
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2">
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 flex gap-3">
+                <Card className="p-1 justify-center aspect-square">
+                  <Button
+                    className={cn(
+                      settings.showOverallRulers
+                        ? "text-primary"
+                        : "text-muted-foreground",
+                    )}
+                    variant="ghost"
+                    size={"icon"}
+                    title="نمایش خطکش ها"
+                    onClick={() => handleRulers()}
+                  >
+                    <Ruler />
+                  </Button>
+                </Card>
                 <Card className="flex-row items-center gap-2 p-1 text-muted-foreground">
                   <Button variant="ghost" onClick={() => zoomOut(0.4)}>
                     <ZoomOut size={20} />
@@ -147,6 +169,7 @@ export default function SvgPreview({
                     <ZoomIn size={20} />
                   </Button>
                 </Card>
+                <div className="size-10" />
               </div>
             )}
           </>

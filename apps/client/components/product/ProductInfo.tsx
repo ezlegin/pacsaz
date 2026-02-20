@@ -41,13 +41,13 @@ const ProductInfo = ({ dimensionsType }: Props) => {
       dimensionType,
       dimensionType === "inner"
         ? (offset?.[axis].inner ?? 0)
-        : (offset?.[axis].outer ?? 0)
+        : (offset?.[axis].outer ?? 0),
     );
 
   const calcInner = (
     rawValue: number,
     manufactureValue: number,
-    axis: "width" | "length"
+    axis: "width" | "length",
   ) => {
     const base = dimensionType === "outer" ? manufactureValue : rawValue;
 
@@ -60,7 +60,7 @@ const ProductInfo = ({ dimensionsType }: Props) => {
   const calcOuter = (
     rawValue: number,
     manufactureValue: number,
-    axis: "width" | "length"
+    axis: "width" | "length",
   ) => {
     const base = dimensionType === "inner" ? manufactureValue : rawValue;
 
@@ -161,7 +161,7 @@ const ProductInfo = ({ dimensionsType }: Props) => {
           {dimensions.map(
             ({ label, value, key }) =>
               dimensionsType.includes(
-                key as "manufacture" | "inner" | "outer"
+                key as "manufacture" | "inner" | "outer",
               ) && (
                 <div key={label} className="border p-2 rounded-2xl">
                   <span className="block text-muted-foreground text-xs">
@@ -171,7 +171,7 @@ const ProductInfo = ({ dimensionsType }: Props) => {
                     {value}
                   </span>
                 </div>
-              )
+              ),
           )}
         </div>
 
