@@ -1,6 +1,7 @@
 import { Dieline } from "../core/dieline/Dieline";
 import Pacsaz from "../core/Pacsaz";
 import { DielineRuler } from "../core/ruler/DielineRuler";
+import { DimensionsType } from "../data/types";
 
 export class PostalCard extends Dieline {
   override slug = `postal-card`;
@@ -9,6 +10,7 @@ export class PostalCard extends Dieline {
     length: 230,
     height: 0,
   };
+  override dimensionsType: DimensionsType = ["manufacture"];
 
   protected override trim() {
     const rect = new Pacsaz.shapes.Rectangle(this.width * 2, this.length);

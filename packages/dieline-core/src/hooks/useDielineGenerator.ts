@@ -3,9 +3,9 @@ import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.sto
 import { useSVGStore } from "@repo/store/dieline/svg.store";
 import { useDeveloperToolsStore } from "@repo/store/dieline/useDeveloperToolsStore";
 import { useEffect, useTransition } from "react";
-import { Dieline } from "../data/types";
 import { resolveDimensions } from "../utils/dimensionResolver";
 import { resolveOffsets } from "../utils/offsetResolver";
+import { Dieline } from "../core/dieline/Dieline";
 
 export function useDielineGenerator(dieline: Dieline) {
   const { setSvg } = useSVGStore();

@@ -21,7 +21,7 @@ const DielineGenerator = ({ slug }: { slug: string }) => {
 
   useEffect(() => {
     setDeveloperToolsCTX("showContainer", true);
-    // this is because: if the use comes dierectly from home screen, doesn't get container.
+    // this is because: if the user comes dierectly from home screen, doesn't get container.
   }, []);
 
   return (

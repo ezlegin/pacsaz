@@ -10,14 +10,14 @@ import { useEffect } from "react";
 import { useDeveloperToolsStore } from "@repo/store/dieline/useDeveloperToolsStore";
 import { DIMENSIONS } from "@/data/consts";
 
-const HomeSVGModel = () => {
+const HomeDieline = () => {
   const dieline = dielineImporter("home-dieline");
 
   if (!dieline) return;
 
-  dieline.dimensions.defaultDimensions.width = 80;
-  dieline.dimensions.defaultDimensions.length = 130;
-  dieline.dimensions.defaultDimensions.height = 40;
+  dieline.defaultDimensions.width = 80;
+  dieline.defaultDimensions.length = 130;
+  dieline.defaultDimensions.height = 40;
   const { isRendering } = useDielineGenerator(dieline);
   const { setDeveloperToolsCTX } = useDeveloperToolsStore();
 
@@ -44,7 +44,7 @@ const HomeSVGModel = () => {
           <DimensionInput
             key={key}
             label={label}
-            min={dieline.dimensions.minDimensions[key]}
+            min={dieline.minDimensions[key]}
             dimKey={key}
             isRendering={isRendering}
           />
@@ -54,4 +54,4 @@ const HomeSVGModel = () => {
   );
 };
 
-export default HomeSVGModel;
+export default HomeDieline;

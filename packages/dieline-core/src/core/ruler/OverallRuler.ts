@@ -26,7 +26,7 @@ export class OverallRuler extends Ruler {
       "overallRulerText",
     );
 
-    const heightIndctr = new Pacsaz.shapes.Line(padding)
+    const heightIndctr = new Pacsaz.shapes.Line(padding - 4)
       .moveTo([trimSize.low[0]! - padding + indctrOffset, trimSize.low[1]!])
       .dup()
       .moveTo([trimSize.low[0]! - padding + indctrOffset, trimSize.high[1]!]);
@@ -34,11 +34,11 @@ export class OverallRuler extends Ruler {
     const widthRuler = this.ruler(
       [trimSize.low[0]!, trimSize.low[1]! - padding],
       [trimSize.high[0]!, trimSize.low[1]! - padding],
-      +trimSize.height.toFixed(1),
+      +trimSize.width.toFixed(1),
       "overallRulerText",
     );
 
-    const widthIndctr = new Pacsaz.shapes.Line(padding, 90)
+    const widthIndctr = new Pacsaz.shapes.Line(padding - 4, 90)
       .moveTo([trimSize.low[0]!, trimSize.low[1]! - padding + indctrOffset])
       .dup()
       .moveTo([trimSize.high[0]!, trimSize.low[1]! - padding + indctrOffset]);
