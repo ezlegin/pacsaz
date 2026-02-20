@@ -1,8 +1,7 @@
 import { Anchor } from "./dieline/Anchor";
 import { Bleed } from "./dieline/Bleed";
 import { Container } from "./dieline/Container";
-import { pushModel } from "./helpers/add/push";
-import { Measure } from "./measure/measure";
+import { pushModel } from "./helpers/push";
 import { Glue } from "./models/Glue";
 import { CustomRuler } from "./ruler/CustomRuler";
 import { DielineRuler } from "./ruler/DielineRuler";
@@ -15,10 +14,13 @@ import { Text } from "./shapes/Text";
 import { PointBuilder } from "./point/PointBuilder";
 import { Door } from "./models/Door";
 import { Dust } from "./models/Dust";
+import { ToShape } from "./shapes/ToShape";
+import { Arc } from "./shapes/Arc";
 
 export default class Pacsaz {
   static shape = {
     push: pushModel,
+    ToShape,
   };
 
   static shapes = {
@@ -29,6 +31,7 @@ export default class Pacsaz {
     SemiCircle,
     Polygon,
     Text,
+    Arc,
   };
 
   static models = {
@@ -52,6 +55,4 @@ export default class Pacsaz {
     Container,
     Anchor,
   };
-
-  static measure = Measure;
 }
