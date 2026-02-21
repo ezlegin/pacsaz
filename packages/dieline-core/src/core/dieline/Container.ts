@@ -1,6 +1,7 @@
 import { getDevCTX } from "@repo/store/dieline/useDeveloperToolsStore";
 import M, { IModel } from "makerjs";
 import Pacsaz from "../Pacsaz";
+import { containerSize } from "../../data/consts";
 
 export class Container implements IModel {
   constructor(trimModel: IModel) {
@@ -23,7 +24,7 @@ export class Container implements IModel {
         [maxX, maxY],
         [minX, maxY],
       ]),
-      getDevCTX().showContainer ? 30 : 6,
+      getDevCTX().showContainer ? containerSize : 6,
       1,
       false,
     );

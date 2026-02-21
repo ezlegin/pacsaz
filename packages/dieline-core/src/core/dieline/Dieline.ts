@@ -8,6 +8,7 @@ import { DimensionsType } from "../../data/types";
 import Pacsaz from "../Pacsaz";
 import { DielineRuler } from "../ruler/DielineRuler";
 import { Exporter } from "./Exporter";
+import { Bleed } from "./Bleed";
 
 export abstract class Dieline {
   // -------------- Models --------------
@@ -88,12 +89,16 @@ export abstract class Dieline {
     };
 
     // Main Layers
-    const bleed = new Pacsaz.layer.Bleed(this.trimModel, this.settings.bleed);
+    const bleed = new Bleed(this.trimModel, this.settings.bleed);
     const container = new Pacsaz.layer.Container(this.trimModel);
-    const widthRuler = this.widthRuler();
-    const lengthRuler = this.lengthRuler();
-    const heightRuler = this.heightRuler();
-    const overallRuler = new Pacsaz.ruler.OverallRuler(this.trimModel);
+    const rulers = {
+      models: {
+        widthRuler: this.widthRuler(),
+        lengthRuler: this.lengthRuler(),
+        heightRuler: this.heightRuler(),
+        overallRuler: new Pacsaz.ruler.OverallRuler(this.trimModel),
+      },
+    };
 
     // Dev Layers
     const anchor = new Pacsaz.layer.Anchor(this.main, this.trimModel);
@@ -102,10 +107,7 @@ export abstract class Dieline {
       bleed,
       container,
       dieline,
-      widthRuler,
-      lengthRuler,
-      heightRuler,
-      overallRuler,
+      rulers,
       anchor,
     });
   }

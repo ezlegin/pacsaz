@@ -14,7 +14,7 @@ export class Anchor implements IModel {
     const holes: IModel = {};
     for (const chain of trimChains as IChain[]) {
       const keyPoints = M.chain.toKeyPoints(chain);
-      const hole = new M.models.Holes(0.5, keyPoints);
+      const hole = new M.models.Holes(0.3, keyPoints);
       Pacsaz.shape.push(holes, "anchor", hole);
     }
 

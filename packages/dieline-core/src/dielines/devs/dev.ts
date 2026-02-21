@@ -1,7 +1,7 @@
 import { Dieline } from "../../core/dieline/Dieline";
 import Pacsaz from "../../core/Pacsaz";
 
-export class Dev extends Dieline {
+class Dev extends Dieline {
   override slug = "dev";
   override defaultDimensions = {
     width: 90,
@@ -41,8 +41,17 @@ export class Dev extends Dieline {
       this.length,
     ]);
 
+    const s4 = new Pacsaz.shapes.Lines(
+      [
+        [-30, -30],
+        [-20, -20],
+        [-20, -30],
+      ],
+      { closed: true },
+    );
+
     this.$pushModels({ glue, door, dust, dust2, lock: snapLock });
-    this.$pushShapes({ s1, s2, s3 }, "trimModel");
+    this.$pushShapes({ s1, s2, s3, s4 }, "trimModel");
   }
 
   protected override fold(): void {
@@ -65,6 +74,7 @@ export class Dev extends Dieline {
       this.width * 2 + this.height,
       snapLockOffsetFromBase,
     ]);
+
     this.$pushShapes({ fold1, fold2, fold3, fold4 }, "foldModel");
   }
 }

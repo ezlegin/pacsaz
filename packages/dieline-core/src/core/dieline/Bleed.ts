@@ -3,31 +3,36 @@ import Pacsaz from "../Pacsaz";
 
 export class Bleed implements IModel {
   constructor(trimModel: IModel, bleedAmount: number) {
-    if (!trimModel) {
-      console.error("Trim Model not Available.");
-      return;
-    }
     const cloned = M.model.clone(trimModel);
-    const chain = M.model.findSingleChain(cloned);
+    const glueModel = cloned.models?.glue;
+    if (glueModel) {
+      const chain = M.model.findSingleChain(glueModel);
+      const keyPoints = M.chain.toKeyPoints(chain!);
+      const points = {
+        start: keyPoints.at(0)!,
+        end: keyPoints.at(-1)!,
+      };
 
-    if (!chain) {
-      const bleed = M.model.outline(cloned, bleedAmount, 1);
-      Pacsaz.shape.push(this, "bleed", bleed, "bleed");
-      return;
-    }
-
-    let keyPoints = M.chain.toKeyPoints(chain);
-
-    const glue = cloned.models?.glue;
-    if (glue) {
+      const path = new Pacsaz.shapes.Lines([points.start, points.end]);
+      Pacsaz.shape.push(cloned, "glue-path", path);
       delete cloned.models?.glue;
-      const chain = M.model.findSingleChain(cloned);
-      if (chain) keyPoints = M.chain.toKeyPoints(chain);
     }
 
-    const newModel = M.chain.toNewModel(chain);
+    const chain = M.model.findChains(cloned) as M.IChain[];
 
-    const bleed = M.model.outline(newModel, bleedAmount, 1);
+    const newerModel: IModel = { paths: {} };
+    let idx = 0;
+    for (const c of chain) {
+      const newModel = M.chain.toNewModel(c);
+
+      for (const key in newModel.paths) {
+        const path = newModel.paths[key]!;
+        newerModel.paths![`path-${idx}`] = path;
+        idx++;
+      }
+    }
+
+    const bleed = M.model.outline(newerModel, bleedAmount, 1);
     Pacsaz.shape.push(this, "bleed", bleed, "bleed");
   }
 }

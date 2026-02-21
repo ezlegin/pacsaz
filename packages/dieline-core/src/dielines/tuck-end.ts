@@ -1,5 +1,6 @@
 import { Dieline } from "../core/dieline/Dieline";
 import Pacsaz from "../core/Pacsaz";
+import { zero } from "../data/consts";
 
 export class TuckEnd extends Dieline {
   override slug = "tuck-end";
@@ -10,7 +11,10 @@ export class TuckEnd extends Dieline {
   };
 
   protected override trim() {
-    const glue = new Pacsaz.models.Glue();
+    const glue = new Pacsaz.models.Glue(zero, [
+      0,
+      this.length + this.safeFoldOffset,
+    ]);
     const door = new Pacsaz.models.Door()
       .moveTo([0, this.length + this.safeFoldOffset])
       .dup()
