@@ -75,32 +75,21 @@ export abstract class Dieline {
     this.trimModel = { layer: "trim" };
     this.foldModel = { layer: "fold" };
 
-    // Dieline Layers
     this.trim();
     this.fold();
     this.perf();
 
     const dieline: IModel = {
       models: {
+        trim: this.trimModel,
         fold: this.foldModel,
         perf: this.perfModel,
-        trim: this.trimModel,
       },
     };
 
-    // Main Layers
     const bleed = new Bleed(this.trimModel, this.settings.bleed);
     const container = new Pacsaz.layer.Container(this.trimModel);
-    const rulers = {
-      models: {
-        widthRuler: this.widthRuler(),
-        lengthRuler: this.lengthRuler(),
-        heightRuler: this.heightRuler(),
-        overallRuler: new Pacsaz.ruler.OverallRuler(this.trimModel),
-      },
-    };
-
-    // Dev Layers
+    const rulers = this.rulers();
     const anchor = new Pacsaz.layer.Anchor(this.main, this.trimModel);
 
     this.$pushLayers({
@@ -113,6 +102,17 @@ export abstract class Dieline {
   }
 
   // -------------- Rulers --------------
+  private rulers() {
+    return {
+      models: {
+        widthRuler: this.widthRuler(),
+        lengthRuler: this.lengthRuler(),
+        heightRuler: this.heightRuler(),
+        overallRuler: new Pacsaz.ruler.OverallRuler(this.trimModel),
+      },
+      layer: "dielineRuler",
+    };
+  }
   protected get rulerOffset() {
     return this.width * 0.02;
   }
