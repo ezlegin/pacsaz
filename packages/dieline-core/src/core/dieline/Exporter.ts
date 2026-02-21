@@ -26,7 +26,7 @@ export class Exporter {
           stroke: "red",
           cssStyle: `stroke-dasharray:${[toMm(5), toMm(4)].join(",")}`,
         },
-        bleed: { stroke: "green", fill: isPaper ? "white" : "#f4efe9" },
+        bleed: { stroke: "green", fill: isPaper ? "white" : "#f3f0ed" },
         perf: {
           stroke: "fuchsia",
           strokeWidth: toMm(1.5).toString(),

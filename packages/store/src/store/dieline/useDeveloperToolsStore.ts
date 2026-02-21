@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { isSubscribed } from "../app/user.store";
+import { onDevelope } from "../../utils/onDevelope";
 
 type DeveloperToolsCTX = {
   showContainer: boolean;
@@ -18,7 +19,7 @@ export const useDeveloperToolsStore = create<DeveloperToolsStore>((set) => ({
     showContainer: true,
     showAnchors: false,
     showWatermark: !isSubscribed,
-    doCenterSVG: true,
+    doCenterSVG: onDevelope ? false : true,
   },
 
   setDeveloperToolsCTX: (key, val) =>

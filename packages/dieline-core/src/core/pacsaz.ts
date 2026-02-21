@@ -16,6 +16,7 @@ import { Door } from "./models/Door";
 import { Dust } from "./models/Dust";
 import { ToShape } from "./shapes/ToShape";
 import { Arc } from "./shapes/Arc";
+import { SnapLock } from "./models/SnapLock";
 
 export default class Pacsaz {
   static shape = {
@@ -38,6 +39,7 @@ export default class Pacsaz {
     Glue,
     Door,
     Dust,
+    SnapLock,
   };
 
   static point = {

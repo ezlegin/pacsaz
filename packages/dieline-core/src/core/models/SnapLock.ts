@@ -1,4 +1,5 @@
-import { IModel } from "makerjs";
+import M, { IModel, IPoint } from "makerjs";
+import { zero } from "../../data/consts";
 import Pacsaz from "../Pacsaz";
 import { Model } from "./Model";
 
@@ -34,11 +35,36 @@ export class SnapLock extends Model {
   }
 
   protected override fold() {
-    const mouthFold = new Pacsaz.shapes.Line(
-      this.width - this.safeFoldOffset * 2,
-    ).move([this.safeFoldOffset, 0]);
+    const endPoint = [this.width * 2 + this.height * 2, 0];
+    const temp = new M.paths.Line([zero, endPoint]);
 
-    return { mouthFold };
+    const trims: IModel = { models: this.trim() };
+    const chain = M.model.findSingleChain(trims);
+    const combinedModel = M.chain.toNewModel(chain);
+
+    let intersectionPoints: IPoint[] = [];
+
+    for (const pathId in combinedModel.paths) {
+      const path = combinedModel.paths[pathId]!;
+      const ints = M.path.intersection(temp, path);
+      if (ints) {
+        const intPoint = ints.intersectionPoints[0]!;
+        const lastPoint = intersectionPoints.at(-1);
+        const isEqual =
+          lastPoint && M.measure.isPointEqual(intPoint, lastPoint);
+        if (!isEqual) intersectionPoints.push(intPoint);
+      }
+    }
+
+    let folds: IModel = {};
+    for (let i = intersectionPoints.length; i > 0; i -= 2) {
+      const p1 = intersectionPoints[i - 1]!;
+      const p2 = intersectionPoints[i - 2]!;
+      const fold = new Pacsaz.shapes.Lines([p1, p2]);
+      Pacsaz.shape.push(folds, "fold", fold);
+    }
+
+    return { folds };
   }
 
   private mouth(): IModel {

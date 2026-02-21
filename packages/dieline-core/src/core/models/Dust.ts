@@ -91,18 +91,16 @@ export class Dust extends Model {
   }
 
   protected override fold() {
-    const Y = -this.safeFoldOffset;
+    const Y = [this.height, -this.safeFoldOffset];
+    const X = [0, -this.safeFoldOffset];
 
-    const temp = new M.paths.Line([
-      [0, Y],
-      [this.height, Y],
-    ]);
+    const temp = new M.paths.Line([X, Y]);
 
     const { intersectionPoints } = M.path.intersection(this.arc, temp);
 
     const fold = new Pacsaz.shapes.Lines([
-      intersectionPoints[1]!,
-      [this.height - this.thickness, Y],
+      this.considerDustHole ? intersectionPoints[1]! : X,
+      [Y[0]! - this.thickness, Y[1]!],
     ]);
 
     return { fold };

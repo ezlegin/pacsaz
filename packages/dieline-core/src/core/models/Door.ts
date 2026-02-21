@@ -1,3 +1,4 @@
+import M, { IModel, IPoint } from "makerjs";
 import { calcualteTuckFlapSize } from "../../utils/calculate/calculateTuckFlapSize";
 import Pacsaz from "../Pacsaz";
 import { Model } from "./Model";
@@ -32,6 +33,12 @@ export class Door extends Model {
       { filletRadius: 20 },
     );
 
+    const seam = this.seam();
+
+    return { doorLine, seam };
+  }
+
+  private seam(): IModel {
     const seam_pb = new Pacsaz.point.Builder([
       this.tuckFlap.indent,
       this.topPanelHeight,
@@ -46,20 +53,36 @@ export class Door extends Model {
       .mirror(true, false, "left")
       .move([this.tuckFlap.w, 0]);
 
-    return { doorLine, seam };
+    return seam;
   }
 
   protected override fold() {
-    const tuckFlapFold = new Pacsaz.shapes.Line(
-      this.width - this.seamSize.w * 2 - this.thickness * 2,
-    ).move([
-      this.thickness + this.seamSize.w,
-      this.topPanelHeight - this.fingerSpace,
+    const Y = this.topPanelHeight - this.fingerSpace;
+    const temp = new M.paths.Line([
+      [0, Y],
+      [this.width, Y],
     ]);
+
+    const seamChain = M.model.findChains(this.seam()) as M.IChain[];
+    let intersectionPoints: IPoint[] = [];
+    for (const chain of seamChain) {
+      const newModel = M.chain.toNewModel(chain);
+
+      for (const pathId in newModel.paths) {
+        const path = newModel.paths[pathId]!;
+        const ints = M.path.intersection(temp, path);
+        if (ints) {
+          const intPoint = ints.intersectionPoints[0]!;
+          intersectionPoints.push(intPoint);
+        }
+      }
+    }
+
+    const tuckEndFold = new Pacsaz.shapes.Lines(intersectionPoints);
 
     const doorFold = new Pacsaz.shapes.Line(this.width);
 
-    return { doorFold, tuckFlapFold };
+    return { doorFold, tuckEndFold };
   }
 
   get seamSize() {
