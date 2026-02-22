@@ -6,9 +6,10 @@ import { notFound } from "next/navigation";
 import DielineSettings from "./DielineSettings";
 import ProductInfo from "./ProductInfo";
 import ProductLoadingOverlay from "./ProductLoadingOverlay";
-import SVGPreview from "./SVGPreview";
 import { useEffect } from "react";
 import { useDeveloperToolsStore } from "@repo/store/dieline/useDeveloperToolsStore";
+import dynamic from "next/dynamic";
+const SVGPreview = dynamic(() => import("./SVGPreview"), { ssr: false });
 
 const DielineGenerator = ({ slug }: { slug: string }) => {
   const { setDeveloperToolsCTX } = useDeveloperToolsStore();

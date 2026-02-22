@@ -14,7 +14,6 @@ export type DielineSettings = {
   thickness: number;
   dimensionType: DimensionType;
   format: Format;
-  safeFoldOffset: number;
   showOverallRulers: boolean;
 };
 
@@ -47,7 +46,6 @@ export const useDielineSettingsStore = create<DielineSettingsStore>((set) => ({
     format: "pdf",
     material: defaultMaterial,
     thickness: defaultMaterial.thickness,
-    safeFoldOffset: defaultMaterial.safeFoldOffset,
     showOverallRulers: false,
   },
 

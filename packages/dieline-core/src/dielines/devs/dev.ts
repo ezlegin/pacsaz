@@ -41,17 +41,8 @@ class Dev extends Dieline {
       this.length,
     ]);
 
-    const s4 = new Pacsaz.shapes.Lines(
-      [
-        [-30, -30],
-        [-20, -20],
-        [-20, -30],
-      ],
-      { closed: true },
-    );
-
     this.$pushModels({ glue, door, dust, dust2, lock: snapLock });
-    this.$pushShapes({ s1, s2, s3, s4 }, "trimModel");
+    this.$pushShapes({ s1, s2, s3 }, "trimModel");
   }
 
   protected override fold(): void {

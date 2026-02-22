@@ -2,21 +2,21 @@ import { Anchor } from "./dieline/Anchor";
 import { Bleed } from "./dieline/Bleed";
 import { Container } from "./dieline/Container";
 import { pushModel } from "./helpers/push";
+import { Door } from "./models/Door";
+import { Dust } from "./models/Dust";
 import { Glue } from "./models/Glue";
+import { SnapLock } from "./models/SnapLock";
+import { PointBuilder } from "./point/PointBuilder";
 import { CustomRuler } from "./ruler/CustomRuler";
 import { DielineRuler } from "./ruler/DielineRuler";
 import { OverallRuler } from "./ruler/OverallRuler";
+import { Arc } from "./shapes/Arc";
 import { Circle, SemiCircle } from "./shapes/Circle";
 import { Line, Lines } from "./shapes/Line";
 import { Polygon } from "./shapes/Polygon";
 import { Rectangle } from "./shapes/Rectangle";
 import { Text } from "./shapes/Text";
-import { PointBuilder } from "./point/PointBuilder";
-import { Door } from "./models/Door";
-import { Dust } from "./models/Dust";
 import { ToShape } from "./shapes/ToShape";
-import { Arc } from "./shapes/Arc";
-import { SnapLock } from "./models/SnapLock";
 
 export default class Pacsaz {
   static shape = {

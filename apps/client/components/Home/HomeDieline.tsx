@@ -24,6 +24,7 @@ const HomeDieline = () => {
   useEffect(() => {
     setDeveloperToolsCTX("showWatermark", false);
     setDeveloperToolsCTX("showContainer", false);
+    setDeveloperToolsCTX("doCenterSVG", true);
   }, []);
 
   return (

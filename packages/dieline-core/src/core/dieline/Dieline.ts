@@ -22,9 +22,9 @@ export abstract class Dieline {
   abstract defaultDimensions: Dimension;
   defaultBleed = bleeds.default;
   minDimensions = {
-    length: 30,
-    width: 30,
-    height: 30,
+    length: 40,
+    width: 40,
+    height: 40,
   };
   dimensionsType: DimensionsType = ["manufacture", "inner", "outer"];
   materials: MaterialValue[] = [
@@ -52,7 +52,7 @@ export abstract class Dieline {
     return this.settings.dimension.resolved.height;
   }
   protected get safeFoldOffset() {
-    return this.settings.safeFoldOffset;
+    return this.settings.material.safeFoldOffset;
   }
 
   // -------------- Model Generator --------------
@@ -81,9 +81,9 @@ export abstract class Dieline {
 
     const dieline: IModel = {
       models: {
-        trim: this.trimModel,
         fold: this.foldModel,
         perf: this.perfModel,
+        trim: this.trimModel,
       },
     };
 

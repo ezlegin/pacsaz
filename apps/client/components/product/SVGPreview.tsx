@@ -1,20 +1,20 @@
 "use client";
+
+import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
 import { useSVGStore } from "@repo/store/dieline/svg.store";
 import { useDeveloperToolsStore } from "@repo/store/dieline/useDeveloperToolsStore";
 import { Button } from "@repo/ui/components/button";
 import { Card } from "@repo/ui/components/card";
 import { Separator } from "@repo/ui/components/separator";
 import { Spinner } from "@repo/ui/components/spinner";
+import { cn } from "@repo/ui/lib/utils";
 import { Ruler, ZoomIn, ZoomOut } from "lucide-react";
 import { useLayoutEffect, useRef, useState } from "react";
-import { onDevelepe } from "@repo/lib/data/consts";
 import {
   ReactZoomPanPinchRef,
   TransformComponent,
   TransformWrapper,
 } from "react-zoom-pan-pinch";
-import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
-import { cn } from "@repo/ui/lib/utils";
 
 interface Props {
   isRendering: boolean;
@@ -29,7 +29,7 @@ export default function SvgPreview({
   disableWheel = false,
   showControls = true,
 }: Props) {
-  const svg = useSVGStore((s) => s.svg);
+  let svg = useSVGStore((s) => s.svg);
   const {
     ctx: { doCenterSVG },
   } = useDeveloperToolsStore();
@@ -38,10 +38,12 @@ export default function SvgPreview({
   const contentRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState<number>();
+  const [scaleFraction, setScaleFraction] = useState(1);
   const { setSetting, settings } = useDielineSettingsStore();
 
   useLayoutEffect(() => {
     if (!contentRef.current || !wrapperRef.current) return;
+    setScaleFraction(1);
 
     const measureAndCenter = () => {
       const content = contentRef.current!;
@@ -57,12 +59,13 @@ export default function SvgPreview({
 
       const scaleX = wrapperWidth / contentWidth;
       const scaleY = wrapperHeight / contentHeight;
-      const nextScale = Math.min(scaleX, scaleY);
+      const scale = Math.min(scaleX, scaleY);
 
-      setScale(nextScale);
+      setScale(scale);
+      console.log("containerScale 00", scale);
 
-      if (isFinite(nextScale) && nextScale > 0 && doCenterSVG) {
-        transformRef.current?.centerView(nextScale, 0);
+      if (isFinite(scale) && scale > 0 && doCenterSVG) {
+        transformRef.current?.centerView(scale, 0);
       }
     };
 
@@ -90,6 +93,14 @@ export default function SvgPreview({
     setSetting("showOverallRulers", !settings.showOverallRulers);
   };
 
+  const getScaleFraction = (containerScale: number) => {
+    if (!scale) return;
+    const scaleFraction = containerScale / scale;
+    setScaleFraction(scaleFraction);
+  };
+
+  svg = scaleSVGStrokeWidth(svg!, scaleFraction);
+
   return (
     <div
       ref={wrapperRef}
@@ -101,11 +112,10 @@ export default function SvgPreview({
         centerOnInit
         limitToBounds={false}
         minScale={0.5}
-        maxScale={onDevelepe ? 10 : 1.8}
+        maxScale={1.5}
         panning={{ disabled: isRendering || disablePanning }}
         wheel={{
           disabled: isRendering || disableWheel,
-          smoothStep: onDevelepe ? 0.002 : 0.0003,
         }}
         velocityAnimation={{ disabled: true }}
         alignmentAnimation={{ disabled: true }}
@@ -113,6 +123,10 @@ export default function SvgPreview({
         doubleClick={{ disabled: true }}
         smooth
         centerZoomedOut
+        onZoom={(ref) => {
+          const scale = ref.state.scale;
+          getScaleFraction(scale);
+        }}
       >
         {({ zoomIn, zoomOut, centerView }) => (
           <>
@@ -137,7 +151,7 @@ export default function SvgPreview({
 
             {showControls && (
               <div className="absolute bottom-0 left-1/2 -translate-x-1/2 flex gap-3">
-                <Card className="p-1 justify-center aspect-square">
+                <Card className="flex-row items-center gap-2 p-1 text-muted-foreground">
                   <Button
                     className={cn(
                       settings.showOverallRulers
@@ -146,30 +160,30 @@ export default function SvgPreview({
                     )}
                     variant="ghost"
                     size={"icon"}
-                    title="نمایش خطکش ها"
+                    title="خطکش ها"
                     onClick={() => handleRulers()}
                   >
                     <Ruler />
                   </Button>
-                </Card>
-                <Card className="flex-row items-center gap-2 p-1 text-muted-foreground">
+                  <div className="h-5">
+                    <Separator orientation="vertical" />
+                  </div>
                   <Button variant="ghost" onClick={() => zoomOut(0.4)}>
                     <ZoomOut size={20} />
                   </Button>
-                  <div className="h-5">
-                    <Separator orientation="vertical" />
-                  </div>
-                  <Button variant="ghost" onClick={() => centerView(scale)}>
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      centerView(scale);
+                      setScaleFraction(1);
+                    }}
+                  >
                     ریست
                   </Button>
-                  <div className="h-5">
-                    <Separator orientation="vertical" />
-                  </div>
                   <Button variant="ghost" onClick={() => zoomIn(0.4)}>
                     <ZoomIn size={20} />
                   </Button>
                 </Card>
-                <div className="size-10" />
               </div>
             )}
           </>
@@ -177,4 +191,29 @@ export default function SvgPreview({
       </TransformWrapper>
     </div>
   );
+}
+
+function scaleSVGStrokeWidth(svg: string, newSclaeAmount: number) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(svg!, "image/svg+xml");
+
+  const group = doc.getElementById("svgGroup");
+
+  if (group) {
+    const originalStrokeWidth = Number(group.getAttribute("stroke-width"));
+    const newStrokeWidth = String(originalStrokeWidth / newSclaeAmount);
+    group.setAttribute("stroke-width", newStrokeWidth);
+
+    const currentStyle = group.getAttribute("style") || "";
+    if (currentStyle.includes("stroke-width")) {
+      const newStyle = currentStyle.replace(
+        /stroke-width:[^;]+/,
+        `stroke-width:${newStrokeWidth}`,
+      );
+      group.setAttribute("style", newStyle);
+    }
+  }
+
+  const serializer = new XMLSerializer();
+  return serializer.serializeToString(doc);
 }

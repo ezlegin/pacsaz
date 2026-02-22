@@ -8,6 +8,11 @@ class TuckEndSnapLock extends Dieline {
     length: 160,
     height: 50,
   };
+  override minDimensions = {
+    width: 50,
+    height: 50,
+    length: 50,
+  };
 
   protected override trim() {
     const glue = new Pacsaz.models.Glue(
@@ -41,7 +46,7 @@ class TuckEndSnapLock extends Dieline {
       this.length,
     ]);
 
-    this.$pushModels({ glue, door, dust, dust2, lock: snapLock });
+    this.$pushModels({ glue, door, dust, dust2, snapLock });
     this.$pushShapes({ s1, s2, s3 }, "trimModel");
   }
 
