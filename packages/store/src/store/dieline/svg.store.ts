@@ -9,3 +9,5 @@ export const useSVGStore = create<SVGStore>((set) => ({
   svg: null,
   setSvg: (svg) => set(() => ({ svg })),
 }));
+
+export const setSVG = useSVGStore.setState;

@@ -4,11 +4,14 @@ import { useDielineGenerator } from "@repo/dieline-core/hooks/useDielineGenerato
 import { dielineImporter } from "@repo/dieline-core/utils/dielineImporter";
 import { Card as ShadCard } from "@repo/ui/components/card";
 import { DimensionInput } from "../product/DimensionsInput";
-import SVGPreview from "../product/SVGPreview";
-import ProductLoadingOverlay from "../product/ProductLoadingOverlay";
+import DielineLoadingOverlay from "../product/DielineLoadingOverlay";
 import { useEffect } from "react";
-import { useDeveloperToolsStore } from "@repo/store/dieline/useDeveloperToolsStore";
+import { useDeveloperToolsStore } from "@repo/store/dieline/developerTools.store";
 import { DIMENSIONS } from "@/data/consts";
+import dynamic from "next/dynamic";
+const SVGPreview = dynamic(() => import("../product/SVGPreview"), {
+  ssr: false,
+});
 
 const HomeDieline = () => {
   const dieline = dielineImporter("home-dieline");
@@ -29,7 +32,7 @@ const HomeDieline = () => {
 
   return (
     <div className="relative p-0">
-      <ProductLoadingOverlay />
+      <DielineLoadingOverlay />
 
       <div className="h-175 max-w-225 min-w-225">
         <SVGPreview

@@ -7,8 +7,8 @@ import M, { IModel, IModelMap } from "makerjs";
 import { DimensionsType } from "../../data/types";
 import Pacsaz from "../Pacsaz";
 import { DielineRuler } from "../ruler/DielineRuler";
-import { Exporter } from "./Exporter";
 import { Bleed } from "./Bleed";
+import { Exporter } from "./Exporter";
 
 export abstract class Dieline {
   // -------------- Models --------------
@@ -64,7 +64,7 @@ export abstract class Dieline {
     onDevelepe && console.log("Main:", this.main);
     console.groupEnd();
 
-    return new Exporter(this.main).svg();
+    new Exporter(this.main).build();
   }
 
   // -------------- Layers --------------

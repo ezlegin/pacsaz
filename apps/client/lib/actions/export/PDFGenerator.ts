@@ -70,7 +70,7 @@ export async function PDFGenerator({
     const offset = 10;
     doc
       .fontSize(9)
-      .fillColor("#1E90FF") //todo: get this from svgSettings in svgExporter
+      .fillColor("#1E90FF")
       .text(guideText, offset, offset, { lineGap: 3 });
 
     const imageWidth = 30;

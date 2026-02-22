@@ -11,7 +11,7 @@ interface LoadingOverlayProps {
   className?: string;
 }
 
-export default function ProductLoadingOverlay({
+export default function DielineLoadingOverlay({
   message = "در حال تولید...",
   className,
 }: LoadingOverlayProps) {
@@ -26,7 +26,7 @@ export default function ProductLoadingOverlay({
       className={cn(
         "absolute inset-0 z-20 flex items-center justify-center bg-accent/20 backdrop-blur-xs transition-opacity duration-700 ease-in-out",
         isRenderingLoading ? "opacity-100" : "opacity-0 pointer-events-none",
-        className
+        className,
       )}
     >
       <Card className="p-3 px-4">

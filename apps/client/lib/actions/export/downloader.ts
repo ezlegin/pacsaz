@@ -1,64 +1,62 @@
 import { mapDimensions } from "@repo/dieline-core/utils/mapDimensions";
+import { getDielineFile } from "@repo/store/dieline/dielineFile.store";
 import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
 import { getOverallSizes } from "@repo/store/dieline/overallSize.store";
 import { PDFGenerator } from "./PDFGenerator";
 
-interface ExportPdfParams {
-  svg: string;
-  slug: string;
-}
-
-type DownloadPdfResult =
-  | { success: true }
-  | { success: false; message: string };
-
-export async function downloadPdf({
-  svg,
-  slug,
-}: ExportPdfParams): Promise<DownloadPdfResult> {
-  const { dimension, format, bleed } = getDielineSettings();
-
+export async function dielineDownloder(slug: string) {
+  const {
+    dimension: {
+      raw: { height, length, width },
+    },
+    format,
+  } = getDielineSettings();
   const overallSizes = getOverallSizes();
+  const { file } = getDielineFile();
 
-  const pdf = await PDFGenerator({
-    svg,
-    slug,
-    overallSizes: overallSizes,
-    bleedAmount: bleed,
-  });
+  let blob = new Blob([file], { type: "application/dxf" });
 
-  if (!pdf.success) {
-    return {
-      success: false,
-      message: pdf.message,
-    };
+  if (format !== "dxf") {
+    const pdf = await PDFGenerator({
+      svg: file,
+      bleedAmount: 5,
+      overallSizes: overallSizes,
+      slug,
+    });
+
+    if (!pdf.success) {
+      return {
+        success: false,
+      };
+    }
+
+    const byteCharacters = atob(pdf.pdfBase64);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const unitArray = new Uint8Array(byteNumbers);
+
+    blob = new Blob([unitArray], {
+      type: `application/${format}`,
+    });
   }
-
-  const byteCharacters = atob(pdf.pdfBase64);
-  const byteNumbers = new Array(byteCharacters.length);
-  for (let i = 0; i < byteCharacters.length; i++) {
-    byteNumbers[i] = byteCharacters.charCodeAt(i);
-  }
-
-  const blob = new Blob([new Uint8Array(byteNumbers)], {
-    type: "application/pdf",
-  });
-
-  const url = URL.createObjectURL(blob);
-
-  const dim = mapDimensions(
-    dimension.raw.width,
-    dimension.raw.length,
-    dimension.raw.height
-  );
-  const fileName = `${slug}-dieline__${dim}`;
 
   const a = document.createElement("a");
+  const url = URL.createObjectURL(blob);
   a.href = url;
-  a.download = `${fileName}.${format}`;
+  const dims = mapDimensions(width, length, height);
+  const fileName = `${slug}-${dims}.${format}`;
+
+  a.download = fileName;
+
+  document.body.appendChild(a);
   a.click();
 
-  URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
 
-  return { success: true };
+  return {
+    success: true,
+  };
 }

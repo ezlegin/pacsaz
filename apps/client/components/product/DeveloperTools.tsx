@@ -1,5 +1,5 @@
 import { onDevelepe } from "@repo/lib/data/consts";
-import { useDeveloperToolsStore } from "@repo/store/dieline/useDeveloperToolsStore";
+import { useDeveloperToolsStore } from "@repo/store/dieline/developerTools.store";
 import { Button } from "@repo/ui/components/button";
 import { Card, CardContent, CardTitle } from "@repo/ui/components/card";
 import { Switch } from "@repo/ui/components/switch";

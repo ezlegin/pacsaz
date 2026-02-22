@@ -8,6 +8,7 @@ type DeveloperToolsCTX = {
   showAnchors: boolean;
   showWatermark: boolean;
   doCenterSVG: boolean;
+  dxf: string | undefined;
 };
 
 type DeveloperToolsStore = {
@@ -21,6 +22,7 @@ const storeCreator = (set: any): DeveloperToolsStore => ({
     showAnchors: false,
     showWatermark: !isSubscribed,
     doCenterSVG: true,
+    dxf: undefined,
   },
 
   setDeveloperToolsCTX: (key, val) =>

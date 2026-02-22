@@ -18,7 +18,9 @@
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@types/react": "19.2.2"
+    "@types/react": "19.2.2",
+    "@types/pdfkit": "^0.17.4",
+    "@types/svg-to-pdfkit": "^0.1.3"
   },
   "dependencies": {
     "@repo/store": "workspace:*",
@@ -26,6 +28,8 @@
     "makerjs": "^0.18.1",
     "react": "19.2.0",
     "react-dom": "19.2.0",
-    "zustand": "^5.0.10"
+    "zustand": "^5.0.10",
+    "svg-to-pdfkit": "^0.1.8",
+    "pdfkit": "0.17.2"
   }
 }

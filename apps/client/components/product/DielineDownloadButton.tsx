@@ -1,6 +1,8 @@
-import { useLoading } from "@repo/lib/utils/useLoading";
-import { downloadPdf } from "@/lib/actions/export/downloader";
+import { dielineDownloder } from "@/lib/actions/export/downloader";
 import Diamond from "@/public/icons/Diamond";
+import { useLoading } from "@repo/lib/utils/useLoading";
+import { useUserStore } from "@repo/store/app/user.store";
+import { useSVGStore } from "@repo/store/dieline/svg.store";
 import { Button } from "@repo/ui/components/button";
 import { Dialog, DialogContent, DialogTitle } from "@repo/ui/components/dialog";
 import { Spinner } from "@repo/ui/components/spinner";
@@ -10,8 +12,6 @@ import { useState } from "react";
 import { toast } from "sonner";
 import LoginPopup from "../forms/LoginPopup";
 import SaveDielineForm from "../forms/SaveDielineForm";
-import { useSVGStore } from "@repo/store/dieline/svg.store";
-import { useUserStore } from "@repo/store/app/user.store";
 
 interface Props {
   svg: string | null;
@@ -37,18 +37,15 @@ const DielineDownloadButton = ({ slug, isRendering }: Props) => {
     }
     startLoading();
 
-    const res = await downloadPdf({
-      svg,
-      slug,
-    });
+    const res = await dielineDownloder(slug);
 
-    if (!res.success) {
+    if (!res?.success) {
       toast.error("خطایی رخ داد. لطفا لحظاتی بعد مجددا تلاش کنید.");
       stopLoading();
       return;
+    } else {
+      toast.success("فایل با موفقیت تولید شد.");
     }
-
-    toast.success("فایل با موفقیت تولید شد.");
 
     stopLoading();
   };

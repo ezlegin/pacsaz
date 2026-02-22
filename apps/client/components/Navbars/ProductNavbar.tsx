@@ -21,7 +21,7 @@ const ProductNavbar = ({ productName }: Props) => {
           </Link>
 
           <Link href={"/dielines"} className="text-muted-foreground">
-            ساخت دایلاین
+            دایلاین‌ها
           </Link>
           <ArrowLeft size={16} />
           <p className="font-semibold">{productName}</p>

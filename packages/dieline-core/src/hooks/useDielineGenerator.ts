@@ -1,14 +1,12 @@
 import { bleeds } from "@repo/store/data/dieline";
+import { useDeveloperToolsStore } from "@repo/store/dieline/developerTools.store";
 import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
-import { useSVGStore } from "@repo/store/dieline/svg.store";
-import { useDeveloperToolsStore } from "@repo/store/dieline/useDeveloperToolsStore";
 import { useEffect, useTransition } from "react";
+import { Dieline } from "../core/dieline/Dieline";
 import { resolveDimensions } from "../utils/dimensionResolver";
 import { resolveOffsets } from "../utils/offsetResolver";
-import { Dieline } from "../core/dieline/Dieline";
 
 export function useDielineGenerator(dieline: Dieline) {
-  const { setSvg } = useSVGStore();
   const [isRendering, startTransition] = useTransition();
 
   const {
@@ -24,6 +22,7 @@ export function useDielineGenerator(dieline: Dieline) {
       thickness,
       dimension,
       showOverallRulers,
+      format,
     },
   } = useDielineSettingsStore();
   const offsets = resolveOffsets();
@@ -47,8 +46,7 @@ export function useDielineGenerator(dieline: Dieline) {
   // set on change
   useEffect(() => {
     startTransition(() => {
-      const result = dieline.model();
-      setSvg(result);
+      dieline.model();
     });
   }, [
     dimension,
@@ -57,6 +55,7 @@ export function useDielineGenerator(dieline: Dieline) {
     bleed,
     dieline,
     thickness,
+    format,
 
     showAnchors,
     showWatermark,

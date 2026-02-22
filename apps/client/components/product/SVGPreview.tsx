@@ -2,7 +2,7 @@
 
 import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
 import { useSVGStore } from "@repo/store/dieline/svg.store";
-import { useDeveloperToolsStore } from "@repo/store/dieline/useDeveloperToolsStore";
+import { useDeveloperToolsStore } from "@repo/store/dieline/developerTools.store";
 import { Button } from "@repo/ui/components/button";
 import { Card } from "@repo/ui/components/card";
 import { Separator } from "@repo/ui/components/separator";
@@ -62,7 +62,6 @@ export default function SvgPreview({
       const scale = Math.min(scaleX, scaleY);
 
       setScale(scale);
-      console.log("containerScale 00", scale);
 
       if (isFinite(scale) && scale > 0 && doCenterSVG) {
         transformRef.current?.centerView(scale, 0);
@@ -151,7 +150,7 @@ export default function SvgPreview({
 
             {showControls && (
               <div className="absolute bottom-0 left-1/2 -translate-x-1/2 flex gap-3">
-                <Card className="flex-row items-center gap-2 p-1 text-muted-foreground">
+                <Card className="flex-row items-center gap-1 p-1 text-muted-foreground">
                   <Button
                     className={cn(
                       settings.showOverallRulers

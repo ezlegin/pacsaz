@@ -5,9 +5,9 @@ import { dielineImporter } from "@repo/dieline-core/utils/dielineImporter";
 import { notFound } from "next/navigation";
 import DielineSettings from "./DielineSettings";
 import ProductInfo from "./ProductInfo";
-import ProductLoadingOverlay from "./ProductLoadingOverlay";
+import DielineLoadingOverlay from "./DielineLoadingOverlay";
 import { useEffect } from "react";
-import { useDeveloperToolsStore } from "@repo/store/dieline/useDeveloperToolsStore";
+import { useDeveloperToolsStore } from "@repo/store/dieline/developerTools.store";
 import dynamic from "next/dynamic";
 const SVGPreview = dynamic(() => import("./SVGPreview"), { ssr: false });
 
@@ -27,7 +27,7 @@ const DielineGenerator = ({ slug }: { slug: string }) => {
 
   return (
     <div className="h-full">
-      <ProductLoadingOverlay />
+      <DielineLoadingOverlay />
 
       <div className="h-full grid grid-cols-[320px_1fr_300px] p-3">
         <DielineSettings
