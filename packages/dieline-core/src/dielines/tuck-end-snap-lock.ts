@@ -1,4 +1,3 @@
-import { MaterialValue } from "@repo/store/data/types";
 import { Dieline } from "../core/dieline/Dieline";
 import Pacsaz from "../core/Pacsaz";
 import { materials } from "@repo/store/data/dieline";
@@ -15,8 +14,7 @@ class TuckEndSnapLock extends Dieline {
     height: 50,
     length: 50,
   };
-
-  override materials: MaterialValue[] = [
+  override materials = [
     materials["glossy-cardboard"],
     materials["f-flute"],
     materials["e-flute"],

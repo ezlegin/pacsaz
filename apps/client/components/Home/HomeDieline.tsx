@@ -14,7 +14,7 @@ const SVGPreview = dynamic(() => import("../product/SVGPreview"), {
 });
 
 const HomeDieline = () => {
-  const dieline = dielineImporter("home-dieline");
+  const dieline = dielineImporter("tuck-end");
 
   if (!dieline) return;
 

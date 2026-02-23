@@ -1,14 +1,21 @@
+import { materials } from "@repo/store/data/dieline";
 import { Dieline } from "../core/dieline/Dieline";
 import Pacsaz from "../core/Pacsaz";
 import { zero } from "../data/consts";
 
-export class TuckEnd extends Dieline {
+class TuckEnd extends Dieline {
   override slug = "tuck-end";
   override defaultDimensions = {
     width: 90,
     length: 160,
     height: 50,
   };
+  override materials = [
+    materials["glossy-cardboard"],
+    materials["f-flute"],
+    materials["e-flute"],
+    materials["b-flute"],
+  ];
 
   protected override trim() {
     const glue = new Pacsaz.models.Glue(zero, [
