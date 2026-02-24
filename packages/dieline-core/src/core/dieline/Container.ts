@@ -5,12 +5,14 @@ import { containerSize } from "../../data/consts";
 
 export class Container implements IModel {
   constructor(trimModel: IModel) {
-    if (!trimModel) {
+    if (!trimModel.models) {
       console.error("Trim Model not Available.");
       return;
     }
 
-    const { low, high } = M.measure.modelExtents(trimModel)!;
+    const extended = M.measure.modelExtents(trimModel)!;
+    if (!extended) return;
+    const { low, high } = extended;
 
     const minX = low[0]!;
     const minY = low[1]!;

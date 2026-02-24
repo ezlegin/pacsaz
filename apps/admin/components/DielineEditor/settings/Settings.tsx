@@ -3,8 +3,9 @@
 import { Button } from "@repo/ui/components/button";
 import { Label } from "@repo/ui/components/label";
 import { PlusCircle } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import LineSettings from "./LineSettings";
+import { useDielineSpecStore } from "@repo/store/dieline/dielineSpec.store";
 
 export type Shapes = Partial<{
   line: Record<string, { length: string }>;
@@ -13,7 +14,13 @@ export type ShapesKey = keyof Shapes;
 
 const Settings = () => {
   const [shapeType, setShapeType] = useState<ShapesKey | null>(null);
-  const [shapes, setShapes] = useState<Shapes>({ line: {} });
+  const [shapes, setShapes] = useState<Shapes>({});
+  const { setDielineSpec } = useDielineSpecStore();
+
+  useEffect(() => {
+    setDielineSpec("shapes", shapes);
+    //todo: push JSON into DB
+  }, [shapes]);
 
   switch (shapeType) {
     case "line":

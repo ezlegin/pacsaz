@@ -3,10 +3,16 @@ import Pacsaz from "../Pacsaz";
 
 export class Bleed implements IModel {
   constructor(trimModel: IModel, bleedAmount: number) {
+    if (!trimModel.models) {
+      console.error("Trim Model not Available.");
+      return;
+    }
+
     const cloned = M.model.clone(trimModel);
     const glueModel = cloned.models?.glue;
     if (glueModel) {
       const chain = M.model.findSingleChain(glueModel);
+      if (!chain) return;
       const keyPoints = M.chain.toKeyPoints(chain!);
       const points = {
         start: keyPoints.at(0)!,
@@ -19,6 +25,7 @@ export class Bleed implements IModel {
     }
 
     const chain = M.model.findChains(cloned) as M.IChain[];
+    if (!chain) return;
 
     const newerModel: IModel = { paths: {} };
     let idx = 0;

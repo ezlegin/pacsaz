@@ -1,21 +1,17 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import React from "react";
-import { dielineImporter } from "@repo/dieline-core/utils/dielineImporter";
-import { notFound } from "next/navigation";
-import { useDielineGenerator } from "@repo/dieline-core/hooks/useDielineGenerator";
 import DielineLayer from "@/components/DielineEditor/DielineLayer";
 import Settings from "@/components/DielineEditor/settings/Settings";
+import Drawer from "@repo/dieline-core/drawer";
+import { useDielineGenerator } from "@repo/dieline-core/hooks/useDielineGenerator";
+import dynamic from "next/dynamic";
 const SVGPreview = dynamic(
   () => import("@repo/ui/components/custom/SVGPreview"),
   { ssr: false },
 );
 
 const DielineEditor = ({ slug }: { slug: string }) => {
-  const dieline = dielineImporter(slug);
-  if (!dieline) return notFound();
-  const { isRendering } = useDielineGenerator(dieline);
+  const { isRendering } = useDielineGenerator(Drawer);
 
   return (
     <div className="h-screen overflow-hidden">

@@ -1,13 +1,15 @@
 import { bleeds } from "@repo/store/data/dieline";
 import { useDeveloperToolsStore } from "@repo/store/dieline/developerTools.store";
 import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
+import { useDielineSpecStore } from "@repo/store/dieline/dielineSpec.store";
 import { useEffect, useTransition } from "react";
-import { Dieline } from "../core/dieline/Dieline";
 import { resolveDimensions } from "../utils/dimensionResolver";
 import { resolveOffsets } from "../utils/offsetResolver";
+import { Drawer } from "../dielines/devs/dev";
 
-export function useDielineGenerator(dieline: Dieline) {
+export function useDielineGenerator(dieline: Drawer) {
   const [isRendering, startTransition] = useTransition();
+  const { dielineSpec: json } = useDielineSpecStore();
 
   const {
     ctx: { showAnchors, showWatermark },
@@ -56,6 +58,8 @@ export function useDielineGenerator(dieline: Dieline) {
     dieline,
     thickness,
     format,
+    json,
+    useDielineSpecStore,
 
     showAnchors,
     showWatermark,
