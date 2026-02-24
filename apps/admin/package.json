@@ -12,29 +12,31 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "@repo/ui": "workspace:*",
+    "@hookform/resolvers": "^5.2.2",
+    "@repo/auth": "workspace:*",
+    "@repo/db": "workspace:*",
+    "@repo/dieline-core": "workspace:*",
     "@repo/lib": "workspace:*",
     "@repo/store": "workspace:*",
-    "@repo/db": "workspace:*",
-    "@repo/auth": "workspace:*",
-    "@hookform/resolvers": "^5.2.2",
+    "@repo/ui": "workspace:*",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.562.0",
+    "mathjs": "^15.1.1",
     "next": "^16.1.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-hook-form": "^7.69.0",
-    "zod": "^3.25.76",
-    "sonner": "^2.0.7"
+    "sonner": "^2.0.7",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
+    "@tailwindcss/postcss": "^4.1.17",
     "@types/node": "^22.15.3",
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",
     "eslint": "^9.39.1",
-    "typescript": "5.9.2",
-    "@tailwindcss/postcss": "^4.1.17"
+    "typescript": "5.9.2"
   }
 }

@@ -27,6 +27,8 @@
     "tailwindcss": "^4.1.11"
   },
   "dependencies": {
+    "@repo/store": "workspace:*",
+    "react-zoom-pan-pinch": "^3.7.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "@hookform/resolvers": "^5.2.2",

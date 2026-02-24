@@ -1,11 +1,10 @@
-import { DielineForm } from "@/components/forms/DielineForm";
 import PageTitle from "@/components/PageTitle";
-import Pagination from "@repo/ui/components/custom/Pagination";
-import DielinesList from "./DielinesList";
-import PopupNewDialog from "@repo/ui/components/custom/PopupNewDialog";
 import { globalPageSize } from "@repo/lib/data/consts";
 import Filter from "@repo/ui/components/custom/Filter";
+import NewButton from "@repo/ui/components/custom/NewButton";
+import Pagination from "@repo/ui/components/custom/Pagination";
 import Search from "@repo/ui/components/custom/Search";
+import DielinesList from "./DielinesList";
 
 const page = () => {
   return (
@@ -25,9 +24,7 @@ const page = () => {
           />
         </div>
 
-        <PopupNewDialog buttonTitle="New Dieline">
-          <DielineForm />
-        </PopupNewDialog>
+        <NewButton title="New Dieline" href="/dielines/new" />
       </div>
 
       <DielinesList data={data} />

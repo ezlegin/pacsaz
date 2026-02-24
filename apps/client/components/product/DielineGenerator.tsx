@@ -9,7 +9,10 @@ import DielineLoadingOverlay from "./DielineLoadingOverlay";
 import { useEffect } from "react";
 import { useDeveloperToolsStore } from "@repo/store/dieline/developerTools.store";
 import dynamic from "next/dynamic";
-const SVGPreview = dynamic(() => import("./SVGPreview"), { ssr: false });
+const SVGPreview = dynamic(
+  () => import("@repo/ui/components/custom/SVGPreview"),
+  { ssr: false },
+);
 
 const DielineGenerator = ({ slug }: { slug: string }) => {
   const { setDeveloperToolsCTX } = useDeveloperToolsStore();

@@ -1,4 +1,5 @@
 import { admin } from "@/data/admin";
+import PacsazLogo from "@repo/ui/components/custom/PacsazLogo";
 import {
   Sidebar,
   SidebarContent,
@@ -19,7 +20,6 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
-import PacsazLogo from "./PacsazLogo";
 
 export function PanelSidebar() {
   const menuItems = [
