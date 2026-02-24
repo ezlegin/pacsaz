@@ -4,7 +4,6 @@ import Pacsaz from "../Pacsaz";
 export class Bleed implements IModel {
   constructor(trimModel: IModel, bleedAmount: number) {
     if (!trimModel.models) {
-      console.error("Trim Model not Available.");
       return;
     }
 

@@ -18,7 +18,6 @@ export abstract class Dieline {
   protected perfModel: IModel = { layer: "perf" };
 
   // -------------- Defaults --------------
-  abstract slug: string;
   abstract defaultDimensions: Dimension;
   defaultBleed = bleeds.default;
   minDimensions = {
@@ -96,7 +95,7 @@ export abstract class Dieline {
       bleed,
       container,
       dieline,
-      rulers,
+      // rulers,
       anchor,
     });
   }

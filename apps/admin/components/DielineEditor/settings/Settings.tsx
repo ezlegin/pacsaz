@@ -1,30 +1,18 @@
 "use client";
 
+import { Shapes } from "@repo/store/dieline/dielineSpec.store";
 import { Button } from "@repo/ui/components/button";
 import { Label } from "@repo/ui/components/label";
 import { PlusCircle } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import LineSettings from "./LineSettings";
-import { useDielineSpecStore } from "@repo/store/dieline/dielineSpec.store";
-
-export type Shapes = Partial<{
-  line: Record<string, { length: string }>;
-}>;
-export type ShapesKey = keyof Shapes;
 
 const Settings = () => {
-  const [shapeType, setShapeType] = useState<ShapesKey | null>(null);
-  const [shapes, setShapes] = useState<Shapes>({});
-  const { setDielineSpec } = useDielineSpecStore();
-
-  useEffect(() => {
-    setDielineSpec("shapes", shapes);
-    //todo: push JSON into DB
-  }, [shapes]);
+  const [shapeType, setShapeType] = useState<keyof Shapes | null>(null);
 
   switch (shapeType) {
     case "line":
-      return <LineSettings setShapeType={setShapeType} setShapes={setShapes} />;
+      return <LineSettings setShapeType={setShapeType} />;
     default:
       return (
         <div>
@@ -38,7 +26,6 @@ const Settings = () => {
               <PlusCircle />
             </Button>
           </div>
-          {JSON.stringify(shapes)}
         </div>
       );
   }

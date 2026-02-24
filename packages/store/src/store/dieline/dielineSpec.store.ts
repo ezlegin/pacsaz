@@ -1,14 +1,17 @@
 import { create } from "zustand";
 
-interface Shapes {
-  line: Record<string, { length: string }>;
+type Point = { x: string; y: string };
+export type LineSpec = { length: string; angle?: number; origin?: Point };
+
+export type Shapes = Partial<{
+  line: Record<string, LineSpec>;
   rectangle: Record<string, {}>;
-}
+}>;
 
 interface DielineSpec {
   slug: string;
   title: string;
-  shapes: Partial<Shapes>;
+  shapes: Shapes;
 }
 
 type DielineSpecStore = {

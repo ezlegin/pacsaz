@@ -5,7 +5,7 @@ import { useDielineSpecStore } from "@repo/store/dieline/dielineSpec.store";
 import { useEffect, useTransition } from "react";
 import { resolveDimensions } from "../utils/dimensionResolver";
 import { resolveOffsets } from "../utils/offsetResolver";
-import { Drawer } from "../dielines/devs/dev";
+import { Drawer } from "../core/dieline/drawer";
 
 export function useDielineGenerator(dieline: Drawer) {
   const [isRendering, startTransition] = useTransition();

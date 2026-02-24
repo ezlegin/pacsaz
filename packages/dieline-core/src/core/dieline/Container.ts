@@ -6,7 +6,6 @@ import { containerSize } from "../../data/consts";
 export class Container implements IModel {
   constructor(trimModel: IModel) {
     if (!trimModel.models) {
-      console.error("Trim Model not Available.");
       return;
     }
 
