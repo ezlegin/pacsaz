@@ -11,7 +11,7 @@ export class Drawer extends Dieline {
   override defaultDimensions = {
     width: 90,
     length: 160,
-    height: 50,
+    height: 0,
   };
 
   private line() {

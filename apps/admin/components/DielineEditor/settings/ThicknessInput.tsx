@@ -1,5 +1,4 @@
 import { useLoading } from "@repo/lib/utils/useLoading";
-import { getThicknessRange } from "@/utils/getThicknessRange";
 import { useUserStore } from "@repo/store/app/user.store";
 import { MaterialValue } from "@repo/store/data/types";
 import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
@@ -9,7 +8,6 @@ import { Spinner } from "@repo/ui/components/spinner";
 import { cn } from "@repo/ui/lib/utils";
 import { Minus, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
-import { calculateSafeFoldOffset } from "../../../../packages/store/src/utils/calculateSafeFoldOffset"; // todo
 
 interface Props {
   isRendering: boolean;
@@ -42,7 +40,6 @@ const ThicknessInput = ({ isRendering, materialsIncluded }: Props) => {
       const newThickness = val + (type === "inc" ? 0.1 : -0.1);
       if (newThickness < mMinThick || newThickness > mMaxThick) return;
       setSetting("thickness", newThickness);
-      setSetting("safeFoldOffset", calculateSafeFoldOffset(newThickness));
     } else {
       if (val < mMinThick) {
         setSetting("thickness", mMinThick);
@@ -53,7 +50,6 @@ const ThicknessInput = ({ isRendering, materialsIncluded }: Props) => {
         return;
       }
       setSetting("thickness", val);
-      setSetting("safeFoldOffset", calculateSafeFoldOffset(val));
     }
   };
 
@@ -119,3 +115,14 @@ const ThicknessInput = ({ isRendering, materialsIncluded }: Props) => {
 };
 
 export default ThicknessInput;
+
+function getThicknessRange(MATERIALS: MaterialValue[]) {
+  const thicknesses = Object.values(MATERIALS).map(
+    (material) => material.thickness,
+  );
+
+  return {
+    min: Math.min(...thicknesses),
+    max: Math.max(...thicknesses),
+  };
+}

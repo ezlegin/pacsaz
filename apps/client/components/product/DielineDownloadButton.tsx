@@ -14,7 +14,6 @@ import LoginPopup from "../forms/LoginPopup";
 import SaveDielineForm from "../forms/SaveDielineForm";
 
 interface Props {
-  svg: string | null;
   slug: string;
   isRendering: boolean;
 }

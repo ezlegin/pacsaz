@@ -11,7 +11,6 @@ import {
   MaterialValue,
 } from "@repo/store/data/types";
 import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
-import { useSVGStore } from "@repo/store/dieline/svg.store";
 import { Badge } from "@repo/ui/components/badge";
 import { Card } from "@repo/ui/components/card";
 import {
@@ -56,7 +55,6 @@ export default function DielineSettings({
   materials,
   isRendering,
 }: Props) {
-  const { svg } = useSVGStore();
   const { isPremium } = useUserStore();
   const {
     setSetting,
@@ -240,11 +238,7 @@ export default function DielineSettings({
             </div>
           </ToggleGroup>
         </Section>
-        <DielineDownloadButton
-          isRendering={isRendering}
-          slug={slug}
-          svg={svg}
-        />
+        <DielineDownloadButton isRendering={isRendering} slug={slug} />
       </div>
     </Card>
   );

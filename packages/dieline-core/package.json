@@ -12,7 +12,7 @@
     "./hooks/*": "./src/hooks/*.ts",
     "./utils/*": "./src/utils/*.ts",
     "./data/*": "./src/data/*.ts",
-    "./drawer": "./src/core/dieline/drawer.ts"
+    "./drawer": "./src/core/dieline/Drawer.ts"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",

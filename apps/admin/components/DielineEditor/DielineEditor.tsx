@@ -1,16 +1,23 @@
 "use client";
 
 import DielineLayer from "@/components/DielineEditor/DielineLayer";
-import Settings from "@/components/DielineEditor/settings/Settings";
 import Drawer from "@repo/dieline-core/drawer";
 import { useDielineGenerator } from "@repo/dieline-core/hooks/useDielineGenerator";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@repo/ui/components/tabs";
 import dynamic from "next/dynamic";
+import Editor from "./Editor";
+import Settings from "./settings/Settings";
 const SVGPreview = dynamic(
   () => import("@repo/ui/components/custom/SVGPreview"),
   { ssr: false },
 );
 
-const DielineEditor = ({ slug }: { slug: string }) => {
+const DielineEditor = () => {
   const { isRendering } = useDielineGenerator(Drawer);
 
   return (
@@ -27,7 +34,22 @@ const DielineEditor = ({ slug }: { slug: string }) => {
         </div>
 
         <div className="bg-muted border-l p-5 z-10">
-          <Settings />
+          <Tabs defaultValue="editor">
+            <TabsList className="w-full px-0">
+              <TabsTrigger className="cursor-pointer " value="editor">
+                Editor
+              </TabsTrigger>
+              <TabsTrigger className="cursor-pointer " value="settings">
+                Settings
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="editor">
+              <Editor />
+            </TabsContent>
+            <TabsContent value="settings">
+              <Settings isRendering={isRendering} />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>
