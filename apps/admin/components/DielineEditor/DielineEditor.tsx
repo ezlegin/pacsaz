@@ -15,7 +15,7 @@ const DielineEditor = ({ slug }: { slug: string }) => {
 
   return (
     <div className="h-screen overflow-hidden">
-      <div className="h-full grid grid-cols-[320px_1fr_320px]">
+      <div className="h-full grid grid-cols-[280px_1fr_280px]">
         <div className="bg-muted border-r p-5 z-10">
           <DielineLayer />
         </div>

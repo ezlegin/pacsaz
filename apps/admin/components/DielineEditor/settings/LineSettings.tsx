@@ -21,7 +21,7 @@ const LineSettings = ({ setShapeType }: Props) => {
   });
   const {
     dielineSpec: { shapes },
-    setDielineSpec,
+    setShape,
   } = useDielineSpecStore();
 
   const addLine = () => {
@@ -36,13 +36,7 @@ const LineSettings = ({ setShapeType }: Props) => {
     const lineCount = xx ? +xx + 1 : "1";
     const lineKey = `line-${lineCount}`;
 
-    setDielineSpec("shapes", {
-      ...shapes,
-      line: {
-        ...prevLines,
-        [lineKey]: input,
-      },
-    });
+    setShape("line", lineKey, input);
 
     setShapeType(null);
   };
@@ -69,7 +63,7 @@ const LineSettings = ({ setShapeType }: Props) => {
           variant={"ghost"}
           onClick={() => setShapeType(null)}
           className="has-[>svg]:px-0"
-          type="button" // Important: prevent form submission
+          type="button"
         >
           <ChevronLeft />
           Line
@@ -78,7 +72,7 @@ const LineSettings = ({ setShapeType }: Props) => {
         <Button
           variant={"primaryForeground"}
           size={"icon"}
-          type="submit" // This will now trigger handleSubmit
+          type="submit"
           disabled={!input.length}
         >
           <Check />

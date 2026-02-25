@@ -21,7 +21,7 @@ const RectangleSettings = ({ setShapeType }: Props) => {
   });
   const {
     dielineSpec: { shapes },
-    setDielineSpec,
+    setShape,
   } = useDielineSpecStore();
 
   const addLine = () => {
@@ -31,13 +31,7 @@ const RectangleSettings = ({ setShapeType }: Props) => {
     const rectCount = prevRects ? Object.keys(prevRects).length : 0;
     const rectKey = `rect-${rectCount + 1}`;
 
-    setDielineSpec("shapes", {
-      ...shapes,
-      rectangle: {
-        ...prevRects,
-        [rectKey]: input,
-      },
-    });
+    setShape("rectangle", rectKey, input);
 
     setShapeType(null);
   };

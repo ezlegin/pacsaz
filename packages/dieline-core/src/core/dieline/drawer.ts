@@ -16,10 +16,13 @@ export class Drawer extends Dieline {
 
   private line() {
     if (!this.shapes.line) return;
+    console.log(this.shapes.line);
 
-    for (const [_, { length, angle, origin, layer }] of Object.entries(
+    for (const [_, { length, angle, origin, layer, hidden }] of Object.entries(
       this.shapes.line,
     )) {
+      if (hidden) continue;
+
       const lineLength = this.$evaluateMathExpr(length);
       const line = new Pacsaz.shapes.Line(lineLength, angle);
 
@@ -38,9 +41,11 @@ export class Drawer extends Dieline {
 
     if (!this.shapes.rectangle) return;
 
-    for (const [key, { width, height }] of Object.entries(
+    for (const [key, { width, height, hidden }] of Object.entries(
       this.shapes.rectangle,
     )) {
+      if (hidden) continue;
+
       const rectWidth = this.$evaluateMathExpr(width);
       const rectHeight = this.$evaluateMathExpr(height);
       const rect = new Pacsaz.shapes.Rectangle(rectWidth, rectHeight);
@@ -52,6 +57,7 @@ export class Drawer extends Dieline {
   }
 
   protected override trim() {
+    console.log("shapes", this.shapes);
     this.line();
     this.rectangle();
   }

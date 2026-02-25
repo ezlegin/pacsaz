@@ -107,7 +107,7 @@ export abstract class Dieline {
         // widthRuler: this.widthRuler(),
         // lengthRuler: this.lengthRuler(),
         // heightRuler: this.heightRuler(),
-        // overallRuler: new Pacsaz.ruler.OverallRuler(this.trimModel),
+        overallRuler: new Pacsaz.ruler.OverallRuler(this.trimModel),
       },
       layer: "dielineRuler",
     };

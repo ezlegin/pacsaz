@@ -2,14 +2,15 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
 type Point = { x: string; y: string };
-type layer = { layer: "trim" | "fold" | "perf" };
+type generals = { layer: "trim" | "fold" | "perf"; hidden?: boolean };
+export type ShapesKey = keyof Shapes;
 
 export type LineSpec = {
   length: string;
   angle?: number;
   origin?: Point;
-} & layer;
-export type RectangleSpec = { width: string; height: string } & layer;
+} & generals;
+export type RectangleSpec = { width: string; height: string } & generals;
 
 export type Shapes = Partial<{
   line: Record<string, LineSpec>;
@@ -17,34 +18,78 @@ export type Shapes = Partial<{
 }>;
 
 interface DielineSpec {
-  slug: string;
-  title: string;
   shapes: Shapes;
 }
 
 type DielineSpecStore = {
   dielineSpec: DielineSpec;
-  setDielineSpec: (
-    key: keyof DielineSpec,
-    val: DielineSpec[keyof DielineSpec],
+  setShape: <T extends ShapesKey>(
+    type: T,
+    key: string,
+    spec: NonNullable<Shapes[T]>[string],
   ) => void;
+  setShapeVisibility: (
+    type: ShapesKey,
+    key: string,
+    isVisible: boolean,
+  ) => void;
+  removeShape: (type: ShapesKey, key: string) => void;
 };
+
 export const useDielineSpecStore = create<DielineSpecStore>()(
   persist(
     (set) => ({
       dielineSpec: {
-        slug: "dev",
-        title: "جعبه تاک اند",
         shapes: {},
       },
 
-      setDielineSpec: (key, val) =>
+      setShape: (type, key, spec) =>
         set((state) => ({
           dielineSpec: {
             ...state.dielineSpec,
-            [key]: val,
+            shapes: {
+              ...state.dielineSpec.shapes,
+              [type]: {
+                ...(state.dielineSpec.shapes[type] || {}),
+                [key]: spec,
+              },
+            },
           },
         })),
+
+      setShapeVisibility: (type, key, isVisible) =>
+        set((state) => ({
+          dielineSpec: {
+            ...state.dielineSpec,
+            shapes: {
+              ...state.dielineSpec.shapes,
+              [type]: {
+                ...state.dielineSpec.shapes[type],
+                [key]: {
+                  ...state.dielineSpec.shapes[type]?.[key],
+                  hidden: !isVisible,
+                },
+              },
+            },
+          },
+        })),
+
+      removeShape: (type, key) =>
+        set((state) => {
+          const currentShapes = state.dielineSpec.shapes[type];
+          if (!currentShapes) return state;
+
+          const { [key]: _, ...remaining } = currentShapes;
+          return {
+            dielineSpec: {
+              ...state.dielineSpec,
+              shapes: {
+                ...state.dielineSpec.shapes,
+                [type]: remaining,
+              },
+            },
+          };
+        }),
     }),
     {
       name: "dieline-spec-storage",
