@@ -95,7 +95,7 @@ export abstract class Dieline {
       bleed,
       container,
       dieline,
-      // rulers,
+      rulers,
       anchor,
     });
   }
@@ -104,10 +104,10 @@ export abstract class Dieline {
   private rulers() {
     return {
       models: {
-        widthRuler: this.widthRuler(),
-        lengthRuler: this.lengthRuler(),
-        heightRuler: this.heightRuler(),
-        overallRuler: new Pacsaz.ruler.OverallRuler(this.trimModel),
+        // widthRuler: this.widthRuler(),
+        // lengthRuler: this.lengthRuler(),
+        // heightRuler: this.heightRuler(),
+        // overallRuler: new Pacsaz.ruler.OverallRuler(this.trimModel),
       },
       layer: "dielineRuler",
     };
