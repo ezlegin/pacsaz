@@ -27,20 +27,16 @@
     "react-dom": "^19.2.0",
     "react-hook-form": "^7.69.0",
     "sonner": "^2.0.7",
-    "zod": "^3.25.76",
-    "svg-to-pdfkit": "^0.1.8",
-    "pdfkit": "0.17.2"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@tailwindcss/postcss": "^4.1.17",
-    "@types/node": "^22.15.3",
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",
-    "@types/svg-to-pdfkit": "^0.1.3",
+    "@types/node": "^22.15.3",
     "eslint": "^9.39.1",
-    "typescript": "5.9.2",
-    "@types/pdfkit": "^0.17.4"
+    "typescript": "5.9.2"
   }
 }

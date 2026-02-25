@@ -1,4 +1,3 @@
-import { mapDimensions } from "@repo/dieline-core/utils/mapDimensions";
 import { getDielineFile } from "@repo/store/dieline/dielineFile.store";
 import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
 import { getOverallSizes } from "@repo/store/dieline/overallSize.store";
@@ -59,4 +58,12 @@ export async function dielineDownloder(slug: string) {
   return {
     success: true,
   };
+}
+
+function mapDimensions(width: number, length: number, height?: number) {
+  let dim = `${width}x${length}`;
+  if (height) dim += "x" + height;
+
+  dim += "mm";
+  return dim;
 }

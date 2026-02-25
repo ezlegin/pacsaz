@@ -11,6 +11,7 @@ import {
 import { Separator } from "@repo/ui/components/separator";
 import { Eye, EyeClosed, Trash } from "lucide-react";
 import DielineMetadataForm from "../forms/DielineMetadataForm";
+import { cn } from "@repo/ui/lib/utils";
 
 const DielineLayer = () => {
   const { dielineSpec, removeShape, setShapeVisibility } =
@@ -20,6 +21,7 @@ const DielineLayer = () => {
     const value = Object.entries(val).map(([key, val]) => ({
       key,
       hidden: val.hidden,
+      layer: val.layer,
     }));
     return { key, value };
   });
@@ -68,7 +70,17 @@ const DielineLayer = () => {
                           child.hidden ? "opacity-50" : ""
                         }`}
                       >
-                        <div>{child.key}</div>
+                        <div
+                          className={cn(
+                            child.layer === "trim"
+                              ? "text-blue-500"
+                              : child.layer === "fold"
+                                ? "text-red-500"
+                                : "text-fuchsia-500",
+                          )}
+                        >
+                          {child.key}
+                        </div>
                         <div className="flex gap-2">
                           <button
                             className="hidden group-hover:block cursor-pointer hover:text-primary-background"

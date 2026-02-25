@@ -1,4 +1,4 @@
-import { dielineDownloder } from "@/actions/export/downloader";
+import { dielineDownloder } from "@repo/lib/utils/dielineDownloader";
 import { useLoading } from "@repo/lib/utils/useLoading";
 import { useSVGStore } from "@repo/store/dieline/svg.store";
 import { Button } from "@repo/ui/components/button";
@@ -17,7 +17,7 @@ const DielineDownloadButton = ({ slug, isRendering }: Props) => {
 
   const onDownload = async () => {
     if (!svg || isRendering) {
-      toast.error("فایل آماده دانلود نیست.");
+      toast.error("File Not Ready.");
       return;
     }
     startLoading();
@@ -25,11 +25,11 @@ const DielineDownloadButton = ({ slug, isRendering }: Props) => {
     const res = await dielineDownloder(slug);
 
     if (!res?.success) {
-      toast.error("خطایی رخ داد. لطفا لحظاتی بعد مجددا تلاش کنید.");
+      toast.error("Something Happended. Check The Logs.");
       stopLoading();
       return;
     } else {
-      toast.success("فایل با موفقیت تولید شد.");
+      toast.success("Successfully Downloaded.");
     }
 
     stopLoading();

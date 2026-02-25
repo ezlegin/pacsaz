@@ -1,4 +1,3 @@
-import { dielineDownloder } from "@/lib/actions/export/downloader";
 import Diamond from "@/public/icons/Diamond";
 import { useLoading } from "@repo/lib/utils/useLoading";
 import { useUserStore } from "@repo/store/app/user.store";
@@ -12,6 +11,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import LoginPopup from "../forms/LoginPopup";
 import SaveDielineForm from "../forms/SaveDielineForm";
+import { dielineDownloder } from "@repo/lib/utils/dielineDownloader";
 
 interface Props {
   slug: string;

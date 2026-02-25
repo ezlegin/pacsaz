@@ -1,6 +1,5 @@
 "use server";
 
-import { toPt } from "@repo/dieline-core/utils/sizeConvertor";
 import { OverallSizes } from "@repo/store/dieline/overallSize.store";
 import path from "path";
 import PDFDocument from "pdfkit";
@@ -95,4 +94,10 @@ export async function PDFGenerator({
     console.error(error);
     return { success: false, message: "Could not generate pdf" };
   }
+}
+
+function toPt(mm: number) {
+  const PT_PER_INCH = 72;
+  const MM_PER_INCH = 25.4;
+  return (mm * PT_PER_INCH) / MM_PER_INCH;
 }

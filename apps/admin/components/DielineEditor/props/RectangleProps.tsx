@@ -7,18 +7,15 @@ import { Button } from "@repo/ui/components/button";
 import { Input } from "@repo/ui/components/input";
 import { Label } from "@repo/ui/components/label";
 import { Check, ChevronLeft } from "lucide-react";
-import { useState } from "react";
+import { Dispatch, SetStateAction } from "react";
 
 interface Props {
   setShapeType: (val: keyof Shapes | null) => void;
+  input: RectangleSpec;
+  setInput: Dispatch<SetStateAction<RectangleSpec>>;
 }
 
-const RectangleSettings = ({ setShapeType }: Props) => {
-  const [input, setInput] = useState<RectangleSpec>({
-    width: "",
-    height: "",
-    layer: "trim",
-  });
+const RectangleSettings = ({ setShapeType, input, setInput }: Props) => {
   const {
     dielineSpec: { shapes },
     setShape,
@@ -51,7 +48,7 @@ const RectangleSettings = ({ setShapeType }: Props) => {
           type="button"
         >
           <ChevronLeft />
-          Line
+          Rectangle
         </Button>
 
         <Button

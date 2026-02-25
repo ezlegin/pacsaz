@@ -12,7 +12,7 @@ import { Exporter } from "./Exporter";
 
 export abstract class Dieline {
   // -------------- Models --------------
-  private main: IModel = {};
+  protected main: IModel = {};
   protected trimModel: IModel = { layer: "trim" };
   protected foldModel: IModel = { layer: "fold" };
   protected perfModel: IModel = { layer: "perf" };
@@ -32,7 +32,7 @@ export abstract class Dieline {
     materials["f-flute"],
   ];
   // -------------- Dieline Factory --------------
-  protected abstract trim(): void;
+  protected abstract draw(): void;
   protected fold(): void {}
   protected perf(): void {}
 
@@ -73,10 +73,9 @@ export abstract class Dieline {
     this.main = {};
     this.trimModel = { layer: "trim" };
     this.foldModel = { layer: "fold" };
+    this.perfModel = { layer: "perf" };
 
-    this.trim();
-    this.fold();
-    this.perf();
+    this.draw();
 
     const dieline: IModel = {
       models: {
@@ -86,18 +85,17 @@ export abstract class Dieline {
       },
     };
 
-    const bleed = new Bleed(this.trimModel, this.settings.bleed);
-    const container = new Pacsaz.layer.Container(this.trimModel);
-    const rulers = this.rulers();
-    const anchor = new Pacsaz.layer.Anchor(this.main, this.trimModel);
-
-    this.$pushLayers({
-      bleed,
-      container,
+    const layers: IModelMap = {
+      bleed: new Bleed(this.trimModel, this.settings.bleed),
+      container: new Pacsaz.layer.Container(this.trimModel),
       dieline,
-      rulers,
-      anchor,
-    });
+      rulers: this.rulers(),
+      anchor: new Pacsaz.layer.Anchor(this.main, this.trimModel),
+    };
+
+    for (const l in layers) {
+      Pacsaz.shape.push(this.main, l, layers[l]!, l);
+    }
   }
 
   // -------------- Rulers --------------
@@ -166,12 +164,6 @@ export abstract class Dieline {
 
   // -------------- Utils --------------
 
-  private $pushLayers(layers: IModelMap) {
-    for (const l in layers) {
-      Pacsaz.shape.push(this.main, l, layers[l]!, l);
-    }
-  }
-
   protected $pushModels(models: IModelMap) {
     for (const m in models) {
       const parentModel = models[m]!;
@@ -195,10 +187,17 @@ export abstract class Dieline {
     }
   }
 
-  protected $pushShapes(models: IModelMap, to: "trimModel" | "foldModel") {
-    for (const m in models) {
-      const model = models[m]!;
-      Pacsaz.shape.push(this[to], m, model);
-    }
+  protected $pushShape(
+    model: IModel,
+    key: string,
+    layer: "trim" | "fold" | "perf",
+  ) {
+    const pushTo =
+      layer === "trim"
+        ? this.trimModel
+        : layer === "fold"
+          ? this.foldModel
+          : this.perfModel;
+    Pacsaz.shape.push(pushTo, key, model);
   }
 }

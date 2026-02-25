@@ -6,42 +6,42 @@ import {
 import { Button } from "@repo/ui/components/button";
 import { Input } from "@repo/ui/components/input";
 import { Label } from "@repo/ui/components/label";
-import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import { Check, ChevronLeft } from "lucide-react";
-import { useState } from "react";
+import { Dispatch, SetStateAction } from "react";
 
 interface Props {
+  input: LineSpec;
+  setInput: Dispatch<SetStateAction<LineSpec>>;
   setShapeType: (val: keyof Shapes | null) => void;
 }
 
-const LineSettings = ({ setShapeType }: Props) => {
-  const [input, setInput] = useState<LineSpec>({
-    length: "",
-    layer: "trim",
-  });
+const LineSettings = ({ setShapeType, input, setInput }: Props) => {
   const {
     dielineSpec: { shapes },
     setShape,
   } = useDielineSpecStore();
 
-  const addLine = () => {
+  const addLine = (input: LineSpec) => {
     if (!input?.length) return;
 
     const prevLines = shapes?.line;
-    const xx = Object.entries(prevLines ?? {})
+    const lastKey = Object.entries(prevLines ?? {})
       .map(([key]) => key)
       .at(-1)
       ?.split("-")[1];
 
-    const lineCount = xx ? +xx + 1 : "1";
+    const lineCount = lastKey ? +lastKey + 1 : "1";
     const lineKey = `line-${lineCount}`;
 
     setShape("line", lineKey, input);
-
     setShapeType(null);
   };
 
-  const updateOrigin = (axis: "x" | "y", value: string) => {
+  const updateOrigin = (
+    setInput: React.Dispatch<React.SetStateAction<LineSpec>>,
+    axis: "x" | "y",
+    value: string,
+  ) => {
     setInput((prev) => ({
       ...prev,
       origin: {
@@ -51,13 +51,14 @@ const LineSettings = ({ setShapeType }: Props) => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (input.length) addLine();
-  };
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (input.length) addLine(input);
+      }}
+      className="space-y-4"
+    >
       <div className="flex justify-between">
         <Button
           variant={"ghost"}
@@ -116,7 +117,7 @@ const LineSettings = ({ setShapeType }: Props) => {
             <Input
               className="h-9 w-full"
               value={input.origin?.x || ""}
-              onChange={(e) => updateOrigin("x", e.target.value)}
+              onChange={(e) => updateOrigin(setInput, "x", e.target.value)}
               placeholder="0"
             />
           </div>
@@ -125,43 +126,11 @@ const LineSettings = ({ setShapeType }: Props) => {
             <Input
               className="h-9 w-full"
               value={input.origin?.y || ""}
-              onChange={(e) => updateOrigin("y", e.target.value)}
+              onChange={(e) => updateOrigin(setInput, "y", e.target.value)}
               placeholder="0"
             />
           </div>
         </div>
-      </div>
-
-      <div className="space-y-1">
-        <Label>Layer</Label>
-        <ToggleGroup
-          defaultValue="trim"
-          onValueChange={(val: "trim" | "fold" | "perf") =>
-            setInput((prev) => ({ ...prev, layer: val }))
-          }
-          variant="outline"
-          type="single"
-          size={"sm"}
-        >
-          <ToggleGroupItem
-            className="data-[state=on]:bg-gray-200 cursor-pointer"
-            value="trim"
-          >
-            Trim
-          </ToggleGroupItem>
-          <ToggleGroupItem
-            className="data-[state=on]:bg-gray-200 cursor-pointer"
-            value="fold"
-          >
-            Fold
-          </ToggleGroupItem>
-          <ToggleGroupItem
-            className="data-[state=on]:bg-gray-200 cursor-pointer"
-            value="perf"
-          >
-            Perf
-          </ToggleGroupItem>
-        </ToggleGroup>
       </div>
     </form>
   );

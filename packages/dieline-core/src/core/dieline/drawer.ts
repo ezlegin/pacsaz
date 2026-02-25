@@ -1,5 +1,4 @@
 import { getDielineSpec } from "@repo/store/dieline/dielineSpec.store";
-import M, { IModel } from "makerjs";
 import { evaluate } from "mathjs";
 import Pacsaz from "../Pacsaz";
 import { Dieline } from "./Dieline";
@@ -13,14 +12,12 @@ export class Drawer extends Dieline {
     length: 160,
     height: 0,
   };
-
   private line() {
     if (!this.shapes.line) return;
-    console.log(this.shapes.line);
 
-    for (const [_, { length, angle, origin, layer, hidden }] of Object.entries(
-      this.shapes.line,
-    )) {
+    const lineArr = Object.entries(this.shapes.line);
+
+    for (const [key, { length, angle, origin, layer, hidden }] of lineArr) {
       if (hidden) continue;
 
       const lineLength = this.$evaluateMathExpr(length);
@@ -31,17 +28,15 @@ export class Drawer extends Dieline {
         const originY = this.$evaluateMathExpr(origin?.y);
         line.move([originX, originY]);
       }
-
-      this.$pushShapes({ line }, layer === "trim" ? "trimModel" : "foldModel");
+      7;
+      this.$pushShape(line, key, layer);
     }
   }
 
   private rectangle() {
-    let rects: IModel = {};
-
     if (!this.shapes.rectangle) return;
 
-    for (const [key, { width, height, hidden }] of Object.entries(
+    for (const [_, { width, height, hidden, layer }] of Object.entries(
       this.shapes.rectangle,
     )) {
       if (hidden) continue;
@@ -50,14 +45,11 @@ export class Drawer extends Dieline {
       const rectHeight = this.$evaluateMathExpr(height);
       const rect = new Pacsaz.shapes.Rectangle(rectWidth, rectHeight);
 
-      M.model.addModel(rects, rect, key);
+      this.$pushShape({ models: rect.models }, "rect", layer);
     }
-
-    this.$pushShapes({ ...rects.models }, "trimModel");
   }
 
-  protected override trim() {
-    console.log("shapes", this.shapes);
+  protected override draw() {
     this.line();
     this.rectangle();
   }
