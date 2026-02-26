@@ -12,10 +12,13 @@ import { Separator } from "@repo/ui/components/separator";
 import { Eye, EyeClosed, Trash } from "lucide-react";
 import DielineMetadataForm from "../forms/DielineMetadataForm";
 import { cn } from "@repo/ui/lib/utils";
+import { useSelectShapeStore } from "@repo/store/app/selectedShape.store";
 
 const DielineLayer = () => {
   const { dielineSpec, removeShape, setShapeVisibility } =
     useDielineSpecStore();
+  const { selectedShape, setSelectedShape, clearSelection } =
+    useSelectShapeStore();
 
   const shapesArr = Object.entries(dielineSpec.shapes).map(([key, val]) => {
     const value = Object.entries(val).map(([key, val]) => ({
@@ -42,6 +45,15 @@ const DielineLayer = () => {
     return hidden ? <EyeClosed size={14} /> : <Eye size={14} />;
   };
 
+  const handleSelection = (parent: ShapesKey, child: string) => {
+    if (selectedShape && selectedShape.parent === parent) {
+      clearSelection();
+      return;
+    }
+
+    setSelectedShape(parent, child);
+  };
+
   return (
     <div className="space-y-3">
       <DielineMetadataForm />
@@ -66,9 +78,17 @@ const DielineLayer = () => {
                     {parent.value.map((child) => (
                       <div
                         key={child.key}
-                        className={`flex justify-between items-center group text-muted-foreground hover:bg-gray-200/50 py-1 px-3 rounded-sm ${
-                          child.hidden ? "opacity-50" : ""
-                        }`}
+                        className={cn(
+                          selectedShape &&
+                            selectedShape.parent === parent.key &&
+                            selectedShape.child === child.key &&
+                            "bg-gray-200/50",
+                          child.hidden ? "opacity-50" : "",
+                          `flex justify-between items-center group text-muted-foreground hover:bg-gray-200/50 py-1 px-3 rounded-sm cursor-pointer`,
+                        )}
+                        onClick={() =>
+                          handleSelection(parent.key as ShapesKey, child.key)
+                        }
                       >
                         <div
                           className={cn(

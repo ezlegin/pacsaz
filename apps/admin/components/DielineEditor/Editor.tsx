@@ -1,60 +1,88 @@
 "use client";
 
+import { useSelectShapeStore } from "@repo/store/app/selectedShape.store";
 import {
   LineSpec,
   RectangleSpec,
-  Shapes,
   ShapesKey,
+  useDielineSpecStore,
 } from "@repo/store/dieline/dielineSpec.store";
 import { Label } from "@repo/ui/components/label";
 import { PlusCircle } from "lucide-react";
-import { useState } from "react";
-import LineSettings from "./props/LineProps";
-import RectangleSettings from "./props/RectangleProps";
+import { useEffect, useState } from "react";
+import LineProps from "./props/LineProps";
 import PropsProvider from "./props/PropsProvider";
+import RectangleProps from "./props/RectangleProps";
 
 const Editor = () => {
-  const [shapeType, setShapeType] = useState<keyof Shapes | null>(null);
-  const shapesList: { key: ShapesKey }[] = [
-    { key: "line" },
-    { key: "rectangle" },
-  ];
+  const [editorMode, setEditorMode] = useState<ShapesKey | null>(null);
+  const shapesList: ShapesKey[] = ["line", "rectangle"];
 
-  switch (shapeType) {
+  const { selectedShape, clearSelection } = useSelectShapeStore();
+  const {
+    dielineSpec: { shapes },
+  } = useDielineSpecStore();
+
+  const selectedParent = selectedShape?.parent;
+  const selectedChild = selectedShape?.child;
+  const data = selectedShape
+    ? shapes[selectedShape.parent]![selectedShape.child]
+    : null;
+
+  useEffect(() => {
+    setEditorMode(selectedParent ?? null);
+  }, [selectedShape]);
+
+  const handleCloseEditor = () => {
+    setEditorMode(null);
+    clearSelection();
+  };
+
+  switch (editorMode) {
     case "line":
       return (
-        <PropsProvider<LineSpec> initialData={{ length: "", layer: "trim" }}>
+        <PropsProvider<LineSpec>
+          key={`${selectedParent} ${selectedChild}`}
+          initialData={
+            (data as LineSpec | undefined) ?? {
+              length: "",
+              layer: "trim",
+            }
+          }
+          close={handleCloseEditor}
+          shapeKey="line"
+        >
           {({ input, setInput }) => (
-            <LineSettings
-              setShapeType={setShapeType}
-              input={input}
-              setInput={setInput}
-            />
+            <LineProps setInput={setInput} input={input} />
           )}
         </PropsProvider>
       );
     case "rectangle":
       return (
         <PropsProvider<RectangleSpec>
-          initialData={{ width: "", height: "", layer: "trim" }}
+          initialData={
+            (data as RectangleSpec | undefined) ?? {
+              width: "",
+              height: "",
+              layer: "trim",
+            }
+          }
+          close={handleCloseEditor}
+          shapeKey="rectangle"
         >
           {({ input, setInput }) => (
-            <RectangleSettings
-              setShapeType={setShapeType}
-              input={input}
-              setInput={setInput}
-            />
+            <RectangleProps setInput={setInput} input={input} />
           )}
         </PropsProvider>
       );
     default:
       return (
         <div>
-          {shapesList.map(({ key }, idx) => (
+          {shapesList.map((key, idx) => (
             <div
               key={idx}
               className="flex justify-between items-center hover:bg-gray-200/50 cursor-pointer px-2 py-2.5 rounded-md"
-              onClick={() => setShapeType(key)}
+              onClick={() => setEditorMode(key)}
             >
               <Label className="capitalize">{key}</Label>
               <PlusCircle size={14} />

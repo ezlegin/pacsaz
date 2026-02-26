@@ -33,6 +33,11 @@ type DielineSpecStore = {
     key: string,
     isVisible: boolean,
   ) => void;
+  updateShape: <T extends ShapesKey>(
+    type: T,
+    key: string,
+    spec: NonNullable<Shapes[T]>[string],
+  ) => void;
   removeShape: (type: ShapesKey, key: string) => void;
 };
 
@@ -51,6 +56,20 @@ export const useDielineSpecStore = create<DielineSpecStore>()(
               ...state.dielineSpec.shapes,
               [type]: {
                 ...(state.dielineSpec.shapes[type] || {}),
+                [key]: spec,
+              },
+            },
+          },
+        })),
+
+      updateShape: (type, key, spec) =>
+        set((state) => ({
+          dielineSpec: {
+            ...state.dielineSpec,
+            shapes: {
+              ...state.dielineSpec.shapes,
+              [type]: {
+                ...state.dielineSpec.shapes[type],
                 [key]: spec,
               },
             },

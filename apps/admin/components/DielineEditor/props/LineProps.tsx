@@ -1,42 +1,14 @@
-import {
-  LineSpec,
-  Shapes,
-  useDielineSpecStore,
-} from "@repo/store/dieline/dielineSpec.store";
-import { Button } from "@repo/ui/components/button";
+import { LineSpec } from "@repo/store/dieline/dielineSpec.store";
 import { Input } from "@repo/ui/components/input";
 import { Label } from "@repo/ui/components/label";
-import { Check, ChevronLeft } from "lucide-react";
 import { Dispatch, SetStateAction } from "react";
 
 interface Props {
   input: LineSpec;
   setInput: Dispatch<SetStateAction<LineSpec>>;
-  setShapeType: (val: keyof Shapes | null) => void;
 }
 
-const LineSettings = ({ setShapeType, input, setInput }: Props) => {
-  const {
-    dielineSpec: { shapes },
-    setShape,
-  } = useDielineSpecStore();
-
-  const addLine = (input: LineSpec) => {
-    if (!input?.length) return;
-
-    const prevLines = shapes?.line;
-    const lastKey = Object.entries(prevLines ?? {})
-      .map(([key]) => key)
-      .at(-1)
-      ?.split("-")[1];
-
-    const lineCount = lastKey ? +lastKey + 1 : "1";
-    const lineKey = `line-${lineCount}`;
-
-    setShape("line", lineKey, input);
-    setShapeType(null);
-  };
-
+const LineProps = ({ input, setInput }: Props) => {
   const updateOrigin = (
     setInput: React.Dispatch<React.SetStateAction<LineSpec>>,
     axis: "x" | "y",
@@ -52,34 +24,7 @@ const LineSettings = ({ setShapeType, input, setInput }: Props) => {
   };
 
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        if (input.length) addLine(input);
-      }}
-      className="space-y-4"
-    >
-      <div className="flex justify-between">
-        <Button
-          variant={"ghost"}
-          onClick={() => setShapeType(null)}
-          className="has-[>svg]:px-0"
-          type="button"
-        >
-          <ChevronLeft />
-          Line
-        </Button>
-
-        <Button
-          variant={"primaryForeground"}
-          size={"icon"}
-          type="submit"
-          disabled={!input.length}
-        >
-          <Check />
-        </Button>
-      </div>
-
+    <div className="space-y-4">
       <div className="space-y-1">
         <Label>Length</Label>
         <Input
@@ -132,8 +77,8 @@ const LineSettings = ({ setShapeType, input, setInput }: Props) => {
           </div>
         </div>
       </div>
-    </form>
+    </div>
   );
 };
 
-export default LineSettings;
+export default LineProps;
