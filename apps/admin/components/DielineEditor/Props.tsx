@@ -1,13 +1,7 @@
 "use client";
 
 import { useSelectShapeStore } from "@repo/store/app/selectedShape.store";
-import {
-  CircleSpec,
-  LineSpec,
-  RectangleSpec,
-  ShapesKey,
-  useDielineSpecStore,
-} from "@repo/store/dieline/dielineSpec.store";
+import { ISpec } from "@repo/store/dieline/dielineSpec.store";
 import { Label } from "@repo/ui/components/label";
 import { Circle, LucideIcon, Minus, PlusCircle, Square } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -17,26 +11,17 @@ import PropsProvider from "./props/PropsProvider";
 import RectangleProps from "./props/RectangleProps";
 
 const Props = () => {
-  const [editorMode, setEditorMode] = useState<ShapesKey | null>(null);
-  const shapesList: { key: ShapesKey; Icon: LucideIcon }[] = [
+  const [editorMode, setEditorMode] = useState<ISpec.ShapesKey | null>(null);
+  const shapesList: { key: ISpec.ShapesKey; Icon: LucideIcon }[] = [
     { key: "line", Icon: Minus },
     { key: "rectangle", Icon: Square },
     { key: "circle", Icon: Circle },
   ];
 
   const { selectedShape, clearSelection } = useSelectShapeStore();
-  const {
-    dielineSpec: { shapes },
-  } = useDielineSpecStore();
-
-  const selectedParent = selectedShape?.parent;
-  const selectedChild = selectedShape?.child;
-  const data = selectedShape
-    ? shapes[selectedShape.parent]![selectedShape.child]
-    : null;
 
   useEffect(() => {
-    setEditorMode(selectedParent ?? null);
+    setEditorMode(selectedShape?.type ?? null);
   }, [selectedShape]);
 
   const handleCloseEditor = () => {
@@ -47,9 +32,9 @@ const Props = () => {
   switch (editorMode) {
     case "line":
       return (
-        <PropsProvider<LineSpec>
-          key={`${selectedParent} ${selectedChild}`}
-          data={data as LineSpec}
+        <PropsProvider<ISpec.LineSpec>
+          key={`${selectedShape?.type} ${selectedShape?.key}`}
+          data={selectedShape as ISpec.LineSpec | null}
           close={handleCloseEditor}
           shapeKey="line"
         >
@@ -58,8 +43,8 @@ const Props = () => {
       );
     case "rectangle":
       return (
-        <PropsProvider<RectangleSpec>
-          data={data as RectangleSpec}
+        <PropsProvider<ISpec.RectangleSpec>
+          data={selectedShape as ISpec.RectangleSpec | null}
           close={handleCloseEditor}
           shapeKey="rectangle"
         >
@@ -68,8 +53,8 @@ const Props = () => {
       );
     case "circle":
       return (
-        <PropsProvider<CircleSpec>
-          data={data as CircleSpec}
+        <PropsProvider<ISpec.CircleSpec>
+          data={selectedShape as ISpec.CircleSpec | null}
           close={handleCloseEditor}
           shapeKey="circle"
         >

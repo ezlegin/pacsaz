@@ -1,8 +1,4 @@
-import {
-  getDielineSpec,
-  Shapes,
-  ShapesKey,
-} from "@repo/store/dieline/dielineSpec.store";
+import { getDielineSpec, ISpec } from "@repo/store/dieline/dielineSpec.store";
 import { evaluate } from "mathjs";
 import Pacsaz from "../Pacsaz";
 import { Shape } from "../shapes/Shape";
@@ -10,7 +6,7 @@ import { Dieline } from "./Dieline";
 
 export class Drawer extends Dieline {
   private get shapes() {
-    return getDielineSpec().dielineSpec.shapes;
+    return getDielineSpec().shapes;
   }
   override defaultDimensions = {
     width: 90,
@@ -18,14 +14,14 @@ export class Drawer extends Dieline {
     height: 0,
   };
 
-  private line(line: NonNullable<Shapes["line"]>) {
+  private line(line: NonNullable<ISpec.Shapes["line"]>) {
     this.$drawShapes<"line">(line, ({ angle, length }) => {
       const lineLength = this.$parseMathStr(length);
       return new Pacsaz.shapes.Line(lineLength, +angle);
     });
   }
 
-  private rectangle(rectangle: NonNullable<Shapes["rectangle"]>) {
+  private rectangle(rectangle: NonNullable<ISpec.Shapes["rectangle"]>) {
     this.$drawShapes<"rectangle">(rectangle, ({ height, width }) => {
       const rectWidth = this.$parseMathStr(width);
       const rectHeight = this.$parseMathStr(height);
@@ -33,7 +29,7 @@ export class Drawer extends Dieline {
     });
   }
 
-  private circle(circle: NonNullable<Shapes["circle"]>) {
+  private circle(circle: NonNullable<ISpec.Shapes["circle"]>) {
     this.$drawShapes<"circle">(circle, ({ radius }) => {
       const circleRadius = this.$parseMathStr(radius);
       return new Pacsaz.shapes.Circle(circleRadius);
@@ -41,6 +37,7 @@ export class Drawer extends Dieline {
   }
 
   protected override draw() {
+    return;
     console.log(this.shapes);
     if (this.shapes.line) this.line(this.shapes.line);
     if (this.shapes.rectangle) this.rectangle(this.shapes.rectangle);
@@ -49,13 +46,13 @@ export class Drawer extends Dieline {
 
   // -------------------- UTILS --------------------
 
-  private $drawShapes<T extends ShapesKey>(
-    obj: NonNullable<Shapes[T]>,
-    callBack: (val: NonNullable<Shapes[T]>[string]) => Shape,
+  private $drawShapes<T extends ISpec.ShapesKey>(
+    obj: NonNullable<ISpec.Shapes[T]>,
+    callBack: (val: NonNullable<ISpec.Shapes[T]>[string]) => Shape,
   ) {
     const arr = Object.entries(obj) as [
       string,
-      NonNullable<Shapes[T]>[string],
+      NonNullable<ISpec.Shapes[T]>[string],
     ][];
     for (const [key, val] of arr) {
       if (val.hidden) continue;

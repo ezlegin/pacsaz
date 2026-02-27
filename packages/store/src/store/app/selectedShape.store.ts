@@ -1,24 +1,18 @@
 import { create } from "zustand";
-import { ShapesKey } from "../dieline/dielineSpec.store";
+import { ISpec } from "../dieline/dielineSpec.store";
 
 interface SelectedShapeStore {
-  selectedShape: {
-    parent: ShapesKey;
-    child: string;
-  } | null;
-  setSelectedShape: (parent: ShapesKey, child: string) => void;
+  selectedShape: ISpec.ShapesSpec | null;
+  setSelectedShape: (selectedShape: ISpec.ShapesSpec) => void;
   clearSelection: () => void;
 }
 
 export const useSelectShapeStore = create<SelectedShapeStore>((set) => ({
   selectedShape: null,
 
-  setSelectedShape: (parent, child) =>
+  setSelectedShape: (selectedShape) =>
     set(() => ({
-      selectedShape: {
-        parent,
-        child,
-      },
+      selectedShape,
     })),
 
   clearSelection: () => set(() => ({ selectedShape: null })),

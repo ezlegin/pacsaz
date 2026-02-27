@@ -6,8 +6,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSelectShapeStore } from "@repo/store/app/selectedShape.store";
 import {
-  ShapesKey,
-  Specs,
+  ISpec,
   useDielineSpecStore,
 } from "@repo/store/dieline/dielineSpec.store";
 import { Button } from "@repo/ui/components/button";
@@ -28,7 +27,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
-const getShapeSchema = (shapeKey: ShapesKey) => {
+const getShapeSchema = (shapeKey: ISpec.ShapesKey) => {
   switch (shapeKey) {
     case "line":
       return lineFormSchema;
@@ -41,24 +40,20 @@ const getShapeSchema = (shapeKey: ShapesKey) => {
   }
 };
 
-interface PropsProvider<T extends Specs> {
-  data: T;
+interface PropsProvider<T extends ISpec.ShapesSpec> {
+  data: T | null;
   children: (props: { form: any }) => ReactNode;
   close: () => void;
-  shapeKey: ShapesKey;
+  shapeKey: ISpec.ShapesKey;
 }
 
-function PropsProvider<T extends Specs>({
+function PropsProvider<T extends ISpec.ShapesSpec>({
   children,
   data,
   close,
   shapeKey,
 }: PropsProvider<T>) {
-  const {
-    setShape,
-    updateShape,
-    dielineSpec: { shapes },
-  } = useDielineSpecStore();
+  const { setShape } = useDielineSpecStore();
 
   const { selectedShape } = useSelectShapeStore();
 
@@ -68,37 +63,28 @@ function PropsProvider<T extends Specs>({
   const form = useForm<FormType>({
     resolver: zodResolver(schema as any),
     defaultValues: data ?? {
-      angle: "0",
+      angle: "",
       height: "",
-      hidden: false,
-      layer: "trim",
       length: "",
-      origin: { x: "0", y: "0" },
       width: "",
       radius: "",
-      shapeKey,
+
+      layer: "trim",
+      origin: ["0", "0"],
+      hidden: false,
+      key: shapeKey,
+      type: shapeKey,
     },
     mode: "onChange",
   });
 
   const onSubmit = (data: FormType) => {
-    const shapesList = selectedShape
-      ? shapes[selectedShape?.parent]
-      : shapes[shapeKey];
-    for (const x of Object.entries(shapesList ?? [])) {
-      if (x[0] === data.shapeKey) {
-        toast.error("Name Shuld Be Unique.");
-        return;
-      }
-    }
-
     if (selectedShape) {
-      updateShape(selectedShape.parent, selectedShape.child, data);
-      toast.info("Shape Updated.");
+      // updateShape(selectedShape.parent, selectedShape.child, data);
+      // toast.info("Shape Updated.");
     } else {
-      setShape(shapeKey, data.shapeKey || "shape", data);
+      setShape(shapeKey, data);
       toast.info("Shape Created.");
-
       close();
     }
   };
@@ -118,14 +104,14 @@ function PropsProvider<T extends Specs>({
             </Button>
             <FormField
               control={form.control}
-              name="shapeKey"
+              name="key"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
                     <input
                       {...field}
                       placeholder="Shape Name"
-                      className="p-0 h-fit w-fit border-0 bg-transparent text-sm focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none focus:font-medium "
+                      className="p-0 h-fit w-fit border-0 bg-transparent text-sm focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none focus:font-medium focus:border-b"
                     />
                   </FormControl>
                 </FormItem>
@@ -150,7 +136,7 @@ function PropsProvider<T extends Specs>({
           <div className="flex gap-3">
             <FormField
               control={form.control}
-              name="origin.x"
+              name="origin.0"
               render={({ field }) => (
                 <FormItem className="gap-0 relative">
                   <span className="text-xs text-muted-foreground absolute translate-y-2.5 pl-3">
@@ -165,7 +151,7 @@ function PropsProvider<T extends Specs>({
 
             <FormField
               control={form.control}
-              name="origin.y"
+              name="origin.1"
               render={({ field }) => (
                 <FormItem className="gap-0 relative">
                   <span className="text-xs text-muted-foreground absolute translate-y-2.5 pl-3">

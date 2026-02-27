@@ -1,18 +1,20 @@
 import z from "zod";
 import { validateMathExpression } from "../utils/validateMathExpression";
+import { ISpec } from "@repo/store/dieline/dielineSpec.store";
 
 const mathInput = z.string().min(1).refine(validateMathExpression);
 
+const x: [ISpec.ShapesKey, ...ISpec.ShapesKey[]] = [
+  "line",
+  "circle",
+  "rectangle",
+] as const;
 const generalSchema = z.object({
-  layer: z.enum(["trim", "fold", "perf"]).optional(),
-  hidden: z.boolean().optional(),
-  shapeKey: z.string().optional(),
-  origin: z
-    .object({
-      x: mathInput,
-      y: mathInput,
-    })
-    .optional(),
+  layer: z.enum(["trim", "fold", "perf"]),
+  hidden: z.boolean(),
+  key: z.string(),
+  origin: z.tuple([z.string(), z.string()]),
+  type: z.enum(x),
 });
 
 export const lineFormSchema = z

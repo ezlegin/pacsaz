@@ -1,5 +1,6 @@
+import { useSelectShapeStore } from "@repo/store/app/selectedShape.store";
 import {
-  ShapesKey,
+  ISpec,
   useDielineSpecStore,
 } from "@repo/store/dieline/dielineSpec.store";
 import {
@@ -9,50 +10,41 @@ import {
   AccordionTrigger,
 } from "@repo/ui/components/accordion";
 import { Separator } from "@repo/ui/components/separator";
+import { cn } from "@repo/ui/lib/utils";
 import { Eye, EyeClosed, Trash } from "lucide-react";
 import DielineMetadataForm from "../forms/DielineMetadataForm";
-import { cn } from "@repo/ui/lib/utils";
-import { useSelectShapeStore } from "@repo/store/app/selectedShape.store";
 
 const DielineLayer = () => {
-  const { dielineSpec, removeShape, setShapeVisibility } =
-    useDielineSpecStore();
+  const { shapes, setShape } = useDielineSpecStore();
   const { selectedShape, setSelectedShape, clearSelection } =
     useSelectShapeStore();
 
-  const shapesArr = Object.entries(dielineSpec.shapes).map(([key, val]) => {
-    const value = Object.entries(val).map(([key, val]) => ({
-      key,
-      hidden: val.hidden,
-      layer: val.layer,
-    }));
-    return { key, value };
-  });
+  const shapesArr = Object.entries(shapes).map(([key, val]) => ({ key, val }));
 
-  const handleDelete = (type: ShapesKey, key: string) => {
-    removeShape(type, key);
+  const handleDelete = (type: ISpec.ShapesKey, key: string) => {
+    // removeShape(type, key);
     clearSelection();
   };
 
   const handleVisibility = (
-    type: ShapesKey,
+    type: ISpec.ShapesKey,
     key: string,
     currentHidden: boolean,
   ) => {
-    setShapeVisibility(type, key, currentHidden);
+    // setShapeVisibility(type, key, currentHidden);
   };
 
   const VisibilityIcon = ({ hidden }: { hidden: boolean }) => {
     return hidden ? <EyeClosed size={14} /> : <Eye size={14} />;
   };
 
-  const handleSelection = (parent: ShapesKey, child: string) => {
-    if (selectedShape && selectedShape.parent === parent) {
-      clearSelection();
-      return;
-    }
+  const handleSelection = (shape: ISpec.ShapesSpec) => {
+    // if (selectedShape && selectedShape.parent === parent) {
+    //   clearSelection();
+    //   return;
+    // }
 
-    setSelectedShape(parent, child);
+    setSelectedShape(shape);
   };
 
   return (
@@ -66,7 +58,7 @@ const DielineLayer = () => {
         <Accordion type="multiple" className="pl-3">
           {shapesArr.map(
             (parent) =>
-              parent.value.length > 0 && (
+              parent.val.length > 0 && (
                 <AccordionItem
                   key={parent.key}
                   value={parent.key}
@@ -76,20 +68,18 @@ const DielineLayer = () => {
                     {parent.key}
                   </AccordionTrigger>
                   <AccordionContent key={parent.key} className="pb-0">
-                    {parent.value.map((child) => (
+                    {parent.val.map((child) => (
                       <div
                         key={child.key}
                         className={cn(
                           selectedShape &&
-                            selectedShape.parent === parent.key &&
-                            selectedShape.child === child.key &&
+                            selectedShape.type === parent.key &&
+                            selectedShape.key === child.key &&
                             "bg-gray-200/50",
                           child.hidden ? "opacity-50" : "",
                           `flex justify-between items-center group text-muted-foreground hover:bg-gray-200/50 py-1 px-3 rounded-sm cursor-pointer`,
                         )}
-                        onClick={() =>
-                          handleSelection(parent.key as ShapesKey, child.key)
-                        }
+                        onClick={() => handleSelection(child)}
                       >
                         <div
                           className={cn(
@@ -107,7 +97,7 @@ const DielineLayer = () => {
                             className="hidden group-hover:block cursor-pointer hover:text-primary-background"
                             onClick={() =>
                               handleVisibility(
-                                parent.key as ShapesKey,
+                                parent.key as ISpec.ShapesKey,
                                 child.key,
                                 child.hidden,
                               )
@@ -118,7 +108,10 @@ const DielineLayer = () => {
                           <button
                             className="hidden group-hover:block cursor-pointer hover:text-destructive"
                             onClick={() =>
-                              handleDelete(parent.key as ShapesKey, child.key)
+                              handleDelete(
+                                parent.key as ISpec.ShapesKey,
+                                child.key,
+                              )
                             }
                           >
                             <Trash size={14} />
