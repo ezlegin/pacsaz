@@ -2,6 +2,7 @@
 
 import { useSelectShapeStore } from "@repo/store/app/selectedShape.store";
 import {
+  CircleSpec,
   LineSpec,
   RectangleSpec,
   ShapesKey,
@@ -13,10 +14,11 @@ import { useEffect, useState } from "react";
 import LineProps from "./props/LineProps";
 import PropsProvider from "./props/PropsProvider";
 import RectangleProps from "./props/RectangleProps";
+import CircleProps from "./props/CircleProps";
 
 const Editor = () => {
   const [editorMode, setEditorMode] = useState<ShapesKey | null>(null);
-  const shapesList: ShapesKey[] = ["line", "rectangle"];
+  const shapesList: ShapesKey[] = ["line", "rectangle", "circle"];
 
   const { selectedShape, clearSelection } = useSelectShapeStore();
   const {
@@ -58,6 +60,16 @@ const Editor = () => {
           shapeKey="rectangle"
         >
           {({ form }) => <RectangleProps form={form} />}
+        </PropsProvider>
+      );
+    case "circle":
+      return (
+        <PropsProvider<CircleSpec>
+          data={data as CircleSpec}
+          close={handleCloseEditor}
+          shapeKey="circle"
+        >
+          {({ form }) => <CircleProps form={form} />}
         </PropsProvider>
       );
     default:

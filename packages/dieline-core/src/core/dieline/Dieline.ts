@@ -190,7 +190,7 @@ export abstract class Dieline {
   protected $pushShape(
     model: IModel,
     key: string,
-    layer: "trim" | "fold" | "perf",
+    layer: "trim" | "fold" | "perf" = "trim",
   ) {
     const pushTo =
       layer === "trim"

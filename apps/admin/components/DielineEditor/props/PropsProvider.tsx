@@ -1,4 +1,5 @@
 import {
+  circleFormSchema,
   lineFormSchema,
   rectangleFormSchema,
 } from "@/lib/validationSchema/PropsSchema";
@@ -32,6 +33,8 @@ const getShapeSchema = (shapeKey: ShapesKey) => {
       return lineFormSchema;
     case "rectangle":
       return rectangleFormSchema;
+    case "circle":
+      return circleFormSchema;
     default:
       throw new Error(`Unsupported shape: ${shapeKey}`);
   }
@@ -64,14 +67,17 @@ function PropsProvider<T extends Specs>({
   const form = useForm<FormType>({
     resolver: zodResolver(schema as any),
     defaultValues: data ?? {
-      angle: "",
+      angle: "0",
       height: "",
       hidden: false,
       layer: "trim",
       length: "",
       origin: { x: "0", y: "0" },
       width: "",
+      radius: "",
+      shapeKey: "Shape",
     },
+    mode: "onChange",
   });
 
   const onSubmit = (data: FormType) => {
@@ -87,9 +93,8 @@ function PropsProvider<T extends Specs>({
       const key = `${shapeKey}-${count}`;
 
       setShape(shapeKey, key, data);
+      close();
     }
-
-    close();
   };
 
   return (

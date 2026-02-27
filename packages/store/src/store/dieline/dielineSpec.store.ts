@@ -10,10 +10,12 @@ type generals = {
 
 export type LineSpec = Record<"length" | "angle", string> & generals;
 export type RectangleSpec = Record<"width" | "height", string> & generals;
+export type CircleSpec = Record<"radius", string> & generals;
 
 export type Shapes = Partial<{
   line: Record<string, LineSpec>;
   rectangle: Record<string, RectangleSpec>;
+  circle: Record<string, CircleSpec>;
 }>;
 export type ShapesKey = keyof Shapes;
 export type Specs = NonNullable<Shapes[ShapesKey]>[string];

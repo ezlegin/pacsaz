@@ -1,6 +1,11 @@
-import { getDielineSpec } from "@repo/store/dieline/dielineSpec.store";
+import {
+  getDielineSpec,
+  Shapes,
+  ShapesKey,
+} from "@repo/store/dieline/dielineSpec.store";
 import { evaluate } from "mathjs";
 import Pacsaz from "../Pacsaz";
+import { Shape } from "../shapes/Shape";
 import { Dieline } from "./Dieline";
 
 export class Drawer extends Dieline {
@@ -12,51 +17,61 @@ export class Drawer extends Dieline {
     length: 160,
     height: 0,
   };
-  private line() {
-    if (!this.shapes.line) return;
 
-    const lineArr = Object.entries(this.shapes.line);
-
-    for (const [key, { length, angle, origin, layer, hidden }] of lineArr) {
-      if (hidden) continue;
-
-      const lineLength = this.$evaluateMathExpr(length);
-      const line = new Pacsaz.shapes.Line(lineLength, angle);
-
-      if (origin) {
-        const originX = this.$evaluateMathExpr(origin?.x);
-        const originY = this.$evaluateMathExpr(origin?.y);
-        line.move([originX, originY]);
-      }
-      7;
-      this.$pushShape(line, key, layer);
-    }
+  private line(line: NonNullable<Shapes["line"]>) {
+    this.$drawShapes<"line">(line, ({ angle, length }) => {
+      const lineLength = this.$parseMathStr(length);
+      return new Pacsaz.shapes.Line(lineLength, +angle);
+    });
   }
 
-  private rectangle() {
-    if (!this.shapes.rectangle) return;
+  private rectangle(rectangle: NonNullable<Shapes["rectangle"]>) {
+    this.$drawShapes<"rectangle">(rectangle, ({ height, width }) => {
+      const rectWidth = this.$parseMathStr(width);
+      const rectHeight = this.$parseMathStr(height);
+      return new Pacsaz.shapes.Rectangle(rectWidth, rectHeight);
+    });
+  }
 
-    for (const [_, { width, height, hidden, layer }] of Object.entries(
-      this.shapes.rectangle,
-    )) {
-      if (hidden) continue;
-
-      const rectWidth = this.$evaluateMathExpr(width);
-      const rectHeight = this.$evaluateMathExpr(height);
-      const rect = new Pacsaz.shapes.Rectangle(rectWidth, rectHeight);
-
-      this.$pushShape({ models: rect.models }, "rect", layer);
-    }
+  private circle(circle: NonNullable<Shapes["circle"]>) {
+    this.$drawShapes<"circle">(circle, ({ radius }) => {
+      const circleRadius = this.$parseMathStr(radius);
+      return new Pacsaz.shapes.Circle(circleRadius);
+    });
   }
 
   protected override draw() {
-    this.line();
-    this.rectangle();
+    if (this.shapes.line) this.line(this.shapes.line);
+    if (this.shapes.rectangle) this.rectangle(this.shapes.rectangle);
+    if (this.shapes.circle) this.circle(this.shapes.circle);
   }
 
   // -------------------- UTILS --------------------
 
-  private $evaluateMathExpr(expr: string): number {
+  private $drawShapes<T extends ShapesKey>(
+    obj: NonNullable<Shapes[T]>,
+    callBack: (val: NonNullable<Shapes[T]>[string]) => Shape,
+  ) {
+    const arr = Object.entries(obj) as [
+      string,
+      NonNullable<Shapes[T]>[string],
+    ][];
+    for (const [key, val] of arr) {
+      if (val.hidden) continue;
+
+      const model = callBack(val);
+
+      if (val.origin) {
+        const originX = this.$parseMathStr(val.origin.x);
+        const originY = this.$parseMathStr(val.origin.y);
+        model.move([originX, originY]);
+      }
+
+      this.$pushShape(model, key, val.layer);
+    }
+  }
+
+  private $parseMathStr(expr: string): number {
     const scope = {
       width: this.width,
       height: this.height,
