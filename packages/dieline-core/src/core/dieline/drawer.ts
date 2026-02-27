@@ -37,8 +37,6 @@ export class Drawer extends Dieline {
   }
 
   protected override draw() {
-    return;
-    console.log(this.shapes);
     if (this.shapes.line) this.line(this.shapes.line);
     if (this.shapes.rectangle) this.rectangle(this.shapes.rectangle);
     if (this.shapes.circle) this.circle(this.shapes.circle);
@@ -47,25 +45,22 @@ export class Drawer extends Dieline {
   // -------------------- UTILS --------------------
 
   private $drawShapes<T extends ISpec.ShapesKey>(
-    obj: NonNullable<ISpec.Shapes[T]>,
-    callBack: (val: NonNullable<ISpec.Shapes[T]>[string]) => Shape,
+    shapes: NonNullable<ISpec.Shapes[T]>,
+    callBack: (val: NonNullable<ISpec.Shapes[T]>[number]) => Shape,
   ) {
-    const arr = Object.entries(obj) as [
-      string,
-      NonNullable<ISpec.Shapes[T]>[string],
-    ][];
-    for (const [key, val] of arr) {
-      if (val.hidden) continue;
+    for (const shape of shapes) {
+      if (shape.hidden) continue;
 
-      const model = callBack(val);
+      const model = callBack(shape);
 
-      if (val.origin) {
-        const originX = this.$parseMathStr(val.origin.x);
-        const originY = this.$parseMathStr(val.origin.y);
-        model.move([originX, originY]);
+      if (shape.origin) {
+        model.move([
+          this.$parseMathStr(shape.origin[0]),
+          this.$parseMathStr(shape.origin[1]),
+        ]);
       }
 
-      this.$pushShape(model, key, val.layer);
+      this.$pushShape(model, shape.key, shape.layer);
     }
   }
 

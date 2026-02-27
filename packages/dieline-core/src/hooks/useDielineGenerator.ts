@@ -9,7 +9,7 @@ import { Drawer } from "../core/dieline/Drawer";
 
 export function useDielineGenerator(dieline: Drawer) {
   const [isRendering, startTransition] = useTransition();
-  const { dielineSpec: json } = useDielineSpecStore();
+  const { shapes } = useDielineSpecStore();
 
   const {
     ctx: { showAnchors, showWatermark },
@@ -45,7 +45,6 @@ export function useDielineGenerator(dieline: Drawer) {
     });
   }, []);
 
-  // set on change
   useEffect(() => {
     startTransition(() => {
       dieline.model();
@@ -58,7 +57,7 @@ export function useDielineGenerator(dieline: Drawer) {
     dieline,
     thickness,
     format,
-    json,
+    shapes,
     useDielineSpecStore,
 
     showAnchors,

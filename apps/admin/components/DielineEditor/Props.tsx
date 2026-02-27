@@ -29,60 +29,46 @@ const Props = () => {
     clearSelection();
   };
 
-  switch (editorMode) {
-    case "line":
-      return (
-        <PropsProvider<ISpec.LineSpec>
-          key={`${selectedShape?.type} ${selectedShape?.key}`}
-          data={selectedShape as ISpec.LineSpec | null}
-          close={handleCloseEditor}
-          shapeKey="line"
-        >
-          {({ form }) => <LineProps form={form} />}
-        </PropsProvider>
-      );
-    case "rectangle":
-      return (
-        <PropsProvider<ISpec.RectangleSpec>
-          data={selectedShape as ISpec.RectangleSpec | null}
-          close={handleCloseEditor}
-          shapeKey="rectangle"
-        >
-          {({ form }) => <RectangleProps form={form} />}
-        </PropsProvider>
-      );
-    case "circle":
-      return (
-        <PropsProvider<ISpec.CircleSpec>
-          data={selectedShape as ISpec.CircleSpec | null}
-          close={handleCloseEditor}
-          shapeKey="circle"
-        >
-          {({ form }) => <CircleProps form={form} />}
-        </PropsProvider>
-      );
-    default:
-      return (
-        <div>
-          {shapesList.map(({ Icon, key }, idx) => (
-            <div
-              key={idx}
-              className="flex justify-between items-center hover:bg-gray-200/50 cursor-pointer px-2 py-2.5 rounded-md group"
-              onClick={() => setEditorMode(key)}
-            >
-              <Label className="capitalize cursor-pointer">
-                <Icon
-                  size={14}
-                  className="text-muted-foreground group-hover:text-foreground"
-                />
-                {key}
-              </Label>
-              <PlusCircle size={14} />
-            </div>
-          ))}
-        </div>
-      );
+  if (editorMode) {
+    const shapeComponents = {
+      line: LineProps,
+      rectangle: RectangleProps,
+      circle: CircleProps,
+    };
+
+    const Component = shapeComponents[editorMode];
+    return (
+      <PropsProvider<ISpec.ShapesSpec>
+        key={`${selectedShape?.type} ${selectedShape?.key}`}
+        data={selectedShape}
+        close={handleCloseEditor}
+        shapeKey={editorMode}
+      >
+        {({ form }) => <Component form={form} />}
+      </PropsProvider>
+    );
   }
+
+  return (
+    <div>
+      {shapesList.map(({ Icon, key }, idx) => (
+        <div
+          key={idx}
+          className="flex justify-between items-center hover:bg-gray-200/50 cursor-pointer px-2 py-2.5 rounded-md group"
+          onClick={() => setEditorMode(key)}
+        >
+          <Label className="capitalize cursor-pointer">
+            <Icon
+              size={14}
+              className="text-muted-foreground group-hover:text-foreground"
+            />
+            {key}
+          </Label>
+          <PlusCircle size={14} />
+        </div>
+      ))}
+    </div>
+  );
 };
 
 export default Props;

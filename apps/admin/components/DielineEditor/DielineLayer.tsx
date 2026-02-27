@@ -70,7 +70,7 @@ const DielineLayer = () => {
                   <AccordionContent key={parent.key} className="pb-0">
                     {parent.val.map((child) => (
                       <div
-                        key={child.key}
+                        key={child.id}
                         className={cn(
                           selectedShape &&
                             selectedShape.type === parent.key &&
