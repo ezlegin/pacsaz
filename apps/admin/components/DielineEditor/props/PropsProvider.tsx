@@ -53,7 +53,7 @@ function PropsProvider<T extends ISpec.ShapesSpec>({
   close,
   shapeKey,
 }: PropsProvider<T>) {
-  const { setShape } = useDielineSpecStore();
+  const { setShape, updateShape } = useDielineSpecStore();
 
   const { selectedShape } = useSelectShapeStore();
 
@@ -69,6 +69,7 @@ function PropsProvider<T extends ISpec.ShapesSpec>({
       width: "",
       radius: "",
 
+      id: "0",
       layer: "trim",
       origin: ["0", "0"],
       hidden: false,
@@ -80,8 +81,8 @@ function PropsProvider<T extends ISpec.ShapesSpec>({
 
   const onSubmit = (data: FormType) => {
     if (selectedShape) {
-      // updateShape(selectedShape.parent, selectedShape.child, data);
-      // toast.info("Shape Updated.");
+      updateShape(selectedShape.type, selectedShape.id, data);
+      toast.info("Shape Updated.");
     } else {
       setShape(shapeKey, data);
       toast.info("Shape Created.");

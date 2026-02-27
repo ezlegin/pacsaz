@@ -21,7 +21,7 @@ const Props = () => {
   const { selectedShape, clearSelection } = useSelectShapeStore();
 
   useEffect(() => {
-    setEditorMode(selectedShape?.type ?? null);
+    setEditorMode(selectedShape ? selectedShape.type : null);
   }, [selectedShape]);
 
   const handleCloseEditor = () => {

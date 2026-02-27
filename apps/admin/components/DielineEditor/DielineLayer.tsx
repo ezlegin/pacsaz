@@ -15,36 +15,28 @@ import { Eye, EyeClosed, Trash } from "lucide-react";
 import DielineMetadataForm from "../forms/DielineMetadataForm";
 
 const DielineLayer = () => {
-  const { shapes, setShape } = useDielineSpecStore();
+  const { shapes, removeShape, setShapeVisibility } = useDielineSpecStore();
   const { selectedShape, setSelectedShape, clearSelection } =
     useSelectShapeStore();
 
   const shapesArr = Object.entries(shapes).map(([key, val]) => ({ key, val }));
 
-  const handleDelete = (type: ISpec.ShapesKey, key: string) => {
-    // removeShape(type, key);
+  const handleDelete = (type: ISpec.ShapesKey, id: string) => {
+    removeShape(type, id);
     clearSelection();
   };
 
-  const handleVisibility = (
-    type: ISpec.ShapesKey,
-    key: string,
-    currentHidden: boolean,
-  ) => {
-    // setShapeVisibility(type, key, currentHidden);
-  };
-
-  const VisibilityIcon = ({ hidden }: { hidden: boolean }) => {
-    return hidden ? <EyeClosed size={14} /> : <Eye size={14} />;
+  const handleVisibility = (type: ISpec.ShapesKey, id: string) => {
+    setShapeVisibility(type, id);
   };
 
   const handleSelection = (shape: ISpec.ShapesSpec) => {
-    // if (selectedShape && selectedShape.parent === parent) {
-    //   clearSelection();
-    //   return;
-    // }
-
-    setSelectedShape(shape);
+    if (selectedShape) {
+      clearSelection();
+      return;
+    } else {
+      setSelectedShape(shape);
+    }
   };
 
   return (
@@ -73,8 +65,7 @@ const DielineLayer = () => {
                         key={child.id}
                         className={cn(
                           selectedShape &&
-                            selectedShape.type === parent.key &&
-                            selectedShape.key === child.key &&
+                            selectedShape.id === child.id &&
                             "bg-gray-200/50",
                           child.hidden ? "opacity-50" : "",
                           `flex justify-between items-center group text-muted-foreground hover:bg-gray-200/50 py-1 px-3 rounded-sm cursor-pointer`,
@@ -95,24 +86,25 @@ const DielineLayer = () => {
                         <div className="flex gap-2">
                           <button
                             className="hidden group-hover:block cursor-pointer hover:text-primary-background"
-                            onClick={() =>
+                            onClick={(e) => {
+                              e.stopPropagation();
                               handleVisibility(
                                 parent.key as ISpec.ShapesKey,
-                                child.key,
-                                child.hidden,
-                              )
-                            }
+                                child.id,
+                              );
+                            }}
                           >
                             <VisibilityIcon hidden={child.hidden} />
                           </button>
                           <button
                             className="hidden group-hover:block cursor-pointer hover:text-destructive"
-                            onClick={() =>
+                            onClick={(e) => {
+                              e.stopPropagation();
                               handleDelete(
                                 parent.key as ISpec.ShapesKey,
-                                child.key,
-                              )
-                            }
+                                child.id,
+                              );
+                            }}
                           >
                             <Trash size={14} />
                           </button>
@@ -130,3 +122,7 @@ const DielineLayer = () => {
 };
 
 export default DielineLayer;
+
+const VisibilityIcon = ({ hidden }: { hidden: boolean }) => {
+  return hidden ? <EyeClosed size={14} /> : <Eye size={14} />;
+};

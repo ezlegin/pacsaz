@@ -6,7 +6,7 @@ export namespace ISpec {
   type Layer = "trim" | "fold" | "perf";
   type Point = [string, string];
   type generals = {
-    id?: string;
+    id: string;
     key: string;
     layer: Layer;
     hidden: boolean;
@@ -36,17 +36,13 @@ interface DielineSpecStore {
     type: T,
     spec: NonNullable<ISpec.Shapes[T]>[number],
   ) => void;
-  // setShapeVisibility: (
-  //   type: ISpec.ShapesKey,
-  //   key: string,
-  //   isVisible: boolean,
-  // ) => void;
-  // updateShape: <T extends ISpec.ShapesKey>(
-  //   type: T,
-  //   key: string,
-  //   spec: ISpec.ShapesSpec,
-  // ) => void;
-  // removeShape: (type: ISpec.ShapesKey, key: string) => void;
+  setShapeVisibility: (type: ISpec.ShapesKey, id: string) => void;
+  updateShape: <T extends ISpec.ShapesKey>(
+    type: T,
+    id: string,
+    newSpec: ISpec.ShapesSpec,
+  ) => void;
+  removeShape: (type: ISpec.ShapesKey, id: string) => void;
 }
 
 export const useDielineSpecStore = create<DielineSpecStore>()(
@@ -71,53 +67,47 @@ export const useDielineSpecStore = create<DielineSpecStore>()(
           };
         }),
 
-      //   updateShape: (type, key, spec) =>
-      //     set((state) => ({
-      //       dielineSpec: {
-      //         ...state.dielineSpec,
-      //         shapes: {
-      //           ...state.dielineSpec.shapes,
-      //           [type]: {
-      //             ...state.dielineSpec.shapes[type],
-      //             [key]: spec,
-      //           },
-      //         },
-      //       },
-      //     })),
+      setShapeVisibility: (type, id) =>
+        set((state) => {
+          const currentShapes = state.shapes[type];
+          if (!currentShapes) return state;
 
-      //   setShapeVisibility: (type, key, isVisible) =>
-      //     set((state) => ({
-      //       dielineSpec: {
-      //         ...state.dielineSpec,
-      //         shapes: {
-      //           ...state.dielineSpec.shapes,
-      //           [type]: {
-      //             ...state.dielineSpec.shapes[type],
-      //             [key]: {
-      //               ...state.dielineSpec.shapes[type]?.[key],
-      //               hidden: !isVisible,
-      //             },
-      //           },
-      //         },
-      //       },
-      //     })),
+          const updatedShapes = currentShapes.map((item) =>
+            item.id === id ? { ...item, hidden: !item.hidden } : item,
+          );
 
-      //   removeShape: (type, key) =>
-      //     set((state) => {
-      //       const currentShapes = state.dielineSpec.shapes[type];
-      //       if (!currentShapes) return state;
+          return {
+            shapes: {
+              ...state.shapes,
+              [type]: updatedShapes,
+            },
+          };
+        }),
 
-      //       const { [key]: _, ...remaining } = currentShapes;
-      //       return {
-      //         dielineSpec: {
-      //           ...state.dielineSpec,
-      //           shapes: {
-      //             ...state.dielineSpec.shapes,
-      //             [type]: remaining,
-      //           },
-      //         },
-      //       };
-      //     }),
+      updateShape: (type, id, newSpec) =>
+        set((state) => {
+          const currentShapes = state.shapes[type];
+          if (!currentShapes) return state;
+
+          const updatedShapes = currentShapes.map((item) =>
+            item.id === id ? { ...item, ...newSpec } : item,
+          );
+
+          return {
+            shapes: {
+              ...state.shapes,
+              [type]: updatedShapes,
+            },
+          };
+        }),
+
+      removeShape: (type, key) =>
+        set((state) => ({
+          shapes: {
+            ...state.shapes,
+            [type]: state.shapes[type]?.filter((spec) => spec.id !== key),
+          },
+        })),
     }),
     {
       name: "dieline-spec-storage",

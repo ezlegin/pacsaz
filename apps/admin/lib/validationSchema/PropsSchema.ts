@@ -15,6 +15,7 @@ const generalSchema = z.object({
   key: z.string(),
   origin: z.tuple([z.string(), z.string()]),
   type: z.enum(x),
+  id: z.string(),
 });
 
 export const lineFormSchema = z
