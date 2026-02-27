@@ -43,36 +43,21 @@ const Editor = () => {
       return (
         <PropsProvider<LineSpec>
           key={`${selectedParent} ${selectedChild}`}
-          initialData={
-            (data as LineSpec | undefined) ?? {
-              length: "",
-              layer: "trim",
-            }
-          }
+          data={data as LineSpec}
           close={handleCloseEditor}
           shapeKey="line"
         >
-          {({ input, setInput }) => (
-            <LineProps setInput={setInput} input={input} />
-          )}
+          {({ form }) => <LineProps form={form} />}
         </PropsProvider>
       );
     case "rectangle":
       return (
         <PropsProvider<RectangleSpec>
-          initialData={
-            (data as RectangleSpec | undefined) ?? {
-              width: "",
-              height: "",
-              layer: "trim",
-            }
-          }
+          data={data as RectangleSpec}
           close={handleCloseEditor}
           shapeKey="rectangle"
         >
-          {({ input, setInput }) => (
-            <RectangleProps setInput={setInput} input={input} />
-          )}
+          {({ form }) => <RectangleProps form={form} />}
         </PropsProvider>
       );
     default:
@@ -84,7 +69,7 @@ const Editor = () => {
               className="flex justify-between items-center hover:bg-gray-200/50 cursor-pointer px-2 py-2.5 rounded-md"
               onClick={() => setEditorMode(key)}
             >
-              <Label className="capitalize">{key}</Label>
+              <Label className="capitalize cursor-pointer">{key}</Label>
               <PlusCircle size={14} />
             </div>
           ))}

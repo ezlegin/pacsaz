@@ -2,27 +2,26 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
 type Point = { x: string; y: string };
-type generals = { layer: "trim" | "fold" | "perf"; hidden?: boolean };
-export type ShapesKey = keyof Shapes;
-
-export type LineSpec = {
-  length: string;
-  angle?: number;
+type generals = {
+  layer?: "trim" | "fold" | "perf";
+  hidden?: boolean;
   origin?: Point;
-} & generals;
-export type RectangleSpec = { width: string; height: string } & generals;
+};
+
+export type LineSpec = Record<"length" | "angle", string> & generals;
+export type RectangleSpec = Record<"width" | "height", string> & generals;
 
 export type Shapes = Partial<{
   line: Record<string, LineSpec>;
   rectangle: Record<string, RectangleSpec>;
 }>;
+export type ShapesKey = keyof Shapes;
+export type Specs = NonNullable<Shapes[ShapesKey]>[string];
 
-interface DielineSpec {
-  shapes: Shapes;
-}
-
-type DielineSpecStore = {
-  dielineSpec: DielineSpec;
+interface DielineSpecStore {
+  dielineSpec: {
+    shapes: Shapes;
+  };
   setShape: <T extends ShapesKey>(
     type: T,
     key: string,
@@ -39,7 +38,7 @@ type DielineSpecStore = {
     spec: NonNullable<Shapes[T]>[string],
   ) => void;
   removeShape: (type: ShapesKey, key: string) => void;
-};
+}
 
 export const useDielineSpecStore = create<DielineSpecStore>()(
   persist(

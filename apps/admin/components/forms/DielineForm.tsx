@@ -1,6 +1,9 @@
 "use client";
 
-import { dielineFormSchema, DielineFormType } from "@/lib/validatoinSchema";
+import {
+  dielineFormSchema,
+  DielineFormType,
+} from "@/lib/validationSchema/validatoinSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@repo/ui/components/button";
 import {

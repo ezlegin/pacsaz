@@ -1,40 +1,52 @@
 import { RectangleSpec } from "@repo/store/dieline/dielineSpec.store";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@repo/ui/components/form";
 import { Input } from "@repo/ui/components/input";
-import { Label } from "@repo/ui/components/label";
-import { Dispatch, SetStateAction } from "react";
+import { UseFormReturn } from "react-hook-form";
+import PropsFormContent from "./PropsFormContent";
 
 interface Props {
-  input: RectangleSpec;
-  setInput: Dispatch<SetStateAction<RectangleSpec>>;
+  form: UseFormReturn<RectangleSpec, any, RectangleSpec>;
 }
 
-const RectangleProps = ({ input, setInput }: Props) => {
+const RectangleProps = ({ form }: Props) => {
   return (
-    <div className="space-y-4">
-      <div className="space-y-1">
-        <Label>Width</Label>
-        <Input
-          autoFocus
-          className="h-9 w-full"
-          value={input.width}
-          onChange={(e) =>
-            setInput((prev) => ({ ...prev, width: e.target.value }))
-          }
-          placeholder="e.g., width * 2"
-        />
-      </div>
-      <div className="space-y-1">
-        <Label>Height</Label>
-        <Input
-          className="h-9 w-full"
-          value={input.height}
-          onChange={(e) =>
-            setInput((prev) => ({ ...prev, height: e.target.value }))
-          }
-          placeholder="e.g., width * 2"
-        />
-      </div>
-    </div>
+    <PropsFormContent>
+      <FormField
+        control={form.control}
+        name="width"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Width</FormLabel>
+            <FormControl>
+              <Input
+                {...field}
+                placeholder="expr.."
+                autoFocus
+                className="h-9"
+              />
+            </FormControl>
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="height"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Height</FormLabel>
+            <FormControl>
+              <Input {...field} placeholder="expr.." className="h-9" />
+            </FormControl>
+          </FormItem>
+        )}
+      />
+    </PropsFormContent>
   );
 };
 

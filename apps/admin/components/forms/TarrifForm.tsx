@@ -1,6 +1,9 @@
 "use client";
 
-import { tarrifFormSchema, TarrifFormType } from "@/lib/validatoinSchema";
+import {
+  tarrifFormSchema,
+  TarrifFormType,
+} from "@/lib/validationSchema/validatoinSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@repo/ui/components/button";
 import {

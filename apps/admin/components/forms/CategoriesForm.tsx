@@ -3,7 +3,7 @@
 import {
   categoriesFormSchema,
   CategoriesFormType,
-} from "@/lib/validatoinSchema";
+} from "@/lib/validationSchema/validatoinSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@repo/ui/components/button";
 import {

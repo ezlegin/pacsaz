@@ -1,6 +1,9 @@
 "use client";
 
-import { userFormSchema, UserFormType } from "@/lib/validatoinSchema";
+import {
+  userFormSchema,
+  UserFormType,
+} from "@/lib/validationSchema/validatoinSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@repo/ui/components/button";
 import {

@@ -10,7 +10,7 @@ import {
   TabsTrigger,
 } from "@repo/ui/components/tabs";
 import dynamic from "next/dynamic";
-import Editor from "./Editor";
+import Editor from "./Props";
 import Settings from "./settings/Settings";
 const SVGPreview = dynamic(
   () => import("@repo/ui/components/custom/SVGPreview"),
