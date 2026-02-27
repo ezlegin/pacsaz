@@ -6,6 +6,7 @@ const mathInput = z.string().min(1).refine(validateMathExpression);
 const generalSchema = z.object({
   layer: z.enum(["trim", "fold", "perf"]).optional(),
   hidden: z.boolean().optional(),
+  shapeKey: z.string().optional(),
   origin: z
     .object({
       x: mathInput,

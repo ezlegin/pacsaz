@@ -41,6 +41,7 @@ export class Drawer extends Dieline {
   }
 
   protected override draw() {
+    console.log(this.shapes);
     if (this.shapes.line) this.line(this.shapes.line);
     if (this.shapes.rectangle) this.rectangle(this.shapes.rectangle);
     if (this.shapes.circle) this.circle(this.shapes.circle);

@@ -25,6 +25,7 @@ import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import { Check, ChevronLeft } from "lucide-react";
 import { ReactNode } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 const getShapeSchema = (shapeKey: ShapesKey) => {
@@ -54,9 +55,9 @@ function PropsProvider<T extends Specs>({
   shapeKey,
 }: PropsProvider<T>) {
   const {
-    dielineSpec: { shapes },
     setShape,
     updateShape,
+    dielineSpec: { shapes },
   } = useDielineSpecStore();
 
   const { selectedShape } = useSelectShapeStore();
@@ -75,24 +76,29 @@ function PropsProvider<T extends Specs>({
       origin: { x: "0", y: "0" },
       width: "",
       radius: "",
-      shapeKey: "Shape",
+      shapeKey,
     },
     mode: "onChange",
   });
 
   const onSubmit = (data: FormType) => {
+    const shapesList = selectedShape
+      ? shapes[selectedShape?.parent]
+      : shapes[shapeKey];
+    for (const x of Object.entries(shapesList ?? [])) {
+      if (x[0] === data.shapeKey) {
+        toast.error("Name Shuld Be Unique.");
+        return;
+      }
+    }
+
     if (selectedShape) {
       updateShape(selectedShape.parent, selectedShape.child, data);
+      toast.info("Shape Updated.");
     } else {
-      const prev = shapes?.[shapeKey];
-      const lastKey = Object.keys(prev ?? {})
-        .at(-1)
-        ?.split("-")[1];
+      setShape(shapeKey, data.shapeKey || "shape", data);
+      toast.info("Shape Created.");
 
-      const count = lastKey ? Number(lastKey) + 1 : 1;
-      const key = `${shapeKey}-${count}`;
-
-      setShape(shapeKey, key, data);
       close();
     }
   };
@@ -101,15 +107,31 @@ function PropsProvider<T extends Specs>({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <div className="flex justify-between">
-          <Button
-            variant="ghost"
-            onClick={close}
-            type="button"
-            className="has-[>svg]:px-0 capitalize"
-          >
-            <ChevronLeft />
-            {shapeKey}
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              type="button"
+              className="has-[>svg]:px-0 "
+              onClick={close}
+            >
+              <ChevronLeft />
+            </Button>
+            <FormField
+              control={form.control}
+              name="shapeKey"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <input
+                      {...field}
+                      placeholder="Shape Name"
+                      className="p-0 h-fit w-fit border-0 bg-transparent text-sm focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none focus:font-medium "
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          </div>
 
           <Button
             variant="primaryForeground"

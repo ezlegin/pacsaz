@@ -10,7 +10,7 @@ import {
   TabsTrigger,
 } from "@repo/ui/components/tabs";
 import dynamic from "next/dynamic";
-import Editor from "./Props";
+import Props from "./Props";
 import Settings from "./settings/Settings";
 const SVGPreview = dynamic(
   () => import("@repo/ui/components/custom/SVGPreview"),
@@ -23,7 +23,7 @@ const DielineEditor = () => {
   return (
     <div className="h-screen overflow-hidden">
       <div className="h-full grid grid-cols-[280px_1fr_280px]">
-        <div className="bg-muted border-r p-5 z-10">
+        <div className="bg-muted border-r p-3 z-10">
           <DielineLayer />
         </div>
 
@@ -33,7 +33,7 @@ const DielineEditor = () => {
           </div>
         </div>
 
-        <div className="bg-muted border-l p-5 z-10">
+        <div className="bg-muted border-l p-3 z-10">
           <Tabs defaultValue="editor">
             <TabsList className="w-full px-0">
               <TabsTrigger className="cursor-pointer " value="editor">
@@ -44,7 +44,7 @@ const DielineEditor = () => {
               </TabsTrigger>
             </TabsList>
             <TabsContent value="editor">
-              <Editor />
+              <Props />
             </TabsContent>
             <TabsContent value="settings">
               <Settings isRendering={isRendering} />

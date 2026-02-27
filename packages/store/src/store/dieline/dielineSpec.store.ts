@@ -6,6 +6,7 @@ type generals = {
   layer?: "trim" | "fold" | "perf";
   hidden?: boolean;
   origin?: Point;
+  id: string;
 };
 
 export type LineSpec = Record<"length" | "angle", string> & generals;
@@ -119,3 +120,35 @@ export const useDielineSpecStore = create<DielineSpecStore>()(
 );
 
 export const getDielineSpec = useDielineSpecStore.getState;
+
+type _generals = {
+  key: string;
+  id: string;
+  layer: "trim" | "fold" | "perf";
+  hidden: boolean;
+  origin: {
+    x: string;
+    y: string;
+  };
+};
+
+type _Shapes = {
+  line: ({
+    length: string;
+    angle: string;
+  } & _generals)[];
+};
+
+const xx: _Shapes = {
+  line: [
+    {
+      key: "line-1",
+      id: "uuid",
+      length: "0",
+      angle: "0",
+      layer: "trim",
+      hidden: false,
+      origin: { x: "0", y: "0" },
+    },
+  ],
+};

@@ -31,6 +31,7 @@ const DielineLayer = () => {
 
   const handleDelete = (type: ShapesKey, key: string) => {
     removeShape(type, key);
+    clearSelection();
   };
 
   const handleVisibility = (
