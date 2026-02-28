@@ -9,7 +9,7 @@ interface FormData {
 }
 
 const DielineMetadataForm = () => {
-  const { dielineSpec } = useDielineSpecStore();
+  const { shapes } = useDielineSpecStore();
   const dielineMetadata = {
     title: "",
     slug: "",
@@ -31,7 +31,7 @@ const DielineMetadataForm = () => {
     console.log({
       title: data.title,
       slug: data.slug,
-      dielineSpec: JSON.stringify(dielineSpec),
+      dielineSpec: JSON.stringify(shapes),
     });
     toast.success("Saved Successfully");
   };

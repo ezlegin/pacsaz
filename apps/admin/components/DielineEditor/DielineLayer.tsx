@@ -3,120 +3,124 @@ import {
   ISpec,
   useDielineSpecStore,
 } from "@repo/store/dieline/dielineSpec.store";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@repo/ui/components/accordion";
 import { Separator } from "@repo/ui/components/separator";
+import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import { cn } from "@repo/ui/lib/utils";
-import { Eye, EyeClosed, Trash } from "lucide-react";
+import {
+  Circle,
+  CircleDashed,
+  Eye,
+  EyeClosed,
+  Minus,
+  Square,
+  SquareDashed,
+  Trash,
+} from "lucide-react";
+import { useState } from "react";
 import DielineMetadataForm from "../forms/DielineMetadataForm";
 
 const DielineLayer = () => {
   const { shapes, removeShape, setShapeVisibility } = useDielineSpecStore();
-  const { selectedShape, setSelectedShape, clearSelection } =
-    useSelectShapeStore();
+  const { setSelectedShape, clearSelection } = useSelectShapeStore();
+  const [shapeRef, setShapeRef] = useState<keyof ShapeRefData>("type");
 
-  const shapesArr = Object.entries(shapes).map(([key, val]) => ({ key, val }));
-
-  const handleDelete = (type: ISpec.ShapesKey, id: string) => {
-    removeShape(type, id);
-    clearSelection();
-  };
-
-  const handleVisibility = (type: ISpec.ShapesKey, id: string) => {
-    setShapeVisibility(type, id);
-  };
-
-  const handleSelection = (shape: ISpec.ShapesSpec) => {
-    if (selectedShape) {
-      clearSelection();
-      return;
-    } else {
-      setSelectedShape(shape);
-    }
-  };
+  const allShapes = Object.values(shapes).flat();
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       <DielineMetadataForm />
 
-      <Separator />
-
-      <div>
-        <span className="font-medium">Shapes</span>
-        <Accordion type="multiple" className="pl-3">
-          {shapesArr.map(
-            (parent) =>
-              parent.val.length > 0 && (
-                <AccordionItem
-                  key={parent.key}
-                  value={parent.key}
-                  className="border-b-0"
-                >
-                  <AccordionTrigger className="py-1.5">
-                    {parent.key}
-                  </AccordionTrigger>
-                  <AccordionContent key={parent.key} className="pb-0">
-                    {parent.val.map((child) => (
-                      <div
-                        key={child.id}
-                        className={cn(
-                          selectedShape &&
-                            selectedShape.id === child.id &&
-                            "bg-gray-200/50",
-                          child.hidden ? "opacity-50" : "",
-                          `flex justify-between items-center group text-muted-foreground hover:bg-gray-200/50 py-1 px-3 rounded-sm cursor-pointer`,
-                        )}
-                        onClick={() => handleSelection(child)}
-                      >
-                        <div
-                          className={cn(
-                            child.layer === "trim"
-                              ? "text-blue-500"
-                              : child.layer === "fold"
-                                ? "text-red-500"
-                                : "text-fuchsia-500",
-                          )}
-                        >
-                          {child.key}
-                        </div>
-                        <div className="flex gap-2">
-                          <button
-                            className="hidden group-hover:block cursor-pointer hover:text-primary-background"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleVisibility(
-                                parent.key as ISpec.ShapesKey,
-                                child.id,
-                              );
-                            }}
-                          >
-                            <VisibilityIcon hidden={child.hidden} />
-                          </button>
-                          <button
-                            className="hidden group-hover:block cursor-pointer hover:text-destructive"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDelete(
-                                parent.key as ISpec.ShapesKey,
-                                child.id,
-                              );
-                            }}
-                          >
-                            <Trash size={14} />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </AccordionContent>
-                </AccordionItem>
-              ),
-          )}
-        </Accordion>
+      <div className="space-y-0.5">
+        <Separator />
+        <div className="flex justify-between items-center">
+          <div className="font-medium text-sm">Layers</div>
+          <ToggleGroup
+            value={shapeRef}
+            onValueChange={(val: keyof ShapeRefData | "") => {
+              if (val === "") return;
+              setShapeRef(val);
+            }}
+            size={"sm"}
+            type="single"
+          >
+            <ToggleGroupItem
+              value="type"
+              className="text-xs text-muted-foreground"
+            >
+              Shape
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              value="layer"
+              className="text-xs text-muted-foreground"
+            >
+              Layer
+            </ToggleGroupItem>
+          </ToggleGroup>
+        </div>
+        <Separator />
       </div>
+
+      <ToggleGroup
+        type="single"
+        spacing={0.01}
+        className="flex-col w-full"
+        onValueChange={(val) => {
+          if (val === "") clearSelection();
+
+          const shape = allShapes.find((i) => i.id === val);
+          if (!shape) return;
+
+          setSelectedShape(shape);
+        }}
+      >
+        {allShapes.map((shape) => (
+          <ToggleGroupItem
+            key={shape.id}
+            value={shape.id}
+            className="justify-between w-full data-[state=on]:bg-gray-200/50 data-[state=on]:border cursor-pointer group"
+          >
+            <div
+              className={cn(
+                shape.layer === "trim"
+                  ? "text-blue-500"
+                  : shape.layer === "fold"
+                    ? "text-red-500"
+                    : "text-fuchsia-500",
+                "flex items-center gap-2",
+              )}
+            >
+              <LayerIcon
+                shapeRef={shapeRef}
+                data={shapeRef === "type" ? shape.type : shape.layer}
+              />
+              {shape.key}
+            </div>
+
+            <div className="flex gap-2">
+              <div
+                className="hidden group-hover:block cursor-pointer hover:text-blue-500"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShapeVisibility(shape.type, shape.id);
+                }}
+              >
+                <VisibilityIcon hidden={shape.hidden} />
+              </div>
+
+              <div
+                className="hidden group-hover:block cursor-pointer hover:text-destructive"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  removeShape(shape.type, shape.id);
+                  clearSelection();
+                }}
+              >
+                <Trash className="scale-[0.85]" />
+              </div>
+            </div>
+          </ToggleGroupItem>
+        ))}
+      </ToggleGroup>
     </div>
   );
 };
@@ -124,5 +128,42 @@ const DielineLayer = () => {
 export default DielineLayer;
 
 const VisibilityIcon = ({ hidden }: { hidden: boolean }) => {
-  return hidden ? <EyeClosed size={14} /> : <Eye size={14} />;
+  return hidden ? (
+    <EyeClosed className="scale-[0.85]" />
+  ) : (
+    <Eye className="scale-[0.85]" />
+  );
 };
+
+interface ShapeRefData {
+  type: ISpec.ShapesKey;
+  layer: ISpec.Layer;
+}
+
+function LayerIcon<T extends keyof ShapeRefData>({
+  shapeRef,
+  data,
+}: {
+  shapeRef: T;
+  data: ShapeRefData[T];
+}) {
+  if (shapeRef === "type") {
+    switch (data as ShapeRefData["type"]) {
+      case "line":
+        return <Minus className="scale-[0.9]" />;
+      case "circle":
+        return <Circle className="scale-[0.9]" />;
+      case "rectangle":
+        return <Square className="scale-[0.9]" />;
+    }
+  } else {
+    switch (data as ShapeRefData["layer"]) {
+      case "trim":
+        return <Square className="scale-[0.9]" />;
+      case "fold":
+        return <SquareDashed className="scale-[0.9]" />;
+      case "perf":
+        return <CircleDashed className="scale-[0.9]" />;
+    }
+  }
+}

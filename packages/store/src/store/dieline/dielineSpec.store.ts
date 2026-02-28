@@ -3,7 +3,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import { v4 as uuidv4 } from "uuid";
 
 export namespace ISpec {
-  type Layer = "trim" | "fold" | "perf";
+  export type Layer = "trim" | "fold" | "perf";
   type Point = [string, string];
   type generals = {
     id: string;
