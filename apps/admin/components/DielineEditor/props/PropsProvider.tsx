@@ -1,6 +1,7 @@
 import {
   circleFormSchema,
   lineFormSchema,
+  linesFormSchema,
   rectangleFormSchema,
 } from "@/lib/validationSchema/PropsSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -28,16 +29,14 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 const getShapeSchema = (shapeKey: ISpec.ShapesKey) => {
-  switch (shapeKey) {
-    case "line":
-      return lineFormSchema;
-    case "rectangle":
-      return rectangleFormSchema;
-    case "circle":
-      return circleFormSchema;
-    default:
-      throw new Error(`Unsupported shape: ${shapeKey}`);
-  }
+  const schemas: Record<ISpec.ShapesKey, any> = {
+    line: lineFormSchema,
+    lines: linesFormSchema,
+    rectangle: rectangleFormSchema,
+    circle: circleFormSchema,
+  };
+
+  return schemas[shapeKey];
 };
 
 interface PropsProvider<T extends ISpec.ShapesSpec> {
@@ -63,18 +62,22 @@ function PropsProvider<T extends ISpec.ShapesSpec>({
   const form = useForm<FormType>({
     resolver: zodResolver(schema as any),
     defaultValues: data ?? {
+      key: shapeKey,
+      type: shapeKey,
       angle: "",
       height: "",
       length: "",
       width: "",
       radius: "",
+      pts: [
+        ["", ""],
+        ["", ""],
+      ],
 
       id: "0",
       layer: "trim",
       origin: ["0", "0"],
       hidden: false,
-      key: shapeKey,
-      type: shapeKey,
     },
     mode: "onChange",
   });
@@ -132,40 +135,50 @@ function PropsProvider<T extends ISpec.ShapesSpec>({
 
         {children({ form })}
 
-        <div className="space-y-1">
-          <Label>Origin</Label>
-          <div className="flex gap-3">
-            <FormField
-              control={form.control}
-              name="origin.0"
-              render={({ field }) => (
-                <FormItem className="gap-0 relative">
-                  <span className="text-xs text-muted-foreground absolute translate-y-2.5 pl-3">
-                    X
-                  </span>
-                  <FormControl>
-                    <Input {...field} placeholder="0" className="h-9 pl-7" />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
+        {shapeKey !== "lines" && (
+          <div className="space-y-1">
+            <Label>Origin</Label>
+            <div className="flex">
+              <FormField
+                control={form.control}
+                name="origin.0"
+                render={({ field }) => (
+                  <FormItem className="gap-0 relative">
+                    <span className="text-xs text-muted-foreground absolute translate-y-2.5 pl-3">
+                      X
+                    </span>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder="0"
+                        className="h-9 pl-7 rounded-r-none"
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="origin.1"
-              render={({ field }) => (
-                <FormItem className="gap-0 relative">
-                  <span className="text-xs text-muted-foreground absolute translate-y-2.5 pl-3">
-                    Y
-                  </span>
-                  <FormControl>
-                    <Input {...field} placeholder="0" className="h-9 pl-7" />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="origin.1"
+                render={({ field }) => (
+                  <FormItem className="gap-0 relative">
+                    <span className="text-xs text-muted-foreground absolute translate-y-2.5 pl-3">
+                      Y
+                    </span>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder="0"
+                        className="h-9 pl-7 rounded-l-none"
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="space-y-1">
           <FormField

@@ -15,14 +15,25 @@ export class Drawer extends Dieline {
   };
 
   private line(line: NonNullable<ISpec.Shapes["line"]>) {
-    this.$drawShapes<"line">(line, ({ angle, length }) => {
+    this.$drawShapes(line, ({ angle, length }) => {
       const lineLength = this.$parseMathStr(length);
       return new Pacsaz.shapes.Line(lineLength, +angle);
     });
   }
 
+  private lines(lines: NonNullable<ISpec.Shapes["lines"]>) {
+    this.$drawShapes(lines, ({ pts }) => {
+      const parsedPts = pts.map((pt) => [
+        this.$parseMathStr(pt[0]),
+        this.$parseMathStr(pt[1]),
+      ]);
+
+      return new Pacsaz.shapes.Lines(parsedPts);
+    });
+  }
+
   private rectangle(rectangle: NonNullable<ISpec.Shapes["rectangle"]>) {
-    this.$drawShapes<"rectangle">(rectangle, ({ height, width }) => {
+    this.$drawShapes(rectangle, ({ height, width }) => {
       const rectWidth = this.$parseMathStr(width);
       const rectHeight = this.$parseMathStr(height);
       return new Pacsaz.shapes.Rectangle(rectWidth, rectHeight);
@@ -30,7 +41,7 @@ export class Drawer extends Dieline {
   }
 
   private circle(circle: NonNullable<ISpec.Shapes["circle"]>) {
-    this.$drawShapes<"circle">(circle, ({ radius }) => {
+    this.$drawShapes(circle, ({ radius }) => {
       const circleRadius = this.$parseMathStr(radius);
       return new Pacsaz.shapes.Circle(circleRadius);
     });
@@ -40,13 +51,14 @@ export class Drawer extends Dieline {
     if (this.shapes.line) this.line(this.shapes.line);
     if (this.shapes.rectangle) this.rectangle(this.shapes.rectangle);
     if (this.shapes.circle) this.circle(this.shapes.circle);
+    if (this.shapes.lines) this.lines(this.shapes.lines);
   }
 
   // -------------------- UTILS --------------------
 
-  private $drawShapes<T extends ISpec.ShapesKey>(
-    shapes: NonNullable<ISpec.Shapes[T]>,
-    callBack: (val: NonNullable<ISpec.Shapes[T]>[number]) => Shape,
+  private $drawShapes<T extends ISpec.ShapesMap>(
+    shapes: T,
+    callBack: (val: T[number]) => Shape,
   ) {
     for (const shape of shapes) {
       if (shape.hidden) continue;

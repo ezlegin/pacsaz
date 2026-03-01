@@ -7,6 +7,7 @@ import { Separator } from "@repo/ui/components/separator";
 import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import { cn } from "@repo/ui/lib/utils";
 import {
+  ChevronUp,
   Circle,
   CircleDashed,
   Eye,
@@ -155,6 +156,8 @@ function LayerIcon<T extends keyof ShapeRefData>({
         return <Circle className="scale-[0.9]" />;
       case "rectangle":
         return <Square className="scale-[0.9]" />;
+      case "lines":
+        return <ChevronUp className="scale-[0.9]" />;
     }
   } else {
     switch (data as ShapeRefData["layer"]) {

@@ -15,11 +15,13 @@ export namespace ISpec {
   };
 
   export type LineSpec = Record<"length" | "angle", string> & generals;
+  export type LinesSpec = { pts: [string, string][] } & generals;
   export type RectangleSpec = Record<"width" | "height", string> & generals;
   export type CircleSpec = Record<"radius", string> & generals;
 
   export type Shapes = Partial<{
     line: LineSpec[];
+    lines: LinesSpec[];
     rectangle: RectangleSpec[];
     circle: CircleSpec[];
   }>;
