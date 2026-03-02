@@ -13,20 +13,36 @@ export namespace ISpec {
     origin: Point;
     type: ShapesKey;
   };
+  export type PointDirection =
+    | "up"
+    | "down"
+    | "right"
+    | "down"
+    | "draw"
+    | "left";
 
   export type LineSpec = Record<"length" | "angle", string> & generals;
   export type LinesSpec = {
-    pts: [string, string][];
+    absolutePts?: [string, string][];
+    relativePts?: {
+      pts: [string, string | undefined, PointDirection][];
+      startPt: Point;
+    };
+    isClosed: boolean;
+    filletRadius?: string;
+    indices?: string;
     isRelative: boolean;
   } & generals;
   export type RectangleSpec = Record<"width" | "height", string> & generals;
   export type CircleSpec = Record<"radius", string> & generals;
+  export type PolygonSpec = Record<"radius" | "sides", string> & generals;
 
   export type Shapes = Partial<{
     line: LineSpec[];
     lines: LinesSpec[];
     rectangle: RectangleSpec[];
     circle: CircleSpec[];
+    polygon: PolygonSpec[];
   }>;
 
   export type ShapesKey = keyof Shapes;

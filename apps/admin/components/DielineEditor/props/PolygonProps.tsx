@@ -10,10 +10,10 @@ import { UseFormReturn } from "react-hook-form";
 import PropsFormContent from "./PropsFormContent";
 
 interface Props {
-  form: UseFormReturn<ISpec.CircleSpec, any, ISpec.CircleSpec>;
+  form: UseFormReturn<ISpec.PolygonSpec, any, ISpec.PolygonSpec>;
 }
 
-const CircleProps = ({ form }: Props) => {
+const PolygonProps = ({ form }: Props) => {
   return (
     <PropsFormContent>
       <FormField
@@ -33,8 +33,20 @@ const CircleProps = ({ form }: Props) => {
           </FormItem>
         )}
       />
+      <FormField
+        control={form.control}
+        name="sides"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Sides</FormLabel>
+            <FormControl>
+              <Input {...field} placeholder="5" className="h-9" />
+            </FormControl>
+          </FormItem>
+        )}
+      />
     </PropsFormContent>
   );
 };
 
-export default CircleProps;
+export default PolygonProps;

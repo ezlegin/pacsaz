@@ -1,9 +1,10 @@
 import { getDielineSpec, ISpec } from "@repo/store/editor/dielineSpec.store";
+import { getVariables } from "@repo/store/editor/variables.store";
 import { evaluate } from "mathjs";
+import { toMm } from "../../utils/sizeConvertor";
 import Pacsaz from "../Pacsaz";
 import { Shape } from "../shapes/Shape";
 import { Dieline } from "./Dieline";
-import { getVariables } from "@repo/store/editor/variables.store";
 
 export class Drawer extends Dieline {
   private get shapes() {
@@ -23,14 +24,68 @@ export class Drawer extends Dieline {
   }
 
   private lines(lines: NonNullable<ISpec.Shapes["lines"]>) {
-    this.$drawShapes(lines, ({ pts }, scope) => {
-      const parsedPts = pts.map((pt) => [
-        this.$parseMathStr(pt[0], scope),
-        this.$parseMathStr(pt[1], scope),
-      ]);
+    this.$drawShapes(
+      lines,
+      (
+        {
+          absolutePts,
+          relativePts,
+          isRelative,
+          filletRadius,
+          indices,
+          isClosed,
+        },
+        scope,
+      ) => {
+        const options = {
+          closed: isClosed,
+          filletRadius: filletRadius ? toMm(+filletRadius) : undefined,
+          indices: indices ? indices.split(",").map((i) => +i) : undefined,
+        };
 
-      return new Pacsaz.shapes.Lines(parsedPts);
-    });
+        if (isRelative) {
+          if (!relativePts) throw new Error("Points Not Avaiable.");
+
+          const pb = new Pacsaz.point.Builder([
+            this.$parseMathStr(relativePts.startPt[0], scope),
+            this.$parseMathStr(relativePts.startPt[1], scope),
+          ]);
+
+          for (const pt of relativePts.pts) {
+            const direction = pt[2];
+            switch (direction) {
+              case "up":
+                pb.up(this.$parseMathStr(pt[0], scope));
+                break;
+              case "down":
+                pb.down(this.$parseMathStr(pt[0], scope));
+                break;
+              case "right":
+                pb.right(this.$parseMathStr(pt[0], scope));
+                break;
+              case "left":
+                pb.left(this.$parseMathStr(pt[0], scope));
+                break;
+              case "draw":
+                pb.draw(
+                  this.$parseMathStr(pt[0], scope),
+                  this.$parseMathStr(pt[1]!, scope),
+                );
+                break;
+            }
+          }
+
+          return new Pacsaz.shapes.Lines(pb.build(), options);
+        } else {
+          if (!absolutePts) throw new Error("Points Not Avaiable.");
+          const parsedPts = absolutePts.map((pt) => [
+            this.$parseMathStr(pt[0], scope),
+            this.$parseMathStr(pt[1], scope),
+          ]);
+          return new Pacsaz.shapes.Lines(parsedPts, options);
+        }
+      },
+    );
   }
 
   private rectangle(rectangle: NonNullable<ISpec.Shapes["rectangle"]>) {
@@ -48,11 +103,19 @@ export class Drawer extends Dieline {
     });
   }
 
+  private polygon(polygon: NonNullable<ISpec.Shapes["polygon"]>) {
+    this.$drawShapes(polygon, ({ radius, sides }, scope) => {
+      const polygonRadius = this.$parseMathStr(radius, scope);
+      return new Pacsaz.shapes.Polygon(polygonRadius, +sides);
+    });
+  }
+
   protected override draw() {
     if (this.shapes.line) this.line(this.shapes.line);
+    if (this.shapes.lines) this.lines(this.shapes.lines);
     if (this.shapes.rectangle) this.rectangle(this.shapes.rectangle);
     if (this.shapes.circle) this.circle(this.shapes.circle);
-    if (this.shapes.lines) this.lines(this.shapes.lines);
+    if (this.shapes.polygon) this.polygon(this.shapes.polygon);
   }
 
   // -------------------- UTILS --------------------

@@ -6,6 +6,7 @@ import { Label } from "@repo/ui/components/label";
 import {
   ChevronUp,
   Circle,
+  Hexagon,
   LucideIcon,
   PlusCircle,
   Slash,
@@ -17,6 +18,7 @@ import LineProps from "./props/LineProps";
 import LinesProps from "./props/LinesProps";
 import PropsProvider from "./props/PropsProvider";
 import RectangleProps from "./props/RectangleProps";
+import PolygonProps from "./props/PolygonProps";
 
 const Props = () => {
   const [editorMode, setEditorMode] = useState<ISpec.ShapesKey | null>(null);
@@ -25,6 +27,7 @@ const Props = () => {
     { key: "lines", Icon: ChevronUp },
     { key: "rectangle", Icon: Square },
     { key: "circle", Icon: Circle },
+    { key: "polygon", Icon: Hexagon },
   ];
 
   const { selectedShape, clearSelection } = useSelectShapeStore();
@@ -43,6 +46,7 @@ const Props = () => {
       lines: LinesProps,
       rectangle: RectangleProps,
       circle: CircleProps,
+      polygon: PolygonProps,
     };
 
     const Component = propsComponents[editorMode];

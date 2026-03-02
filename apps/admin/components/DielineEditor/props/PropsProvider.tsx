@@ -2,6 +2,7 @@ import {
   circleFormSchema,
   lineFormSchema,
   linesFormSchema,
+  polygonFormSchema,
   rectangleFormSchema,
 } from "@/lib/validationSchema/PropsSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -34,6 +35,7 @@ const getShapeSchema = (shapeKey: ISpec.ShapesKey) => {
     lines: linesFormSchema,
     rectangle: rectangleFormSchema,
     circle: circleFormSchema,
+    polygon: polygonFormSchema,
   };
 
   return schemas[shapeKey];
@@ -69,11 +71,19 @@ function PropsProvider<T extends ISpec.ShapesSpec>({
       length: "",
       width: "",
       radius: "",
-      pts: [
-        ["", ""],
-        ["", ""],
-      ],
+      sides: "5",
       isRelative: true,
+      pts: undefined,
+      relativePts: {
+        pts: [
+          ["", undefined, "up"],
+          ["", undefined, "right"],
+        ],
+        startPt: ["0", "0"],
+      },
+      isClosed: false,
+      filletRadius: "",
+      indices: "",
 
       id: "0",
       layer: "trim",
