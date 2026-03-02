@@ -10,6 +10,7 @@
   "exports": {
     "./dieline/*": "./src/store/dieline/*.ts",
     "./app/*": "./src/store/app/*.ts",
+    "./editor/*": "./src/store/editor/*.ts",
     "./data/*": "./src/data/*.ts"
   },
   "devDependencies": {

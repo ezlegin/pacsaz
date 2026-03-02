@@ -1,4 +1,12 @@
-const allowedVariables = ["width", "height", "length"] as const;
+import { getVariables } from "@repo/store/editor/variables.store";
+
+const variableKeys = getVariables().map((v) => v.name);
+const allowedVariables = [
+  "width",
+  "height",
+  "length",
+  ...variableKeys,
+] as const;
 
 const identifierRegex = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
 

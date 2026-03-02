@@ -1,8 +1,9 @@
-import { getDielineSpec, ISpec } from "@repo/store/dieline/dielineSpec.store";
+import { getDielineSpec, ISpec } from "@repo/store/editor/dielineSpec.store";
 import { evaluate } from "mathjs";
 import Pacsaz from "../Pacsaz";
 import { Shape } from "../shapes/Shape";
 import { Dieline } from "./Dieline";
+import { getVariables } from "@repo/store/editor/variables.store";
 
 export class Drawer extends Dieline {
   private get shapes() {
@@ -15,17 +16,17 @@ export class Drawer extends Dieline {
   };
 
   private line(line: NonNullable<ISpec.Shapes["line"]>) {
-    this.$drawShapes(line, ({ angle, length }) => {
-      const lineLength = this.$parseMathStr(length);
+    this.$drawShapes(line, ({ angle, length }, scope) => {
+      const lineLength = this.$parseMathStr(length, scope);
       return new Pacsaz.shapes.Line(lineLength, +angle);
     });
   }
 
   private lines(lines: NonNullable<ISpec.Shapes["lines"]>) {
-    this.$drawShapes(lines, ({ pts }) => {
+    this.$drawShapes(lines, ({ pts }, scope) => {
       const parsedPts = pts.map((pt) => [
-        this.$parseMathStr(pt[0]),
-        this.$parseMathStr(pt[1]),
+        this.$parseMathStr(pt[0], scope),
+        this.$parseMathStr(pt[1], scope),
       ]);
 
       return new Pacsaz.shapes.Lines(parsedPts);
@@ -33,16 +34,16 @@ export class Drawer extends Dieline {
   }
 
   private rectangle(rectangle: NonNullable<ISpec.Shapes["rectangle"]>) {
-    this.$drawShapes(rectangle, ({ height, width }) => {
-      const rectWidth = this.$parseMathStr(width);
-      const rectHeight = this.$parseMathStr(height);
+    this.$drawShapes(rectangle, ({ height, width }, scope) => {
+      const rectWidth = this.$parseMathStr(width, scope);
+      const rectHeight = this.$parseMathStr(height, scope);
       return new Pacsaz.shapes.Rectangle(rectWidth, rectHeight);
     });
   }
 
   private circle(circle: NonNullable<ISpec.Shapes["circle"]>) {
-    this.$drawShapes(circle, ({ radius }) => {
-      const circleRadius = this.$parseMathStr(radius);
+    this.$drawShapes(circle, ({ radius }, scope) => {
+      const circleRadius = this.$parseMathStr(radius, scope);
       return new Pacsaz.shapes.Circle(circleRadius);
     });
   }
@@ -58,17 +59,18 @@ export class Drawer extends Dieline {
 
   private $drawShapes<T extends ISpec.ShapesMap>(
     shapes: T,
-    callBack: (val: T[number]) => Shape,
+    callBack: (val: T[number], scope: Record<string, number>) => Shape,
   ) {
+    const scope = this.scope;
     for (const shape of shapes) {
       if (shape.hidden) continue;
 
-      const model = callBack(shape);
+      const model = callBack(shape, scope);
 
       if (shape.origin) {
         model.move([
-          this.$parseMathStr(shape.origin[0]),
-          this.$parseMathStr(shape.origin[1]),
+          this.$parseMathStr(shape.origin[0], scope),
+          this.$parseMathStr(shape.origin[1], scope),
         ]);
       }
 
@@ -76,13 +78,32 @@ export class Drawer extends Dieline {
     }
   }
 
-  private $parseMathStr(expr: string): number {
-    const scope = {
+  private get scope() {
+    const variables = getVariables();
+
+    let vars: Record<string, string> = {};
+
+    for (const v of variables) {
+      vars[v.name] = v.value;
+    }
+
+    let scope: Record<string, number> = {
       width: this.width,
-      height: this.height,
       length: this.length,
+      height: this.height,
     };
 
+    for (const v in vars) {
+      if (vars[v]) {
+        const res = evaluate(vars[v], scope);
+        scope[v] = res;
+      }
+    }
+
+    return scope;
+  }
+
+  private $parseMathStr(expr: string, scope: Record<string, number>): number {
     return evaluate(expr, scope);
   }
 }

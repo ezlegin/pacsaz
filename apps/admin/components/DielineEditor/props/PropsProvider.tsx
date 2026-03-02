@@ -9,7 +9,7 @@ import { useSelectShapeStore } from "@repo/store/app/selectedShape.store";
 import {
   ISpec,
   useDielineSpecStore,
-} from "@repo/store/dieline/dielineSpec.store";
+} from "@repo/store/editor/dielineSpec.store";
 import { Button } from "@repo/ui/components/button";
 import {
   Form,
@@ -73,6 +73,7 @@ function PropsProvider<T extends ISpec.ShapesSpec>({
         ["", ""],
         ["", ""],
       ],
+      isRelative: true,
 
       id: "0",
       layer: "trim",

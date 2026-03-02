@@ -2,7 +2,7 @@ import { useSelectShapeStore } from "@repo/store/app/selectedShape.store";
 import {
   ISpec,
   useDielineSpecStore,
-} from "@repo/store/dieline/dielineSpec.store";
+} from "@repo/store/editor/dielineSpec.store";
 import { Separator } from "@repo/ui/components/separator";
 import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import { cn } from "@repo/ui/lib/utils";

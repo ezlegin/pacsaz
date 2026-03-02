@@ -12,6 +12,7 @@ import {
 import dynamic from "next/dynamic";
 import Props from "./Props";
 import Settings from "./settings/Settings";
+import Variables from "./Variables";
 const SVGPreview = dynamic(
   () => import("@repo/ui/components/custom/SVGPreview"),
   { ssr: false },
@@ -36,15 +37,21 @@ const DielineEditor = () => {
         <div className="bg-muted border-l p-3 z-10">
           <Tabs defaultValue="editor">
             <TabsList className="w-full px-0">
-              <TabsTrigger className="cursor-pointer " value="editor">
+              <TabsTrigger className="cursor-pointer" value="editor">
                 Editor
               </TabsTrigger>
-              <TabsTrigger className="cursor-pointer " value="settings">
+              <TabsTrigger className="cursor-pointer" value="variables">
+                Variables
+              </TabsTrigger>
+              <TabsTrigger className="cursor-pointer" value="settings">
                 Settings
               </TabsTrigger>
             </TabsList>
             <TabsContent value="editor">
               <Props />
+            </TabsContent>
+            <TabsContent value="variables">
+              <Variables />
             </TabsContent>
             <TabsContent value="settings">
               <Settings isRendering={isRendering} />

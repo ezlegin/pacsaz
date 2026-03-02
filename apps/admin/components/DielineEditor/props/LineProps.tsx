@@ -7,7 +7,7 @@ import {
 import { Input } from "@repo/ui/components/input";
 import { UseFormReturn } from "react-hook-form";
 import PropsFormContent from "./PropsFormContent";
-import { ISpec } from "@repo/store/dieline/dielineSpec.store";
+import { ISpec } from "@repo/store/editor/dielineSpec.store";
 
 interface Props {
   form: UseFormReturn<ISpec.LineSpec, any, ISpec.LineSpec>;

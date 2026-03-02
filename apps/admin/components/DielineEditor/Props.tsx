@@ -1,7 +1,7 @@
 "use client";
 
 import { useSelectShapeStore } from "@repo/store/app/selectedShape.store";
-import { ISpec } from "@repo/store/dieline/dielineSpec.store";
+import { ISpec } from "@repo/store/editor/dielineSpec.store";
 import { Label } from "@repo/ui/components/label";
 import {
   ChevronUp,

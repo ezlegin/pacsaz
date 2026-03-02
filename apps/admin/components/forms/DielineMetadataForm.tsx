@@ -1,4 +1,4 @@
-import { useDielineSpecStore } from "@repo/store/dieline/dielineSpec.store";
+import { useDielineSpecStore } from "@repo/store/editor/dielineSpec.store";
 import { Button } from "@repo/ui/components/button";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";

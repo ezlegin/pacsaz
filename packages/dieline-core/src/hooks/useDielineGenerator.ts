@@ -1,11 +1,12 @@
 import { bleeds } from "@repo/store/data/dieline";
 import { useDeveloperToolsStore } from "@repo/store/dieline/developerTools.store";
 import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
-import { useDielineSpecStore } from "@repo/store/dieline/dielineSpec.store";
+import { useDielineSpecStore } from "@repo/store/editor/dielineSpec.store";
 import { useEffect, useTransition } from "react";
 import { resolveDimensions } from "../utils/dimensionResolver";
 import { resolveOffsets } from "../utils/offsetResolver";
 import { Drawer } from "../core/dieline/Drawer";
+import { useVariableStore } from "@repo/store/editor/variables.store";
 
 export function useDielineGenerator(dieline: Drawer) {
   const [isRendering, startTransition] = useTransition();
@@ -28,6 +29,7 @@ export function useDielineGenerator(dieline: Drawer) {
     },
   } = useDielineSettingsStore();
   const offsets = resolveOffsets();
+  const { variables } = useVariableStore();
 
   // set defaults
   useEffect(() => {
@@ -58,7 +60,8 @@ export function useDielineGenerator(dieline: Drawer) {
     thickness,
     format,
     shapes,
-    useDielineSpecStore,
+    shapes,
+    variables,
 
     showAnchors,
     showWatermark,

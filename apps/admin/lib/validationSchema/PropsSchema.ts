@@ -1,6 +1,6 @@
 import z from "zod";
 import { validateMathExpression } from "../utils/validateMathExpression";
-import { ISpec } from "@repo/store/dieline/dielineSpec.store";
+import { ISpec } from "@repo/store/editor/dielineSpec.store";
 
 const mathInput = z.string().min(1).refine(validateMathExpression);
 const pointInput = z.tuple([mathInput, mathInput]);
@@ -31,6 +31,7 @@ export const lineFormSchema = z
 export const linesFormSchema = z
   .object({
     pts: z.array(pointInput),
+    isRelative: z.boolean(),
   })
   .merge(generalSchema);
 

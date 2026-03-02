@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { ISpec } from "../dieline/dielineSpec.store";
+import { ISpec } from "../editor/dielineSpec.store";
 
 interface SelectedShapeStore {
   selectedShape: ISpec.ShapesSpec | null;
