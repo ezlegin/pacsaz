@@ -1,4 +1,5 @@
 import {
+  arcFormSchema,
   circleFormSchema,
   lineFormSchema,
   linesFormSchema,
@@ -36,6 +37,7 @@ const getShapeSchema = (shapeKey: ISpec.ShapesKey) => {
     rectangle: rectangleFormSchema,
     circle: circleFormSchema,
     polygon: polygonFormSchema,
+    arc: arcFormSchema,
   };
 
   return schemas[shapeKey];
@@ -84,6 +86,8 @@ function PropsProvider<T extends ISpec.ShapesSpec>({
       isClosed: false,
       filletRadius: "",
       indices: "",
+      startAngle: "",
+      endAngle: "",
 
       id: "0",
       layer: "trim",

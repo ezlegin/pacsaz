@@ -11,14 +11,10 @@ const shapesKey: [ISpec.ShapesKey, ...ISpec.ShapesKey[]] = [
   "circle",
   "rectangle",
   "polygon",
+  "arc",
 ] as const;
-const pointDirection: [ISpec.PointDirection, ...ISpec.PointDirection[]] = [
-  "down",
-  "draw",
-  "right",
-  "up",
-  "left",
-] as const;
+const pointDirection = ["down", "draw", "right", "up", "left"] as const;
+const semiCircleDirection = ["down", "right", "up", "left"] as const;
 
 const generalSchema = z.object({
   layer: z.enum(["trim", "fold", "perf"]),
@@ -64,6 +60,7 @@ export const rectangleFormSchema = z
 export const circleFormSchema = z
   .object({
     radius: mathInput,
+    semiCircleDirection: z.enum(semiCircleDirection).optional(),
   })
   .merge(generalSchema);
 
@@ -71,5 +68,13 @@ export const polygonFormSchema = z
   .object({
     radius: mathInput,
     sides: z.string(),
+  })
+  .merge(generalSchema);
+
+export const arcFormSchema = z
+  .object({
+    radius: mathInput,
+    startAngle: mathInput,
+    endAngle: mathInput,
   })
   .merge(generalSchema);

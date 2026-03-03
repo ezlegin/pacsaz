@@ -9,21 +9,19 @@ import { cn } from "@repo/ui/lib/utils";
 import {
   ChevronUp,
   Circle,
-  CircleDashed,
   Eye,
   EyeClosed,
+  Hexagon,
   Minus,
+  Parentheses,
   Square,
-  SquareDashed,
   Trash,
 } from "lucide-react";
-import { useState } from "react";
 import DielineMetadataForm from "../forms/DielineMetadataForm";
 
 const DielineLayer = () => {
   const { shapes, removeShape, setShapeVisibility } = useDielineSpecStore();
   const { setSelectedShape, clearSelection } = useSelectShapeStore();
-  const [shapeRef, setShapeRef] = useState<keyof ShapeRefData>("type");
 
   const allShapes = Object.values(shapes).flat();
 
@@ -31,35 +29,9 @@ const DielineLayer = () => {
     <div className="space-y-2">
       <DielineMetadataForm />
 
-      <div className="space-y-0.5">
-        <Separator />
-        <div className="flex justify-between items-center">
-          <div className="font-medium text-sm">Layers</div>
-          <ToggleGroup
-            value={shapeRef}
-            onValueChange={(val: keyof ShapeRefData | "") => {
-              if (val === "") return;
-              setShapeRef(val);
-            }}
-            size={"sm"}
-            type="single"
-          >
-            <ToggleGroupItem
-              value="type"
-              className="text-xs text-muted-foreground"
-            >
-              Shape
-            </ToggleGroupItem>
-            <ToggleGroupItem
-              value="layer"
-              className="text-xs text-muted-foreground"
-            >
-              Layer
-            </ToggleGroupItem>
-          </ToggleGroup>
-        </div>
-        <Separator />
-      </div>
+      <Separator />
+      <div className="font-medium text-sm">Layers</div>
+      <Separator />
 
       <ToggleGroup
         type="single"
@@ -90,10 +62,7 @@ const DielineLayer = () => {
                 "flex items-center gap-2",
               )}
             >
-              <LayerIcon
-                shapeRef={shapeRef}
-                data={shapeRef === "type" ? shape.type : shape.layer}
-              />
+              <LayerIcon data={shape.type} />
               {shape.key}
             </div>
 
@@ -136,37 +105,21 @@ const VisibilityIcon = ({ hidden }: { hidden: boolean }) => {
   );
 };
 
-interface ShapeRefData {
-  type: ISpec.ShapesKey;
-  layer: ISpec.Layer;
-}
+function LayerIcon({ data }: { data: ISpec.ShapesKey }) {
+  const className = "scale-[0.9]";
 
-function LayerIcon<T extends keyof ShapeRefData>({
-  shapeRef,
-  data,
-}: {
-  shapeRef: T;
-  data: ShapeRefData[T];
-}) {
-  if (shapeRef === "type") {
-    switch (data as ShapeRefData["type"]) {
-      case "line":
-        return <Minus className="scale-[0.9]" />;
-      case "circle":
-        return <Circle className="scale-[0.9]" />;
-      case "rectangle":
-        return <Square className="scale-[0.9]" />;
-      case "lines":
-        return <ChevronUp className="scale-[0.9]" />;
-    }
-  } else {
-    switch (data as ShapeRefData["layer"]) {
-      case "trim":
-        return <Square className="scale-[0.9]" />;
-      case "fold":
-        return <SquareDashed className="scale-[0.9]" />;
-      case "perf":
-        return <CircleDashed className="scale-[0.9]" />;
-    }
+  switch (data) {
+    case "line":
+      return <Minus className={className} />;
+    case "circle":
+      return <Circle className={className} />;
+    case "rectangle":
+      return <Square className={className} />;
+    case "lines":
+      return <ChevronUp className={className} />;
+    case "polygon":
+      return <Hexagon className={className} />;
+    case "arc":
+      return <Parentheses className={className} />;
   }
 }

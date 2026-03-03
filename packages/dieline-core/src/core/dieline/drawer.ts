@@ -97,9 +97,13 @@ export class Drawer extends Dieline {
   }
 
   private circle(circle: NonNullable<ISpec.Shapes["circle"]>) {
-    this.$drawShapes(circle, ({ radius }, scope) => {
+    this.$drawShapes(circle, ({ radius, semiCircleDirection }, scope) => {
       const circleRadius = this.$parseMathStr(radius, scope);
-      return new Pacsaz.shapes.Circle(circleRadius);
+      if (semiCircleDirection) {
+        return new Pacsaz.shapes.SemiCircle(circleRadius, semiCircleDirection);
+      } else {
+        return new Pacsaz.shapes.Circle(circleRadius);
+      }
     });
   }
 
@@ -110,12 +114,22 @@ export class Drawer extends Dieline {
     });
   }
 
+  private arc(arc: NonNullable<ISpec.Shapes["arc"]>) {
+    this.$drawShapes(arc, ({ radius, startAngle, endAngle }, scope) => {
+      const polygonRadius = this.$parseMathStr(radius, scope);
+      const start = this.$parseMathStr(startAngle, scope);
+      const end = this.$parseMathStr(endAngle, scope);
+      return new Pacsaz.shapes.Arc(polygonRadius, start, end);
+    });
+  }
+
   protected override draw() {
     if (this.shapes.line) this.line(this.shapes.line);
     if (this.shapes.lines) this.lines(this.shapes.lines);
     if (this.shapes.rectangle) this.rectangle(this.shapes.rectangle);
     if (this.shapes.circle) this.circle(this.shapes.circle);
     if (this.shapes.polygon) this.polygon(this.shapes.polygon);
+    if (this.shapes.arc) this.arc(this.shapes.arc);
   }
 
   // -------------------- UTILS --------------------

@@ -19,16 +19,16 @@ export class Circle extends Shape {
 }
 
 export class SemiCircle extends Shape {
-  constructor(radius: number, side?: "left" | "right" | "top" | "bottom") {
+  constructor(radius: number, side?: "left" | "right" | "up" | "down") {
     super();
 
-    let startAngle = 0;
-    let endAngle = 180;
+    let startAngle = 180;
+    let endAngle = 360;
 
     switch (side) {
-      case "bottom":
-        startAngle = 180;
-        endAngle = 360;
+      case "up":
+        startAngle = 0;
+        endAngle = 180;
         break;
       case "left":
         startAngle = 90;

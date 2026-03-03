@@ -8,6 +8,7 @@ import {
   Circle,
   Hexagon,
   LucideIcon,
+  Parentheses,
   PlusCircle,
   Slash,
   Square,
@@ -19,6 +20,7 @@ import LinesProps from "./props/LinesProps";
 import PropsProvider from "./props/PropsProvider";
 import RectangleProps from "./props/RectangleProps";
 import PolygonProps from "./props/PolygonProps";
+import ArcProps from "./props/ArcProps";
 
 const Props = () => {
   const [editorMode, setEditorMode] = useState<ISpec.ShapesKey | null>(null);
@@ -28,6 +30,7 @@ const Props = () => {
     { key: "rectangle", Icon: Square },
     { key: "circle", Icon: Circle },
     { key: "polygon", Icon: Hexagon },
+    { key: "arc", Icon: Parentheses },
   ];
 
   const { selectedShape, clearSelection } = useSelectShapeStore();
@@ -47,6 +50,7 @@ const Props = () => {
       rectangle: RectangleProps,
       circle: CircleProps,
       polygon: PolygonProps,
+      arc: ArcProps,
     };
 
     const Component = propsComponents[editorMode];

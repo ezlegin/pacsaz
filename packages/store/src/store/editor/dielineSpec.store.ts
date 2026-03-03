@@ -13,19 +13,13 @@ export namespace ISpec {
     origin: Point;
     type: ShapesKey;
   };
-  export type PointDirection =
-    | "up"
-    | "down"
-    | "right"
-    | "down"
-    | "draw"
-    | "left";
+  export type Direction = "up" | "down" | "right" | "left" | "down";
 
   export type LineSpec = Record<"length" | "angle", string> & generals;
   export type LinesSpec = {
     absolutePts?: [string, string][];
     relativePts?: {
-      pts: [string, string | undefined, PointDirection][];
+      pts: [string, string | undefined, Direction | "draw"][];
       startPt: Point;
     };
     isClosed: boolean;
@@ -34,8 +28,13 @@ export namespace ISpec {
     isRelative: boolean;
   } & generals;
   export type RectangleSpec = Record<"width" | "height", string> & generals;
-  export type CircleSpec = Record<"radius", string> & generals;
+  export type CircleSpec = {
+    radius: string;
+    semiCircleDirection: Direction;
+  } & generals;
   export type PolygonSpec = Record<"radius" | "sides", string> & generals;
+  export type ArcSpec = Record<"radius" | "startAngle" | "endAngle", string> &
+    generals;
 
   export type Shapes = Partial<{
     line: LineSpec[];
@@ -43,6 +42,7 @@ export namespace ISpec {
     rectangle: RectangleSpec[];
     circle: CircleSpec[];
     polygon: PolygonSpec[];
+    arc: ArcSpec[];
   }>;
 
   export type ShapesKey = keyof Shapes;
