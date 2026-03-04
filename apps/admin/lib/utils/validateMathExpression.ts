@@ -3,8 +3,11 @@ import { getVariables } from "@repo/store/editor/variables.store";
 const variableKeys = getVariables().map((v) => v.name);
 const allowedVariables = [
   "width",
+  "twoWidth",
   "height",
+  "twoHeight",
   "length",
+  "twoLength",
   ...variableKeys,
 ] as const;
 

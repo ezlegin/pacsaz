@@ -9,6 +9,7 @@ import { cn } from "@repo/ui/lib/utils";
 import {
   ChevronUp,
   Circle,
+  Copy,
   Eye,
   EyeClosed,
   Hexagon,
@@ -20,10 +21,15 @@ import {
 import DielineMetadataForm from "../forms/DielineMetadataForm";
 
 const DielineLayer = () => {
-  const { shapes, removeShape, setShapeVisibility } = useDielineSpecStore();
+  const { shapes, removeShape, setShapeVisibility, setShape } =
+    useDielineSpecStore();
   const { setSelectedShape, clearSelection } = useSelectShapeStore();
 
   const allShapes = Object.values(shapes).flat();
+
+  const handleDuplication = (shape: ISpec.ShapesSpec) => {
+    setShape(shape.type, { ...shape, key: shape.key + "-dup" });
+  };
 
   return (
     <div className="space-y-2">
@@ -67,6 +73,22 @@ const DielineLayer = () => {
             </div>
 
             <div className="flex gap-2">
+              {shape.dup && shape.dup.length > 0 && (
+                <div className="scale-[0.70] text-muted-foreground group-hover:hidden">
+                  dup
+                </div>
+              )}
+
+              <div
+                className="hidden group-hover:block cursor-pointer hover:text-blue-500"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDuplication(shape);
+                }}
+              >
+                <Copy className="scale-[0.85]" />
+              </div>
+
               <div
                 className="hidden group-hover:block cursor-pointer hover:text-blue-500"
                 onClick={(e) => {

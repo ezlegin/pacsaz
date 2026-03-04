@@ -12,6 +12,12 @@ import {
   ISpec,
   useDielineSpecStore,
 } from "@repo/store/editor/dielineSpec.store";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@repo/ui/components/accordion";
 import { Button } from "@repo/ui/components/button";
 import {
   Form,
@@ -23,12 +29,22 @@ import {
 } from "@repo/ui/components/form";
 import { Input } from "@repo/ui/components/input";
 import { Label } from "@repo/ui/components/label";
+import { Separator } from "@repo/ui/components/separator";
+import { Switch } from "@repo/ui/components/switch";
 import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
-import { Check, ChevronLeft } from "lucide-react";
+import {
+  Check,
+  ChevronLeft,
+  Copy,
+  MoveHorizontal,
+  MoveVertical,
+  Trash,
+} from "lucide-react";
 import { ReactNode } from "react";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import PointInput from "./PointInput";
 
 const getShapeSchema = (shapeKey: ISpec.ShapesKey) => {
   const schemas: Record<ISpec.ShapesKey, any> = {
@@ -59,6 +75,7 @@ function PropsProvider<T extends ISpec.ShapesSpec>({
   const { setShape, updateShape } = useDielineSpecStore();
 
   const { selectedShape } = useSelectShapeStore();
+  const isUpdateType = !!selectedShape;
 
   const schema = getShapeSchema(shapeKey);
   type FormType = z.infer<typeof schema>;
@@ -98,7 +115,8 @@ function PropsProvider<T extends ISpec.ShapesSpec>({
   });
 
   const onSubmit = (data: FormType) => {
-    if (selectedShape) {
+    console.log(data);
+    if (isUpdateType) {
       updateShape(selectedShape.type, selectedShape.id, data);
       toast.info("Shape Updated.");
     } else {
@@ -107,6 +125,11 @@ function PropsProvider<T extends ISpec.ShapesSpec>({
       close();
     }
   };
+
+  const { append, remove, fields } = useFieldArray({
+    name: "dup",
+    control: form.control,
+  });
 
   return (
     <Form {...form}>
@@ -150,49 +173,15 @@ function PropsProvider<T extends ISpec.ShapesSpec>({
 
         {children({ form })}
 
-        {shapeKey !== "lines" && (
-          <div className="space-y-1">
-            <Label>Origin</Label>
-            <div className="flex">
-              <FormField
-                control={form.control}
-                name="origin.0"
-                render={({ field }) => (
-                  <FormItem className="gap-0 relative">
-                    <span className="text-xs text-muted-foreground absolute translate-y-2.5 pl-3">
-                      X
-                    </span>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="0"
-                        className="h-9 pl-7 rounded-r-none"
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
+        <Separator />
 
-              <FormField
-                control={form.control}
-                name="origin.1"
-                render={({ field }) => (
-                  <FormItem className="gap-0 relative">
-                    <span className="text-xs text-muted-foreground absolute translate-y-2.5 pl-3">
-                      Y
-                    </span>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="0"
-                        className="h-9 pl-7 rounded-l-none"
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
+        {shapeKey !== "lines" && (
+          <PointInput
+            form={form}
+            label="Origin"
+            nameX={`origin.0`}
+            nameY={`origin.1`}
+          />
         )}
 
         <div className="space-y-1">
@@ -238,6 +227,162 @@ function PropsProvider<T extends ISpec.ShapesSpec>({
             )}
           />
         </div>
+
+        {isUpdateType && (
+          <>
+            <Separator />
+            <Button
+              onClick={() =>
+                append({
+                  zero: false,
+                  center: false,
+                  mirror: { x: false, y: false },
+                  move: ["0", "0"],
+                  moveTo: ["0", "0"],
+                  rotate: "0",
+                  scale: "0",
+                })
+              }
+              size={"sm"}
+              variant={"outline"}
+              className="w-full"
+              type="button"
+            >
+              <Copy />
+              Duplicate Last
+            </Button>
+
+            <Accordion type="single">
+              {fields.map((field, idx) => (
+                <AccordionItem key={idx} value={field.id}>
+                  <AccordionTrigger className="py-2">Dup-1</AccordionTrigger>
+                  <AccordionContent className="space-y-3 text-muted-foreground">
+                    <FormField
+                      control={form.control}
+                      name={`dup.${idx}.zero`}
+                      render={({ field }) => (
+                        <FormItem className="flex justify-between">
+                          <FormLabel>Zero</FormLabel>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name={`dup.${idx}.center`}
+                      render={({ field }) => (
+                        <FormItem className="flex justify-between">
+                          <FormLabel>Center</FormLabel>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+
+                    <div className="flex justify-between">
+                      <Label>mirror</Label>
+                      <div className="flex gap-2">
+                        <FormField
+                          control={form.control}
+                          name={`dup.${idx}.mirror.x`}
+                          render={({ field }) => (
+                            <FormItem className="flex justify-between">
+                              <FormLabel className="text-muted-foreground">
+                                <MoveHorizontal size={14} />
+                              </FormLabel>
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name={`dup.${idx}.mirror.y`}
+                          render={({ field }) => (
+                            <FormItem className="flex justify-between">
+                              <FormLabel>
+                                <MoveVertical size={14} />
+                              </FormLabel>
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+
+                    <PointInput
+                      form={form}
+                      label="Move"
+                      nameX={`dup.${idx}.move.0`}
+                      nameY={`dup.${idx}.move.1`}
+                    />
+
+                    <PointInput
+                      form={form}
+                      label="Move To"
+                      nameX={`dup.${idx}.moveTo.0`}
+                      nameY={`dup.${idx}.moveTo.1`}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name={`dup.${idx}.rotate`}
+                      render={({ field }) => (
+                        <FormItem className="flex justify-between">
+                          <FormLabel>Rotate</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="45°" />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name={`dup.${idx}.scale`}
+                      render={({ field }) => (
+                        <FormItem className="flex justify-between">
+                          <FormLabel>Scale</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="1.0" />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+
+                    <Button
+                      size={"sm"}
+                      variant={"destructive-light"}
+                      className="w-full"
+                      onClick={() => remove(idx)}
+                    >
+                      <Trash />
+                      Remove
+                    </Button>
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </>
+        )}
       </form>
     </Form>
   );

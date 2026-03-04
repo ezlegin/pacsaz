@@ -12,6 +12,15 @@ export namespace ISpec {
     hidden: boolean;
     origin: Point;
     type: ShapesKey;
+    dup?: {
+      zero: boolean;
+      center: boolean;
+      mirror: { x: boolean; y: boolean };
+      move: Point;
+      moveTo: Point;
+      rotate: string;
+      scale: string;
+    }[];
   };
   export type Direction = "up" | "down" | "right" | "left" | "down";
 

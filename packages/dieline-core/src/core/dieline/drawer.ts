@@ -145,10 +145,36 @@ export class Drawer extends Dieline {
       const model = callBack(shape, scope);
 
       if (shape.origin) {
-        model.move([
+        model.moveTo([
           this.$parseMathStr(shape.origin[0], scope),
           this.$parseMathStr(shape.origin[1], scope),
         ]);
+      }
+
+      const dup = shape.dup;
+      if (dup && dup.length > 0) {
+        for (const d of dup) {
+          model.dup();
+
+          if (d.zero) model.zero();
+          if (d.center) model.center();
+          if (d.mirror.x || d.mirror.y) model.mirror(d.mirror.x, d.mirror.y);
+
+          const move = {
+            x: this.$parseMathStr(d.move[0], scope),
+            y: this.$parseMathStr(d.move[1], scope),
+          };
+          if (move.x > 0 || move.y > 0) model.move([move.x, move.y]);
+
+          const moveTo = {
+            x: this.$parseMathStr(d.moveTo[0], scope),
+            y: this.$parseMathStr(d.moveTo[1], scope),
+          };
+          if (moveTo.x > 0 || moveTo.y > 0) model.moveTo([moveTo.x, moveTo.y]);
+
+          model.rotate(+d.rotate);
+          model.scale(+d.scale);
+        }
       }
 
       this.$pushShape(model, shape.key, shape.layer);
@@ -166,8 +192,11 @@ export class Drawer extends Dieline {
 
     let scope: Record<string, number> = {
       width: this.width,
+      twoWidth: this.width * 2,
       length: this.length,
+      twoLength: this.length * 2,
       height: this.height,
+      twoHeight: this.height * 2,
     };
 
     for (const v in vars) {

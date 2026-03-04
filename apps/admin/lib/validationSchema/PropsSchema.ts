@@ -23,6 +23,17 @@ const generalSchema = z.object({
   origin: pointInput,
   type: z.enum(shapesKey),
   id: z.string(),
+  dup: z.array(
+    z.object({
+      zero: z.boolean().optional(),
+      center: z.boolean().optional(),
+      mirror: z.object({ x: z.boolean(), y: z.boolean() }).optional(),
+      move: pointInput,
+      moveTo: pointInput,
+      rotate: mathInput,
+      scale: mathInput,
+    }),
+  ),
 });
 
 export const lineFormSchema = z
