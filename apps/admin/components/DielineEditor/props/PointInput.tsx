@@ -12,12 +12,12 @@ const PointInput = ({
 }: {
   nameX: string;
   nameY: string;
-  label: string;
+  label?: string;
   form: UseFormReturn<any, any, any>;
 }) => {
   return (
     <div className="space-y-1">
-      <Label>{label}</Label>
+      {label && <Label>{label}</Label>}
       <div className="flex">
         <FormField
           control={form.control}

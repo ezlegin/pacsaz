@@ -1,8 +1,10 @@
 import { useSelectShapeStore } from "@repo/store/app/selectedShape.store";
+import { useDielineHistoryStore } from "@repo/store/editor/dielineHistory.store";
 import {
   ISpec,
   useDielineSpecStore,
 } from "@repo/store/editor/dielineSpec.store";
+import { Button } from "@repo/ui/components/button";
 import { Separator } from "@repo/ui/components/separator";
 import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import { cn } from "@repo/ui/lib/utils";
@@ -15,30 +17,70 @@ import {
   Hexagon,
   Minus,
   Parentheses,
+  Redo,
   Square,
   Trash,
+  Undo,
 } from "lucide-react";
+import { useEffect } from "react";
 import DielineMetadataForm from "../forms/DielineMetadataForm";
 
 const DielineLayer = () => {
-  const { shapes, removeShape, setShapeVisibility, setShape } =
+  const { shapes, removeShape, setShapes, setShapeVisibility, setShape } =
     useDielineSpecStore();
   const { setSelectedShape, clearSelection } = useSelectShapeStore();
+  const { setInitial, push, undo, redo, present, future, past } =
+    useDielineHistoryStore();
 
   const allShapes = Object.values(shapes).flat();
 
-  const handleDuplication = (shape: ISpec.ShapesSpec) => {
-    setShape(shape.type, { ...shape, key: shape.key + "-dup" });
+  useEffect(() => {
+    setInitial(shapes);
+  }, []);
+
+  useEffect(() => {
+    push(shapes);
+  }, [shapes]);
+
+  // useEffect(() => {
+  // if (present) {
+  //     setShapes(present);
+  //   }
+  // }, [present]);
+
+  const handleLayerAction = (
+    type: "dup" | "delete" | "visibility",
+    shape: ISpec.ShapesSpec,
+  ) => {
+    switch (type) {
+      case "delete":
+        removeShape(shape.type, shape.id);
+        clearSelection();
+        break;
+      case "visibility":
+        setShapeVisibility(shape.type, shape.id);
+        break;
+      case "dup":
+        setShape(shape.type, { ...shape, key: shape.key + "-dup" });
+        break;
+    }
   };
 
   return (
     <div className="space-y-2">
       <DielineMetadataForm />
+      <div className="flex gap-2">
+        <Button onClick={undo} variant={"outline"}>
+          <Undo />
+        </Button>
+        <Button onClick={redo} variant={"outline"}>
+          <Redo />
+        </Button>
+      </div>
 
       <Separator />
       <div className="font-medium text-sm">Layers</div>
       <Separator />
-
       <ToggleGroup
         type="single"
         spacing={0.01}
@@ -83,7 +125,7 @@ const DielineLayer = () => {
                 className="hidden group-hover:block cursor-pointer hover:text-blue-500"
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleDuplication(shape);
+                  handleLayerAction("dup", shape);
                 }}
               >
                 <Copy className="scale-[0.85]" />
@@ -93,7 +135,7 @@ const DielineLayer = () => {
                 className="hidden group-hover:block cursor-pointer hover:text-blue-500"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setShapeVisibility(shape.type, shape.id);
+                  handleLayerAction("visibility", shape);
                 }}
               >
                 <VisibilityIcon hidden={shape.hidden} />
@@ -103,8 +145,7 @@ const DielineLayer = () => {
                 className="hidden group-hover:block cursor-pointer hover:text-destructive"
                 onClick={(e) => {
                   e.stopPropagation();
-                  removeShape(shape.type, shape.id);
-                  clearSelection();
+                  handleLayerAction("delete", shape);
                 }}
               >
                 <Trash className="scale-[0.85]" />

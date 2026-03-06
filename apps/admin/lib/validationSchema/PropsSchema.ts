@@ -25,13 +25,33 @@ const generalSchema = z.object({
   id: z.string(),
   dup: z.array(
     z.object({
-      zero: z.boolean().optional(),
-      center: z.boolean().optional(),
-      mirror: z.object({ x: z.boolean(), y: z.boolean() }).optional(),
-      move: pointInput,
-      moveTo: pointInput,
-      rotate: mathInput,
-      scale: mathInput,
+      operations: z.array(
+        z.discriminatedUnion("type", [
+          z.object({ type: z.literal("zero") }),
+          z.object({ type: z.literal("center") }),
+          z.object({
+            type: z.literal("mirror"),
+            x: z.boolean(),
+            y: z.boolean(),
+          }),
+          z.object({
+            type: z.literal("move"),
+            value: pointInput,
+          }),
+          z.object({
+            type: z.literal("moveTo"),
+            value: pointInput,
+          }),
+          z.object({
+            type: z.literal("rotate"),
+            value: mathInput,
+          }),
+          z.object({
+            type: z.literal("scale"),
+            value: mathInput,
+          }),
+        ]),
+      ),
     }),
   ),
 });

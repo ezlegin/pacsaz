@@ -3,6 +3,15 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import { v4 as uuidv4 } from "uuid";
 
 export namespace ISpec {
+  type DupOperation =
+    | { type: "zero" }
+    | { type: "center" }
+    | { type: "mirror"; x: boolean; y: boolean }
+    | { type: "move"; value: Point }
+    | { type: "moveTo"; value: Point }
+    | { type: "rotate"; value: string }
+    | { type: "scale"; value: string };
+
   export type Layer = "trim" | "fold" | "perf";
   type Point = [string, string];
   type generals = {
@@ -13,13 +22,7 @@ export namespace ISpec {
     origin: Point;
     type: ShapesKey;
     dup?: {
-      zero: boolean;
-      center: boolean;
-      mirror: { x: boolean; y: boolean };
-      move: Point;
-      moveTo: Point;
-      rotate: string;
-      scale: string;
+      operations: DupOperation[];
     }[];
   };
   export type Direction = "up" | "down" | "right" | "left" | "down";
@@ -66,6 +69,7 @@ interface DielineSpecStore {
     type: T,
     spec: NonNullable<ISpec.Shapes[T]>[number],
   ) => void;
+  setShapes: (shapes: ISpec.Shapes) => void;
   setShapeVisibility: (type: ISpec.ShapesKey, id: string) => void;
   updateShape: <T extends ISpec.ShapesKey>(
     type: T,
@@ -79,6 +83,7 @@ export const useDielineSpecStore = create<DielineSpecStore>()(
   persist(
     (set) => ({
       shapes: {},
+      preShapes: {},
 
       setShape: (type, spec) =>
         set((state) => {
@@ -90,12 +95,18 @@ export const useDielineSpecStore = create<DielineSpecStore>()(
           }
 
           return {
+            preShapes: state.shapes,
             shapes: {
               ...state.shapes,
               [type]: [...currentShapes, { ...spec, id }],
             },
           };
         }),
+
+      setShapes: (shapes) =>
+        set(() => ({
+          shapes,
+        })),
 
       setShapeVisibility: (type, id) =>
         set((state) => {
@@ -139,6 +150,7 @@ export const useDielineSpecStore = create<DielineSpecStore>()(
           },
         })),
     }),
+
     {
       name: "dieline-spec-storage",
       storage: createJSONStorage(() => localStorage),

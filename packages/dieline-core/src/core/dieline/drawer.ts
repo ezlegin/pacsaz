@@ -124,12 +124,18 @@ export class Drawer extends Dieline {
   }
 
   protected override draw() {
-    if (this.shapes.line) this.line(this.shapes.line);
-    if (this.shapes.lines) this.lines(this.shapes.lines);
-    if (this.shapes.rectangle) this.rectangle(this.shapes.rectangle);
-    if (this.shapes.circle) this.circle(this.shapes.circle);
-    if (this.shapes.polygon) this.polygon(this.shapes.polygon);
-    if (this.shapes.arc) this.arc(this.shapes.arc);
+    if (this.shapes.line && this.shapes.line?.length > 0)
+      this.line(this.shapes.line);
+    if (this.shapes.lines && this.shapes.lines?.length > 0)
+      this.lines(this.shapes.lines);
+    if (this.shapes.rectangle && this.shapes.rectangle?.length > 0)
+      this.rectangle(this.shapes.rectangle);
+    if (this.shapes.circle && this.shapes.circle?.length > 0)
+      this.circle(this.shapes.circle);
+    if (this.shapes.polygon && this.shapes.polygon?.length > 0)
+      this.polygon(this.shapes.polygon);
+    if (this.shapes.arc && this.shapes.arc?.length > 0)
+      this.arc(this.shapes.arc);
   }
 
   // -------------------- UTILS --------------------
@@ -155,25 +161,48 @@ export class Drawer extends Dieline {
       if (dup && dup.length > 0) {
         for (const d of dup) {
           model.dup();
+          console.log(dup);
 
-          if (d.zero) model.zero();
-          if (d.center) model.center();
-          if (d.mirror.x || d.mirror.y) model.mirror(d.mirror.x, d.mirror.y);
+          for (const op of d.operations) {
+            switch (op.type) {
+              case "zero":
+                model.zero();
+                break;
 
-          const move = {
-            x: this.$parseMathStr(d.move[0], scope),
-            y: this.$parseMathStr(d.move[1], scope),
-          };
-          if (move.x > 0 || move.y > 0) model.move([move.x, move.y]);
+              case "center":
+                model.center();
+                break;
 
-          const moveTo = {
-            x: this.$parseMathStr(d.moveTo[0], scope),
-            y: this.$parseMathStr(d.moveTo[1], scope),
-          };
-          if (moveTo.x > 0 || moveTo.y > 0) model.moveTo([moveTo.x, moveTo.y]);
+              case "mirror":
+                if (op.x || op.y) model.mirror(op.x, op.y);
+                break;
 
-          model.rotate(+d.rotate);
-          model.scale(+d.scale);
+              case "move":
+                const move = {
+                  x: this.$parseMathStr(op.value[0], scope),
+                  y: this.$parseMathStr(op.value[1], scope),
+                };
+                if (move.x > 0 || move.y > 0) model.move([move.x, move.y]);
+                break;
+
+              case "moveTo":
+                const moveTo = {
+                  x: this.$parseMathStr(op.value[0], scope),
+                  y: this.$parseMathStr(op.value[1], scope),
+                };
+                if (moveTo.x > 0 || moveTo.y > 0)
+                  model.moveTo([moveTo.x, moveTo.y]);
+                break;
+
+              case "rotate":
+                model.rotate(+op.value);
+                break;
+
+              case "scale":
+                model.scale(+op.value);
+                break;
+            }
+          }
         }
       }
 

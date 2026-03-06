@@ -27,23 +27,14 @@ import {
   FormLabel,
   FormMessage,
 } from "@repo/ui/components/form";
-import { Input } from "@repo/ui/components/input";
-import { Label } from "@repo/ui/components/label";
 import { Separator } from "@repo/ui/components/separator";
-import { Switch } from "@repo/ui/components/switch";
 import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
-import {
-  Check,
-  ChevronLeft,
-  Copy,
-  MoveHorizontal,
-  MoveVertical,
-  Trash,
-} from "lucide-react";
+import { Check, ChevronLeft, Layers2 } from "lucide-react";
 import { ReactNode } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import { DupOperationEditor } from "./DupOperationEditor";
 import PointInput from "./PointInput";
 
 const getShapeSchema = (shapeKey: ISpec.ShapesKey) => {
@@ -115,7 +106,6 @@ function PropsProvider<T extends ISpec.ShapesSpec>({
   });
 
   const onSubmit = (data: FormType) => {
-    console.log(data);
     if (isUpdateType) {
       updateShape(selectedShape.type, selectedShape.id, data);
       toast.info("Shape Updated.");
@@ -231,156 +221,38 @@ function PropsProvider<T extends ISpec.ShapesSpec>({
         {isUpdateType && (
           <>
             <Separator />
+
+            <Accordion defaultValue={fields[0]?.id} collapsible type="single">
+              {fields.map((field, idx) => (
+                <AccordionItem key={idx} value={field.id}>
+                  <AccordionTrigger className="py-2 group">
+                    <div className="flex justify-between w-full">
+                      <div>Dup-1</div>
+                      <div
+                        className="border rounded-sm aspect-square size-4  justify-center items-center hidden group-hover:flex hover:bg-gray-200"
+                        onClick={() => remove(idx)}
+                      >
+                        x
+                      </div>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="space-y-3 text-muted-foreground">
+                    <DupOperationEditor form={form} dupIndex={idx} />
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+
             <Button
-              onClick={() =>
-                append({
-                  zero: false,
-                  center: false,
-                  mirror: { x: false, y: false },
-                  move: ["0", "0"],
-                  moveTo: ["0", "0"],
-                  rotate: "0",
-                  scale: "0",
-                })
-              }
+              onClick={() => append({})}
               size={"sm"}
               variant={"outline"}
               className="w-full"
               type="button"
             >
-              <Copy />
-              Duplicate Last
+              <Layers2 />
+              Duplicate
             </Button>
-
-            <Accordion type="single">
-              {fields.map((field, idx) => (
-                <AccordionItem key={idx} value={field.id}>
-                  <AccordionTrigger className="py-2">Dup-1</AccordionTrigger>
-                  <AccordionContent className="space-y-3 text-muted-foreground">
-                    <FormField
-                      control={form.control}
-                      name={`dup.${idx}.zero`}
-                      render={({ field }) => (
-                        <FormItem className="flex justify-between">
-                          <FormLabel>Zero</FormLabel>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name={`dup.${idx}.center`}
-                      render={({ field }) => (
-                        <FormItem className="flex justify-between">
-                          <FormLabel>Center</FormLabel>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-
-                    <div className="flex justify-between">
-                      <Label>mirror</Label>
-                      <div className="flex gap-2">
-                        <FormField
-                          control={form.control}
-                          name={`dup.${idx}.mirror.x`}
-                          render={({ field }) => (
-                            <FormItem className="flex justify-between">
-                              <FormLabel className="text-muted-foreground">
-                                <MoveHorizontal size={14} />
-                              </FormLabel>
-                              <FormControl>
-                                <Switch
-                                  checked={field.value}
-                                  onCheckedChange={field.onChange}
-                                />
-                              </FormControl>
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name={`dup.${idx}.mirror.y`}
-                          render={({ field }) => (
-                            <FormItem className="flex justify-between">
-                              <FormLabel>
-                                <MoveVertical size={14} />
-                              </FormLabel>
-                              <FormControl>
-                                <Switch
-                                  checked={field.value}
-                                  onCheckedChange={field.onChange}
-                                />
-                              </FormControl>
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                    </div>
-
-                    <PointInput
-                      form={form}
-                      label="Move"
-                      nameX={`dup.${idx}.move.0`}
-                      nameY={`dup.${idx}.move.1`}
-                    />
-
-                    <PointInput
-                      form={form}
-                      label="Move To"
-                      nameX={`dup.${idx}.moveTo.0`}
-                      nameY={`dup.${idx}.moveTo.1`}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name={`dup.${idx}.rotate`}
-                      render={({ field }) => (
-                        <FormItem className="flex justify-between">
-                          <FormLabel>Rotate</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="45°" />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name={`dup.${idx}.scale`}
-                      render={({ field }) => (
-                        <FormItem className="flex justify-between">
-                          <FormLabel>Scale</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="1.0" />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-
-                    <Button
-                      size={"sm"}
-                      variant={"destructive-light"}
-                      className="w-full"
-                      onClick={() => remove(idx)}
-                    >
-                      <Trash />
-                      Remove
-                    </Button>
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
           </>
         )}
       </form>
