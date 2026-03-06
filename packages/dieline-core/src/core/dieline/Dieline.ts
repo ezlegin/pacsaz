@@ -6,7 +6,6 @@ import { setOverallSize } from "@repo/store/dieline/overallSize.store";
 import M, { IModel, IModelMap } from "makerjs";
 import { DimensionsType } from "../../data/types";
 import Pacsaz from "../Pacsaz";
-import { DielineRuler } from "../ruler/DielineRuler";
 import { Bleed } from "./Bleed";
 import { Exporter } from "./Exporter";
 
@@ -16,6 +15,7 @@ export abstract class Dieline {
   protected trimModel: IModel = { layer: "trim" };
   protected foldModel: IModel = { layer: "fold" };
   protected perfModel: IModel = { layer: "perf" };
+  protected rulerModel: IModel = { layer: "ruler" };
 
   // -------------- Defaults --------------
   abstract defaultDimensions: Dimension;
@@ -75,6 +75,7 @@ export abstract class Dieline {
     this.trimModel = { layer: "trim" };
     this.foldModel = { layer: "fold" };
     this.perfModel = { layer: "perf" };
+    this.rulerModel = { layer: "ruler" };
 
     this.drawer();
 
@@ -90,54 +91,13 @@ export abstract class Dieline {
       bleed: new Bleed(this.trimModel, this.settings.bleed),
       container: new Pacsaz.layer.Container(this.trimModel),
       dieline,
-      rulers: this.rulers(),
+      ruler: this.rulerModel,
       anchor: new Pacsaz.layer.Anchor(this.main, this.trimModel),
     };
 
     for (const l in layers) {
       Pacsaz.shape.push(this.main, l, layers[l]!, l);
     }
-  }
-
-  // -------------- Rulers --------------
-  private rulers() {
-    return {
-      models: {
-        // widthRuler: this.widthRuler(),
-        // lengthRuler: this.lengthRuler(),
-        // heightRuler: this.heightRuler(),
-        overallRuler: new Pacsaz.ruler.OverallRuler(this.trimModel),
-      },
-      layer: "dielineRuler",
-    };
-  }
-  protected get rulerOffset() {
-    return this.width * 0.02;
-  }
-  protected widthRuler() {
-    return new DielineRuler(
-      [0, this.length / 4],
-      [this.width, this.length / 4],
-      this.width,
-      this.rulerOffset,
-    );
-  }
-  protected lengthRuler() {
-    return new DielineRuler(
-      [this.width * 2 + this.height * 1.5, 0],
-      [this.width * 2 + this.height * 1.5, this.length],
-      this.length,
-      this.rulerOffset,
-    );
-  }
-  protected heightRuler() {
-    if (this.height === 0) return {};
-    return new DielineRuler(
-      [this.width, this.length / 1.5],
-      [this.width + this.height, this.length / 1.5],
-      this.height,
-      this.rulerOffset,
-    );
   }
 
   // -------------- Post Process --------------
@@ -200,5 +160,12 @@ export abstract class Dieline {
           ? this.foldModel
           : this.perfModel;
     Pacsaz.shape.push(pushTo, key, model);
+  }
+
+  protected $pushRuler(models: IModelMap) {
+    for (const m in models) {
+      const model = models[m];
+      if (model) Pacsaz.shape.push(this.rulerModel, m, model);
+    }
   }
 }

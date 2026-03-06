@@ -1,4 +1,5 @@
 import { useDielineSpecStore } from "@repo/store/editor/dielineSpec.store";
+import { useVariableStore } from "@repo/store/editor/variables.store";
 import { Button } from "@repo/ui/components/button";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -10,6 +11,7 @@ interface FormData {
 
 const DielineMetadataForm = () => {
   const { shapes } = useDielineSpecStore();
+  const { variables } = useVariableStore();
   const dielineMetadata = {
     title: "",
     slug: "",
@@ -32,6 +34,7 @@ const DielineMetadataForm = () => {
       title: data.title,
       slug: data.slug,
       dielineSpec: JSON.stringify(shapes),
+      variables: JSON.stringify(variables),
     });
     toast.success("Saved Successfully");
   };

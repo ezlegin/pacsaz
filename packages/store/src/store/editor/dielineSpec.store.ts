@@ -14,20 +14,20 @@ export namespace ISpec {
 
   export type Layer = "trim" | "fold" | "perf";
   type Point = [string, string];
-  type generals = {
+  type Generals = {
     id: string;
     key: string;
-    layer: Layer;
-    hidden: boolean;
-    origin: Point;
     type: ShapesKey;
+    hidden: boolean;
+    layer: Layer;
+    origin: Point;
     dup?: {
       operations: DupOperation[];
     }[];
   };
   export type Direction = "up" | "down" | "right" | "left";
 
-  export type LineSpec = Record<"length" | "angle", string> & generals;
+  export type LineSpec = Record<"length" | "angle", string> & Generals;
   export type LinesSpec = {
     absolutePts?: [string, string][];
     relativePts?: {
@@ -38,21 +38,21 @@ export namespace ISpec {
     filletRadius?: string;
     indices?: string;
     isRelative: boolean;
-  } & generals;
+  } & Generals;
   export type RectangleSpec = Record<"width" | "height" | "radius", string> & {
     deleteSide?: Direction;
-  } & generals;
+  } & Generals;
   export type CircleSpec = {
     radius: string;
     semiCircleDirection: Direction;
-  } & generals;
+  } & Generals;
   export type PolygonSpec = Record<
     "radius" | "sides" | "firstCornerAngle",
     string
   > &
-    generals;
+    Generals;
   export type ArcSpec = Record<"radius" | "startAngle" | "endAngle", string> &
-    generals;
+    Generals;
 
   export type Shapes = Partial<{
     line: LineSpec[];
@@ -63,14 +63,23 @@ export namespace ISpec {
     arc: ArcSpec[];
   }>;
 
+  export type Ruler = {
+    from: Point;
+    to: Point;
+    value: string;
+    offset: string;
+    type: "ruler";
+  } & Omit<Generals, "type" | "layer" | "origin" | "dup">;
+  export type Rulers = Ruler[];
+
   export type ShapesKey = keyof Shapes;
   export type ShapesMap = NonNullable<Shapes[ShapesKey]>;
   export type ShapesSpec = ShapesMap[number];
 }
 
 interface DielineSpecStore {
+  //! Shapes
   shapes: ISpec.Shapes;
-
   setShape: <T extends ISpec.ShapesKey>(
     type: T,
     spec: NonNullable<ISpec.Shapes[T]>[number],
@@ -83,14 +92,24 @@ interface DielineSpecStore {
     newSpec: ISpec.ShapesSpec,
   ) => void;
   removeShape: (type: ISpec.ShapesKey, id: string) => void;
+
+  //! Rulers
+  rulers: ISpec.Rulers;
+  setRuler: (ruler: ISpec.Ruler) => void;
+  removeRuler: (id: string) => void;
+  updateRuler: (ruler: ISpec.Ruler) => void;
+  setRulerVisibility: (id: string) => void;
+
+  //! Models
 }
 
 export const useDielineSpecStore = create<DielineSpecStore>()(
   persist(
     (set) => ({
       shapes: {},
-      preShapes: {},
+      rulers: [],
 
+      //! Shapes ------------------------------------
       setShape: (type, spec) =>
         set((state) => {
           const currentShapes = state.shapes[type] || [];
@@ -155,6 +174,44 @@ export const useDielineSpecStore = create<DielineSpecStore>()(
             [type]: state.shapes[type]?.filter((spec) => spec.id !== key),
           },
         })),
+
+      //! Rulers ------------------------------------
+      setRuler: (ruler) =>
+        set((state) => {
+          let id = uuidv4();
+          while (state.rulers.some((ruler) => ruler.id === id)) {
+            id = uuidv4();
+          }
+
+          return {
+            rulers: [...state.rulers, { ...ruler, id }],
+          };
+        }),
+
+      removeRuler: (id) =>
+        set((state) => ({ rulers: state.rulers.filter((r) => r.id !== id) })),
+
+      updateRuler: (ruler) =>
+        set((state) => {
+          const updatedRulers = state.rulers.map((r) =>
+            r.id === ruler.id ? ruler : r,
+          );
+
+          return {
+            rulers: updatedRulers,
+          };
+        }),
+
+      setRulerVisibility: (id: string) =>
+        set((state) => {
+          const updatedRulers = state.rulers.map((r) =>
+            r.id === id ? { ...r, hidden: !r.hidden } : r,
+          );
+
+          return {
+            rulers: updatedRulers,
+          };
+        }),
     }),
 
     {

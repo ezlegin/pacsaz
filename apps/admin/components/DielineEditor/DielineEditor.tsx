@@ -10,8 +10,8 @@ import {
   TabsTrigger,
 } from "@repo/ui/components/tabs";
 import dynamic from "next/dynamic";
-import Props from "./Props";
 import Settings from "./settings/Settings";
+import Tools from "./Tools";
 import Variables from "./Variables";
 const SVGPreview = dynamic(
   () => import("@repo/ui/components/custom/SVGPreview"),
@@ -47,8 +47,9 @@ const DielineEditor = () => {
                 Settings
               </TabsTrigger>
             </TabsList>
-            <TabsContent value="editor">
-              <Props />
+
+            <TabsContent value="editor" className="space-y-3">
+              <Tools />
             </TabsContent>
             <TabsContent value="variables">
               <Variables />

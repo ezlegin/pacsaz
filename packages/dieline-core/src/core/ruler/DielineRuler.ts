@@ -6,13 +6,13 @@ import M from "makerjs";
 
 export class DielineRuler extends Ruler {
   constructor(
-    private from: IPoint,
-    private to: IPoint,
-    private value: number,
+    from: IPoint,
+    to: IPoint,
+    value: number,
     private offsetAmount = 0,
   ) {
     super();
-    const temp = new M.paths.Line(this.from, this.to);
+    const temp = new M.paths.Line(from, to);
     const center = M.point.middle(temp);
     M.path.scale(temp, 1.1);
     M.path.center(temp);
@@ -25,7 +25,7 @@ export class DielineRuler extends Ruler {
     const ruler = this.ruler(
       intersectionPoints[0]!,
       intersectionPoints[1]!,
-      this.value,
+      value,
     );
 
     Pacsaz.shape.push(

@@ -119,12 +119,14 @@ model DielineDimension {
 
 //! DIELINE --------------------------------
 model Dieline {
-  id       Int               @id @default(autoincrement())
-  slug     String            @unique
-  title    String
-  image    DielineImage?
-  category DielineCategory[]
+  id            Int    @id @default(autoincrement())
+  title         String
+  slug          String @unique
+  specification String
+  variable      String
 
+  image           DielineImage?
+  category        DielineCategory[]
   downloadRecords DownloadRecord[]
   favedDieline    FavedDieline[]
   dielineInfos    DielineInfo[]

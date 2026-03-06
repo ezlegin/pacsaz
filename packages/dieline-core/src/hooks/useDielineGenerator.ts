@@ -10,7 +10,7 @@ import { useVariableStore } from "@repo/store/editor/variables.store";
 
 export function useDielineGenerator(dieline: Drawer) {
   const [isRendering, startTransition] = useTransition();
-  const { shapes } = useDielineSpecStore();
+  const { shapes, rulers } = useDielineSpecStore();
 
   const {
     ctx: { showAnchors, showWatermark },
@@ -62,6 +62,7 @@ export function useDielineGenerator(dieline: Drawer) {
     shapes,
     shapes,
     variables,
+    rulers,
 
     showAnchors,
     showWatermark,

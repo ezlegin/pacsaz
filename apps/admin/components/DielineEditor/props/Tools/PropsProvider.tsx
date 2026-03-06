@@ -7,7 +7,7 @@ import {
   rectangleFormSchema,
 } from "@/lib/validationSchema/PropsSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useSelectShapeStore } from "@repo/store/app/selectedShape.store";
+import { useSelectionStore } from "@repo/store/app/selection.store";
 import {
   ISpec,
   useDielineSpecStore,
@@ -21,7 +21,6 @@ import {
 import { Button } from "@repo/ui/components/button";
 import {
   Form,
-  FormControl,
   FormField,
   FormItem,
   FormLabel,
@@ -29,11 +28,12 @@ import {
 } from "@repo/ui/components/form";
 import { Separator } from "@repo/ui/components/separator";
 import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
-import { Check, ChevronLeft, Layers2 } from "lucide-react";
+import { Layers2 } from "lucide-react";
 import { ReactNode } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import PropsHeader from "../PropsHeader";
 import { DupOperationEditor } from "./DupOperationEditor";
 import PointInput from "./PointInput";
 
@@ -65,8 +65,8 @@ function PropsProvider<T extends ISpec.ShapesSpec>({
 }: PropsProvider<T>) {
   const { setShape, updateShape } = useDielineSpecStore();
 
-  const { selectedShape } = useSelectShapeStore();
-  const isUpdateType = !!selectedShape;
+  const { selection } = useSelectionStore();
+  const isUpdateType = !!selection;
 
   const schema = getShapeSchema(shapeKey);
   type FormType = z.infer<typeof schema>;
@@ -107,7 +107,7 @@ function PropsProvider<T extends ISpec.ShapesSpec>({
 
   const onSubmit = (data: FormType) => {
     if (isUpdateType) {
-      updateShape(selectedShape.type, selectedShape.id, data);
+      updateShape(selection.type, selection.id, data);
       toast.info("Shape Updated.");
     } else {
       setShape(shapeKey, data);
@@ -121,47 +121,10 @@ function PropsProvider<T extends ISpec.ShapesSpec>({
     control: form.control,
   });
 
-  console.log(form.formState.errors);
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <div className="flex justify-between">
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              type="button"
-              className="has-[>svg]:px-0 "
-              onClick={close}
-            >
-              <ChevronLeft />
-            </Button>
-            <FormField
-              control={form.control}
-              name="key"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <input
-                      {...field}
-                      placeholder="Shape Name"
-                      className="p-0 h-fit w-fit border-0 bg-transparent text-sm focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none focus:font-medium focus:border-b"
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <Button
-            variant="primaryForeground"
-            size="icon"
-            type="submit"
-            // disabled={!form.formState.isValid}
-          >
-            <Check />
-          </Button>
-        </div>
+        <PropsHeader form={form} close={close} />
 
         {children({ form })}
 

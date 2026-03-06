@@ -1,5 +1,6 @@
 import { getDielineSpec, ISpec } from "@repo/store/editor/dielineSpec.store";
 import { getVariables } from "@repo/store/editor/variables.store";
+import { IModel } from "makerjs";
 import { evaluate } from "mathjs";
 import { toMm } from "../../utils/sizeConvertor";
 import Pacsaz from "../Pacsaz";
@@ -9,6 +10,9 @@ import { Dieline } from "./Dieline";
 export class Drawer extends Dieline {
   private get shapes() {
     return getDielineSpec().shapes;
+  }
+  private get rulers() {
+    return getDielineSpec().rulers;
   }
   override defaultDimensions = {
     width: 90,
@@ -143,11 +147,39 @@ export class Drawer extends Dieline {
     if (circle) this.circle(circle);
     if (polygon) this.polygon(polygon);
     if (arc) this.arc(arc);
+
+    const rulers = this.$checkExistance(this.rulers);
+    if (rulers) {
+      let models: Record<string, IModel> = {
+        overall: new Pacsaz.ruler.OverallRuler(this.trimModel),
+      };
+      for (const r of rulers) {
+        if (r.hidden) break;
+
+        const from = [
+          this.$parseMathStr(r.from[0], this.scope),
+          this.$parseMathStr(r.from[1], this.scope),
+        ];
+        const to = [
+          this.$parseMathStr(r.to[0], this.scope),
+          this.$parseMathStr(r.to[1], this.scope),
+        ];
+        const value = this.$parseMathStr(r.value, this.scope);
+        const offset = this.$parseMathStr(r.offset, this.scope);
+
+        const model = new Pacsaz.ruler.DielineRuler(from, to, value, offset);
+        models[r.key] = model;
+      }
+
+      this.$pushRuler(models);
+    }
   }
 
   // -------------------- UTILS --------------------
 
-  private $checkExistance<T extends ISpec.ShapesMap>(shapes: T | undefined) {
+  private $checkExistance<T extends ISpec.ShapesMap | ISpec.Rulers>(
+    shapes: T | undefined,
+  ) {
     if (shapes && shapes.length > 0) return shapes;
   }
 

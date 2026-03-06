@@ -113,3 +113,14 @@ export const arcFormSchema = z
     endAngle: mathInput,
   })
   .merge(generalSchema);
+
+export const rulerFormSchema = z.object({
+  from: pointInput,
+  to: pointInput,
+  value: z.string(),
+  key: z.string(),
+  offset: mathInput,
+  type: z.enum(["ruler"]),
+  id: z.string(),
+  hidden: z.boolean(),
+});
