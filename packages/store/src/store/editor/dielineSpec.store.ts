@@ -25,7 +25,7 @@ export namespace ISpec {
       operations: DupOperation[];
     }[];
   };
-  export type Direction = "up" | "down" | "right" | "left" | "down";
+  export type Direction = "up" | "down" | "right" | "left";
 
   export type LineSpec = Record<"length" | "angle", string> & generals;
   export type LinesSpec = {
@@ -39,12 +39,18 @@ export namespace ISpec {
     indices?: string;
     isRelative: boolean;
   } & generals;
-  export type RectangleSpec = Record<"width" | "height", string> & generals;
+  export type RectangleSpec = Record<"width" | "height" | "radius", string> & {
+    deleteSide?: Direction;
+  } & generals;
   export type CircleSpec = {
     radius: string;
     semiCircleDirection: Direction;
   } & generals;
-  export type PolygonSpec = Record<"radius" | "sides", string> & generals;
+  export type PolygonSpec = Record<
+    "radius" | "sides" | "firstCornerAngle",
+    string
+  > &
+    generals;
   export type ArcSpec = Record<"radius" | "startAngle" | "endAngle", string> &
     generals;
 

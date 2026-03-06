@@ -13,8 +13,8 @@ const shapesKey: [ISpec.ShapesKey, ...ISpec.ShapesKey[]] = [
   "polygon",
   "arc",
 ] as const;
-const pointDirection = ["down", "draw", "right", "up", "left"] as const;
-const semiCircleDirection = ["down", "right", "up", "left"] as const;
+const direction = ["down", "right", "up", "left"] as const;
+const pointDirection = [...direction, "draw"] as const;
 
 const generalSchema = z.object({
   layer: z.enum(["trim", "fold", "perf"]),
@@ -66,14 +66,16 @@ export const lineFormSchema = z
 export const linesFormSchema = z
   .object({
     absolutePts: z.array(z.tuple([mathInput, mathInput])).optional(),
-    relativePts: z.object({
-      pts: z
-        .array(
-          z.tuple([mathInput, mathInput.optional(), z.enum(pointDirection)]),
-        )
-        .optional(),
-      startPt: pointInput,
-    }),
+    relativePts: z
+      .object({
+        pts: z
+          .array(
+            z.tuple([mathInput, mathInput.optional(), z.enum(pointDirection)]),
+          )
+          .optional(),
+        startPt: pointInput,
+      })
+      .optional(),
     isClosed: z.boolean(),
     filletRadius: z.string().optional(),
     indices: z.string().optional(),
@@ -85,13 +87,15 @@ export const rectangleFormSchema = z
   .object({
     width: mathInput,
     height: mathInput,
+    radius: z.string().optional(),
+    deleteSide: z.enum(direction).optional(),
   })
   .merge(generalSchema);
 
 export const circleFormSchema = z
   .object({
     radius: mathInput,
-    semiCircleDirection: z.enum(semiCircleDirection).optional(),
+    semiCircleDirection: z.enum(direction).optional(),
   })
   .merge(generalSchema);
 

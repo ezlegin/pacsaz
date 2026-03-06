@@ -1,13 +1,12 @@
-import M, { IModel, IPoint } from "makerjs";
-import { Shape } from "./Shape";
+import M, { IModel } from "makerjs";
 import { zero } from "../../data/consts";
+import { Shape } from "./Shape";
 
 export class Circle extends Shape {
-  constructor(radius: number, origin?: IPoint) {
+  constructor(radius: number) {
     super();
     const circle = new M.paths.Circle(radius);
     const model: IModel = { paths: { circle } };
-    if (origin) M.model.move(model, origin);
     this.$pushShape("circle", model);
   }
 

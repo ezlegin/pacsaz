@@ -1,9 +1,9 @@
+import { ISpec } from "@repo/store/editor/dielineSpec.store";
 import M from "makerjs";
-import { Side } from "../../data/core.types";
 import { Shape } from "./Shape";
 
 interface Options {
-  deleteSide?: Side;
+  deleteSide?: ISpec.Direction;
   radius?: number;
 }
 
@@ -16,8 +16,19 @@ export class Rectangle extends Shape {
       options?.radius ?? 0,
     );
 
-    if (options?.deleteSide) {
-      if (options?.deleteSide) delete rect.paths?.[options?.deleteSide];
+    switch (options?.deleteSide) {
+      case "down":
+        delete rect.paths?.["Bottom"];
+        break;
+      case "left":
+        delete rect.paths?.["Left"];
+        break;
+      case "right":
+        delete rect.paths?.["Right"];
+        break;
+      case "up":
+        delete rect.paths?.["Top"];
+        break;
     }
 
     this.$pushShape("rectangle", rect);

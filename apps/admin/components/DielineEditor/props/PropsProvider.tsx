@@ -121,6 +121,8 @@ function PropsProvider<T extends ISpec.ShapesSpec>({
     control: form.control,
   });
 
+  console.log(form.formState.errors);
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -155,7 +157,7 @@ function PropsProvider<T extends ISpec.ShapesSpec>({
             variant="primaryForeground"
             size="icon"
             type="submit"
-            disabled={!form.formState.isValid}
+            // disabled={!form.formState.isValid}
           >
             <Check />
           </Button>

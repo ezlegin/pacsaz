@@ -1,5 +1,5 @@
 export type Lane = "trim" | "fold" | "perf";
-export type Side = "Top" | "Bottom" | "Right" | "Left";
+export type Side = "top" | "bottom" | "right" | "left";
 export type Layer =
   | "fold"
   | "trim"

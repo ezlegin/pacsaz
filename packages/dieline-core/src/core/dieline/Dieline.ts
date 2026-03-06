@@ -32,7 +32,7 @@ export abstract class Dieline {
     materials["f-flute"],
   ];
   // -------------- Dieline Factory --------------
-  protected abstract draw(): void;
+  protected abstract drawer(): void;
   protected fold(): void {}
   protected perf(): void {}
 
@@ -76,7 +76,7 @@ export abstract class Dieline {
     this.foldModel = { layer: "fold" };
     this.perfModel = { layer: "perf" };
 
-    this.draw();
+    this.drawer();
 
     const dieline: IModel = {
       models: {

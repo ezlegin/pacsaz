@@ -25,6 +25,7 @@ import {
 import { useEffect, useState } from "react";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
 import PropsFormContent from "./PropsFormContent";
+import PointInput from "./PointInput";
 
 interface Props {
   form: UseFormReturn<ISpec.LinesSpec, any, ISpec.LinesSpec>;
@@ -32,9 +33,10 @@ interface Props {
 
 const LinesProps = ({ form }: Props) => {
   const isRelative = form.watch("isRelative");
+  const [applyRadius, setApplyRadius] = useState(!!form.watch("filletRadius"));
 
   useEffect(() => {
-    form.setValue(isRelative ? "absolutePts" : "relativePts", []);
+    form.setValue(isRelative ? "absolutePts" : "relativePts", undefined);
   }, [isRelative]);
 
   return (
@@ -62,6 +64,79 @@ const LinesProps = ({ form }: Props) => {
         />
       </div>
       {isRelative ? <RelPts form={form} /> : <AbsPts form={form} />}
+
+      <Separator />
+
+      <FormField
+        control={form.control}
+        name={`isClosed`}
+        render={({ field }) => (
+          <FormItem>
+            <FormControl>
+              <div className="flex justify-between">
+                <Label>Closed</Label>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </div>
+            </FormControl>
+          </FormItem>
+        )}
+      />
+
+      <div className="space-y-1">
+        <div className="flex justify-between">
+          <Label>Radius</Label>
+          <Switch checked={applyRadius} onCheckedChange={setApplyRadius} />
+        </div>
+        {applyRadius && (
+          <div className="flex gap-3">
+            <FormField
+              control={form.control}
+              name={`filletRadius`}
+              render={({ field }) => (
+                <FormItem>
+                  <div className="relative">
+                    <span className="text-xs text-muted-foreground absolute translate-y-2.5 pl-3">
+                      Amount
+                    </span>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        autoFocus
+                        autoCapitalize="characters"
+                        placeholder="0"
+                        className="h-9 pl-16"
+                      />
+                    </FormControl>
+                  </div>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name={`indices`}
+              render={({ field }) => (
+                <FormItem>
+                  <div className="relative">
+                    <span className="text-xs text-muted-foreground absolute translate-y-2.5 pl-3">
+                      Indices
+                    </span>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder="0,1,2"
+                        className="h-9 pl-16"
+                      />
+                    </FormControl>
+                  </div>
+                </FormItem>
+              )}
+            />
+          </div>
+        )}
+      </div>
     </PropsFormContent>
   );
 };
@@ -151,7 +226,6 @@ const RelPts = ({ form }: Props) => {
     name: "relativePts.pts",
   });
   const ptDir = form.watch("relativePts.pts");
-  const [applyRadius, setApplyRadius] = useState(!!form.watch("filletRadius"));
 
   return (
     <div className="space-y-4">
@@ -268,120 +342,12 @@ const RelPts = ({ form }: Props) => {
         </Button>
       </div>
 
-      <div className="space-y-1">
-        <Label>Start</Label>
-        <div className="flex">
-          <FormField
-            control={form.control}
-            name="relativePts.startPt.0"
-            render={({ field }) => (
-              <FormItem className="gap-0 relative">
-                <span className="text-xs text-muted-foreground absolute translate-y-2.5 pl-3">
-                  X
-                </span>
-                <FormControl>
-                  <Input
-                    {...field}
-                    placeholder="0"
-                    className="h-9 pl-7 rounded-r-none"
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="relativePts.startPt.1"
-            render={({ field }) => (
-              <FormItem className="gap-0 relative">
-                <span className="text-xs text-muted-foreground absolute translate-y-2.5 pl-3">
-                  Y
-                </span>
-                <FormControl>
-                  <Input
-                    {...field}
-                    placeholder="0"
-                    className="h-9 pl-7 rounded-l-none"
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-        </div>
-      </div>
-
-      <Separator />
-
-      <FormField
-        control={form.control}
-        name={`isClosed`}
-        render={({ field }) => (
-          <FormItem>
-            <FormControl>
-              <div className="flex justify-between">
-                <Label>Closed</Label>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </div>
-            </FormControl>
-          </FormItem>
-        )}
+      <PointInput
+        label="Start"
+        form={form}
+        nameX="relativePts.startPt.0"
+        nameY="relativePts.startPt.1"
       />
-
-      <div className="space-y-1">
-        <div className="flex justify-between">
-          <Label>Radius</Label>
-          <Switch checked={applyRadius} onCheckedChange={setApplyRadius} />
-        </div>
-        {applyRadius && (
-          <div className="flex gap-3">
-            <FormField
-              control={form.control}
-              name={`filletRadius`}
-              render={({ field }) => (
-                <FormItem>
-                  <div className="relative">
-                    <span className="text-xs text-muted-foreground absolute translate-y-2.5 pl-3">
-                      Amount
-                    </span>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        autoFocus
-                        autoCapitalize="characters"
-                        placeholder="0"
-                        className="h-9 pl-16"
-                      />
-                    </FormControl>
-                  </div>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name={`indices`}
-              render={({ field }) => (
-                <FormItem>
-                  <div className="relative">
-                    <span className="text-xs text-muted-foreground absolute translate-y-2.5 pl-3">
-                      Indices
-                    </span>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="0,1,2"
-                        className="h-9 pl-16"
-                      />
-                    </FormControl>
-                  </div>
-                </FormItem>
-              )}
-            />
-          </div>
-        )}
-      </div>
     </div>
   );
 };

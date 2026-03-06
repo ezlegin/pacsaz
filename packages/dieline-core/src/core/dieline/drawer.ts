@@ -89,11 +89,17 @@ export class Drawer extends Dieline {
   }
 
   private rectangle(rectangle: NonNullable<ISpec.Shapes["rectangle"]>) {
-    this.$drawShapes(rectangle, ({ height, width }, scope) => {
-      const rectWidth = this.$parseMathStr(width, scope);
-      const rectHeight = this.$parseMathStr(height, scope);
-      return new Pacsaz.shapes.Rectangle(rectWidth, rectHeight);
-    });
+    this.$drawShapes(
+      rectangle,
+      ({ height, width, radius, deleteSide }, scope) => {
+        const rectWidth = this.$parseMathStr(width, scope);
+        const rectHeight = this.$parseMathStr(height, scope);
+        return new Pacsaz.shapes.Rectangle(rectWidth, rectHeight, {
+          radius: +radius,
+          deleteSide,
+        });
+      },
+    );
   }
 
   private circle(circle: NonNullable<ISpec.Shapes["circle"]>) {
@@ -123,22 +129,27 @@ export class Drawer extends Dieline {
     });
   }
 
-  protected override draw() {
-    if (this.shapes.line && this.shapes.line?.length > 0)
-      this.line(this.shapes.line);
-    if (this.shapes.lines && this.shapes.lines?.length > 0)
-      this.lines(this.shapes.lines);
-    if (this.shapes.rectangle && this.shapes.rectangle?.length > 0)
-      this.rectangle(this.shapes.rectangle);
-    if (this.shapes.circle && this.shapes.circle?.length > 0)
-      this.circle(this.shapes.circle);
-    if (this.shapes.polygon && this.shapes.polygon?.length > 0)
-      this.polygon(this.shapes.polygon);
-    if (this.shapes.arc && this.shapes.arc?.length > 0)
-      this.arc(this.shapes.arc);
+  protected override drawer() {
+    const line = this.$checkExistance(this.shapes.line);
+    const lines = this.$checkExistance(this.shapes.lines);
+    const rectangle = this.$checkExistance(this.shapes.rectangle);
+    const circle = this.$checkExistance(this.shapes.circle);
+    const polygon = this.$checkExistance(this.shapes.polygon);
+    const arc = this.$checkExistance(this.shapes.arc);
+
+    if (line) this.line(line);
+    if (lines) this.lines(lines);
+    if (rectangle) this.rectangle(rectangle);
+    if (circle) this.circle(circle);
+    if (polygon) this.polygon(polygon);
+    if (arc) this.arc(arc);
   }
 
   // -------------------- UTILS --------------------
+
+  private $checkExistance<T extends ISpec.ShapesMap>(shapes: T | undefined) {
+    if (shapes && shapes.length > 0) return shapes;
+  }
 
   private $drawShapes<T extends ISpec.ShapesMap>(
     shapes: T,
