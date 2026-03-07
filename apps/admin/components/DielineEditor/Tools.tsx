@@ -15,19 +15,25 @@ import {
   Square,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import ModelsPropsProvider from "./props/ModelssPropsProvider";
 import RulerProps from "./props/RulerProps";
-import ArcProps from "./props/Tools/ArcProps";
-import CircleProps from "./props/Tools/CircleProps";
-import LineProps from "./props/Tools/LineProps";
-import LinesProps from "./props/Tools/LinesProps";
-import PolygonProps from "./props/Tools/PolygonProps";
-import PropsProvider from "./props/Tools/PropsProvider";
-import RectangleProps from "./props/Tools/RectangleProps";
+import ShapesPropsProvider from "./props/ShapesPropsProvider";
+import ArcProps from "./props/shapes/ArcProps";
+import CircleProps from "./props/shapes/CircleProps";
+import LineProps from "./props/shapes/LineProps";
+import LinesProps from "./props/shapes/LinesProps";
+import PolygonProps from "./props/shapes/PolygonProps";
+import RectangleProps from "./props/shapes/RectangleProps";
+import GlueProps from "./props/models/GlueProps";
+
+type EditorMode = {
+  stack: ISpec.Stack;
+  key: ISpec.ShapesKey | "ruler" | ISpec.ModelsKey;
+};
 
 const Tools = () => {
-  const [editorMode, setEditorMode] = useState<
-    ISpec.ShapesKey | "ruler" | null
-  >(null);
+  const [editorMode, setEditorMode] = useState<EditorMode | null>(null);
+
   const shapesList: { key: ISpec.ShapesKey; Icon: LucideIcon }[] = [
     { key: "line", Icon: Slash },
     { key: "lines", Icon: ChevronUp },
@@ -36,46 +42,80 @@ const Tools = () => {
     { key: "polygon", Icon: Hexagon },
     { key: "arc", Icon: Parentheses },
   ];
+  const modelsList: { key: ISpec.ModelsKey }[] = [{ key: "glue" }];
 
   const { selection, clearSelection } = useSelectionStore();
 
   useEffect(() => {
-    setEditorMode(selection ? selection.type : null);
+    switch (selection?.stack) {
+      case "shape":
+        setEditorMode({ stack: selection.stack, key: selection.type });
+        break;
+      case "model":
+        setEditorMode({ stack: selection.stack, key: selection.type });
+        break;
+      case "ruler":
+        setEditorMode({ stack: selection.stack, key: selection.type });
+        break;
+      default:
+        setEditorMode(null);
+        break;
+    }
   }, [selection]);
 
   const handleCloseEditor = () => {
     setEditorMode(null);
     clearSelection();
   };
-  const propsComponents = {
+  const shapePropsComponents = {
     line: LineProps,
     lines: LinesProps,
     rectangle: RectangleProps,
     circle: CircleProps,
     polygon: PolygonProps,
     arc: ArcProps,
-    ruler: RulerProps,
+  };
+  const modelPropsComponents = {
+    glue: GlueProps,
   };
 
   if (editorMode) {
-    if (editorMode !== "ruler") {
-      const Component = propsComponents[editorMode];
+    if (editorMode.stack === "shape") {
+      const editorKey = editorMode.key as ISpec.ShapesKey;
+      const Component = shapePropsComponents[editorKey];
       return (
-        <PropsProvider<ISpec.ShapesSpec>
+        <ShapesPropsProvider<ISpec.ShapesSpec>
           key={selection?.id}
           data={selection as ISpec.ShapesSpec}
           close={handleCloseEditor}
-          shapeKey={editorMode}
+          shapeKey={editorKey}
         >
           {({ form }) => <Component form={form} />}
-        </PropsProvider>
+        </ShapesPropsProvider>
       );
-    } else {
+    }
+
+    if (editorMode.stack === "model") {
+      const editorKey = editorMode.key as ISpec.ModelsKey;
+      const Component = modelPropsComponents[editorKey];
+      return (
+        <ModelsPropsProvider
+          key={selection?.id}
+          data={selection as ISpec.ModelsSpec}
+          close={handleCloseEditor}
+          modelKey={editorKey}
+        >
+          {({ form }) => <Component form={form} />}
+        </ModelsPropsProvider>
+      );
+    }
+
+    if (editorMode.stack === "ruler") {
       return (
         <RulerProps
           key={selection?.id}
           close={handleCloseEditor}
-          selection={selection}
+          selection={selection as ISpec.Ruler}
         />
       );
     }
@@ -90,7 +130,7 @@ const Tools = () => {
             <div
               key={idx}
               className="flex justify-between items-center hover:bg-gray-200/50 cursor-pointer px-2 py-2.5 rounded-md group"
-              onClick={() => setEditorMode(key)}
+              onClick={() => setEditorMode({ stack: "shape", key })}
             >
               <Label className="capitalize cursor-pointer">
                 <Icon
@@ -106,10 +146,26 @@ const Tools = () => {
       </div>
 
       <div>
+        <Label>Models</Label>
+        <div>
+          {modelsList.map(({ key }, idx) => (
+            <div
+              key={idx}
+              className="flex justify-between items-center hover:bg-gray-200/50 cursor-pointer px-2 py-2.5 rounded-md group"
+              onClick={() => setEditorMode({ stack: "model", key })}
+            >
+              <Label className="capitalize cursor-pointer">{key}</Label>
+              <PlusCircle size={14} />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div>
         <Label>Ruler</Label>
         <div
           className="flex justify-between items-center hover:bg-gray-200/50 cursor-pointer px-2 py-2.5 rounded-md group"
-          onClick={() => setEditorMode("ruler")}
+          onClick={() => setEditorMode({ stack: "ruler", key: "ruler" })}
         >
           <Label className="capitalize cursor-pointer">
             <Ruler

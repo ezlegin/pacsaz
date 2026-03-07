@@ -14,21 +14,24 @@ export class Drawer extends Dieline {
   private get rulers() {
     return getDielineSpec().rulers;
   }
+  private get models() {
+    return getDielineSpec().models;
+  }
   override defaultDimensions = {
     width: 90,
     length: 160,
-    height: 0,
+    height: 80,
   };
 
   private line(line: NonNullable<ISpec.Shapes["line"]>) {
-    this.$drawShapes(line, ({ angle, length }, scope) => {
+    this.$pusher(line, ({ angle, length }, scope) => {
       const lineLength = this.$parseMathStr(length, scope);
       return new Pacsaz.shapes.Line(lineLength, +angle);
     });
   }
 
   private lines(lines: NonNullable<ISpec.Shapes["lines"]>) {
-    this.$drawShapes(
+    this.$pusher(
       lines,
       (
         {
@@ -93,21 +96,18 @@ export class Drawer extends Dieline {
   }
 
   private rectangle(rectangle: NonNullable<ISpec.Shapes["rectangle"]>) {
-    this.$drawShapes(
-      rectangle,
-      ({ height, width, radius, deleteSide }, scope) => {
-        const rectWidth = this.$parseMathStr(width, scope);
-        const rectHeight = this.$parseMathStr(height, scope);
-        return new Pacsaz.shapes.Rectangle(rectWidth, rectHeight, {
-          radius: +radius,
-          deleteSide,
-        });
-      },
-    );
+    this.$pusher(rectangle, ({ height, width, radius, deleteSide }, scope) => {
+      const rectWidth = this.$parseMathStr(width, scope);
+      const rectHeight = this.$parseMathStr(height, scope);
+      return new Pacsaz.shapes.Rectangle(rectWidth, rectHeight, {
+        radius: +radius,
+        deleteSide,
+      });
+    });
   }
 
   private circle(circle: NonNullable<ISpec.Shapes["circle"]>) {
-    this.$drawShapes(circle, ({ radius, semiCircleDirection }, scope) => {
+    this.$pusher(circle, ({ radius, semiCircleDirection }, scope) => {
       const circleRadius = this.$parseMathStr(radius, scope);
       if (semiCircleDirection) {
         return new Pacsaz.shapes.SemiCircle(circleRadius, semiCircleDirection);
@@ -118,14 +118,14 @@ export class Drawer extends Dieline {
   }
 
   private polygon(polygon: NonNullable<ISpec.Shapes["polygon"]>) {
-    this.$drawShapes(polygon, ({ radius, sides }, scope) => {
+    this.$pusher(polygon, ({ radius, sides }, scope) => {
       const polygonRadius = this.$parseMathStr(radius, scope);
       return new Pacsaz.shapes.Polygon(polygonRadius, +sides);
     });
   }
 
   private arc(arc: NonNullable<ISpec.Shapes["arc"]>) {
-    this.$drawShapes(arc, ({ radius, startAngle, endAngle }, scope) => {
+    this.$pusher(arc, ({ radius, startAngle, endAngle }, scope) => {
       const polygonRadius = this.$parseMathStr(radius, scope);
       const start = this.$parseMathStr(startAngle, scope);
       const end = this.$parseMathStr(endAngle, scope);
@@ -133,7 +133,7 @@ export class Drawer extends Dieline {
     });
   }
 
-  protected override drawer() {
+  private drawShapes() {
     const line = this.$checkExistance(this.shapes.line);
     const lines = this.$checkExistance(this.shapes.lines);
     const rectangle = this.$checkExistance(this.shapes.rectangle);
@@ -147,7 +147,28 @@ export class Drawer extends Dieline {
     if (circle) this.circle(circle);
     if (polygon) this.polygon(polygon);
     if (arc) this.arc(arc);
+  }
 
+  private glue(glue: NonNullable<ISpec.Models["glue"]>) {
+    this.$pusher(glue, ({ from, to }, scope) => {
+      const glueFrom = [
+        this.$parseMathStr(from[0], scope),
+        this.$parseMathStr(from[1], scope),
+      ];
+      const glueTo = [
+        this.$parseMathStr(to[0], scope),
+        this.$parseMathStr(to[1], scope),
+      ];
+      return new Pacsaz.models.Glue(glueFrom, glueTo);
+    });
+  }
+
+  private drawModels() {
+    const glue = this.$checkExistance(this.models.glue);
+    if (glue) this.glue(glue);
+  }
+
+  private drawRulers() {
     const rulers = this.$checkExistance(this.rulers);
     if (rulers) {
       let models: Record<string, IModel> = {
@@ -175,36 +196,39 @@ export class Drawer extends Dieline {
     }
   }
 
+  protected override drawer() {
+    this.drawShapes();
+    this.drawModels();
+    this.drawRulers();
+  }
+
   // -------------------- UTILS --------------------
 
-  private $checkExistance<T extends ISpec.ShapesMap | ISpec.Rulers>(
-    shapes: T | undefined,
-  ) {
+  private $checkExistance<
+    T extends ISpec.ShapesMap | ISpec.ModelsMap | ISpec.Rulers,
+  >(shapes: T | undefined) {
     if (shapes && shapes.length > 0) return shapes;
   }
 
-  private $drawShapes<T extends ISpec.ShapesMap>(
-    shapes: T,
+  private $pusher<T extends ISpec.ModelsMap | ISpec.ShapesMap>(
+    items: T,
     callBack: (val: T[number], scope: Record<string, number>) => Shape,
   ) {
     const scope = this.scope;
-    for (const shape of shapes) {
-      if (shape.hidden) continue;
+    for (const item of items) {
+      if (item.hidden) continue;
 
-      const model = callBack(shape, scope);
+      const model = callBack(item, scope);
 
-      if (shape.origin) {
-        model.moveTo([
-          this.$parseMathStr(shape.origin[0], scope),
-          this.$parseMathStr(shape.origin[1], scope),
-        ]);
-      }
+      model.moveTo([
+        this.$parseMathStr(item.origin[0], scope),
+        this.$parseMathStr(item.origin[1], scope),
+      ]);
 
-      const dup = shape.dup;
+      const dup = item.dup;
       if (dup && dup.length > 0) {
         for (const d of dup) {
           model.dup();
-          console.log(dup);
 
           for (const op of d.operations) {
             switch (op.type) {
@@ -249,7 +273,11 @@ export class Drawer extends Dieline {
         }
       }
 
-      this.$pushShape(model, shape.key, shape.layer);
+      if ("layer" in item) {
+        this.$pushShape(model, item.key, item.layer);
+      } else {
+        this.$pushModels({ model });
+      }
     }
   }
 

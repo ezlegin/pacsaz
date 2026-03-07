@@ -33,9 +33,9 @@ import { ReactNode } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import PropsHeader from "../PropsHeader";
-import { DupOperationEditor } from "./DupOperationEditor";
-import PointInput from "./PointInput";
+import PropsHeader from "./PropsHeader";
+import { DupOperationEditor } from "./shapes/DupOperationEditor";
+import PointInput from "./shapes/PointInput";
 
 const getShapeSchema = (shapeKey: ISpec.ShapesKey) => {
   const schemas: Record<ISpec.ShapesKey, any> = {
@@ -50,19 +50,19 @@ const getShapeSchema = (shapeKey: ISpec.ShapesKey) => {
   return schemas[shapeKey];
 };
 
-interface PropsProvider<T extends ISpec.ShapesSpec> {
+interface ShapesPropsProvider<T extends ISpec.ShapesSpec> {
   data: T | null;
   children: (props: { form: any }) => ReactNode;
   close: () => void;
   shapeKey: ISpec.ShapesKey;
 }
 
-function PropsProvider<T extends ISpec.ShapesSpec>({
+function ShapesPropsProvider<T extends ISpec.ShapesSpec>({
   children,
   data,
   close,
   shapeKey,
-}: PropsProvider<T>) {
+}: ShapesPropsProvider<T>) {
   const { setShape, updateShape } = useDielineSpecStore();
 
   const { selection } = useSelectionStore();
@@ -74,6 +74,7 @@ function PropsProvider<T extends ISpec.ShapesSpec>({
   const form = useForm<FormType>({
     resolver: zodResolver(schema as any),
     defaultValues: data ?? {
+      stack: "shape",
       key: shapeKey,
       type: shapeKey,
       angle: "",
@@ -107,7 +108,7 @@ function PropsProvider<T extends ISpec.ShapesSpec>({
 
   const onSubmit = (data: FormType) => {
     if (isUpdateType) {
-      updateShape(selection.type, selection.id, data);
+      updateShape(selection.type as ISpec.ShapesKey, selection.id, data);
       toast.info("Shape Updated.");
     } else {
       setShape(shapeKey, data);
@@ -130,14 +131,12 @@ function PropsProvider<T extends ISpec.ShapesSpec>({
 
         <Separator />
 
-        {shapeKey !== "lines" && (
-          <PointInput
-            form={form}
-            label="Origin"
-            nameX={`origin.0`}
-            nameY={`origin.1`}
-          />
-        )}
+        <PointInput
+          form={form}
+          label="Origin"
+          nameX={`origin.0`}
+          nameY={`origin.1`}
+        />
 
         <div className="space-y-1">
           <FormField
@@ -225,4 +224,4 @@ function PropsProvider<T extends ISpec.ShapesSpec>({
   );
 }
 
-export default PropsProvider;
+export default ShapesPropsProvider;

@@ -1,11 +1,10 @@
 import z from "zod";
 import { validateMathExpression } from "../utils/validateMathExpression";
-import { ISpec } from "@repo/store/editor/dielineSpec.store";
 
 const mathInput = z.string().min(1).refine(validateMathExpression);
 const pointInput = z.tuple([mathInput, mathInput]);
 
-const shapesKey: [ISpec.ShapesKey, ...ISpec.ShapesKey[]] = [
+const shapesKey = [
   "line",
   "lines",
   "circle",
@@ -13,47 +12,51 @@ const shapesKey: [ISpec.ShapesKey, ...ISpec.ShapesKey[]] = [
   "polygon",
   "arc",
 ] as const;
+const modelsKey = ["glue"] as const;
+const stack = ["model", "ruler", "shape"] as const;
 const direction = ["down", "right", "up", "left"] as const;
 const pointDirection = [...direction, "draw"] as const;
 
+const dup = z.array(
+  z.object({
+    operations: z.array(
+      z.discriminatedUnion("type", [
+        z.object({ type: z.literal("zero") }),
+        z.object({ type: z.literal("center") }),
+        z.object({
+          type: z.literal("mirror"),
+          x: z.boolean(),
+          y: z.boolean(),
+        }),
+        z.object({
+          type: z.literal("move"),
+          value: pointInput,
+        }),
+        z.object({
+          type: z.literal("moveTo"),
+          value: pointInput,
+        }),
+        z.object({
+          type: z.literal("rotate"),
+          value: mathInput,
+        }),
+        z.object({
+          type: z.literal("scale"),
+          value: mathInput,
+        }),
+      ]),
+    ),
+  }),
+);
 const generalSchema = z.object({
   layer: z.enum(["trim", "fold", "perf"]),
   hidden: z.boolean(),
   key: z.string(),
   origin: pointInput,
   type: z.enum(shapesKey),
+  stack: z.enum(stack),
   id: z.string(),
-  dup: z.array(
-    z.object({
-      operations: z.array(
-        z.discriminatedUnion("type", [
-          z.object({ type: z.literal("zero") }),
-          z.object({ type: z.literal("center") }),
-          z.object({
-            type: z.literal("mirror"),
-            x: z.boolean(),
-            y: z.boolean(),
-          }),
-          z.object({
-            type: z.literal("move"),
-            value: pointInput,
-          }),
-          z.object({
-            type: z.literal("moveTo"),
-            value: pointInput,
-          }),
-          z.object({
-            type: z.literal("rotate"),
-            value: mathInput,
-          }),
-          z.object({
-            type: z.literal("scale"),
-            value: mathInput,
-          }),
-        ]),
-      ),
-    }),
-  ),
+  dup: dup,
 });
 
 export const lineFormSchema = z
@@ -117,10 +120,23 @@ export const arcFormSchema = z
 export const rulerFormSchema = z.object({
   from: pointInput,
   to: pointInput,
+  stack: z.enum(stack),
   value: z.string(),
   key: z.string(),
   offset: mathInput,
   type: z.enum(["ruler"]),
   id: z.string(),
   hidden: z.boolean(),
+});
+
+export const glueFormSchema = z.object({
+  from: pointInput,
+  to: pointInput,
+  stack: z.enum(stack),
+  key: z.string(),
+  type: z.enum(modelsKey),
+  id: z.string(),
+  hidden: z.boolean(),
+  origin: pointInput,
+  dup: dup,
 });

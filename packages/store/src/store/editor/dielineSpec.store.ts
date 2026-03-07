@@ -12,20 +12,25 @@ export namespace ISpec {
     | { type: "rotate"; value: string }
     | { type: "scale"; value: string };
 
+  export type Stack = "shape" | "model" | "ruler";
   export type Layer = "trim" | "fold" | "perf";
+  export type Dup = {
+    operations: DupOperation[];
+  }[];
   type Point = [string, string];
   type Generals = {
     id: string;
     key: string;
     type: ShapesKey;
+    stack: Stack;
     hidden: boolean;
     layer: Layer;
     origin: Point;
-    dup?: {
-      operations: DupOperation[];
-    }[];
+    dup?: Dup;
   };
   export type Direction = "up" | "down" | "right" | "left";
+
+  //! Shapes --------------------------------------
 
   export type LineSpec = Record<"length" | "angle", string> & Generals;
   export type LinesSpec = {
@@ -62,7 +67,21 @@ export namespace ISpec {
     polygon: PolygonSpec[];
     arc: ArcSpec[];
   }>;
+  export type ShapesKey = keyof Shapes;
+  export type ShapesMap = NonNullable<Shapes[ShapesKey]>;
+  export type ShapesSpec = ShapesMap[number];
 
+  //! Models --------------------------------------
+  type ModelGenerals = Omit<Generals, "layer" | "type"> & { type: ModelsKey };
+  export type GlueSpec = { from: Point; to: Point } & ModelGenerals;
+  export type ModelsKey = keyof Models;
+  export type Models = Partial<{
+    glue: GlueSpec[];
+  }>;
+  export type ModelsMap = NonNullable<Models[ModelsKey]>;
+  export type ModelsSpec = ModelsMap[number];
+
+  //! Rulers --------------------------------------
   export type Ruler = {
     from: Point;
     to: Point;
@@ -71,10 +90,6 @@ export namespace ISpec {
     type: "ruler";
   } & Omit<Generals, "type" | "layer" | "origin" | "dup">;
   export type Rulers = Ruler[];
-
-  export type ShapesKey = keyof Shapes;
-  export type ShapesMap = NonNullable<Shapes[ShapesKey]>;
-  export type ShapesSpec = ShapesMap[number];
 }
 
 interface DielineSpecStore {
@@ -89,7 +104,7 @@ interface DielineSpecStore {
   updateShape: <T extends ISpec.ShapesKey>(
     type: T,
     id: string,
-    newSpec: ISpec.ShapesSpec,
+    newSpec: NonNullable<ISpec.Shapes[T]>[number],
   ) => void;
   removeShape: (type: ISpec.ShapesKey, id: string) => void;
 
@@ -101,6 +116,18 @@ interface DielineSpecStore {
   setRulerVisibility: (id: string) => void;
 
   //! Models
+  models: ISpec.Models;
+  setModel: <T extends ISpec.ModelsKey>(
+    type: T,
+    spec: NonNullable<ISpec.Models[T]>[number],
+  ) => void;
+  updateModel: <T extends ISpec.ModelsKey>(
+    type: T,
+    id: string,
+    newSpec: NonNullable<ISpec.Models[T]>[number],
+  ) => void;
+  setModelVisibility: (type: ISpec.ModelsKey, id: string) => void;
+  removeModel: (type: ISpec.ModelsKey, id: string) => void;
 }
 
 export const useDielineSpecStore = create<DielineSpecStore>()(
@@ -108,6 +135,7 @@ export const useDielineSpecStore = create<DielineSpecStore>()(
     (set) => ({
       shapes: {},
       rulers: [],
+      models: [],
 
       //! Shapes ------------------------------------
       setShape: (type, spec) =>
@@ -175,6 +203,65 @@ export const useDielineSpecStore = create<DielineSpecStore>()(
           },
         })),
 
+      //! Models ------------------------------------
+      setModel: (type, spec) =>
+        set((state) => {
+          const currentModels = state.models[type] || [];
+
+          let id = uuidv4();
+          while (currentModels.some((model) => model.id === id)) {
+            id = uuidv4();
+          }
+
+          return {
+            models: {
+              ...state.models,
+              [type]: [...currentModels, { ...spec, id }],
+            },
+          };
+        }),
+
+      updateModel: (type, id, newSpec) =>
+        set((state) => {
+          const currentModels = state.models[type];
+          if (!currentModels) return state;
+
+          const updatedModels = currentModels.map((item) =>
+            item.id === id ? { ...item, ...newSpec } : item,
+          );
+
+          return {
+            models: {
+              ...state.models,
+              [type]: updatedModels,
+            },
+          };
+        }),
+
+      setModelVisibility: (type, id) =>
+        set((state) => {
+          const currentModels = state.models[type];
+          if (!currentModels) return state;
+
+          const updatedModels = currentModels.map((item) =>
+            item.id === id ? { ...item, hidden: !item.hidden } : item,
+          );
+
+          return {
+            models: {
+              ...state.models,
+              [type]: updatedModels,
+            },
+          };
+        }),
+
+      removeModel: (type, key) =>
+        set((state) => ({
+          models: {
+            ...state.models,
+            [type]: state.models[type]?.filter((spec) => spec.id !== key),
+          },
+        })),
       //! Rulers ------------------------------------
       setRuler: (ruler) =>
         set((state) => {

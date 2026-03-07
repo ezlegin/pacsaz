@@ -12,48 +12,45 @@ import {
   TabsList,
   TabsTrigger,
 } from "@repo/ui/components/tabs";
-import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
-import { cn } from "@repo/ui/lib/utils";
-import {
-  ChevronUp,
-  Circle,
-  Copy,
-  Eye,
-  EyeClosed,
-  Hexagon,
-  Minus,
-  Parentheses,
-  Redo,
-  Ruler,
-  Square,
-  Trash,
-  Undo,
-} from "lucide-react";
-import { ReactNode, useEffect } from "react";
+import { Redo, Undo } from "lucide-react";
+import { useEffect } from "react";
 import DielineMetadataForm from "../forms/DielineMetadataForm";
+import ModelLayers from "./layers/ModelLayers";
+import RulerLayers from "./layers/RulerLayers";
+import ShapeLayers from "./layers/ShapeLayers";
 
-type ItemType = {
+export type ItemType = {
   ShapesSpec: ISpec.ShapesSpec;
   Ruler: ISpec.Ruler;
+  ModelsSpec: ISpec.ModelsSpec;
 };
+
+export type HandleLayerActoin = (
+  layerItemType: keyof ItemType,
+  item: ItemType[keyof ItemType],
+  type: "dup" | "delete" | "visibility",
+) => void;
 
 const DielineLayer = () => {
   const {
     shapes,
     removeShape,
-    setShapes,
     removeRuler,
     setRulerVisibility,
     setRuler,
+    setModelVisibility,
+    setModel,
+    removeModel,
     rulers,
+    models,
     setShapeVisibility,
     setShape,
   } = useDielineSpecStore();
   const { setSelection, clearSelection } = useSelectionStore();
-  const { setInitial, push, undo, redo, present, future, past } =
-    useDielineHistoryStore();
+  const { setInitial, push, undo, redo } = useDielineHistoryStore();
 
   const flattedShapes = Object.values(shapes).flat();
+  const flattedModels = Object.values(models).flat();
 
   useEffect(() => {
     setInitial(shapes);
@@ -75,34 +72,52 @@ const DielineLayer = () => {
     item: ItemType[keyof ItemType],
     type: "dup" | "delete" | "visibility",
   ) {
-    if (layerItemType === "ShapesSpec") {
-      const shape = item as ISpec.ShapesSpec;
-      switch (type) {
-        case "delete":
-          removeShape(shape.type, shape.id);
-          clearSelection();
-          break;
-        case "visibility":
-          setShapeVisibility(shape.type, shape.id);
-          break;
-        case "dup":
-          setShape(shape.type, { ...shape, key: shape.key + "-dup" });
-          break;
-      }
-    } else {
-      const ruler = item as ISpec.Ruler;
-      switch (type) {
-        case "delete":
-          removeRuler(ruler.id);
-          clearSelection();
-          break;
-        case "visibility":
-          setRulerVisibility(ruler.id);
-          break;
-        case "dup":
-          setRuler({ ...ruler, key: ruler.key + "-dup" });
-          break;
-      }
+    switch (layerItemType) {
+      case "ShapesSpec":
+        const shape = item as ISpec.ShapesSpec;
+        switch (type) {
+          case "delete":
+            removeShape(shape.type, shape.id);
+            clearSelection();
+            break;
+          case "visibility":
+            setShapeVisibility(shape.type, shape.id);
+            break;
+          case "dup":
+            setShape(shape.type, { ...shape, key: shape.key + "-dup" });
+            break;
+        }
+        break;
+      case "ModelsSpec":
+        const model = item as ISpec.ModelsSpec;
+        switch (type) {
+          case "delete":
+            removeModel(model.type, model.id);
+            clearSelection();
+            break;
+          case "visibility":
+            setModelVisibility(model.type, model.id);
+            break;
+          case "dup":
+            setModel(model.type, { ...model, key: model.key + "-dup" });
+            break;
+        }
+        break;
+      case "Ruler":
+        const ruler = item as ISpec.Ruler;
+        switch (type) {
+          case "delete":
+            removeRuler(ruler.id);
+            clearSelection();
+            break;
+          case "visibility":
+            setRulerVisibility(ruler.id);
+            break;
+          case "dup":
+            setRuler({ ...ruler, key: ruler.key + "-dup" });
+            break;
+        }
+        break;
     }
   }
 
@@ -122,24 +137,18 @@ const DielineLayer = () => {
         <div className="space-y-1">
           <Separator />
           <TabsList className="w-full px-0">
-            <TabsTrigger className="cursor-pointer" value="layers">
-              Layers
-            </TabsTrigger>
-            <TabsTrigger className="cursor-pointer" value="rulers">
-              Rulers
-            </TabsTrigger>
-            <TabsTrigger className="cursor-pointer" value="models">
-              Models
-            </TabsTrigger>
+            <TabsTrigger value="layers">Layers</TabsTrigger>
+            <TabsTrigger value="rulers">Rulers</TabsTrigger>
+            <TabsTrigger value="models">Models</TabsTrigger>
           </TabsList>
           <Separator />
         </div>
 
-        <TabsContent value="layers" className="space-y-3">
+        <TabsContent value="layers">
           <ShapeLayers
             clearSelection={clearSelection}
             handleLayerAction={handleLayerAction}
-            setSelectedShape={setSelection}
+            setSelection={setSelection}
             shapes={flattedShapes}
           />
         </TabsContent>
@@ -152,7 +161,12 @@ const DielineLayer = () => {
           />
         </TabsContent>
         <TabsContent value="models">
-          <div>hi</div>
+          <ModelLayers
+            clearSelection={clearSelection}
+            handleLayerAction={handleLayerAction}
+            setSelection={setSelection}
+            models={flattedModels}
+          />
         </TabsContent>
       </Tabs>
     </div>
@@ -160,192 +174,3 @@ const DielineLayer = () => {
 };
 
 export default DielineLayer;
-
-const VisibilityIcon = ({ hidden }: { hidden: boolean }) => {
-  return hidden ? (
-    <EyeClosed className="scale-[0.85]" />
-  ) : (
-    <Eye className="scale-[0.85]" />
-  );
-};
-
-function LayerIcon({ data }: { data: ISpec.ShapesKey }) {
-  const className = "scale-[0.9]";
-
-  switch (data) {
-    case "line":
-      return <Minus className={className} />;
-    case "circle":
-      return <Circle className={className} />;
-    case "rectangle":
-      return <Square className={className} />;
-    case "lines":
-      return <ChevronUp className={className} />;
-    case "polygon":
-      return <Hexagon className={className} />;
-    case "arc":
-      return <Parentheses className={className} />;
-  }
-}
-
-type HandleLayerActoin = (
-  layerItemType: keyof ItemType,
-  item: ItemType[keyof ItemType],
-  type: "dup" | "delete" | "visibility",
-) => void;
-
-function ShapeLayers({
-  handleLayerAction,
-  clearSelection,
-  setSelectedShape,
-  shapes,
-}: {
-  shapes: ISpec.ShapesSpec[];
-  handleLayerAction: HandleLayerActoin;
-  clearSelection: () => void;
-  setSelectedShape: (shape: ISpec.ShapesSpec) => void;
-}) {
-  return (
-    <ToggleGroup
-      type="single"
-      spacing={0.01}
-      className="flex-col w-full"
-      onValueChange={(val) => {
-        if (val === "") clearSelection();
-
-        const shape = shapes.find((i) => i.id === val);
-        if (!shape) return;
-
-        setSelectedShape(shape);
-      }}
-    >
-      {shapes.map((shape) => (
-        <ToggleGroupItem
-          key={shape.id}
-          value={shape.id}
-          className="justify-between w-full data-[state=on]:bg-gray-200/50 data-[state=on]:border cursor-pointer group"
-        >
-          <div
-            className={cn(
-              shape.layer === "trim"
-                ? "text-blue-500"
-                : shape.layer === "fold"
-                  ? "text-red-500"
-                  : "text-fuchsia-500",
-              "flex items-center gap-2",
-            )}
-          >
-            <LayerIcon data={shape.type} />
-            {shape.key}
-          </div>
-
-          <LayerActions
-            layerItemType="ShapesSpec"
-            handleLayerAction={handleLayerAction}
-            item={shape}
-          >
-            {shape.dup && shape.dup.length > 0 && (
-              <div className="scale-[0.70] text-muted-foreground group-hover:hidden">
-                dup
-              </div>
-            )}
-          </LayerActions>
-        </ToggleGroupItem>
-      ))}
-    </ToggleGroup>
-  );
-}
-
-function RulerLayers({
-  handleLayerAction,
-  clearSelection,
-  setSelection,
-  rulers,
-}: {
-  rulers: ISpec.Rulers;
-  handleLayerAction: HandleLayerActoin;
-  clearSelection: () => void;
-  setSelection: (ruler: ISpec.Ruler) => void;
-}) {
-  return (
-    <ToggleGroup
-      type="single"
-      spacing={0.01}
-      className="flex-col w-full"
-      onValueChange={(val) => {
-        if (val === "") clearSelection();
-
-        const ruler = rulers.find((i) => i.id === val);
-        if (!ruler) return;
-
-        setSelection(ruler);
-      }}
-    >
-      {rulers.map((ruler) => (
-        <ToggleGroupItem
-          key={ruler.id}
-          value={ruler.id}
-          className="justify-between w-full data-[state=on]:bg-gray-200/50 data-[state=on]:border cursor-pointer group"
-        >
-          <div className={"flex items-center gap-2"}>
-            <Ruler className="scale-[0.9] text-muted-foreground" />
-            {ruler.key}
-          </div>
-          <LayerActions
-            layerItemType="Ruler"
-            handleLayerAction={handleLayerAction}
-            item={ruler}
-          />
-        </ToggleGroupItem>
-      ))}
-    </ToggleGroup>
-  );
-}
-
-function LayerActions<T extends ISpec.ShapesSpec | ISpec.Ruler>({
-  item,
-  handleLayerAction,
-  children,
-  layerItemType,
-}: {
-  item: T;
-  children?: ReactNode;
-  layerItemType: keyof ItemType;
-  handleLayerAction: HandleLayerActoin;
-}) {
-  return (
-    <div className="flex gap-2">
-      {children}
-
-      <div
-        className="hidden group-hover:block cursor-pointer hover:text-blue-500"
-        onClick={(e) => {
-          e.stopPropagation();
-          handleLayerAction(layerItemType, item, "dup");
-        }}
-      >
-        <Copy className="scale-[0.85]" />
-      </div>
-
-      <div
-        className="hidden group-hover:block cursor-pointer hover:text-blue-500"
-        onClick={(e) => {
-          e.stopPropagation();
-          handleLayerAction(layerItemType, item, "visibility");
-        }}
-      >
-        <VisibilityIcon hidden={item.hidden} />
-      </div>
-
-      <div
-        className="hidden group-hover:block cursor-pointer hover:text-destructive"
-        onClick={(e) => {
-          e.stopPropagation();
-          handleLayerAction(layerItemType, item, "delete");
-        }}
-      >
-        <Trash className="scale-[0.85]" />
-      </div>
-    </div>
-  );
-}

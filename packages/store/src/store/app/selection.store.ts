@@ -2,8 +2,10 @@ import { create } from "zustand";
 import { ISpec } from "../editor/dielineSpec.store";
 
 interface SelectedShapeStore {
-  selection: ISpec.ShapesSpec | ISpec.Ruler | null;
-  setSelection: (selection: ISpec.ShapesSpec | ISpec.Ruler) => void;
+  selection: ISpec.ShapesSpec | ISpec.Ruler | ISpec.ModelsSpec | null;
+  setSelection: (
+    selection: ISpec.ShapesSpec | ISpec.ModelsSpec | ISpec.Ruler,
+  ) => void;
   clearSelection: () => void;
 }
 

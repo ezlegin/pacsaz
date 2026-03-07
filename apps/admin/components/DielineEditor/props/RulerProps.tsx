@@ -16,7 +16,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
 import PropsHeader from "./PropsHeader";
-import PointInput from "./Tools/PointInput";
+import PointInput from "./shapes/PointInput";
 
 type FormType = z.infer<typeof rulerFormSchema>;
 
@@ -32,6 +32,7 @@ const RulerProps = ({
     resolver: zodResolver(rulerFormSchema),
     defaultValues: (selection as ISpec.Ruler) ?? {
       id: "",
+      stack: "shape",
       hidden: false,
       from: ["0", "length / 4"],
       to: ["width", "length / 4"],
