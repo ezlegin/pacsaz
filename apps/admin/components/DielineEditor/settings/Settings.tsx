@@ -23,7 +23,11 @@ const Settings = ({ isRendering }: { isRendering: boolean }) => {
     settings: { bleed, dimension, dimensionType, format },
   } = useDielineSettingsStore();
 
-  const MATERIALS = [materials["glossy-cardboard"], materials["b-flute"]];
+  const MATERIALS = [
+    materials["glossy-cardboard"],
+    materials["f-flute"],
+    materials["e-flute"],
+  ];
 
   return (
     <div className="space-y-5">

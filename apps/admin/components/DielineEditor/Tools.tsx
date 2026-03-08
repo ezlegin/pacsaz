@@ -18,13 +18,14 @@ import { useEffect, useState } from "react";
 import ModelsPropsProvider from "./props/ModelssPropsProvider";
 import RulerProps from "./props/RulerProps";
 import ShapesPropsProvider from "./props/ShapesPropsProvider";
+import DoorProps from "./props/models/DoorProps";
+import GlueProps from "./props/models/GlueProps";
 import ArcProps from "./props/shapes/ArcProps";
 import CircleProps from "./props/shapes/CircleProps";
 import LineProps from "./props/shapes/LineProps";
 import LinesProps from "./props/shapes/LinesProps";
 import PolygonProps from "./props/shapes/PolygonProps";
 import RectangleProps from "./props/shapes/RectangleProps";
-import GlueProps from "./props/models/GlueProps";
 
 type EditorMode = {
   stack: ISpec.Stack;
@@ -42,7 +43,7 @@ const Tools = () => {
     { key: "polygon", Icon: Hexagon },
     { key: "arc", Icon: Parentheses },
   ];
-  const modelsList: { key: ISpec.ModelsKey }[] = [{ key: "glue" }];
+  const modelsList: ISpec.ModelsKey[] = ["glue", "door"];
 
   const { selection, clearSelection } = useSelectionStore();
 
@@ -77,6 +78,7 @@ const Tools = () => {
   };
   const modelPropsComponents = {
     glue: GlueProps,
+    door: DoorProps,
   };
 
   if (editorMode) {
@@ -148,7 +150,7 @@ const Tools = () => {
       <div>
         <Label>Models</Label>
         <div>
-          {modelsList.map(({ key }, idx) => (
+          {modelsList.map((key, idx) => (
             <div
               key={idx}
               className="flex justify-between items-center hover:bg-gray-200/50 cursor-pointer px-2 py-2.5 rounded-md group"

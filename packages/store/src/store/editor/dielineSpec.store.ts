@@ -72,11 +72,18 @@ export namespace ISpec {
   export type ShapesSpec = ShapesMap[number];
 
   //! Models --------------------------------------
+  type DustSide = "left" | "right" | "both";
   type ModelGenerals = Omit<Generals, "layer" | "type"> & { type: ModelsKey };
   export type GlueSpec = { from: Point; to: Point } & ModelGenerals;
+  export type DoorSpec = {
+    dustSide?: DustSide;
+    mirror: { x: boolean; y: boolean };
+    indentAt: { l: boolean; r: boolean };
+  } & ModelGenerals;
   export type ModelsKey = keyof Models;
   export type Models = Partial<{
     glue: GlueSpec[];
+    door: DoorSpec[];
   }>;
   export type ModelsMap = NonNullable<Models[ModelsKey]>;
   export type ModelsSpec = ModelsMap[number];
@@ -262,6 +269,7 @@ export const useDielineSpecStore = create<DielineSpecStore>()(
             [type]: state.models[type]?.filter((spec) => spec.id !== key),
           },
         })),
+
       //! Rulers ------------------------------------
       setRuler: (ruler) =>
         set((state) => {

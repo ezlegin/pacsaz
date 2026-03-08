@@ -1,7 +1,10 @@
-import M, { IModel, IPoint } from "makerjs";
+import M, { IModel, IModelMap, IPoint } from "makerjs";
 import { calcualteTuckFlapSize } from "../../utils/calculate/calculateTuckFlapSize";
 import Pacsaz from "../Pacsaz";
 import { Model } from "./Model";
+
+type DustSide = "left" | "right" | "both";
+type IndentAt = { l: boolean; r: boolean };
 
 export class Door extends Model {
   fingerSpace = this.seamSize.h / 2;
@@ -12,10 +15,122 @@ export class Door extends Model {
   };
   topPanelHeight = this.height;
 
-  constructor() {
+  constructor(dustSide?: DustSide, indetAt?: IndentAt) {
     super();
 
-    this.$pushModel("door", this.trim(), this.fold());
+    const dust = this.dust(dustSide, indetAt);
+
+    this.$pushModel(
+      "door",
+      { ...this.trim(), ...dust.dustTrims },
+      { ...this.fold(), ...dust.dustFolds },
+    );
+  }
+
+  private dust(dustSide?: DustSide, indetAt?: IndentAt) {
+    const dustTrims: IModelMap = {};
+    const dustFolds: IModelMap = {};
+
+    if (dustSide) {
+      const doorSize = M.measure.modelExtents({ models: this.trim() });
+      if (!doorSize) throw new Error("Door Size Not Available. [Door]");
+
+      if (dustSide === "right") {
+        const dust1 = new Pacsaz.models.Dust(doorSize.height, true, true);
+        dust1.move([doorSize.width, 0]);
+
+        const dust1Model = dust1.models.dust!;
+        dustTrims.dust1 = {
+          models: dust1Model.models?.trims?.models,
+          origin: dust1Model.origin,
+        };
+        dustFolds.dust1 = {
+          models: dust1Model.models?.folds?.models,
+          origin: dust1Model.origin,
+        };
+
+        const dust2 = new Pacsaz.models.Dust(doorSize.height, false, true)
+          .mirror(true, false)
+          .move([doorSize.width + this.width + this.height, 0]);
+
+        const dust2Model = dust2.models.dust!;
+        dustTrims.dust2 = {
+          models: dust2Model.models?.trims?.models,
+          origin: dust2Model.origin,
+        };
+        dustFolds.dust2 = {
+          models: dust2Model.models?.folds?.models,
+          origin: dust2Model.origin,
+        };
+      }
+
+      if (dustSide === "left") {
+        const dust1 = new Pacsaz.models.Dust(doorSize.height, true, true);
+        dust1.mirror(true, false).move([-dust1.size.width, 0]);
+
+        const dust1Model = dust1.models.dust!;
+        dustTrims.dust1 = {
+          models: dust1Model.models?.trims?.models,
+          origin: dust1Model.origin,
+        };
+        dustFolds.dust1 = {
+          models: dust1Model.models?.folds?.models,
+          origin: dust1Model.origin,
+        };
+
+        const dust2 = new Pacsaz.models.Dust(doorSize.height, false, true);
+        dust2.move([-dust2.size.width - this.width - this.height, 0]);
+
+        const dust2Model = dust2.models.dust!;
+        dustTrims.dust2 = {
+          models: dust2Model.models?.trims?.models,
+          origin: dust2Model.origin,
+        };
+        dustFolds.dust2 = {
+          models: dust2Model.models?.folds?.models,
+          origin: dust2Model.origin,
+        };
+      }
+
+      if (dustSide === "both") {
+        const dust1 = new Pacsaz.models.Dust(
+          doorSize.height,
+          true,
+          indetAt?.l ?? false,
+        );
+        dust1.mirror(true, false).move([-dust1.size.width, 0]);
+
+        const dust1Model = dust1.models.dust!;
+
+        dustTrims.dust1 = {
+          models: dust1Model.models?.trims?.models,
+          origin: dust1Model.origin,
+        };
+        dustFolds.dust1 = {
+          models: dust1Model.models?.folds?.models,
+          origin: dust1Model.origin,
+        };
+
+        const dust2 = new Pacsaz.models.Dust(
+          doorSize.height,
+          true,
+          indetAt?.r ?? false,
+        ).move([doorSize.width, 0]);
+
+        const dust2Model = dust2.models.dust!;
+
+        dustTrims.dust2 = {
+          models: dust2Model.models?.trims?.models,
+          origin: dust2Model.origin,
+        };
+        dustFolds.dust2 = {
+          models: dust2Model.models?.folds?.models,
+          origin: dust2Model.origin,
+        };
+      }
+    }
+
+    return { dustTrims, dustFolds };
   }
 
   protected override trim() {

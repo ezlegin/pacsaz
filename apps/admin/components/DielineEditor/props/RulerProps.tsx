@@ -32,7 +32,7 @@ const RulerProps = ({
     resolver: zodResolver(rulerFormSchema),
     defaultValues: (selection as ISpec.Ruler) ?? {
       id: "",
-      stack: "shape",
+      stack: "ruler",
       hidden: false,
       from: ["0", "length / 4"],
       to: ["width", "length / 4"],

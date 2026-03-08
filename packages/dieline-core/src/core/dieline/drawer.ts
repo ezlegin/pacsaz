@@ -20,8 +20,10 @@ export class Drawer extends Dieline {
   override defaultDimensions = {
     width: 90,
     length: 160,
-    height: 80,
+    height: 50,
   };
+
+  //! ------------------------ Shapes ------------------------
 
   private line(line: NonNullable<ISpec.Shapes["line"]>) {
     this.$pusher(line, ({ angle, length }, scope) => {
@@ -149,6 +151,7 @@ export class Drawer extends Dieline {
     if (arc) this.arc(arc);
   }
 
+  //! ------------------------ Models ------------------------
   private glue(glue: NonNullable<ISpec.Models["glue"]>) {
     this.$pusher(glue, ({ from, to }, scope) => {
       const glueFrom = [
@@ -162,12 +165,24 @@ export class Drawer extends Dieline {
       return new Pacsaz.models.Glue(glueFrom, glueTo);
     });
   }
+  private door(door: NonNullable<ISpec.Models["door"]>) {
+    this.$pusher(door, ({ dustSide, mirror, indentAt }) => {
+      const door = new Pacsaz.models.Door(dustSide, indentAt);
+      if (mirror.x || mirror.y) {
+        door.mirror(mirror.x, mirror.y);
+      }
+      return door;
+    });
+  }
 
   private drawModels() {
     const glue = this.$checkExistance(this.models.glue);
+    const door = this.$checkExistance(this.models.door);
     if (glue) this.glue(glue);
+    if (door) this.door(door);
   }
 
+  //! ------------------------ Rulers ------------------------
   private drawRulers() {
     const rulers = this.$checkExistance(this.rulers);
     if (rulers) {
@@ -225,6 +240,12 @@ export class Drawer extends Dieline {
         this.$parseMathStr(item.origin[1], scope),
       ]);
 
+      const dupScope = {
+        ...scope,
+        selfWidth: model.size.width,
+        selfHeight: model.size.height,
+      };
+
       const dup = item.dup;
       if (dup && dup.length > 0) {
         for (const d of dup) {
@@ -246,16 +267,16 @@ export class Drawer extends Dieline {
 
               case "move":
                 const move = {
-                  x: this.$parseMathStr(op.value[0], scope),
-                  y: this.$parseMathStr(op.value[1], scope),
+                  x: this.$parseMathStr(op.value[0], dupScope),
+                  y: this.$parseMathStr(op.value[1], dupScope),
                 };
                 if (move.x > 0 || move.y > 0) model.move([move.x, move.y]);
                 break;
 
               case "moveTo":
                 const moveTo = {
-                  x: this.$parseMathStr(op.value[0], scope),
-                  y: this.$parseMathStr(op.value[1], scope),
+                  x: this.$parseMathStr(op.value[0], dupScope),
+                  y: this.$parseMathStr(op.value[1], dupScope),
                 };
                 if (moveTo.x > 0 || moveTo.y > 0)
                   model.moveTo([moveTo.x, moveTo.y]);
@@ -276,7 +297,7 @@ export class Drawer extends Dieline {
       if ("layer" in item) {
         this.$pushShape(model, item.key, item.layer);
       } else {
-        this.$pushModels({ model });
+        this.$pushModels({ [item.key]: model });
       }
     }
   }
@@ -297,6 +318,7 @@ export class Drawer extends Dieline {
       twoLength: this.length * 2,
       height: this.height,
       twoHeight: this.height * 2,
+      safeOffset: this.safeFoldOffset,
     };
 
     for (const v in vars) {
@@ -309,7 +331,10 @@ export class Drawer extends Dieline {
     return scope;
   }
 
-  private $parseMathStr(expr: string, scope: Record<string, number>): number {
+  private $parseMathStr(
+    expr: string,
+    scope: Record<string, number | Record<string, number>>,
+  ): number {
     return evaluate(expr, scope);
   }
 }

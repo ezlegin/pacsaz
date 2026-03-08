@@ -12,10 +12,11 @@ const shapesKey = [
   "polygon",
   "arc",
 ] as const;
-const modelsKey = ["glue"] as const;
+const modelsKey = ["glue", "door"] as const;
 const stack = ["model", "ruler", "shape"] as const;
 const direction = ["down", "right", "up", "left"] as const;
 const pointDirection = [...direction, "draw"] as const;
+const dustSide = ["left", "right", "both"] as const;
 
 const dup = z.array(
   z.object({
@@ -129,9 +130,7 @@ export const rulerFormSchema = z.object({
   hidden: z.boolean(),
 });
 
-export const glueFormSchema = z.object({
-  from: pointInput,
-  to: pointInput,
+const modelGenerals = z.object({
   stack: z.enum(stack),
   key: z.string(),
   type: z.enum(modelsKey),
@@ -140,3 +139,26 @@ export const glueFormSchema = z.object({
   origin: pointInput,
   dup: dup,
 });
+
+export const glueFormSchema = z
+  .object({
+    from: pointInput,
+    to: pointInput,
+  })
+  .merge(modelGenerals);
+
+export const doorFormSchema = z
+  .object({
+    dustSide: z.enum(dustSide).optional(),
+    mirror: z.object({
+      x: z.boolean(),
+      y: z.boolean(),
+    }),
+    indentAt: z
+      .object({
+        l: z.boolean().default(false),
+        r: z.boolean().default(false),
+      })
+      .optional(),
+  })
+  .merge(modelGenerals);

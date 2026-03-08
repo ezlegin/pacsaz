@@ -1,4 +1,7 @@
-import { glueFormSchema } from "@/lib/validationSchema/PropsSchema";
+import {
+  doorFormSchema,
+  glueFormSchema,
+} from "@/lib/validationSchema/PropsSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSelectionStore } from "@repo/store/app/selection.store";
 import {
@@ -26,6 +29,7 @@ import PointInput from "./shapes/PointInput";
 const getModelSchema = (modelKey: ISpec.ModelsKey) => {
   const schemas: Record<ISpec.ModelsKey, any> = {
     glue: glueFormSchema,
+    door: doorFormSchema,
   };
 
   return schemas[modelKey];
@@ -60,6 +64,10 @@ function ModelsPropsProvider<T extends ISpec.ModelsSpec>({
       type: modelKey,
       from: ["0", "0"],
       to: ["0", "0"],
+      mirror: {
+        x: false,
+        y: false,
+      },
 
       id: "0",
       origin: ["0", "0"],
@@ -83,6 +91,8 @@ function ModelsPropsProvider<T extends ISpec.ModelsSpec>({
     name: "dup",
     control: form.control,
   });
+
+  console.log(form.formState.errors);
 
   return (
     <Form {...form}>

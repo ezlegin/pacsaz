@@ -8,6 +8,9 @@ const allowedVariables = [
   "twoHeight",
   "length",
   "twoLength",
+  "safeOffset",
+  "selfWidth",
+  "selfHeight",
   ...variableKeys,
 ] as const;
 
