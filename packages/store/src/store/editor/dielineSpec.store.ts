@@ -97,11 +97,20 @@ export namespace ISpec {
     type: "ruler";
   } & Omit<Generals, "type" | "layer" | "origin" | "dup">;
   export type Rulers = Ruler[];
+
+  //! Specs --------------------------------------
+  export type Specs = {
+    shapes: ISpec.Shapes;
+    models: ISpec.Models;
+    rulers: ISpec.Rulers;
+  };
 }
 
 interface DielineSpecStore {
+  specs: ISpec.Specs;
+  setSpecs: (spec: ISpec.Specs) => void;
+
   //! Shapes
-  shapes: ISpec.Shapes;
   setShape: <T extends ISpec.ShapesKey>(
     type: T,
     spec: NonNullable<ISpec.Shapes[T]>[number],
@@ -116,14 +125,12 @@ interface DielineSpecStore {
   removeShape: (type: ISpec.ShapesKey, id: string) => void;
 
   //! Rulers
-  rulers: ISpec.Rulers;
   setRuler: (ruler: ISpec.Ruler) => void;
   removeRuler: (id: string) => void;
   updateRuler: (ruler: ISpec.Ruler) => void;
   setRulerVisibility: (id: string) => void;
 
   //! Models
-  models: ISpec.Models;
   setModel: <T extends ISpec.ModelsKey>(
     type: T,
     spec: NonNullable<ISpec.Models[T]>[number],
@@ -140,14 +147,19 @@ interface DielineSpecStore {
 export const useDielineSpecStore = create<DielineSpecStore>()(
   persist(
     (set) => ({
-      shapes: {},
-      rulers: [],
-      models: [],
+      //! Specs ------------------------------------
+      specs: {
+        shapes: {},
+        rulers: [],
+        models: [],
+      },
+
+      setSpecs: (specs) => set(() => ({ specs })),
 
       //! Shapes ------------------------------------
       setShape: (type, spec) =>
         set((state) => {
-          const currentShapes = state.shapes[type] || [];
+          const currentShapes = state.specs.shapes[type] || [];
 
           let id = uuidv4();
           while (currentShapes.some((shape) => shape.id === id)) {
@@ -155,22 +167,27 @@ export const useDielineSpecStore = create<DielineSpecStore>()(
           }
 
           return {
-            preShapes: state.shapes,
-            shapes: {
-              ...state.shapes,
-              [type]: [...currentShapes, { ...spec, id }],
+            specs: {
+              ...state.specs,
+              shapes: {
+                ...state.specs.shapes,
+                [type]: [...currentShapes, { ...spec, id }],
+              },
             },
           };
         }),
 
       setShapes: (shapes) =>
-        set(() => ({
-          shapes,
+        set((state) => ({
+          specs: {
+            ...state.specs,
+            shapes,
+          },
         })),
 
       setShapeVisibility: (type, id) =>
         set((state) => {
-          const currentShapes = state.shapes[type];
+          const currentShapes = state.specs.shapes[type];
           if (!currentShapes) return state;
 
           const updatedShapes = currentShapes.map((item) =>
@@ -178,16 +195,19 @@ export const useDielineSpecStore = create<DielineSpecStore>()(
           );
 
           return {
-            shapes: {
-              ...state.shapes,
-              [type]: updatedShapes,
+            specs: {
+              ...state.specs,
+              shapes: {
+                ...state.specs.shapes,
+                [type]: updatedShapes,
+              },
             },
           };
         }),
 
       updateShape: (type, id, newSpec) =>
         set((state) => {
-          const currentShapes = state.shapes[type];
+          const currentShapes = state.specs.shapes[type];
           if (!currentShapes) return state;
 
           const updatedShapes = currentShapes.map((item) =>
@@ -195,25 +215,33 @@ export const useDielineSpecStore = create<DielineSpecStore>()(
           );
 
           return {
-            shapes: {
-              ...state.shapes,
-              [type]: updatedShapes,
+            specs: {
+              ...state.specs,
+              shapes: {
+                ...state.specs.shapes,
+                [type]: updatedShapes,
+              },
             },
           };
         }),
 
       removeShape: (type, key) =>
         set((state) => ({
-          shapes: {
-            ...state.shapes,
-            [type]: state.shapes[type]?.filter((spec) => spec.id !== key),
+          specs: {
+            ...state.specs,
+            shapes: {
+              ...state.specs.shapes,
+              [type]: state.specs.shapes[type]?.filter(
+                (spec) => spec.id !== key,
+              ),
+            },
           },
         })),
 
       //! Models ------------------------------------
       setModel: (type, spec) =>
         set((state) => {
-          const currentModels = state.models[type] || [];
+          const currentModels = state.specs.models[type] || [];
 
           let id = uuidv4();
           while (currentModels.some((model) => model.id === id)) {
@@ -221,16 +249,19 @@ export const useDielineSpecStore = create<DielineSpecStore>()(
           }
 
           return {
-            models: {
-              ...state.models,
-              [type]: [...currentModels, { ...spec, id }],
+            specs: {
+              ...state.specs,
+              models: {
+                ...state.specs.models,
+                [type]: [...currentModels, { ...spec, id }],
+              },
             },
           };
         }),
 
       updateModel: (type, id, newSpec) =>
         set((state) => {
-          const currentModels = state.models[type];
+          const currentModels = state.specs.models[type];
           if (!currentModels) return state;
 
           const updatedModels = currentModels.map((item) =>
@@ -238,16 +269,19 @@ export const useDielineSpecStore = create<DielineSpecStore>()(
           );
 
           return {
-            models: {
-              ...state.models,
-              [type]: updatedModels,
+            specs: {
+              ...state.specs,
+              models: {
+                ...state.specs.models,
+                [type]: updatedModels,
+              },
             },
           };
         }),
 
       setModelVisibility: (type, id) =>
         set((state) => {
-          const currentModels = state.models[type];
+          const currentModels = state.specs.models[type];
           if (!currentModels) return state;
 
           const updatedModels = currentModels.map((item) =>
@@ -255,18 +289,26 @@ export const useDielineSpecStore = create<DielineSpecStore>()(
           );
 
           return {
-            models: {
-              ...state.models,
-              [type]: updatedModels,
+            specs: {
+              ...state.specs,
+              models: {
+                ...state.specs.models,
+                [type]: updatedModels,
+              },
             },
           };
         }),
 
       removeModel: (type, key) =>
         set((state) => ({
-          models: {
-            ...state.models,
-            [type]: state.models[type]?.filter((spec) => spec.id !== key),
+          specs: {
+            ...state.specs,
+            models: {
+              ...state.specs.models,
+              [type]: state.specs.models[type]?.filter(
+                (spec) => spec.id !== key,
+              ),
+            },
           },
         })),
 
@@ -274,37 +316,51 @@ export const useDielineSpecStore = create<DielineSpecStore>()(
       setRuler: (ruler) =>
         set((state) => {
           let id = uuidv4();
-          while (state.rulers.some((ruler) => ruler.id === id)) {
+          while (state.specs.rulers.some((ruler) => ruler.id === id)) {
             id = uuidv4();
           }
 
           return {
-            rulers: [...state.rulers, { ...ruler, id }],
+            specs: {
+              ...state.specs,
+              rulers: [...state.specs.rulers, { ...ruler, id }],
+            },
           };
         }),
 
       removeRuler: (id) =>
-        set((state) => ({ rulers: state.rulers.filter((r) => r.id !== id) })),
+        set((state) => ({
+          specs: {
+            ...state.specs,
+            rulers: state.specs.rulers.filter((r) => r.id !== id),
+          },
+        })),
 
       updateRuler: (ruler) =>
         set((state) => {
-          const updatedRulers = state.rulers.map((r) =>
+          const updatedRulers = state.specs.rulers.map((r) =>
             r.id === ruler.id ? ruler : r,
           );
 
           return {
-            rulers: updatedRulers,
+            specs: {
+              ...state.specs,
+              rulers: updatedRulers,
+            },
           };
         }),
 
       setRulerVisibility: (id: string) =>
         set((state) => {
-          const updatedRulers = state.rulers.map((r) =>
+          const updatedRulers = state.specs.rulers.map((r) =>
             r.id === id ? { ...r, hidden: !r.hidden } : r,
           );
 
           return {
-            rulers: updatedRulers,
+            specs: {
+              ...state.specs,
+              rulers: updatedRulers,
+            },
           };
         }),
     }),

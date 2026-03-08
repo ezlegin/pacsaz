@@ -27,7 +27,11 @@ const RulerProps = ({
   close: () => void;
   selection: ISpec.ShapesSpec | ISpec.Ruler | null;
 }) => {
-  const { setRuler, rulers, updateRuler } = useDielineSpecStore();
+  const {
+    setRuler,
+    specs: { rulers },
+    updateRuler,
+  } = useDielineSpecStore();
   const form = useForm<FormType>({
     resolver: zodResolver(rulerFormSchema),
     defaultValues: (selection as ISpec.Ruler) ?? {

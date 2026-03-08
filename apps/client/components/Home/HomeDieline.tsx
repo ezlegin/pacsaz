@@ -9,9 +9,12 @@ import { useEffect } from "react";
 import { useDeveloperToolsStore } from "@repo/store/dieline/developerTools.store";
 import { DIMENSIONS } from "@/data/consts";
 import dynamic from "next/dynamic";
-const SVGPreview = dynamic(() => import("../product/SVGPreview"), {
-  ssr: false,
-});
+const SVGPreview = dynamic(
+  () => import("@repo/ui/components/custom/SVGPreview"),
+  {
+    ssr: false,
+  },
+);
 
 const HomeDieline = () => {
   const dieline = dielineImporter("tuck-end");

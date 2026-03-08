@@ -13,19 +13,22 @@ import dynamic from "next/dynamic";
 import Settings from "./settings/Settings";
 import Tools from "./Tools";
 import Variables from "./Variables";
+import { Dieline } from "@repo/db";
 const SVGPreview = dynamic(
   () => import("@repo/ui/components/custom/SVGPreview"),
   { ssr: false },
 );
 
-const DielineEditor = () => {
+export type EditorComponentType = "create" | "update";
+
+const DielineEditor = ({ dieline }: { dieline?: Dieline }) => {
   const { isRendering } = useDielineGenerator(Drawer);
 
   return (
     <div className="h-screen overflow-hidden">
       <div className="h-full grid grid-cols-[280px_1fr_280px]">
         <div className="bg-muted border-r p-3 z-10">
-          <DielineLayer />
+          <DielineLayer dieline={dieline} />
         </div>
 
         <div className="relative">

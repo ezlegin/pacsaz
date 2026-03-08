@@ -1,70 +1,140 @@
+import { createDieline, updateDieline } from "@/actions/editor/editor";
+import { handleRes } from "@/lib/utils/handleRes";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Dieline } from "@repo/db";
+import { useLoading } from "@repo/lib/utils/useLoading";
 import { useDielineSpecStore } from "@repo/store/editor/dielineSpec.store";
 import { useVariableStore } from "@repo/store/editor/variables.store";
 import { Button } from "@repo/ui/components/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+} from "@repo/ui/components/form";
+import { Spinner } from "@repo/ui/components/spinner";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
+import z from "zod";
 
 interface FormData {
   title: string;
   slug: string;
 }
 
-const DielineMetadataForm = () => {
-  const { shapes } = useDielineSpecStore();
-  const { variables } = useVariableStore();
-  const dielineMetadata = {
-    title: "",
-    slug: "",
-  }; //todo: fetch from DB
+const schema = z.object({
+  title: z.string().min(1),
+  slug: z.string().min(1),
+});
 
-  const {
-    register,
-    handleSubmit,
-    formState: { isValid },
-  } = useForm<FormData>({
+const DielineMetadataForm = ({ dieline }: { dieline?: Dieline }) => {
+  const router = useRouter();
+  const isUpdateType = !!dieline;
+  const { specs } = useDielineSpecStore();
+  const { variables } = useVariableStore();
+  const { isLoading, startLoading, stopLoading } = useLoading();
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(schema as any),
     defaultValues: {
-      title: dielineMetadata?.title || "Untitled",
-      slug: dielineMetadata?.slug,
+      title: dieline?.title || "Untitled",
+      slug: dieline?.slug || "",
     },
   });
 
-  const onSubmit = (data: FormData) => {
-    //todo: push to DB
-    console.log({
-      title: data.title,
-      slug: data.slug,
-      dielineSpec: JSON.stringify(shapes),
-      variables: JSON.stringify(variables),
-    });
-    toast.success("Saved Successfully");
+  const dielineData = {
+    specification: JSON.stringify(specs),
+    variable: JSON.stringify(variables),
   };
 
+  const onSubmit = async ({ slug, title }: FormData) => {
+    startLoading();
+
+    const res = isUpdateType
+      ? await updateDieline(
+          {
+            title,
+            slug,
+            ...dielineData,
+          },
+          dieline!.id,
+        )
+      : await createDieline({
+          title,
+          slug,
+          ...dielineData,
+        });
+
+    handleRes(res, {
+      onSuccess: () => {
+        router.push(`/dielines/${slug}`);
+      },
+    });
+
+    stopLoading();
+  };
+
+  useEffect(() => {
+    const timeoutId = setTimeout(async () => {
+      const formData = form.getValues();
+      await updateDieline(
+        {
+          ...formData,
+          ...dielineData,
+        },
+        dieline!.id,
+      );
+    }, 20000);
+
+    return () => clearTimeout(timeoutId);
+  }, [specs]);
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <Button
-        disabled={!isValid}
-        className="w-full mb-3"
-        variant={"primaryForeground"}
-      >
-        Save Changes
-      </Button>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <Button
+          disabled={!form.formState.isValid || isLoading}
+          className="w-full mb-3"
+          variant={"primaryForeground"}
+        >
+          <Spinner isLoading={isLoading} />
+          {isUpdateType ? "Save Changes" : "Create Dieline"}
+        </Button>
 
-      <input
-        {...register("title", {
-          required: "Title is required",
-        })}
-        className="text-lg w-full px-1 -translate-x-1 font-medium "
-        placeholder="Title"
-      />
+        <FormField
+          control={form.control}
+          name="title"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <input
+                  {...field}
+                  placeholder="Title"
+                  className="text-lg w-full px-1 -translate-x-1 font-medium "
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
 
-      <input
-        {...register("slug", {
-          required: "Slug is required",
-        })}
-        className="text-sm w-full px-1 text-muted-foreground -translate-x-1 "
-        placeholder="Slug"
-      />
-    </form>
+        <FormField
+          control={form.control}
+          name="slug"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <input
+                  {...field}
+                  placeholder="slug"
+                  className="text-sm w-full px-1 text-muted-foreground -translate-x-1 "
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+      </form>
+    </Form>
   );
 };
 

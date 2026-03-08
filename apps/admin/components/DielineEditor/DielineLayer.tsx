@@ -18,6 +18,7 @@ import DielineMetadataForm from "../forms/DielineMetadataForm";
 import ModelLayers from "./layers/ModelLayers";
 import RulerLayers from "./layers/RulerLayers";
 import ShapeLayers from "./layers/ShapeLayers";
+import { Dieline } from "@repo/db";
 
 export type ItemType = {
   ShapesSpec: ISpec.ShapesSpec;
@@ -31,9 +32,9 @@ export type HandleLayerActoin = (
   type: "dup" | "delete" | "visibility",
 ) => void;
 
-const DielineLayer = () => {
+const DielineLayer = ({ dieline }: { dieline?: Dieline }) => {
   const {
-    shapes,
+    specs: { models, shapes, rulers },
     removeShape,
     removeRuler,
     setRulerVisibility,
@@ -41,8 +42,6 @@ const DielineLayer = () => {
     setModelVisibility,
     setModel,
     removeModel,
-    rulers,
-    models,
     setShapeVisibility,
     setShape,
   } = useDielineSpecStore();
@@ -123,7 +122,8 @@ const DielineLayer = () => {
 
   return (
     <div className="space-y-2">
-      <DielineMetadataForm />
+      <DielineMetadataForm dieline={dieline} />
+
       <div className="flex gap-2">
         <Button onClick={undo} variant={"outline"}>
           <Undo />

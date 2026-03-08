@@ -1,6 +1,6 @@
 import DielineEditor from "@/components/DielineEditor/DielineEditor";
 
-const page = () => {
+const page = async () => {
   return <DielineEditor />;
 };
 

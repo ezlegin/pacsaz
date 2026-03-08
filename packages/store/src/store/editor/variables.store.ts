@@ -50,7 +50,7 @@ export const useVariableStore = create<VariableStore>()(
         })),
     }),
     {
-      name: "editor.variables",
+      name: "editor-variables-storage",
       storage: createJSONStorage(() => localStorage),
     },
   ),

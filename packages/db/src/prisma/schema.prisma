@@ -119,11 +119,13 @@ model DielineDimension {
 
 //! DIELINE --------------------------------
 model Dieline {
-  id            Int    @id @default(autoincrement())
+  id            Int      @id @default(autoincrement())
   title         String
-  slug          String @unique
-  specification String
+  slug          String   @unique
+  specification String   @db.MediumText
   variable      String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   image           DielineImage?
   category        DielineCategory[]

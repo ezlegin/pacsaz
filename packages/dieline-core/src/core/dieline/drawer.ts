@@ -8,15 +8,11 @@ import { Shape } from "../shapes/Shape";
 import { Dieline } from "./Dieline";
 
 export class Drawer extends Dieline {
-  private get shapes() {
-    return getDielineSpec().shapes;
+  private get specs() {
+    const { models, rulers, shapes } = getDielineSpec().specs;
+    return { models, rulers, shapes };
   }
-  private get rulers() {
-    return getDielineSpec().rulers;
-  }
-  private get models() {
-    return getDielineSpec().models;
-  }
+
   override defaultDimensions = {
     width: 90,
     length: 160,
@@ -136,12 +132,13 @@ export class Drawer extends Dieline {
   }
 
   private drawShapes() {
-    const line = this.$checkExistance(this.shapes.line);
-    const lines = this.$checkExistance(this.shapes.lines);
-    const rectangle = this.$checkExistance(this.shapes.rectangle);
-    const circle = this.$checkExistance(this.shapes.circle);
-    const polygon = this.$checkExistance(this.shapes.polygon);
-    const arc = this.$checkExistance(this.shapes.arc);
+    const shapes = this.specs.shapes;
+    const line = this.$checkExistance(shapes.line);
+    const lines = this.$checkExistance(shapes.lines);
+    const rectangle = this.$checkExistance(shapes.rectangle);
+    const circle = this.$checkExistance(shapes.circle);
+    const polygon = this.$checkExistance(shapes.polygon);
+    const arc = this.$checkExistance(shapes.arc);
 
     if (line) this.line(line);
     if (lines) this.lines(lines);
@@ -176,15 +173,15 @@ export class Drawer extends Dieline {
   }
 
   private drawModels() {
-    const glue = this.$checkExistance(this.models.glue);
-    const door = this.$checkExistance(this.models.door);
+    const glue = this.$checkExistance(this.specs.models.glue);
+    const door = this.$checkExistance(this.specs.models.door);
     if (glue) this.glue(glue);
     if (door) this.door(door);
   }
 
   //! ------------------------ Rulers ------------------------
   private drawRulers() {
-    const rulers = this.$checkExistance(this.rulers);
+    const rulers = this.$checkExistance(this.specs.rulers);
     if (rulers) {
       let models: Record<string, IModel> = {
         overall: new Pacsaz.ruler.OverallRuler(this.trimModel),

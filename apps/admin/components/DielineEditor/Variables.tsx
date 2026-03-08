@@ -80,7 +80,9 @@ const Variables = () => {
     if (variable) setSelectedVar(variable);
   };
 
-  const { shapes } = useDielineSpecStore();
+  const {
+    specs: { shapes },
+  } = useDielineSpecStore();
   const handleVarDelesion = (id: string) => {
     const variable = variables.find((v) => v.id === id);
     if (!variable) {
