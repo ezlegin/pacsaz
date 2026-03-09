@@ -3,23 +3,21 @@ import { isSubscribed } from "@repo/store/app/user.store";
 import { getDevCTX } from "@repo/store/dieline/developerTools.store";
 import { setDielineFile } from "@repo/store/dieline/dielineFile.store";
 import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
-import { setSVG } from "@repo/store/dieline/svg.store";
 import M, { IModel } from "makerjs";
 import { toMm } from "../../utils/sizeConvertor";
 import { extractPathDs } from "../helpers/extractPathDs";
 
 export class Exporter {
   constructor(private main: IModel) {}
-
-  async build() {
+  private get format() {
     const { format } = getDielineSettings();
+    return format;
+  }
 
+  build() {
     const svg = this.svg();
-    setSVG(() => ({
-      svg,
-    }));
 
-    if (format === "dxf") {
+    if (this.format === "dxf") {
       setDielineFile(() => ({
         file: this.dxf(),
       }));
@@ -28,6 +26,8 @@ export class Exporter {
         file: svg,
       }));
     }
+
+    return svg;
   }
 
   private svg() {

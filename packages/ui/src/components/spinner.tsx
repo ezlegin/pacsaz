@@ -3,7 +3,7 @@ import { Loader2Icon } from "lucide-react";
 import { cn } from "@repo/ui/lib/utils";
 
 function Spinner({
-  isLoading,
+  isLoading = true,
   className,
   ...props
 }: React.ComponentProps<"svg"> & { isLoading?: boolean }) {

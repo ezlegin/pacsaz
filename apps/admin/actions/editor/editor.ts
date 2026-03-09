@@ -11,9 +11,14 @@ interface Dieline {
 
 export const createDieline = async (data: Dieline) => {
   const { specification, slug, title, variable } = data;
+
   try {
     const existingDieline = await prisma.dieline.findFirst({ where: { slug } });
-    if (existingDieline) throw new Error("Slug Should Be Unique.");
+    if (existingDieline) {
+      return { error: "Slug Should Be Unique." };
+    }
+
+    console.log(data);
 
     await prisma.dieline.create({
       data: {
@@ -27,7 +32,7 @@ export const createDieline = async (data: Dieline) => {
     return { success: "Dieline Saved Successfully." };
   } catch (error) {
     console.error(error);
-    return { error: (error as Error).message };
+    return { error: "Something Wen't Wrong. Check the Server logs." };
   }
 };
 

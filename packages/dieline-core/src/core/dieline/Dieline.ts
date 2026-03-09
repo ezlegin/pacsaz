@@ -64,7 +64,7 @@ export abstract class Dieline {
     onDevelepe && console.log("Dieline:", this.main.models?.dieline?.models);
     console.groupEnd();
 
-    new Exporter(this.main).build();
+    return new Exporter(this.main).build();
   }
 
   // -------------- Layers --------------

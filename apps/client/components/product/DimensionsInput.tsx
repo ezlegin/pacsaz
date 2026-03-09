@@ -58,6 +58,7 @@ export function DimensionInput({
       <p className="text-xs text-muted-foreground">{label}</p>
       <div className="relative">
         <Input
+          autoFocus={dimKey === "length"}
           disabled={isRendering && dimKey === blurredInput}
           dir="ltr"
           value={localValue ?? 0}

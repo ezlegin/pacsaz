@@ -3,8 +3,14 @@ import { Button } from "@repo/ui/components/button";
 import { ChevronDown, ChevronLeft, Zap } from "lucide-react";
 import Link from "next/link";
 import SquarePattern from "../SquarePattern";
+import HomeDieline from "./HomeDieline";
+import { prisma } from "@repo/db";
 
-const LandingPage = () => {
+const LandingPage = async () => {
+  const dieline = await prisma.dieline.findFirst({
+    where: { slug: "tuck-end" },
+  });
+
   return (
     <div className="space-y-28">
       <SquarePattern />
@@ -54,7 +60,7 @@ const LandingPage = () => {
           </div>
         </div>
 
-        {/* <HomeDieline /> */}
+        <HomeDieline dieline={dieline} />
       </div>
     </div>
   );

@@ -66,14 +66,6 @@ const DielineMetadataForm = ({ dieline }: { dieline?: Dieline }) => {
 
   useEffect(() => {
     form.setValue("specification", JSON.stringify(specs));
-
-    if (isUpdateType) {
-      const timeoutId = setTimeout(async () => {
-        const formData = form.getValues();
-        await updateDieline(formData, dieline!.id);
-      }, 20000);
-      return () => clearTimeout(timeoutId);
-    }
   }, [specs]);
 
   return (
@@ -112,7 +104,7 @@ const DielineMetadataForm = ({ dieline }: { dieline?: Dieline }) => {
               <FormControl>
                 <input
                   {...field}
-                  placeholder="slug"
+                  placeholder="Slug"
                   className="text-sm w-full px-1 text-muted-foreground -translate-x-1 "
                 />
               </FormControl>

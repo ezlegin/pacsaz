@@ -100,7 +100,7 @@ export class Drawer extends Dieline {
       const rectWidth = this.$parseMathStr(width, scope);
       const rectHeight = this.$parseMathStr(height, scope);
       return new Pacsaz.shapes.Rectangle(rectWidth, rectHeight, {
-        radius: +radius,
+        radius: toMm(+radius),
         deleteSide,
       });
     });

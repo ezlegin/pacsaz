@@ -1,15 +1,15 @@
 "use client";
 
+import { Dieline } from "@repo/db";
 import { useDielineGenerator } from "@repo/dieline-core/hooks/useDielineGenerator";
-import { notFound } from "next/navigation";
+import { materials } from "@repo/store/data/dieline";
+import { useDeveloperToolsStore } from "@repo/store/dieline/developerTools.store";
+import { useDielineSpecStore } from "@repo/store/editor/dielineSpec.store";
+import dynamic from "next/dynamic";
+import { useEffect } from "react";
+import DielineLoadingOverlay from "./DielineLoadingOverlay";
 import DielineSettings from "./DielineSettings";
 import ProductInfo from "./ProductInfo";
-import DielineLoadingOverlay from "./DielineLoadingOverlay";
-import { useEffect } from "react";
-import { useDeveloperToolsStore } from "@repo/store/dieline/developerTools.store";
-import dynamic from "next/dynamic";
-import { Dieline } from "@repo/db";
-import { materials } from "@repo/store/data/dieline";
 const SVGPreview = dynamic(
   () => import("@repo/ui/components/custom/SVGPreview"),
   { ssr: false },
@@ -17,23 +17,27 @@ const SVGPreview = dynamic(
 
 const DielineGenerator = ({ dieline: _dieline }: { dieline: Dieline }) => {
   const { setDeveloperTools: setDeveloperToolsCTX } = useDeveloperToolsStore();
+  const { specs, setSpecs } = useDielineSpecStore();
+  const { isRendering } = useDielineGenerator(specs);
 
+  useEffect(() => {
+    setSpecs(JSON.parse(_dieline.specification));
+    setDeveloperToolsCTX("showContainer", true);
+    // this is because: if the user comes dierectly from home screen, doesn't get container.
+  }, []);
+
+  // todo
   const dieline = {
     ..._dieline,
     minDimensions: { width: 50, height: 50, length: 50 },
     defaultDimensions: { width: 90, height: 50, length: 160 },
     dimensionsType: ["inner", "outer", "manufacture"],
-    materials: [materials["f-flute"]],
+    materials: [
+      materials["f-flute"],
+      materials["e-flute"],
+      materials["glossy-cardboard"],
+    ],
   };
-
-  if (!dieline) return notFound();
-
-  const { isRendering } = useDielineGenerator(dieline);
-
-  useEffect(() => {
-    setDeveloperToolsCTX("showContainer", true);
-    // this is because: if the user comes dierectly from home screen, doesn't get container.
-  }, []);
 
   return (
     <div className="h-full">

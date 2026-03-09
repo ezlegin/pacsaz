@@ -1,21 +1,23 @@
 import { bleeds } from "@repo/store/data/dieline";
 import { useDeveloperToolsStore } from "@repo/store/dieline/developerTools.store";
 import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
-import { useDielineSpecStore } from "@repo/store/editor/dielineSpec.store";
+import { useSVGStore } from "@repo/store/dieline/svg.store";
+import { ISpec } from "@repo/store/editor/dielineSpec.store";
+import { useVariableStore } from "@repo/store/editor/variables.store";
 import { useEffect, useTransition } from "react";
+import { Drawer } from "../core/dieline/Drawer";
 import { resolveDimensions } from "../utils/dimensionResolver";
 import { resolveOffsets } from "../utils/offsetResolver";
-import { Drawer } from "../core/dieline/Drawer";
-import { useVariableStore } from "@repo/store/editor/variables.store";
 
-export function useDielineGenerator() {
+export function useDielineGenerator(specs: ISpec.Specs) {
   const [isRendering, startTransition] = useTransition();
   const { setDefaultSettings, settings } = useDielineSettingsStore();
   const { developerTools } = useDeveloperToolsStore();
   const { variables } = useVariableStore();
-  const { specs } = useDielineSpecStore();
+
   const dieline = new Drawer(specs, variables);
   const offsets = resolveOffsets();
+  const { setSvg } = useSVGStore();
 
   // set defaults
   useEffect(() => {
@@ -35,9 +37,10 @@ export function useDielineGenerator() {
 
   useEffect(() => {
     startTransition(() => {
-      dieline.model();
+      const svg = dieline.model();
+      setSvg(svg);
     });
-  }, [settings, Drawer, specs, variables, developerTools]);
+  }, [settings, specs, variables, developerTools]);
 
   return {
     isRendering,

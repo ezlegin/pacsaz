@@ -13,6 +13,8 @@ import Settings from "./settings/Settings";
 import Tools from "./Tools";
 import Variables from "./Variables";
 import { Dieline } from "@repo/db";
+import { useDielineSpecStore } from "@repo/store/editor/dielineSpec.store";
+import { useEffect } from "react";
 const SVGPreview = dynamic(
   () => import("@repo/ui/components/custom/SVGPreview"),
   { ssr: false },
@@ -21,7 +23,14 @@ const SVGPreview = dynamic(
 export type EditorComponentType = "create" | "update";
 
 const DielineEditor = ({ dieline }: { dieline?: Dieline }) => {
-  const { isRendering } = useDielineGenerator();
+  const { specs, setSpecs } = useDielineSpecStore();
+  const { isRendering } = useDielineGenerator(specs);
+
+  useEffect(() => {
+    if (dieline) {
+      setSpecs(JSON.parse(dieline.specification));
+    }
+  }, []);
 
   return (
     <div className="h-screen overflow-hidden">
@@ -30,7 +39,7 @@ const DielineEditor = ({ dieline }: { dieline?: Dieline }) => {
           <DielineLayer dieline={dieline} />
         </div>
 
-        <div className="relative">
+        <div className="relative bg-slate-50">
           <div className="absolute top-1/2 right-1/2 -translate-y-1/2 translate-x-1/2 h-full w-full pb-10">
             <SVGPreview isRendering={isRendering} type="editor" />
           </div>
