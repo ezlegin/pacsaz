@@ -20,9 +20,6 @@ export abstract class Model extends Shape {
   protected get height() {
     return this.settings.dimension.resolved.height;
   }
-  protected get safeFoldOffset() {
-    return this.settings.material.safeFoldOffset;
-  }
   protected get thickness() {
     return this.settings.thickness;
   }

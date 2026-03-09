@@ -50,8 +50,8 @@ export abstract class Dieline {
   protected get height() {
     return this.settings.dimension.resolved.height;
   }
-  protected get safeFoldOffset() {
-    return this.settings.material.safeFoldOffset;
+  protected get thickness() {
+    return this.settings.material.thickness;
   }
 
   // -------------- Model Generator --------------

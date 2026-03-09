@@ -16,7 +16,6 @@ export type MaterialValue = {
   value: MaterialKey;
   label: string;
   thickness: number;
-  safeFoldOffset: number;
   offset: {
     inner: number;
     outer: number;

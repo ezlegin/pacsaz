@@ -44,11 +44,11 @@ export class Dust extends Model {
       ? mappedDustSize - indent.bl
       : mappedDustSize - indent.bl;
 
-    const baseToHoleEndOffset = this.safeFoldOffset - dustHoleOuterHeight;
+    const baseToHoleEndOffset = this.thickness - dustHoleOuterHeight;
 
     const dustStartPoint = this.considerDustHole
       ? getLastPointFromPath(this.arc)
-      : [0, -this.safeFoldOffset];
+      : [0, -this.thickness];
 
     const pb = new Pacsaz.point.Builder(dustStartPoint);
     const dust = new Pacsaz.shapes.Lines(
@@ -87,15 +87,11 @@ export class Dust extends Model {
   }
 
   protected override fold() {
-    const point1 = [0, -this.safeFoldOffset];
-    const point2 = [this.height, -this.safeFoldOffset];
-
-    const temp = new M.paths.Line([point1, point2]);
-
-    const { intersectionPoints } = M.path.intersection(this.arc, temp);
+    const point1 = [0, -this.thickness];
+    const point2 = [this.height, -this.thickness];
 
     const fold = new Pacsaz.shapes.Lines([
-      this.considerDustHole ? intersectionPoints[1]! : point1,
+      this.considerDustHole ? [this.thickness, -this.thickness] : point1,
       [
         point2[0]! - (this.considerOuterIndent ? this.thickness : 0),
         point2[1]!,
@@ -106,27 +102,12 @@ export class Dust extends Model {
   }
 
   private get arc(): IPath {
-    const { holeRadius, endAngle } = this.$calculateDustHoleSize(
-      this.safeFoldOffset,
-    );
+    //todo
+    const arcStartPoint = [this.thickness, 0];
+    const endAngle = this.thickness <= 2 ? (this.thickness < 1 ? -30 : -15) : 0;
 
-    const arcStartPoint: [number, number] = [holeRadius, 0];
-
-    const arc = new M.paths.Arc(arcStartPoint, holeRadius, 180, endAngle);
+    const arc = new M.paths.Arc(arcStartPoint, this.thickness, 180, endAngle);
 
     return arc;
-  }
-
-  // ──────────────────── Utils ────────────────────
-
-  private $calculateDustHoleSize(safeFoldOffset: number) {
-    const addLineToHole = safeFoldOffset < 2;
-    const endAngleThreshold = safeFoldOffset < 1;
-    const endAngle = addLineToHole ? (endAngleThreshold ? -30 : -15) : 0;
-    return {
-      addLineToHole,
-      endAngle,
-      holeRadius: (safeFoldOffset * 3) / 2, // to /2 BECUASE IT IS RADUIS
-    };
   }
 }

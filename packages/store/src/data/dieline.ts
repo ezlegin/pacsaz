@@ -1,4 +1,3 @@
-import { calculateSafeFoldOffset } from "../utils/calculateSafeFoldOffset";
 import { Materials } from "./types";
 
 export const bleeds = {
@@ -13,9 +12,6 @@ export const materials: Materials = {
     value: "art-paper",
     label: "کاغذ گلاسه",
     thickness: 0.2,
-    get safeFoldOffset() {
-      return calculateSafeFoldOffset(this.thickness);
-    },
     get offset() {
       return {
         inner: 1.5,
@@ -27,9 +23,6 @@ export const materials: Materials = {
     value: "glossy-cardboard",
     label: "مقوا گلاسه",
     thickness: 0.5,
-    get safeFoldOffset() {
-      return calculateSafeFoldOffset(this.thickness);
-    },
     get offset() {
       return {
         inner: 2,
@@ -41,9 +34,6 @@ export const materials: Materials = {
     value: "f-flute",
     label: "کارتن فلوت F",
     thickness: 1.2,
-    get safeFoldOffset() {
-      return calculateSafeFoldOffset(this.thickness);
-    },
     get offset() {
       return {
         inner: 2,
@@ -55,9 +45,6 @@ export const materials: Materials = {
     value: "e-flute",
     label: "کارتن فلوت E",
     thickness: 2,
-    get safeFoldOffset() {
-      return calculateSafeFoldOffset(this.thickness);
-    },
     get offset() {
       return {
         inner: 2,
@@ -69,9 +56,6 @@ export const materials: Materials = {
     value: "b-flute",
     label: "کارتن فلوت B",
     thickness: 3,
-    get safeFoldOffset() {
-      return calculateSafeFoldOffset(this.thickness);
-    },
     get offset() {
       return {
         inner: 3,
@@ -83,9 +67,6 @@ export const materials: Materials = {
     value: "c-flute",
     label: "کارتن فلوت C",
     thickness: 4,
-    get safeFoldOffset() {
-      return calculateSafeFoldOffset(this.thickness);
-    },
     get offset() {
       return {
         inner: 4,
@@ -97,9 +78,6 @@ export const materials: Materials = {
     value: "be-flute",
     label: "کارتن فلوت BE",
     thickness: 5,
-    get safeFoldOffset() {
-      return calculateSafeFoldOffset(this.thickness);
-    },
     get offset() {
       return {
         inner: 4,
@@ -111,9 +89,6 @@ export const materials: Materials = {
     value: "bc-flute",
     label: "کارتن فلوت BC",
     thickness: 7,
-    get safeFoldOffset() {
-      return calculateSafeFoldOffset(this.thickness);
-    },
     get offset() {
       return {
         inner: 4,
@@ -125,9 +100,6 @@ export const materials: Materials = {
     value: "ab-flute",
     label: "کارتن فلوت AB",
     thickness: 7,
-    get safeFoldOffset() {
-      return calculateSafeFoldOffset(this.thickness);
-    },
     get offset() {
       return {
         inner: 4,

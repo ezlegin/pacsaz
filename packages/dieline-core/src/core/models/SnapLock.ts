@@ -4,7 +4,7 @@ import Pacsaz from "../Pacsaz";
 import { Model } from "./Model";
 
 export class SnapLock extends Model {
-  private arcRadius = this.safeFoldOffset;
+  private arcRadius = this.thickness;
   private offsetFromBase = this.arcRadius / 2;
   private lockHeightRaw = this.height * 0.75;
   private toothHeight = this.lockHeightRaw / 3;

@@ -38,7 +38,7 @@ const DielineEditor = ({ dieline }: { dieline?: Dieline }) => {
         </div>
 
         <div className="bg-muted border-l p-3 z-10">
-          <Tabs defaultValue="editor">
+          <Tabs defaultValue="tools">
             <TabsList className="w-full px-0">
               <TabsTrigger className="cursor-pointer" value="tools">
                 Tools

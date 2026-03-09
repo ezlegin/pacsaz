@@ -324,7 +324,7 @@ export class Drawer extends Dieline {
       twoLength: this.length * 2,
       height: this.height,
       twoHeight: this.height * 2,
-      safeOffset: this.safeFoldOffset,
+      safeOffset: this.thickness,
     };
 
     for (const v in vars) {
