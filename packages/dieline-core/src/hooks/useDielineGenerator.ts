@@ -8,28 +8,14 @@ import { resolveOffsets } from "../utils/offsetResolver";
 import { Drawer } from "../core/dieline/Drawer";
 import { useVariableStore } from "@repo/store/editor/variables.store";
 
-export function useDielineGenerator(dieline: Drawer) {
+export function useDielineGenerator() {
   const [isRendering, startTransition] = useTransition();
-  const { specs } = useDielineSpecStore();
-
-  const {
-    ctx: { showAnchors, showWatermark },
-  } = useDeveloperToolsStore();
-
-  const {
-    setDefaultSettings,
-    settings: {
-      bleed,
-      dimensionType,
-      material,
-      thickness,
-      dimension,
-      showOverallRulers,
-      format,
-    },
-  } = useDielineSettingsStore();
-  const offsets = resolveOffsets();
+  const { setDefaultSettings, settings } = useDielineSettingsStore();
+  const { developerTools } = useDeveloperToolsStore();
   const { variables } = useVariableStore();
+  const { specs } = useDielineSpecStore();
+  const dieline = new Drawer(specs, variables);
+  const offsets = resolveOffsets();
 
   // set defaults
   useEffect(() => {
@@ -51,21 +37,7 @@ export function useDielineGenerator(dieline: Drawer) {
     startTransition(() => {
       dieline.model();
     });
-  }, [
-    dimension,
-    dimensionType,
-    material,
-    bleed,
-    dieline,
-    thickness,
-    format,
-    specs,
-    variables,
-
-    showAnchors,
-    showWatermark,
-    showOverallRulers,
-  ]);
+  }, [settings, Drawer, specs, variables, developerTools]);
 
   return {
     isRendering,

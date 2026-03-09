@@ -1,7 +1,6 @@
 "use client";
 
 import DielineLayer from "@/components/DielineEditor/DielineLayer";
-import Drawer from "@repo/dieline-core/drawer";
 import { useDielineGenerator } from "@repo/dieline-core/hooks/useDielineGenerator";
 import {
   Tabs,
@@ -22,7 +21,7 @@ const SVGPreview = dynamic(
 export type EditorComponentType = "create" | "update";
 
 const DielineEditor = ({ dieline }: { dieline?: Dieline }) => {
-  const { isRendering } = useDielineGenerator(Drawer);
+  const { isRendering } = useDielineGenerator();
 
   return (
     <div className="h-screen overflow-hidden">
@@ -33,7 +32,7 @@ const DielineEditor = ({ dieline }: { dieline?: Dieline }) => {
 
         <div className="relative">
           <div className="absolute top-1/2 right-1/2 -translate-y-1/2 translate-x-1/2 h-full w-full pb-10">
-            <SVGPreview isRendering={isRendering} />
+            <SVGPreview isRendering={isRendering} type="editor" />
           </div>
         </div>
 

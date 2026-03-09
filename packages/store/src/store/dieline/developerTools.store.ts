@@ -12,12 +12,12 @@ type DeveloperToolsCTX = {
 };
 
 type DeveloperToolsStore = {
-  ctx: DeveloperToolsCTX;
-  setDeveloperToolsCTX: (key: keyof DeveloperToolsCTX, val: boolean) => void;
+  developerTools: DeveloperToolsCTX;
+  setDeveloperTools: (key: keyof DeveloperToolsCTX, val: boolean) => void;
 };
 
 const storeCreator = (set: any): DeveloperToolsStore => ({
-  ctx: {
+  developerTools: {
     showContainer: true,
     showAnchors: false,
     showWatermark: !isSubscribed,
@@ -25,10 +25,10 @@ const storeCreator = (set: any): DeveloperToolsStore => ({
     dxf: undefined,
   },
 
-  setDeveloperToolsCTX: (key, val) =>
+  setDeveloperTools: (key, val) =>
     set((state: DeveloperToolsStore) => ({
-      ctx: {
-        ...state.ctx,
+      developerTools: {
+        ...state.developerTools,
         [key]: val,
       },
     })),
@@ -43,4 +43,4 @@ export const useDeveloperToolsStore = create<DeveloperToolsStore>()(
     : storeCreator,
 );
 
-export const getDevCTX = () => useDeveloperToolsStore.getState().ctx;
+export const getDevCTX = () => useDeveloperToolsStore.getState().developerTools;

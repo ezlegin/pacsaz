@@ -3,7 +3,6 @@ import { Button } from "@repo/ui/components/button";
 import { ChevronDown, ChevronLeft, Zap } from "lucide-react";
 import Link from "next/link";
 import SquarePattern from "../SquarePattern";
-import HomeDieline from "./HomeDieline";
 
 const LandingPage = () => {
   return (
@@ -55,7 +54,7 @@ const LandingPage = () => {
           </div>
         </div>
 
-        <HomeDieline />
+        {/* <HomeDieline /> */}
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
-import { getDielineSpec, ISpec } from "@repo/store/editor/dielineSpec.store";
-import { getVariables } from "@repo/store/editor/variables.store";
+import { ISpec } from "@repo/store/editor/dielineSpec.store";
+import { IVar } from "@repo/store/editor/variables.store";
 import { IModel } from "makerjs";
 import { evaluate } from "mathjs";
 import { toMm } from "../../utils/sizeConvertor";
@@ -8,9 +8,11 @@ import { Shape } from "../shapes/Shape";
 import { Dieline } from "./Dieline";
 
 export class Drawer extends Dieline {
-  private get specs() {
-    const { models, rulers, shapes } = getDielineSpec().specs;
-    return { models, rulers, shapes };
+  constructor(
+    private specs: ISpec.Specs,
+    private variables: IVar.VariableMap,
+  ) {
+    super();
   }
 
   override defaultDimensions = {
@@ -309,11 +311,9 @@ export class Drawer extends Dieline {
   }
 
   private get scope() {
-    const variables = getVariables();
-
     let vars: Record<string, string> = {};
 
-    for (const v of variables) {
+    for (const v of this.variables) {
       vars[v.name] = v.value;
     }
 
@@ -345,4 +345,4 @@ export class Drawer extends Dieline {
   }
 }
 
-export default new Drawer();
+export default Drawer;

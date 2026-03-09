@@ -9,8 +9,8 @@ import { useState } from "react";
 
 const DeveloperTools = () => {
   const {
-    ctx: { showAnchors, doCenterSVG, showWatermark },
-    setDeveloperToolsCTX,
+    developerTools: { showAnchors, doCenterSVG, showWatermark },
+    setDeveloperTools: setDeveloperToolsCTX,
   } = useDeveloperToolsStore();
   const [open, setOpen] = useState(false);
 

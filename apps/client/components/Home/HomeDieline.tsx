@@ -25,7 +25,7 @@ const HomeDieline = () => {
   dieline.defaultDimensions.length = 130;
   dieline.defaultDimensions.height = 40;
   const { isRendering } = useDielineGenerator(dieline);
-  const { setDeveloperToolsCTX } = useDeveloperToolsStore();
+  const { setDeveloperTools: setDeveloperToolsCTX } = useDeveloperToolsStore();
 
   useEffect(() => {
     setDeveloperToolsCTX("showWatermark", false);

@@ -1,5 +1,5 @@
 import ProductNavbar from "@/components/Navbars/ProductNavbar";
-import { dielineImporter } from "@repo/dieline-core/utils/dielineImporter";
+import { prisma } from "@repo/db";
 import { notFound } from "next/navigation";
 
 export default async function Layout({
@@ -10,8 +10,8 @@ export default async function Layout({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  const dieline = await prisma.dieline.findFirst({ where: { slug } });
 
-  const dieline = dielineImporter(slug);
   if (!dieline) return notFound();
 
   return (

@@ -1,8 +1,8 @@
 "use client";
 
+import { useDeveloperToolsStore } from "@repo/store/dieline/developerTools.store";
 import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
 import { useSVGStore } from "@repo/store/dieline/svg.store";
-import { useDeveloperToolsStore } from "@repo/store/dieline/developerTools.store";
 import { Button } from "@repo/ui/components/button";
 import { Card } from "@repo/ui/components/card";
 import { Separator } from "@repo/ui/components/separator";
@@ -21,17 +21,20 @@ interface Props {
   disablePanning?: boolean;
   disableWheel?: boolean;
   showControls?: boolean;
+  type: "editor" | "client";
 }
 
 export default function SvgPreview({
   isRendering,
+  type,
   disablePanning = false,
   disableWheel = false,
   showControls = true,
 }: Props) {
+  const isEditorType = type === "editor";
   let svg = useSVGStore((s) => s.svg);
   const {
-    ctx: { doCenterSVG },
+    developerTools: { doCenterSVG },
   } = useDeveloperToolsStore();
 
   const transformRef = useRef<ReactZoomPanPinchRef | null>(null);
@@ -63,7 +66,7 @@ export default function SvgPreview({
 
       setScale(scale);
 
-      if (isFinite(scale) && scale > 0 && doCenterSVG) {
+      if (isFinite(scale) && scale > 0 && doCenterSVG && !isEditorType) {
         transformRef.current?.centerView(scale, 0);
       }
     };
@@ -111,7 +114,7 @@ export default function SvgPreview({
         centerOnInit
         limitToBounds={false}
         minScale={0.5}
-        maxScale={1.5}
+        maxScale={isEditorType ? 3 : 1.5}
         panning={{ disabled: isRendering || disablePanning }}
         wheel={{
           disabled: isRendering || disableWheel,

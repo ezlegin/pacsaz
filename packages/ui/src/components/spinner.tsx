@@ -6,7 +6,7 @@ function Spinner({
   isLoading,
   className,
   ...props
-}: React.ComponentProps<"svg"> & { isLoading: boolean }) {
+}: React.ComponentProps<"svg"> & { isLoading?: boolean }) {
   if (isLoading)
     return (
       <Loader2Icon

@@ -18,15 +18,14 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import z from "zod";
 
-interface FormData {
-  title: string;
-  slug: string;
-}
-
 const schema = z.object({
   title: z.string().min(1),
   slug: z.string().min(1),
+  specification: z.string().min(1),
+  variable: z.string(),
 });
+
+type FormData = z.infer<typeof schema>;
 
 const DielineMetadataForm = ({ dieline }: { dieline?: Dieline }) => {
   const router = useRouter();
@@ -40,35 +39,21 @@ const DielineMetadataForm = ({ dieline }: { dieline?: Dieline }) => {
     defaultValues: {
       title: dieline?.title || "Untitled",
       slug: dieline?.slug || "",
+      specification: dieline?.specification ?? "",
+      variable: dieline?.variable ?? "",
     },
   });
 
-  const dielineData = {
-    specification: JSON.stringify(specs),
-    variable: JSON.stringify(variables),
-  };
-
-  const onSubmit = async ({ slug, title }: FormData) => {
+  const onSubmit = async (data: FormData) => {
     startLoading();
 
     const res = isUpdateType
-      ? await updateDieline(
-          {
-            title,
-            slug,
-            ...dielineData,
-          },
-          dieline!.id,
-        )
-      : await createDieline({
-          title,
-          slug,
-          ...dielineData,
-        });
+      ? await updateDieline(data, dieline!.id)
+      : await createDieline(data);
 
     handleRes(res, {
       onSuccess: () => {
-        router.push(`/dielines/${slug}`);
+        router.push(`/dielines/${data.slug}`);
       },
     });
 
@@ -76,17 +61,17 @@ const DielineMetadataForm = ({ dieline }: { dieline?: Dieline }) => {
   };
 
   useEffect(() => {
+    form.setValue("variable", JSON.stringify(variables));
+  }, [variables]);
+
+  useEffect(() => {
+    form.setValue("specification", JSON.stringify(specs));
+
     if (isUpdateType) {
       const timeoutId = setTimeout(async () => {
         const formData = form.getValues();
-        await updateDieline(
-          {
-            ...formData,
-            ...dielineData,
-          },
-          dieline!.id,
-        );
-      }, 3000);
+        await updateDieline(formData, dieline!.id);
+      }, 20000);
       return () => clearTimeout(timeoutId);
     }
   }, [specs]);

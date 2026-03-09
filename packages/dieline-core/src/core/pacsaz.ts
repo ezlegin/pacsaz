@@ -1,6 +1,7 @@
 import { Anchor } from "./dieline/Anchor";
 import { Bleed } from "./dieline/Bleed";
 import { Container } from "./dieline/Container";
+import Drawer from "./dieline/Drawer";
 import { pushModel } from "./helpers/push";
 import { Door } from "./models/Door";
 import { Dust } from "./models/Dust";
