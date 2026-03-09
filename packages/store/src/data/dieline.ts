@@ -9,6 +9,20 @@ export const bleeds = {
 };
 
 export const materials: Materials = {
+  "art-paper": {
+    value: "art-paper",
+    label: "کاغذ گلاسه",
+    thickness: 0.2,
+    get safeFoldOffset() {
+      return calculateSafeFoldOffset(this.thickness);
+    },
+    get offset() {
+      return {
+        inner: 1.5,
+        outer: this.thickness,
+      };
+    },
+  },
   "glossy-cardboard": {
     value: "glossy-cardboard",
     label: "مقوا گلاسه",
@@ -117,20 +131,6 @@ export const materials: Materials = {
     get offset() {
       return {
         inner: 4,
-        outer: this.thickness,
-      };
-    },
-  },
-  "art-paper": {
-    value: "art-paper",
-    label: "کاغذ گلاسه",
-    thickness: 0.2,
-    get safeFoldOffset() {
-      return calculateSafeFoldOffset(this.thickness);
-    },
-    get offset() {
-      return {
-        inner: 1.5,
         outer: this.thickness,
       };
     },

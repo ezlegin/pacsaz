@@ -40,8 +40,8 @@ const DielineEditor = ({ dieline }: { dieline?: Dieline }) => {
         <div className="bg-muted border-l p-3 z-10">
           <Tabs defaultValue="editor">
             <TabsList className="w-full px-0">
-              <TabsTrigger className="cursor-pointer" value="editor">
-                Editor
+              <TabsTrigger className="cursor-pointer" value="tools">
+                Tools
               </TabsTrigger>
               <TabsTrigger className="cursor-pointer" value="variables">
                 Variables
@@ -51,7 +51,7 @@ const DielineEditor = ({ dieline }: { dieline?: Dieline }) => {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="editor" className="space-y-3">
+            <TabsContent value="tools" className="space-y-3">
               <Tools />
             </TabsContent>
             <TabsContent value="variables">

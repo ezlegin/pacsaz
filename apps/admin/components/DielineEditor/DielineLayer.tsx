@@ -49,7 +49,7 @@ const DielineLayer = ({ dieline }: { dieline?: Dieline }) => {
   const { setInitial, push, undo, redo } = useDielineHistoryStore();
 
   const flattedShapes = Object.values(shapes).flat();
-  const flattedModels = Object.values(models).flat();
+  const flattenedModels = Object.values(models).flat();
 
   useEffect(() => {
     setInitial(shapes);
@@ -165,7 +165,7 @@ const DielineLayer = ({ dieline }: { dieline?: Dieline }) => {
             clearSelection={clearSelection}
             handleLayerAction={handleLayerAction}
             setSelection={setSelection}
-            models={flattedModels}
+            models={flattenedModels}
           />
         </TabsContent>
       </Tabs>

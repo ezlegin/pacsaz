@@ -80,11 +80,14 @@ export namespace ISpec {
     mirror: { x: boolean; y: boolean };
     indentAt: { l: boolean; r: boolean };
   } & ModelGenerals;
-  export type ModelsKey = keyof Models;
+  export type SnapLockSpec = ModelGenerals;
+
   export type Models = Partial<{
     glue: GlueSpec[];
     door: DoorSpec[];
+    snapLock: SnapLockSpec[];
   }>;
+  export type ModelsKey = keyof Models;
   export type ModelsMap = NonNullable<Models[ModelsKey]>;
   export type ModelsSpec = ModelsMap[number];
 

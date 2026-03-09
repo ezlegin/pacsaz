@@ -162,6 +162,7 @@ export class Drawer extends Dieline {
       return new Pacsaz.models.Glue(glueFrom, glueTo);
     });
   }
+
   private door(door: NonNullable<ISpec.Models["door"]>) {
     this.$pusher(door, ({ dustSide, mirror, indentAt }) => {
       const door = new Pacsaz.models.Door(dustSide, indentAt);
@@ -172,11 +173,19 @@ export class Drawer extends Dieline {
     });
   }
 
+  private snapLock(snapLock: NonNullable<ISpec.Models["snapLock"]>) {
+    this.$pusher(snapLock, ({}) => {
+      return new Pacsaz.models.SnapLock();
+    });
+  }
+
   private drawModels() {
     const glue = this.$checkExistance(this.specs.models.glue);
     const door = this.$checkExistance(this.specs.models.door);
+    const snapLock = this.$checkExistance(this.specs.models.snapLock);
     if (glue) this.glue(glue);
     if (door) this.door(door);
+    if (snapLock) this.snapLock(snapLock);
   }
 
   //! ------------------------ Rulers ------------------------

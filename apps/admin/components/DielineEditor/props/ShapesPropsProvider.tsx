@@ -77,7 +77,7 @@ function ShapesPropsProvider<T extends ISpec.ShapesSpec>({
       stack: "shape",
       key: shapeKey,
       type: shapeKey,
-      angle: "",
+      angle: "0",
       height: "",
       length: "",
       width: "",

@@ -26,6 +26,7 @@ import LineProps from "./props/shapes/LineProps";
 import LinesProps from "./props/shapes/LinesProps";
 import PolygonProps from "./props/shapes/PolygonProps";
 import RectangleProps from "./props/shapes/RectangleProps";
+import SnapLockProps from "./props/models/SnapLockProps";
 
 type EditorMode = {
   stack: ISpec.Stack;
@@ -43,7 +44,7 @@ const Tools = () => {
     { key: "polygon", Icon: Hexagon },
     { key: "arc", Icon: Parentheses },
   ];
-  const modelsList: ISpec.ModelsKey[] = ["glue", "door"];
+  const modelsList: ISpec.ModelsKey[] = ["glue", "door", "snapLock"];
 
   const { selection, clearSelection } = useSelectionStore();
 
@@ -79,6 +80,7 @@ const Tools = () => {
   const modelPropsComponents = {
     glue: GlueProps,
     door: DoorProps,
+    snapLock: SnapLockProps,
   };
 
   if (editorMode) {

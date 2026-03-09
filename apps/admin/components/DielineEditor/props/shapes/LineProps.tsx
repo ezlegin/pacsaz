@@ -1,3 +1,4 @@
+import { ISpec } from "@repo/store/editor/dielineSpec.store";
 import {
   FormControl,
   FormField,
@@ -7,7 +8,6 @@ import {
 import { Input } from "@repo/ui/components/input";
 import { UseFormReturn } from "react-hook-form";
 import PropsFormContent from "./PropsFormContent";
-import { ISpec } from "@repo/store/editor/dielineSpec.store";
 
 interface Props {
   form: UseFormReturn<ISpec.LineSpec, any, ISpec.LineSpec>;
@@ -28,6 +28,7 @@ const LineProps = ({ form }: Props) => {
                 placeholder="expr.."
                 autoFocus
                 className="h-9"
+                list="suggestion"
               />
             </FormControl>
           </FormItem>

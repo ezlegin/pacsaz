@@ -76,18 +76,19 @@ const DielineMetadataForm = ({ dieline }: { dieline?: Dieline }) => {
   };
 
   useEffect(() => {
-    const timeoutId = setTimeout(async () => {
-      const formData = form.getValues();
-      await updateDieline(
-        {
-          ...formData,
-          ...dielineData,
-        },
-        dieline!.id,
-      );
-    }, 20000);
-
-    return () => clearTimeout(timeoutId);
+    if (isUpdateType) {
+      const timeoutId = setTimeout(async () => {
+        const formData = form.getValues();
+        await updateDieline(
+          {
+            ...formData,
+            ...dielineData,
+          },
+          dieline!.id,
+        );
+      }, 3000);
+      return () => clearTimeout(timeoutId);
+    }
   }, [specs]);
 
   return (
