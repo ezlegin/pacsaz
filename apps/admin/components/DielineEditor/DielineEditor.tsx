@@ -1,7 +1,12 @@
 "use client";
 
 import DielineLayer from "@/components/DielineEditor/DielineLayer";
-import { useDielineGenerator } from "@repo/dieline-core/hooks/useDielineGenerator";
+import { Dieline } from "@repo/db";
+import {
+  DielineSettingsFromDB,
+  useDielineGenerator,
+} from "@repo/dieline-core/hooks/useDielineGenerator";
+import { useDielineSpecStore } from "@repo/store/editor/dielineSpec.store";
 import {
   Tabs,
   TabsContent,
@@ -9,12 +14,11 @@ import {
   TabsTrigger,
 } from "@repo/ui/components/tabs";
 import dynamic from "next/dynamic";
+import { useEffect } from "react";
 import Settings from "./settings/Settings";
 import Tools from "./Tools";
 import Variables from "./Variables";
-import { Dieline } from "@repo/db";
-import { useDielineSpecStore } from "@repo/store/editor/dielineSpec.store";
-import { useEffect } from "react";
+import DeveloperTools from "./DeveloperTools";
 const SVGPreview = dynamic(
   () => import("@repo/ui/components/custom/SVGPreview"),
   { ssr: false },
@@ -22,9 +26,16 @@ const SVGPreview = dynamic(
 
 export type EditorComponentType = "create" | "update";
 
-const DielineEditor = ({ dieline }: { dieline?: Dieline }) => {
+const DielineEditor = ({
+  dieline,
+}: {
+  dieline?: Dieline & { settings: DielineSettingsFromDB };
+}) => {
   const { specs, setSpecs } = useDielineSpecStore();
-  const { isRendering } = useDielineGenerator(specs);
+  const { isRendering } = useDielineGenerator(
+    { specification: specs, settings: dieline?.settings },
+    "editor",
+  );
 
   useEffect(() => {
     if (dieline) {
@@ -37,6 +48,7 @@ const DielineEditor = ({ dieline }: { dieline?: Dieline }) => {
       <div className="h-full grid grid-cols-[280px_1fr_280px]">
         <div className="bg-muted border-r p-3 z-10">
           <DielineLayer dieline={dieline} />
+          <DeveloperTools />
         </div>
 
         <div className="relative bg-slate-50">

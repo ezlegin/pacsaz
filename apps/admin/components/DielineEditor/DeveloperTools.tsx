@@ -18,17 +18,10 @@ const DeveloperTools = () => {
     onDevelepe && (
       <div
         className={cn(
-          open ? "translate-x-0" : "-translate-x-55",
+          open ? "translate-x-0" : "-translate-x-52",
           "absolute flex items-center left-0 bottom-0 w-fit m-3 transition-all",
         )}
       >
-        <Button
-          onClick={() => setOpen(!open)}
-          className="rounded-l-none rounded-r-full bg-background text-foreground border border-l-0 hover:bg-background"
-        >
-          <ChevronRight />
-        </Button>
-
         <Card dir="ltr" className="p-4 gap-1">
           <CardTitle>Developer Tools:</CardTitle>
 
@@ -62,6 +55,13 @@ const DeveloperTools = () => {
             </div>
           </CardContent>
         </Card>
+
+        <Button
+          onClick={() => setOpen(!open)}
+          className="rounded-l-none rounded-r-full bg-background text-foreground border border-l-0 hover:bg-background"
+        >
+          <ChevronRight />
+        </Button>
       </div>
     )
   );

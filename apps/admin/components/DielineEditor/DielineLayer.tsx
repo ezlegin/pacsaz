@@ -1,3 +1,5 @@
+import { Dieline } from "@repo/db";
+import { DielineSettingsFromDB } from "@repo/dieline-core/hooks/useDielineGenerator";
 import { useSelectionStore } from "@repo/store/app/selection.store";
 import { useDielineHistoryStore } from "@repo/store/editor/dielineHistory.store";
 import {
@@ -18,7 +20,6 @@ import DielineMetadataForm from "../forms/DielineMetadataForm";
 import ModelLayers from "./layers/ModelLayers";
 import RulerLayers from "./layers/RulerLayers";
 import ShapeLayers from "./layers/ShapeLayers";
-import { Dieline } from "@repo/db";
 
 export type ItemType = {
   ShapesSpec: ISpec.ShapesSpec;
@@ -32,7 +33,11 @@ export type HandleLayerActoin = (
   type: "dup" | "delete" | "visibility",
 ) => void;
 
-const DielineLayer = ({ dieline }: { dieline?: Dieline }) => {
+const DielineLayer = ({
+  dieline,
+}: {
+  dieline?: Dieline & { settings: DielineSettingsFromDB };
+}) => {
   const {
     specs: { models, shapes, rulers },
     removeShape,

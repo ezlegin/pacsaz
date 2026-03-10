@@ -1,16 +1,14 @@
-import React from "react";
-import { DimensionInput } from "./DimensionsInput";
-import MaterialInput from "./MaterialInput";
-import { materials } from "@repo/store/data/dieline";
-import BleedInput from "./BleedInput";
 import {
   DielineSettings,
   useDielineSettingsStore,
 } from "@repo/store/dieline/dielineSettings.store";
-import ThicknessInput from "./ThicknessInput";
+import BleedInput from "./BleedInput";
+import DielineDownloadButton from "./DielineDownloadButton";
+import { DimensionInput } from "./DimensionsInput";
 import DimensionTypeInput from "./DimensionTypeInput";
 import FormatInput from "./FormatInput";
-import DielineDownloadButton from "./DielineDownloadButton";
+import MaterialInput from "./MaterialInput";
+import ThicknessInput from "./ThicknessInput";
 
 export type SetSetting = <K extends keyof DielineSettings>(
   key: K,
@@ -20,14 +18,15 @@ export type SetSetting = <K extends keyof DielineSettings>(
 const Settings = ({ isRendering }: { isRendering: boolean }) => {
   const {
     setSetting,
-    settings: { bleed, dimension, dimensionType, format },
+    settings: {
+      bleed,
+      dimension,
+      dimensionType,
+      format,
+      materials,
+      dimensionTypes,
+    },
   } = useDielineSettingsStore();
-
-  const MATERIALS = [
-    materials["glossy-cardboard"],
-    materials["f-flute"],
-    materials["e-flute"],
-  ];
 
   return (
     <div className="space-y-5">
@@ -45,15 +44,15 @@ const Settings = ({ isRendering }: { isRendering: boolean }) => {
         ))}
       </div>
 
-      <MaterialInput materials={MATERIALS} setSetting={setSetting} />
+      <MaterialInput materials={materials} setSetting={setSetting} />
 
       <BleedInput bleedAmount={bleed} setSetting={setSetting} />
 
-      <ThicknessInput isRendering={isRendering} materialsIncluded={MATERIALS} />
+      <ThicknessInput isRendering={isRendering} materialsIncluded={materials} />
 
       <DimensionTypeInput
         dimensionType={dimensionType}
-        dimensionsType={["inner", "outer", "manufacture"]}
+        dimensionsType={dimensionTypes}
         setSetting={setSetting}
       />
 

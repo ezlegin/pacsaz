@@ -20,7 +20,6 @@ const DimensionTypeInput = ({
       size="lg"
       defaultValue="manufacture"
       spacing={2}
-      dir="rtl"
       value={dimensionType}
       onValueChange={(val) => {
         if (val) setSetting("dimensionType", val as DimensionType);

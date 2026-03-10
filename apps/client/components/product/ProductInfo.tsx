@@ -1,8 +1,10 @@
 import { tuckEndModel } from "@/public";
 
 import { formatDimensions } from "@/utils/formatDimensions";
-import { DimensionsType } from "@repo/dieline-core/data/types";
 import { applyDimensionOffset } from "@repo/dieline-core/utils/applyDimensionOffset";
+import { resolveOffsets } from "@repo/dieline-core/utils/offsetResolver";
+import { DimensionType } from "@repo/store/data/types";
+import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
 import {
   Dialog,
   DialogContent,
@@ -11,17 +13,8 @@ import {
   DialogTrigger,
 } from "@repo/ui/components/dialog";
 import Image from "next/image";
-import DeveloperTools from "./DeveloperTools";
-import { DimensionType } from "@repo/store/data/types";
-import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
-import { resolveOffsets } from "@repo/dieline-core/utils/offsetResolver";
 
-interface Props {
-  dimensionsType: DimensionsType;
-  slug: string | undefined;
-}
-
-const ProductInfo = ({ dimensionsType }: Props) => {
+const ProductInfo = () => {
   const offset = resolveOffsets();
 
   const {
@@ -29,6 +22,7 @@ const ProductInfo = ({ dimensionsType }: Props) => {
       dimension: {
         raw: { height, length, width },
       },
+      dimensionTypes,
     },
   } = useDielineSettingsStore();
   const {
@@ -160,7 +154,7 @@ const ProductInfo = ({ dimensionsType }: Props) => {
         <div className="space-y-1">
           {dimensions.map(
             ({ label, value, key }) =>
-              dimensionsType.includes(
+              dimensionTypes.includes(
                 key as "manufacture" | "inner" | "outer",
               ) && (
                 <div key={label} className="border p-2 rounded-2xl">
@@ -183,8 +177,6 @@ const ProductInfo = ({ dimensionsType }: Props) => {
           ))}
         </ul>
       </div>
-
-      <DeveloperTools />
     </div>
   );
 };

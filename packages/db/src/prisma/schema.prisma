@@ -126,12 +126,46 @@ model Dieline {
   variable      String
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  settings      Settings @relation(fields: [settingsId], references: [id])
+  settingsId    Int      @unique
 
   image           DielineImage?
   category        DielineCategory[]
   downloadRecords DownloadRecord[]
   favedDieline    FavedDieline[]
   dielineInfos    DielineInfo[]
+}
+
+model Settings {
+  id                 Int              @id @default(autoincrement())
+  bleed              Int
+  materials          String
+  dimensionTypes     String
+  defaultDimension   DefaultDimension @relation(fields: [defaultDimensionId], references: [id])
+  defaultDimensionId Int              @unique
+  minDimension       MinDimension     @relation(fields: [minDimensionId], references: [id])
+  minDimensionId     Int              @unique
+  dielines           Dieline[]
+}
+
+model DefaultDimension {
+  id       Int       @id @default(autoincrement())
+  width    Int
+  length   Int
+  height   Int
+  settings Settings?
+}
+
+enum Hi {
+  enum
+}
+
+model MinDimension {
+  id       Int       @id @default(autoincrement())
+  width    Int
+  length   Int
+  height   Int
+  settings Settings?
 }
 
 model DielineCategory {

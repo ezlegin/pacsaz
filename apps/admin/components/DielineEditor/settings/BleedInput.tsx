@@ -1,5 +1,4 @@
 import { bleeds as BLEEDS } from "@repo/store/data/dieline";
-import { DielineSettings } from "@repo/store/dieline/dielineSettings.store";
 import {
   Select,
   SelectContent,
@@ -18,7 +17,7 @@ const BleedInput = ({
 }) => {
   return (
     <Select
-      defaultValue={bleedAmount?.toString()}
+      defaultValue={String(bleedAmount)}
       onValueChange={(val: string) => setSetting("bleed", +val)}
     >
       <SelectTrigger className="w-full">

@@ -1,16 +1,20 @@
 "use server";
 
+import { DielineMetadataFormType } from "@/components/forms/DielineMetadataForm";
 import { prisma } from "@repo/db";
 
-interface Dieline {
-  title: string;
-  slug: string;
-  specification: string;
-  variable: string;
-}
-
-export const createDieline = async (data: Dieline) => {
-  const { specification, slug, title, variable } = data;
+export const createDieline = async (data: DielineMetadataFormType) => {
+  const {
+    specification,
+    slug,
+    title,
+    variable,
+    bleed,
+    defaultDimensions,
+    dimensionTypes,
+    materials,
+    minDimensions,
+  } = data;
 
   try {
     const existingDieline = await prisma.dieline.findFirst({ where: { slug } });
@@ -18,14 +22,25 @@ export const createDieline = async (data: Dieline) => {
       return { error: "Slug Should Be Unique." };
     }
 
-    console.log(data);
-
     await prisma.dieline.create({
       data: {
         slug,
         title,
         specification,
         variable,
+        settings: {
+          create: {
+            materials,
+            dimensionTypes,
+            bleed: +bleed,
+            defaultDimension: {
+              create: defaultDimensions,
+            },
+            minDimension: {
+              create: minDimensions,
+            },
+          },
+        },
       },
     });
 
@@ -36,8 +51,21 @@ export const createDieline = async (data: Dieline) => {
   }
 };
 
-export const updateDieline = async (data: Dieline, id: number) => {
-  const { specification, slug, title, variable } = data;
+export const updateDieline = async (
+  data: DielineMetadataFormType,
+  id: number,
+) => {
+  const {
+    specification,
+    slug,
+    title,
+    variable,
+    bleed,
+    defaultDimensions,
+    dimensionTypes,
+    materials,
+    minDimensions,
+  } = data;
   try {
     const existingDieline = await prisma.dieline.findFirst({ where: { id } });
     if (!existingDieline) throw new Error("Dieline Not Found.");
@@ -55,6 +83,19 @@ export const updateDieline = async (data: Dieline, id: number) => {
         title,
         specification,
         variable,
+        settings: {
+          update: {
+            materials,
+            dimensionTypes,
+            bleed: +bleed,
+            defaultDimension: {
+              create: defaultDimensions,
+            },
+            minDimension: {
+              create: minDimensions,
+            },
+          },
+        },
       },
     });
 

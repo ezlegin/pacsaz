@@ -66,7 +66,7 @@ export default function SvgPreview({
 
       setScale(scale);
 
-      if (isFinite(scale) && scale > 0 && doCenterSVG && !isEditorType) {
+      if (isFinite(scale) && scale > 0 && doCenterSVG) {
         transformRef.current?.centerView(scale, 0);
       }
     };
@@ -113,7 +113,7 @@ export default function SvgPreview({
         ref={transformRef}
         centerOnInit
         limitToBounds={false}
-        minScale={0.5}
+        minScale={0.05}
         maxScale={isEditorType ? 3 : 1.5}
         panning={{ disabled: isRendering || disablePanning }}
         wheel={{

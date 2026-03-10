@@ -10,7 +10,17 @@ interface Props {
 const page = async ({ params }: Props) => {
   const { slug } = await params;
 
-  const dieline = await prisma.dieline.findFirst({ where: { slug } });
+  const dieline = await prisma.dieline.findFirst({
+    where: { slug },
+    include: {
+      settings: {
+        include: {
+          defaultDimension: true,
+          minDimension: true,
+        },
+      },
+    },
+  });
 
   if (!dieline) notFound();
 

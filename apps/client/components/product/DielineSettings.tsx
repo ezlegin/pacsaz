@@ -1,15 +1,9 @@
 import { DIMENSIONS, DIMENSIONS_TYPE } from "@/data/consts";
 import { aiIcon, dxfIcon, pdfIcon } from "@/public";
-import { DimensionsType } from "@repo/dieline-core/data/types";
 import { isPackagingSizeLogical } from "@repo/dieline-core/utils/isPackagingSizeLogical";
 import { useUserStore } from "@repo/store/app/user.store";
 import { bleeds as BLEEDS } from "@repo/store/data/dieline";
-import {
-  Dimension,
-  DimensionType,
-  Format,
-  MaterialValue,
-} from "@repo/store/data/types";
+import { DimensionType, Format } from "@repo/store/data/types";
 import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
 import { Badge } from "@repo/ui/components/badge";
 import { Card } from "@repo/ui/components/card";
@@ -41,28 +35,22 @@ import MaterialInput from "./MaterialInput";
 import ThicknessInput from "./ThicknessInput";
 
 interface Props {
-  minDimensions: Dimension;
-  materials: MaterialValue[];
-  dimensionsType: DimensionsType;
   slug: string;
   isRendering: boolean;
 }
 
-export default function DielineSettings({
-  dimensionsType,
-  minDimensions,
-  slug,
-  materials,
-  isRendering,
-}: Props) {
+export default function DielineSettings({ slug, isRendering }: Props) {
   const { isPremium } = useUserStore();
   const {
     setSetting,
-    settings: { bleed, dimensionType, format },
-  } = useDielineSettingsStore();
-
-  const {
-    settings: { dimension },
+    settings: {
+      bleed,
+      dimensionType,
+      format,
+      dimension,
+      minDimension,
+      dimensionTypes,
+    },
   } = useDielineSettingsStore();
 
   const bleeds = Object.entries(BLEEDS).map(([type, size]) => ({
@@ -91,7 +79,7 @@ export default function DielineSettings({
               <DimensionInput
                 key={key}
                 label={label}
-                min={minDimensions[key]}
+                min={minDimension[key]}
                 dimKey={key}
                 isRendering={isRendering}
               />
@@ -129,7 +117,7 @@ export default function DielineSettings({
         </Section>
 
         <Section title="متریال چاپ" infoContent={<MeterialGuide />}>
-          <MaterialInput materials={materials} />
+          <MaterialInput />
         </Section>
 
         <Section
@@ -170,10 +158,7 @@ export default function DielineSettings({
           title="ضخامت"
           infoContent={<ThicknessGuide />}
         >
-          <ThicknessInput
-            isRendering={isRendering}
-            materialsIncluded={materials}
-          />
+          <ThicknessInput isRendering={isRendering} />
         </Section>
 
         <Section title="نوع ابعاد" infoContent={<DimensionTypeGuide />}>
@@ -193,7 +178,7 @@ export default function DielineSettings({
             <div className="grid grid-cols-3 w-full gap-2">
               {DIMENSIONS_TYPE.map(
                 ({ label, key }) =>
-                  dimensionsType.includes(key) && (
+                  dimensionTypes.includes(key) && (
                     <ToggleGroupItem
                       key={key}
                       value={key}

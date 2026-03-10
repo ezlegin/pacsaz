@@ -1,4 +1,4 @@
-import { MaterialKey, MaterialValue } from "@repo/store/data/types";
+import { MaterialKey } from "@repo/store/data/types";
 import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
 import {
   Select,
@@ -9,8 +9,11 @@ import {
 } from "@repo/ui/components/select";
 import { cn } from "@repo/ui/lib/utils";
 
-const MaterialInput = ({ materials }: { materials: MaterialValue[] }) => {
-  const { setSetting } = useDielineSettingsStore();
+const MaterialInput = () => {
+  const {
+    setSetting,
+    settings: { materials, material },
+  } = useDielineSettingsStore();
 
   const onSelectMaterial = (val: MaterialKey) => {
     const material = materials.find((m) => m.value === val);
@@ -21,11 +24,7 @@ const MaterialInput = ({ materials }: { materials: MaterialValue[] }) => {
   };
 
   return (
-    <Select
-      onValueChange={onSelectMaterial}
-      dir="rtl"
-      defaultValue={materials[0]!.value}
-    >
+    <Select onValueChange={onSelectMaterial} dir="rtl" value={material.value}>
       <SelectTrigger className="w-full">
         <SelectValue placeholder="انتخاب متریال" />
       </SelectTrigger>

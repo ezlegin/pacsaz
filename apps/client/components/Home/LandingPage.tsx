@@ -9,6 +9,9 @@ import { prisma } from "@repo/db";
 const LandingPage = async () => {
   const dieline = await prisma.dieline.findFirst({
     where: { slug: "tuck-end" },
+    include: {
+      settings: { include: { defaultDimension: true, minDimension: true } },
+    },
   });
 
   return (

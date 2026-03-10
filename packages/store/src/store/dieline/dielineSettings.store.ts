@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import {
+  Dimension,
   Dimensions,
   DimensionType,
   Format,
@@ -9,10 +10,13 @@ import { materials, bleeds } from "../../data/dieline";
 
 export type DielineSettings = {
   dimension: Dimensions;
+  minDimension: Dimension;
   material: MaterialValue;
+  materials: MaterialValue[];
   bleed: number;
   thickness: number;
   dimensionType: DimensionType;
+  dimensionTypes: DimensionType[];
   format: Format;
   showOverallRulers: boolean;
 };
@@ -41,10 +45,17 @@ export const useDielineSettingsStore = create<DielineSettingsStore>((set) => ({
         height: 0,
       },
     },
+    minDimension: {
+      width: 0,
+      length: 0,
+      height: 0,
+    },
+    dimensionTypes: [],
     bleed: bleeds.default,
     dimensionType: "manufacture",
     format: "pdf",
     material: defaultMaterial,
+    materials: [defaultMaterial],
     thickness: defaultMaterial.thickness,
     showOverallRulers: false,
   },
