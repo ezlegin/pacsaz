@@ -12,6 +12,8 @@ import { toast } from "sonner";
 import LoginPopup from "../forms/LoginPopup";
 import SaveDielineForm from "../forms/SaveDielineForm";
 import { dielineDownloder } from "@repo/lib/utils/dielineDownloader";
+import { createDownloadRecord } from "@/actions/dieline";
+import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
 
 interface Props {
   slug: string;
@@ -19,6 +21,7 @@ interface Props {
 }
 
 const DielineDownloadButton = ({ slug, isRendering }: Props) => {
+  const { settings } = useDielineSettingsStore();
   const { svg } = useSVGStore();
   const { startLoading, stopLoading, isLoading } = useLoading();
   const [openPopup, setOpenPopup] = useState<"login" | "save" | null>(null);
@@ -38,15 +41,24 @@ const DielineDownloadButton = ({ slug, isRendering }: Props) => {
 
     const res = await dielineDownloder(slug);
 
-    if (!res?.success) {
-      toast.error("خطایی رخ داد. لطفا لحظاتی بعد مجددا تلاش کنید.");
+    const createRecord = await createDownloadRecord(slug, {
+      width: settings.dimension.raw.width,
+      length: settings.dimension.raw.length,
+      height: settings.dimension.raw.height,
+      material: settings.material.value,
+      bleed: settings.bleed,
+      dimensionType: settings.dimensionType,
+      thickness: settings.thickness,
+    });
+
+    if (res?.success && createRecord.success) {
+      toast.success("فایل با موفقیت تولید شد.");
       stopLoading();
       return;
     } else {
-      toast.success("فایل با موفقیت تولید شد.");
+      toast.error("خطایی رخ داد. لطفا لحظاتی بعد مجددا تلاش کنید.");
+      stopLoading();
     }
-
-    stopLoading();
   };
 
   const onOpenSavePopup = () => {
@@ -70,7 +82,7 @@ const DielineDownloadButton = ({ slug, isRendering }: Props) => {
           {openPopup === "login" ? (
             <LoginPopup />
           ) : (
-            <SaveDielineForm type="create" />
+            <SaveDielineForm type="create" settings={settings} />
           )}
         </DialogContent>
       </Dialog>

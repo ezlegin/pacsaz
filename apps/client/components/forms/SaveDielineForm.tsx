@@ -15,12 +15,9 @@ import {
   DimensionType,
   MaterialValue,
 } from "@repo/store/data/types";
-import {
-  getDielineSettings,
-  useDielineSettingsStore,
-} from "@repo/store/dieline/dielineSettings.store";
 import { Badge } from "@repo/ui/components/badge";
 import { Button } from "@repo/ui/components/button";
+import DeleteButton from "@repo/ui/components/custom/DeleteButton";
 import { DialogTitle } from "@repo/ui/components/dialog";
 import {
   Form,
@@ -31,7 +28,6 @@ import {
 import { Input } from "@repo/ui/components/input";
 import { Separator } from "@repo/ui/components/separator";
 import { useForm } from "react-hook-form";
-import DeleteButton from "@repo/ui/components/custom/DeleteButton";
 
 interface SavedDieline {
   bleed: number;
@@ -43,19 +39,25 @@ interface SavedDieline {
   description?: string | undefined;
   customer?: string | undefined;
 }
+export interface Settings {
+  dimension: { raw: Dimension; resolved: Dimension };
+  bleed: number;
+  dimensionType: DimensionType;
+  material: MaterialValue;
+  thickness: number;
+}
 
 const SaveDielineForm = ({
   type,
   savedDieline,
+  settings,
 }: {
   savedDieline?: SavedDieline;
   type: FormType;
+  settings: Settings;
 }) => {
-  const {
-    settings: { dimension },
-  } = useDielineSettingsStore();
+  const { bleed, dimension, dimensionType, material, thickness } = settings;
   const { isLoading, startLoading, stopLoading } = useLoading();
-  const { thickness, bleed, dimensionType, material } = getDielineSettings();
   const { isPremium } = useUserStore();
 
   const form = useForm<SaveDielineFormType>({

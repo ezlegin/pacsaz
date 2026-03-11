@@ -9,12 +9,25 @@ import DielinesList from "./DielinesList";
 
 const page = async () => {
   const dielines = await prisma.dieline.findMany({
-    include: { categoryByModel: true, categoryByUsage: true },
+    include: {
+      categoryByModel: true,
+      categoryByUsage: true,
+      _count: {
+        select: {
+          downloadRecords: true,
+        },
+      },
+    },
   });
   const categories = {
     byModel: await prisma.dielineCategoryByModel.findMany(),
     byUsage: await prisma.dielineCategoryByUsage.findMany(),
   };
+
+  const x = await prisma.downloadRecord.findMany({
+    include: { dieline: { include: { settings: true } } },
+  });
+  console.log(x[2]);
 
   // Todo: Sorting
 

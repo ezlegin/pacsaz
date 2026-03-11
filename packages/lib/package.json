@@ -23,6 +23,7 @@
     "@types/pdfkit": "^0.17.4"
   },
   "dependencies": {
+    "sonner": "^2.0.7",
     "react": "^19.2.0",
     "svg-to-pdfkit": "^0.1.8",
     "pdfkit": "0.17.2"

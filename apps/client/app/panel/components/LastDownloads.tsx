@@ -1,39 +1,38 @@
-import { MaterialKey } from "@repo/store/data/types";
+import { Dieline, DownloadHistory, Settings } from "@repo/db";
 import Card from "@repo/ui/components/custom/Card";
 import Table from "@repo/ui/components/custom/Table";
 import { TableCell, TableRow } from "@repo/ui/components/table";
 import { formatDate } from "date-fns";
+import { ArrowUpRight } from "lucide-react";
 
-type LastDownloads = {
-  id: number;
-  dieline: string;
-  dimensions: string;
-  bleed: number;
-  material: MaterialKey;
-  thickness: number;
-  downloadedAt: Date;
-};
+interface RecordType extends DownloadHistory {
+  dieline: Dieline;
+  settings: Settings | null;
+}
 
-const LastDownloads = ({ data }: { data: LastDownloads[] }) => {
-  const renderRows = ({
-    bleed,
-    dimensions,
-    dieline,
-    id,
-    material,
-    thickness,
-    downloadedAt,
-  }: LastDownloads) => {
+const LastDownloads = ({ data }: { data: RecordType[] }) => {
+  const renderRows = ({ id, downloadedAt, dieline, settings }: RecordType) => {
     return (
       <TableRow key={id}>
-        <TableCell>{dieline}</TableCell>
-        <TableCell className="text-center">{dimensions}</TableCell>
-        <TableCell className="text-center">{material}</TableCell>
+        <TableCell>
+          <a
+            href={`/dieline/${dieline.slug}`}
+            className="flex gap-0.5 items-center"
+          >
+            <ArrowUpRight size={11} />
+            {dieline.title}
+          </a>
+        </TableCell>
+        <TableCell className="text-center">{`${settings?.length}x${settings?.width}x${settings?.height}mm`}</TableCell>
+        <TableCell className="text-center">{settings?.material}</TableCell>
         <TableCell className="text-center" dir="ltr">
-          {thickness} mm
+          {settings?.thickness} mm
         </TableCell>
         <TableCell className="text-center" dir="ltr">
-          {bleed} mm
+          {settings?.bleed} mm
+        </TableCell>
+        <TableCell className="text-center" dir="ltr">
+          {settings?.dimensionType}
         </TableCell>
         <TableCell className="text-left">
           {formatDate(downloadedAt, "PP")}
@@ -62,5 +61,6 @@ const columns = [
   { label: "متریال", className: "" },
   { label: "ضخامت", className: "" },
   { label: "بلید", className: "" },
+  { label: "نوع ابعاد", className: "" },
   { label: "تاریخ", className: "" },
 ];

@@ -18,11 +18,12 @@ import {
   TooltipTrigger,
 } from "@repo/ui/components/tooltip";
 import { cn } from "@repo/ui/lib/utils";
-import { Pencil, Settings } from "lucide-react";
+import { ArrowUpRight, Pencil, Settings } from "lucide-react";
 
 export interface DielineType extends Dieline {
   categoryByUsage: DielineCategoryByUsage[];
   categoryByModel: DielineCategoryByModel[];
+  _count: { downloadRecords: number };
 }
 
 export type Categories = {
@@ -41,12 +42,17 @@ const DielinesList = ({
     return (
       <TableRow key={dieline.id}>
         <TableCell>{dieline.id}</TableCell>
-        <TableCell className="text-center">{dieline.title}</TableCell>
         <TableCell className="text-center">
-          <a target="_blank" href={`${mainURL}/dieline/${dieline.slug}`}>
-            {dieline.slug}
+          <a
+            target="_blank"
+            href={`${mainURL}/dieline/${dieline.slug}`}
+            className="flex gap-1 w-full justify-center items-center"
+          >
+            {dieline.title}
+            <ArrowUpRight size={11} />
           </a>
         </TableCell>
+        <TableCell className="text-center">{dieline.slug}</TableCell>
         <TableCell className="text-center flex gap-2 justify-center items-center">
           <Tooltip>
             <TooltipTrigger>
@@ -69,7 +75,9 @@ const DielinesList = ({
             </TooltipContent>
           </Tooltip>
         </TableCell>
-        <TableCell className="text-center">{/* {data.downloaded} */}</TableCell>
+        <TableCell className="text-center">
+          {dieline._count.downloadRecords}
+        </TableCell>
         <TableCell className="flex justify-center">
           <div
             className={cn(

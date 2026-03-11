@@ -9,3 +9,5 @@ export const DIMENSIONS = [
   { key: "width", label: "عرض" },
   { key: "height", label: "ارتفاع" },
 ] as const;
+
+export const serverErrorMessage = "مشکلی ناشناخته رخ داد.";

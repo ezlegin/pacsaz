@@ -101,7 +101,7 @@ const DielineMetadataForm = ({ dieline }: { dieline?: DielineType }) => {
 
     handleRes(res, {
       onSuccess: () => {
-        router.push(`/dielines/${data.slug}`);
+        router.push(`/editor/${data.slug}`);
       },
     });
 
