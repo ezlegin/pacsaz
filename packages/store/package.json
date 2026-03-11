@@ -19,6 +19,8 @@
     "@types/node": "^22.15.3"
   },
   "dependencies": {
+    "@repo/db": "workspace:*",
+    "@repo/auth": "workspace:*",
     "uuid": "^13.0.0",
     "zustand": "^5.0.10"
   }

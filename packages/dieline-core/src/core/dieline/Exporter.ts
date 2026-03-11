@@ -5,7 +5,6 @@ import { setDielineFile } from "@repo/store/dieline/dielineFile.store";
 import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
 import M, { IModel } from "makerjs";
 import { toMm } from "../../utils/sizeConvertor";
-import { extractPathDs } from "../helpers/extractPathDs";
 
 export class Exporter {
   constructor(private main: IModel) {}
@@ -127,7 +126,7 @@ export class Exporter {
 
     if (isSubscribed && onProduction) return svg;
 
-    const clipD = extractPathDs(M.exporter.toSVG(bleedModel));
+    const clipD = this.$extractPathDs(M.exporter.toSVG(bleedModel));
 
     return svg.replace(
       "</svg>",
@@ -165,5 +164,14 @@ export class Exporter {
     </svg>
   `,
     );
+  }
+
+  $extractPathDs(svgString: string): string[] {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(svgString, "image/svg+xml");
+
+    const paths = Array.from(doc.querySelectorAll("path"));
+
+    return paths.map((p) => p.getAttribute("d")!).filter(Boolean);
   }
 }

@@ -49,7 +49,7 @@ export const plans: Plan[] = [
     get fairDownload() {
       return calculateFairDownload({ monthly: 40 });
     },
-    price: 399000,
+    price: 299000,
     level: 1,
     features: [
       ...generals,
@@ -65,7 +65,7 @@ export const plans: Plan[] = [
     get fairDownload() {
       return calculateFairDownload({ monthly: 100 });
     },
-    price: 699000,
+    price: 499000,
     level: 2,
     features: [...generals, ...paids],
   },
@@ -78,7 +78,7 @@ export const plans: Plan[] = [
     get fairDownload() {
       return calculateFairDownload({ monthly: 500 });
     },
-    price: 1399000,
+    price: 999000,
     level: 3,
     features: [...generals, ...paids],
   },

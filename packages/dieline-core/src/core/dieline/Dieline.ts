@@ -1,10 +1,7 @@
 import { onDevelepe } from "@repo/lib/data/consts";
-import { bleeds, materials } from "@repo/store/data/dieline";
-import { Dimension, MaterialValue } from "@repo/store/data/types";
 import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
 import { setOverallSize } from "@repo/store/dieline/overallSize.store";
 import M, { IModel, IModelMap } from "makerjs";
-import { DimensionsType } from "../../data/types";
 import Pacsaz from "../Pacsaz";
 import { Bleed } from "./Bleed";
 import { Exporter } from "./Exporter";
@@ -17,20 +14,6 @@ export abstract class Dieline {
   protected perfModel: IModel = { layer: "perf" };
   protected rulerModel: IModel = { layer: "ruler" };
 
-  // -------------- Defaults --------------
-  abstract defaultDimensions: Dimension;
-  defaultBleed = bleeds.default;
-  minDimensions = {
-    length: 40,
-    width: 40,
-    height: 40,
-  };
-  dimensionsType: DimensionsType = ["manufacture", "inner", "outer"];
-  materials: MaterialValue[] = [
-    materials["glossy-cardboard"],
-    materials["art-paper"],
-    materials["f-flute"],
-  ];
   // -------------- Dieline Factory --------------
   protected abstract drawer(): void;
   protected fold(): void {}

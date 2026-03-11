@@ -1,6 +1,6 @@
 import { LoginForm } from "@/components/forms/LoginForm";
-import PacsazLogo from "@/components/PacsazLogo";
 import { Card, CardContent } from "@repo/ui/components/card";
+import PacsazLogo from "@repo/ui/components/custom/PacsazLogo";
 import React from "react";
 
 const page = () => {

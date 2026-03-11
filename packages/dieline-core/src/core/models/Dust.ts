@@ -1,6 +1,4 @@
-import M, { IModel, IPath } from "makerjs";
-import { getDistanceOfFirstAndLastPoint } from "../helpers/getDistance";
-import { getLastPointFromPath } from "../helpers/getLastPoint";
+import M, { IModel } from "makerjs";
 import Pacsaz from "../Pacsaz";
 import { Model } from "./Model";
 
@@ -33,21 +31,26 @@ export class Dust extends Model {
       br: 3,
     };
 
-    const { disOfHeight: dustHoleOuterHeight, disOfWidth: dustHoleWidth } =
-      getDistanceOfFirstAndLastPoint(this.arc, "path");
+    const arcStartPoint = [this.thickness, 0];
+    const endAngle = this.thickness <= 2 ? (this.thickness < 1 ? -30 : -15) : 0;
+
+    const arcModel = new Pacsaz.shapes.Arc(this.thickness, 180, endAngle).move(
+      arcStartPoint,
+    );
 
     const bottomLeftIndent = this.considerDustHole
-      ? Math.max(0, indent.bl - dustHoleWidth)
+      ? Math.max(0, indent.bl - arcModel.size.width)
       : indent.bl;
 
     const verticalMoveToTop = this.considerDustHole
       ? mappedDustSize - indent.bl
       : mappedDustSize - indent.bl;
 
-    const baseToHoleEndOffset = this.thickness - dustHoleOuterHeight;
+    const baseToHoleEndOffset =
+      this.thickness - Math.abs(arcModel.points.end[1]!);
 
     const dustStartPoint = this.considerDustHole
-      ? getLastPointFromPath(this.arc)
+      ? arcModel.points.end
       : [0, -this.thickness];
 
     const pb = new Pacsaz.point.Builder(dustStartPoint);
@@ -64,7 +67,7 @@ export class Dust extends Model {
             bottomLeftIndent -
             indent.tl -
             indent.tr -
-            (this.considerDustHole ? dustHoleWidth : 0) -
+            (this.considerDustHole ? arcModel.size.width : 0) -
             (this.considerOuterIndent ? this.thickness : 0),
         )
         .draw(indent.tr, -mappedDustSize + dustHeight.r.inner)
@@ -81,7 +84,7 @@ export class Dust extends Model {
     const trim: IModel = {
       models: { dust },
     };
-    if (this.considerDustHole) trim.paths = { arc: this.arc };
+    if (this.considerDustHole) trim.models!["arc"] = arcModel;
 
     return { trim };
   }
@@ -99,15 +102,5 @@ export class Dust extends Model {
     ]);
 
     return { fold };
-  }
-
-  private get arc(): IPath {
-    //todo
-    const arcStartPoint = [this.thickness, 0];
-    const endAngle = this.thickness <= 2 ? (this.thickness < 1 ? -30 : -15) : 0;
-
-    const arc = new M.paths.Arc(arcStartPoint, this.thickness, 180, endAngle);
-
-    return arc;
   }
 }

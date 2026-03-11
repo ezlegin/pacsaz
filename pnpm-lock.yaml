@@ -429,6 +429,12 @@ importers:
 
   packages/store:
     dependencies:
+      '@repo/auth':
+        specifier: workspace:*
+        version: link:../auth
+      '@repo/db':
+        specifier: workspace:*
+        version: link:../db
       uuid:
         specifier: ^13.0.0
         version: 13.0.0

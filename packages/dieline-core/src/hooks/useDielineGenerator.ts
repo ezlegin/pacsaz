@@ -1,20 +1,21 @@
 import { bleeds, materials } from "@repo/store/data/dieline";
-import { useDeveloperToolsStore } from "@repo/store/dieline/developerTools.store";
-import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
-import { useSVGStore } from "@repo/store/dieline/svg.store";
-import { ISpec } from "@repo/store/editor/dielineSpec.store";
-import { useVariableStore } from "@repo/store/editor/variables.store";
-import { useEffect, useTransition } from "react";
-import { Drawer } from "../core/dieline/Drawer";
-import { resolveDimensions } from "../utils/dimensionResolver";
-import { resolveOffsets } from "../utils/offsetResolver";
 import {
   Dimension,
   DimensionType,
   MaterialKey,
   MaterialValue,
 } from "@repo/store/data/types";
+import { useDeveloperToolsStore } from "@repo/store/dieline/developerTools.store";
+import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
+import { useSVGStore } from "@repo/store/dieline/svg.store";
+import { ISpec } from "@repo/store/editor/dielineSpec.store";
+import { useVariableStore } from "@repo/store/editor/variables.store";
+import { useEffect, useTransition } from "react";
+import Pacsaz from "../core/Pacsaz";
 import { DimensionsType } from "../data/types";
+import { resolveDimensions } from "../utils/dimensionResolver";
+import { resolveOffsets } from "../utils/offsetResolver";
+import Drawer from "../core/dieline/Drawer";
 
 interface Dieline {
   specification: ISpec.Specs;
@@ -46,7 +47,7 @@ export function useDielineGenerator(
   const { setDefaultSettings, settings } = useDielineSettingsStore();
   const { developerTools } = useDeveloperToolsStore();
   const { variables } = useVariableStore();
-  const drawer = new Drawer(dieline.specification, variables);
+  const drawer = new Pacsaz.models.Drawer(dieline.specification, variables);
   const offsets = resolveOffsets();
   const { setSvg } = useSVGStore();
 
@@ -104,6 +105,7 @@ export function useDielineGenerator(
     });
   }, [
     settings,
+    Drawer,
     app === "editor" ? specs : undefined,
     variables,
     developerTools,

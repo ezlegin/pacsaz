@@ -41,6 +41,7 @@ export default class Pacsaz {
     Door,
     Dust,
     SnapLock,
+    Drawer,
   };
 
   static point = {

@@ -1,6 +1,6 @@
 import { zero } from "../../data/consts";
 import { Shape } from "./Shape";
-import M, { IPathArc, IPoint } from "makerjs";
+import M, { IPathArc } from "makerjs";
 
 export class Arc extends Shape {
   constructor(
@@ -20,7 +20,7 @@ export class Arc extends Shape {
     this.$pushShape("arc", { paths: { arc }, origin: zero });
   }
 
-  get points(): { start: IPoint; end: IPoint } {
+  get points() {
     const arcPath = this.lastModel?.paths?.arc!;
     const cloned = M.path.clone(arcPath) as IPathArc;
     cloned.origin = this.lastModel?.origin ?? zero;

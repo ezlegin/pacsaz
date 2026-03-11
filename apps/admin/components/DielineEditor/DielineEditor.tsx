@@ -18,7 +18,6 @@ import { useEffect } from "react";
 import Settings from "./settings/Settings";
 import Tools from "./Tools";
 import Variables from "./Variables";
-import DeveloperTools from "./DeveloperTools";
 const SVGPreview = dynamic(
   () => import("@repo/ui/components/custom/SVGPreview"),
   { ssr: false },
@@ -48,10 +47,9 @@ const DielineEditor = ({
       <div className="h-full grid grid-cols-[280px_1fr_280px]">
         <div className="bg-muted border-r p-3 z-10">
           <DielineLayer dieline={dieline} />
-          <DeveloperTools />
         </div>
 
-        <div className="relative bg-slate-50">
+        <div className="relative bg-gray-50">
           <div className="absolute top-1/2 right-1/2 -translate-y-1/2 translate-x-1/2 h-full w-full pb-10">
             <SVGPreview isRendering={isRendering} type="editor" />
           </div>

@@ -13,7 +13,7 @@ const PeriodSwitch = ({
 }) => {
   const items = [
     { label: <div>ماهیانه</div>, value: "monthly" },
-    { label: <div>3 ماهه</div>, value: "3-month" },
+    { label: <div>3 ماهه</div>, value: "threeMonth" },
     {
       label: (
         <div className="flex justify-end gap-1">

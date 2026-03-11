@@ -1,5 +1,5 @@
 import M, { IModel } from "makerjs";
-import Pacsaz from "../../Pacsaz";
+import Pacsaz from "../Pacsaz";
 
 export function addFillet(model: IModel, radius: number = 0) {
   const chain = M.model.findSingleChain(model);

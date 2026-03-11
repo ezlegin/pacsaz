@@ -6,7 +6,7 @@ import { cn } from "@repo/ui/lib/utils";
 import { CircleCheck, Zap } from "lucide-react";
 import Link from "next/link";
 import Price from "./Price";
-import { PlanFeature, PlanPeriod, SubCardProps } from "@repo/lib/data/plans";
+import { PlanFeature, PlanPeriod, Plan } from "@repo/lib/data/plans";
 
 export const SubscriptionCard = ({
   props: { key, description, fairDownload, price, title },
@@ -14,7 +14,7 @@ export const SubscriptionCard = ({
   index,
   features,
 }: {
-  props: SubCardProps;
+  props: Plan;
   index: number;
   features: PlanFeature[];
   period: PlanPeriod;
@@ -31,7 +31,7 @@ export const SubscriptionCard = ({
       <Card
         className={cn(
           index === 1 ? "mt-2 rounded-lg bg-background" : "mt-9 rounded-2xl",
-          "p-5 space-y-8 w-xs"
+          "p-5 space-y-8 w-xs",
         )}
       >
         <div className="flex flex-col gap-3">

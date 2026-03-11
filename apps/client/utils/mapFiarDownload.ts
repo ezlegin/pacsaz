@@ -2,11 +2,11 @@ import { PlanFairDownload, PlanPeriod } from "@repo/lib/data/plans";
 
 export function mapFiarDownload(
   fairDownload: PlanFairDownload,
-  period: PlanPeriod
+  period: PlanPeriod,
 ) {
   return period === "annual"
     ? fairDownload.annual
-    : period === "3-month"
+    : period === "threeMonth"
       ? fairDownload.threeMonth
       : fairDownload.monthly;
 }

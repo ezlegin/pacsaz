@@ -22,7 +22,7 @@ const Price = ({
       <span
         className={cn(
           size === "sm" ? "text-xs" : "text-sm",
-          "text-muted-foreground"
+          "text-muted-foreground",
         )}
       >
         / {mapPeriodLabel(period)}

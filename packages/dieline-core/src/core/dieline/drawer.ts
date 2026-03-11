@@ -15,12 +15,6 @@ export class Drawer extends Dieline {
     super();
   }
 
-  override defaultDimensions = {
-    width: 90,
-    length: 160,
-    height: 50,
-  };
-
   //! ------------------------ Shapes ------------------------
 
   private line(line: NonNullable<ISpec.Shapes["line"]>) {

@@ -35,98 +35,55 @@ export class Door extends Model {
       const doorSize = M.measure.modelExtents({ models: this.trim() });
       if (!doorSize) throw new Error("Door Size Not Available. [Door]");
 
+      const createAndAssignDust = (
+        isLeft: boolean,
+        isRight: boolean,
+        mirrorX: boolean,
+        offsetX: number,
+        dustId: "dust1" | "dust2",
+      ) => {
+        const dust = new Pacsaz.models.Dust(doorSize.height, isLeft, isRight);
+        const movedDust = dust.mirror(mirrorX, false).move([offsetX, 0]);
+
+        const dustModel = movedDust.models.dust!;
+        dustTrims[dustId] = {
+          models: dustModel.models?.trims?.models,
+          origin: dustModel.origin,
+        };
+        dustFolds[dustId] = {
+          models: dustModel.models?.folds?.models,
+          origin: dustModel.origin,
+        };
+      };
+
       if (dustSide === "right") {
-        const dust1 = new Pacsaz.models.Dust(doorSize.height, true, true);
-        dust1.move([doorSize.width, 0]);
-
-        const dust1Model = dust1.models.dust!;
-        dustTrims.dust1 = {
-          models: dust1Model.models?.trims?.models,
-          origin: dust1Model.origin,
-        };
-        dustFolds.dust1 = {
-          models: dust1Model.models?.folds?.models,
-          origin: dust1Model.origin,
-        };
-
-        const dust2 = new Pacsaz.models.Dust(doorSize.height, false, true)
-          .mirror(true, false)
-          .move([doorSize.width + this.width + this.height, 0]);
-
-        const dust2Model = dust2.models.dust!;
-        dustTrims.dust2 = {
-          models: dust2Model.models?.trims?.models,
-          origin: dust2Model.origin,
-        };
-        dustFolds.dust2 = {
-          models: dust2Model.models?.folds?.models,
-          origin: dust2Model.origin,
-        };
+        createAndAssignDust(true, true, false, doorSize.width, "dust1");
+        createAndAssignDust(
+          false,
+          true,
+          true,
+          doorSize.width + this.width + this.height,
+          "dust2",
+        );
       }
 
       if (dustSide === "left") {
-        const dust1 = new Pacsaz.models.Dust(doorSize.height, true, true);
-        dust1.mirror(true, false).move([-dust1.size.width, 0]);
-
-        const dust1Model = dust1.models.dust!;
-        dustTrims.dust1 = {
-          models: dust1Model.models?.trims?.models,
-          origin: dust1Model.origin,
-        };
-        dustFolds.dust1 = {
-          models: dust1Model.models?.folds?.models,
-          origin: dust1Model.origin,
-        };
-
-        const dust2 = new Pacsaz.models.Dust(doorSize.height, false, true);
-        dust2.move([-dust2.size.width - this.width - this.height, 0]);
-
-        const dust2Model = dust2.models.dust!;
-        dustTrims.dust2 = {
-          models: dust2Model.models?.trims?.models,
-          origin: dust2Model.origin,
-        };
-        dustFolds.dust2 = {
-          models: dust2Model.models?.folds?.models,
-          origin: dust2Model.origin,
-        };
+        createAndAssignDust(true, true, true, -this.height, "dust1");
+        createAndAssignDust(
+          false,
+          true,
+          false,
+          -this.width - this.height * 2,
+          "dust2",
+        );
       }
 
       if (dustSide === "both") {
-        const dust1 = new Pacsaz.models.Dust(
-          doorSize.height,
-          true,
-          indetAt?.l ?? false,
-        );
-        dust1.mirror(true, false).move([-dust1.size.width, 0]);
+        const isLeft = indetAt?.l ?? false;
+        const isRight = indetAt?.r ?? false;
 
-        const dust1Model = dust1.models.dust!;
-
-        dustTrims.dust1 = {
-          models: dust1Model.models?.trims?.models,
-          origin: dust1Model.origin,
-        };
-        dustFolds.dust1 = {
-          models: dust1Model.models?.folds?.models,
-          origin: dust1Model.origin,
-        };
-
-        const dust2 = new Pacsaz.models.Dust(
-          doorSize.height,
-          true,
-          indetAt?.r ?? false,
-        ).move([doorSize.width, 0]);
-
-        const dust2Model = dust2.models.dust!;
-
-        dustTrims.dust2 = {
-          models: dust2Model.models?.trims?.models,
-          origin: dust2Model.origin,
-        };
-        dustFolds.dust2 = {
-          models: dust2Model.models?.folds?.models,
-          origin: dust2Model.origin,
-        };
+        createAndAssignDust(true, isLeft, true, -this.height, "dust1");
+        createAndAssignDust(true, isRight, false, doorSize.width, "dust2");
       }
     }
 

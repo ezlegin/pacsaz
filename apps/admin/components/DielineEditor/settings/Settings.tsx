@@ -9,6 +9,7 @@ import DimensionTypeInput from "./DimensionTypeInput";
 import FormatInput from "./FormatInput";
 import MaterialInput from "./MaterialInput";
 import ThicknessInput from "./ThicknessInput";
+import DeveloperTools from "../DeveloperTools";
 
 export type SetSetting = <K extends keyof DielineSettings>(
   key: K,
@@ -29,36 +30,37 @@ const Settings = ({ isRendering }: { isRendering: boolean }) => {
   } = useDielineSettingsStore();
 
   return (
-    <div className="space-y-5">
-      <div className="grid grid-cols-3 gap-2">
-        {DIMENSIONS.map(({ key }) => (
-          <DimensionInput
-            key={key}
-            label={key}
-            min={30}
-            dimKey={key}
-            isRendering={isRendering}
-            dimension={dimension}
-            setSetting={setSetting}
-          />
-        ))}
+    <div className="space-y-6">
+      <div className="space-y-5">
+        <div className="grid grid-cols-3 gap-2">
+          {DIMENSIONS.map(({ key }) => (
+            <DimensionInput
+              key={key}
+              label={key}
+              min={30}
+              dimKey={key}
+              isRendering={isRendering}
+              dimension={dimension}
+              setSetting={setSetting}
+            />
+          ))}
+        </div>
+        <MaterialInput materials={materials} setSetting={setSetting} />
+        <BleedInput bleedAmount={bleed} setSetting={setSetting} />
+        <ThicknessInput
+          isRendering={isRendering}
+          materialsIncluded={materials}
+        />
+        <DimensionTypeInput
+          dimensionType={dimensionType}
+          dimensionsType={dimensionTypes}
+          setSetting={setSetting}
+        />
+        <FormatInput format={format} setSetting={setSetting} />
+        <DielineDownloadButton isRendering={isRendering} slug={"slug"} />
       </div>
 
-      <MaterialInput materials={materials} setSetting={setSetting} />
-
-      <BleedInput bleedAmount={bleed} setSetting={setSetting} />
-
-      <ThicknessInput isRendering={isRendering} materialsIncluded={materials} />
-
-      <DimensionTypeInput
-        dimensionType={dimensionType}
-        dimensionsType={dimensionTypes}
-        setSetting={setSetting}
-      />
-
-      <FormatInput format={format} setSetting={setSetting} />
-
-      <DielineDownloadButton isRendering={isRendering} slug={"slug"} />
+      <DeveloperTools />
     </div>
   );
 };

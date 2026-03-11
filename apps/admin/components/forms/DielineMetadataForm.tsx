@@ -4,10 +4,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Dieline } from "@repo/db";
 import { DielineSettingsFromDB } from "@repo/dieline-core/hooks/useDielineGenerator";
 import { useLoading } from "@repo/lib/utils/useLoading";
-import { bleeds } from "@repo/store/data/dieline";
+import { bleeds, materials } from "@repo/store/data/dieline";
 import { useDielineSpecStore } from "@repo/store/editor/dielineSpec.store";
 import { useVariableStore } from "@repo/store/editor/variables.store";
 import { Button } from "@repo/ui/components/button";
+import { Checkbox } from "@repo/ui/components/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -327,18 +328,50 @@ const DefaultSettings = ({ form }: { form: Form }) => {
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="materials"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Materials</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="f-flute,b-flute" />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+        <div className="space-y-1">
+          <Label>Materials</Label>
+          <FormField
+            control={form.control}
+            name="materials"
+            render={({ field }) => (
+              <FormItem className="grid grid-cols-2">
+                {Object.entries(materials)?.map(([key, item]) => {
+                  const isChecked = field.value
+                    ?.split(",")
+                    .includes(item.value);
+                  return (
+                    <FormItem
+                      key={key}
+                      className="flex flex-row items-center gap-3 pb-1.5"
+                    >
+                      <FormControl>
+                        <Checkbox
+                          checked={isChecked}
+                          onCheckedChange={(checked) => {
+                            const materials = field.value.split(",");
+                            const updatedMaterials = checked
+                              ? [...materials, key].join(",")
+                              : materials.filter((i) => i !== key).join(",");
+
+                            console.log(updatedMaterials);
+                            // return;
+                            field.onChange(updatedMaterials);
+                          }}
+                        />
+                      </FormControl>
+                      <FormLabel className="text-sm font-normal cursor-pointer">
+                        {key}
+                        <span className="text-xs text-muted-foreground">
+                          ({item.thickness}mm)
+                        </span>
+                      </FormLabel>
+                    </FormItem>
+                  );
+                })}
+              </FormItem>
+            )}
+          />
+        </div>
       </DialogContent>
     </Dialog>
   );
