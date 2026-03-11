@@ -71,5 +71,6 @@ export const dielineSettingsFormSchema = z.object({
   slug: z.string().min(1),
   categoryByModel: z.array(z.string()),
   categoryByUsage: z.array(z.string()),
+  active: z.boolean(),
 });
 export type DielineSettingsFormType = z.infer<typeof dielineSettingsFormSchema>;

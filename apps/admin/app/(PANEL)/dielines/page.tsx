@@ -14,20 +14,16 @@ const page = async () => {
       categoryByUsage: true,
       _count: {
         select: {
-          downloadRecords: true,
+          downloadHistory: true,
         },
       },
     },
+    orderBy: { createdAt: "desc" },
   });
   const categories = {
     byModel: await prisma.dielineCategoryByModel.findMany(),
     byUsage: await prisma.dielineCategoryByUsage.findMany(),
   };
-
-  const x = await prisma.downloadRecord.findMany({
-    include: { dieline: { include: { settings: true } } },
-  });
-  console.log(x[2]);
 
   // Todo: Sorting
 

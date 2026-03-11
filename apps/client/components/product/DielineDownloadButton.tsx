@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import LoginPopup from "../forms/LoginPopup";
 import SaveDielineForm from "../forms/SaveDielineForm";
 import { dielineDownloder } from "@repo/lib/utils/dielineDownloader";
-import { createDownloadRecord } from "@/actions/dieline";
+import { createDownloadHistory } from "@/actions/dieline";
 import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
 
 interface Props {
@@ -26,6 +26,16 @@ const DielineDownloadButton = ({ slug, isRendering }: Props) => {
   const { startLoading, stopLoading, isLoading } = useLoading();
   const [openPopup, setOpenPopup] = useState<"login" | "save" | null>(null);
   const { isSubscribed } = useUserStore();
+
+  const setts = {
+    width: settings.dimension.raw.width,
+    length: settings.dimension.raw.length,
+    height: settings.dimension.raw.height,
+    material: settings.material.value,
+    bleed: settings.bleed,
+    dimensionType: settings.dimensionType,
+    thickness: settings.thickness,
+  };
 
   const onDownload = async () => {
     if (!isSubscribed) {
@@ -41,15 +51,7 @@ const DielineDownloadButton = ({ slug, isRendering }: Props) => {
 
     const res = await dielineDownloder(slug);
 
-    const createRecord = await createDownloadRecord(slug, {
-      width: settings.dimension.raw.width,
-      length: settings.dimension.raw.length,
-      height: settings.dimension.raw.height,
-      material: settings.material.value,
-      bleed: settings.bleed,
-      dimensionType: settings.dimensionType,
-      thickness: settings.thickness,
-    });
+    const createRecord = await createDownloadHistory(slug, setts);
 
     if (res?.success && createRecord.success) {
       toast.success("فایل با موفقیت تولید شد.");
@@ -82,7 +84,10 @@ const DielineDownloadButton = ({ slug, isRendering }: Props) => {
           {openPopup === "login" ? (
             <LoginPopup />
           ) : (
-            <SaveDielineForm type="create" settings={settings} />
+            <>
+              <DialogTitle>ذخیره قالب</DialogTitle>
+              <SaveDielineForm type="create" settings={setts} slug={slug} />
+            </>
           )}
         </DialogContent>
       </Dialog>

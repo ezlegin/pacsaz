@@ -111,7 +111,7 @@ export const updateDielineSettings = async (
   data: DielineSettingsFormType,
   id: number,
 ) => {
-  const { slug, title, categoryByModel, categoryByUsage } = data;
+  const { slug, title, categoryByModel, active, categoryByUsage } = data;
   try {
     const existingDieline = await prisma.dieline.findFirst({ where: { id } });
     if (!existingDieline) throw new Error("Dieline Not Found.");
@@ -127,6 +127,7 @@ export const updateDielineSettings = async (
       data: {
         slug,
         title,
+        active,
         categoryByModel: {
           set: categoryByModel.map((i) => ({ slug: i })),
         },
@@ -155,14 +156,3 @@ export const deleteDieline = async (id: number) => {
     return { error: (error as Error).message };
   }
 };
-
-export type ServerAction = Promise<
-  | {
-      success: string;
-      error?: undefined;
-    }
-  | {
-      error: string;
-      success?: undefined;
-    }
->;

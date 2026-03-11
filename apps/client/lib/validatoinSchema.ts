@@ -1,5 +1,19 @@
 import z from "zod";
 
+const material = [
+  "abFlute",
+  "artPaper",
+  "bFlute",
+  "bcFlute",
+  "beFlute",
+  "cFlute",
+  "fFlute",
+  "eFlute",
+  "glossyCardboard",
+] as const;
+
+const dimensionType = ["manufacture", "inner", "outer"] as const;
+
 export const inputFormSchema = z.object({
   phoneNumber: z.string().regex(/^09\d{9}$/),
 });
@@ -46,7 +60,14 @@ export type DiscountFormType = z.infer<typeof discountFormSchema>;
 export const saveDielineFormSchema = z.object({
   title: z.string().min(1),
   description: z.string().optional(),
-  customer: z.string().optional(),
+  // customer: z.string().optional(),
+  bleed: z.number(),
+  width: z.number(),
+  length: z.number(),
+  height: z.number(),
+  thickness: z.number(),
+  material: z.enum(material),
+  dimensionType: z.enum(dimensionType),
 });
 
 export type SaveDielineFormType = z.infer<typeof saveDielineFormSchema>;

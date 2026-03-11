@@ -1,6 +1,6 @@
 import { deleteDieline } from "@/actions/dieline";
 import DielineSettingsForm from "@/components/forms/DielineSettingsForm";
-import DeleteButton from "@/components/TrashButton";
+import DeleteButton from "@/components/DeleteButton";
 import { mainURL } from "@/data/envs";
 import {
   Dieline,
@@ -23,7 +23,7 @@ import { ArrowUpRight, Pencil, Settings } from "lucide-react";
 export interface DielineType extends Dieline {
   categoryByUsage: DielineCategoryByUsage[];
   categoryByModel: DielineCategoryByModel[];
-  _count: { downloadRecords: number };
+  _count: { downloadHistory: number };
 }
 
 export type Categories = {
@@ -76,13 +76,15 @@ const DielinesList = ({
           </Tooltip>
         </TableCell>
         <TableCell className="text-center">
-          {dieline._count.downloadRecords}
+          {dieline._count.downloadHistory}
         </TableCell>
         <TableCell className="flex justify-center">
           <div
             className={cn(
-              dieline.active ? "bg-green-500" : "bg-gray-300",
-              "w-5 h-1.5 rounded-full",
+              dieline.active
+                ? "bg-green-500 drop-shadow-green-500"
+                : "bg-gray-300",
+              "w-5 h-1.5 rounded-full drop-shadow-sm",
             )}
           />
         </TableCell>
@@ -96,7 +98,7 @@ const DielinesList = ({
               href={`/editor/${dieline.slug}`}
               target="_blank"
             />
-            <DeleteButton deleteFn={deleteDieline} />
+            <DeleteButton id={dieline.id} deleteFn={deleteDieline} />
           </div>
         </TableCell>
       </TableRow>

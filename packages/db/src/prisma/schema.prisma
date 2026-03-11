@@ -146,6 +146,7 @@ model SavedDieline {
   title       String
   description String
   createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   dieline   Dieline @relation(fields: [dielineId], references: [id])
   dielineId Int
@@ -167,6 +168,15 @@ model DownloadHistory {
   settings Settings?
 }
 
+model FavedDieline {
+  id Int @id @default(autoincrement())
+
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  dieline   Dieline @relation(fields: [dielineId], references: [id], onDelete: Cascade)
+  dielineId Int
+}
+
 model Settings {
   id            Int           @id @default(autoincrement())
   bleed         Int
@@ -174,7 +184,7 @@ model Settings {
   height        Float
   length        Float
   thickness     Float
-  material      String
+  material      Material
   dimensionType DimensionType
 
   downloadHistory   DownloadHistory? @relation(fields: [downloadHistoryId], references: [id])
@@ -183,19 +193,22 @@ model Settings {
   savedDielinesId   Int?             @unique
 }
 
+enum Material {
+  cFlute
+  beFlute
+  bcFlute
+  abFlute
+  artPaper
+  glossyCardboard
+  fFlute
+  eFlute
+  bFlute
+}
+
 enum DimensionType {
   manufacture
   inner
   outer
-}
-
-model FavedDieline {
-  id Int @id @default(autoincrement())
-
-  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    Int
-  dieline   Dieline @relation(fields: [dielineId], references: [id], onDelete: Cascade)
-  dielineId Int
 }
 
 //! PAYMENT --------------------------------

@@ -1,63 +1,46 @@
+import { deleteSavedDieline } from "@/actions/dieline";
+import DeleteButton from "@/components/DeleteButton";
 import SaveDielineForm from "@/components/forms/SaveDielineForm";
-import { DimensionType, MaterialKey } from "@repo/store/data/types";
+import { Dieline, SavedDieline, Settings } from "@repo/db";
 import ActionButton from "@repo/ui/components/custom/ActionButton";
 import Card from "@repo/ui/components/custom/Card";
 import Table from "@repo/ui/components/custom/Table";
-import {
-  Dialog,
-  DialogContent,
-  DialogTrigger,
-} from "@repo/ui/components/dialog";
+import { DialogTitle } from "@repo/ui/components/dialog";
 import { TableCell, TableRow } from "@repo/ui/components/table";
 import { formatDate } from "date-fns";
 import { Pencil } from "lucide-react";
 
-export type SavedDieline = {
-  id: number;
-  title: string;
-  dieline: string;
-  dimensions: string;
-  bleed: number;
-  material: MaterialKey;
-  thickness: number;
-  dimenstionsType: DimensionType;
-  downloadedAt: Date;
-};
+interface SavedDielineType extends SavedDieline {
+  settings: Settings | null;
+  dieline: Dieline;
+}
 
-const SavedDielinesList = ({ data }: { data: SavedDieline[] }) => {
-  const renderRows = (data: SavedDieline) => {
-    const {
-      bleed,
-      dimensions,
-      dimenstionsType,
-      dieline,
-      id,
-      material,
-      thickness,
-      title,
-      downloadedAt,
-    } = data;
+const SavedDielinesList = ({ data }: { data: SavedDielineType[] }) => {
+  const renderRows = (data: SavedDielineType) => {
+    const { createdAt, id, title, settings, dieline } = data;
+
     return (
       <TableRow key={id}>
         <TableCell>{title}</TableCell>
-        <TableCell className="text-center">{dieline}</TableCell>
-        <TableCell className="text-center">{dimensions}</TableCell>
-        <TableCell className="text-center">{material}</TableCell>
-        <TableCell className="text-center">{thickness}mm</TableCell>
-        <TableCell className="text-center">{bleed}mm</TableCell>
-        <TableCell className="text-center">{dimenstionsType}</TableCell>
+        <TableCell className="text-center">{dieline.title}</TableCell>
+        <TableCell className="text-center">{settings?.width}</TableCell>
+        <TableCell className="text-center">{settings?.material}</TableCell>
+        <TableCell className="text-center">{settings?.thickness}mm</TableCell>
+        <TableCell className="text-center">{settings?.bleed}mm</TableCell>
+        <TableCell className="text-center">{settings?.dimensionType}</TableCell>
         <TableCell className="text-center">
-          {formatDate(downloadedAt, "PP")}
+          {formatDate(createdAt, "PP")}
         </TableCell>
-        <TableCell className="text-left">
-          <Dialog>
-            <DialogTrigger asChild>
-              <ActionButton icon={Pencil} />
-            </DialogTrigger>
-            <DialogContent>
-              <SaveDielineForm type="update" />
-            </DialogContent>
-          </Dialog>
+        <TableCell className="text-left space-x-1.5">
+          <ActionButton icon={Pencil}>
+            <DialogTitle>ویرایش قالب</DialogTitle>
+            <SaveDielineForm
+              settings={settings!}
+              slug={dieline.slug}
+              savedDieline={data}
+            />
+          </ActionButton>
+          <DeleteButton deleteFn={deleteSavedDieline} id={data.id} />
         </TableCell>
       </TableRow>
     );

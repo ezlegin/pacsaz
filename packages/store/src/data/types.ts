@@ -3,15 +3,15 @@ export type DimensionType = "manufacture" | "inner" | "outer";
 
 //! Materils ---------------------------------
 export type MaterialKey =
-  | "c-flute"
-  | "be-flute"
-  | "bc-flute"
-  | "ab-flute"
-  | "art-paper"
-  | "glossy-cardboard"
-  | "f-flute"
-  | "e-flute"
-  | "b-flute";
+  | "cFlute"
+  | "beFlute"
+  | "bcFlute"
+  | "abFlute"
+  | "artPaper"
+  | "glossyCardboard"
+  | "fFlute"
+  | "eFlute"
+  | "bFlute";
 export type MaterialValue = {
   value: MaterialKey;
   label: string;

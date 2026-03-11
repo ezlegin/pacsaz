@@ -2,7 +2,6 @@
 
 import { updateDielineSettings } from "@/actions/dieline";
 import { Categories, DielineType } from "@/app/(PANEL)/dielines/DielinesList";
-import { handleRes } from "@/lib/utils/handleRes";
 import {
   dielineSettingsFormSchema,
   DielineSettingsFormType,
@@ -23,6 +22,8 @@ import { Label } from "@repo/ui/components/label";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import SubmitButton from "../SubmitButton";
+import { Switch } from "@repo/ui/components/switch";
+import { handleRes } from "@/lib/utils/handleRes";
 
 const DielineSettingsForm = ({
   dieline,
@@ -38,6 +39,7 @@ const DielineSettingsForm = ({
     defaultValues: {
       title: dieline.title ?? "",
       slug: dieline.slug ?? "",
+      active: dieline.active ?? false,
       categoryByModel:
         dieline.categoryByModel.length > 0
           ? dieline.categoryByModel.map((i) => i.slug)
@@ -50,8 +52,6 @@ const DielineSettingsForm = ({
   });
 
   const onSubmit = async (data: DielineSettingsFormType) => {
-    // console.log(data);
-    // return;
     startLoading();
 
     const res = await updateDielineSettings(data, dieline.id);
@@ -62,7 +62,25 @@ const DielineSettingsForm = ({
 
   return (
     <Form {...form}>
-      <DialogTitle>Settings</DialogTitle>
+      <div className="flex justify-between">
+        <DialogTitle>Settings</DialogTitle>
+
+        <FormField
+          control={form.control}
+          name="active"
+          render={({ field }) => (
+            <FormItem className="flex">
+              <FormLabel>Active</FormLabel>
+              <FormControl>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+      </div>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
         <FormField
           control={form.control}

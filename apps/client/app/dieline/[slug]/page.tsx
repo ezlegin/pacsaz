@@ -9,7 +9,7 @@ interface Props {
 export default async function DielinePage({ params }: Props) {
   const { slug } = await params;
   const dieline = await prisma.dieline.findFirst({
-    where: { slug },
+    where: { slug, active: true },
     include: {
       settings: { include: { defaultDimension: true, minDimension: true } },
     },

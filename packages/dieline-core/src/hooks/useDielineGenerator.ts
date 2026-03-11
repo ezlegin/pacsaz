@@ -53,10 +53,13 @@ export function useDielineGenerator(
 
   // set defaults
   useEffect(() => {
-    const materailsss = setts?.materials.split(",") as
+    const materialsArr = setts?.materials.split(",") as
       | MaterialKey[]
       | undefined;
-    const mats = materailsss?.map((i) => materials[i]);
+    console.log(materialsArr);
+    const mats = materialsArr
+      ?.map((i) => materials.find((m) => m.value === i))
+      .filter((i) => i !== undefined);
     const dimensionTypes = setts?.dimensionTypes.split(",") as
       | DimensionType[]
       | undefined;
@@ -73,7 +76,7 @@ export function useDielineGenerator(
         height: 30,
         length: 30,
       },
-      mat: materials["glossy-cardboard"],
+      mat: materials[0]!,
       dimensionTypes: ["manufacture", "inner", "outer"],
     };
 

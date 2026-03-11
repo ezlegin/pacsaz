@@ -1,7 +1,7 @@
 "use client";
 
-import { ServerAction } from "@/actions/dieline";
-import { handleRes } from "@/lib/utils/handleRes";
+import { handleRes } from "@/lib/handleRes";
+import { ServerAction } from "@repo/lib/data/types";
 import { useLoading } from "@repo/lib/utils/useLoading";
 import { Button } from "@repo/ui/components/button";
 import ActionButton from "@repo/ui/components/custom/ActionButton";
@@ -12,19 +12,22 @@ import { useRouter } from "next/navigation";
 
 const DeleteButton = ({
   deleteFn,
+  id,
 }: {
   deleteFn: (id: number) => ServerAction;
+  id: number;
 }) => {
   const router = useRouter();
   const { isLoading, startLoading, stopLoading } = useLoading();
 
   const onDelete = async () => {
     startLoading();
-    const res = await deleteFn(2);
+    const res = await deleteFn(id);
     handleRes(res, { onSuccess: () => router.refresh() });
     stopLoading();
   };
   //   Todo: Use AlertDialog from Shadcn instead of raw Dialog.
+  // Todo: implement language support
   return (
     <ActionButton icon={Trash}>
       <DialogTitle>Delete</DialogTitle>

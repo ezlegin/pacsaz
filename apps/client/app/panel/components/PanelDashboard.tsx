@@ -15,6 +15,7 @@ const PanelDashboard = async () => {
     throw new Error("User or User Plan not Provided. [PanelDashboard]");
 
   const downloadRecords = await prisma.downloadHistory.findMany({
+    where: { userId: 1 }, // todo
     take: 10,
     include: { dieline: true, settings: true },
     orderBy: { downloadedAt: "desc" },

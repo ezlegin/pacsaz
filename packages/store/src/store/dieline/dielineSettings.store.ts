@@ -30,7 +30,7 @@ type DielineSettingsStore = {
   setDefaultSettings: (settings: DielineSettings) => void;
 };
 
-export const defaultMaterial = materials["glossy-cardboard"];
+export const defaultMaterial = materials[0]!;
 export const useDielineSettingsStore = create<DielineSettingsStore>((set) => ({
   settings: {
     dimension: {
