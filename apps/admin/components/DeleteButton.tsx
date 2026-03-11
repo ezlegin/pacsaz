@@ -13,16 +13,18 @@ import { useRouter } from "next/navigation";
 const DeleteButton = ({
   deleteFn,
   id,
+  args,
 }: {
-  deleteFn: (id: number) => ServerAction;
+  deleteFn: (id: number, ...arg: any) => ServerAction;
   id: number;
+  args?: any;
 }) => {
   const router = useRouter();
   const { isLoading, startLoading, stopLoading } = useLoading();
 
   const onDelete = async () => {
     startLoading();
-    const res = await deleteFn(id);
+    const res = await deleteFn(id, args);
     handleRes(res, { onSuccess: () => router.refresh() });
     stopLoading();
   };

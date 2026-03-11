@@ -1,17 +1,28 @@
+import { deleteCategory } from "@/actions/categories";
+import DeleteButton from "@/components/DeleteButton";
+import { CategoriesForm } from "@/components/forms/CategoriesForm";
 import { mainURL } from "@/data/envs";
 import ActionButton from "@repo/ui/components/custom/ActionButton";
 import Card from "@repo/ui/components/custom/Card";
 import Table from "@repo/ui/components/custom/Table";
+import { DialogTitle } from "@repo/ui/components/dialog";
 import { TableCell, TableRow } from "@repo/ui/components/table";
 import { Pencil, Trash } from "lucide-react";
 
-type Category = {
+export type Category = {
+  id: number;
   title: string;
   slug: string;
   _count: { dieline: number };
 };
 
-function CategoriesList({ data }: { data: Category[] }) {
+function CategoriesList({
+  data,
+  type,
+}: {
+  data: Category[];
+  type: "model" | "usage";
+}) {
   const renderRows = (data: Category) => {
     return (
       <TableRow key={data.slug}>
@@ -23,8 +34,13 @@ function CategoriesList({ data }: { data: Category[] }) {
         </TableCell>
         <TableCell className="text-center">{data._count.dieline}</TableCell>
         <TableCell className="flex justify-end gap-3">
-          <ActionButton icon={Pencil} />
-          <ActionButton icon={Trash} />
+          <ActionButton icon={Pencil}>
+            <DialogTitle className="capitalize">
+              Update Category By {type}
+            </DialogTitle>
+            <CategoriesForm type={type} category={data} />
+          </ActionButton>
+          <DeleteButton deleteFn={deleteCategory} id={data.id} args={type} />
         </TableCell>
       </TableRow>
     );

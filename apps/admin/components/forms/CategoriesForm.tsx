@@ -1,5 +1,8 @@
 "use client";
 
+import { createCategory, updateCategory } from "@/actions/categories";
+import { Category } from "@/app/(PANEL)/categories/CategoriesList";
+import { handleRes } from "@/lib/utils/handleRes";
 import {
   categoriesFormSchema,
   CategoriesFormType,
@@ -14,26 +17,37 @@ import {
   FormLabel,
 } from "@repo/ui/components/form";
 import { Input } from "@repo/ui/components/input";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import PageTitle from "../PageTitle";
 
-export function CategoriesForm({ by }: { by: "usage" | "model" }) {
+export function CategoriesForm({
+  category,
+  type,
+}: {
+  category?: Category;
+  type: "usage" | "model";
+}) {
+  const isUpdateType = !!category;
+  const router = useRouter();
+
   const form = useForm<CategoriesFormType>({
     resolver: zodResolver(categoriesFormSchema),
     defaultValues: {
-      title: "",
-      slug: "",
+      title: category?.title ?? "",
+      slug: category?.slug ?? "",
     },
   });
 
-  function onSubmit(data: CategoriesFormType) {
-    console.log(data);
-  }
+  const onSubmit = async (data: CategoriesFormType) => {
+    const res = isUpdateType
+      ? await updateCategory(data, type, category!.id)
+      : await createCategory(data, type);
+
+    handleRes(res, { onSuccess: () => router.refresh() });
+  };
 
   return (
     <Form {...form}>
-      <PageTitle title={`New Category By ${by}`} />
-
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
         <FormField
           control={form.control}
@@ -65,7 +79,7 @@ export function CategoriesForm({ by }: { by: "usage" | "model" }) {
           disabled={!form.formState.isValid}
           className="w-full"
         >
-          Create
+          {isUpdateType ? "Update" : "Create"}
         </Button>
       </form>
     </Form>

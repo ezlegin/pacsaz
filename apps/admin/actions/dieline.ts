@@ -1,6 +1,7 @@
 "use server";
 
 import { DielineMetadataFormType } from "@/components/forms/DielineMetadataForm";
+import { ServerErrorMessage } from "@/data/consts";
 import { DielineSettingsFormType } from "@/lib/validationSchema/validatoinSchema";
 import { prisma } from "@repo/db";
 
@@ -48,7 +49,7 @@ export const createDieline = async (data: DielineMetadataFormType) => {
     return { success: "Dieline Saved Successfully." };
   } catch (error) {
     console.error(error);
-    return { error: "Something Wen't Wrong. Check the Server logs." };
+    return { error: ServerErrorMessage };
   }
 };
 
@@ -103,7 +104,7 @@ export const updateDieline = async (
     return { success: "Dieline Updated Successfully." };
   } catch (error) {
     console.error(error);
-    return { error: (error as Error).message };
+    return { error: ServerErrorMessage };
   }
 };
 
@@ -140,7 +141,7 @@ export const updateDielineSettings = async (
     return { success: "Dieline Updated Successfully." };
   } catch (error) {
     console.error(error);
-    return { error: (error as Error).message };
+    return { error: ServerErrorMessage };
   }
 };
 export const deleteDieline = async (id: number) => {
@@ -153,6 +154,6 @@ export const deleteDieline = async (id: number) => {
     return { success: "Dieline Deleted Successfully." };
   } catch (error) {
     console.error(error);
-    return { error: (error as Error).message };
+    return { error: ServerErrorMessage };
   }
 };

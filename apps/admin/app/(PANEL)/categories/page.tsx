@@ -7,6 +7,7 @@ import { globalPageSize } from "@repo/lib/data/consts";
 import Search from "@repo/ui/components/custom/Search";
 import Filter from "@repo/ui/components/custom/Filter";
 import { prisma } from "@repo/db";
+import { DialogTitle } from "@repo/ui/components/dialog";
 
 const page = async () => {
   const dielineIncludes = {
@@ -36,11 +37,12 @@ const page = async () => {
           </div>
 
           <PopupNewDialog buttonTitle="New">
-            <CategoriesForm by="usage" />
+            <DialogTitle>New Category By Usage</DialogTitle>
+            <CategoriesForm type="usage" />
           </PopupNewDialog>
         </div>
 
-        <CategoriesList data={catByUsage} />
+        <CategoriesList data={catByUsage} type="usage" />
 
         <Pagination
           pageSize={globalPageSize}
@@ -67,11 +69,12 @@ const page = async () => {
           </div>
 
           <PopupNewDialog buttonTitle="New">
-            <CategoriesForm by="model" />
+            <DialogTitle>New Category By Model</DialogTitle>
+            <CategoriesForm type="model" />
           </PopupNewDialog>
         </div>
 
-        <CategoriesList data={catByModel} />
+        <CategoriesList data={catByModel} type="model" />
 
         <Pagination
           pageSize={globalPageSize}

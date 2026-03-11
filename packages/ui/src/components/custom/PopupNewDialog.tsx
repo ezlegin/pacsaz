@@ -22,10 +22,7 @@ const PopupNewDialog = ({
         <NewButton title={buttonTitle} icon={icon} />
         {/* INSTALL LUDICE REACT V0.562.0 TO FIX TYPE ERROR */}
       </DialogTrigger>
-      <DialogContent>
-        <DialogTitle className="sr-only" />
-        {children}
-      </DialogContent>
+      <DialogContent>{children}</DialogContent>
     </Dialog>
   );
 };
