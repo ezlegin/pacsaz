@@ -8,10 +8,10 @@ import { Pencil, Trash } from "lucide-react";
 type Category = {
   title: string;
   slug: string;
-  dielines: number;
+  _count: { dieline: number };
 };
 
-const CategoriesList = ({ data }: { data: Category[] }) => {
+function CategoriesList({ data }: { data: Category[] }) {
   const renderRows = (data: Category) => {
     return (
       <TableRow key={data.slug}>
@@ -21,7 +21,7 @@ const CategoriesList = ({ data }: { data: Category[] }) => {
             {data.slug}
           </a>
         </TableCell>
-        <TableCell className="text-center">{data.dielines}</TableCell>
+        <TableCell className="text-center">{data._count.dieline}</TableCell>
         <TableCell className="flex justify-end gap-3">
           <ActionButton icon={Pencil} />
           <ActionButton icon={Trash} />
@@ -35,7 +35,7 @@ const CategoriesList = ({ data }: { data: Category[] }) => {
       <Table columns={columns} data={data} renderRows={renderRows} dir="ltr" />
     </Card>
   );
-};
+}
 
 export default CategoriesList;
 

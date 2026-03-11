@@ -65,3 +65,11 @@ export const subscriptionFormSchema = z.object({
   status: z.enum(paymentStatus),
 });
 export type SubscriptionFormType = z.infer<typeof subscriptionFormSchema>;
+
+export const dielineSettingsFormSchema = z.object({
+  title: z.string().min(1),
+  slug: z.string().min(1),
+  categoryByModel: z.array(z.string()),
+  categoryByUsage: z.array(z.string()),
+});
+export type DielineSettingsFormType = z.infer<typeof dielineSettingsFormSchema>;

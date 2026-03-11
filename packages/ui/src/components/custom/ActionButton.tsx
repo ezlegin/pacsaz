@@ -1,24 +1,47 @@
-import { Button } from "@repo/ui/components/button";
-import { cn } from "@repo/ui/lib/utils";
 import { LucideIcon } from "lucide-react";
+import Link from "next/link";
+import { HTMLAttributeAnchorTarget, ReactNode } from "react";
+import { Dialog, DialogContent, DialogTrigger } from "../dialog";
 
 const ActionButton = (param: {
   icon: LucideIcon;
+  href?: string;
+  target?: HTMLAttributeAnchorTarget;
   className?: string;
   iconClass?: string;
+  children?: ReactNode;
 }) => {
+  if (param.href)
+    return (
+      <Link href={param.href} target={param.target}>
+        <ActButton>
+          <param.icon size={14} className={param.iconClass} />
+        </ActButton>
+      </Link>
+    );
+
   return (
-    <Button
-      variant={"secondary"}
-      size={"icon"}
-      className={cn(
-        "rounded-full text-muted-foreground hover:text-foreground size-7",
-        param.className
-      )}
-    >
-      <param.icon className={cn("scale-90", param.iconClass)} />
-    </Button>
+    <Dialog>
+      <DialogTrigger>
+        <ActButton>
+          <param.icon size={14} className={param.iconClass} />
+        </ActButton>
+      </DialogTrigger>
+      <DialogContent>{param.children}</DialogContent>
+    </Dialog>
   );
 };
 
 export default ActionButton;
+
+export const ActButton = ({ children }: { children: ReactNode }) => {
+  return (
+    <div
+      className={
+        "rounded-full bg-muted flex items-center justify-center hover:bg-gray-200 cursor-pointer text-muted-foreground hover:text-foreground size-7"
+      }
+    >
+      {children}
+    </div>
+  );
+};

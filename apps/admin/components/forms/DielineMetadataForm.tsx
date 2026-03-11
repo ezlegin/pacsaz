@@ -1,4 +1,4 @@
-import { createDieline, updateDieline } from "@/actions/editor/editor";
+import { createDieline, updateDieline } from "@/actions/dieline";
 import { handleRes } from "@/lib/utils/handleRes";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Dieline } from "@repo/db";
@@ -334,7 +334,7 @@ const DefaultSettings = ({ form }: { form: Form }) => {
             control={form.control}
             name="materials"
             render={({ field }) => (
-              <FormItem className="grid grid-cols-2">
+              <div className="grid grid-cols-2">
                 {Object.entries(materials)?.map(([key, item]) => {
                   const isChecked = field.value
                     ?.split(",")
@@ -353,8 +353,6 @@ const DefaultSettings = ({ form }: { form: Form }) => {
                               ? [...materials, key].join(",")
                               : materials.filter((i) => i !== key).join(",");
 
-                            console.log(updatedMaterials);
-                            // return;
                             field.onChange(updatedMaterials);
                           }}
                         />
@@ -368,7 +366,7 @@ const DefaultSettings = ({ form }: { form: Form }) => {
                     </FormItem>
                   );
                 })}
-              </FormItem>
+              </div>
             )}
           />
         </div>

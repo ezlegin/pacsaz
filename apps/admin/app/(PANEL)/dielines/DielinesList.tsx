@@ -1,4 +1,12 @@
+import { deleteDieline } from "@/actions/dieline";
+import DielineSettingsForm from "@/components/forms/DielineSettingsForm";
+import DeleteButton from "@/components/TrashButton";
 import { mainURL } from "@/data/envs";
+import {
+  Dieline,
+  DielineCategoryByModel,
+  DielineCategoryByUsage,
+} from "@repo/db";
 import { Badge } from "@repo/ui/components/badge";
 import ActionButton from "@repo/ui/components/custom/ActionButton";
 import Card from "@repo/ui/components/custom/Card";
@@ -9,28 +17,34 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@repo/ui/components/tooltip";
-import { Pencil, Trash } from "lucide-react";
+import { cn } from "@repo/ui/lib/utils";
+import { Pencil, Settings } from "lucide-react";
 
-type Dieline = {
-  id: number;
-  title: string;
-  slug: string;
-  categories: {
-    byUsage: string[];
-    byModel: string[];
-  };
-  downloaded: number;
+export interface DielineType extends Dieline {
+  categoryByUsage: DielineCategoryByUsage[];
+  categoryByModel: DielineCategoryByModel[];
+}
+
+export type Categories = {
+  byModel: DielineCategoryByModel[];
+  byUsage: DielineCategoryByUsage[];
 };
 
-const DielinesList = ({ data }: { data: Dieline[] }) => {
-  const renderRows = (data: Dieline) => {
+const DielinesList = ({
+  data,
+  categories,
+}: {
+  data: DielineType[];
+  categories: Categories;
+}) => {
+  const renderRows = (dieline: DielineType) => {
     return (
-      <TableRow key={data.id}>
-        <TableCell>{data.id}</TableCell>
-        <TableCell className="text-center">{data.title}</TableCell>
+      <TableRow key={dieline.id}>
+        <TableCell>{dieline.id}</TableCell>
+        <TableCell className="text-center">{dieline.title}</TableCell>
         <TableCell className="text-center">
-          <a target="_blank" href={`${mainURL}/dieline/${data.slug}`}>
-            {data.slug}
+          <a target="_blank" href={`${mainURL}/dieline/${dieline.slug}`}>
+            {dieline.slug}
           </a>
         </TableCell>
         <TableCell className="text-center flex gap-2 justify-center items-center">
@@ -38,24 +52,43 @@ const DielinesList = ({ data }: { data: Dieline[] }) => {
             <TooltipTrigger>
               <Badge variant={"outline"}>By Usage</Badge>
             </TooltipTrigger>
-            <TooltipContent>
-              {data.categories.byUsage.join(", ")}
+            <TooltipContent dir="rtl">
+              {dieline.categoryByUsage.map((i) => (
+                <div key={i.id}>- {i.title}</div>
+              ))}
             </TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger>
               <Badge variant={"outline"}>By Model</Badge>
             </TooltipTrigger>
-            <TooltipContent>
-              {data.categories.byModel.join(", ")}
+            <TooltipContent dir="rtl">
+              {dieline.categoryByModel.map((i) => (
+                <div key={i.id}>- {i.title}</div>
+              ))}
             </TooltipContent>
           </Tooltip>
         </TableCell>
-        <TableCell className="text-center">{data.downloaded}</TableCell>
+        <TableCell className="text-center">{/* {data.downloaded} */}</TableCell>
+        <TableCell className="flex justify-center">
+          <div
+            className={cn(
+              dieline.active ? "bg-green-500" : "bg-gray-300",
+              "w-5 h-1.5 rounded-full",
+            )}
+          />
+        </TableCell>
         <TableCell>
           <div className="flex justify-end gap-2">
-            <ActionButton icon={Pencil} />
-            <ActionButton icon={Trash} />
+            <ActionButton icon={Settings}>
+              <DielineSettingsForm dieline={dieline} categories={categories} />
+            </ActionButton>
+            <ActionButton
+              icon={Pencil}
+              href={`/editor/${dieline.slug}`}
+              target="_blank"
+            />
+            <DeleteButton deleteFn={deleteDieline} />
           </div>
         </TableCell>
       </TableRow>
@@ -77,5 +110,6 @@ const columns = [
   { label: "Slug", className: "" },
   { label: "Categories", className: "" },
   { label: "Downloaded", className: "" },
+  { label: "Active", className: "" },
   { label: "Action", className: "" },
 ];

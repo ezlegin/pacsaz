@@ -128,9 +128,11 @@ model Dieline {
   updatedAt     DateTime @updatedAt
   settings      Settings @relation(fields: [settingsId], references: [id])
   settingsId    Int      @unique
+  active        Boolean  @default(false)
 
   image           DielineImage?
-  category        DielineCategory[]
+  categoryByUsage DielineCategoryByUsage[]
+  categoryByModel DielineCategoryByModel[]
   downloadRecords DownloadRecord[]
   favedDieline    FavedDieline[]
   dielineInfos    DielineInfo[]
@@ -156,10 +158,6 @@ model DefaultDimension {
   settings Settings?
 }
 
-enum Hi {
-  enum
-}
-
 model MinDimension {
   id       Int       @id @default(autoincrement())
   width    Int
@@ -168,17 +166,18 @@ model MinDimension {
   settings Settings?
 }
 
-model DielineCategory {
-  id      Int          @id @default(autoincrement())
+model DielineCategoryByUsage {
+  id      Int       @id @default(autoincrement())
   title   String
-  slug    String
-  type    CategoryType
+  slug    String    @unique
   dieline Dieline[]
 }
 
-enum CategoryType {
-  byUsage
-  byModel
+model DielineCategoryByModel {
+  id      Int       @id @default(autoincrement())
+  title   String
+  slug    String    @unique
+  dieline Dieline[]
 }
 
 model DielineImage {

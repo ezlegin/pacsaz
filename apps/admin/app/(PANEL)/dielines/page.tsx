@@ -1,4 +1,5 @@
 import PageTitle from "@/components/PageTitle";
+import { prisma } from "@repo/db";
 import { globalPageSize } from "@repo/lib/data/consts";
 import Filter from "@repo/ui/components/custom/Filter";
 import NewButton from "@repo/ui/components/custom/NewButton";
@@ -6,7 +7,17 @@ import Pagination from "@repo/ui/components/custom/Pagination";
 import Search from "@repo/ui/components/custom/Search";
 import DielinesList from "./DielinesList";
 
-const page = () => {
+const page = async () => {
+  const dielines = await prisma.dieline.findMany({
+    include: { categoryByModel: true, categoryByUsage: true },
+  });
+  const categories = {
+    byModel: await prisma.dielineCategoryByModel.findMany(),
+    byUsage: await prisma.dielineCategoryByUsage.findMany(),
+  };
+
+  // Todo: Sorting
+
   return (
     <div className="space-y-3">
       <PageTitle title="Dielines" />
@@ -24,37 +35,14 @@ const page = () => {
           />
         </div>
 
-        <NewButton title="New Dieline" href="/dielines/new" />
+        <NewButton title="New Dieline" href="/editor/new" />
       </div>
 
-      <DielinesList data={data} />
+      <DielinesList data={dielines} categories={categories} />
 
-      <Pagination pageSize={globalPageSize} totalItems={data.length} />
+      <Pagination pageSize={globalPageSize} totalItems={dielines.length} />
     </div>
   );
 };
 
 export default page;
-
-const data = [
-  {
-    id: 1,
-    title: "جعبه دو طرف درب",
-    slug: "tuck-end",
-    categories: {
-      byUsage: ["medicine", "food"],
-      byModel: ["tuck-end"],
-    },
-    downloaded: 290,
-  },
-  {
-    id: 2,
-    title: "جعبه اسنپ لاک",
-    slug: "tuck-end-snap-lock",
-    categories: {
-      byUsage: ["medicine", "food"],
-      byModel: ["tuck-end"],
-    },
-    downloaded: 373,
-  },
-];

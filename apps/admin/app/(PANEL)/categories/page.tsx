@@ -6,8 +6,17 @@ import PopupNewDialog from "@repo/ui/components/custom/PopupNewDialog";
 import { globalPageSize } from "@repo/lib/data/consts";
 import Search from "@repo/ui/components/custom/Search";
 import Filter from "@repo/ui/components/custom/Filter";
+import { prisma } from "@repo/db";
 
-const page = () => {
+const page = async () => {
+  const dielineIncludes = {
+    include: { _count: { select: { dieline: true } } },
+  };
+  const catByUsage =
+    await prisma.dielineCategoryByUsage.findMany(dielineIncludes);
+  const catByModel =
+    await prisma.dielineCategoryByModel.findMany(dielineIncludes);
+
   return (
     <div className="grid grid-cols-2 gap-8">
       <div className="space-y-3">
@@ -31,11 +40,11 @@ const page = () => {
           </PopupNewDialog>
         </div>
 
-        <CategoriesList data={data} />
+        <CategoriesList data={catByUsage} />
 
         <Pagination
           pageSize={globalPageSize}
-          totalItems={data.length}
+          totalItems={catByUsage.length}
           paramName="pageByUsage"
         />
       </div>
@@ -62,11 +71,11 @@ const page = () => {
           </PopupNewDialog>
         </div>
 
-        <CategoriesList data={data} />
+        <CategoriesList data={catByModel} />
 
         <Pagination
           pageSize={globalPageSize}
-          totalItems={data.length}
+          totalItems={catByModel.length}
           paramName="pageByModel"
         />
       </div>
@@ -75,18 +84,3 @@ const page = () => {
 };
 
 export default page;
-
-const data = [
-  {
-    id: 1,
-    title: "مواد غذایی",
-    slug: "food",
-    dielines: 123,
-  },
-  {
-    id: 2,
-    title: "کادو",
-    slug: "gift",
-    dielines: 123,
-  },
-];
