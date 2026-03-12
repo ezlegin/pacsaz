@@ -1,6 +1,5 @@
 "use server";
 
-import { serverErrorMessage } from "@/data/consts";
 import { UserFormType } from "@/lib/validationSchema/validatoinSchema";
 import { prisma } from "@repo/db";
 
@@ -23,7 +22,7 @@ export const createUser = async (data: UserFormType) => {
     return { success: "User Created Succesfully." };
   } catch (error) {
     console.error(error);
-    return { error: serverErrorMessage };
+    return { error: (error as Error).message };
   }
 };
 
@@ -43,7 +42,7 @@ export const updateUser = async (data: UserFormType, id: number) => {
     return { success: "User Updated Succesfully." };
   } catch (error) {
     console.error(error);
-    return { error: serverErrorMessage };
+    return { error: (error as Error).message };
   }
 };
 
@@ -60,6 +59,6 @@ export const deleteUser = async (id: number) => {
     return { success: "User Deleted Succesfully." };
   } catch (error) {
     console.error(error);
-    return { error: serverErrorMessage };
+    return { error: (error as Error).message };
   }
 };

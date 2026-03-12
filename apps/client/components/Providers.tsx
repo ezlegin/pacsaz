@@ -1,5 +1,6 @@
 "use client";
 
+import { getUserById } from "@/data/user";
 import { ProgressProvider } from "@bprogress/next/app";
 import { useUserStore } from "@repo/store/app/user.store";
 import { ReactNode, useEffect } from "react";
@@ -30,10 +31,18 @@ const ProgressBarProvider = ({ children }: { children: React.ReactNode }) => {
 export function UserProvider({ children }: { children: ReactNode }) {
   const { setUser } = useUserStore();
 
-  const user = null; //todo: AUTH Fetch
+  const userIdFromAuth = 1; //todo: get from auth token
+
   useEffect(() => {
-    if (user) setUser(user);
-  }, [user, setUser]);
+    (async () => {
+      try {
+        const u = await getUserById(userIdFromAuth);
+        if (u) setUser(u);
+      } catch (err) {
+        console.error("Failed to fetch user:", err);
+      }
+    })();
+  }, []);
 
   return children;
 }

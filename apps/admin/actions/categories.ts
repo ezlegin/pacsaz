@@ -1,6 +1,5 @@
 "use server";
 
-import { serverErrorMessage } from "@/data/consts";
 import { CategoriesFormType } from "@/lib/validationSchema/validatoinSchema";
 import { prisma } from "@repo/db";
 
@@ -28,7 +27,7 @@ export const createCategory = async (
     return { success: "Category Created Successfully." };
   } catch (error) {
     console.error(error);
-    return { error: serverErrorMessage };
+    return { error: (error as Error).message };
   }
 };
 
@@ -68,7 +67,7 @@ export const updateCategory = async (
     return { success: "Category Updated Successfully." };
   } catch (error) {
     console.error(error);
-    return { error: serverErrorMessage };
+    return { error: (error as Error).message };
   }
 };
 
@@ -93,6 +92,6 @@ export const deleteCategory = async (id: number, type: "model" | "usage") => {
     return { success: "Category Updated Successfully." };
   } catch (error) {
     console.error(error);
-    return { error: serverErrorMessage };
+    return { error: (error as Error).message };
   }
 };

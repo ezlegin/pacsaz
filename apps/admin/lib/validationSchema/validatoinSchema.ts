@@ -11,7 +11,7 @@ export const userType = [
 ] as const;
 
 export const planKey = ["standard", "pro", "organization"] as const;
-export const planPeriod = ["monthly", "3-month", "annual"] as const;
+export const planPeriod = ["monthly", "threeMonth", "annual"] as const;
 export const paymentStatus = [
   "success",
   "failed",
@@ -41,10 +41,19 @@ export const categoriesFormSchema = z.object({
 });
 export type CategoriesFormType = z.infer<typeof categoriesFormSchema>;
 
+const tarrifForm = z.object({
+  title: z.string().min(1),
+  shortDescription: z.string().min(1),
+  description: z.string().min(1),
+  fairDownload: z.string().min(1),
+  monthly: z.string().min(1),
+  threeMonth: z.string().min(1),
+  annual: z.string().min(1),
+});
 export const tarrifFormSchema = z.object({
-  standard: z.string().min(1),
-  pro: z.string().min(1),
-  organization: z.string(),
+  standard: tarrifForm,
+  pro: tarrifForm,
+  organization: tarrifForm,
 });
 export type TarrifFormType = z.infer<typeof tarrifFormSchema>;
 

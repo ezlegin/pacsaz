@@ -37,7 +37,6 @@ export const contactFormSchema = z.object({
     .string()
     .min(10, "شماره تماس معتبر نیست")
     .max(15, "شماره تماس معتبر نیست"),
-
   subject: z.string().min(3, "عنوان باید حداقل ۳ کاراکتر باشد"),
   message: z.string().min(10, "پیام باید حداقل ۱۰ کاراکتر باشد"),
 });

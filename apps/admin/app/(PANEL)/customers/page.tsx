@@ -1,8 +1,8 @@
 import PageTitle from "@/components/PageTitle";
-import Search from "@/components/Search";
 import { globalPageSize } from "@repo/lib/data/consts";
 import Pagination from "@repo/ui/components/custom/Pagination";
 import CustomersList from "./CustomersList";
+import Search from "@repo/ui/components/custom/Search";
 
 export type Customer = {
   id: number;

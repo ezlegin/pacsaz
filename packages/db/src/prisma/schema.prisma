@@ -29,7 +29,7 @@ model User {
   otp           Otp[]
   favedDielines FavedDieline[]
   savedDielines SavedDieline[]
-  paymentPlans  PaymentPlan[]
+  paymentPlans  Plan[]
 }
 
 enum UserType {
@@ -56,27 +56,6 @@ model Customer {
   phoneNumber String?
   email       String?
   address     String?
-}
-
-//! PLAN --------------------------------
-model Plan {
-  id    Int     @id @default(autoincrement())
-  key   PlanKey
-  title String
-  level Int
-
-  paymentPlans PaymentPlan[]
-}
-
-//! Download --------------------------------
-model UserDownload {
-  id            Int      @id @default(autoincrement())
-  fair          Int
-  downloaded    Int
-  firstDownload DateTime
-  lastDownload  DateTime
-
-  paymentPlan PaymentPlan[]
 }
 
 //! DIELINE --------------------------------
@@ -213,19 +192,18 @@ enum DimensionType {
 
 //! PAYMENT --------------------------------
 model Payment {
-  id             Int             @id @default(autoincrement())
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  amount         Int
-  totalDiscount  Int
-  discountAmount Int
-  discountCode   String
-  total          Int
-  type           PaymentPlanType
-  status         PaymentStatus
+  id                 Int           @id @default(autoincrement())
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  amount             Float
+  total              Float
+  totalDiscount      Float
+  discountCodeAmount Float
+  discountCode       String
+  status             PaymentStatus
 
-  plan          PaymentPlan @relation(fields: [paymentPlanId], references: [id])
-  paymentPlanId Int         @unique
+  plan          Plan @relation(fields: [paymentPlanId], references: [id], onDelete: Restrict)
+  paymentPlanId Int  @unique
 }
 
 enum PaymentStatus {
@@ -235,7 +213,7 @@ enum PaymentStatus {
   canceled
 }
 
-model PaymentPlan {
+model Plan {
   id        Int             @id @default(autoincrement())
   key       PlanKey
   title     String
@@ -249,8 +227,29 @@ model PaymentPlan {
   payments  Payment?
   user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    Int
-  plan      Plan           @relation(fields: [planId], references: [id])
-  planId    Int
+}
+
+model Tarrif {
+  id               Int     @id @default(autoincrement())
+  key              PlanKey
+  title            String
+  shortDescription String
+  description      String
+  fairDownload     Int
+  monthly          Float
+  threeMonth       Float
+  annual           Float
+}
+
+model UserDownload {
+  id            Int      @id @default(autoincrement())
+  fair          Int
+  downloaded    Int
+  firstDownload DateTime
+  lastDownload  DateTime
+
+  plan   Plan? @relation(fields: [planId], references: [id], onDelete: SetNull)
+  planId Int?
 }
 
 enum PlanPeriod {
@@ -260,12 +259,12 @@ enum PlanPeriod {
 }
 
 enum PaymentPlanType {
-  renewal
   new
+  renewal
 }
 
 enum PlanKey {
   standard
   pro
-  orgnization
+  organization
 }
