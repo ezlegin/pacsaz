@@ -21,7 +21,7 @@ model User {
   email               String   @unique
   phoneNumber         String   @unique
   fullName            String
-  onboardingCompleted Boolean
+  onboardingCompleted Boolean  @default(false)
   joinedAt            DateTime @default(now())
   type                UserType
 
@@ -162,7 +162,7 @@ model DownloadHistory {
 
   dieline   Dieline @relation(fields: [dielineId], references: [id])
   dielineId Int
-  user      User    @relation(fields: [userId], references: [id])
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    Int
 
   settings Settings?

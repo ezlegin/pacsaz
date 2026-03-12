@@ -52,7 +52,7 @@ export const userFormSchema = z.object({
   fullName: z.string().min(1),
   email: z.string().email(),
   phoneNumber: z.string().min(1),
-  userType: z.enum(userType),
+  type: z.enum(userType),
 });
 export type UserFormType = z.infer<typeof userFormSchema>;
 

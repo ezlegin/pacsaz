@@ -1,11 +1,15 @@
 "use client";
 
+import { createUser, updateUser } from "@/actions/user";
+import { handleRes } from "@/lib/utils/handleRes";
 import {
   userFormSchema,
   UserFormType,
 } from "@/lib/validationSchema/validatoinSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@repo/ui/components/button";
+import { User } from "@repo/db";
+import { UserType } from "@repo/lib/data/types";
+import { useLoading } from "@repo/lib/utils/useLoading";
 import {
   Form,
   FormControl,
@@ -22,28 +26,35 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@repo/ui/components/select";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import PageTitle from "../PageTitle";
-import { UserType } from "@repo/lib/data/types";
+import SubmitButton from "../SubmitButton";
 
-export function UserForm() {
+export function UserForm({ user }: { user?: User }) {
+  const router = useRouter();
+  const { startLoading, stopLoading, isLoading } = useLoading();
   const form = useForm<UserFormType>({
     resolver: zodResolver(userFormSchema),
     defaultValues: {
-      fullName: "",
-      email: "",
-      phoneNumber: "",
-      userType: "designer",
+      fullName: user?.fullName ?? "",
+      email: user?.email ?? "",
+      phoneNumber: user?.phoneNumber ?? "",
+      type: user?.type ?? "designer",
     },
   });
 
-  function onSubmit(data: UserFormType) {
-    console.log(data);
-  }
+  const onSubmit = async (data: UserFormType) => {
+    startLoading();
+
+    const res = user ? await updateUser(data, user.id) : await createUser(data);
+
+    handleRes(res, { onSuccess: () => router.refresh() });
+
+    stopLoading();
+  };
 
   return (
     <Form {...form}>
-      <PageTitle title="New User" />
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
         <FormField
           control={form.control}
@@ -86,7 +97,7 @@ export function UserForm() {
 
         <FormField
           control={form.control}
-          name="userType"
+          name="type"
           render={({ field }) => (
             <FormItem>
               <FormLabel>User Type</FormLabel>
@@ -114,13 +125,11 @@ export function UserForm() {
           )}
         />
 
-        <Button
-          size={"lg"}
-          disabled={!form.formState.isValid}
-          className="w-full"
-        >
-          Create User
-        </Button>
+        <SubmitButton
+          form={form}
+          isLoading={isLoading}
+          label={user ? "Update" : "Create"}
+        />
       </form>
     </Form>
   );

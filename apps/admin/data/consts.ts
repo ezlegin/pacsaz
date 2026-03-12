@@ -1,1 +1,1 @@
-export const ServerErrorMessage = "Something Happened. Check the Sever Logs.";
+export const serverErrorMessage = "Something Happened. Check the Sever Logs.";
