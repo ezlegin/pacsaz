@@ -35,7 +35,7 @@ const MaterialInput = ({
           <SelectItem className="py-2.5" key={item.value} value={item.value}>
             <span
               className={cn(
-                item.value === "glossy-cardboard" || item.value === "art-paper"
+                item.value === "glossyCardboard" || item.value === "artPaper"
                   ? "bg-white"
                   : "bg-orange-100",
                 `size-5 rounded-full border`,

@@ -35,6 +35,7 @@ interface Defaults {
   minDim: Dimension;
   mat: MaterialValue;
   dimensionTypes: DimensionsType;
+  mats: MaterialValue[];
 }
 
 export function useDielineGenerator(
@@ -77,6 +78,12 @@ export function useDielineGenerator(
         length: 30,
       },
       mat: materials[0]!,
+      mats: materials.filter(
+        (m) =>
+          m.value === "glossyCardboard" ||
+          m.value === "fFlute" ||
+          m.value === "eFlute",
+      ),
       dimensionTypes: ["manufacture", "inner", "outer"],
     };
 
@@ -92,7 +99,7 @@ export function useDielineGenerator(
       dimensionTypes: dimensionTypes ? dimensionTypes : defaults.dimensionTypes,
       minDimension: setts?.minDimension ?? defaults.minDim,
       material: mats ? mats[0]! : defaults.mat,
-      materials: mats ? mats : [defaults.mat],
+      materials: mats ? mats : defaults.mats,
       thickness: mats ? mats[0]!.thickness : defaults.mat.thickness,
 
       dimensionType: "manufacture",

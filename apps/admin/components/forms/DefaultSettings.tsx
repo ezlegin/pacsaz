@@ -188,13 +188,13 @@ const DefaultSettings = ({ form }: { form: Form }) => {
             name="materials"
             render={({ field }) => (
               <div className="grid grid-cols-2">
-                {Object.entries(materials)?.map(([key, item]) => {
+                {materials.map((item, idx) => {
                   const isChecked = field.value
                     ?.split(",")
                     .includes(item.value);
                   return (
                     <FormItem
-                      key={key}
+                      key={idx}
                       className="flex flex-row items-center gap-3 pb-1.5"
                     >
                       <FormControl>
@@ -203,15 +203,17 @@ const DefaultSettings = ({ form }: { form: Form }) => {
                           onCheckedChange={(checked) => {
                             const materials = field.value.split(",");
                             const updatedMaterials = checked
-                              ? [...materials, key].join(",")
-                              : materials.filter((i) => i !== key).join(",");
+                              ? [...materials, item.value].join(",")
+                              : materials
+                                  .filter((i) => i !== item.value)
+                                  .join(",");
 
                             field.onChange(updatedMaterials);
                           }}
                         />
                       </FormControl>
                       <FormLabel className="text-sm font-normal cursor-pointer">
-                        {key}
+                        {item.value}
                         <span className="text-xs text-muted-foreground">
                           ({item.thickness}mm)
                         </span>

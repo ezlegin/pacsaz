@@ -1,7 +1,14 @@
 import DielinesGrid from "@/components/DielinesGrid";
-import { tuckEnd, tuckEndModel } from "@/public";
+import { prisma } from "@repo/db";
 
-const page = () => {
+const page = async () => {
+  const favs = await prisma.favedDieline.findMany({
+    where: { userId: 1 },
+    include: { dieline: true },
+  });
+
+  const dielines = favs.map((f) => f.dieline);
+
   return (
     <div>
       <DielinesGrid dielines={dielines} />
@@ -10,72 +17,3 @@ const page = () => {
 };
 
 export default page;
-
-const dielines = [
-  {
-    title: "جعبه درب‌دار ساده",
-    slug: "tuck-end",
-    dielineImg: tuckEnd,
-    modelImg: tuckEndModel,
-  },
-  {
-    title: "جعبه اسنپ لاک",
-    slug: "tuck-end-snap-lock",
-    dielineImg: tuckEnd,
-    modelImg: tuckEndModel,
-  },
-  {
-    title: "جعبه پستی",
-    slug: "postal-card",
-    dielineImg: tuckEnd,
-    modelImg: tuckEndModel,
-  },
-  {
-    title: "جعبه استاندارد FEFCO",
-    slug: "fefco-box",
-    dielineImg: tuckEnd,
-    modelImg: tuckEndModel,
-  },
-  {
-    title: "پاکت مقوایی",
-    slug: "paper-envelope",
-    dielineImg: tuckEnd,
-    modelImg: tuckEndModel,
-  },
-  {
-    title: "جعبه سینی‌دار",
-    slug: "tray-box",
-    dielineImg: tuckEnd,
-    modelImg: tuckEndModel,
-  },
-  {
-    title: "جعبه درب‌دار ساده",
-    slug: "tuck-end",
-    dielineImg: tuckEnd,
-    modelImg: tuckEndModel,
-  },
-  {
-    title: "جعبه پستی",
-    slug: "postal-card",
-    dielineImg: tuckEnd,
-    modelImg: tuckEndModel,
-  },
-  {
-    title: "جعبه استاندارد FEFCO",
-    slug: "fefco-box",
-    dielineImg: tuckEnd,
-    modelImg: tuckEndModel,
-  },
-  {
-    title: "پاکت مقوایی",
-    slug: "paper-envelope",
-    dielineImg: tuckEnd,
-    modelImg: tuckEndModel,
-  },
-  {
-    title: "جعبه سینی‌دار",
-    slug: "tray-box",
-    dielineImg: tuckEnd,
-    modelImg: tuckEndModel,
-  },
-];

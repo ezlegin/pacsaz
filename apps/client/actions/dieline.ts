@@ -162,3 +162,45 @@ export const deleteSavedDieline = async (id: number) => {
     return { error: serverErrorMessage };
   }
 };
+
+export const faveDieline = async (dielineId: number) => {
+  try {
+    const existingDieline = await prisma.dieline.findFirst({
+      where: { id: dielineId },
+    });
+    if (!existingDieline) return { error: "Dieline Not Found." };
+
+    await prisma.favedDieline.create({
+      data: { dielineId: existingDieline.id, userId: 1 }, //todo
+    });
+
+    return { success: "به لیست علاقه مندی ها اضافه شد." };
+  } catch (error) {
+    console.log(error);
+    return { error: serverErrorMessage };
+  }
+};
+
+export const unfaveDieline = async (dielineId: number) => {
+  try {
+    const existingDieline = await prisma.dieline.findFirst({
+      where: { id: dielineId },
+    });
+    if (!existingDieline) return { error: "Dieline Not Found." };
+
+    const favedDieline = await prisma.favedDieline.findFirst({
+      where: { AND: [{ userId: 1 }, { dielineId: dielineId }] },
+    });
+
+    if (!favedDieline) return { error: "Faved Dieline Not Found." };
+
+    await prisma.favedDieline.delete({
+      where: { id: favedDieline.id },
+    });
+
+    return { success: "از لیست علاقه مندی ها حذف شد." };
+  } catch (error) {
+    console.log(error);
+    return { error: serverErrorMessage };
+  }
+};

@@ -1,4 +1,4 @@
-import ProductNavbar from "@/components/Navbars/ProductNavbar";
+import ProductNavbar from "@/components/Navbars/DielineNavbar";
 import { prisma } from "@repo/db";
 import { notFound } from "next/navigation";
 
@@ -16,7 +16,7 @@ export default async function Layout({
 
   return (
     <div className="bg-accent flex flex-col h-screen overflow-hidden">
-      <ProductNavbar productName={dieline.title} />
+      <ProductNavbar dieline={dieline} />
       {children}
     </div>
   );

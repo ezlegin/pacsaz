@@ -3,14 +3,17 @@ import Link from "next/link";
 import { layoutPaddings } from "./Navbar";
 import NavbarButtons from "./NavbarButtons";
 import PacsazLogo from "../PacsazLogo";
-import FavoriteDieline from "../product/FavoriteDieline";
+import FavoriteDieline from "../product/FavoriteDielineButton";
+import { Dieline, prisma } from "@repo/db";
 
 interface Props {
-  productName: string;
+  dieline: Dieline;
 }
 
-const ProductNavbar = ({ productName }: Props) => {
-  const isFaved = true;
+const ProductNavbar = async ({ dieline }: Props) => {
+  const favedDieline = await prisma.favedDieline.findFirst({
+    where: { AND: [{ userId: 1 }, { dielineId: dieline.id }] },
+  });
 
   return (
     <div className={`bg-background border-b z-10 ${layoutPaddings}`}>
@@ -24,8 +27,8 @@ const ProductNavbar = ({ productName }: Props) => {
             دایلاین‌ها
           </Link>
           <ArrowLeft size={16} />
-          <p className="font-semibold">{productName}</p>
-          <FavoriteDieline isFaved={isFaved} />
+          <p className="font-semibold">{dieline.title}</p>
+          <FavoriteDieline isFaved={!!favedDieline} dielineId={dieline.id} />
         </div>
         <NavbarButtons />
       </div>

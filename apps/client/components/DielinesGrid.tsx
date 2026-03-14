@@ -1,5 +1,7 @@
 "use client";
 
+import { tuckEnd, tuckEndModel } from "@/public";
+import { Dieline } from "@repo/db";
 import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import { cn } from "@repo/ui/lib/utils";
 import { Box, Ratio } from "lucide-react";
@@ -7,7 +9,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 type ImageType = "model" | "dieline";
-const DielinesGrid = ({ dielines }: { dielines: Dielines[] }) => {
+
+const DielinesGrid = ({ dielines }: { dielines: Dieline[] }) => {
   const [imageType, setImageType] = useState<ImageType>("dieline");
 
   return (
@@ -41,26 +44,19 @@ const DielinesGrid = ({ dielines }: { dielines: Dielines[] }) => {
 
 export default DielinesGrid;
 
-type Dielines = {
-  title: string;
-  slug: string;
-  dielineImg: string;
-  modelImg: string;
-};
-
 const DielineCard = ({
   imageType,
   dieline,
 }: {
   imageType: ImageType;
-  dieline: Dielines;
+  dieline: Dieline;
 }) => {
   return (
     <Link href={`/dieline/${dieline.slug}`} target="_blank">
       <div className="space-y-3 relative">
         <Image
           alt=""
-          src={dieline.modelImg}
+          src={tuckEndModel}
           width={400}
           height={400}
           className={cn(
@@ -72,7 +68,7 @@ const DielineCard = ({
         />
         <Image
           alt=""
-          src={dieline.dielineImg}
+          src={tuckEnd}
           width={500}
           height={500}
           className="w-full aspect-square border rounded-2xl p-6"

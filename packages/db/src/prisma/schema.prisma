@@ -154,6 +154,8 @@ model FavedDieline {
   userId    Int
   dieline   Dieline @relation(fields: [dielineId], references: [id], onDelete: Cascade)
   dielineId Int
+
+  @@unique([userId, dielineId])
 }
 
 model Settings {
