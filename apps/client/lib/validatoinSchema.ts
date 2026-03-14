@@ -14,6 +14,16 @@ const material = [
 
 const dimensionType = ["manufacture", "inner", "outer"] as const;
 
+const userType = [
+  "student",
+  "designer",
+  "designStudio",
+  "printHouse",
+  "dielineMaker",
+  "packagingFactory",
+  "other",
+] as const;
+
 export const inputFormSchema = z.object({
   phoneNumber: z.string().regex(/^09\d{9}$/),
 });
@@ -45,7 +55,7 @@ export type ContactFormType = z.infer<typeof contactFormSchema>;
 
 export const profileFormSchema = z.object({
   fullName: z.string().min(3, "نام و نام خانوادگی حداقل باید ۳ کاراکتر باشد"),
-  userType: z.string(),
+  userType: z.enum(userType),
 });
 
 export type ProfileFormType = z.infer<typeof profileFormSchema>;

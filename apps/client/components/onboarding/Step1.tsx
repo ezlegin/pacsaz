@@ -1,6 +1,6 @@
+import { UserType } from "@repo/db";
 import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import React from "react";
-import { UserType } from "./Onboarding";
 
 interface Props {
   userType: UserType | null;

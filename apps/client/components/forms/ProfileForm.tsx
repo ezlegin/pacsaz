@@ -1,7 +1,11 @@
 "use client";
 
+import { updateUserProfile } from "@/actions/user";
+import { handleRes } from "@/lib/handleRes";
 import { profileFormSchema, ProfileFormType } from "@/lib/validatoinSchema";
+import { isUserIndividual } from "@/utils/isUserIndividual";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { User, UserType } from "@repo/db";
 import { Button } from "@repo/ui/components/button";
 import {
   Form,
@@ -20,24 +24,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@repo/ui/components/select";
-import { UserType } from "../onboarding/Onboarding";
-import { userTypes } from "../onboarding/Step1";
-import { isUserIndividual } from "@/utils/isUserIndividual";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { sessionUser } from "@repo/store/app/user.store";
+import { userTypes } from "../onboarding/Step1";
 
-export function ProfileForm() {
+export function ProfileForm({ user }: { user: User }) {
+  const router = useRouter();
   const form = useForm<ProfileFormType>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
-      fullName: sessionUser?.fullName,
-      userType: "student",
+      fullName: user.fullName,
+      userType: user.userType,
     },
   });
 
-  function onSubmit(data: ProfileFormType) {
+  const onSubmit = async (data: ProfileFormType) => {
     console.log(data);
-  }
+    const res = await updateUserProfile(data, 1); //todo;
+
+    handleRes(res, { onSuccess: () => router.refresh() });
+  };
 
   const userType = form.watch("userType") as UserType;
   const isIndividual = isUserIndividual(userType);
@@ -58,7 +64,7 @@ export function ProfileForm() {
                   {...field}
                   onChange={(e) =>
                     field.onChange(
-                      e.target.value.replace(/[^a-zA-Zآ-ی\s]/g, "")
+                      e.target.value.replace(/[^a-zA-Zآ-ی\s]/g, ""),
                     )
                   }
                 />
@@ -69,12 +75,12 @@ export function ProfileForm() {
 
         <div className="space-y-1">
           <Label>شماره تماس</Label>
-          <Input disabled value={sessionUser?.phoneNumber} />
+          <Input disabled value={user?.phoneNumber} />
         </div>
 
         <div className="space-y-1">
           <Label>ایمیل</Label>
-          <Input disabled value={sessionUser?.email} />
+          <Input disabled value={user?.email} />
         </div>
 
         <FormField
@@ -90,7 +96,7 @@ export function ProfileForm() {
                   onValueChange={(e) => field.onChange(e as UserType)}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue />
+                    <SelectValue placeholder="نوع کاربری" />
                   </SelectTrigger>
                   <SelectContent position="popper">
                     {userTypes.map((u, idx) => (

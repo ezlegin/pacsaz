@@ -10,15 +10,7 @@ import { Separator } from "@repo/ui/components/separator";
 import { useState } from "react";
 import Step4 from "./Step4";
 import { useLoading } from "@repo/lib/utils/useLoading";
-
-export type UserType =
-  | "student"
-  | "designer"
-  | "designStudio"
-  | "printHouse"
-  | "dielineMaker"
-  | "packagingFactory"
-  | "other";
+import { UserType } from "@repo/db";
 
 export type MostUsage =
   | "practice"

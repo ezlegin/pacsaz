@@ -46,7 +46,7 @@ export const createDownloadHistory = async (
     return { success: true };
   } catch (error) {
     console.error(error);
-    return { error: (error as Error).message };
+    return { error: serverErrorMessage };
   }
 };
 
