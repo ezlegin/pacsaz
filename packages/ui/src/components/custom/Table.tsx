@@ -21,7 +21,7 @@ const Table = ({
   columns,
   data,
   renderRows,
-  noDataMessage,
+  noDataMessage = "No Data Available...",
   dir = "rtl",
 }: Props) => {
   return (
@@ -57,7 +57,7 @@ const Table = ({
       {data.length < 1 && (
         <div className="py-20 text-muted-foreground flex flex-col gap-3 justify-center items-center text-sm">
           <Frown size={80} className="text-gray-400" strokeWidth={1.5} />
-          {noDataMessage ?? "No Data Available..."}
+          {noDataMessage}
         </div>
       )}
     </>

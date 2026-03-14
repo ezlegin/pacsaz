@@ -130,9 +130,9 @@ const SaveDielineForm = ({
             )}
           />
 
-          {/* <FormField
+          <FormField
             control={form.control}
-            name="customer" //todo: do search the customer
+            name="customerId"
             render={({ field }) => (
               <FormItem>
                 <FormControl>
@@ -144,7 +144,7 @@ const SaveDielineForm = ({
                 </FormControl>
               </FormItem>
             )}
-          /> */}
+          />
 
           <div className="flex flex-col gap-3">
             <Button

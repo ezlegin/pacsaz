@@ -48,7 +48,12 @@ const SavedDielinesList = ({ data }: { data: SavedDielineType[] }) => {
 
   return (
     <Card title="قالب‌های ذخیره شده" className="col-span-6">
-      <Table columns={columns} data={data} renderRows={renderRows} />
+      <Table
+        columns={columns}
+        data={data}
+        renderRows={renderRows}
+        noDataMessage="هیچ قالبی ذخیره نکرده اید..."
+      />
     </Card>
   );
 };

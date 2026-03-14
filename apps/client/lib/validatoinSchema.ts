@@ -69,7 +69,7 @@ export type DiscountFormType = z.infer<typeof discountFormSchema>;
 export const saveDielineFormSchema = z.object({
   title: z.string().min(1),
   description: z.string().optional(),
-  // customer: z.string().optional(),
+  customerId: z.string().optional(),
   bleed: z.number(),
   width: z.number(),
   length: z.number(),

@@ -64,6 +64,7 @@ export const createSaveDieline = async (
     width,
     description,
     dimensionType,
+    customerId,
   } = data;
   try {
     const existingDieline = await prisma.dieline.findFirst({ where: { slug } });
@@ -75,6 +76,7 @@ export const createSaveDieline = async (
         description: description ?? "",
         dielineId: existingDieline.id,
         title,
+        customerId: customerId ? +customerId : null,
         settings: {
           create: {
             bleed,
@@ -110,6 +112,7 @@ export const updateSavedDieline = async (
     width,
     description,
     dimensionType,
+    customerId,
   } = data;
   try {
     const existingDieline = await prisma.savedDieline.findFirst({
@@ -122,6 +125,7 @@ export const updateSavedDieline = async (
       data: {
         title,
         description,
+        customerId: customerId ? +customerId : null,
         settings: {
           update: {
             data: {
@@ -176,7 +180,7 @@ export const faveDieline = async (dielineId: number) => {
 
     return { success: "به لیست علاقه مندی ها اضافه شد." };
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return { error: serverErrorMessage };
   }
 };
@@ -200,7 +204,7 @@ export const unfaveDieline = async (dielineId: number) => {
 
     return { success: "از لیست علاقه مندی ها حذف شد." };
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return { error: serverErrorMessage };
   }
 };

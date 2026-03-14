@@ -56,6 +56,8 @@ model Customer {
   phoneNumber String?
   email       String?
   address     String?
+
+  savedDielie SavedDieline[]
 }
 
 //! DIELINE --------------------------------
@@ -127,12 +129,13 @@ model SavedDieline {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  dieline   Dieline @relation(fields: [dielineId], references: [id])
-  dielineId Int
-  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    Int
-
-  settings Settings?
+  settings   Settings?
+  dieline    Dieline   @relation(fields: [dielineId], references: [id])
+  dielineId  Int
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     Int
+  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  customerId Int?
 }
 
 model DownloadHistory {

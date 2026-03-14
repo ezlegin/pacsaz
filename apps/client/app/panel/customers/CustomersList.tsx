@@ -1,13 +1,11 @@
+import { deleteCustomer } from "@/actions/customer";
+import DeleteButton from "@/components/DeleteButton";
 import { CustomerForm } from "@/components/forms/CustomerForm";
 import { Customer } from "@repo/db";
 import ActionButton from "@repo/ui/components/custom/ActionButton";
 import Card from "@repo/ui/components/custom/Card";
 import Table from "@repo/ui/components/custom/Table";
-import {
-  Dialog,
-  DialogContent,
-  DialogTrigger,
-} from "@repo/ui/components/dialog";
+import { DialogTitle } from "@repo/ui/components/dialog";
 import { TableCell, TableRow } from "@repo/ui/components/table";
 import { Pencil } from "lucide-react";
 
@@ -20,15 +18,12 @@ const CustomersList = ({ data }: { data: Customer[] }) => {
         <TableCell className="text-center">{phoneNumber}</TableCell>
         <TableCell className="text-center">{email}</TableCell>
         <TableCell className="text-center">{address}</TableCell>
-        <TableCell className="text-left">
-          <Dialog>
-            <DialogTrigger asChild>
-              <ActionButton icon={Pencil} />
-            </DialogTrigger>
-            <DialogContent>
-              <CustomerForm type="update" customer={data} />
-            </DialogContent>
-          </Dialog>
+        <TableCell className="text-left space-x-2">
+          <DeleteButton deleteFn={deleteCustomer} id={data.id} />
+          <ActionButton icon={Pencil}>
+            <DialogTitle>مشتری</DialogTitle>
+            <CustomerForm type="update" customer={data} />
+          </ActionButton>
         </TableCell>
       </TableRow>
     );
@@ -36,7 +31,12 @@ const CustomersList = ({ data }: { data: Customer[] }) => {
 
   return (
     <Card>
-      <Table columns={columns} data={data} renderRows={renderRows} />
+      <Table
+        columns={columns}
+        data={data}
+        renderRows={renderRows}
+        noDataMessage="هنوز مشتری ایجاد نکرده اید..."
+      />
     </Card>
   );
 };

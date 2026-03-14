@@ -16,7 +16,7 @@ export const updateUserProfile = async (data: ProfileFormType, id: number) => {
 
     return { success: "کاربر با موفقیت به روزرسانی شد." };
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return { error: serverErrorMessage };
   }
 };

@@ -1,8 +1,12 @@
 "use client";
 
-import { useLoading } from "@repo/lib/utils/useLoading";
+import { createCustomer, updateCustomer } from "@/actions/customer";
+import { handleRes } from "@/lib/handleRes";
 import { customerFormSchema, CustomerFormType } from "@/lib/validatoinSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Customer } from "@repo/db";
+import { FormType } from "@repo/lib/data/types";
+import { useLoading } from "@repo/lib/utils/useLoading";
 import { Button } from "@repo/ui/components/button";
 import {
   Form,
@@ -14,11 +18,8 @@ import {
 import { Input } from "@repo/ui/components/input";
 import { Spinner } from "@repo/ui/components/spinner";
 import { Textarea } from "@repo/ui/components/textarea";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { FormType } from "@repo/lib/data/types";
-import DeleteButton from "@repo/ui/components/custom/DeleteButton";
-import { DialogTitle } from "@repo/ui/components/dialog";
-import { Customer } from "@repo/db";
 
 export function CustomerForm({
   type,
@@ -27,6 +28,7 @@ export function CustomerForm({
   customer?: Customer;
   type: FormType;
 }) {
+  const router = useRouter();
   const { isLoading, startLoading, stopLoading } = useLoading();
   const form = useForm<CustomerFormType>({
     resolver: zodResolver(customerFormSchema),
@@ -38,15 +40,19 @@ export function CustomerForm({
     },
   });
 
-  function onSubmit(data: CustomerFormType) {
+  const onSubmit = async (data: CustomerFormType) => {
     startLoading();
-    console.log(data);
+
+    const res = customer
+      ? await updateCustomer(data, customer.id)
+      : await createCustomer(data);
+
+    handleRes(res, { onSuccess: () => router.refresh() });
     stopLoading();
-  }
+  };
 
   return (
     <div className="space-y-4">
-      <DialogTitle>{type === "create" ? "مشتری جدید" : "مشتری"}</DialogTitle>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
           <FormField
@@ -116,8 +122,6 @@ export function CustomerForm({
               {isLoading && <Spinner />}
               {type === "create" ? "ایجاد مشتری جدید" : "ذخیره اطلاعات"}
             </Button>
-
-            {type === "update" && <DeleteButton lang="fa" />}
           </div>
         </form>
       </Form>
