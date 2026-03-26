@@ -1,7 +1,10 @@
 "use client";
 
+import { PlanType } from "@/app/panel/components/UserSubscriptionCard";
 import { usePaymentCheckout } from "@/hooks/usePaymentCheckout";
 import { mapPaymentData } from "@/utils/mapPaymentData";
+import { PlanKey, plans } from "@repo/lib/data/plans";
+import { formatPrice } from "@repo/lib/utils/formatPrice";
 import { Button } from "@repo/ui/components/button";
 import Card from "@repo/ui/components/custom/Card";
 import { Label } from "@repo/ui/components/label";
@@ -9,19 +12,12 @@ import { RadioGroup, RadioGroupItem } from "@repo/ui/components/radio-group";
 import { Separator } from "@repo/ui/components/separator";
 import { SquareArrowOutUpRight } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 import DiscountForm from "./forms/DiscountForm";
 import PeriodSwitch from "./PeriodSwitch";
 import Price from "./Price";
-import { useState } from "react";
-import { sessionUser } from "@repo/store/app/user.store";
-import { formatPrice } from "@repo/lib/utils/formatPrice";
-import { PlanKey, plans } from "@repo/lib/data/plans";
 
-const UpgradeSubscription = () => {
-  const userPlan = sessionUser?.plan;
-  if (!userPlan)
-    throw new Error("User Plan Not Provided. [UpgradeSubscription]");
-
+const UpgradeSubscription = ({ userPlan }: { userPlan: PlanType }) => {
   const [appliedDiscountCode, setAppliedDiscountCode] = useState<
     string | undefined
   >(undefined);

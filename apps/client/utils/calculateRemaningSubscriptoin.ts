@@ -1,12 +1,7 @@
-import { sessionUser } from "@repo/store/app/user.store";
+import { Plan } from "@repo/db";
 import { formatDistance } from "date-fns";
 
-export function calculateRemaningSubscription() {
-  if (!sessionUser || !sessionUser.plan) return;
-
-  const distande = formatDistance(
-    sessionUser?.plan?.endsAt,
-    sessionUser?.plan?.startedAt
-  );
+export function calculateRemaningSubscription(plan: Plan) {
+  const distande = formatDistance(plan.endsAt, plan.startedAt);
   return parseInt(distande);
 }

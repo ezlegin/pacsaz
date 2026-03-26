@@ -1,3 +1,4 @@
+import { getSessionUser } from "@/data/user";
 import {
   Sidebar,
   SidebarContent,
@@ -11,53 +12,54 @@ import {
 import { Bookmark, CreditCard, Flag, Heart, User, Users } from "lucide-react";
 import Link from "next/link";
 import PacsazLogo from "./PacsazLogo";
-import { isSubscribed, sessionUser } from "@repo/store/app/user.store";
 
-const items = [
-  {
-    title: isSubscribed ? "وضعیت اشتراک" : "اشتراک",
-    url: "/panel",
-    icon: Flag,
-  },
-  {
-    title: "علاقه‌مندی ها",
-    url: "/panel/favs",
-    icon: Heart,
-  },
-  {
-    title: "ذخیره شده",
-    url: "/panel/saved",
-    icon: Bookmark,
-  },
-  {
-    title: "مشتری‌ها",
-    url: "/panel/customers",
-    icon: Users,
-  },
-  {
-    title: "پرداخت ها",
-    url: "/panel/payments",
-    icon: CreditCard,
-  },
-  {
-    title: "مشخصات",
-    url: "/panel/profile",
-    icon: User,
-  },
-];
+const PanelSidebar = async () => {
+  const user = await getSessionUser();
 
-export function PanelSidebar() {
+  const items = [
+    {
+      title: user?.plan ? "وضعیت اشتراک" : "اشتراک",
+      url: "/panel",
+      icon: Flag,
+    },
+    {
+      title: "علاقه‌مندی ها",
+      url: "/panel/favs",
+      icon: Heart,
+    },
+    {
+      title: "ذخیره شده",
+      url: "/panel/saved",
+      icon: Bookmark,
+    },
+    {
+      title: "مشتری‌ها",
+      url: "/panel/customers",
+      icon: Users,
+    },
+    {
+      title: "پرداخت ها",
+      url: "/panel/payments",
+      icon: CreditCard,
+    },
+    {
+      title: "مشخصات",
+      url: "/panel/profile",
+      icon: User,
+    },
+  ];
+
   return (
     <Sidebar side="right">
       <SidebarContent className="p-10 py-5">
         <Link href={"/"} className="mb-4">
-          <PacsazLogo type="full" scale={1.2} />
+          <PacsazLogo type="full" scale={1} />
         </Link>
 
         <div>
-          <p className="font-semibold text-lg">{sessionUser?.fullName}</p>
+          <p className="font-semibold text-lg">{user?.fullName}</p>
           <span className=" text-xs text-muted-foreground font-medium">
-            {sessionUser?.phoneNumber}
+            {user?.phoneNumber}
           </span>
         </div>
 
@@ -81,4 +83,6 @@ export function PanelSidebar() {
       </SidebarContent>
     </Sidebar>
   );
-}
+};
+
+export default PanelSidebar;

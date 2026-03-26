@@ -1,40 +1,33 @@
+import { getSessionUser } from "@/data/user";
 import Diamond from "@/public/icons/Diamond";
 import { calculateRemaningSubscription } from "@/utils/calculateRemaningSubscriptoin";
-import { sessionUser } from "@repo/store/app/user.store";
 import { Badge } from "@repo/ui/components/badge";
 import { Button } from "@repo/ui/components/button";
 import { User } from "lucide-react";
 import Link from "next/link";
 
-const NavbarButtons = () => {
-  const remainingDays = calculateRemaningSubscription();
-  const isCloseToExpiry = (remainingDays ?? 0) < 7;
+const NavbarButtons = async () => {
+  const user = await getSessionUser();
+  const userPlan = user?.plan;
+
+  const remainingDays = userPlan ? calculateRemaningSubscription(userPlan) : 0;
+  const isCloseToExpiry = remainingDays < 7;
 
   return (
     <div className="flex gap-3 items-center">
-      {sessionUser?.plan ? (
+      {userPlan ? (
         <Badge
           className="p-2 px-4"
-          variant={
-            !sessionUser.plan
-              ? "lightRed"
-              : isCloseToExpiry
-                ? "lightYellow"
-                : "lightGreen"
-          }
+          variant={isCloseToExpiry ? "lightYellow" : "lightGreen"}
         >
           {isCloseToExpiry ? (
             `تمدید اشتراک در ${remainingDays} روز `
           ) : (
-            <span> پلن: {sessionUser.plan.title}</span>
+            <span> پلن: {userPlan.title}</span>
           )}
         </Badge>
       ) : (
-        <Link
-          href={
-            sessionUser?.plan ? "#" : sessionUser ? "/panel" : "/subscription"
-          }
-        >
+        <Link href={user?.plan ? "#" : user ? "/panel" : "/subscription"}>
           <Button variant={"ghost"}>
             <Diamond />
             اشتراک
@@ -45,12 +38,12 @@ const NavbarButtons = () => {
       <div>
         <div className="w-px ml-3 h-6 bg-slate-300" />
       </div>
-      <Link href={sessionUser ? "/panel" : "/login"}>
-        <Button variant={sessionUser ? "outline" : "default"}>
-          {sessionUser ? (
+      <Link href={user ? "/panel" : "/login"}>
+        <Button variant={user ? "outline" : "default"}>
+          {user ? (
             <div className="flex items-center gap-1.5">
               <User />
-              {sessionUser.fullName}
+              {user.fullName}
             </div>
           ) : (
             "حساب کاربری"

@@ -23,10 +23,8 @@ const ProductInfo = () => {
         raw: { height, length, width },
       },
       dimensionTypes,
+      dimensionType,
     },
-  } = useDielineSettingsStore();
-  const {
-    settings: { dimensionType },
   } = useDielineSettingsStore();
 
   const calcManufacture = (value: number, axis: "width" | "length") =>

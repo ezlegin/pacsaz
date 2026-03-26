@@ -57,7 +57,6 @@ export function useDielineGenerator(
     const materialsArr = setts?.materials.split(",") as
       | MaterialKey[]
       | undefined;
-    console.log(materialsArr);
     const mats = materialsArr
       ?.map((i) => materials.find((m) => m.value === i))
       .filter((i) => i !== undefined);

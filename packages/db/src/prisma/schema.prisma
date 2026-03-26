@@ -29,7 +29,7 @@ model User {
   otp           Otp[]
   favedDielines FavedDieline[]
   savedDielines SavedDieline[]
-  paymentPlans  Plan[]
+  plans         Plan[]
 }
 
 enum UserType {
@@ -125,7 +125,7 @@ model DielineCategoryByModel {
 model SavedDieline {
   id          Int      @id @default(autoincrement())
   title       String
-  description String
+  description String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -225,13 +225,18 @@ model Plan {
   level     Int
   startedAt DateTime        @default(now())
   endsAt    DateTime
+  isPremium Boolean         @default(false)
   period    PlanPeriod
   type      PaymentPlanType
 
-  downloads UserDownload[]
-  payments  Payment?
-  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    Int
+  fairDownload  Int
+  downloaded    Int       @default(0)
+  firstDownload DateTime?
+  lastDownload  DateTime?
+
+  payments Payment?
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   Int
 }
 
 model Tarrif {
@@ -244,17 +249,6 @@ model Tarrif {
   monthly          Float
   threeMonth       Float
   annual           Float
-}
-
-model UserDownload {
-  id            Int      @id @default(autoincrement())
-  fair          Int
-  downloaded    Int
-  firstDownload DateTime
-  lastDownload  DateTime
-
-  plan   Plan? @relation(fields: [planId], references: [id], onDelete: SetNull)
-  planId Int?
 }
 
 enum PlanPeriod {

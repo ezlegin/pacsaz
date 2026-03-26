@@ -1,10 +1,10 @@
 import { onProduction } from "@repo/lib/data/consts";
-import { isSubscribed } from "@repo/store/app/user.store";
 import { getDevCTX } from "@repo/store/dieline/developerTools.store";
 import { setDielineFile } from "@repo/store/dieline/dielineFile.store";
 import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
 import M, { IModel } from "makerjs";
 import { toMm } from "../../utils/sizeConvertor";
+import { getSessionUser } from "@repo/store/app/user.store";
 
 export class Exporter {
   constructor(private main: IModel) {}
@@ -103,6 +103,7 @@ export class Exporter {
   // ------------ UTILS --------------
 
   private $injectWatermark(svg: string) {
+    const isSubscribed = !!getSessionUser()?.plan;
     const bleedModel = this.main.models?.bleed;
     const containerModel = this.main.models?.container;
 

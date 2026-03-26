@@ -1,4 +1,4 @@
-import React from "react";
+"use client";
 
 const SquarePattern = () => {
   return (
@@ -6,7 +6,7 @@ const SquarePattern = () => {
       className={`
         absolute inset-0 
         bg-[url('/square-pattern.png')]
-        bg-[length:100%]
+        bg-size-[100%]
         bg-no-repeat
         opacity-15
         pointer-events-none

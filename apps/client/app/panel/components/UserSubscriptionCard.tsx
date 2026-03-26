@@ -1,28 +1,24 @@
 "use client";
 
+import { mapUserPlanTitle } from "@/utils/mapUserPlanTitle";
 import { Button } from "@repo/ui/components/button";
+import Card from "@repo/ui/components/custom/Card";
 import { Dialog, DialogContent, DialogTitle } from "@repo/ui/components/dialog";
 import { RotateCw, Zap } from "lucide-react";
-import { useState } from "react";
-import Card from "@repo/ui/components/custom/Card";
-import UpgradeSubscription from "../../../components/UpgradeSubscription";
 import Link from "next/link";
-import { sessionUser } from "@repo/store/app/user.store";
-import { mapUserPlanTitle } from "@/utils/mapUserPlanTitle";
+import { useState } from "react";
+import UpgradeSubscription from "../../../components/UpgradeSubscription";
+import { Plan } from "@repo/db";
 
-const UserSubscriptionCard = () => {
+const UserSubscriptionCard = ({ userPlan }: { userPlan: Plan }) => {
   const [openUpgradeDialog, setOpenUpgradeDialog] = useState(false);
-
-  const userPlan = sessionUser?.plan;
-  if (!userPlan)
-    throw new Error("User Plan Not Provided. [UpgradeSubscription]");
 
   return (
     <>
       <Dialog open={openUpgradeDialog} onOpenChange={setOpenUpgradeDialog}>
         <DialogContent showCloseButton={false} className="sm:max-w-2xl">
           <DialogTitle className="sr-only" />
-          <UpgradeSubscription />
+          <UpgradeSubscription userPlan={userPlan} />
         </DialogContent>
       </Dialog>
 

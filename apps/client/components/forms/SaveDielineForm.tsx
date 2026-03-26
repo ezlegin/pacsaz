@@ -49,6 +49,7 @@ const SaveDielineForm = ({
     defaultValues: {
       title: savedDieline?.title ?? "",
       description: savedDieline?.description ?? "",
+      customerId: String(savedDieline?.customerId) ?? "",
       bleed,
       height,
       length,

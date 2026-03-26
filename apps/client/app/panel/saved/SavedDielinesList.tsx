@@ -7,6 +7,11 @@ import Card from "@repo/ui/components/custom/Card";
 import Table from "@repo/ui/components/custom/Table";
 import { DialogTitle } from "@repo/ui/components/dialog";
 import { TableCell, TableRow } from "@repo/ui/components/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@repo/ui/components/tooltip";
 import { formatDate } from "date-fns";
 import { Pencil } from "lucide-react";
 
@@ -17,11 +22,16 @@ interface SavedDielineType extends SavedDieline {
 
 const SavedDielinesList = ({ data }: { data: SavedDielineType[] }) => {
   const renderRows = (data: SavedDielineType) => {
-    const { createdAt, id, title, settings, dieline } = data;
+    const { createdAt, id, title, description, settings, dieline } = data;
 
     return (
       <TableRow key={id}>
-        <TableCell>{title}</TableCell>
+        <TableCell>
+          <Tooltip>
+            <TooltipTrigger>{title}</TooltipTrigger>
+            <TooltipContent>{description}</TooltipContent>
+          </Tooltip>
+        </TableCell>
         <TableCell className="text-center">{dieline.title}</TableCell>
         <TableCell className="text-center">{settings?.width}</TableCell>
         <TableCell className="text-center">{settings?.material}</TableCell>

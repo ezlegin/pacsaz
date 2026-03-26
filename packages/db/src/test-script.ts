@@ -1,10 +1,10 @@
 import { prisma } from "./lib/prisma";
 
 async function main() {
-  const admins = await prisma.admin.findMany({
+  const newAdmins = await prisma.admin.findMany({
     omit: { password: true },
   });
-  console.log("All admins:", admins);
+  console.log("All admins:", newAdmins);
 }
 
 main()

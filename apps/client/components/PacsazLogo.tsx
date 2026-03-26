@@ -14,14 +14,14 @@ const PacsazLogo = ({
 }) => {
   const styles = cn(
     "select-none",
-    grayout ? "saturate-0 hover:saturate-100 transition-all" : "saturate-100"
+    grayout ? "saturate-0 hover:saturate-100 transition-all" : "saturate-100",
   );
   return type === "icon" ? (
     <Image
       alt="logo"
       src={pacsazLogoIcon}
       width={36 * scale}
-      height={36}
+      height={36 * scale}
       className={styles}
     />
   ) : (
@@ -29,7 +29,7 @@ const PacsazLogo = ({
       alt="logo"
       src={pacsazLogoFull}
       width={85 * scale}
-      height={36}
+      height={33 * scale}
       className={styles}
     />
   );
