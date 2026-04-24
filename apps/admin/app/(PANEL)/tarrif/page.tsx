@@ -1,4 +1,4 @@
-import { UserForm } from "@/components/forms/UserForm";
+import { TarrifForm } from "@/components/forms/TarrifForm";
 import PageTitle from "@/components/PageTitle";
 import { prisma } from "@repo/db";
 import { globalPageSize } from "@repo/lib/data/consts";
@@ -26,7 +26,7 @@ const page = async () => {
       <div className="flex justify-between">
         <PopupNewDialog buttonTitle="New Tarrif">
           <DialogTitle>New Tarrif</DialogTitle>
-          <UserForm />
+          <TarrifForm features={features} />
         </PopupNewDialog>
       </div>
 

@@ -54,7 +54,7 @@ export const tarrifFormSchema = z.object({
   shortDescription: z.string().min(1),
   fairDownload: period,
   price: period,
-  isRecoommended: z.boolean(),
+  isRecommended: z.boolean(),
   selectedFeatures: z.array(z.string()),
 });
 export type TarrifFormType = z.infer<typeof tarrifFormSchema>;

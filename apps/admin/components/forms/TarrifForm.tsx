@@ -5,14 +5,7 @@ import {
   TarrifFormType,
 } from "@/lib/validationSchema/validatoinSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  FairDownload,
-  PlanKey,
-  Price,
-  SelectedFeature,
-  Tarrif,
-  TarrifFeature,
-} from "@repo/db";
+import { FairDownload, PlanKey, Price, Tarrif, TarrifFeature } from "@repo/db";
 import { useLoading } from "@repo/lib/utils/useLoading";
 import { Checkbox } from "@repo/ui/components/checkbox";
 import {
@@ -38,11 +31,12 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import SubmitButton from "../SubmitButton";
 import { handleRes } from "@repo/lib/utils/handleRes";
+import { createTarrif, updateTarrif } from "@/actions/tarrif";
 
 export interface TarrifType extends Tarrif {
   price: Price | null;
   fairDownload: FairDownload | null;
-  features: SelectedFeature[];
+  features: TarrifFeature[];
 }
 
 export function TarrifForm({
@@ -71,7 +65,7 @@ export function TarrifForm({
         threeMonth: tarrif?.fairDownload?.threeMonth.toString() ?? "",
         annual: tarrif?.fairDownload?.annual.toString() ?? "",
       },
-      isRecoommended: tarrif?.isRecommended ?? false,
+      isRecommended: tarrif?.isRecommended ?? false,
       key: tarrif?.key ?? "standard",
       selectedFeatures: tarrif?.features.map((f) => f.id.toString()) ?? [],
     },
@@ -81,7 +75,9 @@ export function TarrifForm({
     console.log(data);
     startLoading();
 
-    const res = { success: "s" };
+    const res = tarrif
+      ? await updateTarrif(data, tarrif.id)
+      : await createTarrif(data);
 
     handleRes(res, { onSuccess: () => router.refresh() });
 
@@ -172,51 +168,53 @@ export function TarrifForm({
           </div>
         </div>
 
-        <FormField
-          control={form.control}
-          name="isRecoommended"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Recommended</FormLabel>
-              <FormControl>
-                <Switch
-                  defaultChecked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+        <div className="flex justify-between  gap-3">
+          <FormField
+            control={form.control}
+            name="key"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel>Key</FormLabel>
+                <FormControl>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Status" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {tarrifKeys.map((i, idx) => (
+                        <SelectItem key={idx} value={i} className="capitalize">
+                          {i}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="key"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Key</FormLabel>
-              <FormControl>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Status" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {tarrifKeys.map((i, idx) => (
-                      <SelectItem key={idx} value={i} className="capitalize">
-                        {i}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="isRecommended"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel>Recommended</FormLabel>
+                <FormControl>
+                  <Switch
+                    defaultChecked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        </div>
 
         <div className="space-y-1">
           <Label>Features</Label>
