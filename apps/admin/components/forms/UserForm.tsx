@@ -1,7 +1,6 @@
 "use client";
 
 import { createUser, updateUser } from "@/actions/user";
-import { handleRes } from "@/lib/utils/handleRes";
 import {
   userFormSchema,
   UserFormType,
@@ -29,6 +28,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import SubmitButton from "../SubmitButton";
+import { handleRes } from "@repo/lib/utils/handleRes";
 
 export function UserForm({ user }: { user?: User }) {
   const router = useRouter();
@@ -39,7 +39,7 @@ export function UserForm({ user }: { user?: User }) {
       fullName: user?.fullName ?? "",
       email: user?.email ?? "",
       phoneNumber: user?.phoneNumber ?? "",
-      type: user?.type ?? "designer",
+      type: user?.userType ?? "designer",
     },
   });
 

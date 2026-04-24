@@ -19,6 +19,12 @@ export const paymentStatus = [
   "pending",
 ] as const;
 
+const period = z.object({
+  monthly: z.string(),
+  threeMonth: z.string(),
+  annual: z.string(),
+});
+
 export const inputFormSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
@@ -41,19 +47,15 @@ export const categoriesFormSchema = z.object({
 });
 export type CategoriesFormType = z.infer<typeof categoriesFormSchema>;
 
-const tarrifForm = z.object({
-  title: z.string().min(1),
-  shortDescription: z.string().min(1),
-  description: z.string().min(1),
-  fairDownload: z.string().min(1),
-  monthly: z.string().min(1),
-  threeMonth: z.string().min(1),
-  annual: z.string().min(1),
-});
 export const tarrifFormSchema = z.object({
-  standard: tarrifForm,
-  pro: tarrifForm,
-  organization: tarrifForm,
+  title: z.string().min(1),
+  key: z.enum(planKey),
+  description: z.string().min(1),
+  shortDescription: z.string().min(1),
+  fairDownload: period,
+  price: period,
+  isRecoommended: z.boolean(),
+  selectedFeatures: z.array(z.string()),
 });
 export type TarrifFormType = z.infer<typeof tarrifFormSchema>;
 

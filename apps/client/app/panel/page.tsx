@@ -11,6 +11,7 @@ import UserSubscriptionCard from "./components/UserSubscriptionCard";
 const Page = async () => {
   const user = await getSessionUser();
   const userPlan = user?.plan;
+
   if (!userPlan) return <SubscriptionList />;
 
   const fairDownload = userPlan.fairDownload;

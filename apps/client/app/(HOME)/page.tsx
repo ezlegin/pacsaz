@@ -3,8 +3,8 @@ import HomeCategories from "@/components/Home/HomeCategories";
 import HomeCourseIntro from "@/components/Home/HomeCourseIntro";
 import HomeFeatures from "@/components/Home/HomeFeatures";
 import HomeSUbFAQ from "@/components/Home/HomeSubFAQ";
-import HomeSubscription from "@/components/Home/HomeSubscription";
 import LandingPage from "@/components/Home/LandingPage";
+import SubscriptionList from "@/components/SubscriptionList";
 
 const page = async () => {
   return (
@@ -26,7 +26,7 @@ const page = async () => {
       </div>
 
       <div className="space-y-10" id="subscription">
-        <HomeSubscription />
+        <SubscriptionList />
       </div>
 
       <div className="max-w-6xl mx-auto">

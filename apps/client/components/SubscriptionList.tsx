@@ -5,9 +5,10 @@ import { Flag } from "lucide-react";
 import { useState } from "react";
 import PeriodSwitch from "./PeriodSwitch";
 import { SubscriptionCard } from "./SubscriptionCard";
-import { PlanPeriod, plans } from "@repo/lib/data/plans";
+import { plans } from "@repo/lib/data/plans";
+import { PlanPeriod } from "@repo/db";
 
-export const discountFactor = 0.35;
+export const discountFactor = 0.35; //todo
 
 const SubscriptionList = () => {
   const [period, setPeriod] = useState<PlanPeriod>("monthly");
@@ -35,9 +36,9 @@ const SubscriptionList = () => {
         {plans.map((p, idx) => (
           <SubscriptionCard
             key={idx}
+            isRecommended={p.key === "pro"}
             props={p}
-            features={p.features}
-            index={idx}
+            // features={p.features}
             period={period}
           />
         ))}

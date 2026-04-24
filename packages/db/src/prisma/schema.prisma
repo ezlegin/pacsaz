@@ -239,22 +239,16 @@ model Plan {
   userId   Int
 }
 
-model Tarrif {
-  id               Int     @id @default(autoincrement())
-  key              PlanKey
-  title            String
-  shortDescription String
-  description      String
-  fairDownload     Int
-  monthly          Float
-  threeMonth       Float
-  annual           Float
-}
-
 enum PlanPeriod {
   monthly
   threeMonth
   annual
+}
+
+enum PlanKey {
+  standard
+  pro
+  organization
 }
 
 enum PaymentPlanType {
@@ -262,8 +256,51 @@ enum PaymentPlanType {
   renewal
 }
 
-enum PlanKey {
-  standard
-  pro
-  organization
+//! TARRIF --------------------------------
+
+model Tarrif {
+  id               Int               @id @default(autoincrement())
+  title            String
+  key              PlanKey
+  description      String
+  shortDescription String
+  isRecommended    Boolean
+  fairDownload     FairDownload?
+  price            Price?
+  tarrifFeatureId  Int?
+  features         SelectedFeature[]
+}
+
+model SelectedFeature {
+  id              Int           @id @default(autoincrement())
+  feature         TarrifFeature @relation(fields: [tarrifFeatureId], references: [id])
+  tarrifFeatureId Int
+  tarrif          Tarrif        @relation(fields: [tarrifId], references: [id])
+  tarrifId        Int
+}
+
+model TarrifFeature {
+  id               Int               @id @default(autoincrement())
+  title            String
+  selectedFeatures SelectedFeature[]
+}
+
+model FairDownload {
+  id         Int   @id @default(autoincrement())
+  monthly    Float
+  threeMonth Float
+  annual     Float
+
+  tarrif   Tarrif @relation(fields: [tarrifId], references: [id])
+  tarrifId Int    @unique
+}
+
+model Price {
+  id         Int   @id @default(autoincrement())
+  monthly    Float
+  threeMonth Float
+  annual     Float
+
+  tarrif   Tarrif @relation(fields: [tarrifId], references: [id])
+  tarrifId Int    @unique
 }
