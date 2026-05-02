@@ -25,7 +25,7 @@ export const createTarrif = async (data: TarrifFormType) => {
     const recommendedFeature = await prisma.tarrif.findFirst({
       where: { isRecommended: true },
     });
-    if (recommendedFeature)
+    if (isRecommended && recommendedFeature)
       return { error: "There is already a tarrif with Recommended Label." };
 
     await prisma.tarrif.create({
@@ -87,7 +87,7 @@ export const updateTarrif = async (data: TarrifFormType, id: number) => {
     const recommendedFeature = await prisma.tarrif.findFirst({
       where: { isRecommended: true, id: { not: id } },
     });
-    if (recommendedFeature)
+    if (isRecommended && recommendedFeature)
       return { error: "There is already a tarrif with Recommended Label." };
 
     await prisma.tarrif.update({

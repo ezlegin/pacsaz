@@ -26,7 +26,7 @@ const page = async () => {
       </div>
 
       <div className="space-y-10" id="subscription">
-        <SubscriptionList />
+        <SubscriptionList tarrif={[]} />
       </div>
 
       <div className="max-w-6xl mx-auto">

@@ -10,7 +10,7 @@ const UserProvider = ({
   user: any | null; // todo
   children: ReactNode;
 }) => {
-  if (!user) return;
+  if (!user) return children;
 
   const { setUser } = useUserStore();
 

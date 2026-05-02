@@ -1,16 +1,33 @@
 "use client";
 
+import {
+  FairDownload,
+  PlanPeriod,
+  Price,
+  Tarrif,
+  TarrifFeature,
+} from "@repo/db";
 import { Badge } from "@repo/ui/components/badge";
 import { Flag } from "lucide-react";
 import { useState } from "react";
 import PeriodSwitch from "./PeriodSwitch";
 import { SubscriptionCard } from "./SubscriptionCard";
-import { plans } from "@repo/lib/data/plans";
-import { PlanPeriod } from "@repo/db";
 
 export const discountFactor = 0.35; //todo
 
-const SubscriptionList = () => {
+export interface TarrifType extends Tarrif {
+  price: Price | null;
+  fairDownload: FairDownload | null;
+  features: TarrifFeature[];
+}
+
+const SubscriptionList = ({
+  tarrif,
+  features,
+}: {
+  tarrif: TarrifType[];
+  features: TarrifFeature[];
+}) => {
   const [period, setPeriod] = useState<PlanPeriod>("monthly");
 
   return (
@@ -33,13 +50,12 @@ const SubscriptionList = () => {
       <PeriodSwitch period={period} setPeriod={setPeriod} />
 
       <div className="flex gap-5">
-        {plans.map((p, idx) => (
+        {tarrif.map((t, idx) => (
           <SubscriptionCard
             key={idx}
-            isRecommended={p.key === "pro"}
-            props={p}
-            // features={p.features}
+            tarrif={t}
             period={period}
+            features={features}
           />
         ))}
       </div>
