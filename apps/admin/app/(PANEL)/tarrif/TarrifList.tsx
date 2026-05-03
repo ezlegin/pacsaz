@@ -1,4 +1,4 @@
-import { deleteUser } from "@/actions/user";
+import { deleteTarrif } from "@/actions/tarrif";
 import DeleteButton from "@/components/DeleteButton";
 import { TarrifForm, TarrifType } from "@/components/forms/TarrifForm";
 import { TarrifFeature } from "@repo/db";
@@ -48,7 +48,7 @@ const TarrifList = ({
             <DialogTitle>Update User</DialogTitle>
             <TarrifForm tarrif={tarrif} features={features} />
           </ActionButton>
-          <DeleteButton deleteFn={deleteUser} id={tarrif.id} />
+          <DeleteButton deleteFn={deleteTarrif} id={tarrif.id} />
         </TableCell>
       </TableRow>
     );

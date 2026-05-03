@@ -52,12 +52,19 @@ export const tarrifFormSchema = z.object({
   key: z.enum(planKey),
   description: z.string().min(1),
   shortDescription: z.string().min(1),
+  discountAmount: z.string().min(1),
   fairDownload: period,
   price: period,
   isRecommended: z.boolean(),
   selectedFeatures: z.array(z.string()),
 });
 export type TarrifFormType = z.infer<typeof tarrifFormSchema>;
+
+export const featureFormSchema = z.object({
+  title: z.string().min(1),
+  type: z.enum(["paid", "general"]),
+});
+export type FeatureFormType = z.infer<typeof featureFormSchema>;
 
 export const userFormSchema = z.object({
   fullName: z.string().min(1),

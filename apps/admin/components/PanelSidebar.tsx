@@ -11,10 +11,12 @@ import {
   SidebarMenuItem,
 } from "@repo/ui/components/sidebar";
 import {
+  Coins,
   CreditCard,
   Flag,
   Layout,
   LayoutDashboard,
+  List,
   Ratio,
   Ticket,
   Users,
@@ -59,7 +61,7 @@ export function PanelSidebar() {
       ],
     },
     {
-      groupLabel: "Payments",
+      groupLabel: "Financial",
       items: [
         {
           title: "Payments",
@@ -71,10 +73,20 @@ export function PanelSidebar() {
           url: "/cuopons",
           icon: Ticket,
         },
+      ],
+    },
+    {
+      groupLabel: "Tarrif",
+      items: [
         {
           title: "Tarrif",
           url: "/tarrif",
-          icon: CreditCard,
+          icon: Coins,
+        },
+        {
+          title: "Features",
+          url: "/tarrif/features",
+          icon: List,
         },
       ],
     },

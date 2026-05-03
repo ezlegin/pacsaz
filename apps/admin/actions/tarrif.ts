@@ -12,6 +12,7 @@ export const createTarrif = async (data: TarrifFormType) => {
     price,
     selectedFeatures,
     shortDescription,
+    discountAmount,
     title,
   } = data;
 
@@ -35,6 +36,7 @@ export const createTarrif = async (data: TarrifFormType) => {
         key,
         shortDescription,
         title,
+        discountAmount: +discountAmount,
         fairDownload: {
           create: {
             monthly: +fairDownload.monthly,
@@ -50,7 +52,9 @@ export const createTarrif = async (data: TarrifFormType) => {
           },
         },
         features: {
-          connect: selectedFeatures.map((f) => ({ id: +f })),
+          createMany: {
+            data: selectedFeatures.map((f) => ({ tarrifFeatureId: +f })),
+          },
         },
       },
     });
@@ -71,6 +75,7 @@ export const updateTarrif = async (data: TarrifFormType, id: number) => {
     price,
     selectedFeatures,
     shortDescription,
+    discountAmount,
     title,
   } = data;
 
@@ -98,6 +103,7 @@ export const updateTarrif = async (data: TarrifFormType, id: number) => {
         key,
         shortDescription,
         title,
+        discountAmount: +discountAmount,
         fairDownload: {
           update: {
             monthly: +fairDownload.monthly,
@@ -113,12 +119,33 @@ export const updateTarrif = async (data: TarrifFormType, id: number) => {
           },
         },
         features: {
-          set: selectedFeatures.map((f) => ({ id: +f })),
+          deleteMany: {
+            tarrifId: id,
+          },
+          createMany: {
+            data: selectedFeatures.map((f) => ({
+              tarrifFeatureId: +f,
+            })),
+          },
         },
       },
     });
 
     return { success: "Tarrif Updated Successfully." };
+  } catch (error) {
+    console.error(error);
+    return { error: (error as Error).name };
+  }
+};
+
+export const deleteTarrif = async (id: number) => {
+  try {
+    const existingTarrif = await prisma.tarrif.findFirst({ where: { id } });
+    if (!existingTarrif) return { error: "Tarrif Not Found." };
+
+    await prisma.tarrif.delete({ where: { id } });
+
+    return { success: "Tarrif Deleted Successfully." };
   } catch (error) {
     console.error(error);
     return { error: (error as Error).name };

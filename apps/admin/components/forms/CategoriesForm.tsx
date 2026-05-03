@@ -2,12 +2,12 @@
 
 import { createCategory, updateCategory } from "@/actions/categories";
 import { Category } from "@/app/(PANEL)/categories/CategoriesList";
-import { handleRes } from "@/lib/utils/handleRes";
 import {
   categoriesFormSchema,
   CategoriesFormType,
 } from "@/lib/validationSchema/validatoinSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { handleRes } from "@repo/lib/utils/handleRes";
 import { Button } from "@repo/ui/components/button";
 import {
   Form,

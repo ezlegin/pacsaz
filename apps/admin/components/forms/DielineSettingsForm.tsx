@@ -23,7 +23,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import SubmitButton from "../SubmitButton";
 import { Switch } from "@repo/ui/components/switch";
-import { handleRes } from "@/lib/utils/handleRes";
+import { handleRes } from "@repo/lib/utils/handleRes";
 
 const DielineSettingsForm = ({
   dieline,

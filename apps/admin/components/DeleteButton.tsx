@@ -1,6 +1,6 @@
 "use client";
 
-import { ServerAction } from "@repo/lib/data/types";
+import { ServerResponse } from "@repo/lib/data/types";
 import { handleRes } from "@repo/lib/utils/handleRes";
 import { useLoading } from "@repo/lib/utils/useLoading";
 import { Button } from "@repo/ui/components/button";
@@ -15,7 +15,7 @@ const DeleteButton = ({
   id,
   args,
 }: {
-  deleteFn: (id: number, ...arg: any) => ServerAction;
+  deleteFn: (id: number, ...arg: any) => ServerResponse;
   id: number;
   args?: any;
 }) => {

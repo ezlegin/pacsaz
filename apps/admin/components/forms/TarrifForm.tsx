@@ -5,7 +5,14 @@ import {
   TarrifFormType,
 } from "@/lib/validationSchema/validatoinSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FairDownload, PlanKey, Price, Tarrif, TarrifFeature } from "@repo/db";
+import {
+  FairDownload,
+  PlanKey,
+  Price,
+  SelectedTarrifFeature,
+  Tarrif,
+  TarrifFeature,
+} from "@repo/db";
 import { useLoading } from "@repo/lib/utils/useLoading";
 import { Checkbox } from "@repo/ui/components/checkbox";
 import {
@@ -36,7 +43,7 @@ import { createTarrif, updateTarrif } from "@/actions/tarrif";
 export interface TarrifType extends Tarrif {
   price: Price | null;
   fairDownload: FairDownload | null;
-  features: TarrifFeature[];
+  features: SelectedTarrifFeature[];
 }
 
 export function TarrifForm({
@@ -46,6 +53,7 @@ export function TarrifForm({
   tarrif?: TarrifType;
   features: TarrifFeature[];
 }) {
+  console.log("tarrif", tarrif);
   const router = useRouter();
 
   const { startLoading, stopLoading, isLoading } = useLoading();
@@ -55,6 +63,7 @@ export function TarrifForm({
       title: tarrif?.title ?? "",
       description: tarrif?.description ?? "",
       shortDescription: tarrif?.shortDescription ?? "",
+      discountAmount: tarrif?.discountAmount.toString() ?? "0",
       price: {
         monthly: tarrif?.price?.monthly.toString() ?? "",
         threeMonth: tarrif?.price?.threeMonth.toString() ?? "",
@@ -67,12 +76,12 @@ export function TarrifForm({
       },
       isRecommended: tarrif?.isRecommended ?? false,
       key: tarrif?.key ?? "standard",
-      selectedFeatures: tarrif?.features.map((f) => f.id.toString()) ?? [],
+      selectedFeatures:
+        tarrif?.features.map((f) => f.tarrifFeatureId.toString()) ?? [],
     },
   });
 
   const onSubmit = async (data: TarrifFormType) => {
-    console.log(data);
     startLoading();
 
     const res = tarrif
@@ -120,7 +129,7 @@ export function TarrifForm({
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <Textarea {...field} />
+                <Textarea {...field} dir="rtl" />
               </FormControl>
             </FormItem>
           )}
@@ -167,6 +176,19 @@ export function TarrifForm({
             />
           </div>
         </div>
+
+        <FormField
+          control={form.control}
+          name="discountAmount"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Discount Amount (%)</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
 
         <div className="flex justify-between  gap-3">
           <FormField
@@ -224,6 +246,7 @@ export function TarrifForm({
             render={({ field }) => (
               <div className="max-h-35 overflow-y-auto">
                 {features.map((item, idx) => {
+                  console.log(field.value);
                   const isChecked = field.value.includes(item.id.toString());
 
                   return (
