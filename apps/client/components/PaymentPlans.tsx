@@ -1,11 +1,11 @@
 import Price from "@/components/Price";
+import { PlanKey, PlanPeriod, plans } from "@repo/lib/data/plans";
 import Card from "@repo/ui/components/custom/Card";
 import { Label } from "@repo/ui/components/label";
 import { RadioGroup, RadioGroupItem } from "@repo/ui/components/radio-group";
 import { Separator } from "@repo/ui/components/separator";
 import { cn } from "@repo/ui/lib/utils";
 import PeriodSwitch from "./PeriodSwitch";
-import { PlanKey, PlanPeriod, plans } from "@repo/lib/data/plans";
 
 interface Props {
   plan: PlanKey;
@@ -14,6 +14,7 @@ interface Props {
   setPlan: (val: PlanKey) => void;
 }
 
+//todo: you can delete this file.
 export const PaymentPlans = ({ plan, setPeriod, setPlan, period }: Props) => {
   return (
     <Card className="w-full space-y-5">

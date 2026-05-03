@@ -4,6 +4,7 @@ import {
   FairDownload,
   PlanPeriod,
   Price,
+  SelectedTarrifFeature,
   Tarrif,
   TarrifFeature,
 } from "@repo/db";
@@ -18,7 +19,7 @@ export const discountFactor = 0.35; //todo
 export interface TarrifType extends Tarrif {
   price: Price | null;
   fairDownload: FairDownload | null;
-  features: TarrifFeature[];
+  features: SelectedTarrifFeature[];
 }
 
 const SubscriptionList = ({

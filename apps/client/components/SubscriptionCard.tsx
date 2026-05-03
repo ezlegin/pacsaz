@@ -1,4 +1,5 @@
-import { FairDownload, Price as PriceType, TarrifFeature } from "@repo/db";
+import { PriceMapper } from "@/lib/map";
+import { FairDownload, TarrifFeature } from "@repo/db";
 import { PlanPeriod } from "@repo/lib/data/plans";
 import { Button } from "@repo/ui/components/button";
 import Card from "@repo/ui/components/custom/Card";
@@ -42,7 +43,10 @@ export const SubscriptionCard = ({
       >
         <div className="flex flex-col gap-3">
           <span className="font-semibold">{tarrif.title}</span>
-          <Price period={period} price={PriceMap(period, tarrif.price!)} />
+          <Price
+            period={period}
+            price={PriceMapper(period, tarrif.price!, tarrif.discountAmount)}
+          />
           <p className="text-xs text-muted-foreground">{tarrif.description}</p>
         </div>
 
@@ -67,7 +71,7 @@ export const SubscriptionCard = ({
                 <CircleCheck
                   size={13}
                   className={
-                    tarrif.features.some((tf) => tf.title === f.title)
+                    tarrif.features.some((tf) => tf.tarrifFeatureId === f.id)
                       ? "text-green-600"
                       : "text-muted-foreground"
                   }
@@ -90,16 +94,5 @@ const FairDownloadMap = (period: PlanPeriod, fairDownload: FairDownload) => {
       return fairDownload.threeMonth;
     case "annual":
       return fairDownload.annual;
-  }
-};
-
-const PriceMap = (period: PlanPeriod, price: PriceType) => {
-  switch (period) {
-    case "monthly":
-      return price.monthly;
-    case "threeMonth":
-      return price.threeMonth;
-    case "annual":
-      return price.annual;
   }
 };

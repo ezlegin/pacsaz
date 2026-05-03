@@ -259,22 +259,36 @@ enum PaymentPlanType {
 //! TARRIF --------------------------------
 
 model Tarrif {
-  id               Int             @id @default(autoincrement())
+  id               Int                     @id @default(autoincrement())
   title            String
-  key              PlanKey         @unique
+  key              PlanKey                 @unique
   description      String
   shortDescription String
   isRecommended    Boolean
+  discountAmount   Float                   @default(0)
   fairDownload     FairDownload?
   price            Price?
-  features         TarrifFeature[]
+  features         SelectedTarrifFeature[]
 }
 
 model TarrifFeature {
-  id       Int     @id @default(autoincrement())
-  title    String
-  tarrif   Tarrif? @relation(fields: [tarrifId], references: [id])
-  tarrifId Int?
+  id                     Int                     @id @default(autoincrement())
+  title                  String
+  type                   TarrifFeatureType
+  selectedTarrifFeatures SelectedTarrifFeature[]
+}
+
+enum TarrifFeatureType {
+  general
+  paid
+}
+
+model SelectedTarrifFeature {
+  id              Int           @id @default(autoincrement())
+  tarrifFeature   TarrifFeature @relation(fields: [tarrifFeatureId], references: [id], onDelete: Cascade)
+  tarrifFeatureId Int
+  tarrif          Tarrif        @relation(fields: [tarrifId], references: [id], onDelete: Cascade)
+  tarrifId        Int
 }
 
 model FairDownload {

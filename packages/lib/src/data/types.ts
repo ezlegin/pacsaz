@@ -8,7 +8,7 @@ export type UserType =
   | "other";
 export type FormType = "update" | "create";
 export type Lang = "fa" | "en";
-export type ServerAction = Promise<
+export type ServerResponse = Promise<
   | {
       success: string;
       error?: undefined;

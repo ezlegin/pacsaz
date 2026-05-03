@@ -1,88 +1,80 @@
 "use client";
 
-import { usePaymentCheckout } from "@/hooks/usePaymentCheckout";
-import { mapPaymentData } from "@/utils/mapPaymentData";
-import { PlanKey, PlanPeriod } from "@repo/lib/data/plans";
-import { formatPrice } from "@repo/lib/utils/formatPrice";
-import { Button } from "@repo/ui/components/button";
+import { PlanPeriod, Price, Tarrif } from "@repo/db";
 import Card from "@repo/ui/components/custom/Card";
-import { Separator } from "@repo/ui/components/separator";
-import { useState } from "react";
-import { PaymentPlans } from "./PaymentPlans";
+import Image from "next/image";
 import DiscountForm from "./forms/DiscountForm";
+import { useState } from "react";
+import { Button } from "@repo/ui/components/button";
+import { formatPrice } from "@repo/lib/utils/formatPrice";
 
-export type PaymentQuery = {
-  plan?: PlanKey | undefined;
-  period?: PlanPeriod | undefined;
-};
+interface TarrifType extends Tarrif {
+  price: Price | null;
+}
 
-const PaymentGrid = ({ query }: { query: PaymentQuery }) => {
+const PaymentGrid = ({
+  tarrif,
+  period,
+}: {
+  tarrif: TarrifType;
+  period: PlanPeriod;
+}) => {
   const [appliedDiscountCode, setAppliedDiscountCode] = useState<
     string | undefined
   >(undefined);
-
-  const { discountInfo, checkoutInfo, period, plan, setPeriod, setPlan } =
-    usePaymentCheckout({
-      discountCode: appliedDiscountCode,
-      query,
-    });
+  const basePrice = tarrif.price?.[period] ?? 0;
+  const [totalPrice, setTotalPrice] = useState(basePrice);
 
   const onStartPayment = () => {
-    const data = {
-      total: checkoutInfo.total,
-      amount: checkoutInfo.amount,
-      discountCodeAmount: checkoutInfo.discountAmount,
-      discountCode: discountInfo.code,
-      plan,
-      period,
-    };
-
-    console.log(data);
+    console.log("Payment Started.");
   };
 
-  const paymentData = mapPaymentData(period, plan, checkoutInfo);
+  // todo: implement applying discount code.
 
   return (
-    <div className="max-w-7xl mx-auto">
-      <div className="flex gap-6">
-        <PaymentPlans
-          period={period}
-          plan={plan}
-          setPeriod={setPeriod}
-          setPlan={setPlan}
+    <div className="flex justify-center">
+      <Card className="relative min-w-sm mt-10 pt-26 space-y-3">
+        <Image
+          alt=""
+          src={`/icons/period/${tarrif.key}-${period}.png`}
+          width={400}
+          height={400}
+          className="w-30 h-auto absolute -top-10 right-1/2 translate-x-1/2"
         />
-        <Card className="w-1/3 h-fit space-y-3">
-          <ul className="text-sm text-muted-foreground space-y-2.5">
-            {paymentData.map((p, idx) => (
-              <div
-                key={idx}
-                className="space-y-2.5 last:font-medium last:text-foreground"
-              >
-                <li className="flex justify-between">
-                  <span>{p.title}</span>
-                  <span>{p.value}</span>
-                </li>
-                <Separator />
-              </div>
-            ))}
-          </ul>
+        <p className="text-center text-muted-foreground">
+          {tarrif.shortDescription}
+        </p>
 
-          <DiscountForm
-            appliedDiscountCode={appliedDiscountCode}
-            setAppliedDiscountCode={setAppliedDiscountCode}
-            discountInfo={discountInfo}
-          />
+        <ul>
+          <li className="flex justify-between border-b py-3 text-muted-foreground">
+            <span>هزینه اشتراک:</span>
+            <span>{formatPrice(basePrice, true)}</span>
+          </li>
+          <li className="flex justify-between border-b py-3 text-muted-foreground">
+            <span>تخفیف:</span>
+            <span>{formatPrice(0, true)}</span>
+          </li>
+          <li className="flex justify-between border-b py-3">
+            <span>قابل پرداخت:</span>
+            <span>{formatPrice(totalPrice, true)}</span>
+          </li>
+        </ul>
 
-          <Button
-            onClick={onStartPayment}
-            size={"lg"}
-            className="w-full"
-            variant={"gradient"}
-          >
-            پرداخت {formatPrice(checkoutInfo.total, true)}
-          </Button>
-        </Card>
-      </div>
+        <DiscountForm
+          appliedDiscountCode={undefined}
+          discountInfo={{ code: undefined, error: null, success: null }}
+          setAppliedDiscountCode={setAppliedDiscountCode}
+        />
+
+        <Button
+          onClick={onStartPayment}
+          size={"xl"}
+          className="w-full"
+          variant={"gradient"}
+        >
+          پرداخت {formatPrice(totalPrice, true)}
+        </Button>
+      </Card>
     </div>
   );
 };
