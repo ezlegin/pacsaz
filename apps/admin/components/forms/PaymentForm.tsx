@@ -2,6 +2,7 @@
 
 import { createPayment } from "@/actions/payment";
 import { PaymentType } from "@/app/(PANEL)/payments/PaymentsList";
+import { getCouponByCode } from "@/data/coupon";
 import {
   paymentFormSchema,
   PaymentFormType,
@@ -11,6 +12,7 @@ import {
 } from "@/lib/validationSchema/validatoinSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Price, Tarrif } from "@repo/db";
+import { formatPrice } from "@repo/lib/utils/formatPrice";
 import { handleRes } from "@repo/lib/utils/handleRes";
 import { useLoading } from "@repo/lib/utils/useLoading";
 import { Button } from "@repo/ui/components/button";
@@ -43,6 +45,7 @@ import { CalendarIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 interface TarrifType extends Tarrif {
   price: Price | null;
@@ -57,7 +60,7 @@ export function PaymentForm({
 }) {
   const router = useRouter();
   const { startLoading, stopLoading, isLoading } = useLoading();
-  const [discountCode, setDiscountCode] = useState("");
+  const [discountCode, setDiscountCode] = useState<string | null>(null);
 
   const form = useForm<PaymentFormType>({
     resolver: zodResolver(paymentFormSchema),
@@ -86,32 +89,86 @@ export function PaymentForm({
 
   const plan = form.watch("planKey");
   const period = form.watch("period");
+  const tarrifPlan = tarrif.find((t) => t.key === plan);
+  const rawTotal = tarrifPlan?.price![period] ?? 0;
 
   useEffect(() => {
-    const tarrifPlan = tarrif.find((t) => t.key === plan);
-    if (!tarrifPlan) return;
-
-    form.setValue("amount", tarrifPlan.price![period]);
-    form.setValue("discountCodeAmount", 0);
-    form.setValue("total", tarrifPlan.price![period]);
-  }, [plan, period, discountCode]);
-
-  const formCode = form.watch("discountCode");
-
-  const applyDiscount = () => {
-    if (discountCode) {
-      setDiscountCode("");
-      form.setValue("discountCode", "");
+    if (!tarrifPlan) {
+      toast.error("Tarrif not available.");
       return;
     }
 
-    if (formCode) setDiscountCode(formCode);
+    form.setValue("amount", tarrifPlan.price![period]);
+    form.setValue("discountCodeAmount", 0);
+    form.setValue("total", rawTotal);
+  }, [plan, period]);
+
+  const formCode = form.watch("discountCode");
+
+  const applyDiscount = async () => {
+    if (discountCode) {
+      setDiscountCode("");
+      form.setValue("discountCode", "");
+      form.setValue("discountCodeAmount", 0);
+      form.setValue("total", rawTotal);
+      toast.info("Coupon Removed.");
+      return;
+    }
+
+    const coupon = await getCouponByCode(formCode);
+    try {
+      if (!coupon) {
+        throw new Error("Coupon Invalid.");
+      }
+      if (coupon.expiresAt < new Date()) {
+        throw new Error("Coupon Expired.");
+      }
+      if (coupon.used >= coupon.limit) {
+        throw new Error("Coupon Limit Has Reached.");
+      }
+      const isCouponValidForThisPlan = coupon.plan.some(
+        (p) => p.key === tarrifPlan?.key,
+      );
+      const validPlans = coupon.plan.map((p) => p.key).join(", ");
+      if (!isCouponValidForThisPlan) {
+        throw new Error(
+          `This coupon is not valid for this plan. valid plans are: ${validPlans}`,
+        );
+      }
+
+      switch (coupon.type) {
+        case "fixed": {
+          const discountAmount =
+            coupon.amount > rawTotal ? rawTotal : coupon.amount;
+          form.setValue("discountCodeAmount", discountAmount);
+          form.setValue("total", rawTotal - discountAmount);
+          break;
+        }
+
+        case "percent": {
+          const factor = 1 - coupon.amount / 100;
+          const discountAmount = rawTotal - rawTotal * factor;
+          form.setValue("discountCodeAmount", discountAmount);
+          form.setValue("total", rawTotal * factor);
+          break;
+        }
+      }
+
+      toast.success("Discount Code Applied.");
+      setDiscountCode(formCode);
+    } catch (error) {
+      toast.error((error as Error).message);
+      form.setValue("discountCode", "");
+    }
   };
 
   const checkout = [
-    { title: "Amount:", value: form.watch("amount") },
-    { title: "Discount:", value: form.watch("discountCodeAmount") },
-    { title: "Total:", value: form.watch("total") },
+    { title: "Amount:", value: formatPrice(form.watch("amount"), true, "en") },
+    {
+      title: "Discount:",
+      value: formatPrice(form.watch("discountCodeAmount"), true, "en"),
+    },
+    { title: "Total:", value: formatPrice(form.watch("total"), true, "en") },
   ];
 
   return (

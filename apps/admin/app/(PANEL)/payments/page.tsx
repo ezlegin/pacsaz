@@ -9,7 +9,7 @@ import { prisma } from "@repo/db";
 
 const page = async () => {
   const payments = await prisma.payment.findMany({
-    include: { plan: true, user: true, coupon: true },
+    include: { plan: true, user: true, coupon: { include: { plan: true } } },
     orderBy: { id: "desc" },
   });
 

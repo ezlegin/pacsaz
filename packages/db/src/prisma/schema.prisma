@@ -218,15 +218,14 @@ model Payment {
 
 model Coupon {
   id        Int        @id @default(autoincrement())
-  code      String
+  code      String     @unique
   expiresAt DateTime
   amount    Float
   used      Int        @default(0)
   limit     Int
   type      CouponType
   payment   Payment[]
-  plan      Plan?      @relation(fields: [planId], references: [id])
-  planId    Int?
+  plan      Plan[]
 }
 
 enum CouponType {
@@ -266,7 +265,7 @@ model Plan {
   payments Payment?
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId   Int
-  coupons  Coupon[]
+  coupon   Coupon[]
 }
 
 enum PlanPeriod {

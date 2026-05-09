@@ -16,7 +16,7 @@ import Link from "next/link";
 export interface PaymentType extends Payment {
   user: User;
   plan: Plan;
-  coupon: Coupon | null;
+  coupon: (Coupon & { plan: Plan[] }) | null;
 }
 
 const PaymentsList = ({ data }: { data: PaymentType[] }) => {
