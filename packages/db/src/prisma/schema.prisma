@@ -205,6 +205,7 @@ model Payment {
   total              Float
   totalDiscount      Float
   discountCodeAmount Float
+  discountCode       String
   status             PaymentStatus
   method             PaymentMethod
 
@@ -222,10 +223,10 @@ model Coupon {
   expiresAt DateTime
   amount    Float
   used      Int        @default(0)
-  limit     Int
+  limit     Int?
   type      CouponType
   payment   Payment[]
-  plan      Plan[]
+  tarrif    Tarrif[]
 }
 
 enum CouponType {
@@ -265,7 +266,6 @@ model Plan {
   payments Payment?
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId   Int
-  coupon   Coupon[]
 }
 
 enum PlanPeriod {
@@ -298,6 +298,7 @@ model Tarrif {
   fairDownload     FairDownload?
   price            Price?
   features         SelectedTarrifFeature[]
+  coupon           Coupon[]
 }
 
 model TarrifFeature {

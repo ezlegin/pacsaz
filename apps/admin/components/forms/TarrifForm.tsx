@@ -246,7 +246,6 @@ export function TarrifForm({
             render={({ field }) => (
               <div className="max-h-35 overflow-y-auto">
                 {features.map((item, idx) => {
-                  console.log(field.value);
                   const isChecked = field.value.includes(item.id.toString());
 
                   return (

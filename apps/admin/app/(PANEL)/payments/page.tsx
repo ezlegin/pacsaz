@@ -1,17 +1,20 @@
+import { PaymentForm } from "@/components/forms/PaymentForm";
 import PageTitle from "@/components/PageTitle";
+import { prisma } from "@repo/db";
 import { globalPageSize } from "@repo/lib/data/consts";
 import Filter from "@repo/ui/components/custom/Filter";
-import NewButton from "@repo/ui/components/custom/NewButton";
 import Pagination from "@repo/ui/components/custom/Pagination";
+import PopupNewDialog from "@repo/ui/components/custom/PopupNewDialog";
 import Search from "@repo/ui/components/custom/Search";
+import { DialogTitle } from "@repo/ui/components/dialog";
 import PaymentsList from "./PaymentsList";
-import { prisma } from "@repo/db";
 
 const page = async () => {
   const payments = await prisma.payment.findMany({
-    include: { plan: true, user: true, coupon: { include: { plan: true } } },
+    include: { plan: true, user: true, coupon: { include: { tarrif: true } } },
     orderBy: { id: "desc" },
   });
+  const tarrif = await prisma.tarrif.findMany({ include: { price: true } });
 
   return (
     <div className="space-y-3">
@@ -32,10 +35,13 @@ const page = async () => {
           />
         </div>
 
-        <NewButton title="New Payment" href="/payments/new" />
+        <PopupNewDialog buttonTitle="New Payment">
+          <DialogTitle>New Payment</DialogTitle>
+          <PaymentForm tarrif={tarrif} />
+        </PopupNewDialog>
       </div>
 
-      <PaymentsList data={payments} />
+      <PaymentsList data={payments} tarrif={tarrif} />
 
       <Pagination pageSize={globalPageSize} totalItems={payments.length} />
     </div>

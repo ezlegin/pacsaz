@@ -18,6 +18,7 @@ export const paymentStatus = [
   "canceled",
   "pending",
 ] as const;
+export const couponTypes = ["fixed", "percent"] as const;
 
 const period = z.object({
   monthly: z.string(),
@@ -105,3 +106,13 @@ export const dielineSettingsFormSchema = z.object({
   active: z.boolean(),
 });
 export type DielineSettingsFormType = z.infer<typeof dielineSettingsFormSchema>;
+
+export const couponFormSchema = z.object({
+  code: z.string().min(1),
+  amount: z.string().min(1),
+  type: z.enum(couponTypes),
+  expiresAt: z.date(),
+  limit: z.string().min(1),
+  plans: z.array(z.string()),
+});
+export type CouponFormType = z.infer<typeof couponFormSchema>;

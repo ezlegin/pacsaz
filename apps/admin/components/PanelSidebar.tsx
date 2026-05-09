@@ -70,7 +70,7 @@ export function PanelSidebar() {
         },
         {
           title: "Coupons",
-          url: "/cuopons",
+          url: "/coupons",
           icon: Ticket,
         },
       ],

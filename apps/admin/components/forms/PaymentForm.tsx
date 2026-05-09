@@ -1,6 +1,6 @@
 "use client";
 
-import { createPayment } from "@/actions/payment";
+import { createPayment, updatePayment } from "@/actions/payment";
 import { PaymentType } from "@/app/(PANEL)/payments/PaymentsList";
 import { getCouponByCode } from "@/data/coupon";
 import {
@@ -60,7 +60,9 @@ export function PaymentForm({
 }) {
   const router = useRouter();
   const { startLoading, stopLoading, isLoading } = useLoading();
-  const [discountCode, setDiscountCode] = useState<string | null>(null);
+  const [discountCode, setDiscountCode] = useState<string | null>(
+    payment?.discountCode ?? null,
+  );
 
   const form = useForm<PaymentFormType>({
     resolver: zodResolver(paymentFormSchema),
@@ -80,7 +82,9 @@ export function PaymentForm({
   const onSubmit = async (data: PaymentFormType) => {
     startLoading();
 
-    const res = payment ? await createPayment(data) : await createPayment(data);
+    const res = payment
+      ? await updatePayment(data, payment.id)
+      : await createPayment(data);
 
     handleRes(res, { onSuccess: () => router.refresh() });
 
@@ -90,7 +94,7 @@ export function PaymentForm({
   const plan = form.watch("planKey");
   const period = form.watch("period");
   const tarrifPlan = tarrif.find((t) => t.key === plan);
-  const rawTotal = tarrifPlan?.price![period] ?? 0;
+  const rawTotal = payment?.total ?? tarrifPlan?.price![period] ?? 0;
 
   useEffect(() => {
     if (!tarrifPlan) {
@@ -123,14 +127,14 @@ export function PaymentForm({
       if (coupon.expiresAt < new Date()) {
         throw new Error("Coupon Expired.");
       }
-      if (coupon.used >= coupon.limit) {
+      if (coupon.limit && coupon.used >= coupon.limit) {
         throw new Error("Coupon Limit Has Reached.");
       }
-      const isCouponValidForThisPlan = coupon.plan.some(
+      const isCouponValidForThisPlan = coupon.tarrif.some(
         (p) => p.key === tarrifPlan?.key,
       );
-      const validPlans = coupon.plan.map((p) => p.key).join(", ");
-      if (!isCouponValidForThisPlan) {
+      const validPlans = coupon.tarrif.map((p) => p.key).join(", ");
+      if (coupon.tarrif.length > 0 && !isCouponValidForThisPlan) {
         throw new Error(
           `This coupon is not valid for this plan. valid plans are: ${validPlans}`,
         );
@@ -173,10 +177,7 @@ export function PaymentForm({
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-5 max-w-sm"
-      >
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
         <FormField
           control={form.control}
           name="from"
@@ -365,7 +366,7 @@ export function PaymentForm({
           disabled={!form.formState.isValid || isLoading}
           className="w-full"
         >
-          Create
+          {payment ? "Update" : "Create"}
         </Button>
       </form>
     </Form>

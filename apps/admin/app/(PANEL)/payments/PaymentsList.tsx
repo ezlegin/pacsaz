@@ -1,9 +1,13 @@
-import { Coupon, Payment, Plan, User } from "@repo/db";
+import { deletePayment } from "@/actions/payment";
+import DeleteButton from "@/components/DeleteButton";
+import { PaymentForm } from "@/components/forms/PaymentForm";
+import { Coupon, Payment, Plan, Price, Tarrif, User } from "@repo/db";
 import { formatPrice } from "@repo/lib/utils/formatPrice";
-import { ActButton } from "@repo/ui/components/custom/ActionButton";
+import ActionButton from "@repo/ui/components/custom/ActionButton";
 import Card from "@repo/ui/components/custom/Card";
 import PaymentStatus from "@repo/ui/components/custom/PaymentStatus";
 import Table from "@repo/ui/components/custom/Table";
+import { DialogTitle } from "@repo/ui/components/dialog";
 import { TableCell, TableRow } from "@repo/ui/components/table";
 import {
   Tooltip,
@@ -11,15 +15,20 @@ import {
   TooltipTrigger,
 } from "@repo/ui/components/tooltip";
 import { Info, Pencil } from "lucide-react";
-import Link from "next/link";
 
 export interface PaymentType extends Payment {
   user: User;
   plan: Plan;
-  coupon: (Coupon & { plan: Plan[] }) | null;
+  coupon: (Coupon & { tarrif: Tarrif[] }) | null;
 }
 
-const PaymentsList = ({ data }: { data: PaymentType[] }) => {
+const PaymentsList = ({
+  data,
+  tarrif,
+}: {
+  data: PaymentType[];
+  tarrif: (Tarrif & { price: Price | null })[];
+}) => {
   const renderRows = (data: PaymentType) => {
     return (
       <TableRow key={data.id}>
@@ -60,11 +69,11 @@ const PaymentsList = ({ data }: { data: PaymentType[] }) => {
         </TableCell>
         <TableCell className="text-center">{formatPrice(data.total)}</TableCell>
         <TableCell className="text-center flex justify-end">
-          <Link href={`/payments/${data.id}`}>
-            <ActButton>
-              <Pencil size={14} />
-            </ActButton>
-          </Link>
+          <ActionButton icon={Pencil}>
+            <DialogTitle>Update Coupon</DialogTitle>
+            <PaymentForm payment={data} tarrif={tarrif} />
+          </ActionButton>
+          <DeleteButton deleteFn={deletePayment} id={data.id} />
         </TableCell>
       </TableRow>
     );

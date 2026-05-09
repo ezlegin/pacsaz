@@ -36,11 +36,17 @@ export const createPayment = async (data: PaymentFormType) => {
         discountCodeAmount,
         status,
         total,
-        totalDiscount: 0,
+        totalDiscount: discountCodeAmount,
         method: "admin",
         user: {
           connect: { id: +userId }, //todo
         },
+        coupon:
+          discountCode.length > 0
+            ? {
+                connect: { code: discountCode },
+              }
+            : undefined,
 
         plan: {
           create: {
@@ -59,10 +65,103 @@ export const createPayment = async (data: PaymentFormType) => {
       },
     });
 
+    if (discountCode)
+      await prisma.coupon.update({
+        where: { code: discountCode },
+        data: { used: { increment: 1 } },
+      });
+
     return { success: "Payment and Subscription created successfully." };
   } catch (error) {
     console.error(error);
-    return { error: (error as Error).message };
+    return { error: (error as Error).name };
+  }
+};
+
+export const updatePayment = async (data: PaymentFormType, id: number) => {
+  const {
+    amount,
+    from,
+    discountCodeAmount,
+    period,
+    planKey,
+    status,
+    total,
+    userId,
+    discountCode,
+  } = data;
+
+  const title = mapPlanTitle(planKey);
+  const endsAt = mapPlanDataRange(from, period);
+  const level = mapPlanLevel(planKey);
+
+  try {
+    const tarrif = await prisma.tarrif.findUnique({
+      where: { key: planKey },
+      include: { fairDownload: true },
+    });
+    if (!tarrif || !tarrif.fairDownload)
+      return { error: "Tarrif or Tarrif Fair Download not available." };
+
+    await prisma.payment.update({
+      where: { id },
+      data: {
+        amount,
+        discountCode,
+        discountCodeAmount,
+        status,
+        total,
+        totalDiscount: discountCodeAmount,
+        method: "admin",
+        user: {
+          connect: { id: +userId },
+        },
+        coupon:
+          discountCode.length > 0
+            ? {
+                connect: { code: discountCode },
+                update: { used: { increment: 1 } },
+              }
+            : undefined,
+
+        plan: {
+          update: {
+            title,
+            endsAt,
+            fairDownload: tarrif.fairDownload[period],
+            key: planKey,
+            level,
+            period,
+            isPremium: planKey !== "standard",
+            userId: +userId,
+            startedAt: from,
+            type: "new",
+          },
+        },
+      },
+    });
+
+    return { success: "Payment and Subscription created successfully." };
+  } catch (error) {
+    console.error(error);
+    return { error: (error as Error).name };
+  }
+};
+
+export const deletePayment = async (id: number) => {
+  try {
+    await prisma.$transaction(async (ts) => {
+      const deletedPayment = await ts.payment.delete({
+        where: { id },
+        include: { plan: true },
+      });
+      await ts.plan.delete({ where: { id: deletedPayment.plan.id } });
+    });
+
+    return { success: "Payment Deleted Successfully." };
+  } catch (error) {
+    console.error(error);
+    return { error: (error as Error).name };
   }
 };
 
