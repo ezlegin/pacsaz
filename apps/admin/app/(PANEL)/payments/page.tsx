@@ -1,12 +1,18 @@
 import PageTitle from "@/components/PageTitle";
-import Pagination from "@repo/ui/components/custom/Pagination";
-import PaymentsList, { Payment } from "./PaymentsList";
 import { globalPageSize } from "@repo/lib/data/consts";
-import NewButton from "@repo/ui/components/custom/NewButton";
 import Filter from "@repo/ui/components/custom/Filter";
+import NewButton from "@repo/ui/components/custom/NewButton";
+import Pagination from "@repo/ui/components/custom/Pagination";
 import Search from "@repo/ui/components/custom/Search";
+import PaymentsList from "./PaymentsList";
+import { prisma } from "@repo/db";
 
-const page = () => {
+const page = async () => {
+  const payments = await prisma.payment.findMany({
+    include: { plan: true, user: true, coupon: true },
+    orderBy: { id: "desc" },
+  });
+
   return (
     <div className="space-y-3">
       <PageTitle title="Payments" />
@@ -29,65 +35,11 @@ const page = () => {
         <NewButton title="New Payment" href="/payments/new" />
       </div>
 
-      <PaymentsList data={data} />
+      <PaymentsList data={payments} />
 
-      <Pagination pageSize={globalPageSize} totalItems={data.length} />
+      <Pagination pageSize={globalPageSize} totalItems={payments.length} />
     </div>
   );
 };
 
 export default page;
-
-const data: Payment[] = [
-  {
-    id: 1,
-    amount: 699000,
-    discount: { amount: 100000, code: "pacsaz" },
-    status: "success",
-    total: 599000,
-    user: { fullName: "علیرضا ازلگینی", phoneNumber: "09127452859" },
-    plan: {
-      key: "standard",
-      level: 1,
-      period: "monthly",
-    },
-  },
-  {
-    id: 2,
-    amount: 699000,
-    status: "failed",
-    total: 699000,
-    user: { fullName: "علیرضا ازلگینی", phoneNumber: "09127452859" },
-    plan: {
-      key: "pro",
-      level: 1,
-      period: "3-month",
-    },
-  },
-  {
-    id: 3,
-    amount: 699000,
-    discount: { amount: 100000, code: "pacsaz" },
-    status: "pending",
-    total: 599000,
-    user: { fullName: "علیرضا ازلگینی", phoneNumber: "09127452859" },
-    plan: {
-      key: "organization",
-      level: 1,
-      period: "annual",
-    },
-  },
-  {
-    id: 4,
-    amount: 699000,
-    discount: { amount: 100000, code: "pacsaz" },
-    status: "canceled",
-    total: 599000,
-    user: { fullName: "علیرضا ازلگینی", phoneNumber: "09127452859" },
-    plan: {
-      key: "organization",
-      level: 1,
-      period: "3-month",
-    },
-  },
-];

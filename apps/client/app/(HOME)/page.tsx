@@ -5,8 +5,14 @@ import HomeFeatures from "@/components/Home/HomeFeatures";
 import HomeSUbFAQ from "@/components/Home/HomeSubFAQ";
 import LandingPage from "@/components/Home/LandingPage";
 import SubscriptionList from "@/components/SubscriptionList";
+import { prisma } from "@repo/db";
 
 const page = async () => {
+  const tarrif = await prisma.tarrif.findMany({
+    include: { price: true, fairDownload: true, features: true },
+  });
+  const features = await prisma.tarrifFeature.findMany();
+
   return (
     <div className="space-y-48">
       <div className="px-20 mx-auto pt-20">
@@ -26,7 +32,7 @@ const page = async () => {
       </div>
 
       <div className="space-y-10" id="subscription">
-        <SubscriptionList tarrif={[]} />
+        <SubscriptionList tarrif={tarrif} features={features} />
       </div>
 
       <div className="max-w-6xl mx-auto">

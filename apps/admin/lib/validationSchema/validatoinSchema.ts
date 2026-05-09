@@ -84,6 +84,19 @@ export const subscriptionFormSchema = z.object({
 });
 export type SubscriptionFormType = z.infer<typeof subscriptionFormSchema>;
 
+export const paymentFormSchema = z.object({
+  from: z.date(),
+  amount: z.number(),
+  total: z.number(),
+  discountCodeAmount: z.number(),
+  discountCode: z.string(),
+  userId: z.string().min(1),
+  planKey: z.enum(planKey),
+  period: z.enum(planPeriod),
+  status: z.enum(paymentStatus),
+});
+export type PaymentFormType = z.infer<typeof paymentFormSchema>;
+
 export const dielineSettingsFormSchema = z.object({
   title: z.string().min(1),
   slug: z.string().min(1),

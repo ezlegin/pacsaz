@@ -1,33 +1,26 @@
-import ActionButton from "@repo/ui/components/custom/ActionButton";
-import PlanCard from "@/components/PlanCard";
+import { Coupon, Payment, Plan, User } from "@repo/db";
+import { formatPrice } from "@repo/lib/utils/formatPrice";
+import { ActButton } from "@repo/ui/components/custom/ActionButton";
 import Card from "@repo/ui/components/custom/Card";
-import PaymentStatus, {
-  PaymentStatusType,
-} from "@repo/ui/components/custom/PaymentStatus";
+import PaymentStatus from "@repo/ui/components/custom/PaymentStatus";
 import Table from "@repo/ui/components/custom/Table";
 import { TableCell, TableRow } from "@repo/ui/components/table";
 import {
   Tooltip,
-  TooltipTrigger,
   TooltipContent,
+  TooltipTrigger,
 } from "@repo/ui/components/tooltip";
 import { Info, Pencil } from "lucide-react";
 import Link from "next/link";
-import { formatPrice } from "@repo/lib/utils/formatPrice";
-import { Plan } from "@repo/store/app/user.store";
 
-export type Payment = {
-  id: number;
-  user: { fullName: string; phoneNumber: string };
-  status: PaymentStatusType;
-  amount: number;
-  discount?: { amount: number; code: string };
-  total: number;
+export interface PaymentType extends Payment {
+  user: User;
   plan: Plan;
-};
+  coupon: Coupon | null;
+}
 
-const PaymentsList = ({ data }: { data: Payment[] }) => {
-  const renderRows = (data: Payment) => {
+const PaymentsList = ({ data }: { data: PaymentType[] }) => {
+  const renderRows = (data: PaymentType) => {
     return (
       <TableRow key={data.id}>
         <TableCell>{data.id}</TableCell>
@@ -51,29 +44,26 @@ const PaymentsList = ({ data }: { data: Payment[] }) => {
           {formatPrice(data.amount)}
         </TableCell>
         <TableCell className="text-center">
-          {data.discount && (
+          {data.coupon && (
             <Tooltip>
               <TooltipTrigger>
                 <div className="flex items-center justify-center gap-1">
-                  {formatPrice(data.discount.amount)}
+                  {formatPrice(data.discountCodeAmount)}
                   <Info size={10} className="text-muted-foreground" />
                 </div>
               </TooltipTrigger>
               <TooltipContent side="bottom">
-                Code: "{data.discount.code}"
+                Code: "{data.coupon.code}"
               </TooltipContent>
             </Tooltip>
           )}
         </TableCell>
         <TableCell className="text-center">{formatPrice(data.total)}</TableCell>
-        <TableCell>
-          <div className="flex justify-center">
-            <PlanCard planKey={data.plan.key} planPeriod={data.plan.period} />
-          </div>
-        </TableCell>
         <TableCell className="text-center flex justify-end">
           <Link href={`/payments/${data.id}`}>
-            <ActionButton icon={Pencil} />
+            <ActButton>
+              <Pencil size={14} />
+            </ActButton>
           </Link>
         </TableCell>
       </TableRow>
@@ -94,8 +84,7 @@ const columns = [
   { label: "User" },
   { label: "Status" },
   { label: "Amount" },
-  { label: "discount" },
+  { label: "Discount" },
   { label: "Total" },
-  { label: "Plan" },
   { label: "Edit" },
 ];

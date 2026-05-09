@@ -19,7 +19,7 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import z from "zod";
 import DefaultSettings from "./DefaultSettings";
-import { handleRes } from "@/lib/utils/handleRes";
+import { handleRes } from "@repo/lib/utils/handleRes";
 
 const dimension = z.object({
   width: z.number(),

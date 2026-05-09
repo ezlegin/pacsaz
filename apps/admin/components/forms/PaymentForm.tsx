@@ -1,15 +1,21 @@
 "use client";
 
-import { usePaymentCheckout } from "@/hooks/usePaymentCheckout";
+import { createPayment } from "@/actions/payment";
+import { PaymentType } from "@/app/(PANEL)/payments/PaymentsList";
 import {
+  paymentFormSchema,
+  PaymentFormType,
   paymentStatus,
   planKey,
   planPeriod,
-  subscriptionFormSchema,
-  SubscriptionFormType,
 } from "@/lib/validationSchema/validatoinSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Price, Tarrif } from "@repo/db";
+import { handleRes } from "@repo/lib/utils/handleRes";
+import { useLoading } from "@repo/lib/utils/useLoading";
 import { Button } from "@repo/ui/components/button";
+import { Calendar } from "@repo/ui/components/calendar";
+import Card from "@repo/ui/components/custom/Card";
 import {
   Form,
   FormControl,
@@ -20,64 +26,77 @@ import {
 } from "@repo/ui/components/form";
 import { Input } from "@repo/ui/components/input";
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@repo/ui/components/popover";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@repo/ui/components/select";
-import { toast } from "sonner";
-import { useForm } from "react-hook-form";
+import { cn } from "@repo/ui/lib/utils";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import Card from "@repo/ui/components/custom/Card";
-import { formatPrice } from "@repo/lib/utils/formatPrice";
+import { useForm } from "react-hook-form";
 
-export function PaymentForm() {
-  const [paymentInfo, setPaymentInfo] = useState<{
-    amount: number;
-    discountAmount: number;
-    total: number;
-  }>({ amount: 0, discountAmount: 0, total: 0 });
+interface TarrifType extends Tarrif {
+  price: Price | null;
+}
 
+export function PaymentForm({
+  tarrif,
+  payment,
+}: {
+  tarrif: TarrifType[];
+  payment?: PaymentType | null;
+}) {
+  const router = useRouter();
+  const { startLoading, stopLoading, isLoading } = useLoading();
   const [discountCode, setDiscountCode] = useState("");
 
-  const form = useForm<SubscriptionFormType>({
-    resolver: zodResolver(subscriptionFormSchema),
+  const form = useForm<PaymentFormType>({
+    resolver: zodResolver(paymentFormSchema),
     defaultValues: {
-      userId: "",
-      planKey: "standard",
-      period: "monthly",
-      date: new Date(),
-      discountCode: "",
-      status: "success",
+      userId: payment?.userId.toString() ?? "",
+      planKey: payment?.plan.key ?? "standard",
+      period: payment?.plan.period ?? "monthly",
+      from: payment?.plan.startedAt ?? new Date(),
+      discountCode: payment?.coupon?.code ?? "",
+      status: payment?.status ?? "success",
+      amount: payment?.amount ?? 0,
+      discountCodeAmount: payment?.discountCodeAmount ?? 0,
+      total: payment?.total ?? 0,
     },
   });
 
-  function onSubmit(data: SubscriptionFormType) {
-    console.log({
-      ...data,
-      ...paymentInfo,
-    });
-  }
+  const onSubmit = async (data: PaymentFormType) => {
+    startLoading();
+
+    const res = payment ? await createPayment(data) : await createPayment(data);
+
+    handleRes(res, { onSuccess: () => router.refresh() });
+
+    stopLoading();
+  };
 
   const plan = form.watch("planKey");
   const period = form.watch("period");
 
   useEffect(() => {
-    const checkout = usePaymentCheckout({
-      plan,
-      period,
-      discountCode,
-    });
+    const tarrifPlan = tarrif.find((t) => t.key === plan);
+    if (!tarrifPlan) return;
 
-    if (checkout.error) {
-      toast.error(checkout.error);
-    }
-
-    if (checkout.paymentInfo) setPaymentInfo(checkout.paymentInfo);
+    form.setValue("amount", tarrifPlan.price![period]);
+    form.setValue("discountCodeAmount", 0);
+    form.setValue("total", tarrifPlan.price![period]);
   }, [plan, period, discountCode]);
 
-  const code = form.watch("discountCode");
+  const formCode = form.watch("discountCode");
 
   const applyDiscount = () => {
     if (discountCode) {
@@ -86,13 +105,13 @@ export function PaymentForm() {
       return;
     }
 
-    if (code) setDiscountCode(code);
+    if (formCode) setDiscountCode(formCode);
   };
 
   const checkout = [
-    { title: "Amount:", value: formatPrice(paymentInfo.amount) },
-    { title: "Discount:", value: formatPrice(paymentInfo.discountAmount) },
-    { title: "Total:", value: formatPrice(paymentInfo.total) },
+    { title: "Amount:", value: form.watch("amount") },
+    { title: "Discount:", value: form.watch("discountCodeAmount") },
+    { title: "Total:", value: form.watch("total") },
   ];
 
   return (
@@ -101,16 +120,49 @@ export function PaymentForm() {
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-5 max-w-sm"
       >
-        {/* //todo: Search users and select a user id */}
         <FormField
           control={form.control}
-          name="userId"
+          name="from"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>Date</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
+            <FormItem className="flex flex-col py-1">
+              <FormLabel>From / To</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full pl-3 text-left font-normal",
+                        !field.value && "text-muted-foreground",
+                      )}
+                    >
+                      {field.value ? (
+                        <div className="flex gap-1">
+                          {format(field.value || new Date(), "MMMM dd")}
+                        </div>
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 en-digits" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value}
+                    onSelect={field.onChange}
+                    disabled={(date) => {
+                      const today = new Date();
+                      today.setHours(0, 0, 0, 0);
+                      return date < today;
+                    }}
+                    // initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -253,7 +305,7 @@ export function PaymentForm() {
 
         <Button
           size={"lg"}
-          disabled={!form.formState.isValid}
+          disabled={!form.formState.isValid || isLoading}
           className="w-full"
         >
           Create

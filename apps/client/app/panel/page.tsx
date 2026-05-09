@@ -11,8 +11,13 @@ import UserSubscriptionCard from "./components/UserSubscriptionCard";
 const Page = async () => {
   const user = await getSessionUser();
   const userPlan = user?.plan;
+  const tarrif = await prisma.tarrif.findMany({
+    include: { fairDownload: true, features: true, price: true },
+  });
+  const features = await prisma.tarrifFeature.findMany();
 
-  if (!userPlan) return <SubscriptionList />;
+  if (!userPlan)
+    return <SubscriptionList features={features} tarrif={tarrif} />;
 
   const fairDownload = userPlan.fairDownload;
   const downloaded = userPlan.downloaded;

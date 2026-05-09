@@ -30,6 +30,7 @@ model User {
   favedDielines FavedDieline[]
   savedDielines SavedDieline[]
   plans         Plan[]
+  payments      Payment[]
 }
 
 enum UserType {
@@ -204,11 +205,39 @@ model Payment {
   total              Float
   totalDiscount      Float
   discountCodeAmount Float
-  discountCode       String
   status             PaymentStatus
+  method             PaymentMethod
 
-  plan          Plan @relation(fields: [paymentPlanId], references: [id], onDelete: Restrict)
-  paymentPlanId Int  @unique
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   Int
+  plan     Plan    @relation(fields: [planId], references: [id], onDelete: Restrict)
+  planId   Int     @unique
+  coupon   Coupon? @relation(fields: [couponId], references: [id], onDelete: SetNull)
+  couponId Int?
+}
+
+model Coupon {
+  id        Int        @id @default(autoincrement())
+  code      String
+  expiresAt DateTime
+  amount    Float
+  used      Int        @default(0)
+  limit     Int
+  type      CouponType
+  payment   Payment[]
+  plan      Plan?      @relation(fields: [planId], references: [id])
+  planId    Int?
+}
+
+enum CouponType {
+  fixed
+  percent
+}
+
+enum PaymentMethod {
+  admin
+  zarrinPal
+  no_method
 }
 
 enum PaymentStatus {
@@ -218,25 +247,26 @@ enum PaymentStatus {
   canceled
 }
 
+//! PLAN --------------------------------
 model Plan {
-  id        Int             @id @default(autoincrement())
-  key       PlanKey
-  title     String
-  level     Int
-  startedAt DateTime        @default(now())
-  endsAt    DateTime
-  isPremium Boolean         @default(false)
-  period    PlanPeriod
-  type      PaymentPlanType
-
+  id            Int             @id @default(autoincrement())
+  key           PlanKey
+  title         String
+  level         Int
+  startedAt     DateTime        @default(now())
+  endsAt        DateTime
+  isPremium     Boolean         @default(false)
+  period        PlanPeriod
+  type          PaymentPlanType
   fairDownload  Int
-  downloaded    Int       @default(0)
+  downloaded    Int             @default(0)
   firstDownload DateTime?
   lastDownload  DateTime?
 
   payments Payment?
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId   Int
+  coupons  Coupon[]
 }
 
 enum PlanPeriod {

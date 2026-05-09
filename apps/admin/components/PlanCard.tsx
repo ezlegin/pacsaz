@@ -18,7 +18,7 @@ const PlanCard = ({
   const periodVariant =
     planPeriod === "monthly"
       ? "outline"
-      : planPeriod === "3-month"
+      : planPeriod === "threeMonth"
         ? "lightYellow"
         : "gradient";
 
