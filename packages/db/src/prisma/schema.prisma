@@ -55,11 +55,12 @@ model Otp {
 }
 
 model Customer {
-  id          Int     @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   fullName    String
   phoneNumber String?
   email       String?
   address     String?
+  createdAt   DateTime @default(now())
 
   savedDielie SavedDieline[]
   user        User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -229,6 +230,7 @@ model Coupon {
   amount    Float
   used      Int        @default(0)
   limit     Int?
+  createdAt DateTime   @default(now())
   type      CouponType
   payment   Payment[]
   tarrif    Tarrif[]
@@ -268,9 +270,9 @@ model Plan {
   firstDownload DateTime?
   lastDownload  DateTime?
 
-  payments Payment?
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId   Int
+  payment Payment?
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  Int
 }
 
 enum PlanPeriod {

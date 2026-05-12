@@ -6,7 +6,11 @@ import Search from "@repo/ui/components/custom/Search";
 import { prisma } from "@repo/db";
 
 const page = async () => {
-  const customers = await prisma.customer.findMany({ include: { user: true } });
+  const customers = await prisma.customer.findMany({
+    include: { user: true },
+    orderBy: { createdAt: "desc" },
+  });
+
   return (
     <div className="space-y-3">
       <PageTitle title="Customers" />

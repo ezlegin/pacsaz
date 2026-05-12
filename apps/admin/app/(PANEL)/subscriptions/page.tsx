@@ -1,14 +1,17 @@
 import PageTitle from "@/components/PageTitle";
-import { SubscriptionForm } from "@/components/forms/SubscriptionForm";
-import Pagination from "@repo/ui/components/custom/Pagination";
-import { addMonths, addYears } from "date-fns";
-import SubscriptionsList, { Subscription } from "./SubscriptionsList";
-import PopupNewDialog from "@repo/ui/components/custom/PopupNewDialog";
+import { prisma } from "@repo/db";
 import { globalPageSize } from "@repo/lib/data/consts";
-import Search from "@repo/ui/components/custom/Search";
 import Filter from "@repo/ui/components/custom/Filter";
+import Pagination from "@repo/ui/components/custom/Pagination";
+import Search from "@repo/ui/components/custom/Search";
+import SubscriptionsList from "./SubscriptionsList";
 
-const page = () => {
+const page = async () => {
+  const plans = await prisma.plan.findMany({
+    include: { user: true, payment: true },
+    orderBy: { id: "desc" },
+  });
+
   return (
     <div className="space-y-3">
       <PageTitle title="Subscriptions" />
@@ -25,64 +28,13 @@ const page = () => {
             placeholder="Sort By Status"
           />
         </div>
-
-        <PopupNewDialog buttonTitle="New">
-          <SubscriptionForm />
-        </PopupNewDialog>
       </div>
 
-      <SubscriptionsList data={data} />
+      <SubscriptionsList data={plans} />
 
-      <Pagination pageSize={globalPageSize} totalItems={data.length} />
+      <Pagination pageSize={globalPageSize} totalItems={plans.length} />
     </div>
   );
 };
 
 export default page;
-
-const data: Subscription[] = [
-  {
-    id: 1,
-    user: { fullName: "علیرضا ازلگینی", phoneNumber: "09127452859" },
-    startedAt: new Date("2026-01-13"),
-    endsAt: addMonths(new Date(), 1),
-    plan: { key: "standard", level: 1, period: "monthly" },
-    downloads: {
-      fair: 90,
-      downloaded: 30,
-    },
-  },
-  {
-    id: 2,
-    user: { fullName: "علیرضا ازلگینی", phoneNumber: "09127452859" },
-    startedAt: new Date("2026-01-13"),
-    endsAt: addMonths(new Date(), 1),
-    plan: { key: "pro", level: 2, period: "3-month" },
-    downloads: {
-      fair: 90,
-      downloaded: 30,
-    },
-  },
-  {
-    id: 3,
-    user: { fullName: "علیرضا ازلگینی", phoneNumber: "09127452859" },
-    startedAt: new Date("2026-01-13"),
-    endsAt: addMonths(new Date(), 1),
-    plan: { key: "organization", level: 3, period: "annual" },
-    downloads: {
-      fair: 90,
-      downloaded: 30,
-    },
-  },
-  {
-    id: 4,
-    user: { fullName: "علیرضا ازلگینی", phoneNumber: "09127452859" },
-    startedAt: new Date("2025-01-13"),
-    endsAt: addYears(new Date("2025-01-13"), 1),
-    plan: { key: "organization", level: 3, period: "annual" },
-    downloads: {
-      fair: 90,
-      downloaded: 30,
-    },
-  },
-];

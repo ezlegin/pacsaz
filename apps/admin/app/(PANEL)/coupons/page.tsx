@@ -11,6 +11,7 @@ import CouponsList from "./CouponsList";
 const page = async () => {
   const coupons = await prisma.coupon.findMany({
     include: { tarrif: true },
+    orderBy: { createdAt: "desc" },
   });
   const tarrif = await prisma.tarrif.findMany();
 

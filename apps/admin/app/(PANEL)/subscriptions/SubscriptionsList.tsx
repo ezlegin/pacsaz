@@ -1,7 +1,6 @@
 import PlanCard from "@/components/PlanCard";
 import SubscriptionStatus from "@/components/SubscriptionStatus";
-import { Plan } from "@repo/store/app/user.store";
-import ActionButton from "@repo/ui/components/custom/ActionButton";
+import { Payment, Plan, User } from "@repo/db";
 import Card from "@repo/ui/components/custom/Card";
 import Table from "@repo/ui/components/custom/Table";
 import { TableCell, TableRow } from "@repo/ui/components/table";
@@ -11,22 +10,15 @@ import {
   TooltipTrigger,
 } from "@repo/ui/components/tooltip";
 import { formatDate, formatDistanceToNow } from "date-fns";
-import { Info, Pencil } from "lucide-react";
+import { Info } from "lucide-react";
 
-export type Subscription = {
-  id: number;
-  user: { fullName: string; phoneNumber: string };
-  plan: Plan;
-  startedAt: Date;
-  endsAt: Date;
-  downloads: {
-    fair: number;
-    downloaded: number;
-  };
-};
+interface PlanType extends Plan {
+  user: User | null;
+  payment: Payment | null;
+}
 
-const SubscriptionsList = ({ data }: { data: Subscription[] }) => {
-  const renderRows = (data: Subscription) => {
+const SubscriptionsList = ({ data }: { data: PlanType[] }) => {
+  const renderRows = (data: PlanType) => {
     return (
       <TableRow key={data.id}>
         <TableCell>{data.id}</TableCell>
@@ -34,12 +26,12 @@ const SubscriptionsList = ({ data }: { data: Subscription[] }) => {
           <Tooltip>
             <TooltipTrigger>
               <div className="flex items-center justify-center gap-1">
-                {data.user.fullName}
+                {data.user?.fullName}
                 <Info size={10} className="text-muted-foreground" />
               </div>
             </TooltipTrigger>
             <TooltipContent side="bottom">
-              {data.user.phoneNumber}
+              {data.user?.phoneNumber}
             </TooltipContent>
           </Tooltip>
         </TableCell>
@@ -48,7 +40,7 @@ const SubscriptionsList = ({ data }: { data: Subscription[] }) => {
         </TableCell>
         <TableCell>
           <div className="flex justify-center">
-            <PlanCard planKey={data.plan.key} planPeriod={data.plan.period} />
+            <PlanCard planKey={data.key} planPeriod={data.period} />
           </div>
         </TableCell>
 
@@ -80,27 +72,21 @@ const SubscriptionsList = ({ data }: { data: Subscription[] }) => {
           </Tooltip>
         </TableCell>
 
-        <TableCell className="text-center">
+        <TableCell className="text-right">
           <Tooltip>
             <TooltipTrigger>
               <div className="flex items-center justify-center gap-1">
-                <span>
-                  Remaining: {data.downloads.fair - data.downloads.downloaded}
-                </span>
+                <span>Remaining: {data.fairDownload - data.downloaded}</span>
                 <Info size={10} className="text-muted-foreground" />
               </div>
             </TooltipTrigger>
             <TooltipContent side="bottom">
               <div className="flex flex-col">
-                <span>Fair: {data.downloads.fair}</span>
-                <span>Downloaded: {data.downloads.downloaded}</span>
+                <span>Fair: {data.fairDownload}</span>
+                <span>Downloaded: {data.downloaded}</span>
               </div>
             </TooltipContent>
           </Tooltip>
-        </TableCell>
-
-        <TableCell className="flex justify-end">
-          <ActionButton icon={Pencil} />
         </TableCell>
       </TableRow>
     );
@@ -123,5 +109,4 @@ const columns = [
   { label: "Start Date" },
   { label: "End Date" },
   { label: "Downloads" },
-  { label: "Edit" },
 ];
