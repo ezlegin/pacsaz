@@ -4,7 +4,7 @@ import { UserFormType } from "@/lib/validationSchema/validatoinSchema";
 import { prisma } from "@repo/db";
 
 export const createUser = async (data: UserFormType) => {
-  const { email, phoneNumber } = data;
+  const { email, phoneNumber, firstName, lastName } = data;
 
   try {
     const existingUser = await prisma.user.findFirst({
@@ -16,7 +16,10 @@ export const createUser = async (data: UserFormType) => {
       };
 
     await prisma.user.create({
-      data,
+      data: {
+        ...data,
+        fullName: `${firstName} ${lastName}`,
+      },
     });
 
     return { success: "User Created Succesfully." };
@@ -27,6 +30,7 @@ export const createUser = async (data: UserFormType) => {
 };
 
 export const updateUser = async (data: UserFormType, id: number) => {
+  const { firstName, lastName } = data;
   try {
     const existingUser = await prisma.user.findFirst({ where: { id } });
     if (!existingUser)
@@ -36,7 +40,10 @@ export const updateUser = async (data: UserFormType, id: number) => {
 
     await prisma.user.update({
       where: { id },
-      data,
+      data: {
+        ...data,
+        fullName: `${firstName} ${lastName}`,
+      },
     });
 
     return { success: "User Updated Succesfully." };

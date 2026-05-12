@@ -240,66 +240,6 @@ export function PaymentForm({
 
         <FormField
           control={form.control}
-          name="planKey"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Plan</FormLabel>
-              <FormControl>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {planKey.map((i, idx) => (
-                      <SelectItem key={idx} value={i} className="capitalize">
-                        {i}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="period"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Period</FormLabel>
-              <FormControl>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {planPeriod.map((i, idx) => (
-                      <SelectItem key={idx} value={i} className="capitalize">
-                        {i}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
           name="status"
           render={({ field }) => (
             <FormItem>
@@ -328,30 +268,100 @@ export function PaymentForm({
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="discountCode"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Discount Code</FormLabel>
-              <FormControl>
-                <div className="relative">
-                  <Input disabled={!!discountCode} {...field} />
-                  <Button
-                    type="button"
-                    variant={"ghost"}
-                    size={"sm"}
-                    className="absolute right-1 top-1/2 -translate-y-1/2"
-                    onClick={applyDiscount}
-                    disabled={field.value === ""}
-                  >
-                    {discountCode ? "Remove" : "Apply"}
-                  </Button>
-                </div>
-              </FormControl>
-            </FormItem>
-          )}
-        />
+        {!payment && (
+          <div className="space-y-5">
+            <FormField
+              control={form.control}
+              name="planKey"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Plan</FormLabel>
+                  <FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {planKey.map((i, idx) => (
+                          <SelectItem
+                            key={idx}
+                            value={i}
+                            className="capitalize"
+                          >
+                            {i}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="period"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Period</FormLabel>
+                  <FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {planPeriod.map((i, idx) => (
+                          <SelectItem
+                            key={idx}
+                            value={i}
+                            className="capitalize"
+                          >
+                            {i}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="discountCode"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Discount Code</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Input disabled={!!discountCode} {...field} />
+                      <Button
+                        type="button"
+                        variant={"ghost"}
+                        size={"sm"}
+                        className="absolute right-1 top-1/2 -translate-y-1/2"
+                        onClick={applyDiscount}
+                        disabled={field.value === ""}
+                      >
+                        {discountCode ? "Remove" : "Apply"}
+                      </Button>
+                    </div>
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          </div>
+        )}
 
         <Card className="col-span-3 h-fit">
           {checkout.map((i, idx) => (

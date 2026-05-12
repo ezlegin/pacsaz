@@ -31,7 +31,11 @@ const CouponsList = ({
         <TableCell className="text-center">{coupon.used}</TableCell>
         <TableCell className="text-center">{coupon.limit}</TableCell>
         <TableCell className="text-center">
-          {coupon.tarrif.map((p) => p.key).join(", ")}
+          {coupon.tarrif.length > 0 ? (
+            coupon.tarrif.map((p) => p.key).join(", ")
+          ) : (
+            <span className="font-semibold">All</span>
+          )}
         </TableCell>
         <TableCell className="flex justify-end">
           <ActionButton icon={Pencil}>

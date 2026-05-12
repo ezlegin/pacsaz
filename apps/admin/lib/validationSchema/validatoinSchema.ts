@@ -68,10 +68,11 @@ export const featureFormSchema = z.object({
 export type FeatureFormType = z.infer<typeof featureFormSchema>;
 
 export const userFormSchema = z.object({
-  fullName: z.string().min(1),
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
   email: z.string().email(),
   phoneNumber: z.string().min(1),
-  type: z.enum(userType),
+  userType: z.enum(userType),
 });
 export type UserFormType = z.infer<typeof userFormSchema>;
 

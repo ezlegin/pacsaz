@@ -3,16 +3,10 @@ import { globalPageSize } from "@repo/lib/data/consts";
 import Pagination from "@repo/ui/components/custom/Pagination";
 import CustomersList from "./CustomersList";
 import Search from "@repo/ui/components/custom/Search";
+import { prisma } from "@repo/db";
 
-export type Customer = {
-  id: number;
-  fullName: string;
-  phoneNumber?: string;
-  email?: string;
-  address?: string;
-};
-
-const page = () => {
+const page = async () => {
+  const customers = await prisma.customer.findMany({ include: { user: true } });
   return (
     <div className="space-y-3">
       <PageTitle title="Customers" />
@@ -21,28 +15,11 @@ const page = () => {
         <Search placeholder="Search Customers" />
       </div>
 
-      <CustomersList data={data} />
+      <CustomersList data={customers} />
 
-      <Pagination pageSize={globalPageSize} totalItems={data.length} />
+      <Pagination pageSize={globalPageSize} totalItems={customers.length} />
     </div>
   );
 };
 
 export default page;
-
-const data: Customer[] = [
-  {
-    id: 1,
-    fullName: "علیرضا ازلیگنی",
-    address: "زنجان، خیابان فردوسی، کوچه نسترن اول، پلاک 46",
-    email: "ezlegini.ir@gmail.com",
-    phoneNumber: "09127452859",
-  },
-  {
-    id: 2,
-    fullName: "فاطمه احمدی",
-    address: "زنجان، خیابان فردوسی، کوچه نسترن اول، پلاک 46",
-    email: "fa.ahmdi03@gmail.com",
-    phoneNumber: "09392563627",
-  },
-];

@@ -36,10 +36,11 @@ export function UserForm({ user }: { user?: User }) {
   const form = useForm<UserFormType>({
     resolver: zodResolver(userFormSchema),
     defaultValues: {
-      fullName: user?.fullName ?? "",
+      firstName: user?.firstName ?? "",
+      lastName: user?.lastName ?? "",
       email: user?.email ?? "",
       phoneNumber: user?.phoneNumber ?? "",
-      type: user?.userType ?? "designer",
+      userType: user?.userType ?? "designer",
     },
   });
 
@@ -58,10 +59,23 @@ export function UserForm({ user }: { user?: User }) {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
         <FormField
           control={form.control}
-          name="fullName"
+          name="firstName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Full Name</FormLabel>
+              <FormLabel>First Name</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="lastName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Last Name</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>
@@ -97,7 +111,7 @@ export function UserForm({ user }: { user?: User }) {
 
         <FormField
           control={form.control}
-          name="type"
+          name="userType"
           render={({ field }) => (
             <FormItem>
               <FormLabel>User Type</FormLabel>
