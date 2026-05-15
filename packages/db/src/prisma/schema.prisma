@@ -34,6 +34,7 @@ model User {
   plans         Plan[]
   payments      Payment[]
   customers     Customer[]
+  paymentTracks PaymentTrack[]
 }
 
 enum UserType {
@@ -214,13 +215,25 @@ model Payment {
   discountCode       String
   status             PaymentStatus
   method             PaymentMethod
+  authority          String?       @unique
+  period             PlanPeriod
 
   user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId   Int
-  plan     Plan    @relation(fields: [planId], references: [id], onDelete: Restrict)
-  planId   Int     @unique
+  tarrif   Tarrif  @relation(fields: [tarrifId], references: [id])
+  tarrifId Int
+  plan     Plan?   @relation(fields: [planId], references: [id], onDelete: Restrict)
+  planId   Int?    @unique
   coupon   Coupon? @relation(fields: [couponId], references: [id], onDelete: SetNull)
   couponId Int?
+}
+
+model PaymentTrack {
+  id     Int        @id @default(autoincrement())
+  plan   PlanKey
+  period PlanPeriod
+  user   User       @relation(fields: [userId], references: [id])
+  userId Int
 }
 
 model Coupon {
@@ -252,6 +265,7 @@ enum PaymentStatus {
   success
   pending
   canceled
+  could_not_initiate
 }
 
 //! PLAN --------------------------------
@@ -306,6 +320,7 @@ model Tarrif {
   price            Price?
   features         SelectedTarrifFeature[]
   coupon           Coupon[]
+  payments         Payment[]
 }
 
 model TarrifFeature {

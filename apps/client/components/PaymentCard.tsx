@@ -1,32 +1,52 @@
 "use client";
 
+import { initiatePayment } from "@/actions/payment";
 import { PlanPeriod, Price, Tarrif } from "@repo/db";
-import Card from "@repo/ui/components/custom/Card";
-import Image from "next/image";
-import DiscountForm from "./forms/DiscountForm";
-import { useState } from "react";
-import { Button } from "@repo/ui/components/button";
 import { formatPrice } from "@repo/lib/utils/formatPrice";
+import { useLoading } from "@repo/lib/utils/useLoading";
+import { Button } from "@repo/ui/components/button";
+import Card from "@repo/ui/components/custom/Card";
+import { Spinner } from "@repo/ui/components/spinner";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
+import DiscountForm from "./forms/DiscountForm";
 
 interface TarrifType extends Tarrif {
   price: Price | null;
 }
 
-const PaymentGrid = ({
+const PaymentCard = ({
   tarrif,
   period,
 }: {
   tarrif: TarrifType;
   period: PlanPeriod;
 }) => {
+  const router = useRouter();
+  const { isLoading, startLoading, stopLoading } = useLoading();
   const [appliedDiscountCode, setAppliedDiscountCode] = useState<
     string | undefined
   >(undefined);
   const basePrice = tarrif.price?.[period] ?? 0;
   const [totalPrice, setTotalPrice] = useState(basePrice);
 
-  const onStartPayment = () => {
-    console.log("Payment Started.");
+  const onStartPayment = async () => {
+    startLoading();
+    const res = await initiatePayment(
+      tarrif.price![period],
+      tarrif.key,
+      period,
+    );
+
+    if (res.error) {
+      toast.error(res.error);
+    } else if (res.success) {
+      router.push(res.data.paymentUrl);
+    }
+
+    stopLoading();
   };
 
   // todo: implement applying discount code.
@@ -71,7 +91,9 @@ const PaymentGrid = ({
           size={"xl"}
           className="w-full"
           variant={"gradient"}
+          disabled={isLoading}
         >
+          {isLoading && <Spinner />}
           پرداخت {formatPrice(totalPrice, true)}
         </Button>
       </Card>
@@ -79,4 +101,4 @@ const PaymentGrid = ({
   );
 };
 
-export default PaymentGrid;
+export default PaymentCard;

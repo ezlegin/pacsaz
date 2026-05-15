@@ -1,4 +1,5 @@
-import PaymentGrid from "@/components/PaymentGrid";
+import { createPaymentTrack } from "@/actions/payment";
+import PaymentCard from "@/components/PaymentCard";
 import { prisma } from "@repo/db";
 import { PlanKey, PlanPeriod } from "@repo/lib/data/plans";
 import Card from "@repo/ui/components/custom/Card";
@@ -17,10 +18,11 @@ const page = async ({ searchParams }: Props) => {
     where: { key: plan },
     include: { price: true },
   });
+  createPaymentTrack({ period, plan, userId: 1 }); //todo
 
   if (!tarrif) return <div>Tarrif Doesn't Exist.</div>;
 
-  return <PaymentGrid period={period} tarrif={tarrif} />;
+  return <PaymentCard period={period} tarrif={tarrif} />;
 };
 
 export default page;

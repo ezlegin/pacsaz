@@ -1,4 +1,4 @@
-import { PaymentQuery } from "@/components/PaymentGrid";
+import { PaymentQuery } from "@/components/PaymentCard";
 import { useState } from "react";
 import { applyDiscount } from "@repo/lib/utils/applyDiscount";
 import { periodMultiplier } from "@repo/lib/utils/periodMultiplier";
