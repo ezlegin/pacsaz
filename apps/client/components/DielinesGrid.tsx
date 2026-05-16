@@ -57,8 +57,8 @@ const DielineCard = ({
         <Image
           alt=""
           src={tuckEndModel}
-          width={400}
-          height={400}
+          width={500}
+          height={500}
           className={cn(
             imageType === "model"
               ? "opacity-100 hover:opacity-0"

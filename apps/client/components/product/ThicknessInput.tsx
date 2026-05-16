@@ -1,6 +1,5 @@
 import { getThicknessRange } from "@/utils/getThicknessRange";
 import { useLoading } from "@repo/lib/utils/useLoading";
-import { useUserStore } from "@repo/store/app/user.store";
 import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
 import { Button } from "@repo/ui/components/button";
 import { Input } from "@repo/ui/components/input";
@@ -11,9 +10,9 @@ import { useEffect, useState } from "react";
 
 interface Props {
   isRendering: boolean;
+  isPremium?: boolean;
 }
-const ThicknessInput = ({ isRendering }: Props) => {
-  const { isPremium } = useUserStore();
+const ThicknessInput = ({ isRendering, isPremium }: Props) => {
   const [localInput, setLocalInput] = useState<string | undefined>();
 
   const {

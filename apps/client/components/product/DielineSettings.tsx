@@ -1,7 +1,9 @@
 import { DIMENSIONS, DIMENSIONS_TYPE } from "@/data/consts";
+import { getUserPlan } from "@/data/plan";
+import { getSessionUser } from "@/data/user";
 import { aiIcon, dxfIcon, pdfIcon } from "@/public";
+import { Plan } from "@repo/db";
 import { isPackagingSizeLogical } from "@repo/dieline-core/utils/isPackagingSizeLogical";
-import { useUserStore } from "@repo/store/app/user.store";
 import { bleeds as BLEEDS } from "@repo/store/data/dieline";
 import { DimensionType, Format } from "@repo/store/data/types";
 import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
@@ -22,6 +24,7 @@ import {
 } from "@repo/ui/components/tooltip";
 import { CircleQuestionMark } from "lucide-react";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 import { Section } from "./DetailsSection";
 import DielineDownloadButton from "./DielineDownloadButton";
 import { DimensionInput } from "./DimensionsInput";
@@ -40,7 +43,17 @@ interface Props {
 }
 
 export default function DielineSettings({ slug, isRendering }: Props) {
-  const { isPremium } = useUserStore();
+  const [plan, setPlan] = useState<Plan | null>(null);
+
+  useEffect(() => {
+    const setUserPlan = async () => {
+      const user = await getSessionUser();
+      const plan = await getUserPlan(user?.id);
+      if (plan) setPlan(plan);
+    };
+
+    setUserPlan();
+  }, []);
   const {
     setSetting,
     settings: {
@@ -121,12 +134,12 @@ export default function DielineSettings({ slug, isRendering }: Props) {
         </Section>
 
         <Section
-          isPremium={isPremium}
+          isPremium={plan?.isPremium}
           title="اندازه بلید"
           infoContent={<BleedGuide />}
         >
           <Select
-            disabled={!isPremium}
+            disabled={!plan?.isPremium}
             defaultValue={bleed?.toString()}
             onValueChange={(val: string) => setSetting("bleed", +val)}
             dir="rtl"
@@ -154,11 +167,14 @@ export default function DielineSettings({ slug, isRendering }: Props) {
         </Section>
 
         <Section
-          isPremium={isPremium}
+          isPremium={plan?.isPremium}
           title="ضخامت"
           infoContent={<ThicknessGuide />}
         >
-          <ThicknessInput isRendering={isRendering} />
+          <ThicknessInput
+            isRendering={isRendering}
+            isPremium={plan?.isPremium}
+          />
         </Section>
 
         <Section title="نوع ابعاد" infoContent={<DimensionTypeGuide />}>
@@ -223,7 +239,11 @@ export default function DielineSettings({ slug, isRendering }: Props) {
             </div>
           </ToggleGroup>
         </Section>
-        <DielineDownloadButton isRendering={isRendering} slug={slug} />
+        <DielineDownloadButton
+          isRendering={isRendering}
+          slug={slug}
+          plan={plan}
+        />
       </div>
     </Card>
   );

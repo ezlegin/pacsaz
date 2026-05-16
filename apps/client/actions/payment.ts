@@ -156,6 +156,7 @@ export const verifyPayment = async (
         fairDownload: tarrif.fairDownload[payment.period],
         endsAt: calculatePlanEndDate(payment.period),
         userId: 1,
+        isPremium: tarrif.level > 1,
         payment: {
           connect: {
             id: payment.id,

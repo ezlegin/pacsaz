@@ -1,3 +1,4 @@
+import { getUserPlan } from "@/data/plan";
 import { getSessionUser } from "@/data/user";
 import Diamond from "@/public/icons/Diamond";
 import { calculateRemaningSubscription } from "@/utils/calculateRemaningSubscriptoin";
@@ -8,14 +9,14 @@ import Link from "next/link";
 
 const NavbarButtons = async () => {
   const user = await getSessionUser();
-  const userPlan = user?.plan;
+  const plan = await getUserPlan(user?.id);
 
-  const remainingDays = userPlan ? calculateRemaningSubscription(userPlan) : 0;
+  const remainingDays = plan ? calculateRemaningSubscription(plan) : 0;
   const isCloseToExpiry = remainingDays < 7;
 
   return (
     <div className="flex gap-3 items-center">
-      {userPlan ? (
+      {plan ? (
         <Badge
           className="p-2 px-4"
           variant={isCloseToExpiry ? "lightYellow" : "lightGreen"}
@@ -23,11 +24,11 @@ const NavbarButtons = async () => {
           {isCloseToExpiry ? (
             `تمدید اشتراک در ${remainingDays} روز `
           ) : (
-            <span> پلن: {userPlan.title}</span>
+            <span> پلن: {plan.title}</span>
           )}
         </Badge>
       ) : (
-        <Link href={user?.plan ? "#" : user ? "/panel" : "/subscription"}>
+        <Link href={plan ? "#" : user ? "/panel" : "/subscription"}>
           <Button variant={"ghost"}>
             <Diamond />
             اشتراک

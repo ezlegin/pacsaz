@@ -18,10 +18,17 @@ export interface Settings {
 export const createDownloadHistory = async (
   slug: string,
   settings: Settings,
+  planId: number,
 ) => {
   const { bleed, width, height, length, dimensionType, material, thickness } =
     settings;
+
   try {
+    const plan = await prisma.plan.findFirst({ where: { id: planId } });
+    if (!plan) return { error: "پلن کاربری شما یافت نشد." };
+    if (plan.downloaded >= plan.fairDownload)
+      return { error: "شما به حداکثر تعداد دانلود رسیده اید." };
+
     const existingDieline = await prisma.dieline.findFirst({ where: { slug } });
     if (!existingDieline) throw new Error("Dieline Not Found.");
 
@@ -29,6 +36,7 @@ export const createDownloadHistory = async (
       data: {
         userId: 1, //todo
         dielineId: existingDieline.id,
+        planId,
         settings: {
           create: {
             bleed,
@@ -41,6 +49,11 @@ export const createDownloadHistory = async (
           },
         },
       },
+    });
+
+    await prisma.plan.update({
+      where: { id: planId },
+      data: { downloaded: { increment: 1 } },
     });
 
     return { success: true };

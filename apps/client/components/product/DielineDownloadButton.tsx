@@ -1,6 +1,9 @@
+import { createDownloadHistory } from "@/actions/dieline";
 import Diamond from "@/public/icons/Diamond";
+import { Plan } from "@repo/db";
+import { dielineDownloder } from "@repo/lib/utils/dielineDownloader";
 import { useLoading } from "@repo/lib/utils/useLoading";
-import { useUserStore } from "@repo/store/app/user.store";
+import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
 import { useSVGStore } from "@repo/store/dieline/svg.store";
 import { Button } from "@repo/ui/components/button";
 import { Dialog, DialogContent, DialogTitle } from "@repo/ui/components/dialog";
@@ -11,21 +14,18 @@ import { useState } from "react";
 import { toast } from "sonner";
 import LoginPopup from "../forms/LoginPopup";
 import SaveDielineForm from "../forms/SaveDielineForm";
-import { dielineDownloder } from "@repo/lib/utils/dielineDownloader";
-import { createDownloadHistory } from "@/actions/dieline";
-import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
 
 interface Props {
   slug: string;
   isRendering: boolean;
+  plan: Plan | null;
 }
 
-const DielineDownloadButton = ({ slug, isRendering }: Props) => {
+const DielineDownloadButton = ({ slug, isRendering, plan }: Props) => {
   const { settings } = useDielineSettingsStore();
   const { svg } = useSVGStore();
   const { startLoading, stopLoading, isLoading } = useLoading();
   const [openPopup, setOpenPopup] = useState<"login" | "save" | null>(null);
-  const { isSubscribed } = useUserStore();
 
   const setts = {
     width: settings.dimension.raw.width,
@@ -38,7 +38,7 @@ const DielineDownloadButton = ({ slug, isRendering }: Props) => {
   };
 
   const onDownload = async () => {
-    if (!isSubscribed) {
+    if (!plan) {
       setOpenPopup("login");
       return;
     }
@@ -47,11 +47,17 @@ const DielineDownloadButton = ({ slug, isRendering }: Props) => {
       toast.error("فایل آماده دانلود نیست.");
       return;
     }
+
     startLoading();
 
-    const res = await dielineDownloder(slug);
+    const createRecord = await createDownloadHistory(slug, setts, plan.id);
+    if (createRecord.error) {
+      toast.error(createRecord.error);
+      stopLoading();
+      return;
+    }
 
-    const createRecord = await createDownloadHistory(slug, setts);
+    const res = await dielineDownloder(slug);
 
     if (res?.success && createRecord.success) {
       toast.success("فایل با موفقیت تولید شد.");
@@ -86,7 +92,7 @@ const DielineDownloadButton = ({ slug, isRendering }: Props) => {
           ) : (
             <>
               <DialogTitle>ذخیره قالب</DialogTitle>
-              <SaveDielineForm type="create" settings={setts} slug={slug} />
+              <SaveDielineForm settings={setts} slug={slug} />
             </>
           )}
         </DialogContent>
@@ -96,10 +102,10 @@ const DielineDownloadButton = ({ slug, isRendering }: Props) => {
         <Button
           disabled={isRendering || isLoading}
           onClick={onDownload}
-          variant={isSubscribed ? "green" : "default"}
+          variant={plan ? "green" : "default"}
           size="lg"
           className={cn(
-            isSubscribed ? "col-span-5" : "col-span-6",
+            plan ? "col-span-5" : "col-span-6",
             "gap-2 font-medium",
           )}
         >
@@ -107,12 +113,12 @@ const DielineDownloadButton = ({ slug, isRendering }: Props) => {
             <Spinner />
           ) : (
             <div className="flex gap-1.5 items-center">
-              {isSubscribed ? <Download /> : <Diamond />}
+              {plan ? <Download /> : <Diamond />}
               دانلود فایل
             </div>
           )}
         </Button>
-        {isSubscribed && (
+        {plan && (
           <Button
             disabled={isRendering || isLoading}
             onClick={onOpenSavePopup}

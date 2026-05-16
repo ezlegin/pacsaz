@@ -156,6 +156,8 @@ model DownloadHistory {
   userId    Int
 
   settings Settings?
+  plan     Plan      @relation(fields: [planId], references: [id])
+  planId   Int
 }
 
 model FavedDieline {
@@ -270,20 +272,21 @@ enum PaymentStatus {
 
 //! PLAN --------------------------------
 model Plan {
-  id            Int             @id @default(autoincrement())
+  id            Int               @id @default(autoincrement())
   key           PlanKey
   title         String
   level         Int
-  startedAt     DateTime        @default(now())
+  startedAt     DateTime          @default(now())
   endsAt        DateTime
-  isPremium     Boolean         @default(false)
+  isPremium     Boolean           @default(false)
   period        PlanPeriod
   type          PaymentPlanType
   fairDownload  Int
-  downloaded    Int             @default(0)
+  downloaded    Int               @default(0)
   firstDownload DateTime?
   lastDownload  DateTime?
-  status        PlanStatus      @default(active)
+  status        PlanStatus        @default(active)
+  histories     DownloadHistory[]
 
   payment Payment?
   user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
