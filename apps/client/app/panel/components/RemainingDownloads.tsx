@@ -11,11 +11,11 @@ const RemainingDownloads = ({
 }) => {
   return (
     <Card className="col-span-3 space-y-4 text-sm font-medium text-muted-foreground">
-      <div>دانلود باقی مانده</div>
+      <div>دانلود مجاز: {fairDownload} عدد</div>
 
       <div>
         <div className="flex justify-between text-xs mb-1">
-          <span>{fairDownload} دانلود</span>
+          <span>باقی مانده</span>
           <span>{fairDownload - downloaded} دانلود</span>
         </div>
         <Progress value={100 - (downloaded / fairDownload) * 100} />

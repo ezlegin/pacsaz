@@ -283,10 +283,16 @@ model Plan {
   downloaded    Int             @default(0)
   firstDownload DateTime?
   lastDownload  DateTime?
+  status        PlanStatus      @default(active)
 
   payment Payment?
   user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId  Int
+}
+
+enum PlanStatus {
+  active
+  inActive
 }
 
 enum PlanPeriod {
@@ -315,6 +321,7 @@ model Tarrif {
   description      String
   shortDescription String
   isRecommended    Boolean
+  level            Int
   discountAmount   Float                   @default(0)
   fairDownload     FairDownload?
   price            Price?

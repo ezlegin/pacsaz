@@ -69,7 +69,7 @@ export const createPayment = async (params: {
     });
 
     const res = await initiateZarinpalPayment({
-      amount,
+      amount: total,
       paymentId: newPayment.id,
       user: newPayment.user,
     });
@@ -135,13 +135,16 @@ export const verifyPayment = async (
     });
 
     const tarrif = payment.tarrif;
+    const currentPlan = await prisma.plan.findFirst({
+      where: { status: "active", endsAt: { gte: new Date() } },
+    });
 
     await prisma.plan.create({
       data: {
         key: tarrif.key,
         title: mapPlanTitle(tarrif.key),
         level: mapPlanLevel(tarrif.key),
-        type: "new", //TODO
+        type: currentPlan ? "renewal" : "new",
         period: payment.period,
         fairDownload: tarrif.fairDownload[payment.period],
         endsAt: calculatePlanEndDate(payment.period),

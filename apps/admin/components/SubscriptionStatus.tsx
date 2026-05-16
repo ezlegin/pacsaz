@@ -1,7 +1,15 @@
+import { PlanStatus } from "@repo/db";
 import { Badge } from "@repo/ui/components/badge";
 
-const SubscriptionStatus = ({ endsAt }: { endsAt: Date }) => {
-  const isActive = endsAt > new Date();
+const SubscriptionStatus = ({
+  endsAt,
+  status,
+}: {
+  endsAt: Date;
+  status: PlanStatus;
+}) => {
+  const isInDateRange = endsAt > new Date();
+  const isActive = isInDateRange && status;
 
   return (
     <Badge variant={isActive ? "lightGreen" : "outline"}>

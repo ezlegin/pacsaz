@@ -1,36 +1,32 @@
 "use client";
 
-import { PlanType } from "@/app/panel/components/UserSubscriptionCard";
-import { usePaymentCheckout } from "@/hooks/usePaymentCheckout";
-import { mapPaymentData } from "@/utils/mapPaymentData";
-import { PlanKey, plans } from "@repo/lib/data/plans";
-import { formatPrice } from "@repo/lib/utils/formatPrice";
+import { Plan, Price as PriceType, Tarrif } from "@repo/db";
+import { PlanKey, PlanPeriod } from "@repo/lib/data/plans";
 import { Button } from "@repo/ui/components/button";
 import Card from "@repo/ui/components/custom/Card";
 import { Label } from "@repo/ui/components/label";
 import { RadioGroup, RadioGroupItem } from "@repo/ui/components/radio-group";
-import { Separator } from "@repo/ui/components/separator";
 import { SquareArrowOutUpRight } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import DiscountForm from "./forms/DiscountForm";
 import PeriodSwitch from "./PeriodSwitch";
 import Price from "./Price";
+import { Badge } from "@repo/ui/components/badge";
 
-const UpgradeSubscription = ({ userPlan }: { userPlan: PlanType }) => {
-  const [appliedDiscountCode, setAppliedDiscountCode] = useState<
-    string | undefined
-  >(undefined);
-  const defaultPlan = plans.find((p) => p.level === userPlan.level + 1)?.key;
+export interface TarrifType extends Tarrif {
+  price: PriceType | null;
+}
 
-  const { checkoutInfo, setPeriod, setPlan, period, plan, discountInfo } =
-    usePaymentCheckout({ discountCode: appliedDiscountCode, defaultPlan });
-
-  const onStartPayment = () => {
-    console.log("Payment Started");
-  };
-
-  const paymentData = mapPaymentData(period, plan, checkoutInfo);
+const UpgradeSubscription = ({
+  userPlan,
+  tarrif,
+}: {
+  userPlan: Plan;
+  tarrif: TarrifType[];
+}) => {
+  const currentPlan = tarrif.find((p) => p.level === userPlan.level + 1);
+  const [plan, setPlan] = useState<PlanKey>(currentPlan?.key || "pro");
+  const [period, setPeriod] = useState<PlanPeriod>(userPlan.period);
 
   return (
     <div className="space-y-6">
@@ -41,7 +37,7 @@ const UpgradeSubscription = ({ userPlan }: { userPlan: PlanType }) => {
         onValueChange={(val: PlanKey) => setPlan(val)}
         dir="rtl"
       >
-        {plans.map((p, i) => (
+        {tarrif.map((p, i) => (
           <Card
             key={i}
             primaryTheme={p.key === plan}
@@ -64,10 +60,15 @@ const UpgradeSubscription = ({ userPlan }: { userPlan: PlanType }) => {
                 </div>
               </div>
               {p.key === userPlan.key ? (
-                <div className="text-xs text-primary ">(پلن فعال)</div>
+                <Badge
+                  variant={"primaryForeground"}
+                  className="border border-primary/50 py-1.5"
+                >
+                  پلن فعال
+                </Badge>
               ) : (
                 <div>
-                  <Price period={period} price={p.price} size="sm" />
+                  <Price period={period} price={p.price![period]} size="sm" />
                 </div>
               )}
             </Label>
@@ -85,38 +86,11 @@ const UpgradeSubscription = ({ userPlan }: { userPlan: PlanType }) => {
         </Link>
       </RadioGroup>
 
-      <Card className="space-y-3">
-        <ul className="text-sm text-muted-foreground space-y-2.5">
-          {paymentData.map((p, idx) => (
-            <div
-              key={idx}
-              className="space-y-2.5 last:font-medium last:text-foreground"
-            >
-              <li className="flex justify-between">
-                <span>{p.title}</span>
-                <span>{p.value}</span>
-              </li>
-
-              <Separator />
-            </div>
-          ))}
-        </ul>
-
-        <DiscountForm
-          appliedDiscountCode={appliedDiscountCode}
-          setAppliedDiscountCode={setAppliedDiscountCode}
-          discountInfo={discountInfo}
-        />
-
-        <Button
-          onClick={onStartPayment}
-          size={"lg"}
-          className="w-full"
-          variant={"gradient"}
-        >
-          پرداخت {formatPrice(checkoutInfo.total, true)}
+      <Link href={`/payment?plan=${plan}&period=${period}`}>
+        <Button size={"lg"} className="w-full" variant={"gradient"}>
+          مرحله بعد
         </Button>
-      </Card>
+      </Link>
     </div>
   );
 };

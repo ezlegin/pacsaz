@@ -36,7 +36,7 @@ const SubscriptionsList = ({ data }: { data: PlanType[] }) => {
           </Tooltip>
         </TableCell>
         <TableCell className="text-center">
-          <SubscriptionStatus endsAt={data.endsAt} />
+          <SubscriptionStatus endsAt={data.endsAt} status={data.status} />
         </TableCell>
         <TableCell>
           <div className="flex justify-center">
