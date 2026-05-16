@@ -11,6 +11,7 @@ const zarinpal = new ZarinPal({
   sandbox: process.env.NODE_ENV === "development" ? true : false,
 });
 
+export type ZarinPalStatus = "OK" | "NOK";
 interface InitiatePayment {
   data: {
     authority: string;
@@ -52,5 +53,40 @@ export const initiateZarinpalPayment = async (params: {
     return {
       error: "درگاه پرداخت پاسخگو نیست. لطفا دقایقی بعد دوباره تلاش کنید.",
     };
+  }
+};
+
+interface VerifyPayment {
+  data: {
+    code: 100 | 101;
+    ref_id: number;
+  };
+  errors: any[];
+}
+
+export const verifyZarrinPalPurchase = async (
+  authority: string,
+  amount: number,
+) => {
+  if (!authority || !amount) throw new Error("Amount and Authory is needed");
+
+  try {
+    const res = (await zarinpal.verifications.verify({
+      amount: amount * 10,
+      authority,
+    })) as VerifyPayment;
+
+    if (res.data.code === 100) {
+      return { success: "تراکتش با موفقیت انجام شد." };
+    } else if (res.data.code === 101) {
+      return {
+        success: "تراکنش از قبل تایید شده است.",
+      };
+    } else {
+      return { error: `خطای درگاه پرداخت. کد: ${res.data.code}` };
+    }
+  } catch (error) {
+    console.error(error);
+    return { error: "خطای ناشناخته رخ داد. لطفا لحظاتی بعد دوباره تلاش کنید." };
   }
 };

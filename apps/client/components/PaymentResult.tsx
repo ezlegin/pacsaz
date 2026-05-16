@@ -1,6 +1,7 @@
 "use client";
 
 import { verifyPayment } from "@/actions/payment";
+import { ZarinPalStatus } from "@/lib/zarrinpal";
 import { Button } from "@repo/ui/components/button";
 import Card from "@repo/ui/components/custom/Card";
 import { Spinner } from "@repo/ui/components/spinner";
@@ -10,7 +11,13 @@ import { useEffect, useState } from "react";
 
 type Status = "success" | "failed" | "pending";
 
-const PaymentResult = ({ authority }: { authority: string }) => {
+const PaymentResult = ({
+  authority,
+  status: zpStatus,
+}: {
+  authority: string;
+  status: ZarinPalStatus;
+}) => {
   const [status, setStatus] = useState<Status>("pending");
   const [text, setText] = useState("در حال بررسی اطلاعات...");
 
@@ -22,7 +29,7 @@ const PaymentResult = ({ authority }: { authority: string }) => {
     }
 
     const Verify = async () => {
-      const res = await verifyPayment("authority");
+      const res = await verifyPayment(authority, zpStatus);
       setStatus(res.result as Status);
       setText(res.message);
     };
@@ -45,7 +52,7 @@ const PaymentResult = ({ authority }: { authority: string }) => {
             <span className="text-xl font-medium">{text}</span>
             <p className="text-sm text-muted-foreground">
               {status === "failed" &&
-                "در صورت کسر وجه مبلغ پرداخت شده حداکثر تا 72 ساعت آینده به حساب شما برگشت خواهد خورد.."}
+                "در صورت کسر وجه مبلغ پرداخت شده حداکثر تا 72 ساعت آینده به حساب شما برگشت خواهد خورد."}
             </p>
           </div>
           {status !== "success" && (

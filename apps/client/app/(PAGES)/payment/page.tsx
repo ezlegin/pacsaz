@@ -2,7 +2,7 @@ import { createPaymentTrack } from "@/actions/payment";
 import PaymentCard from "@/components/PaymentCard";
 import { prisma } from "@repo/db";
 import { PlanKey, PlanPeriod } from "@repo/lib/data/plans";
-import Card from "@repo/ui/components/custom/Card";
+import { redirect } from "next/navigation";
 
 interface Props {
   searchParams: Promise<{ plan: PlanKey; period: PlanPeriod }>;
@@ -11,8 +11,7 @@ interface Props {
 const page = async ({ searchParams }: Props) => {
   const { period, plan } = await searchParams;
 
-  if (!plan || !period)
-    return <Card className="text-center">Error loading tarrif.</Card>;
+  if (!plan || !period) redirect("/subscription");
 
   const tarrif = await prisma.tarrif.findFirst({
     where: { key: plan },

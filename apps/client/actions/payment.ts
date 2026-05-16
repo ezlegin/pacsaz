@@ -1,7 +1,21 @@
 "use server";
 
-import { initiateZarinpalPayment } from "@/lib/zarrinpal";
-import { Payment, PlanKey, PlanPeriod, prisma } from "@repo/db";
+import {
+  initiateZarinpalPayment,
+  verifyZarrinPalPurchase,
+  ZarinPalStatus,
+} from "@/lib/zarrinpal";
+import { calculatePlanEndDate } from "@/utils/calculatePlanEndDate";
+import { mapPlanLevel } from "@/utils/mapPlanLevel";
+import { mapPlanTitle } from "@/utils/mapPlanTitle";
+import {
+  FairDownload,
+  Payment,
+  PlanKey,
+  PlanPeriod,
+  prisma,
+  Tarrif,
+} from "@repo/db";
 
 type Response = Promise<
   | {
@@ -65,29 +79,58 @@ export const initiatePayment = async (
   }
 };
 
-export const verifyPayment = async (authority: string): Response => {
+export const verifyPayment = async (
+  authority: string,
+  status: ZarinPalStatus,
+): Response => {
   try {
+    if (status === "NOK") throw new Error("پرداخت نا موفق!");
+
     const timeoutPromise = new Promise((_, reject) => {
       setTimeout(() => {
         reject(new Error("پرداخت نا موفق! (زمان به پایان رسید.)"));
       }, 30000);
     });
 
-    const result = (await Promise.race([
+    const payment = (await Promise.race([
       timeoutPromise,
       prisma.payment.findUnique({
         where: { authority },
-        select: { amount: true, authority: true },
+        include: { tarrif: { include: { fairDownload: true } } },
       }),
-    ])) as Payment;
-    if (!result) throw new Error("توکن پرداخت معتبر نمی باشد.");
+    ])) as Payment & { tarrif: Tarrif & { fairDownload: FairDownload } };
+    if (!payment) throw new Error("توکن پرداخت معتبر نمی باشد.");
 
-    // todo: apply zarringpal verification.
-    const res = true;
+    const verifyPayment = await verifyZarrinPalPurchase(
+      payment.authority!,
+      payment.amount,
+    );
 
-    if (!res) throw new Error("پرداخت نا موفق!");
+    if (verifyPayment.error) {
+      throw new Error(verifyPayment.error);
+    }
 
-    return { result: "success", message: "تراکنش با موفقیت انجام شد." };
+    const tarrif = payment.tarrif;
+
+    await prisma.plan.create({
+      data: {
+        key: tarrif.key,
+        title: mapPlanTitle(tarrif.key),
+        level: mapPlanLevel(tarrif.key),
+        type: "new", //TODO
+        period: payment.period,
+        fairDownload: tarrif.fairDownload[payment.period],
+        endsAt: calculatePlanEndDate(payment.period),
+        userId: 1,
+        payment: {
+          connect: {
+            id: payment.id,
+          },
+        },
+      },
+    });
+
+    return { result: "success", message: verifyPayment.success! };
   } catch (error) {
     console.error(error);
     return { result: "failed", message: (error as Error).message };

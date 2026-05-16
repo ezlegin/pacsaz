@@ -42,13 +42,11 @@ const PaymentCard = ({
 
     if (res.error) {
       toast.error(res.error);
+      stopLoading();
     } else if (res.success) {
       router.push(res.data.paymentUrl);
     }
-
-    stopLoading();
   };
-
   // todo: implement applying discount code.
 
   return (

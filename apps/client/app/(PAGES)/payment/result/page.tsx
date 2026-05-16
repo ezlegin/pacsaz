@@ -1,14 +1,15 @@
 import PaymentResult from "@/components/PaymentResult";
+import { ZarinPalStatus } from "@/lib/zarrinpal";
 import React from "react";
 
 interface Props {
-  searchParams: Promise<{ authority: string }>;
+  searchParams: Promise<{ Authority: string; Status: ZarinPalStatus }>;
 }
 
 const page = async ({ searchParams }: Props) => {
-  const { authority } = await searchParams;
+  const { Authority, Status } = await searchParams;
 
-  return <PaymentResult authority={authority} />;
+  return <PaymentResult authority={Authority} status={Status} />;
 };
 
 export default page;

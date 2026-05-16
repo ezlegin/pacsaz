@@ -1,6 +1,6 @@
 "use client";
 
-import { mapUserPlanTitle } from "@/utils/mapUserPlanTitle";
+import { mapPlanTitle } from "@/utils/mapPlanTitle";
 import { Button } from "@repo/ui/components/button";
 import Card from "@repo/ui/components/custom/Card";
 import { Dialog, DialogContent, DialogTitle } from "@repo/ui/components/dialog";
@@ -29,7 +29,7 @@ const UserSubscriptionCard = ({ userPlan }: { userPlan: Plan }) => {
         <div>
           <div className="text-sm text-muted-foreground">پلن</div>
           <div className="text-2xl font-semibold">
-            {mapUserPlanTitle(userPlan.key)}
+            {mapPlanTitle(userPlan.key)}
           </div>
           <div className="text-xs text-muted-foreground font-medium">
             36 روز باقی مانده
