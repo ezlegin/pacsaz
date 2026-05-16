@@ -57,7 +57,7 @@ export const createPayment = async (params: {
         discountCode,
         discountCodeAmount,
         totalDiscount: discountCodeAmount,
-        method: "zarrinPal",
+        method: "zarinPal",
         status: "pending",
         total,
         period,
@@ -99,8 +99,6 @@ export const verifyPayment = async (
   status: ZarinPalStatus,
 ): Response => {
   try {
-    if (status === "NOK") throw new Error("پرداخت نا موفق!");
-
     const timeoutPromise = new Promise((_, reject) => {
       setTimeout(() => {
         reject(new Error("پرداخت نا موفق! (زمان به پایان رسید.)"));
@@ -119,13 +117,15 @@ export const verifyPayment = async (
     const verifyPayment = await verifyZarrinPalPurchase(
       payment.authority!,
       payment.amount,
+      status,
     );
 
     if (verifyPayment.error) {
-      await prisma.payment.update({
-        where: { id: payment.id },
-        data: { status: "failed" },
-      });
+      if (payment.status !== "failed")
+        await prisma.payment.update({
+          where: { id: payment.id },
+          data: { status: "failed" },
+        });
       throw new Error(verifyPayment.error);
     }
 

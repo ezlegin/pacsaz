@@ -67,10 +67,12 @@ interface VerifyPayment {
 export const verifyZarrinPalPurchase = async (
   authority: string,
   amount: number,
+  status: ZarinPalStatus,
 ) => {
-  if (!authority || !amount) throw new Error("Amount and Authory is needed");
-
   try {
+    if (status === "NOK") throw new Error("پرداخت نا موفق!");
+    if (!authority || !amount) throw new Error("Amount and Authory is needed");
+
     const res = (await zarinpal.verifications.verify({
       amount: amount * 10,
       authority,

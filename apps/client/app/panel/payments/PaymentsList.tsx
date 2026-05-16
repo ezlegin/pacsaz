@@ -1,6 +1,7 @@
 import { mapPaymentStatusLable } from "@/utils/mapPaymentStatusLable";
 import { mapPeriodLabel } from "@/utils/mapPeriodLabel";
 import { mapPlanTitle } from "@/utils/mapPlanTitle";
+import { Payment, Plan } from "@repo/db";
 import { PlanKey, PlanPeriod } from "@repo/lib/data/plans";
 import { formatPrice } from "@repo/lib/utils/formatPrice";
 import Card from "@repo/ui/components/custom/Card";
@@ -11,45 +12,40 @@ import Table from "@repo/ui/components/custom/Table";
 import { TableCell, TableRow } from "@repo/ui/components/table";
 import { formatDate } from "date-fns";
 
-type Data = {
-  id: number;
-  date: Date;
-  status: string;
-  amount: number;
-  plan: string;
-  period: string;
-  discountCode?: string;
-  discountAmount?: number;
-  total: number;
-};
+interface PaymentType extends Payment {
+  plan: Plan | null;
+}
 
-function PaymentsList({ data }: { data: Data[] }) {
-  const renderRows = (data: Data) => {
+function PaymentsList({ data }: { data: PaymentType[] }) {
+  const renderRows = (payment: PaymentType) => {
     return (
-      <TableRow key={data.id}>
-        <TableCell>{data.id}</TableCell>
+      <TableRow key={payment.id}>
+        <TableCell>{payment.id}</TableCell>
         <TableCell className="text-center">
-          {formatPrice(data.amount)}
+          {formatPrice(payment.amount)}
         </TableCell>
         <TableCell className="text-center">
-          {data.discountAmount && formatPrice(data.discountAmount)}
+          {payment.discountCodeAmount &&
+            formatPrice(payment.discountCodeAmount)}
         </TableCell>
-        <TableCell className="text-center">{data.discountCode}</TableCell>
-        <TableCell className="text-center">{formatPrice(data.total)}</TableCell>
         <TableCell className="text-center">
-          {formatDate(data.date, "PPP")}
+          {formatPrice(payment.total)}
+        </TableCell>
+        <TableCell className="text-center">{payment.discountCode}</TableCell>
+        <TableCell className="text-center">
+          {formatDate(payment.createdAt, "PPP")}
         </TableCell>
         <TableCell className="text-center">
           <PaymentStatus
-            label={mapPaymentStatusLable(data.status as PaymentStatusType)}
-            status={data.status as PaymentStatusType}
+            label={mapPaymentStatusLable(payment.status as PaymentStatusType)}
+            status={payment.status as PaymentStatusType}
           />
         </TableCell>
         <TableCell className="text-center">
-          {mapPlanTitle(data.plan as PlanKey)}
+          {mapPlanTitle(payment.plan?.key as PlanKey)}
         </TableCell>
         <TableCell className="text-left">
-          {mapPeriodLabel(data.period as PlanPeriod)}
+          {mapPeriodLabel(payment.period as PlanPeriod)}
         </TableCell>
       </TableRow>
     );
@@ -74,8 +70,8 @@ const columns = [
   { label: "شناسه" },
   { label: "مجموع" },
   { label: "تخفیف" },
+  { label: "قیمت کل" },
   { label: "کد تخفیف" },
-  { label: "قیمت" },
   { label: "تاریخ" },
   { label: "وضعیت" },
   { label: "پلن" },
