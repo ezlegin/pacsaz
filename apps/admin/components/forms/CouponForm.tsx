@@ -1,6 +1,6 @@
 "use client";
 
-import { createCoupon } from "@/actions/coupon";
+import { createCoupon, updateCoupon } from "@/actions/coupon";
 import { CouponType } from "@/app/(PANEL)/coupons/CouponsList";
 import {
   couponFormSchema,
@@ -66,7 +66,9 @@ export function CouponForm({
   const onSubmit = async (data: CouponFormType) => {
     startLoading();
 
-    const res = coupon ? await createCoupon(data) : await createCoupon(data);
+    const res = coupon
+      ? await updateCoupon(data, coupon.id)
+      : await createCoupon(data);
     handleRes(res, { onSuccess: () => router.refresh() });
 
     stopLoading();

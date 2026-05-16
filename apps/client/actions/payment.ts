@@ -28,27 +28,42 @@ type Response = Promise<
     }
 >;
 
-export const initiatePayment = async (
-  amount: number,
-  plan: PlanKey,
-  period: PlanPeriod,
-) => {
+export const createPayment = async (params: {
+  amount: number;
+  total: number;
+  plan: PlanKey;
+  period: PlanPeriod;
+  discountCode: string | null;
+  discountCodeAmount: number;
+}) => {
+  const { amount, discountCode, discountCodeAmount, period, plan, total } =
+    params;
   try {
     const tarrif = await prisma.tarrif.findUnique({ where: { key: plan } });
     if (!tarrif) return { error: "Tarrif Not Found." };
 
+    let couponId: number | undefined = undefined;
+    if (discountCode) {
+      const existingCoupon = await prisma.coupon.findUnique({
+        where: { code: discountCode },
+      });
+      if (!existingCoupon) return { error: "Coupon Invalid." };
+      couponId = existingCoupon.id;
+    }
+
     const newPayment = await prisma.payment.create({
       data: {
         amount,
-        discountCode: "",
-        discountCodeAmount: 0,
-        totalDiscount: 0,
+        discountCode,
+        discountCodeAmount,
+        totalDiscount: discountCodeAmount,
         method: "zarrinPal",
         status: "pending",
-        total: amount,
+        total,
         period,
         userId: 1, // todo,
         tarrifId: tarrif.id,
+        couponId,
       },
       include: { user: true },
     });
@@ -107,8 +122,17 @@ export const verifyPayment = async (
     );
 
     if (verifyPayment.error) {
+      await prisma.payment.update({
+        where: { id: payment.id },
+        data: { status: "failed" },
+      });
       throw new Error(verifyPayment.error);
     }
+
+    await prisma.payment.update({
+      where: { id: payment.id },
+      data: { status: "success" },
+    });
 
     const tarrif = payment.tarrif;
 

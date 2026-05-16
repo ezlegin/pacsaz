@@ -1,6 +1,6 @@
 "use client";
 
-import { initiatePayment } from "@/actions/payment";
+import { createPayment } from "@/actions/payment";
 import { PlanPeriod, Price, Tarrif } from "@repo/db";
 import { formatPrice } from "@repo/lib/utils/formatPrice";
 import { useLoading } from "@repo/lib/utils/useLoading";
@@ -26,19 +26,23 @@ const PaymentCard = ({
 }) => {
   const router = useRouter();
   const { isLoading, startLoading, stopLoading } = useLoading();
-  const [appliedDiscountCode, setAppliedDiscountCode] = useState<
-    string | undefined
-  >(undefined);
+  const [appliedDiscountCode, setAppliedDiscountCode] = useState<string | null>(
+    null,
+  );
+  const [discountCodeAmount, setDiscountCodeAmount] = useState(0);
   const basePrice = tarrif.price?.[period] ?? 0;
   const [totalPrice, setTotalPrice] = useState(basePrice);
 
   const onStartPayment = async () => {
     startLoading();
-    const res = await initiatePayment(
-      tarrif.price![period],
-      tarrif.key,
+    const res = await createPayment({
+      total: totalPrice,
+      amount: tarrif.price![period],
+      plan: tarrif.key,
       period,
-    );
+      discountCode: appliedDiscountCode,
+      discountCodeAmount,
+    });
 
     if (res.error) {
       toast.error(res.error);
@@ -70,17 +74,20 @@ const PaymentCard = ({
           </li>
           <li className="flex justify-between border-b py-3 text-muted-foreground">
             <span>تخفیف:</span>
-            <span>{formatPrice(0, true)}</span>
+            <span>{formatPrice(discountCodeAmount, true)}</span>
           </li>
-          <li className="flex justify-between border-b py-3">
+          <li className="flex justify-between border-b py-3 font-medium">
             <span>قابل پرداخت:</span>
             <span>{formatPrice(totalPrice, true)}</span>
           </li>
         </ul>
 
         <DiscountForm
-          appliedDiscountCode={undefined}
-          discountInfo={{ code: undefined, error: null, success: null }}
+          setDiscountCodeAmount={setDiscountCodeAmount}
+          tarrif={tarrif}
+          basePrice={basePrice}
+          setTotalPrice={setTotalPrice}
+          appliedDiscountCode={appliedDiscountCode}
           setAppliedDiscountCode={setAppliedDiscountCode}
         />
 

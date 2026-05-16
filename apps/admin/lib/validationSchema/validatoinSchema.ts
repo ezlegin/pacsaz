@@ -17,6 +17,7 @@ export const paymentStatus = [
   "failed",
   "canceled",
   "pending",
+  "could_not_initiate",
 ] as const;
 export const couponTypes = ["fixed", "percent"] as const;
 

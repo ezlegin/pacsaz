@@ -31,6 +31,36 @@ export const createCoupon = async (data: CouponFormType) => {
   }
 };
 
+export const updateCoupon = async (data: CouponFormType, id: number) => {
+  const { amount, code, expiresAt, limit, plans, type } = data;
+
+  try {
+    const existingCoupon = await prisma.coupon.findFirst({
+      where: { code, id: { not: id } },
+    });
+    if (existingCoupon) return { error: "Coupon Code Should be Unique." };
+
+    await prisma.coupon.update({
+      where: { id },
+      data: {
+        amount: +amount,
+        code,
+        expiresAt,
+        type,
+        limit: +limit,
+        tarrif: {
+          connect: plans.map((id) => ({ id: +id })),
+        },
+      },
+    });
+
+    return { success: "Coupon Updated Successfully." };
+  } catch (error) {
+    console.error(error);
+    return { error: serverErrorMessage };
+  }
+};
+
 export const deleteCoupon = async (id: number) => {
   try {
     const existingPaymentsForThisCoupon = await prisma.payment.findFirst({

@@ -212,7 +212,7 @@ model Payment {
   total              Float
   totalDiscount      Float
   discountCodeAmount Float
-  discountCode       String
+  discountCode       String?
   status             PaymentStatus
   method             PaymentMethod
   authority          String?       @unique
@@ -256,7 +256,7 @@ enum CouponType {
 
 enum PaymentMethod {
   admin
-  zarrinPal
+  zarinPal
   no_method
 }
 
