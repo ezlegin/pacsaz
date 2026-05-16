@@ -51,17 +51,15 @@ const UserSubscriptionCard = ({
             </Button>
           </Link>
 
-          {plan.level !== 3 && (
-            <Button
-              className="w-full"
-              variant="gradient"
-              onClick={() => setOpenUpgradeDialog(true)}
-              size={"sm"}
-            >
-              <Zap />
-              ارتفا اشتراک
-            </Button>
-          )}
+          <Button
+            className="w-full"
+            variant="gradient"
+            onClick={() => setOpenUpgradeDialog(true)}
+            size={"sm"}
+          >
+            <Zap />
+            ارتفا اشتراک
+          </Button>
         </div>
       </Card>
     </>
