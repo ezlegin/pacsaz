@@ -12,9 +12,8 @@ import {
 } from "@/lib/validatoinSchema";
 import Diamond from "@/public/icons/Diamond";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { SavedDieline } from "@repo/db";
+import { Plan, SavedDieline } from "@repo/db";
 import { useLoading } from "@repo/lib/utils/useLoading";
-import { useUserStore } from "@repo/store/app/user.store";
 import { Badge } from "@repo/ui/components/badge";
 import { Button } from "@repo/ui/components/button";
 import {
@@ -22,34 +21,37 @@ import {
   FormControl,
   FormField,
   FormItem,
+  FormMessage,
 } from "@repo/ui/components/form";
 import { Input } from "@repo/ui/components/input";
 import { Separator } from "@repo/ui/components/separator";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import SearchCustomers from "../SearchCustomers";
 
 const SaveDielineForm = ({
   settings,
   savedDieline,
   slug,
+  plan,
 }: {
   slug: string;
   savedDieline?: SavedDieline;
   settings: Settings;
+  plan: Plan;
 }) => {
   const router = useRouter();
   const isUpdateType = !!savedDieline;
   const { bleed, dimensionType, height, length, material, thickness, width } =
     settings;
   const { isLoading, startLoading, stopLoading } = useLoading();
-  const { isPremium } = useUserStore();
 
   const form = useForm<SaveDielineFormType>({
     resolver: zodResolver(saveDielineFormSchema),
     defaultValues: {
       title: savedDieline?.title ?? "",
       description: savedDieline?.description ?? "",
-      customerId: String(savedDieline?.customerId) ?? "",
+      customerId: savedDieline?.customerId?.toString() ?? "",
       bleed,
       height,
       length,
@@ -74,7 +76,7 @@ const SaveDielineForm = ({
 
   return (
     <div className="space-y-5">
-      {!isPremium && (
+      {!plan.isPremium && (
         <Badge variant={"lightRed"} className="p-2 px-4">
           <Diamond />
           فقط در اشتراک حرفه ای و سازمانی
@@ -109,7 +111,11 @@ const SaveDielineForm = ({
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Input disabled={!isPremium} {...field} placeholder="عنوان" />
+                  <Input
+                    disabled={!plan.isPremium}
+                    {...field}
+                    placeholder="عنوان"
+                  />
                 </FormControl>
               </FormItem>
             )}
@@ -122,7 +128,7 @@ const SaveDielineForm = ({
               <FormItem>
                 <FormControl>
                   <Input
-                    disabled={!isPremium}
+                    disabled={!plan.isPremium}
                     {...field}
                     placeholder="توضیح کوتاه"
                   />
@@ -133,16 +139,15 @@ const SaveDielineForm = ({
 
           <FormField
             control={form.control}
-            name="customerId"
+            name={"customerId"}
             render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input
-                    disabled={!isPremium}
-                    {...field}
-                    placeholder="مشتری (دلخواه)"
-                  />
-                </FormControl>
+              <FormItem className={`w-full`}>
+                <SearchCustomers
+                  field={field}
+                  placeHolder="جستجوی مشتری..."
+                  customerId={savedDieline?.customerId}
+                />
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -150,7 +155,7 @@ const SaveDielineForm = ({
           <div className="flex flex-col gap-3">
             <Button
               size={"lg"}
-              disabled={!form.formState.isValid || isLoading || !isPremium}
+              disabled={!form.formState.isValid || isLoading || !plan.isPremium}
               className="w-full"
             >
               ذخیره

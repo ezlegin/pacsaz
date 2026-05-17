@@ -41,7 +41,7 @@ function SubscriptionsList({ data }: { data: PlanType[] }) {
   };
 
   return (
-    <Card title="پرداخت ها">
+    <Card title="سوابق اشتراک">
       <Table
         columns={columns}
         data={data}

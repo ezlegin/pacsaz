@@ -92,7 +92,7 @@ const DielineDownloadButton = ({ slug, isRendering, plan }: Props) => {
           ) : (
             <>
               <DialogTitle>ذخیره قالب</DialogTitle>
-              <SaveDielineForm settings={setts} slug={slug} />
+              <SaveDielineForm settings={setts} slug={slug} plan={plan!} />
             </>
           )}
         </DialogContent>

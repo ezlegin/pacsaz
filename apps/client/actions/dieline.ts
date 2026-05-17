@@ -83,6 +83,14 @@ export const createSaveDieline = async (
     const existingDieline = await prisma.dieline.findFirst({ where: { slug } });
     if (!existingDieline) throw new Error("Dieline Not Found.");
 
+    if (customerId) {
+      const existingCustoer = await prisma.customer.findFirst({
+        where: { id: +customerId },
+      });
+      if (!existingCustoer)
+        return { error: "مشتری یافت نشد. لطفا ابتدا مشتری ایجاد کنید.." };
+    }
+
     await prisma.savedDieline.create({
       data: {
         userId: 1, //todo

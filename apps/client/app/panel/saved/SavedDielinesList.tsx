@@ -1,7 +1,7 @@
 import { deleteSavedDieline } from "@/actions/dieline";
 import DeleteButton from "@/components/DeleteButton";
 import SaveDielineForm from "@/components/forms/SaveDielineForm";
-import { Dieline, SavedDieline, Settings } from "@repo/db";
+import { Dieline, Plan, SavedDieline, Settings } from "@repo/db";
 import ActionButton from "@repo/ui/components/custom/ActionButton";
 import Card from "@repo/ui/components/custom/Card";
 import Table from "@repo/ui/components/custom/Table";
@@ -20,7 +20,13 @@ interface SavedDielineType extends SavedDieline {
   dieline: Dieline;
 }
 
-const SavedDielinesList = ({ data }: { data: SavedDielineType[] }) => {
+const SavedDielinesList = ({
+  data,
+  plan,
+}: {
+  data: SavedDielineType[];
+  plan: Plan;
+}) => {
   const renderRows = (data: SavedDielineType) => {
     const { createdAt, id, title, description, settings, dieline } = data;
 
@@ -45,6 +51,7 @@ const SavedDielinesList = ({ data }: { data: SavedDielineType[] }) => {
           <ActionButton icon={Pencil}>
             <DialogTitle>ویرایش قالب</DialogTitle>
             <SaveDielineForm
+              plan={plan}
               settings={settings!}
               slug={dieline.slug}
               savedDieline={data}

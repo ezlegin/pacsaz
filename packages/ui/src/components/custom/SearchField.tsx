@@ -83,13 +83,13 @@ const SearchField = <T,>({
     setSelected(null);
   };
 
-  const isSelect = type === "select";
-  const showSpinner = isSelect && !selected && loading && query.length > 2;
-  const showSearchIcon = !showSpinner && (!isSelect || !selected);
+  const isSelectType = type === "select";
+  const showSpinner = isSelectType && !selected && loading && query.length > 2;
+  const showSearchIcon = !showSpinner && (!isSelectType || !selected);
 
   const searchIconClass = cn(
     dir === "ltr" ? "left-3" : "right-3",
-    "absolute top-2.5 text-gray-400"
+    "absolute top-2.5 text-gray-400",
   );
 
   return (
@@ -119,7 +119,7 @@ const SearchField = <T,>({
           <X
             size={27}
             onClick={handleDeselect}
-            className="absolute right-3 top-1.5 text-gray-500 hover:text-red-400 cursor-pointer p-1 hover:bg-slate-50 rounded-sm"
+            className="absolute right-3 top-1.5 text-muted-foreground hover:text-red-400 cursor-pointer p-1 hover:bg-slate-50 rounded-sm"
           />
         )}
       </div>
