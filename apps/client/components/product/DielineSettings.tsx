@@ -140,7 +140,7 @@ export default function DielineSettings({ slug, isRendering }: Props) {
         >
           <Select
             disabled={!plan?.isPremium}
-            defaultValue={bleed?.toString()}
+            value={String(bleed)}
             onValueChange={(val: string) => setSetting("bleed", +val)}
             dir="rtl"
           >

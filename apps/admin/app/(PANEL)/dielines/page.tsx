@@ -1,15 +1,18 @@
+import DielineSettingsForm from "@/components/forms/DielineSettingsForm";
 import PageTitle from "@/components/PageTitle";
 import { prisma } from "@repo/db";
 import { globalPageSize } from "@repo/lib/data/consts";
 import Filter from "@repo/ui/components/custom/Filter";
-import NewButton from "@repo/ui/components/custom/NewButton";
 import Pagination from "@repo/ui/components/custom/Pagination";
+import PopupNewDialog from "@repo/ui/components/custom/PopupNewDialog";
 import Search from "@repo/ui/components/custom/Search";
+import { DialogTitle } from "@repo/ui/components/dialog";
 import DielinesList from "./DielinesList";
 
 const page = async () => {
   const dielines = await prisma.dieline.findMany({
     include: {
+      settings: true,
       categoryByModel: true,
       categoryByUsage: true,
       _count: {
@@ -44,7 +47,10 @@ const page = async () => {
           />
         </div>
 
-        <NewButton title="New Dieline" href="/editor/new" />
+        <PopupNewDialog buttonTitle="New Dieline">
+          <DialogTitle>New Dieline</DialogTitle>
+          <DielineSettingsForm categories={categories} />
+        </PopupNewDialog>
       </div>
 
       <DielinesList data={dielines} categories={categories} />

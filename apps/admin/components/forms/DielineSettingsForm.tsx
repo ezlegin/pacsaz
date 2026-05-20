@@ -1,15 +1,17 @@
 "use client";
 
-import { updateDielineSettings } from "@/actions/dieline";
+import { createDieline, updateDieline } from "@/actions/dieline";
 import { Categories, DielineType } from "@/app/(PANEL)/dielines/DielinesList";
 import {
-  dielineSettingsFormSchema,
-  DielineSettingsFormType,
+  dielineMetadataFormSchema,
+  DielineMetadataFormType,
 } from "@/lib/validationSchema/validatoinSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { handleRes } from "@repo/lib/utils/handleRes";
 import { useLoading } from "@repo/lib/utils/useLoading";
+import { materials } from "@repo/store/data/dieline";
+import { Button } from "@repo/ui/components/button";
 import { Checkbox } from "@repo/ui/components/checkbox";
-import { DialogTitle } from "@repo/ui/components/dialog";
 import {
   Form,
   FormControl,
@@ -19,69 +21,78 @@ import {
 } from "@repo/ui/components/form";
 import { Input } from "@repo/ui/components/input";
 import { Label } from "@repo/ui/components/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@repo/ui/components/select";
+import { Separator } from "@repo/ui/components/separator";
+import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import SubmitButton from "../SubmitButton";
-import { Switch } from "@repo/ui/components/switch";
-import { handleRes } from "@repo/lib/utils/handleRes";
 
 const DielineSettingsForm = ({
-  dieline,
   categories,
+  dieline,
 }: {
-  dieline: DielineType;
   categories: Categories;
+  dieline?: DielineType;
 }) => {
+  const settings = dieline?.settings;
   const router = useRouter();
-  const { isLoading, startLoading, stopLoading } = useLoading();
-  const form = useForm<DielineSettingsFormType>({
-    resolver: zodResolver(dielineSettingsFormSchema),
+  const { startLoading, stopLoading, isLoading } = useLoading();
+  const form = useForm<DielineMetadataFormType>({
+    resolver: zodResolver(dielineMetadataFormSchema),
     defaultValues: {
-      title: dieline.title ?? "",
-      slug: dieline.slug ?? "",
-      active: dieline.active ?? false,
+      bleed: settings?.bleed ?? 5,
+      defaultDimensions: {
+        width: settings?.width ?? 90,
+        height: settings?.height ?? 50,
+        length: settings?.length ?? 160,
+      },
+      minDimensions: {
+        width: settings?.minWidth ?? 30,
+        height: settings?.minHeight ?? 30,
+        length: settings?.length ?? 30,
+      },
+      title: dieline?.title ?? "",
+      slug: dieline?.slug ?? "",
+      dimensionTypes: settings?.dimensionTypes ?? "manufacture,inner,outer",
+      materials:
+        settings?.materials ?? "fFlute,glossyCardboard,eFlute,artPaper",
       categoryByModel:
-        dieline.categoryByModel.length > 0
+        dieline && dieline.categoryByModel.length > 0
           ? dieline.categoryByModel.map((i) => i.slug)
           : [],
       categoryByUsage:
-        dieline.categoryByUsage.length > 0
+        dieline && dieline.categoryByUsage.length > 0
           ? dieline.categoryByUsage.map((i) => i.slug)
           : [],
     },
+    mode: "onChange",
   });
 
-  const onSubmit = async (data: DielineSettingsFormType) => {
+  const onSubmit = async (data: DielineMetadataFormType) => {
     startLoading();
+    const res = dieline
+      ? await updateDieline(data, dieline.id)
+      : await createDieline(data);
 
-    const res = await updateDielineSettings(data, dieline.id);
-    handleRes(res, { onSuccess: () => router.refresh() });
-
+    handleRes(res, {
+      onSuccess: () => {
+        if (!dieline) router.push(`/editor/${res.slug}`);
+        else router.refresh();
+      },
+    });
     stopLoading();
   };
+  console.log(form.formState.errors);
 
   return (
     <Form {...form}>
-      <div className="flex justify-between">
-        <DialogTitle>Settings</DialogTitle>
-
-        <FormField
-          control={form.control}
-          name="active"
-          render={({ field }) => (
-            <FormItem className="flex">
-              <FormLabel>Active</FormLabel>
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-      </div>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="title"
@@ -89,7 +100,7 @@ const DielineSettingsForm = ({
             <FormItem>
               <FormLabel>Title</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} placeholder="Untitled" />
               </FormControl>
             </FormItem>
           )}
@@ -102,46 +113,48 @@ const DielineSettingsForm = ({
             <FormItem>
               <FormLabel>Slug</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} placeholder="slug" />
               </FormControl>
             </FormItem>
           )}
         />
 
-        <div className="space-y-2">
-          <Label>Categories By Model</Label>
-          <FormField
-            control={form.control}
-            name="categoryByModel"
-            render={({ field }) => (
-              <div className="grid grid-cols-4">
-                {categories.byModel.map((cat, idx) => {
-                  const isChecked = field.value.includes(cat.slug);
-                  return (
-                    <FormItem
-                      key={idx}
-                      className="flex flex-row items-center gap-3 pb-1.5"
-                    >
-                      <FormControl>
-                        <Checkbox
-                          checked={isChecked}
-                          onCheckedChange={(checked) => {
-                            const cats = field.value;
-                            const updatedMaterials = checked
-                              ? [...cats, cat.slug]
-                              : cats.filter((i) => i !== cat.slug);
+        <div className="grid grid-cols-2">
+          <div className="space-y-2">
+            <Label>Categories By Model</Label>
+            <FormField
+              control={form.control}
+              name="categoryByModel"
+              render={({ field }) => (
+                <div className="grid grid-cols-2">
+                  {categories.byModel.map((cat, idx) => {
+                    const isChecked = field.value.includes(cat.slug);
+                    return (
+                      <FormItem
+                        key={idx}
+                        className="flex flex-row items-center gap-3 pb-1.5"
+                      >
+                        <FormControl>
+                          <Checkbox
+                            checked={isChecked}
+                            onCheckedChange={(checked) => {
+                              const cats = field.value;
+                              const updatedMaterials = checked
+                                ? [...cats, cat.slug]
+                                : cats.filter((i) => i !== cat.slug);
 
-                            field.onChange(updatedMaterials);
-                          }}
-                        />
-                      </FormControl>
-                      <FormLabel>{cat.title}</FormLabel>
-                    </FormItem>
-                  );
-                })}
-              </div>
-            )}
-          />
+                              field.onChange(updatedMaterials);
+                            }}
+                          />
+                        </FormControl>
+                        <FormLabel>{cat.title}</FormLabel>
+                      </FormItem>
+                    );
+                  })}
+                </div>
+              )}
+            />
+          </div>
 
           <div className="space-y-2">
             <Label>Categories By Usage</Label>
@@ -149,7 +162,7 @@ const DielineSettingsForm = ({
               control={form.control}
               name="categoryByUsage"
               render={({ field }) => (
-                <div className="grid grid-cols-4">
+                <div className="grid grid-cols-2">
                   {categories.byUsage.map((cat, idx) => {
                     const isChecked = field.value.includes(cat.slug);
                     return (
@@ -180,10 +193,217 @@ const DielineSettingsForm = ({
           </div>
         </div>
 
-        <SubmitButton isLoading={isLoading} form={form} label="Update" />
+        <Separator />
+
+        <FormField
+          control={form.control}
+          name="bleed"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Bleed</FormLabel>
+              <FormControl>
+                <Select
+                  defaultValue={String(field.value)}
+                  onValueChange={(val) => {
+                    field.onChange(+val);
+                  }}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Bleed Amount" />
+                  </SelectTrigger>
+                  <SelectContent position="popper">
+                    <SelectItem value="3">3</SelectItem>
+                    <SelectItem value="5">5</SelectItem>
+                    <SelectItem value="7">7</SelectItem>
+                    <SelectItem value="10">10</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        <div className="space-y-1">
+          <Label>Default Dimensions</Label>
+          <div className="grid grid-cols-3 gap-3">
+            <FormField
+              control={form.control}
+              name="defaultDimensions.width"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <NumberInput field={field} placeHolder="Width" />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="defaultDimensions.length"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <NumberInput field={field} placeHolder="Length" />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="defaultDimensions.height"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <NumberInput field={field} placeHolder="Height" />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+
+        <div className="space-y-1">
+          <Label>Min Dimensions</Label>
+          <div className="grid grid-cols-3 gap-3">
+            <FormField
+              control={form.control}
+              name="minDimensions.width"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <NumberInput field={field} placeHolder="Width" />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="minDimensions.length"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <NumberInput field={field} placeHolder="Length" />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="minDimensions.height"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <NumberInput field={field} placeHolder="Height" />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+
+        <FormField
+          control={form.control}
+          name="dimensionTypes"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Dimension Types</FormLabel>
+              <FormControl>
+                <ToggleGroup
+                  variant={"outline"}
+                  defaultValue={field.value.split(",")}
+                  type="multiple"
+                  onValueChange={(val) => {
+                    if (val.length === 0) return;
+
+                    const stringVal = val.join(",");
+                    field.onChange(stringVal);
+                  }}
+                >
+                  <ToggleGroupItem value="manufacture">
+                    Manufacture
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="inner">Inner</ToggleGroupItem>
+                  <ToggleGroupItem value="outer">Outer</ToggleGroupItem>
+                </ToggleGroup>
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        <div className="space-y-1">
+          <Label>Materials</Label>
+          <FormField
+            control={form.control}
+            name="materials"
+            render={({ field }) => (
+              <div className="grid grid-cols-2">
+                {materials.map((item, idx) => {
+                  const isChecked = field.value
+                    ?.split(",")
+                    .includes(item.value);
+                  return (
+                    <FormItem
+                      key={idx}
+                      className="flex flex-row items-center gap-3 pb-1.5"
+                    >
+                      <FormControl>
+                        <Checkbox
+                          checked={isChecked}
+                          onCheckedChange={(checked) => {
+                            const materials = field.value.split(",");
+                            const updatedMaterials = checked
+                              ? [...materials, item.value].join(",")
+                              : materials
+                                  .filter((i) => i !== item.value)
+                                  .join(",");
+
+                            field.onChange(updatedMaterials);
+                          }}
+                        />
+                      </FormControl>
+                      <FormLabel className="text-sm font-normal cursor-pointer">
+                        {item.value}
+                        <span className="text-xs text-muted-foreground">
+                          ({item.thickness}mm)
+                        </span>
+                      </FormLabel>
+                    </FormItem>
+                  );
+                })}
+              </div>
+            )}
+          />
+        </div>
+
+        <Button
+          className="w-full"
+          disabled={!form.formState.isValid || isLoading}
+        >
+          {dieline ? "Update" : "Create New"} Dieline
+        </Button>
       </form>
     </Form>
   );
 };
 
 export default DielineSettingsForm;
+
+const NumberInput = ({
+  field,
+  placeHolder,
+}: {
+  field: any;
+  placeHolder?: string;
+}) => {
+  return (
+    <Input
+      type="number"
+      {...field}
+      placeholder={placeHolder}
+      onChange={(e) => {
+        const value = e.target.value;
+        field.onChange(value === "" ? 0 : Number(value));
+      }}
+    />
+  );
+};

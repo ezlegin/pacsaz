@@ -1,10 +1,5 @@
-import { bleeds, materials } from "@repo/store/data/dieline";
-import {
-  Dimension,
-  DimensionType,
-  MaterialKey,
-  MaterialValue,
-} from "@repo/store/data/types";
+import { materials } from "@repo/store/data/dieline";
+import { DimensionType, MaterialKey } from "@repo/store/data/types";
 import { useDeveloperToolsStore } from "@repo/store/dieline/developerTools.store";
 import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
 import { useSVGStore } from "@repo/store/dieline/svg.store";
@@ -12,36 +7,39 @@ import { ISpec } from "@repo/store/editor/dielineSpec.store";
 import { useVariableStore } from "@repo/store/editor/variables.store";
 import { useEffect, useTransition } from "react";
 import Pacsaz from "../core/Pacsaz";
-import { DimensionsType } from "../data/types";
 import { resolveDimensions } from "../utils/dimensionResolver";
 import { resolveOffsets } from "../utils/offsetResolver";
 import Drawer from "../core/dieline/Drawer";
 
 interface Dieline {
-  specification: ISpec.Specs;
-  settings?: DielineSettingsFromDB;
-}
-export type DielineSettingsFromDB = {
-  bleed: number;
-  defaultDimension: Dimension;
-  minDimension: Dimension;
   materials: string;
+  specification: ISpec.Specs;
   dimensionTypes: string;
+  minWidth: number;
+  minLength: number;
+  minHeight: number;
+  settings: DielineSettings;
+}
+
+type DielineSettings = {
+  bleed: number;
+  width: number;
+  length: number;
+  height: number;
+  thickness: number;
+  material: string;
+  dimensionType: string;
 };
 
-interface Defaults {
-  bleed: number;
-  dim: Dimension;
-  minDim: Dimension;
-  mat: MaterialValue;
-  dimensionTypes: DimensionsType;
-  mats: MaterialValue[];
+interface DielineType extends Dieline {
+  settings: DielineSettings;
 }
 
 export function useDielineGenerator(
-  dieline: Dieline,
+  dieline: DielineType,
   app: "client" | "editor",
 ) {
+  console.log("dieline", dieline);
   const specs = dieline.specification;
   const setts = dieline.settings;
   const [isRendering, startTransition] = useTransition();
@@ -54,54 +52,34 @@ export function useDielineGenerator(
 
   // set defaults
   useEffect(() => {
-    const materialsArr = setts?.materials.split(",") as
-      | MaterialKey[]
-      | undefined;
-    const mats = materialsArr
-      ?.map((i) => materials.find((m) => m.value === i))
-      .filter((i) => i !== undefined);
-    const dimensionTypes = setts?.dimensionTypes.split(",") as
-      | DimensionType[]
-      | undefined;
+    const dimensionTypes = dieline.dimensionTypes.split(",") as DimensionType[];
 
-    const defaults: Defaults = {
-      bleed: bleeds.default,
-      dim: {
-        width: 90,
-        height: 50,
-        length: 160,
-      },
-      minDim: {
-        width: 30,
-        height: 30,
-        length: 30,
-      },
-      mat: materials[0]!,
-      mats: materials.filter(
-        (m) =>
-          m.value === "glossyCardboard" ||
-          m.value === "fFlute" ||
-          m.value === "eFlute",
-      ),
-      dimensionTypes: ["manufacture", "inner", "outer"],
-    };
+    const mats = dieline.materials
+      .split(",")
+      .map((i) => materials.find((m) => m.value === i))
+      .filter((i) => i !== undefined);
+    const material = materials.find((m) => m.value === setts.material)!;
 
     setDefaultSettings({
-      bleed: setts?.bleed ?? defaults.bleed,
+      bleed: setts.bleed,
       dimension: {
-        raw: setts?.defaultDimension ?? defaults.dim,
+        raw: { width: setts.width, length: setts.length, height: setts.height },
         resolved: resolveDimensions(
-          setts?.defaultDimension ?? defaults.dim,
+          { width: setts.width, length: setts.length, height: setts.height },
           offsets,
         ),
       },
-      dimensionTypes: dimensionTypes ? dimensionTypes : defaults.dimensionTypes,
-      minDimension: setts?.minDimension ?? defaults.minDim,
-      material: mats ? mats[0]! : defaults.mat,
-      materials: mats ? mats : defaults.mats,
-      thickness: mats ? mats[0]!.thickness : defaults.mat.thickness,
+      dimensionTypes: dimensionTypes,
+      minDimension: {
+        width: dieline.minWidth,
+        height: dieline.minHeight,
+        length: dieline.minLength,
+      },
+      material: material,
+      materials: mats,
+      thickness: material.thickness,
 
-      dimensionType: "manufacture",
+      dimensionType: setts.dimensionType as DimensionType,
       format: "pdf",
       showOverallRulers: false,
     });

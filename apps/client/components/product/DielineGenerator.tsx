@@ -1,31 +1,38 @@
 "use client";
 
-import { Dieline } from "@repo/db";
-import {
-  DielineSettingsFromDB,
-  useDielineGenerator,
-} from "@repo/dieline-core/hooks/useDielineGenerator";
+import { Dieline, DielineSettings as DielineSettingsType } from "@repo/db";
+import { useDielineGenerator } from "@repo/dieline-core/hooks/useDielineGenerator";
 import { useDeveloperToolsStore } from "@repo/store/dieline/developerTools.store";
 import { ISpec } from "@repo/store/editor/dielineSpec.store";
 import dynamic from "next/dynamic";
 import { useEffect } from "react";
 import DielineLoadingOverlay from "./DielineLoadingOverlay";
-import DielineSettings from "./DielineSettings";
 import ProductInfo from "./ProductInfo";
+import DielineSettings from "./DielineSettings";
 const SVGPreview = dynamic(
   () => import("@repo/ui/components/custom/SVGPreview"),
   { ssr: false },
 );
 
+interface DielineType extends Dieline {
+  settings: DielineSettingsType | null;
+}
+
 const DielineGenerator = ({
   dieline,
+  customSettings,
 }: {
-  dieline: Dieline & { settings: DielineSettingsFromDB };
+  dieline: DielineType;
+  customSettings?: DielineSettingsType | null;
 }) => {
   const { setDeveloperTools: setDeveloperToolsCTX } = useDeveloperToolsStore();
   const specs = JSON.parse(dieline.specification) as ISpec.Specs;
   const { isRendering } = useDielineGenerator(
-    { specification: specs, settings: dieline.settings },
+    {
+      ...dieline,
+      specification: specs,
+      settings: customSettings ?? dieline.settings!,
+    },
     "client",
   );
 

@@ -12,11 +12,17 @@ const page = async () => {
     include: { price: true, fairDownload: true, features: true },
   });
   const features = await prisma.tarrifFeature.findMany();
+  const dieline = await prisma.dieline.findFirst({
+    where: { slug: "tuck-end" },
+    include: {
+      settings: true,
+    },
+  });
 
   return (
     <div className="space-y-48">
       <div className="px-20 mx-auto pt-20">
-        <LandingPage />
+        <LandingPage dieline={dieline} />
       </div>
 
       <div className="max-w-6xl mx-auto">

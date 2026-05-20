@@ -23,6 +23,8 @@ const MaterialInput = () => {
     setSetting("thickness", material.thickness);
   };
 
+  console.log("material", material);
+
   return (
     <Select onValueChange={onSelectMaterial} dir="rtl" value={material.value}>
       <SelectTrigger className="w-full">

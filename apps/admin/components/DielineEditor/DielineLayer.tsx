@@ -1,5 +1,4 @@
-import { Dieline } from "@repo/db";
-import { DielineSettingsFromDB } from "@repo/dieline-core/hooks/useDielineGenerator";
+import { Categories, DielineType } from "@/app/(PANEL)/dielines/DielinesList";
 import { useSelectionStore } from "@repo/store/app/selection.store";
 import { useDielineHistoryStore } from "@repo/store/editor/dielineHistory.store";
 import {
@@ -7,6 +6,13 @@ import {
   useDielineSpecStore,
 } from "@repo/store/editor/dielineSpec.store";
 import { Button } from "@repo/ui/components/button";
+import { ActButton } from "@repo/ui/components/custom/ActionButton";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from "@repo/ui/components/dialog";
 import { Separator } from "@repo/ui/components/separator";
 import {
   Tabs,
@@ -14,9 +20,10 @@ import {
   TabsList,
   TabsTrigger,
 } from "@repo/ui/components/tabs";
-import { Redo, Undo } from "lucide-react";
+import { Redo, Settings, Undo } from "lucide-react";
 import { useEffect } from "react";
-import DielineMetadataForm from "../forms/DielineMetadataForm";
+import DielineChangesSaver from "../forms/dielineChagesSaver";
+import DielineSettingsForm from "../forms/DielineSettingsForm";
 import ModelLayers from "./layers/ModelLayers";
 import RulerLayers from "./layers/RulerLayers";
 import ShapeLayers from "./layers/ShapeLayers";
@@ -35,8 +42,10 @@ export type HandleLayerActoin = (
 
 const DielineLayer = ({
   dieline,
+  categories,
 }: {
-  dieline?: Dieline & { settings: DielineSettingsFromDB };
+  dieline: DielineType;
+  categories: Categories;
 }) => {
   const {
     specs: { models, shapes, rulers },
@@ -127,15 +136,31 @@ const DielineLayer = ({
 
   return (
     <div className="space-y-2">
-      <DielineMetadataForm dieline={dieline} />
+      <DielineChangesSaver dieline={dieline} />
+      <div className="flex items-center justify-between">
+        <div className="flex gap-2">
+          <Button onClick={undo} variant={"outline"}>
+            <Undo />
+          </Button>
+          <Button onClick={redo} variant={"outline"}>
+            <Redo />
+          </Button>
+        </div>
 
-      <div className="flex gap-2">
-        <Button onClick={undo} variant={"outline"}>
-          <Undo />
-        </Button>
-        <Button onClick={redo} variant={"outline"}>
-          <Redo />
-        </Button>
+        <Dialog>
+          <DialogTrigger>
+            <ActButton>
+              <Settings size={18} />
+            </ActButton>
+          </DialogTrigger>
+          <DialogContent
+            showCloseButton={false}
+            overlayClassname="backdrop-blur-xs bg-transparent"
+          >
+            <DialogTitle className="sr-only" />
+            <DielineSettingsForm categories={categories} dieline={dieline} />
+          </DialogContent>
+        </Dialog>
       </div>
 
       <Tabs defaultValue="layers">

@@ -70,50 +70,44 @@ model Customer {
 
 //! DIELINE --------------------------------
 model Dieline {
-  id            Int      @id @default(autoincrement())
-  title         String
-  slug          String   @unique
-  specification String   @db.MediumText
-  variable      String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  active        Boolean  @default(false)
+  id             Int      @id @default(autoincrement())
+  title          String
+  slug           String   @unique
+  specification  String   @db.MediumText
+  variable       String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  active         Boolean  @default(true)
+  materials      String
+  dimensionTypes String
+  minWidth       Float
+  minLength      Float
+  minHeight      Float
 
-  settings        DefaultSettings          @relation(fields: [settingsId], references: [id])
-  settingsId      Int                      @unique
   categoryByUsage DielineCategoryByUsage[]
   categoryByModel DielineCategoryByModel[]
   downloadHistory DownloadHistory[]
   favedDieline    FavedDieline[]
   savedDielines   SavedDieline[]
+  settings        DielineSettings?
 }
 
-model DefaultSettings {
-  id                 Int              @id @default(autoincrement())
-  bleed              Int
-  materials          String
-  dimensionTypes     String
-  defaultDimension   DefaultDimension @relation(fields: [defaultDimensionId], references: [id])
-  defaultDimensionId Int              @unique
-  minDimension       MinDimension     @relation(fields: [minDimensionId], references: [id])
-  minDimensionId     Int              @unique
-  dieline            Dieline?
-}
+model DielineSettings {
+  id            Int           @id @default(autoincrement())
+  bleed         Int
+  thickness     Float
+  material      String
+  dimensionType DimensionType
+  width         Float
+  length        Float
+  height        Float
 
-model DefaultDimension {
-  id       Int              @id @default(autoincrement())
-  width    Int
-  length   Int
-  height   Int
-  settings DefaultSettings?
-}
-
-model MinDimension {
-  id       Int              @id @default(autoincrement())
-  width    Int
-  length   Int
-  height   Int
-  settings DefaultSettings?
+  dieline           Dieline?         @relation(fields: [dielineId], references: [id], onDelete: Cascade)
+  dielineId         Int?             @unique
+  savedDieline      SavedDieline?    @relation(fields: [savedDielineId], references: [id], onDelete: Cascade)
+  savedDielineId    Int?             @unique
+  downloadHistory   DownloadHistory? @relation(fields: [downloadHistoryId], references: [id], onDelete: SetNull)
+  downloadHistoryId Int?             @unique
 }
 
 model DielineCategoryByUsage {
@@ -137,13 +131,13 @@ model SavedDieline {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  settings   Settings?
-  dieline    Dieline   @relation(fields: [dielineId], references: [id])
+  dieline    Dieline          @relation(fields: [dielineId], references: [id])
   dielineId  Int
-  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId     Int
-  customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  customer   Customer?        @relation(fields: [customerId], references: [id], onDelete: SetNull)
   customerId Int?
+  settings   DielineSettings?
 }
 
 model DownloadHistory {
@@ -154,10 +148,10 @@ model DownloadHistory {
   dielineId Int
   user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    Int
+  plan      Plan    @relation(fields: [planId], references: [id])
+  planId    Int
 
-  settings Settings?
-  plan     Plan      @relation(fields: [planId], references: [id])
-  planId   Int
+  settings DielineSettings?
 }
 
 model FavedDieline {
@@ -169,22 +163,6 @@ model FavedDieline {
   dielineId Int
 
   @@unique([userId, dielineId])
-}
-
-model Settings {
-  id            Int           @id @default(autoincrement())
-  bleed         Int
-  width         Float
-  height        Float
-  length        Float
-  thickness     Float
-  material      Material
-  dimensionType DimensionType
-
-  downloadHistory   DownloadHistory? @relation(fields: [downloadHistoryId], references: [id])
-  downloadHistoryId Int?             @unique
-  savedDielines     SavedDieline?    @relation(fields: [savedDielinesId], references: [id])
-  savedDielinesId   Int?             @unique
 }
 
 enum Material {

@@ -46,6 +46,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import SearchUsers from "../SearchUsers";
 
 interface TarrifType extends Tarrif {
   price: Price | null;
@@ -227,13 +228,16 @@ export function PaymentForm({
 
         <FormField
           control={form.control}
-          name="userId"
+          name={"userId"}
           render={({ field }) => (
-            <FormItem>
+            <FormItem className={`w-full`}>
               <FormLabel>User</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
+              <SearchUsers
+                field={field}
+                placeHolder="Search Users..."
+                customerId={payment?.userId}
+              />
+              <FormMessage />
             </FormItem>
           )}
         />

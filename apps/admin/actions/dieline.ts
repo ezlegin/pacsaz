@@ -1,20 +1,23 @@
 "use server";
 
-import { DielineMetadataFormType } from "@/components/forms/DielineMetadataForm";
-import { DielineSettingsFormType } from "@/lib/validationSchema/validatoinSchema";
+import {
+  DielineMetadataFormType,
+  DielineUpdateFormType,
+} from "@/lib/validationSchema/validatoinSchema";
 import { prisma } from "@repo/db";
+import { materials as allMats } from "@repo/store/data/dieline";
 
 export const createDieline = async (data: DielineMetadataFormType) => {
   const {
-    specification,
     slug,
     title,
-    variable,
     bleed,
-    defaultDimensions,
     dimensionTypes,
     materials,
+    defaultDimensions,
     minDimensions,
+    categoryByModel,
+    categoryByUsage,
   } = data;
 
   try {
@@ -23,29 +26,45 @@ export const createDieline = async (data: DielineMetadataFormType) => {
       return { error: "Slug Should Be Unique." };
     }
 
+    const defaultMaterial = materials.split(",")[0]!;
     await prisma.dieline.create({
       data: {
         slug,
         title,
-        specification,
-        variable,
+        minHeight: minDimensions.height,
+        minLength: minDimensions.length,
+        minWidth: minDimensions.width,
+        dimensionTypes,
+        materials,
+        specification: JSON.stringify({
+          shapes: {},
+          rulers: [],
+          models: [],
+        }),
+        variable: JSON.stringify([]),
+        categoryByModel: {
+          connect: categoryByModel.map((i) => ({ slug: i })),
+        },
+        categoryByUsage: {
+          connect: categoryByUsage.map((i) => ({ slug: i })),
+        },
         settings: {
           create: {
-            materials,
-            dimensionTypes,
+            material: materials.split(",")[0]!, //todo
+            dimensionType: "manufacture", // todo
+            thickness:
+              allMats.find((m) => m.value === defaultMaterial)?.thickness ??
+              0.5,
             bleed: +bleed,
-            defaultDimension: {
-              create: defaultDimensions,
-            },
-            minDimension: {
-              create: minDimensions,
-            },
+            height: defaultDimensions.height,
+            length: defaultDimensions.length,
+            width: defaultDimensions.width,
           },
         },
       },
     });
 
-    return { success: "Dieline Saved Successfully." };
+    return { success: "Dieline Saved Successfully.", slug };
   } catch (error) {
     console.error(error);
     return { error: (error as Error).message };
@@ -57,92 +76,90 @@ export const updateDieline = async (
   id: number,
 ) => {
   const {
-    specification,
     slug,
     title,
-    variable,
     bleed,
-    defaultDimensions,
     dimensionTypes,
     materials,
+    defaultDimensions,
     minDimensions,
+    categoryByModel,
+    categoryByUsage,
   } = data;
-  try {
-    const existingDieline = await prisma.dieline.findFirst({ where: { id } });
-    if (!existingDieline) throw new Error("Dieline Not Found.");
 
-    const existingDielineBySlug = await prisma.dieline.findFirst({
+  try {
+    const existingDieline = await prisma.dieline.findFirst({
       where: { slug, id: { not: id } },
     });
-    if (existingDielineBySlug)
-      throw new Error("There is another dieline with this slug.");
+    if (existingDieline) {
+      return { error: "Slug Should Be Unique." };
+    }
 
+    const defaultMaterial = materials.split(",")[0]!;
     await prisma.dieline.update({
       where: { id },
       data: {
+        minHeight: minDimensions.height,
+        minLength: minDimensions.length,
+        minWidth: minDimensions.width,
+        materials,
+        dimensionTypes,
+
         slug,
         title,
-        specification,
-        variable,
-        settings: {
-          update: {
-            materials,
-            dimensionTypes,
-            bleed: +bleed,
-            defaultDimension: {
-              create: defaultDimensions,
-            },
-            minDimension: {
-              create: minDimensions,
-            },
-          },
-        },
-      },
-    });
-
-    return { success: "Dieline Updated Successfully." };
-  } catch (error) {
-    console.error(error);
-    return { error: (error as Error).message };
-  }
-};
-
-export const updateDielineSettings = async (
-  data: DielineSettingsFormType,
-  id: number,
-) => {
-  const { slug, title, categoryByModel, active, categoryByUsage } = data;
-  try {
-    const existingDieline = await prisma.dieline.findFirst({ where: { id } });
-    if (!existingDieline) throw new Error("Dieline Not Found.");
-
-    const existingDielineBySlug = await prisma.dieline.findFirst({
-      where: { slug, id: { not: id } },
-    });
-    if (existingDielineBySlug)
-      throw new Error("There is another dieline with this slug.");
-
-    await prisma.dieline.update({
-      where: { id },
-      data: {
-        slug,
-        title,
-        active,
         categoryByModel: {
           set: categoryByModel.map((i) => ({ slug: i })),
         },
         categoryByUsage: {
           set: categoryByUsage.map((i) => ({ slug: i })),
         },
+        settings: {
+          update: {
+            material: materials.split(",")[0]!, // todo
+            dimensionType: "manufacture", // todo
+            thickness:
+              allMats.find((m) => m.value === defaultMaterial)?.thickness ??
+              0.5,
+            bleed: +bleed,
+            height: defaultDimensions.height,
+            length: defaultDimensions.length,
+            width: defaultDimensions.width,
+          },
+        },
       },
     });
 
-    return { success: "Dieline Updated Successfully." };
+    return { success: "Dieline Settings Updated Successfully.", slug };
   } catch (error) {
     console.error(error);
     return { error: (error as Error).message };
   }
 };
+
+export const saveDielineChanges = async (
+  data: DielineUpdateFormType,
+  id: number,
+) => {
+  const { specification, variable } = data;
+  try {
+    const existingDieline = await prisma.dieline.findFirst({ where: { id } });
+    if (!existingDieline) throw new Error("Dieline Not Found.");
+
+    await prisma.dieline.update({
+      where: { id },
+      data: {
+        specification,
+        variable,
+      },
+    });
+
+    return { success: "Dieline Saved Successfully." };
+  } catch (error) {
+    console.error(error);
+    return { error: (error as Error).message };
+  }
+};
+
 export const deleteDieline = async (id: number) => {
   try {
     const existingDieline = await prisma.dieline.findFirst({ where: { id } });
@@ -151,6 +168,22 @@ export const deleteDieline = async (id: number) => {
     await prisma.dieline.delete({ where: { id } });
 
     return { success: "Dieline Deleted Successfully." };
+  } catch (error) {
+    console.error(error);
+    return { error: (error as Error).message };
+  }
+};
+
+export const setDielineStatus = async (status: boolean, id: number) => {
+  try {
+    await prisma.dieline.update({
+      where: { id },
+      data: { active: status },
+    });
+
+    const statusLabel = status ? "Active" : "Inactive";
+
+    return { success: `Dieline Set ${statusLabel}` };
   } catch (error) {
     console.error(error);
     return { error: (error as Error).message };

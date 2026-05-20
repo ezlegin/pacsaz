@@ -6,7 +6,12 @@ import { prisma } from "@repo/db";
 
 export const createCustomer = async (data: CustomerFormType) => {
   try {
-    await prisma.customer.create({ data });
+    await prisma.customer.create({
+      data: {
+        ...data,
+        userId: 1, // todo
+      },
+    });
 
     return { success: "مشتری با مفوقیت ایجاد شد." };
   } catch (error) {

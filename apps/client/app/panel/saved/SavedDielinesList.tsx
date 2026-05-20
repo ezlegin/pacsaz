@@ -1,8 +1,10 @@
 import { deleteSavedDieline } from "@/actions/dieline";
 import DeleteButton from "@/components/DeleteButton";
 import SaveDielineForm from "@/components/forms/SaveDielineForm";
-import { Dieline, Plan, SavedDieline, Settings } from "@repo/db";
-import ActionButton from "@repo/ui/components/custom/ActionButton";
+import { Dieline, Plan, SavedDieline, DielineSettings } from "@repo/db";
+import ActionButton, {
+  ActButton,
+} from "@repo/ui/components/custom/ActionButton";
 import Card from "@repo/ui/components/custom/Card";
 import Table from "@repo/ui/components/custom/Table";
 import { DialogTitle } from "@repo/ui/components/dialog";
@@ -13,10 +15,11 @@ import {
   TooltipTrigger,
 } from "@repo/ui/components/tooltip";
 import { formatDate } from "date-fns";
-import { Pencil } from "lucide-react";
+import { Pencil, RotateCw } from "lucide-react";
+import Link from "next/link";
 
 interface SavedDielineType extends SavedDieline {
-  settings: Settings | null;
+  settings: DielineSettings | null;
   dieline: Dieline;
 }
 
@@ -38,22 +41,32 @@ const SavedDielinesList = ({
             <TooltipContent>{description}</TooltipContent>
           </Tooltip>
         </TableCell>
-        <TableCell className="text-center">{dieline.title}</TableCell>
-        <TableCell className="text-center">{settings?.width}</TableCell>
+        <TableCell className="text-center">{dieline?.title}</TableCell>
+        <TableCell className="text-center">
+          W{settings?.width} - L{settings?.length} - H{settings?.height}
+        </TableCell>
         <TableCell className="text-center">{settings?.material}</TableCell>
-        <TableCell className="text-center">{settings?.thickness}mm</TableCell>
-        <TableCell className="text-center">{settings?.bleed}mm</TableCell>
+        <TableCell className="text-center">{settings?.thickness}</TableCell>
+        <TableCell className="text-center">{settings?.bleed}</TableCell>
         <TableCell className="text-center">{settings?.dimensionType}</TableCell>
         <TableCell className="text-center">
           {formatDate(createdAt, "PP")}
         </TableCell>
-        <TableCell className="text-left space-x-1.5">
+        <TableCell className="flex gap-3 justify-end">
+          <Link
+            target="_blank"
+            href={`/dieline/${dieline?.slug}?settingsId=${settings?.id}`}
+          >
+            <ActButton>
+              <RotateCw size={14} />
+            </ActButton>
+          </Link>
           <ActionButton icon={Pencil}>
             <DialogTitle>ویرایش قالب</DialogTitle>
             <SaveDielineForm
               plan={plan}
               settings={settings!}
-              slug={dieline.slug}
+              slug={dieline?.slug}
               savedDieline={data}
             />
           </ActionButton>
@@ -80,10 +93,10 @@ export default SavedDielinesList;
 const columns = [
   { label: "عنوان" },
   { label: "قالب" },
-  { label: "ابعاد" },
+  { label: "ابعاد (mm)" },
   { label: "متریال" },
-  { label: "ضخامت" },
-  { label: "بلید" },
+  { label: "ضخامت (mm)" },
+  { label: "بلید (mm)" },
   { label: "نوع ابعاد" },
   { label: "تاریخ" },
   { label: "ویرایش" },

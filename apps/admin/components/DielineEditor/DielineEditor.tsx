@@ -1,11 +1,8 @@
 "use client";
 
+import { Categories, DielineType } from "@/app/(PANEL)/dielines/DielinesList";
 import DielineLayer from "@/components/DielineEditor/DielineLayer";
-import { Dieline } from "@repo/db";
-import {
-  DielineSettingsFromDB,
-  useDielineGenerator,
-} from "@repo/dieline-core/hooks/useDielineGenerator";
+import { useDielineGenerator } from "@repo/dieline-core/hooks/useDielineGenerator";
 import { useDielineSpecStore } from "@repo/store/editor/dielineSpec.store";
 import {
   Tabs,
@@ -27,16 +24,22 @@ export type EditorComponentType = "create" | "update";
 
 const DielineEditor = ({
   dieline,
+  categories,
 }: {
-  dieline?: Dieline & { settings: DielineSettingsFromDB };
+  dieline: DielineType;
+  categories: Categories;
 }) => {
   const { specs, setSpecs } = useDielineSpecStore();
   const { isRendering } = useDielineGenerator(
-    { specification: specs, settings: dieline?.settings },
+    {
+      ...dieline,
+      specification: specs,
+    },
     "editor",
   );
 
   useEffect(() => {
+    console.log("dieline.specification", dieline.specification);
     if (dieline) {
       setSpecs(JSON.parse(dieline.specification));
     }
@@ -46,7 +49,7 @@ const DielineEditor = ({
     <div className="h-screen overflow-hidden">
       <div className="h-full grid grid-cols-[280px_1fr_280px]">
         <div className="bg-muted border-r p-3 z-10">
-          <DielineLayer dieline={dieline} />
+          <DielineLayer dieline={dieline} categories={categories} />
         </div>
 
         <div className="relative bg-gray-50">

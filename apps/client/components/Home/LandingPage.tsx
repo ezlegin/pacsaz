@@ -1,19 +1,12 @@
+import { DielineType } from "@/data/types";
 import { Badge } from "@repo/ui/components/badge";
 import { Button } from "@repo/ui/components/button";
 import { ChevronDown, ChevronLeft, Zap } from "lucide-react";
 import Link from "next/link";
 import SquarePattern from "../SquarePattern";
 import HomeDieline from "./HomeDieline";
-import { prisma } from "@repo/db";
 
-const LandingPage = async () => {
-  const dieline = await prisma.dieline.findFirst({
-    where: { slug: "tuck-end" },
-    include: {
-      settings: { include: { defaultDimension: true, minDimension: true } },
-    },
-  });
-
+const LandingPage = async ({ dieline }: { dieline: DielineType | null }) => {
   return (
     <div className="space-y-28">
       <SquarePattern />

@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  createSaveDieline,
-  Settings,
-  updateSavedDieline,
-} from "@/actions/dieline";
+import { createSaveDieline, updateSavedDieline } from "@/actions/dieline";
 import { handleRes } from "@/lib/handleRes";
 import {
   saveDielineFormSchema,
@@ -12,7 +8,7 @@ import {
 } from "@/lib/validatoinSchema";
 import Diamond from "@/public/icons/Diamond";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plan, SavedDieline } from "@repo/db";
+import { DielineSettings, Plan, SavedDieline } from "@repo/db";
 import { useLoading } from "@repo/lib/utils/useLoading";
 import { Badge } from "@repo/ui/components/badge";
 import { Button } from "@repo/ui/components/button";
@@ -28,6 +24,7 @@ import { Separator } from "@repo/ui/components/separator";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import SearchCustomers from "../SearchCustomers";
+import { MaterialKey } from "@repo/store/data/types";
 
 const SaveDielineForm = ({
   settings,
@@ -37,7 +34,7 @@ const SaveDielineForm = ({
 }: {
   slug: string;
   savedDieline?: SavedDieline;
-  settings: Settings;
+  settings: DielineSettings;
   plan: Plan;
 }) => {
   const router = useRouter();
@@ -55,7 +52,7 @@ const SaveDielineForm = ({
       bleed,
       height,
       length,
-      material,
+      material: settings.material as MaterialKey,
       thickness,
       width,
       dimensionType,

@@ -1,10 +1,9 @@
 "use client";
 
 import { DIMENSIONS } from "@/data/consts";
+import { DielineType } from "@/data/types";
 import { tuckEnd } from "@/public";
-import { Dieline } from "@repo/db";
 import { useDielineGenerator } from "@repo/dieline-core/hooks/useDielineGenerator";
-import { Dimension } from "@repo/store/data/types";
 import { useDeveloperToolsStore } from "@repo/store/dieline/developerTools.store";
 import { Card as ShadCard } from "@repo/ui/components/card";
 import { cn } from "@repo/ui/lib/utils";
@@ -20,19 +19,7 @@ const SVGPreview = dynamic(
   },
 );
 
-type DielineSettings = {
-  bleed: number;
-  defaultDimension: Dimension;
-  minDimension: Dimension;
-  materials: string;
-  dimensionTypes: string;
-};
-
-const HomeDieline = ({
-  dieline,
-}: {
-  dieline: (Dieline & { settings: DielineSettings }) | null;
-}) => {
+const HomeDieline = ({ dieline }: { dieline: DielineType | null }) => {
   const containerClass = "h-175 max-w-225 min-w-225";
   if (!dieline)
     return (
@@ -47,12 +34,16 @@ const HomeDieline = ({
       </div>
     );
 
-  dieline.settings.defaultDimension.width = 80;
-  dieline.settings.defaultDimension.length = 130;
-  dieline.settings.defaultDimension.height = 40;
+  dieline.settings!.width = 80;
+  dieline.settings!.length = 130;
+  dieline.settings!.height = 40;
   const specs = JSON.parse(dieline.specification);
   const { isRendering } = useDielineGenerator(
-    { specification: specs, settings: dieline.settings },
+    {
+      ...dieline,
+      specification: specs,
+      settings: dieline.settings!,
+    },
     "client",
   );
   const { setDeveloperTools: setDeveloperToolsCTX } = useDeveloperToolsStore();
@@ -82,7 +73,7 @@ const HomeDieline = ({
           <DimensionInput
             key={key}
             label={label}
-            min={dieline.settings.minDimension[key]}
+            min={dieline.settings![key]}
             dimKey={key}
             isRendering={isRendering}
           />

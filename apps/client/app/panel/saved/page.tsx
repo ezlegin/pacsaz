@@ -7,14 +7,16 @@ import { getUserPlan } from "@/data/plan";
 
 const page = async () => {
   const savedDielines = await prisma.savedDieline.findMany({
-    where: { userId: 1 },
+    where: { userId: 1 }, //todo
     include: { settings: true, dieline: true },
+    orderBy: { id: "desc" },
   });
   const plan = await getUserPlan(1);
 
   if (!plan || !plan.isPremium)
     return <div>فقط در اشتراک حرفه ای و سازمانی</div>;
-  // todo: sorting
+  // todo: search
+
   return (
     <div className="space-y-3">
       <div className="flex">

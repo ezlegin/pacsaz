@@ -109,6 +109,26 @@ export const dielineSettingsFormSchema = z.object({
 });
 export type DielineSettingsFormType = z.infer<typeof dielineSettingsFormSchema>;
 
+const dimension = z.object({
+  width: z.number(),
+  length: z.number(),
+  height: z.number(),
+});
+
+export const dielineMetadataFormSchema = z.object({
+  title: z.string().min(1),
+  slug: z.string().min(1),
+  bleed: z.number(),
+  defaultDimensions: dimension,
+  minDimensions: dimension,
+  dimensionTypes: z.string(),
+  materials: z.string(),
+  categoryByModel: z.array(z.string()),
+  categoryByUsage: z.array(z.string()),
+});
+
+export type DielineMetadataFormType = z.infer<typeof dielineMetadataFormSchema>;
+
 export const couponFormSchema = z.object({
   code: z.string().min(1),
   amount: z.string().min(1),
@@ -118,3 +138,9 @@ export const couponFormSchema = z.object({
   plans: z.array(z.string()),
 });
 export type CouponFormType = z.infer<typeof couponFormSchema>;
+
+export const dielineUpdateFormSchema = z.object({
+  specification: z.string().min(1),
+  variable: z.string(),
+});
+export type DielineUpdateFormType = z.infer<typeof dielineUpdateFormSchema>;
