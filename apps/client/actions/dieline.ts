@@ -32,28 +32,30 @@ export const createDownloadHistory = async (
     const existingDieline = await prisma.dieline.findFirst({ where: { slug } });
     if (!existingDieline) throw new Error("Dieline Not Found.");
 
-    await prisma.downloadHistory.create({
-      data: {
-        userId: 1, //todo
-        dielineId: existingDieline.id,
-        planId,
-        settings: {
-          create: {
-            height,
-            length,
-            width,
-            bleed,
-            dimensionType,
-            material,
-            thickness,
+    await prisma.$transaction(async (ts) => {
+      await ts.downloadHistory.create({
+        data: {
+          userId: 1, //todo
+          dielineId: existingDieline.id,
+          planId,
+          settings: {
+            create: {
+              height,
+              length,
+              width,
+              bleed,
+              dimensionType,
+              material,
+              thickness,
+            },
           },
         },
-      },
-    });
+      });
 
-    await prisma.plan.update({
-      where: { id: planId },
-      data: { downloaded: { increment: 1 } },
+      await ts.plan.update({
+        where: { id: planId },
+        data: { downloaded: { increment: 1 } },
+      });
     });
 
     return { success: true };

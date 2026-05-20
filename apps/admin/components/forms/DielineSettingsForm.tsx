@@ -53,15 +53,14 @@ const DielineSettingsForm = ({
         length: settings?.length ?? 160,
       },
       minDimensions: {
-        width: settings?.minWidth ?? 30,
-        height: settings?.minHeight ?? 30,
-        length: settings?.length ?? 30,
+        width: dieline?.minWidth ?? 30,
+        height: dieline?.minHeight ?? 30,
+        length: dieline?.minLength ?? 30,
       },
       title: dieline?.title ?? "",
       slug: dieline?.slug ?? "",
-      dimensionTypes: settings?.dimensionTypes ?? "manufacture,inner,outer",
-      materials:
-        settings?.materials ?? "fFlute,glossyCardboard,eFlute,artPaper",
+      dimensionTypes: dieline?.dimensionTypes ?? "manufacture,inner,outer",
+      materials: dieline?.materials ?? "fFlute,glossyCardboard,eFlute,artPaper",
       categoryByModel:
         dieline && dieline.categoryByModel.length > 0
           ? dieline.categoryByModel.map((i) => i.slug)
