@@ -35,8 +35,9 @@ export const otpFormSchema = z.object({
 export type OTPFormType = z.infer<typeof otpFormSchema>;
 
 export const onboardingStep2Schema = z.object({
-  fullName: z.string().min(2).trim(),
-  email: z.string().email().trim(),
+  firstName: z.string().min(2).trim(),
+  lastName: z.string().min(2).trim().optional(),
+  email: z.string().email({ message: "ایمیل نامعتبر است." }).trim(),
 });
 export type OnboardingStep2Type = z.infer<typeof onboardingStep2Schema>;
 

@@ -52,7 +52,7 @@ const SavedDielinesList = ({
         <TableCell className="text-center">
           {formatDate(createdAt, "PP")}
         </TableCell>
-        <TableCell className="flex gap-3 justify-end">
+        <TableCell className="flex justify-center">
           <Link
             target="_blank"
             href={`/dieline/${dieline?.slug}?settingsId=${settings?.id}`}
@@ -61,6 +61,8 @@ const SavedDielinesList = ({
               <RotateCw size={14} />
             </ActButton>
           </Link>
+        </TableCell>
+        <TableCell className="text-left">
           <ActionButton icon={Pencil}>
             <DialogTitle>ویرایش قالب</DialogTitle>
             <SaveDielineForm
@@ -99,5 +101,6 @@ const columns = [
   { label: "بلید (mm)" },
   { label: "نوع ابعاد" },
   { label: "تاریخ" },
+  { label: "باز تولید" },
   { label: "ویرایش" },
 ];

@@ -21,7 +21,8 @@ export type MostUsage =
 
 export type PersonaData = {
   email: string;
-  fullName: string;
+  firstName: string;
+  lastName: string | undefined;
 };
 
 const Onboarding = () => {

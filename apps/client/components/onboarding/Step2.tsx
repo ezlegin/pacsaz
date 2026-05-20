@@ -9,6 +9,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@repo/ui/components/form";
 import { Input } from "@repo/ui/components/input";
 import { useEffect } from "react";
@@ -26,38 +27,39 @@ const Step2 = ({
     resolver: zodResolver(onboardingStep2Schema),
     defaultValues: {
       email: "",
-      fullName: "",
+      firstName: "",
+      lastName: isIndividual ? "" : undefined,
     },
+    mode: "onChange",
   });
 
   const email = form.watch("email");
-  const fullName = form.watch("fullName");
+  const firstName = form.watch("firstName");
+  const lastName = form.watch("lastName");
   const isValid = form.formState.isValid;
 
   useEffect(() => {
     if (isValid) {
-      setPersonaData({ email, fullName });
+      setPersonaData({ email, firstName, lastName });
     }
-  }, [email, fullName, isValid]);
+  }, [email, firstName, lastName, isValid]);
 
   return (
     <Form {...form}>
-      <form className="flex gap-10 w-full">
+      <form className="space-y-4 w-full">
         <FormField
           control={form.control}
-          name="fullName"
+          name="firstName"
           render={({ field }) => (
             <FormItem className="w-full">
-              <FormLabel>
-                {isIndividual ? "نام و نام خانوادگی" : "نام سازمان/تیم"}
-              </FormLabel>
+              <FormLabel>{isIndividual ? "نام" : "نام سازمان/تیم"}</FormLabel>
               <FormControl>
                 <div className="relative">
                   <Input
                     {...field}
                     onChange={(e) =>
                       field.onChange(
-                        e.target.value.replace(/[^a-zA-Zآ-ی\s]/g, "")
+                        e.target.value.replace(/[^a-zA-Zآ-ی\s]/g, ""),
                       )
                     }
                   />
@@ -66,6 +68,30 @@ const Step2 = ({
             </FormItem>
           )}
         />
+
+        {isIndividual && (
+          <FormField
+            control={form.control}
+            name="lastName"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel>نام خانوادگی</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <Input
+                      {...field}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value.replace(/[^a-zA-Zآ-ی\s]/g, ""),
+                        )
+                      }
+                    />
+                  </div>
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        )}
 
         <FormField
           control={form.control}
@@ -78,6 +104,7 @@ const Step2 = ({
                   <Input {...field} />
                 </div>
               </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />

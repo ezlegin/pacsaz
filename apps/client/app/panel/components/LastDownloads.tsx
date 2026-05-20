@@ -1,13 +1,15 @@
-import { Dieline, DownloadHistory, Settings } from "@repo/db";
+import { CustomDielineSettings, Dieline, DownloadHistory } from "@repo/db";
+import { ActButton } from "@repo/ui/components/custom/ActionButton";
 import Card from "@repo/ui/components/custom/Card";
 import Table from "@repo/ui/components/custom/Table";
 import { TableCell, TableRow } from "@repo/ui/components/table";
 import { formatDate } from "date-fns";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, RotateCw } from "lucide-react";
+import Link from "next/link";
 
 interface RecordType extends DownloadHistory {
   dieline: Dieline;
-  settings: Settings | null;
+  settings: CustomDielineSettings | null;
 }
 
 const LastDownloads = ({ data }: { data: RecordType[] }) => {
@@ -37,6 +39,16 @@ const LastDownloads = ({ data }: { data: RecordType[] }) => {
         <TableCell className="text-left">
           {formatDate(downloadedAt, "PP")}
         </TableCell>
+        <TableCell className="flex justify-end">
+          <Link
+            target="_blank"
+            href={`/dieline/${dieline?.slug}?settingsId=${settings?.id}`}
+          >
+            <ActButton>
+              <RotateCw size={14} />
+            </ActButton>
+          </Link>
+        </TableCell>
       </TableRow>
     );
   };
@@ -63,4 +75,5 @@ const columns = [
   { label: "بلید", className: "" },
   { label: "نوع ابعاد", className: "" },
   { label: "تاریخ", className: "" },
+  { label: "باز تولید", className: "" },
 ];
