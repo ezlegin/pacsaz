@@ -1,7 +1,7 @@
 import { deleteSavedDieline } from "@/actions/dieline";
 import DeleteButton from "@/components/DeleteButton";
 import SaveDielineForm from "@/components/forms/SaveDielineForm";
-import { Dieline, Plan, SavedDieline, DielineSettings } from "@repo/db";
+import { CustomDielineSettings, Dieline, Plan, SavedDieline } from "@repo/db";
 import ActionButton, {
   ActButton,
 } from "@repo/ui/components/custom/ActionButton";
@@ -19,7 +19,7 @@ import { Pencil, RotateCw } from "lucide-react";
 import Link from "next/link";
 
 interface SavedDielineType extends SavedDieline {
-  settings: DielineSettings | null;
+  settings: CustomDielineSettings | null;
   dieline: Dieline;
 }
 

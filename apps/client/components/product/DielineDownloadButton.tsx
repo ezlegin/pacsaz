@@ -28,6 +28,7 @@ const DielineDownloadButton = ({ slug, isRendering, plan }: Props) => {
   const [openPopup, setOpenPopup] = useState<"login" | "save" | null>(null);
 
   const setts = {
+    id: 0,
     width: settings.dimension.raw.width,
     length: settings.dimension.raw.length,
     height: settings.dimension.raw.height,

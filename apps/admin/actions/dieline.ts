@@ -50,7 +50,7 @@ export const createDieline = async (data: DielineMetadataFormType) => {
         },
         settings: {
           create: {
-            material: materials.split(",")[0]!, //todo
+            material: materials.split(",")[0]!, // todo
             dimensionType: "manufacture", // todo
             thickness:
               allMats.find((m) => m.value === defaultMaterial)?.thickness ??

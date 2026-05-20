@@ -1,5 +1,5 @@
 import DielineGenerator from "@/components/product/DielineGenerator";
-import { DielineSettings, prisma } from "@repo/db";
+import { CustomDielineSettings, prisma } from "@repo/db";
 import { notFound } from "next/navigation";
 
 interface Props {
@@ -17,14 +17,14 @@ export default async function DielinePage({ params, searchParams }: Props) {
     },
   });
 
-  let settings: DielineSettings | null = null;
+  let customSettings: CustomDielineSettings | null = null;
   if (settingsId) {
-    settings = await prisma.dielineSettings.findFirst({
+    customSettings = await prisma.customDielineSettings.findFirst({
       where: { id: +settingsId },
     });
   }
 
   if (!dieline) notFound();
 
-  return <DielineGenerator dieline={dieline} customSettings={settings} />;
+  return <DielineGenerator dieline={dieline} customSettings={customSettings} />;
 }

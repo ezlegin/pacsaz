@@ -89,7 +89,8 @@ model Dieline {
   downloadHistory DownloadHistory[]
   favedDieline    FavedDieline[]
   savedDielines   SavedDieline[]
-  settings        DielineSettings?
+  settings        DielineSettings          @relation(fields: [settingsId], references: [id])
+  settingsId      Int                      @unique
 }
 
 model DielineSettings {
@@ -97,13 +98,24 @@ model DielineSettings {
   bleed         Int
   thickness     Float
   material      String
-  dimensionType DimensionType
   width         Float
   length        Float
   height        Float
+  dimensionType DimensionType
 
-  dieline           Dieline?         @relation(fields: [dielineId], references: [id], onDelete: Cascade)
-  dielineId         Int?             @unique
+  dieline Dieline?
+}
+
+model CustomDielineSettings {
+  id            Int           @id @default(autoincrement())
+  bleed         Int
+  thickness     Float
+  material      String
+  width         Float
+  length        Float
+  height        Float
+  dimensionType DimensionType
+
   savedDieline      SavedDieline?    @relation(fields: [savedDielineId], references: [id], onDelete: Cascade)
   savedDielineId    Int?             @unique
   downloadHistory   DownloadHistory? @relation(fields: [downloadHistoryId], references: [id], onDelete: SetNull)
@@ -131,13 +143,13 @@ model SavedDieline {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  dieline    Dieline          @relation(fields: [dielineId], references: [id])
+  dieline    Dieline                @relation(fields: [dielineId], references: [id])
   dielineId  Int
-  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user       User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId     Int
-  customer   Customer?        @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  customer   Customer?              @relation(fields: [customerId], references: [id], onDelete: SetNull)
   customerId Int?
-  settings   DielineSettings?
+  settings   CustomDielineSettings?
 }
 
 model DownloadHistory {
@@ -151,7 +163,7 @@ model DownloadHistory {
   plan      Plan    @relation(fields: [planId], references: [id])
   planId    Int
 
-  settings DielineSettings?
+  settings CustomDielineSettings?
 }
 
 model FavedDieline {

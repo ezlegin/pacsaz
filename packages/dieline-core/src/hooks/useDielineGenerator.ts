@@ -1,5 +1,5 @@
 import { materials } from "@repo/store/data/dieline";
-import { DimensionType, MaterialKey } from "@repo/store/data/types";
+import { DimensionType } from "@repo/store/data/types";
 import { useDeveloperToolsStore } from "@repo/store/dieline/developerTools.store";
 import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
 import { useSVGStore } from "@repo/store/dieline/svg.store";
@@ -52,8 +52,12 @@ export function useDielineGenerator(
 
   // set defaults
   useEffect(() => {
+    const dims = {
+      width: setts.width,
+      length: setts.length,
+      height: setts.height,
+    };
     const dimensionTypes = dieline.dimensionTypes.split(",") as DimensionType[];
-
     const mats = dieline.materials
       .split(",")
       .map((i) => materials.find((m) => m.value === i))
@@ -63,11 +67,8 @@ export function useDielineGenerator(
     setDefaultSettings({
       bleed: setts.bleed,
       dimension: {
-        raw: { width: setts.width, length: setts.length, height: setts.height },
-        resolved: resolveDimensions(
-          { width: setts.width, length: setts.length, height: setts.height },
-          offsets,
-        ),
+        raw: dims,
+        resolved: resolveDimensions(dims, offsets),
       },
       dimensionTypes: dimensionTypes,
       minDimension: {
@@ -77,7 +78,7 @@ export function useDielineGenerator(
       },
       material: material,
       materials: mats,
-      thickness: material.thickness,
+      thickness: setts.thickness,
 
       dimensionType: setts.dimensionType as DimensionType,
       format: "pdf",

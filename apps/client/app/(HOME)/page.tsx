@@ -14,9 +14,7 @@ const page = async () => {
   const features = await prisma.tarrifFeature.findMany();
   const dieline = await prisma.dieline.findFirst({
     where: { slug: "tuck-end" },
-    include: {
-      settings: true,
-    },
+    include: { settings: true },
   });
 
   return (

@@ -5,7 +5,7 @@ import { DielineType } from "@/data/types";
 import { tuckEnd } from "@/public";
 import { useDielineGenerator } from "@repo/dieline-core/hooks/useDielineGenerator";
 import { useDeveloperToolsStore } from "@repo/store/dieline/developerTools.store";
-import { Card as ShadCard } from "@repo/ui/components/card";
+import { Card } from "@repo/ui/components/card";
 import { cn } from "@repo/ui/lib/utils";
 import dynamic from "next/dynamic";
 import Image from "next/image";
@@ -34,9 +34,9 @@ const HomeDieline = ({ dieline }: { dieline: DielineType | null }) => {
       </div>
     );
 
-  dieline.settings!.width = 80;
-  dieline.settings!.length = 130;
-  dieline.settings!.height = 40;
+  dieline.settings.width = 80;
+  dieline.settings.length = 130;
+  dieline.settings.height = 40;
   const specs = JSON.parse(dieline.specification);
   const { isRendering } = useDielineGenerator(
     {
@@ -68,17 +68,17 @@ const HomeDieline = ({ dieline }: { dieline: DielineType | null }) => {
         />
       </div>
 
-      <ShadCard className="gap-3 max-w-40 absolute right-0 bottom-0 bg-background p-3">
+      <Card className="gap-3 max-w-40 absolute right-0 bottom-0 bg-background p-3">
         {DIMENSIONS.map(({ key, label }) => (
           <DimensionInput
             key={key}
             label={label}
-            min={dieline.settings![key]}
+            min={dieline.settings[key]}
             dimKey={key}
             isRendering={isRendering}
           />
         ))}
-      </ShadCard>
+      </Card>
     </div>
   );
 };

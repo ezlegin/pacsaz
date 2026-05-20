@@ -10,6 +10,7 @@ import Diamond from "@/public/icons/Diamond";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DielineSettings, Plan, SavedDieline } from "@repo/db";
 import { useLoading } from "@repo/lib/utils/useLoading";
+import { MaterialKey } from "@repo/store/data/types";
 import { Badge } from "@repo/ui/components/badge";
 import { Button } from "@repo/ui/components/button";
 import {
@@ -24,7 +25,6 @@ import { Separator } from "@repo/ui/components/separator";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import SearchCustomers from "../SearchCustomers";
-import { MaterialKey } from "@repo/store/data/types";
 
 const SaveDielineForm = ({
   settings,
@@ -39,7 +39,7 @@ const SaveDielineForm = ({
 }) => {
   const router = useRouter();
   const isUpdateType = !!savedDieline;
-  const { bleed, dimensionType, height, length, material, thickness, width } =
+  const { bleed, dimensionType, material, thickness, height, length, width } =
     settings;
   const { isLoading, startLoading, stopLoading } = useLoading();
 

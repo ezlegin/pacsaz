@@ -39,11 +39,11 @@ export const createDownloadHistory = async (
         planId,
         settings: {
           create: {
-            bleed,
-            dimensionType,
             height,
             length,
             width,
+            bleed,
+            dimensionType,
             material,
             thickness,
           },
@@ -100,13 +100,13 @@ export const createSaveDieline = async (
         customerId: customerId ? +customerId : null,
         settings: {
           create: {
-            bleed,
-            dimensionType,
             height,
             length,
+            width,
+            bleed,
+            dimensionType,
             material,
             thickness,
-            width,
           },
         },
       },
@@ -150,13 +150,13 @@ export const updateSavedDieline = async (
         settings: {
           update: {
             data: {
-              bleed,
-              dimensionType,
+              width,
               height,
               length,
+              bleed,
+              dimensionType,
               material,
               thickness,
-              width,
             },
           },
         },
