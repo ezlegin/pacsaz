@@ -18,7 +18,7 @@ export const createPayment = async (data: PaymentFormType) => {
   } = data;
 
   const title = mapPlanTitle(planKey);
-  const endsAt = mapPlanDataRange(from, period);
+  const endsAt = mapPlanDateRange(from, period);
   const level = mapPlanLevel(planKey);
 
   try {
@@ -38,6 +38,12 @@ export const createPayment = async (data: PaymentFormType) => {
         total,
         totalDiscount: discountCodeAmount,
         method: "admin",
+        period,
+        tarrif: {
+          connect: {
+            id: tarrif.id,
+          },
+        },
         user: {
           connect: { id: +userId }, //todo
         },
@@ -92,7 +98,7 @@ export const updatePayment = async (data: PaymentFormType, id: number) => {
   } = data;
 
   const title = mapPlanTitle(planKey);
-  const endsAt = mapPlanDataRange(from, period);
+  const endsAt = mapPlanDateRange(from, period);
   const level = mapPlanLevel(planKey);
 
   try {
@@ -155,7 +161,7 @@ export const deletePayment = async (id: number) => {
         where: { id },
         include: { plan: true },
       });
-      await ts.plan.delete({ where: { id: deletedPayment.plan.id } });
+      await ts.plan.delete({ where: { id: deletedPayment.plan?.id } });
     });
 
     return { success: "Payment Deleted Successfully." };
@@ -172,12 +178,12 @@ const mapPlanTitle = (planKey: PlanKey) => {
       return "استاندارد";
     case "pro":
       return "حرفه‌ای";
-    default:
+    case "organization":
       return "سازمانی";
   }
 };
 
-const mapPlanDataRange = (from: Date, period: PlanPeriod) => {
+const mapPlanDateRange = (from: Date, period: PlanPeriod) => {
   switch (period) {
     case "monthly":
       return addMonths(from, 1);

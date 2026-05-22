@@ -135,12 +135,12 @@ export const verifyPayment = async (
     });
 
     const tarrif = payment.tarrif;
-    const currentPlan = await prisma.plan.findMany({
+    const previusActivePlans = await prisma.plan.findMany({
       where: { status: "active" },
     });
 
     await prisma.plan.updateMany({
-      where: { OR: currentPlan.map((p) => ({ id: p.id })) },
+      where: { OR: previusActivePlans.map((p) => ({ id: p.id })) },
       data: {
         status: "inActive",
       },
@@ -151,17 +151,13 @@ export const verifyPayment = async (
         key: tarrif.key,
         title: mapPlanTitle(tarrif.key),
         level: mapPlanLevel(tarrif.key),
-        type: currentPlan.length > 0 ? "renewal" : "new",
+        type: previusActivePlans.length > 0 ? "renewal" : "new",
         period: payment.period,
         fairDownload: tarrif.fairDownload[payment.period],
         endsAt: calculatePlanEndDate(payment.period),
         userId: 1,
         isPremium: tarrif.level > 1,
-        payment: {
-          connect: {
-            id: payment.id,
-          },
-        },
+        paymentId: payment.id,
       },
     });
 

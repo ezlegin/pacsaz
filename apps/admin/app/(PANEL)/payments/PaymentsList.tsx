@@ -18,7 +18,7 @@ import { Info, Pencil } from "lucide-react";
 
 export interface PaymentType extends Payment {
   user: User;
-  plan: Plan;
+  plan: Plan | null;
   coupon: (Coupon & { tarrif: Tarrif[] }) | null;
 }
 

@@ -214,8 +214,7 @@ model Payment {
   userId   Int
   tarrif   Tarrif  @relation(fields: [tarrifId], references: [id])
   tarrifId Int
-  plan     Plan?   @relation(fields: [planId], references: [id], onDelete: Restrict)
-  planId   Int?    @unique
+  plan     Plan?
   coupon   Coupon? @relation(fields: [couponId], references: [id], onDelete: SetNull)
   couponId Int?
 }
@@ -278,9 +277,10 @@ model Plan {
   status        PlanStatus        @default(active)
   histories     DownloadHistory[]
 
-  payment Payment?
-  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId  Int
+  payment   Payment? @relation(fields: [paymentId], references: [id], onDelete: Restrict)
+  paymentId Int?     @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
 }
 
 enum PlanStatus {

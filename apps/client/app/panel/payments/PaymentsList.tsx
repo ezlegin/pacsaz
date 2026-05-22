@@ -5,9 +5,7 @@ import { Payment, Plan } from "@repo/db";
 import { PlanKey, PlanPeriod } from "@repo/lib/data/plans";
 import { formatPrice } from "@repo/lib/utils/formatPrice";
 import Card from "@repo/ui/components/custom/Card";
-import PaymentStatus, {
-  PaymentStatusType,
-} from "@repo/ui/components/custom/PaymentStatus";
+import PaymentStatus from "@repo/ui/components/custom/PaymentStatus";
 import Table from "@repo/ui/components/custom/Table";
 import { TableCell, TableRow } from "@repo/ui/components/table";
 import { formatDate } from "date-fns";
@@ -37,8 +35,8 @@ function PaymentsList({ data }: { data: PaymentType[] }) {
         </TableCell>
         <TableCell className="text-center">
           <PaymentStatus
-            label={mapPaymentStatusLable(payment.status as PaymentStatusType)}
-            status={payment.status as PaymentStatusType}
+            label={mapPaymentStatusLable(payment.status)}
+            status={payment.status}
           />
         </TableCell>
         <TableCell className="text-center">

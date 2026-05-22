@@ -28,15 +28,15 @@ const LastDownloads = ({ data }: { data: RecordType[] }) => {
         <TableCell className="text-center">{`${settings?.length}x${settings?.width}x${settings?.height}mm`}</TableCell>
         <TableCell className="text-center">{settings?.material}</TableCell>
         <TableCell className="text-center" dir="ltr">
-          {settings?.thickness} mm
+          {settings?.thickness}
         </TableCell>
         <TableCell className="text-center" dir="ltr">
-          {settings?.bleed} mm
+          {settings?.bleed}
         </TableCell>
         <TableCell className="text-center" dir="ltr">
           {settings?.dimensionType}
         </TableCell>
-        <TableCell className="text-left">
+        <TableCell className="text-center">
           {formatDate(downloadedAt, "PP")}
         </TableCell>
         <TableCell className="flex justify-end">
@@ -71,8 +71,8 @@ const columns = [
   { label: "قالب", className: "" },
   { label: "ابعاد", className: "" },
   { label: "متریال", className: "" },
-  { label: "ضخامت", className: "" },
-  { label: "بلید", className: "" },
+  { label: "ضخامت (mm)", className: "" },
+  { label: "بلید (mm)", className: "" },
   { label: "نوع ابعاد", className: "" },
   { label: "تاریخ", className: "" },
   { label: "باز تولید", className: "" },

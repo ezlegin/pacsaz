@@ -1,6 +1,11 @@
 import { Badge } from "@repo/ui/components/badge";
 
-export type PaymentStatusType = "success" | "failed" | "canceled" | "pending";
+export type PaymentStatusType =
+  | "success"
+  | "failed"
+  | "canceled"
+  | "pending"
+  | "could_not_initiate";
 
 const PaymentStatus = ({
   label,
