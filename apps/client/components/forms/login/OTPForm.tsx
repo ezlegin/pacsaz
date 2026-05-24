@@ -1,5 +1,8 @@
 "use client";
 
+import { authenticator } from "@/actions/login/authenticator";
+import { verifyOtp } from "@/actions/login/otp";
+import { handleRes } from "@/lib/handleRes";
 import { otpFormSchema, OTPFormType } from "@/lib/validatoinSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@repo/ui/components/button";
@@ -14,9 +17,11 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@repo/ui/components/input-otp";
-import { LoginStep } from "./LoginForm";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { LoginStep } from "./LoginForm";
 
 interface Props {
   setLoginStep: (val: LoginStep) => void;
@@ -24,6 +29,9 @@ interface Props {
 }
 
 export function OTPForm({ setLoginStep, phoneNumber }: Props) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl");
   const form = useForm<OTPFormType>({
     resolver: zodResolver(otpFormSchema),
     defaultValues: {
@@ -31,9 +39,22 @@ export function OTPForm({ setLoginStep, phoneNumber }: Props) {
     },
   });
 
-  function onSubmit(values: OTPFormType) {
-    console.log(values);
-  }
+  const onSubmit = async ({ otp }: OTPFormType) => {
+    const otpRes = await verifyOtp(phoneNumber, otp);
+
+    if (otpRes.error) {
+      toast.error(otpRes.error);
+      form.setValue("otp", "");
+      return;
+    }
+
+    if (otpRes.success) {
+      const authRes = await authenticator(phoneNumber);
+      handleRes(authRes, {
+        onSuccess: () => router.push(callbackUrl ?? "/panel"),
+      });
+    }
+  };
 
   const otpValue = form.watch("otp");
   useEffect(() => {

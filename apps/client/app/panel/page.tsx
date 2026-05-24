@@ -1,5 +1,5 @@
 import { getUserPlan } from "@/data/plan";
-import { getSessionUser } from "@/data/user";
+import { getSessionUser } from "@repo/auth/session";
 import { prisma } from "@repo/db";
 import { Button } from "@repo/ui/components/button";
 import Card from "@repo/ui/components/custom/Card";

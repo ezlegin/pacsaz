@@ -1,8 +1,7 @@
 import { getUserPlan } from "@/data/plan";
-import { getSessionUser } from "@/data/user";
-import { Button } from "@repo/ui/components/button";
+import { getSessionUser } from "@repo/auth/session";
 import { cn } from "@repo/ui/lib/utils";
-import { LogOut } from "lucide-react";
+import LogoutButton from "../LogoutButton";
 
 const PanelNavbar = async () => {
   const user = await getSessionUser();
@@ -23,10 +22,7 @@ const PanelNavbar = async () => {
         </span>
       </div>
 
-      <Button variant={"ghost"}>
-        <LogOut size={20} className="text-destructive/50" />
-        <span>خروج از حساب</span>
-      </Button>
+      <LogoutButton />
     </div>
   );
 };

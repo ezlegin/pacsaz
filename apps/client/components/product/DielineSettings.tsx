@@ -1,6 +1,6 @@
 import { DIMENSIONS, DIMENSIONS_TYPE } from "@/data/consts";
 import { getUserPlan } from "@/data/plan";
-import { getSessionUser } from "@/data/user";
+import { getSessionUser } from "@repo/auth/session";
 import { aiIcon, dxfIcon, pdfIcon } from "@/public";
 import { Plan } from "@repo/db";
 import { isPackagingSizeLogical } from "@repo/dieline-core/utils/isPackagingSizeLogical";

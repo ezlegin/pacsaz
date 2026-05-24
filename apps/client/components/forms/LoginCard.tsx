@@ -5,7 +5,7 @@ import Link from "next/link";
 import PacsazLogo from "../PacsazLogo";
 import LoginForm from "./login/LoginForm";
 
-const LoginPopup = () => {
+const LoginCard = () => {
   return (
     <Card className="p-0 flex-row justify-between overflow-hidden gap-0 z-10 w-full max-w-2xl">
       <div className="p-8 pr-5 w-3/5 flex flex-col justify-between">
@@ -37,4 +37,4 @@ const LoginPopup = () => {
   );
 };
 
-export default LoginPopup;
+export default LoginCard;

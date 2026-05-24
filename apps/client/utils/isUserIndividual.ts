@@ -1,4 +1,4 @@
-import { UserType } from "@/components/onboarding/Onboarding";
+import { UserType } from "@/components/forms/OnboardingForm";
 
 export function isUserIndividual(userType: UserType) {
   return (

@@ -12,7 +12,7 @@ import { cn } from "@repo/ui/lib/utils";
 import { BookmarkPlus, Download } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import LoginPopup from "../forms/LoginPopup";
+import LoginCard from "../forms/LoginCard";
 import SaveDielineForm from "../forms/SaveDielineForm";
 
 interface Props {
@@ -89,7 +89,7 @@ const DielineDownloadButton = ({ slug, isRendering, plan }: Props) => {
         >
           <DialogTitle className="sr-only" />
           {openPopup === "login" ? (
-            <LoginPopup />
+            <LoginCard />
           ) : (
             <>
               <DialogTitle>ذخیره قالب</DialogTitle>

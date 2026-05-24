@@ -1,5 +1,3 @@
-"use client";
-
 import { inputFormSchema, InputFormType } from "@/lib/validatoinSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@repo/ui/components/button";
@@ -13,6 +11,10 @@ import { Input } from "@repo/ui/components/input";
 import { Phone } from "lucide-react";
 import { LoginStep } from "./LoginForm";
 import { useForm } from "react-hook-form";
+import { sendOtpCode } from "@/actions/login/otp";
+import { handleRes } from "@/lib/handleRes";
+import { useLoading } from "@repo/lib/utils/useLoading";
+import { Spinner } from "@repo/ui/components/spinner";
 
 interface Props {
   setLoginStep: (val: LoginStep) => void;
@@ -20,6 +22,7 @@ interface Props {
 }
 
 export function InputForm({ setLoginStep, setPhoneNumber }: Props) {
+  const { startLoading, stopLoading, isLoading } = useLoading();
   const form = useForm<InputFormType>({
     resolver: zodResolver(inputFormSchema),
     defaultValues: {
@@ -27,11 +30,19 @@ export function InputForm({ setLoginStep, setPhoneNumber }: Props) {
     },
   });
 
-  function onSubmit(data: InputFormType) {
-    setLoginStep("otp");
-    setPhoneNumber(data.phoneNumber);
-    console.log(data);
-  }
+  const onSubmit = async (data: InputFormType) => {
+    startLoading();
+
+    const res = await sendOtpCode(data);
+    handleRes(res, {
+      onSuccess: () => {
+        setLoginStep("otp");
+        setPhoneNumber(data.phoneNumber);
+      },
+    });
+
+    stopLoading();
+  };
 
   return (
     <Form {...form}>
@@ -63,9 +74,10 @@ export function InputForm({ setLoginStep, setPhoneNumber }: Props) {
         />
         <Button
           size={"lg"}
-          disabled={!form.formState.isValid}
+          disabled={!form.formState.isValid || isLoading}
           className="w-full"
         >
+          <Spinner isLoading={isLoading} />
           ارسال کد
         </Button>
       </form>

@@ -17,24 +17,32 @@ model Admin {
 }
 
 model User {
-  id                  Int      @id @default(autoincrement())
-  email               String   @unique
-  phoneNumber         String   @unique
+  id                  Int        @id @default(autoincrement())
+  email               String     @unique
+  phoneNumber         String     @unique
   firstName           String
   lastName            String?
   fullName            String
-  onboardingCompleted Boolean  @default(false)
-  joinedAt            DateTime @default(now())
-  userType            UserType
+  usageGoal           UsageGoal?
+  onboardingCompleted Boolean    @default(false)
+  joinedAt            DateTime   @default(now())
+  userType            UserType?
 
   downloads     DownloadHistory[]
-  otp           Otp[]
   favedDielines FavedDieline[]
   savedDielines SavedDieline[]
   plans         Plan[]
   payments      Payment[]
   customers     Customer[]
   paymentTracks PaymentTrack[]
+}
+
+enum UsageGoal {
+  practice
+  projects
+  portfolio
+  hobby
+  other
 }
 
 enum UserType {
@@ -45,14 +53,6 @@ enum UserType {
   dielineMaker
   packagingFactory
   other
-}
-
-model Otp {
-  id        Int      @id @default(autoincrement())
-  otp       String
-  expiresAt DateTime
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    Int
 }
 
 model Customer {
@@ -66,6 +66,17 @@ model Customer {
   savedDielie SavedDieline[]
   user        User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId      Int?
+}
+
+model Otp {
+  id          Int      @id @default(autoincrement())
+  phoneNumber String
+  code        String
+  expiresAt   DateTime
+  // user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // userId      Int?
+
+  @@unique([code, phoneNumber])
 }
 
 //! DIELINE --------------------------------
@@ -223,7 +234,7 @@ model PaymentTrack {
   id     Int        @id @default(autoincrement())
   plan   PlanKey
   period PlanPeriod
-  user   User       @relation(fields: [userId], references: [id])
+  user   User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId Int
 }
 

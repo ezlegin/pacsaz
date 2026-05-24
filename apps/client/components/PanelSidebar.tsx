@@ -1,4 +1,4 @@
-import { getSessionUser } from "@/data/user";
+import { getSessionUser } from "@repo/auth/session";
 import {
   Sidebar,
   SidebarContent,

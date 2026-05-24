@@ -13,6 +13,13 @@ const material = [
 ] as const;
 
 const dimensionType = ["manufacture", "inner", "outer"] as const;
+const usageGoal = [
+  "practice",
+  "projects",
+  "portfolio",
+  "hobby",
+  "other",
+] as const;
 
 const userType = [
   "student",
@@ -93,3 +100,14 @@ export const customerFormSchema = z.object({
 });
 
 export type CustomerFormType = z.infer<typeof customerFormSchema>;
+
+export const onboardingFormSchema = z.object({
+  phoneNumber: z.string().min(1),
+  email: z.string().email({ message: "ایمیل نامعتبر است." }).trim(),
+  firstName: z.string().min(2).trim(),
+  lastName: z.string().min(2).trim().optional(),
+  usageGoal: z.enum(usageGoal),
+  userType: z.enum(userType),
+});
+
+export type OnboardingFormType = z.infer<typeof onboardingFormSchema>;

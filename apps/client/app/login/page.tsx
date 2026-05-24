@@ -1,10 +1,10 @@
-import LoginPopup from "@/components/forms/LoginPopup";
+import LoginCard from "@/components/forms/LoginCard";
 import PacsazBGPattern from "@/components/PacsazBGPattern";
 
 const page = () => {
   return (
     <PacsazBGPattern className="flex justify-center items-center">
-      <LoginPopup />
+      <LoginCard />
     </PacsazBGPattern>
   );
 };

@@ -1,7 +1,7 @@
 import ProgressBarProvider from "@/components/ProgressBarProvider";
 import UserProvider from "@/components/UserProvider";
-import { getSessionUser } from "@/data/user";
 import { pacsazLogoIcon } from "@/public";
+import { getSessionUser } from "@repo/auth/session";
 import { Toaster } from "@repo/ui/components/sonner";
 import "@repo/ui/globals.css";
 

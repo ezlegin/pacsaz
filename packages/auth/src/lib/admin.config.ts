@@ -6,7 +6,7 @@ export default {
   pages: {
     signIn: "/login",
   },
-  trustHost: true,
+  trustHost: process.env.NODE_ENV === "development" ? true : false,
   callbacks: {
     async jwt({ token, user }) {
       if (user) {

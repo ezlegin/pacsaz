@@ -1,10 +1,12 @@
+import { OnboardingFormType } from "@/lib/validatoinSchema";
+import { UsageGoal } from "@repo/db";
 import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
-import { MostUsage } from "./Onboarding";
+import { UseFormReturn } from "react-hook-form";
 
 const Step3 = ({
-  setUsageGoal,
+  form,
 }: {
-  setUsageGoal: (val: MostUsage) => void;
+  form: UseFormReturn<OnboardingFormType, any, OnboardingFormType>;
 }) => {
   return (
     <div className="space-y-3">
@@ -17,8 +19,8 @@ const Step3 = ({
         variant="outline"
         spacing={2}
         size="lg"
-        className="flex-wrap"
-        onValueChange={(val: MostUsage) => setUsageGoal(val)}
+        className="flex-wrap w-full"
+        onValueChange={(val: UsageGoal) => form.setValue("usageGoal", val)}
       >
         {usageGoals.map((i, idx) => (
           <ToggleGroupItem
@@ -38,7 +40,7 @@ export default Step3;
 
 const usageGoals: {
   title: string;
-  key: MostUsage;
+  key: UsageGoal;
 }[] = [
   { title: "پروژه‌های واقعی", key: "projects" },
   { title: "تمرین و یادگیری", key: "practice" },

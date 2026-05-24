@@ -1,8 +1,17 @@
 import PanelNavbar from "@/components/Navbars/PanelNavbar";
 import PanelSidebar from "@/components/PanelSidebar";
+import { getSessionUser } from "@repo/auth/session";
 import { SidebarProvider } from "@repo/ui/components/sidebar";
+import { redirect } from "next/navigation";
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default async function Layout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const user = await getSessionUser();
+  if (!user?.onboardingCompleted) redirect("/onboarding");
+
   return (
     <SidebarProvider>
       <PanelSidebar />

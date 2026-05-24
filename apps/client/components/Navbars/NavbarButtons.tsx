@@ -1,5 +1,5 @@
 import { getUserPlan } from "@/data/plan";
-import { getSessionUser } from "@/data/user";
+import { getSessionUser } from "@repo/auth/session";
 import Diamond from "@/public/icons/Diamond";
 import { calculateRemaningSubscription } from "@/utils/calculateRemaningSubscriptoin";
 import { Badge } from "@repo/ui/components/badge";
@@ -39,7 +39,7 @@ const NavbarButtons = async () => {
       <div>
         <div className="w-px ml-3 h-6 bg-slate-300" />
       </div>
-      <Link href={user ? "/panel" : "/login"}>
+      <Link href={"/panel"}>
         <Button variant={user ? "outline" : "default"}>
           {user ? (
             <div className="flex items-center gap-1.5">
