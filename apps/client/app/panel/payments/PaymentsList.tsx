@@ -2,7 +2,6 @@ import { mapPaymentStatusLable } from "@/utils/mapPaymentStatusLable";
 import { mapPeriodLabel } from "@/utils/mapPeriodLabel";
 import { mapPlanTitle } from "@/utils/mapPlanTitle";
 import { Payment, Plan } from "@repo/db";
-import { PlanKey, PlanPeriod } from "@repo/lib/data/plans";
 import { formatPrice } from "@repo/lib/utils/formatPrice";
 import Card from "@repo/ui/components/custom/Card";
 import PaymentStatus from "@repo/ui/components/custom/PaymentStatus";
@@ -40,10 +39,10 @@ function PaymentsList({ data }: { data: PaymentType[] }) {
           />
         </TableCell>
         <TableCell className="text-center">
-          {mapPlanTitle(payment.plan?.key as PlanKey)}
+          {mapPlanTitle(payment.plan?.key)}
         </TableCell>
         <TableCell className="text-left">
-          {mapPeriodLabel(payment.period as PlanPeriod)}
+          {mapPeriodLabel(payment.period)}
         </TableCell>
       </TableRow>
     );

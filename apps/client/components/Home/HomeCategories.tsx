@@ -50,7 +50,7 @@ const CategoryCard = ({
           src={tuckEnd}
           width={500}
           height={500}
-          className={imgClass ? imgClass : " h-[200px] w-auto"}
+          className={imgClass ? imgClass : " h-50 w-auto"}
         />
         <div className="flex justify-between items-end w-full">
           <h3>

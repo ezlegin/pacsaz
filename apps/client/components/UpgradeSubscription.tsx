@@ -1,7 +1,12 @@
 "use client";
 
-import { Plan, Price as PriceType, Tarrif } from "@repo/db";
-import { PlanKey, PlanPeriod } from "@repo/lib/data/plans";
+import {
+  Plan,
+  PlanKey,
+  PlanPeriod,
+  Price as PriceType,
+  Tarrif,
+} from "@repo/db";
 import { Button } from "@repo/ui/components/button";
 import Card from "@repo/ui/components/custom/Card";
 import { Label } from "@repo/ui/components/label";

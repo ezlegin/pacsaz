@@ -34,7 +34,7 @@ export function ProfileForm({ user }: { user: User }) {
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
       fullName: user.fullName,
-      userType: user.userType,
+      userType: user.userType!,
     },
   });
 

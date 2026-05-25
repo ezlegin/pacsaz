@@ -14,6 +14,8 @@ import { useState } from "react";
 import { toast } from "sonner";
 import LoginCard from "../forms/LoginCard";
 import SaveDielineForm from "../forms/SaveDielineForm";
+import { useUserStore } from "@repo/store/app/user.store";
+import { redirect } from "next/navigation";
 
 interface Props {
   slug: string;
@@ -26,6 +28,7 @@ const DielineDownloadButton = ({ slug, isRendering, plan }: Props) => {
   const { svg } = useSVGStore();
   const { startLoading, stopLoading, isLoading } = useLoading();
   const [openPopup, setOpenPopup] = useState<"login" | "save" | null>(null);
+  const { user } = useUserStore();
 
   const setts = {
     id: 0,
@@ -39,9 +42,12 @@ const DielineDownloadButton = ({ slug, isRendering, plan }: Props) => {
   };
 
   const onDownload = async () => {
+    if (!user) {
+      redirect("/login?callbackUrl=/subscription");
+    }
+
     if (!plan) {
-      setOpenPopup("login");
-      return;
+      redirect("/subscription");
     }
 
     if (!svg || isRendering) {

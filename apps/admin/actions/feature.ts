@@ -25,7 +25,7 @@ export const updateFeature = async (data: FeatureFormType, id: number) => {
 
     await prisma.tarrifFeature.update({
       where: { id },
-      data: { title: data.title },
+      data,
     });
 
     return { success: "Feature Updated Successull." };

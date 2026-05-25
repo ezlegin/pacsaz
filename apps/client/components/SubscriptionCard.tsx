@@ -1,6 +1,5 @@
 import { PriceMapper } from "@/lib/map";
-import { FairDownload, TarrifFeature } from "@repo/db";
-import { PlanPeriod } from "@repo/lib/data/plans";
+import { FairDownload, PlanPeriod, TarrifFeature } from "@repo/db";
 import { Button } from "@repo/ui/components/button";
 import Card from "@repo/ui/components/custom/Card";
 import { Separator } from "@repo/ui/components/separator";
@@ -45,7 +44,7 @@ export const SubscriptionCard = ({
           <span className="font-semibold">{tarrif.title}</span>
           <Price
             period={period}
-            price={PriceMapper(period, tarrif.price!, tarrif.discountAmount)}
+            price={PriceMapper(period, tarrif.price!, 0)}
           />
           <p className="text-xs text-muted-foreground">{tarrif.description}</p>
         </div>

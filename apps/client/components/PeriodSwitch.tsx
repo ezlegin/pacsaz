@@ -2,7 +2,7 @@ import { Badge } from "@repo/ui/components/badge";
 import { Label } from "@repo/ui/components/label";
 import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import { annualPlanDisocunt } from "@repo/lib/data/consts";
-import { PlanPeriod } from "@repo/lib/data/plans";
+import { PlanPeriod } from "@repo/db";
 
 const PeriodSwitch = ({
   setPeriod,

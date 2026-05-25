@@ -1,7 +1,6 @@
 import { createPaymentTrack } from "@/actions/payment";
 import PaymentCard from "@/components/PaymentCard";
-import { prisma } from "@repo/db";
-import { PlanKey, PlanPeriod } from "@repo/lib/data/plans";
+import { PlanKey, PlanPeriod, prisma } from "@repo/db";
 import { redirect } from "next/navigation";
 import { getSessionUser } from "@repo/auth/session";
 import { loginPageRoute } from "@/proxy";

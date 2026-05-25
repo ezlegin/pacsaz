@@ -1,5 +1,5 @@
 import { mapPeriodLabel } from "@/utils/mapPeriodLabel";
-import { PlanPeriod } from "@repo/lib/data/plans";
+import { PlanPeriod } from "@repo/db";
 import { cn } from "@repo/ui/lib/utils";
 
 const Price = ({

@@ -1,7 +1,7 @@
 "use client";
 
+import { ServerAction } from "@/data/types";
 import { handleRes } from "@/lib/handleRes";
-import { ServerAction } from "@repo/lib/data/types";
 import { useLoading } from "@repo/lib/utils/useLoading";
 import { Button } from "@repo/ui/components/button";
 import ActionButton from "@repo/ui/components/custom/ActionButton";
