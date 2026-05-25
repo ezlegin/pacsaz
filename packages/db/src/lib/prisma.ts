@@ -3,13 +3,17 @@ import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { PrismaClient } from "../generated/prisma/client";
 export * from "../generated/prisma/client";
 
+const host = process.env.DATABASE_HOST;
+const user = process.env.DATABASE_USER;
+const password = process.env.DATABASE_PASSWORD;
+const database = process.env.DATABASE_NAME;
+
 const adapter = new PrismaMariaDb({
-  host: process.env.DATABASE_HOST,
-  user: process.env.DATABASE_USER,
-  password: process.env.DATABASE_PASSWORD,
-  database: process.env.DATABASE_NAME,
+  host,
+  user,
+  password,
+  database,
   connectionLimit: 5,
-  allowPublicKeyRetrieval: true, //TODO: this should be fixed or thought so much.
 });
 const prisma = new PrismaClient({ adapter });
 

@@ -39,7 +39,6 @@ export function useDielineGenerator(
   dieline: DielineType,
   app: "client" | "editor",
 ) {
-  console.log("dieline", dieline);
   const specs = dieline.specification;
   const setts = dieline.settings;
   const [isRendering, startTransition] = useTransition();

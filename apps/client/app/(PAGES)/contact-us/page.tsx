@@ -124,7 +124,7 @@ export default function ContactUs() {
                       <Textarea
                         placeholder="پیام خود را بنویسید..."
                         {...field}
-                        className="min-h-[200px]"
+                        className="min-h-50"
                       />
                     </FormControl>
                     <FormMessage />

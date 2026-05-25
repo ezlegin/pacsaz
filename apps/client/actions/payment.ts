@@ -8,6 +8,7 @@ import {
 import { calculatePlanEndDate } from "@/utils/calculatePlanEndDate";
 import { mapPlanLevel } from "@/utils/mapPlanLevel";
 import { mapPlanTitle } from "@/utils/mapPlanTitle";
+import { getSessionUser } from "@repo/auth/session";
 import {
   FairDownload,
   Payment,
@@ -51,43 +52,50 @@ export const createPayment = async (params: {
       couponId = existingCoupon.id;
     }
 
-    const newPayment = await prisma.payment.create({
-      data: {
-        amount,
-        discountCode,
-        discountCodeAmount,
-        totalDiscount: discountCodeAmount,
-        method: "zarinPal",
-        status: "pending",
-        total,
-        period,
-        userId: 1, // todo,
-        tarrifId: tarrif.id,
-        couponId,
-      },
-      include: { user: true },
-    });
+    const user = await getSessionUser();
+    if (!user) return { error: "User Not Found." };
 
-    const res = await initiateZarinpalPayment({
-      amount: total,
-      paymentId: newPayment.id,
-      user: newPayment.user,
-    });
-
-    await prisma.payment.update({
-      where: { id: newPayment.id },
-      data: { authority: res.data?.authority },
-    });
-
-    if (res.success) {
-      return { success: "به درگاه پرداخت منتقل می شوید...", data: res.data };
-    } else {
-      await prisma.payment.update({
-        where: { id: newPayment.id },
-        data: { status: "could_not_initiate" },
+    const tsRes = await prisma.$transaction(async (ts) => {
+      const newPayment = await ts.payment.create({
+        data: {
+          amount,
+          discountCode,
+          discountCodeAmount,
+          totalDiscount: discountCodeAmount,
+          method: "zarinPal",
+          status: "pending",
+          total,
+          period,
+          userId: user.id,
+          tarrifId: tarrif.id,
+          couponId,
+        },
+        include: { user: true },
       });
-      return { error: res.error };
-    }
+
+      const res = await initiateZarinpalPayment({
+        amount: total,
+        paymentId: newPayment.id,
+        user: newPayment.user,
+      });
+
+      await ts.payment.update({
+        where: { id: newPayment.id },
+        data: { authority: res.data?.authority },
+      });
+
+      if (res.success) {
+        return { success: "به درگاه پرداخت منتقل می شوید...", data: res.data };
+      } else {
+        await ts.payment.update({
+          where: { id: newPayment.id },
+          data: { status: "could_not_initiate" },
+        });
+        return { error: res.error };
+      }
+    });
+
+    return tsRes;
   } catch (error) {
     console.error(error);
     return { error: "مشکلی رخ داد. لطفا لحظاتی بعد دوباره تلاش کنید." };
@@ -99,69 +107,77 @@ export const verifyPayment = async (
   status: ZarinPalStatus,
 ): Response => {
   try {
+    const user = await getSessionUser();
+    if (!user) throw new Error("User Not Found.");
+
     const timeoutPromise = new Promise((_, reject) => {
       setTimeout(() => {
         reject(new Error("پرداخت نا موفق! (زمان به پایان رسید.)"));
       }, 30000);
     });
 
-    const payment = (await Promise.race([
-      timeoutPromise,
-      prisma.payment.findUnique({
-        where: { authority },
-        include: { tarrif: { include: { fairDownload: true } } },
-      }),
-    ])) as Payment & { tarrif: Tarrif & { fairDownload: FairDownload } };
-    if (!payment) throw new Error("توکن پرداخت معتبر نمی باشد.");
+    const res = await prisma.$transaction(async (ts) => {
+      const payment = (await Promise.race([
+        timeoutPromise,
+        ts.payment.findUnique({
+          where: { authority },
+          include: { tarrif: { include: { fairDownload: true } } },
+        }),
+      ])) as Payment & { tarrif: Tarrif & { fairDownload: FairDownload } };
+      if (!payment) throw new Error("توکن پرداخت معتبر نمی باشد.");
 
-    const verifyPayment = await verifyZarrinPalPurchase(
-      payment.authority!,
-      payment.amount,
-      status,
-    );
+      const verifyPayment = await verifyZarrinPalPurchase(
+        payment.authority!,
+        payment.amount,
+        status,
+      );
 
-    if (verifyPayment.error) {
-      if (payment.status !== "failed")
-        await prisma.payment.update({
-          where: { id: payment.id },
-          data: { status: "failed" },
-        });
-      throw new Error(verifyPayment.error);
-    }
+      if (verifyPayment.error) {
+        if (payment.status !== "failed")
+          await ts.payment.update({
+            where: { id: payment.id },
+            data: { status: "failed" },
+          });
+        throw new Error(verifyPayment.error);
+      }
 
-    await prisma.payment.update({
-      where: { id: payment.id },
-      data: { status: "success" },
+      await ts.payment.update({
+        where: { id: payment.id },
+        data: { status: "success" },
+      });
+
+      const previusActivePlans = await ts.plan.findMany({
+        where: { status: "active" },
+      });
+
+      await ts.plan.updateMany({
+        where: { OR: previusActivePlans.map((p) => ({ id: p.id })) },
+        data: {
+          status: "inActive",
+        },
+      });
+
+      const tarrif = payment.tarrif;
+
+      await ts.plan.create({
+        data: {
+          key: tarrif.key,
+          title: mapPlanTitle(tarrif.key),
+          level: mapPlanLevel(tarrif.key),
+          type: previusActivePlans.length > 0 ? "renewal" : "new",
+          period: payment.period,
+          fairDownload: tarrif.fairDownload[payment.period],
+          endsAt: calculatePlanEndDate(payment.period),
+          userId: user.id,
+          isPremium: tarrif.level > 1,
+          paymentId: payment.id,
+        },
+      });
+
+      return { success: verifyPayment.success };
     });
 
-    const tarrif = payment.tarrif;
-    const previusActivePlans = await prisma.plan.findMany({
-      where: { status: "active" },
-    });
-
-    await prisma.plan.updateMany({
-      where: { OR: previusActivePlans.map((p) => ({ id: p.id })) },
-      data: {
-        status: "inActive",
-      },
-    });
-
-    await prisma.plan.create({
-      data: {
-        key: tarrif.key,
-        title: mapPlanTitle(tarrif.key),
-        level: mapPlanLevel(tarrif.key),
-        type: previusActivePlans.length > 0 ? "renewal" : "new",
-        period: payment.period,
-        fairDownload: tarrif.fairDownload[payment.period],
-        endsAt: calculatePlanEndDate(payment.period),
-        userId: 1,
-        isPremium: tarrif.level > 1,
-        paymentId: payment.id,
-      },
-    });
-
-    return { result: "success", message: verifyPayment.success! };
+    return { result: "success", message: res.success! };
   } catch (error) {
     console.error(error);
     return { result: "failed", message: (error as Error).message };

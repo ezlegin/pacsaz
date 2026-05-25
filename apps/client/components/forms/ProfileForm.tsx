@@ -39,7 +39,6 @@ export function ProfileForm({ user }: { user: User }) {
   });
 
   const onSubmit = async (data: ProfileFormType) => {
-    console.log(data);
     const res = await updateUserProfile(data, 1); //todo;
 
     handleRes(res, { onSuccess: () => router.refresh() });
