@@ -3,19 +3,19 @@ import Pagination from "@repo/ui/components/custom/Pagination";
 import Search from "@repo/ui/components/custom/Search";
 import SavedDielinesList from "./SavedDielinesList";
 import { prisma } from "@repo/db";
-import { getUserPlan } from "@/data/plan";
+import { getSessionUser } from "@repo/auth/session";
 
 const page = async () => {
+  const user = await getSessionUser();
+
   const savedDielines = await prisma.savedDieline.findMany({
-    where: { userId: 1 }, //todo
+    where: { userId: user?.id }, //todo
     include: { settings: true, dieline: true },
     orderBy: { id: "desc" },
   });
-  const plan = await getUserPlan(1);
 
-  if (!plan || !plan.isPremium)
-    return <div>فقط در اشتراک حرفه ای و سازمانی</div>;
-  // todo: search
+  if (!user?.plan?.isPremium) return <div>فقط در اشتراک حرفه ای و سازمانی</div>;
+  // todo: searching
 
   return (
     <div className="space-y-3">
@@ -23,7 +23,7 @@ const page = async () => {
         <Search placeholder="جستجو..." />
       </div>
 
-      <SavedDielinesList data={savedDielines} plan={plan} />
+      <SavedDielinesList data={savedDielines} plan={user.plan} />
       <Pagination pageSize={globalPageSize} totalItems={savedDielines.length} />
     </div>
   );

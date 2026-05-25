@@ -1,13 +1,15 @@
-import Card from "@repo/ui/components/custom/Card";
 import { ProfileForm } from "@/components/forms/ProfileForm";
-import React from "react";
+import { loginPageRoute } from "@/proxy";
+import { getSessionUser } from "@repo/auth/session";
 import { prisma } from "@repo/db";
-import { notFound } from "next/navigation";
+import Card from "@repo/ui/components/custom/Card";
+import { redirect } from "next/navigation";
 
 const page = async () => {
-  const user = await prisma.user.findFirst(); //todo
+  const sessionUser = await getSessionUser();
+  const user = await prisma.user.findUnique({ where: { id: sessionUser?.id } });
 
-  if (!user) notFound(); // todo
+  if (!user) redirect(loginPageRoute);
 
   return (
     <div className="max-w-lg mx-auto">

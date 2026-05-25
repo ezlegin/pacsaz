@@ -13,11 +13,9 @@ import { Bookmark, CreditCard, Flag, Heart, User, Users } from "lucide-react";
 import Link from "next/link";
 import PacsazLogo from "./PacsazLogo";
 import { Button } from "@repo/ui/components/button";
-import { getUserPlan } from "@/data/plan";
 
 const PanelSidebar = async () => {
   const user = await getSessionUser();
-  const plan = await getUserPlan(user?.id);
 
   const items = [
     {
@@ -66,7 +64,7 @@ const PanelSidebar = async () => {
           </span>
         </div>
 
-        {plan && (
+        {user?.plan && (
           <Link href={"/panel"}>
             <Button
               variant={"primaryForeground"}

@@ -2,6 +2,7 @@
 
 import { serverErrorMessage } from "@/data/consts";
 import { SaveDielineFormType } from "@/lib/validatoinSchema";
+import { getSessionUser } from "@repo/auth/session";
 import { DimensionType, prisma } from "@repo/db";
 import { MaterialKey } from "@repo/store/data/types";
 
@@ -24,7 +25,10 @@ export const createDownloadHistory = async (
     settings;
 
   try {
-    const plan = await prisma.plan.findFirst({ where: { id: planId } });
+    const plan = await prisma.plan.findFirst({
+      where: { id: planId },
+      include: { user: true },
+    });
     if (!plan) return { error: "پلن کاربری شما یافت نشد." };
     if (plan.downloaded >= plan.fairDownload)
       return { error: "شما به حداکثر تعداد دانلود رسیده اید." };
@@ -35,7 +39,7 @@ export const createDownloadHistory = async (
     await prisma.$transaction(async (ts) => {
       await ts.downloadHistory.create({
         data: {
-          userId: 1, //todo
+          userId: plan.user.id,
           dielineId: existingDieline.id,
           planId,
           settings: {
@@ -82,6 +86,9 @@ export const createSaveDieline = async (
     customerId,
   } = data;
   try {
+    const user = await getSessionUser();
+    if (!user) throw new Error("Use Not Found.");
+
     const existingDieline = await prisma.dieline.findFirst({ where: { slug } });
     if (!existingDieline) throw new Error("Dieline Not Found.");
 
@@ -95,7 +102,7 @@ export const createSaveDieline = async (
 
     await prisma.savedDieline.create({
       data: {
-        userId: 1, //todo
+        userId: user.id,
         description: description ?? "",
         dielineId: existingDieline.id,
         title,
@@ -192,13 +199,16 @@ export const deleteSavedDieline = async (id: number) => {
 
 export const faveDieline = async (dielineId: number) => {
   try {
+    const user = await getSessionUser();
+    if (!user) throw new Error("User Not Found.");
+
     const existingDieline = await prisma.dieline.findFirst({
       where: { id: dielineId },
     });
     if (!existingDieline) return { error: "Dieline Not Found." };
 
     await prisma.favedDieline.create({
-      data: { dielineId: existingDieline.id, userId: 1 }, //todo
+      data: { dielineId: existingDieline.id, userId: user.id },
     });
 
     return { success: "به لیست علاقه مندی ها اضافه شد." };
@@ -210,13 +220,16 @@ export const faveDieline = async (dielineId: number) => {
 
 export const unfaveDieline = async (dielineId: number) => {
   try {
+    const user = await getSessionUser();
+    if (!user) throw new Error("User Not Found.");
+
     const existingDieline = await prisma.dieline.findFirst({
       where: { id: dielineId },
     });
     if (!existingDieline) return { error: "Dieline Not Found." };
 
     const favedDieline = await prisma.favedDieline.findFirst({
-      where: { AND: [{ userId: 1 }, { dielineId: dielineId }] },
+      where: { AND: [{ userId: user.id }, { dielineId: dielineId }] },
     });
 
     if (!favedDieline) return { error: "Faved Dieline Not Found." };

@@ -2,10 +2,12 @@ import { globalPageSize } from "@repo/lib/data/consts";
 import Pagination from "@repo/ui/components/custom/Pagination";
 import SubscriptionsList from "./SuscriptionsList";
 import { prisma } from "@repo/db";
+import { getSessionUser } from "@repo/auth/session";
 
 const page = async () => {
+  const user = await getSessionUser();
   const payments = await prisma.plan.findMany({
-    where: { userId: 1 },
+    where: { userId: user?.id },
     include: { payment: true },
     orderBy: { id: "desc" },
   });

@@ -2,14 +2,18 @@
 
 import { serverErrorMessage } from "@/data/consts";
 import { CustomerFormType } from "@/lib/validatoinSchema";
+import { getSessionUser } from "@repo/auth/session";
 import { prisma } from "@repo/db";
 
 export const createCustomer = async (data: CustomerFormType) => {
   try {
+    const user = await getSessionUser();
+    if (!user) throw new Error("User Not Found.");
+
     await prisma.customer.create({
       data: {
         ...data,
-        userId: 1, // todo
+        userId: user.id,
       },
     });
 

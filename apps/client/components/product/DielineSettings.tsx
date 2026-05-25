@@ -1,5 +1,4 @@
 import { DIMENSIONS, DIMENSIONS_TYPE } from "@/data/consts";
-import { getUserPlan } from "@/data/plan";
 import { getSessionUser } from "@repo/auth/session";
 import { aiIcon, dxfIcon, pdfIcon } from "@/public";
 import { Plan } from "@repo/db";
@@ -48,8 +47,7 @@ export default function DielineSettings({ slug, isRendering }: Props) {
   useEffect(() => {
     const setUserPlan = async () => {
       const user = await getSessionUser();
-      const plan = await getUserPlan(user?.id);
-      if (plan) setPlan(plan);
+      if (user?.plan) setPlan(user.plan);
     };
 
     setUserPlan();

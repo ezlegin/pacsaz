@@ -1,16 +1,22 @@
 "use server";
 
-import { auth } from "@repo/auth";
 import { prisma } from "@repo/db";
+import { auth } from "../auth";
 
-const getUserById = async (id: number) => {
-  return await prisma.user.findFirst({
-    where: { id },
-  });
-};
 export const getSessionUser = async () => {
   const session = await auth();
   const userId = session?.user?.id;
+  if (!userId) return null;
 
-  return userId ? getUserById(+userId) : null;
+  const user = await prisma.user.findFirst({
+    where: { id: +userId },
+  });
+
+  if (!user) return null;
+
+  const plan = await prisma.plan.findFirst({
+    where: { userId: +userId, endsAt: { gte: new Date() }, status: "active" },
+  });
+
+  return { ...user, plan };
 };

@@ -1,4 +1,5 @@
 import DielinesGrid from "@/components/DielinesGrid";
+import { getSessionUser } from "@repo/auth/session";
 import { prisma } from "@repo/db";
 import { Button } from "@repo/ui/components/button";
 import Card from "@repo/ui/components/custom/Card";
@@ -6,8 +7,9 @@ import { Frown } from "lucide-react";
 import Link from "next/link";
 
 const page = async () => {
+  const user = await getSessionUser();
   const favs = await prisma.favedDieline.findMany({
-    where: { userId: 1 },
+    where: { userId: user?.id },
     include: { dieline: true },
   });
 

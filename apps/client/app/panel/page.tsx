@@ -1,4 +1,3 @@
-import { getUserPlan } from "@/data/plan";
 import { getSessionUser } from "@repo/auth/session";
 import { prisma } from "@repo/db";
 import { Button } from "@repo/ui/components/button";
@@ -13,10 +12,9 @@ import { formatDate } from "date-fns";
 
 const Page = async () => {
   const user = await getSessionUser();
-  const plan = await getUserPlan(user?.id);
   const tarrif = await prisma.tarrif.findMany({ include: { price: true } });
 
-  if (!plan)
+  if (!user?.plan)
     return (
       <Card className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
         <Frown size={50} />
@@ -27,14 +25,14 @@ const Page = async () => {
       </Card>
     );
 
-  const fairDownload = plan.fairDownload;
-  const downloaded = plan.downloaded;
+  const fairDownload = user.plan.fairDownload;
+  const downloaded = user.plan.downloaded;
 
   const allDownloads = await prisma.downloadHistory.count({
-    where: { userId: user?.id },
+    where: { userId: user.id },
   });
   const downloadRecords = await prisma.downloadHistory.findMany({
-    where: { userId: user?.id }, // todo
+    where: { userId: user.id }, // todo
     take: 10,
     include: { dieline: true, settings: true },
     orderBy: { downloadedAt: "desc" },
@@ -42,7 +40,7 @@ const Page = async () => {
 
   return (
     <div className="grid grid-cols-6 gap-5">
-      <UserSubscriptionCard plan={plan} tarrif={tarrif} />
+      <UserSubscriptionCard plan={user.plan} tarrif={tarrif} />
 
       <RemainingDownloads downloaded={downloaded} fairDownload={fairDownload} />
 
@@ -62,7 +60,7 @@ const Page = async () => {
 
       <StatCard
         title="پایان اشتراک"
-        value={formatDate(plan?.endsAt!, "PP")}
+        value={formatDate(user.plan?.endsAt!, "PP")}
         icon={Calendar}
         className="col-span-2"
       />
