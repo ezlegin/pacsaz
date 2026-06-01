@@ -13,3 +13,7 @@ const page = async ({ searchParams }: Props) => {
 };
 
 export default page;
+
+export const metadata = {
+  title: "نتیجه پرداخت",
+};

@@ -22,3 +22,10 @@ export default async function Layout({
     </SidebarProvider>
   );
 }
+
+export const metadata = {
+  title: {
+    default: "حساب کاربری",
+    template: "%s - پک‌ساز",
+  },
+};

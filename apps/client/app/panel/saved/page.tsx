@@ -30,3 +30,7 @@ const page = async () => {
 };
 
 export default page;
+
+export const metadata = {
+  title: "ذخیره شده",
+};

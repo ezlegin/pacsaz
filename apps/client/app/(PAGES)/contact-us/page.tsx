@@ -142,3 +142,7 @@ export default function ContactUs() {
     </div>
   );
 }
+
+export const metadata = {
+  title: "تماس با ما",
+};

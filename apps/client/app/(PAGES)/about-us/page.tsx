@@ -124,3 +124,7 @@ const AboutPage = () => {
 };
 
 export default AboutPage;
+
+export const metadata = {
+  title: "درباره ما",
+};
