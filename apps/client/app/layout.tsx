@@ -1,5 +1,5 @@
 import ProgressBarProvider from "@/components/ProgressBarProvider";
-import { pacsazLogoIcon } from "@/public";
+import { favIcon, pacsazLogoIcon } from "@/public";
 import { Toaster } from "@repo/ui/components/sonner";
 import "@repo/ui/globals.css";
 
@@ -28,6 +28,6 @@ export default async function RootLayout({
 export const metadata = {
   title: "Pacsaz",
   icons: {
-    icon: pacsazLogoIcon,
+    icon: favIcon,
   },
 };

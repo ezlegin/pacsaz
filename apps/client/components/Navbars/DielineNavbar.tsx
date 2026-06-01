@@ -5,14 +5,16 @@ import NavbarButtons from "./NavbarButtons";
 import PacsazLogo from "../PacsazLogo";
 import FavoriteDieline from "../product/FavoriteDielineButton";
 import { Dieline, prisma } from "@repo/db";
+import { getSessionUser } from "@repo/auth/session";
 
 interface Props {
   dieline: Dieline;
 }
 
-const ProductNavbar = async ({ dieline }: Props) => {
+const DielineNavbar = async ({ dieline }: Props) => {
+  const user = await getSessionUser();
   const favedDieline = await prisma.favedDieline.findFirst({
-    where: { AND: [{ userId: 1 }, { dielineId: dieline.id }] },
+    where: { AND: [{ userId: user?.id }, { dielineId: dieline.id }] },
   });
 
   return (
@@ -36,4 +38,4 @@ const ProductNavbar = async ({ dieline }: Props) => {
   );
 };
 
-export default ProductNavbar;
+export default DielineNavbar;

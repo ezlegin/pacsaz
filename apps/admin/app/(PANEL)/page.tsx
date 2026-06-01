@@ -1,33 +1,71 @@
-import PageTitle from "@/components/PageTitle";
-import Card from "@repo/ui/components/custom/Card";
-import TitleIndicator from "@/components/TitleIndicator";
 import MostDielinesList from "@/components/MostDielinesList";
+import PageTitle from "@/components/PageTitle";
+import TitleIndicator from "@/components/TitleIndicator";
+import { PlanPeriod, prisma } from "@repo/db";
 import { formatPrice } from "@repo/lib/utils/formatPrice";
+import Card from "@repo/ui/components/custom/Card";
+import { endOfMonth, startOfMonth, subMonths } from "date-fns";
 
-const page = () => {
+const page = async () => {
+  const activeSubs = await prisma.plan.findMany({
+    where: { status: "active", endsAt: { gt: new Date() } },
+    select: { period: true },
+  });
+
+  const thisMonthRevenue = await prisma.payment.aggregate({
+    where: {
+      status: "success",
+      updatedAt: {
+        gte: startOfMonth(new Date()),
+        lte: endOfMonth(new Date()),
+      },
+    },
+    _sum: {
+      total: true,
+    },
+  });
+
+  const lastMonthRevenue = await prisma.payment.aggregate({
+    where: {
+      status: "success",
+      updatedAt: {
+        gte: startOfMonth(subMonths(new Date(), 1)),
+        lte: endOfMonth(subMonths(new Date(), 1)),
+      },
+    },
+    _sum: {
+      total: true,
+    },
+  });
+
+  function getActiveCount(period: PlanPeriod) {
+    return activeSubs.filter((s) => s.period === period).length;
+  }
+
   const subscriptionsData = [
-    { label: "Active", value: 123, primaryTheme: true },
-    { label: "Monthly", value: 12 },
-    { label: "3-month", value: 8 },
-    { label: "Annual", value: 76 },
-    { label: "Near To End", value: 14 },
-    { label: "Returning", value: 12 },
-    { label: "Faithful Users", value: 14 },
-    { label: "Lost Users", value: 14 },
+    { label: "Actives", value: activeSubs.length, primaryTheme: true },
+    { label: "Monthly", value: getActiveCount("monthly") },
+    { label: "3-month", value: getActiveCount("threeMonth") },
+    { label: "Annual", value: getActiveCount("annual") },
   ];
 
   const revenueData = [
-    { label: "This Month", value: formatPrice(123), primaryTheme: true },
-    { label: "Last Month", value: formatPrice(123) },
-    { label: "This Season", value: formatPrice(123) },
-    { label: "This Year", value: formatPrice(123) },
+    {
+      label: "This Month",
+      value: formatPrice(thisMonthRevenue._sum.total ?? 0, true, "en"),
+      primaryTheme: true,
+    },
+    {
+      label: "Last Month",
+      value: formatPrice(lastMonthRevenue._sum.total ?? 0, true, "en"),
+    },
   ];
 
   const DielinesData = [
-    { label: "Most Downloaded", data },
-    { label: "Most Viewd", data },
-    { label: "Most Faved", data },
-    { label: "Most Saved", data },
+    { label: "Most Downloaded", data: [] },
+    { label: "Most Viewd", data: [] },
+    { label: "Most Faved", data: [] },
+    { label: "Most Saved", data: [] },
   ];
 
   return (
@@ -73,39 +111,6 @@ const page = () => {
 };
 
 export default page;
-
-const data = [
-  {
-    id: 1,
-    title: "جعبه دو طرف درب",
-    slug: "tuck-end",
-    count: 123,
-  },
-  {
-    id: 2,
-    title: "جعبه اسنپ لاک",
-    slug: "tuck-end-snap-lock",
-    count: 123,
-  },
-  {
-    id: 3,
-    title: "جعبه دو طرف درب",
-    slug: "tuck-end",
-    count: 123,
-  },
-  {
-    id: 4,
-    title: "جعبه اسنپ لاک",
-    slug: "tuck-end-snap-lock",
-    count: 123,
-  },
-  {
-    id: 5,
-    title: "جعبه اسنپ لاک",
-    slug: "tuck-end-snap-lock",
-    count: 123,
-  },
-];
 
 const StatCard = ({
   value,

@@ -1,11 +1,9 @@
 import { useLoading } from "@repo/lib/utils/useLoading";
-import { useUserStore } from "@repo/store/app/user.store";
 import { MaterialValue } from "@repo/store/data/types";
 import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
 import { Button } from "@repo/ui/components/button";
 import { Input } from "@repo/ui/components/input";
 import { Spinner } from "@repo/ui/components/spinner";
-import { cn } from "@repo/ui/lib/utils";
 import { Minus, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -14,7 +12,6 @@ interface Props {
   materialsIncluded: MaterialValue[];
 }
 const ThicknessInput = ({ isRendering, materialsIncluded }: Props) => {
-  const { isPremium } = useUserStore();
   const [localInput, setLocalInput] = useState<string | undefined>();
 
   const {
@@ -61,12 +58,12 @@ const ThicknessInput = ({ isRendering, materialsIncluded }: Props) => {
 
   return (
     <div>
-      <div className={cn(!isPremium && "cursor-not-allowed", "relative")}>
+      <div className={"relative"}>
         {isRendering && isMThicknessLoading && (
           <Spinner className="text-primary absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 opacity-100" />
         )}
         <Input
-          disabled={!isPremium || disabledInputs}
+          disabled={disabledInputs}
           dir="ltr"
           className="text-center"
           value={(localInput ?? thickness).toString()}
@@ -93,7 +90,7 @@ const ThicknessInput = ({ isRendering, materialsIncluded }: Props) => {
           size={"icon"}
           className="absolute left-0 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
           onClick={() => handleThicknessChange("dec", thickness)}
-          disabled={thickness <= mMinThick || !isPremium || disabledInputs}
+          disabled={thickness <= mMinThick || disabledInputs}
         >
           <Minus />
         </Button>
@@ -102,7 +99,7 @@ const ThicknessInput = ({ isRendering, materialsIncluded }: Props) => {
           size={"icon"}
           className="absolute right-0 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
           onClick={() => handleThicknessChange("inc", thickness)}
-          disabled={thickness >= mMaxThick || !isPremium || disabledInputs}
+          disabled={thickness >= mMaxThick || disabledInputs}
         >
           <Plus />
         </Button>
