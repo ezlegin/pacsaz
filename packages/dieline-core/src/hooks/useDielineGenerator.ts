@@ -38,12 +38,13 @@ interface DielineType extends Dieline {
 export function useDielineGenerator(
   dieline: DielineType,
   app: "client" | "editor",
+  user?: any | null, // todo
 ) {
   const specs = dieline.specification;
   const setts = dieline.settings;
   const [isRendering, startTransition] = useTransition();
   const { setDefaultSettings, settings } = useDielineSettingsStore();
-  const { developerTools } = useDeveloperToolsStore();
+  const { developerTools, setDeveloperTools } = useDeveloperToolsStore();
   const { variables } = useVariableStore();
   const drawer = new Pacsaz.models.Drawer(dieline.specification, variables);
   const offsets = resolveOffsets();
@@ -83,6 +84,8 @@ export function useDielineGenerator(
       format: "pdf",
       showOverallRulers: false,
     });
+
+    setDeveloperTools("showWatermark", !!!user);
   }, []);
 
   useEffect(() => {

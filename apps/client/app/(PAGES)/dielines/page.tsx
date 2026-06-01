@@ -19,8 +19,13 @@ const page = async ({ searchParams }: Props) => {
     },
   });
 
-  const categoriesByModel = await prisma.dielineCategoryByModel.findMany();
-  const categoriesByUsage = await prisma.dielineCategoryByUsage.findMany();
+  const categoriesByModel = (
+    await prisma.dielineCategoryByModel.findMany({ include: { dieline: true } })
+  ).filter((c) => c.dieline.length > 0);
+
+  const categoriesByUsage = (
+    await prisma.dielineCategoryByUsage.findMany({ include: { dieline: true } })
+  ).filter((c) => c.dieline.length > 0);
 
   return (
     <div className="flex gap-14">

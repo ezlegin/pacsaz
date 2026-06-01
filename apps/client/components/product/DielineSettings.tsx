@@ -1,7 +1,5 @@
 import { DIMENSIONS, DIMENSIONS_TYPE } from "@/data/consts";
-import { getSessionUser } from "@repo/auth/session";
 import { aiIcon, dxfIcon, pdfIcon } from "@/public";
-import { Plan } from "@repo/db";
 import { isPackagingSizeLogical } from "@repo/dieline-core/utils/isPackagingSizeLogical";
 import { bleeds as BLEEDS } from "@repo/store/data/dieline";
 import { DimensionType, Format } from "@repo/store/data/types";
@@ -23,9 +21,8 @@ import {
 } from "@repo/ui/components/tooltip";
 import { CircleQuestionMark } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
 import { Section } from "./DetailsSection";
-import DielineDownloadButton from "./DielineDownloadButton";
+import DielineDownloadButton, { UserType } from "./DielineDownloadButton";
 import { DimensionInput } from "./DimensionsInput";
 import BleedGuide from "./guides/BleedGuide";
 import DimensionGuide from "./guides/DimensionGuide";
@@ -39,19 +36,10 @@ import ThicknessInput from "./ThicknessInput";
 interface Props {
   slug: string;
   isRendering: boolean;
+  user: UserType | null;
 }
 
-export default function DielineSettings({ slug, isRendering }: Props) {
-  const [plan, setPlan] = useState<Plan | null>(null);
-
-  useEffect(() => {
-    const setUserPlan = async () => {
-      const user = await getSessionUser();
-      if (user?.plan) setPlan(user.plan);
-    };
-
-    setUserPlan();
-  }, []);
+export default function DielineSettings({ slug, isRendering, user }: Props) {
   const {
     setSetting,
     settings: {
@@ -132,12 +120,12 @@ export default function DielineSettings({ slug, isRendering }: Props) {
         </Section>
 
         <Section
-          isPremium={plan?.isPremium}
+          isPremium={user?.plan?.isPremium}
           title="اندازه بلید"
           infoContent={<BleedGuide />}
         >
           <Select
-            disabled={!plan?.isPremium}
+            disabled={!user?.plan?.isPremium}
             value={String(bleed)}
             onValueChange={(val: string) => setSetting("bleed", +val)}
             dir="rtl"
@@ -165,13 +153,13 @@ export default function DielineSettings({ slug, isRendering }: Props) {
         </Section>
 
         <Section
-          isPremium={plan?.isPremium}
+          isPremium={user?.plan?.isPremium}
           title="ضخامت"
           infoContent={<ThicknessGuide />}
         >
           <ThicknessInput
             isRendering={isRendering}
-            isPremium={plan?.isPremium}
+            isPremium={user?.plan?.isPremium}
           />
         </Section>
 
@@ -240,7 +228,7 @@ export default function DielineSettings({ slug, isRendering }: Props) {
         <DielineDownloadButton
           isRendering={isRendering}
           slug={slug}
-          plan={plan}
+          user={user}
         />
       </div>
     </Card>

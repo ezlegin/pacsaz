@@ -14,7 +14,7 @@ const PacsazBGPattern = ({
         className={`
         absolute inset-0 
         bg-[url('/pacsaz-pattern.png')]
-        bg-[length:800px]
+        bg-size-[800px]
         bg-repeat
         opacity-20
         pointer-events-none

@@ -20,7 +20,7 @@ export const sendOtpSms = async (phoneNumber: string, otp: string) => {
       {
         receptor: convertPersianDigitsToEnglish(phoneNumber),
         token: otp,
-        template: "igraphical",
+        template: "pacsaz",
       },
       function (response, status) {
         console.log(response);

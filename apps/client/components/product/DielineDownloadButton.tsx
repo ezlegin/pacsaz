@@ -1,6 +1,6 @@
 import { createDownloadHistory } from "@/actions/dieline";
 import Diamond from "@/public/icons/Diamond";
-import { Plan } from "@repo/db";
+import { Plan, User } from "@repo/db";
 import { dielineDownloder } from "@repo/lib/utils/dielineDownloader";
 import { useLoading } from "@repo/lib/utils/useLoading";
 import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
@@ -14,21 +14,23 @@ import { useState } from "react";
 import { toast } from "sonner";
 import LoginCard from "../forms/LoginCard";
 import SaveDielineForm from "../forms/SaveDielineForm";
-import { useUserStore } from "@repo/store/app/user.store";
 import { redirect } from "next/navigation";
+
+export interface UserType extends User {
+  plan: Plan | null;
+}
 
 interface Props {
   slug: string;
   isRendering: boolean;
-  plan: Plan | null;
+  user: UserType | null;
 }
 
-const DielineDownloadButton = ({ slug, isRendering, plan }: Props) => {
+const DielineDownloadButton = ({ slug, isRendering, user }: Props) => {
   const { settings } = useDielineSettingsStore();
   const { svg } = useSVGStore();
   const { startLoading, stopLoading, isLoading } = useLoading();
   const [openPopup, setOpenPopup] = useState<"login" | "save" | null>(null);
-  const { user } = useUserStore();
 
   const setts = {
     id: 0,
@@ -46,7 +48,7 @@ const DielineDownloadButton = ({ slug, isRendering, plan }: Props) => {
       redirect("/login?callbackUrl=/subscription");
     }
 
-    if (!plan) {
+    if (!user.plan) {
       redirect("/subscription");
     }
 
@@ -57,7 +59,7 @@ const DielineDownloadButton = ({ slug, isRendering, plan }: Props) => {
 
     startLoading();
 
-    const createRecord = await createDownloadHistory(slug, setts, plan.id);
+    const createRecord = await createDownloadHistory(slug, setts, user.plan.id);
     if (createRecord.error) {
       toast.error(createRecord.error);
       stopLoading();
@@ -99,7 +101,11 @@ const DielineDownloadButton = ({ slug, isRendering, plan }: Props) => {
           ) : (
             <>
               <DialogTitle>ذخیره قالب</DialogTitle>
-              <SaveDielineForm settings={setts} slug={slug} plan={plan!} />
+              <SaveDielineForm
+                settings={setts}
+                slug={slug}
+                plan={user?.plan!}
+              />
             </>
           )}
         </DialogContent>
@@ -109,10 +115,10 @@ const DielineDownloadButton = ({ slug, isRendering, plan }: Props) => {
         <Button
           disabled={isRendering || isLoading}
           onClick={onDownload}
-          variant={plan ? "green" : "default"}
+          variant={user?.plan ? "green" : "default"}
           size="lg"
           className={cn(
-            plan ? "col-span-5" : "col-span-6",
+            user?.plan ? "col-span-5" : "col-span-6",
             "gap-2 font-medium",
           )}
         >
@@ -120,12 +126,12 @@ const DielineDownloadButton = ({ slug, isRendering, plan }: Props) => {
             <Spinner />
           ) : (
             <div className="flex gap-1.5 items-center">
-              {plan ? <Download /> : <Diamond />}
+              {user?.plan ? <Download /> : <Diamond />}
               دانلود فایل
             </div>
           )}
         </Button>
-        {plan && (
+        {user?.plan && (
           <Button
             disabled={isRendering || isLoading}
             onClick={onOpenSavePopup}

@@ -1,7 +1,5 @@
 import ProgressBarProvider from "@/components/ProgressBarProvider";
-import UserProvider from "@/components/UserProvider";
 import { pacsazLogoIcon } from "@/public";
-import { getSessionUser } from "@repo/auth/session";
 import { Toaster } from "@repo/ui/components/sonner";
 import "@repo/ui/globals.css";
 
@@ -12,14 +10,10 @@ export default async function RootLayout({
 }>) {
   const fontFamily = "KalamehWebFaNum";
 
-  const user = await getSessionUser();
-
   return (
     <html lang="fa" dir="rtl" suppressHydrationWarning>
       <body style={{ fontFamily }} className="antialiased">
-        <ProgressBarProvider>
-          <UserProvider user={user}>{children}</UserProvider>
-        </ProgressBarProvider>
+        <ProgressBarProvider>{children}</ProgressBarProvider>
         <Toaster
           richColors
           theme="light"

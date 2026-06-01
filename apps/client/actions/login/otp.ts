@@ -53,6 +53,8 @@ export const verifyOtp = async (phoneNumber: string, code: string) => {
 
     if (!existingOtp) return { error: "کد معتبر نمی باشد." };
 
+    await prisma.otp.delete({ where: { id: existingOtp.id } });
+
     const existingUser = await prisma.user.findUnique({
       where: { phoneNumber },
     });

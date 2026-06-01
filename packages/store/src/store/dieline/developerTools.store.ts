@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { onDevelope } from "../../utils/onDevelope";
-import { getSessionUser } from "../app/user.store";
 
 type DeveloperToolsCTX = {
   showContainer: boolean;
@@ -20,7 +19,7 @@ const storeCreator = (set: any): DeveloperToolsStore => ({
   developerTools: {
     showContainer: true,
     showAnchors: false,
-    showWatermark: !!getSessionUser()?.plan,
+    showWatermark: true,
     doCenterSVG: true,
     dxf: undefined,
   },

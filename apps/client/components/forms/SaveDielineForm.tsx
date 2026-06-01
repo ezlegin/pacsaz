@@ -22,6 +22,8 @@ import {
 } from "@repo/ui/components/form";
 import { Input } from "@repo/ui/components/input";
 import { Separator } from "@repo/ui/components/separator";
+import { UserPlus } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import SearchCustomers from "../SearchCustomers";
@@ -134,20 +136,33 @@ const SaveDielineForm = ({
             )}
           />
 
-          <FormField
-            control={form.control}
-            name={"customerId"}
-            render={({ field }) => (
-              <FormItem className={`w-full`}>
-                <SearchCustomers
-                  field={field}
-                  placeHolder="جستجوی مشتری..."
-                  customerId={savedDieline?.customerId}
-                />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="flex gap-3">
+            <FormField
+              control={form.control}
+              name={"customerId"}
+              render={({ field }) => (
+                <FormItem className={`w-full`}>
+                  <SearchCustomers
+                    field={field}
+                    placeHolder="جستجوی مشتری..."
+                    customerId={savedDieline?.customerId}
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Link href={"/panel/customers"} target="_blank">
+              <Button
+                type="button"
+                size={"icon"}
+                variant={"outline"}
+                className="size-10"
+                title="ایجاد مشتری"
+              >
+                <UserPlus />
+              </Button>
+            </Link>
+          </div>
 
           <div className="flex flex-col gap-3">
             <Button
