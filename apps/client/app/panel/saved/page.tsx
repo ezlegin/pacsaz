@@ -1,18 +1,30 @@
-import { globalPageSize } from "@repo/lib/data/consts";
+import { getSessionUser } from "@repo/auth/session";
+import { prisma } from "@repo/db";
+import { pagination } from "@repo/lib/utils/pagination";
 import Pagination from "@repo/ui/components/custom/Pagination";
 import Search from "@repo/ui/components/custom/Search";
 import SavedDielinesList from "./SavedDielinesList";
-import { prisma } from "@repo/db";
-import { getSessionUser } from "@repo/auth/session";
 
-const page = async () => {
+interface Props {
+  searchParams: Promise<{ page: string }>;
+}
+
+const page = async ({ searchParams }: Props) => {
+  const { page } = await searchParams;
+  const { skip, take } = pagination(page, 1);
+
   const user = await getSessionUser();
 
+  const where = { userId: user?.id };
   const savedDielines = await prisma.savedDieline.findMany({
-    where: { userId: user?.id }, //todo
+    where,
     include: { settings: true, dieline: true },
     orderBy: { id: "desc" },
+    skip,
+    take,
   });
+
+  const totalSavedDielines = await prisma.savedDieline.count({ where });
 
   if (!user?.plan?.isPremium) return <div>فقط در اشتراک حرفه ای و سازمانی</div>;
   // todo: searching
@@ -24,7 +36,7 @@ const page = async () => {
       </div>
 
       <SavedDielinesList data={savedDielines} plan={user.plan} />
-      <Pagination pageSize={globalPageSize} totalItems={savedDielines.length} />
+      <Pagination pageSize={1} totalItems={totalSavedDielines} lang="fa" />
     </div>
   );
 };

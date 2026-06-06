@@ -1,22 +1,46 @@
 import { CategoriesForm } from "@/components/forms/CategoriesForm";
 import PageTitle from "@/components/PageTitle";
-import Pagination from "@repo/ui/components/custom/Pagination";
-import CategoriesList from "./CategoriesList";
-import PopupNewDialog from "@repo/ui/components/custom/PopupNewDialog";
-import { globalPageSize } from "@repo/lib/data/consts";
-import Search from "@repo/ui/components/custom/Search";
-import Filter from "@repo/ui/components/custom/Filter";
 import { prisma } from "@repo/db";
+import { globalPageSize } from "@repo/lib/data/consts";
+import { pagination } from "@repo/lib/utils/pagination";
+import Filter from "@repo/ui/components/custom/Filter";
+import Pagination from "@repo/ui/components/custom/Pagination";
+import PopupNewDialog from "@repo/ui/components/custom/PopupNewDialog";
+import Search from "@repo/ui/components/custom/Search";
 import { DialogTitle } from "@repo/ui/components/dialog";
+import CategoriesList from "./CategoriesList";
 
-const page = async () => {
+interface Props {
+  searchParams: Promise<{ pageByUsage: string; pageByModel: string }>;
+}
+
+const page = async ({ searchParams }: Props) => {
+  const { pageByModel, pageByUsage } = await searchParams;
+  const { skip: skipPageByUsage, take: takePageByUsage } = pagination(
+    pageByUsage,
+    globalPageSize,
+  );
+  const { skip: skipPageByModel, take: takePageByModel } = pagination(
+    pageByModel,
+    globalPageSize,
+  );
+
   const dielineIncludes = {
     include: { _count: { select: { dieline: true } } },
   };
-  const catByUsage =
-    await prisma.dielineCategoryByUsage.findMany(dielineIncludes);
-  const catByModel =
-    await prisma.dielineCategoryByModel.findMany(dielineIncludes);
+  const catByUsage = await prisma.dielineCategoryByUsage.findMany({
+    ...dielineIncludes,
+    take: takePageByUsage,
+    skip: skipPageByUsage,
+  });
+
+  const catByModel = await prisma.dielineCategoryByModel.findMany({
+    ...dielineIncludes,
+    take: takePageByModel,
+    skip: skipPageByModel,
+  });
+  const totalCatByUsage = await prisma.dielineCategoryByUsage.count();
+  const totalCatByModel = await prisma.dielineCategoryByModel.count();
 
   return (
     <div className="grid grid-cols-2 gap-8">
@@ -46,7 +70,7 @@ const page = async () => {
 
         <Pagination
           pageSize={globalPageSize}
-          totalItems={catByUsage.length}
+          totalItems={totalCatByUsage}
           paramName="pageByUsage"
         />
       </div>
@@ -78,7 +102,7 @@ const page = async () => {
 
         <Pagination
           pageSize={globalPageSize}
-          totalItems={catByModel.length}
+          totalItems={totalCatByModel}
           paramName="pageByModel"
         />
       </div>

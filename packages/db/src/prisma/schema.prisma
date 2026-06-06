@@ -288,7 +288,7 @@ model Plan {
   status        PlanStatus        @default(active)
   histories     DownloadHistory[]
 
-  payment   Payment? @relation(fields: [paymentId], references: [id], onDelete: Restrict)
+  payment   Payment? @relation(fields: [paymentId], references: [id], onDelete: Cascade)
   paymentId Int?     @unique
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    Int

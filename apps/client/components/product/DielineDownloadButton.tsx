@@ -10,11 +10,11 @@ import { Dialog, DialogContent, DialogTitle } from "@repo/ui/components/dialog";
 import { Spinner } from "@repo/ui/components/spinner";
 import { cn } from "@repo/ui/lib/utils";
 import { BookmarkPlus, Download } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import LoginCard from "../forms/LoginCard";
 import SaveDielineForm from "../forms/SaveDielineForm";
-import { redirect } from "next/navigation";
 
 export interface UserType extends User {
   plan: Plan | null;
@@ -27,6 +27,7 @@ interface Props {
 }
 
 const DielineDownloadButton = ({ slug, isRendering, user }: Props) => {
+  const router = useRouter();
   const { settings } = useDielineSettingsStore();
   const { svg } = useSVGStore();
   const { startLoading, stopLoading, isLoading } = useLoading();
@@ -45,11 +46,13 @@ const DielineDownloadButton = ({ slug, isRendering, user }: Props) => {
 
   const onDownload = async () => {
     if (!user) {
-      redirect("/login?callbackUrl=/subscription");
+      router.push("/login?callbackUrl=/subscription");
+      return;
     }
 
     if (!user.plan) {
-      redirect("/subscription");
+      router.push("/subscription");
+      return;
     }
 
     if (!svg || isRendering) {

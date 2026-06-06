@@ -69,6 +69,8 @@ export default function DielineSettings({ slug, isRendering, user }: Props) {
     dimension.raw.width,
   );
 
+  const isPremium = !!user && user.plan?.isPremium;
+
   return (
     <Card className="h-full flex flex-col justify-between p-6 z-10">
       <div className="space-y-5">
@@ -120,12 +122,12 @@ export default function DielineSettings({ slug, isRendering, user }: Props) {
         </Section>
 
         <Section
-          isPremium={user?.plan?.isPremium}
+          isPremium={isPremium}
           title="اندازه بلید"
           infoContent={<BleedGuide />}
         >
           <Select
-            disabled={!user?.plan?.isPremium}
+            disabled={!isPremium}
             value={String(bleed)}
             onValueChange={(val: string) => setSetting("bleed", +val)}
             dir="rtl"
@@ -153,14 +155,11 @@ export default function DielineSettings({ slug, isRendering, user }: Props) {
         </Section>
 
         <Section
-          isPremium={user?.plan?.isPremium}
+          isPremium={isPremium}
           title="ضخامت"
           infoContent={<ThicknessGuide />}
         >
-          <ThicknessInput
-            isRendering={isRendering}
-            isPremium={user?.plan?.isPremium}
-          />
+          <ThicknessInput isRendering={isRendering} isPremium={isPremium} />
         </Section>
 
         <Section title="نوع ابعاد" infoContent={<DimensionTypeGuide />}>

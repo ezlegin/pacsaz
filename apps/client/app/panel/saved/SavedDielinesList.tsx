@@ -38,7 +38,9 @@ const SavedDielinesList = ({
         <TableCell>
           <Tooltip>
             <TooltipTrigger>{title}</TooltipTrigger>
-            <TooltipContent>{description}</TooltipContent>
+            <TooltipContent>
+              {description === "" ? "بدون توضیحات" : description}
+            </TooltipContent>
           </Tooltip>
         </TableCell>
         <TableCell className="text-center">{dieline?.title}</TableCell>
@@ -62,17 +64,20 @@ const SavedDielinesList = ({
             </ActButton>
           </Link>
         </TableCell>
-        <TableCell className="text-left">
-          <ActionButton icon={Pencil}>
-            <DialogTitle>ویرایش قالب</DialogTitle>
-            <SaveDielineForm
-              plan={plan}
-              settings={settings!}
-              slug={dieline?.slug}
-              savedDieline={data}
-            />
-          </ActionButton>
-          <DeleteButton deleteFn={deleteSavedDieline} id={data.id} />
+        <TableCell>
+          <div className="flex justify-end gap-2">
+            <ActionButton icon={Pencil}>
+              <DialogTitle>ویرایش قالب</DialogTitle>
+              <SaveDielineForm
+                plan={plan}
+                settings={settings!}
+                slug={dieline?.slug}
+                savedDieline={data}
+              />
+            </ActionButton>
+
+            <DeleteButton deleteFn={deleteSavedDieline} id={data.id} />
+          </div>
         </TableCell>
       </TableRow>
     );

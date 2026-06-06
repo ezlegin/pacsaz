@@ -27,6 +27,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import SearchCustomers from "../SearchCustomers";
+import { cn } from "@repo/ui/lib/utils";
 
 const SaveDielineForm = ({
   settings,
@@ -69,12 +70,13 @@ const SaveDielineForm = ({
       : await createSaveDieline(data, slug);
 
     handleRes(res, { onSuccess: () => router.refresh() });
+    form.reset();
 
     stopLoading();
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 ">
       {!plan.isPremium && (
         <Badge variant={"lightRed"} className="p-2 px-4">
           <Diamond />
@@ -103,18 +105,20 @@ const SaveDielineForm = ({
       </ul>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className={cn(
+            !plan.isPremium && "opacity-50 pointer-events-none",
+            "space-y-5",
+          )}
+        >
           <FormField
             control={form.control}
             name="title"
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Input
-                    disabled={!plan.isPremium}
-                    {...field}
-                    placeholder="عنوان"
-                  />
+                  <Input {...field} placeholder="عنوان" />
                 </FormControl>
               </FormItem>
             )}
@@ -126,11 +130,7 @@ const SaveDielineForm = ({
             render={({ field }) => (
               <FormItem>
                 <FormControl>
-                  <Input
-                    disabled={!plan.isPremium}
-                    {...field}
-                    placeholder="توضیح کوتاه"
-                  />
+                  <Input {...field} placeholder="توضیح کوتاه" />
                 </FormControl>
               </FormItem>
             )}

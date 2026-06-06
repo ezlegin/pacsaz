@@ -1,25 +1,36 @@
-import { globalPageSize } from "@repo/lib/data/consts";
+import { getSessionUser } from "@repo/auth/session";
+import { prisma } from "@repo/db";
+import { pagination } from "@repo/lib/utils/pagination";
 import Pagination from "@repo/ui/components/custom/Pagination";
 import SubscriptionsList from "./SuscriptionsList";
-import { prisma } from "@repo/db";
-import { getSessionUser } from "@repo/auth/session";
+import { globalPageSize } from "@repo/lib/data/consts";
 
-const page = async () => {
+interface Props {
+  searchParams: Promise<{ page: string }>;
+}
+
+const page = async ({ searchParams }: Props) => {
+  const { page } = await searchParams;
+
   const user = await getSessionUser();
-  const payments = await prisma.plan.findMany({
-    where: { userId: user?.id },
+  const { skip, take } = pagination(page, globalPageSize);
+
+  const where = { userId: user?.id };
+
+  const plans = await prisma.plan.findMany({
+    where,
     include: { payment: true },
     orderBy: { id: "desc" },
+    take,
+    skip,
   });
+
+  const totalPlans = await prisma.plan.count({ where });
 
   return (
     <div className="space-y-3">
-      <SubscriptionsList data={payments} />
-      <Pagination
-        pageSize={globalPageSize}
-        totalItems={payments.length}
-        lang="fa"
-      />
+      <SubscriptionsList data={plans} />
+      <Pagination pageSize={globalPageSize} totalItems={totalPlans} lang="fa" />
     </div>
   );
 };

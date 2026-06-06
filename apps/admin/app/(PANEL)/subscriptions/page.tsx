@@ -5,12 +5,23 @@ import Filter from "@repo/ui/components/custom/Filter";
 import Pagination from "@repo/ui/components/custom/Pagination";
 import Search from "@repo/ui/components/custom/Search";
 import SubscriptionsList from "./SubscriptionsList";
+import { pagination } from "@repo/lib/utils/pagination";
 
-const page = async () => {
+interface Props {
+  searchParams: Promise<{ page: string }>;
+}
+
+const page = async ({ searchParams }: Props) => {
+  const { page } = await searchParams;
+  const { skip, take } = pagination(page, globalPageSize);
+
   const plans = await prisma.plan.findMany({
     include: { user: true, payment: true },
     orderBy: { id: "desc" },
+    skip,
+    take,
   });
+  const totalPlans = await prisma.plan.count();
 
   return (
     <div className="space-y-3">
@@ -32,7 +43,7 @@ const page = async () => {
 
       <SubscriptionsList data={plans} />
 
-      <Pagination pageSize={globalPageSize} totalItems={plans.length} />
+      <Pagination pageSize={globalPageSize} totalItems={totalPlans} />
     </div>
   );
 };

@@ -8,12 +8,23 @@ import PopupNewDialog from "@repo/ui/components/custom/PopupNewDialog";
 import Search from "@repo/ui/components/custom/Search";
 import { DialogTitle } from "@repo/ui/components/dialog";
 import PaymentsList from "./PaymentsList";
+import { pagination } from "@repo/lib/utils/pagination";
 
-const page = async () => {
+interface Props {
+  searchParams: Promise<{ page: string }>;
+}
+
+const page = async ({ searchParams }: Props) => {
+  const { page } = await searchParams;
+  const { skip, take } = pagination(page, globalPageSize);
+
   const payments = await prisma.payment.findMany({
     include: { plan: true, user: true, coupon: { include: { tarrif: true } } },
     orderBy: { id: "desc" },
+    skip,
+    take,
   });
+  const totalPayments = await prisma.payment.count();
   const tarrif = await prisma.tarrif.findMany({ include: { price: true } });
 
   return (
@@ -43,7 +54,7 @@ const page = async () => {
 
       <PaymentsList data={payments} tarrif={tarrif} />
 
-      <Pagination pageSize={globalPageSize} totalItems={payments.length} />
+      <Pagination pageSize={globalPageSize} totalItems={totalPayments} />
     </div>
   );
 };

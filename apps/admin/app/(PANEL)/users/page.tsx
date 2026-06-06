@@ -7,12 +7,21 @@ import PopupNewDialog from "@repo/ui/components/custom/PopupNewDialog";
 import Search from "@repo/ui/components/custom/Search";
 import { DialogTitle } from "@repo/ui/components/dialog";
 import UsersList from "./UsersList";
+import { pagination } from "@repo/lib/utils/pagination";
 
-const page = async () => {
+interface Props {
+  searchParams: Promise<{ page: string }>;
+}
+
+const page = async ({ searchParams }: Props) => {
+  const { page } = await searchParams;
+  const { skip, take } = pagination(page, globalPageSize);
   const users = await prisma.user.findMany({
-    take: 10,
     orderBy: { joinedAt: "desc" },
+    skip,
+    take,
   });
+  const totalUsers = await prisma.user.count();
 
   // todo: sorting and searching
 
@@ -31,7 +40,7 @@ const page = async () => {
 
       <UsersList data={users} />
 
-      <Pagination pageSize={globalPageSize} totalItems={users.length} />
+      <Pagination pageSize={globalPageSize} totalItems={totalUsers} />
     </div>
   );
 };

@@ -35,6 +35,6 @@ export default Navbar;
 
 const navbarMenu = [
   { label: "قالب ها", href: "/dielines" },
-  { label: "آموزش", href: "https://igraphical.ir/courses/packaging" },
   { label: "درباره ما", href: "/about-us" },
+  { label: "آموزش", href: "https://igraphical.ir/courses/packaging" },
 ];

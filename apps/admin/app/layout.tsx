@@ -1,6 +1,6 @@
-import "@repo/ui/globals.css";
+import { favIcon } from "@/public";
 import { Toaster } from "@repo/ui/components/sonner";
-import { pacsazLogoIcon } from "@/public";
+import "@repo/ui/globals.css";
 
 export default function RootLayout({
   children,
@@ -27,6 +27,6 @@ export default function RootLayout({
 export const metadata = {
   title: "Pacsaz",
   icons: {
-    icon: pacsazLogoIcon,
+    icon: favIcon,
   },
 };

@@ -18,12 +18,12 @@ const CustomersList = ({ data }: { data: Customer[] }) => {
         <TableCell className="text-center">{phoneNumber}</TableCell>
         <TableCell className="text-center">{email}</TableCell>
         <TableCell className="text-center">{address}</TableCell>
-        <TableCell className="text-left space-x-2">
-          <DeleteButton deleteFn={deleteCustomer} id={data.id} />
+        <TableCell className="flex justify-end gap-2">
           <ActionButton icon={Pencil}>
             <DialogTitle>مشتری</DialogTitle>
             <CustomerForm type="update" customer={data} />
           </ActionButton>
+          <DeleteButton deleteFn={deleteCustomer} id={data.id} />
         </TableCell>
       </TableRow>
     );

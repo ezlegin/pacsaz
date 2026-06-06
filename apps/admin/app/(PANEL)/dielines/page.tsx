@@ -8,8 +8,15 @@ import PopupNewDialog from "@repo/ui/components/custom/PopupNewDialog";
 import Search from "@repo/ui/components/custom/Search";
 import { DialogTitle } from "@repo/ui/components/dialog";
 import DielinesList from "./DielinesList";
+import { pagination } from "@repo/lib/utils/pagination";
 
-const page = async () => {
+interface Props {
+  searchParams: Promise<{ page: string }>;
+}
+
+const page = async ({ searchParams }: Props) => {
+  const { page } = await searchParams;
+  const { skip, take } = pagination(page, globalPageSize);
   const dielines = await prisma.dieline.findMany({
     include: {
       settings: true,
@@ -22,7 +29,10 @@ const page = async () => {
       },
     },
     orderBy: { createdAt: "desc" },
+    skip,
+    take,
   });
+  const totalDieliens = await prisma.dieline.count();
   const categories = {
     byModel: await prisma.dielineCategoryByModel.findMany(),
     byUsage: await prisma.dielineCategoryByUsage.findMany(),
@@ -55,7 +65,7 @@ const page = async () => {
 
       <DielinesList data={dielines} categories={categories} />
 
-      <Pagination pageSize={globalPageSize} totalItems={dielines.length} />
+      <Pagination pageSize={globalPageSize} totalItems={totalDieliens} />
     </div>
   );
 };

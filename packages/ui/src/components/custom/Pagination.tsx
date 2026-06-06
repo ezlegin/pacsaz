@@ -14,19 +14,19 @@ interface Props {
 const Pagination = ({
   pageSize,
   totalItems,
-  paramName,
+  paramName = "page",
   lang = "en",
 }: Props) => {
   const pageCount = Math.ceil(totalItems / pageSize);
 
   const router = useRouter();
   const searchParams = useSearchParams();
-  const currentPage = parseInt(searchParams.get("page") || "1");
+  const currentPage = parseInt(searchParams.get(paramName) || "1");
 
   const pageHandler = (pageAction: PageAction) => {
     const page = currentPage + (pageAction === "inc" ? 1 : -1);
     const params = new URLSearchParams(Array.from(searchParams.entries()));
-    params.set(paramName ?? "page", page.toString());
+    params.set(paramName, page.toString());
 
     router.push(`?${params.toString()}`);
   };
@@ -34,7 +34,10 @@ const Pagination = ({
   if (pageCount < 2) return null;
 
   return (
-    <div className="text-sm flex items-center">
+    <div
+      dir={lang === "en" ? "ltr" : "rtl"}
+      className="text-sm flex items-center"
+    >
       <PageButton
         pageAction="dec"
         pageHandler={pageHandler}
