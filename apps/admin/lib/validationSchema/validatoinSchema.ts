@@ -68,6 +68,14 @@ export const featureFormSchema = z.object({
 });
 export type FeatureFormType = z.infer<typeof featureFormSchema>;
 
+export const adminFormSchema = z.object({
+  fullName: z.string().min(1),
+  email: z.string().email(),
+  phoneNumber: z.string().min(1),
+  password: z.string().min(6).optional(),
+});
+export type AdminFormType = z.infer<typeof adminFormSchema>;
+
 export const userFormSchema = z.object({
   firstName: z.string().min(1),
   lastName: z.string().min(1),

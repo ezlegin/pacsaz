@@ -1,10 +1,13 @@
 "use client";
 
+import { verifyLogin } from "@/actions/login/login";
 import {
   inputFormSchema,
   InputFormType,
 } from "@/lib/validationSchema/validatoinSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { handleRes } from "@repo/lib/utils/handleRes";
+import { useLoading } from "@repo/lib/utils/useLoading";
 import { Button } from "@repo/ui/components/button";
 import {
   Form,
@@ -13,10 +16,12 @@ import {
   FormItem,
 } from "@repo/ui/components/form";
 import { Input } from "@repo/ui/components/input";
+import { Spinner } from "@repo/ui/components/spinner";
 import { Lock, Mail } from "lucide-react";
 import { useForm } from "react-hook-form";
 
 export function LoginForm() {
+  const { startLoading, stopLoading, isLoading } = useLoading();
   const form = useForm<InputFormType>({
     resolver: zodResolver(inputFormSchema),
     defaultValues: {
@@ -25,9 +30,15 @@ export function LoginForm() {
     },
   });
 
-  function onSubmit(data: InputFormType) {
-    console.log(data);
-  }
+  const onSubmit = async (data: InputFormType) => {
+    startLoading();
+
+    const res = await verifyLogin(data.email, data.password);
+
+    handleRes(res);
+
+    stopLoading();
+  };
 
   return (
     <Form {...form}>
@@ -78,9 +89,10 @@ export function LoginForm() {
         />
         <Button
           size={"lg"}
-          disabled={!form.formState.isValid}
+          disabled={!form.formState.isValid || isLoading}
           className="w-full"
         >
+          <Spinner isLoading={isLoading} />
           Log In
         </Button>
       </form>

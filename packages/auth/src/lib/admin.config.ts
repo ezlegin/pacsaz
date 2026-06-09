@@ -1,6 +1,7 @@
 import { prisma } from "@repo/db";
 import { NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import bcrypt from "bcrypt";
 
 export default {
   pages: {
@@ -33,16 +34,20 @@ export default {
         password: {},
       },
       authorize: async (credentials) => {
-        const { email } = credentials as {
+        const { email, password } = credentials as {
           email: string;
+          password: string;
         };
 
         if (!email) {
           throw new Error("Invalid Credentials");
         }
 
-        const admin = await prisma.admin.findFirst({ where: { email: email } });
-        if (!admin) throw new Error("User Not Found");
+        const admin = await prisma.admin.findFirst({ where: { email } });
+        if (!admin) throw new Error("Invalid Credentials");
+
+        const isValidPassword = await bcrypt.compare(admin.password, password);
+        if (!isValidPassword) throw new Error("Invalid Credentials");
 
         return { id: admin.id.toString() };
       },
