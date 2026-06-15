@@ -84,6 +84,7 @@ model Dieline {
   id             Int      @id @default(autoincrement())
   title          String
   slug           String   @unique
+  image          String?
   specification  String   @db.MediumText
   variable       String
   createdAt      DateTime @default(now())

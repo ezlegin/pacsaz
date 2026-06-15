@@ -1,5 +1,4 @@
-import { tuckEndModel } from "@/public";
-
+import { placeholder } from "@/public";
 import { formatDimensions } from "@/utils/formatDimensions";
 import { applyDimensionOffset } from "@repo/dieline-core/utils/applyDimensionOffset";
 import { resolveOffsets } from "@repo/dieline-core/utils/offsetResolver";
@@ -14,7 +13,7 @@ import {
 } from "@repo/ui/components/dialog";
 import Image from "next/image";
 
-const ProductInfo = () => {
+const ProductInfo = ({ imageSrc }: { imageSrc: string | null }) => {
   const offset = resolveOffsets();
 
   const {
@@ -126,10 +125,10 @@ const ProductInfo = () => {
           <DialogTrigger>
             <Image
               alt=""
-              src={tuckEndModel}
+              src={imageSrc ?? placeholder}
               width={300}
               height={300}
-              className="bg-accent rounded-2xl cursor-pointer"
+              className="bg-accent rounded-2xl cursor-pointer aspect-square object-cover"
             />
           </DialogTrigger>
           <DialogContent
@@ -140,7 +139,7 @@ const ProductInfo = () => {
               <DialogTitle className="sr-only" />
               <Image
                 alt=""
-                src={tuckEndModel}
+                src={imageSrc ?? placeholder}
                 width={700}
                 height={700}
                 className="bg-accent rounded-2xl"

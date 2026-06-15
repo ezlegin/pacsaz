@@ -59,7 +59,7 @@ const DielineGenerator = ({
           </div>
         </div>
 
-        <ProductInfo />
+        <ProductInfo imageSrc={dieline.image} />
       </div>
     </div>
   );

@@ -54,5 +54,6 @@ export async function generateMetadata({
 
   return {
     title: `دایلاین ${dieline.title}`,
+    description: `دانلود دایلاین ${dieline.title}`,
   };
 }
