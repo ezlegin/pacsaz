@@ -1,16 +1,16 @@
 "use client";
 
 import { DielineType } from "@/data/types";
+import { CustomDielineSettings } from "@repo/db";
 import { useDielineGenerator } from "@repo/dieline-core/hooks/useDielineGenerator";
 import { useDeveloperToolsStore } from "@repo/store/dieline/developerTools.store";
 import { ISpec } from "@repo/store/editor/dielineSpec.store";
 import dynamic from "next/dynamic";
 import { useEffect } from "react";
+import { UserType } from "./DielineDownloadButton";
 import DielineLoadingOverlay from "./DielineLoadingOverlay";
 import DielineSettings from "./DielineSettings";
 import ProductInfo from "./ProductInfo";
-import { CustomDielineSettings } from "@repo/db";
-import { UserType } from "./DielineDownloadButton";
 const SVGPreview = dynamic(
   () => import("@repo/ui/components/custom/SVGPreview"),
   { ssr: false },
@@ -59,7 +59,7 @@ const DielineGenerator = ({
           </div>
         </div>
 
-        <ProductInfo imageSrc={dieline.image} />
+        <ProductInfo imageSrc={dieline.image?.url} />
       </div>
     </div>
   );

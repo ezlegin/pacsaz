@@ -19,6 +19,7 @@ const page = async ({ searchParams }: Props) => {
   const { skip, take } = pagination(page, globalPageSize);
   const dielines = await prisma.dieline.findMany({
     include: {
+      image: true,
       settings: true,
       categoryByModel: true,
       categoryByUsage: true,

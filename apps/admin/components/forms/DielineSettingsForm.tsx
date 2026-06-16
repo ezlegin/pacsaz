@@ -32,6 +32,7 @@ import { Separator } from "@repo/ui/components/separator";
 import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import ImageField from "../ImageField";
 
 const DielineSettingsForm = ({
   categories,
@@ -116,6 +117,13 @@ const DielineSettingsForm = ({
               </FormControl>
             </FormItem>
           )}
+        />
+
+        <ImageField
+          control={form.control}
+          setValue={form.setValue}
+          public_id={dieline?.image?.publicId}
+          image={dieline?.image?.url}
         />
 
         <div className="grid grid-cols-2">

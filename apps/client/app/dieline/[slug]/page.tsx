@@ -14,6 +14,7 @@ const getDieline = async (slug: string) => {
     where: { slug, active: true },
     include: {
       settings: true,
+      image: true,
     },
   });
 };

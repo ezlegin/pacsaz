@@ -3,11 +3,13 @@ import DeleteButton from "@/components/DeleteButton";
 import DielineStatusSetter from "@/components/DielineStatusSetter";
 import DielineSettingsForm from "@/components/forms/DielineSettingsForm";
 import { mainURL } from "@/data/envs";
+import { placeholder } from "@/public";
 import {
   Dieline,
   DielineCategoryByModel,
   DielineCategoryByUsage,
   DielineSettings,
+  Image as ImageType,
 } from "@repo/db";
 import { Badge } from "@repo/ui/components/badge";
 import ActionButton from "@repo/ui/components/custom/ActionButton";
@@ -21,9 +23,11 @@ import {
   TooltipTrigger,
 } from "@repo/ui/components/tooltip";
 import { ArrowUpRight, Pencil, Settings } from "lucide-react";
+import Image from "next/image";
 
 export interface DielineType extends Dieline {
   settings: DielineSettings;
+  image: ImageType | null;
   categoryByUsage: DielineCategoryByUsage[];
   categoryByModel: DielineCategoryByModel[];
   _count: { downloadHistory: number };
@@ -44,7 +48,15 @@ const DielinesList = ({
   const renderRows = (dieline: DielineType) => {
     return (
       <TableRow key={dieline.id}>
-        <TableCell>{dieline.id}</TableCell>
+        <TableCell>
+          <Image
+            src={dieline.image?.url ?? placeholder}
+            alt=""
+            width={45}
+            height={45}
+            className="object-cover aspect-square rounded-sm"
+          />
+        </TableCell>
         <TableCell className="text-center">
           <a
             target="_blank"

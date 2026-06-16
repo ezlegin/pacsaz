@@ -6,6 +6,8 @@ import {
 } from "@/lib/validationSchema/validatoinSchema";
 import { prisma } from "@repo/db";
 import { materials as allMats } from "@repo/store/data/dieline";
+import { uploadCloudFile } from "./cloudinary";
+import { UploadApiResponse } from "cloudinary";
 
 export const createDieline = async (data: DielineMetadataFormType) => {
   const {
@@ -18,16 +20,18 @@ export const createDieline = async (data: DielineMetadataFormType) => {
     minDimensions,
     categoryByModel,
     categoryByUsage,
+    image,
   } = data;
 
   try {
+    // todo: use TSX
     const existingDieline = await prisma.dieline.findFirst({ where: { slug } });
     if (existingDieline) {
       return { error: "Slug Should Be Unique." };
     }
 
-    const defaultMaterial = materials.split(",")[0]!;
-    await prisma.dieline.create({
+    const defaultMaterial = materials.split(",")[0]!; // todo: get from form
+    const newDieline = await prisma.dieline.create({
       data: {
         slug,
         title,
@@ -50,8 +54,8 @@ export const createDieline = async (data: DielineMetadataFormType) => {
         },
         settings: {
           create: {
-            material: materials.split(",")[0]!, // todo
-            dimensionType: "manufacture", // todo
+            material: materials.split(",")[0]!, // todo: get from form
+            dimensionType: "manufacture", // todo: get from form
             thickness:
               allMats.find((m) => m.value === defaultMaterial)?.thickness ??
               0.5,
@@ -64,7 +68,29 @@ export const createDieline = async (data: DielineMetadataFormType) => {
       },
     });
 
-    return { success: "Dieline Saved Successfully.", slug };
+    if (image && image instanceof File) {
+      const buffer = Buffer.from(await image.arrayBuffer());
+
+      const { secure_url, public_id } = (await uploadCloudFile(buffer, {
+        folder: "dieline",
+        width: 800,
+        resource_type: "image",
+      })) as UploadApiResponse;
+
+      await prisma.image.create({
+        data: {
+          publicId: public_id,
+          url: secure_url,
+          dieline: {
+            connect: {
+              id: newDieline.id,
+            },
+          },
+        },
+      });
+    }
+
+    return { success: "Dieline Created Successfully.", slug };
   } catch (error) {
     console.error(error);
     return { error: (error as Error).message };

@@ -73,10 +73,19 @@ model Otp {
   phoneNumber String
   code        String
   expiresAt   DateTime
-  // user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  // userId      Int?
 
   @@unique([code, phoneNumber])
+}
+
+//! IMAGE  --------------------------------
+
+model Image {
+  id        Int      @id @default(autoincrement())
+  url       String
+  publicId  String   @unique
+  createdAt DateTime @default(now())
+  dieline   Dieline  @relation(fields: [dielineId], references: [id])
+  dielineId Int      @unique
 }
 
 //! DIELINE --------------------------------
@@ -84,7 +93,6 @@ model Dieline {
   id             Int      @id @default(autoincrement())
   title          String
   slug           String   @unique
-  image          String?
   specification  String   @db.MediumText
   variable       String
   createdAt      DateTime @default(now())
@@ -96,6 +104,7 @@ model Dieline {
   minLength      Float
   minHeight      Float
 
+  image           Image?
   categoryByUsage DielineCategoryByUsage[]
   categoryByModel DielineCategoryByModel[]
   downloadHistory DownloadHistory[]

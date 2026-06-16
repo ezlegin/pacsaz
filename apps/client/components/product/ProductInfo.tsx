@@ -13,7 +13,7 @@ import {
 } from "@repo/ui/components/dialog";
 import Image from "next/image";
 
-const ProductInfo = ({ imageSrc }: { imageSrc: string | null }) => {
+const ProductInfo = ({ imageSrc }: { imageSrc?: string | null }) => {
   const offset = resolveOffsets();
 
   const {
