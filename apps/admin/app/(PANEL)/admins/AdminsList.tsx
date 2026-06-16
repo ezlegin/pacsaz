@@ -1,3 +1,4 @@
+import { deleteAdmin } from "@/actions/admin";
 import DeleteButton from "@/components/DeleteButton";
 import { AdminForm } from "@/components/forms/AdminForm";
 import { Admin } from "@repo/db";
@@ -42,7 +43,5 @@ const columns = [
   { label: "Full Name" },
   { label: "Phone Number" },
   { label: "Email" },
-  { label: "Type" },
-  { label: "Joined At" },
   { label: "Action" },
 ];

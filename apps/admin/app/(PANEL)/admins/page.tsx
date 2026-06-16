@@ -1,13 +1,13 @@
-import { UserForm } from "@/components/forms/UserForm";
+import { AdminForm } from "@/components/forms/AdminForm";
 import PageTitle from "@/components/PageTitle";
 import { prisma } from "@repo/db";
 import { globalPageSize } from "@repo/lib/data/consts";
+import { pagination } from "@repo/lib/utils/pagination";
 import Pagination from "@repo/ui/components/custom/Pagination";
 import PopupNewDialog from "@repo/ui/components/custom/PopupNewDialog";
 import Search from "@repo/ui/components/custom/Search";
 import { DialogTitle } from "@repo/ui/components/dialog";
-import AdminsList from "./UsersList";
-import { pagination } from "@repo/lib/utils/pagination";
+import AdminsList from "./AdminsList";
 
 interface Props {
   searchParams: Promise<{ page: string }>;
@@ -27,14 +27,14 @@ const page = async ({ searchParams }: Props) => {
 
   return (
     <div className="space-y-3">
-      <PageTitle title="Users" />
+      <PageTitle title="Admins" />
 
       <div className="flex justify-between">
-        <Search placeholder="Search Users" />
+        <Search placeholder="Search Admins" />
 
-        <PopupNewDialog buttonTitle="New User">
-          <DialogTitle>New User</DialogTitle>
-          <UserForm />
+        <PopupNewDialog buttonTitle="New Admin">
+          <DialogTitle>New Admin</DialogTitle>
+          <AdminForm />
         </PopupNewDialog>
       </div>
 

@@ -1,13 +1,12 @@
 "use client";
 
-import { createUser, updateUser } from "@/actions/user";
+import { createAdmin, updateAdmin } from "@/actions/admin";
 import {
   adminFormSchema,
   AdminFormType,
 } from "@/lib/validationSchema/validatoinSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Admin } from "@repo/db";
-import { UserType } from "@repo/lib/data/types";
 import { handleRes } from "@repo/lib/utils/handleRes";
 import { useLoading } from "@repo/lib/utils/useLoading";
 import {
@@ -39,8 +38,8 @@ export function AdminForm({ admin }: { admin?: Admin }) {
     startLoading();
 
     const res = admin
-      ? await updateUser(data, admin.id)
-      : await createUser(data);
+      ? await updateAdmin(data, admin.id)
+      : await createAdmin(data);
 
     handleRes(res, { onSuccess: () => router.refresh() });
 
@@ -111,16 +110,3 @@ export function AdminForm({ admin }: { admin?: Admin }) {
     </Form>
   );
 }
-
-const userTypes: {
-  label: string;
-  key: UserType;
-}[] = [
-  { label: "Designer", key: "designer" },
-  { label: "Design Studio", key: "designStudio" },
-  { label: "Student", key: "student" },
-  { label: "Print House", key: "printHouse" },
-  { label: "Dieline Maker", key: "dielineMaker" },
-  { label: "Packaging Factory", key: "packagingFactory" },
-  { label: "Other", key: "other" },
-];

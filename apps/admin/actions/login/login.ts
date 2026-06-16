@@ -17,5 +17,3 @@ export const verifyLogin = async (email: string, password: string) => {
     return { error: (error as Error).message };
   }
 };
-
-// 09126411485 mohandes arbati

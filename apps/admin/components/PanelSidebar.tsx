@@ -19,7 +19,9 @@ import {
   List,
   Ratio,
   Ticket,
+  UserCheck,
   Users,
+  UserStar,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -94,6 +96,11 @@ export function PanelSidebar() {
       groupLabel: "Usre Management",
       items: [
         {
+          title: "Admins",
+          url: "/admins",
+          icon: UserStar,
+        },
+        {
           title: "Users",
           url: "/users",
           icon: Users,
@@ -101,7 +108,7 @@ export function PanelSidebar() {
         {
           title: "Customers",
           url: "/customers",
-          icon: Users,
+          icon: UserCheck,
         },
       ],
     },
