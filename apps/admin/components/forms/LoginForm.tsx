@@ -18,9 +18,11 @@ import {
 import { Input } from "@repo/ui/components/input";
 import { Spinner } from "@repo/ui/components/spinner";
 import { Lock, Mail } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 
 export function LoginForm() {
+  const router = useRouter();
   const { startLoading, stopLoading, isLoading } = useLoading();
   const form = useForm<InputFormType>({
     resolver: zodResolver(inputFormSchema),
@@ -35,7 +37,7 @@ export function LoginForm() {
 
     const res = await verifyLogin(data.email, data.password);
 
-    handleRes(res);
+    handleRes(res, { onSuccess: () => router.refresh() });
 
     stopLoading();
   };

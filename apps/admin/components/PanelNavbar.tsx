@@ -1,7 +1,8 @@
 import { mainURL } from "@/data/envs";
 import { Button } from "@repo/ui/components/button";
-import { Home, LogOut } from "lucide-react";
+import { Home } from "lucide-react";
 import Link from "next/link";
+import LogoutButton from "./LogoutButton";
 
 const PanelNavbar = () => {
   return (
@@ -19,10 +20,7 @@ const PanelNavbar = () => {
           </Link>
         </div>
 
-        <Button variant={"ghost"}>
-          <span>Log Out</span>
-          <LogOut size={20} className="text-destructive/50" />
-        </Button>
+        <LogoutButton />
       </div>
     </div>
   );

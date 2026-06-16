@@ -39,14 +39,14 @@ export default {
           password: string;
         };
 
-        if (!email) {
+        if (!email || !password) {
           throw new Error("Invalid Credentials");
         }
 
-        const admin = await prisma.admin.findFirst({ where: { email } });
+        const admin = await prisma.admin.findUnique({ where: { email } });
         if (!admin) throw new Error("Invalid Credentials");
 
-        const isValidPassword = await bcrypt.compare(admin.password, password);
+        const isValidPassword = await bcrypt.compare(password, admin.password);
         if (!isValidPassword) throw new Error("Invalid Credentials");
 
         return { id: admin.id.toString() };
