@@ -17,6 +17,7 @@ const page = async ({ searchParams }: Props) => {
         { categoryByUsage: { some: { slug: category } } },
       ],
     },
+    include: { image: true },
   });
 
   const categoriesByModel = (

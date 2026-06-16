@@ -1,5 +1,6 @@
+import DemoContainer from "@/components/DemoContainer";
 import ProgressBarProvider from "@/components/ProgressBarProvider";
-import { favIcon, pacsazLogoIcon } from "@/public";
+import { favIcon } from "@/public";
 import { Toaster } from "@repo/ui/components/sonner";
 import "@repo/ui/globals.css";
 
@@ -13,7 +14,10 @@ export default async function RootLayout({
   return (
     <html lang="fa" dir="rtl" suppressHydrationWarning>
       <body style={{ fontFamily }} className="antialiased">
-        <ProgressBarProvider>{children}</ProgressBarProvider>
+        <div className="hidden md:block">
+          <ProgressBarProvider>{children}</ProgressBarProvider>
+        </div>
+        <DemoContainer />
         <Toaster
           richColors
           theme="light"

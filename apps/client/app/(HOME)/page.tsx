@@ -14,7 +14,7 @@ const page = async () => {
   const features = await prisma.tarrifFeature.findMany();
   const dieline = await prisma.dieline.findFirst({
     where: { slug: "tuck-end" },
-    include: { settings: true },
+    include: { settings: true, image: true },
   });
 
   return (
@@ -31,12 +31,12 @@ const page = async () => {
         <HomeCategories />
       </div>
 
-      <div className="max-w-6xl mx-auto">
-        <FAQ />
-      </div>
-
       <div className="space-y-10" id="subscription">
         <SubscriptionList tarrif={tarrif} features={features} />
+      </div>
+
+      <div className="max-w-6xl mx-auto">
+        <FAQ />
       </div>
 
       <div className="max-w-6xl mx-auto">

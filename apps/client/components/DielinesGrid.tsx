@@ -1,7 +1,7 @@
 "use client";
 
-import { tuckEnd, tuckEndModel } from "@/public";
-import { Dieline } from "@repo/db";
+import { DielineType } from "@/data/types";
+import { placeholder, tuckEnd } from "@/public";
 import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import { cn } from "@repo/ui/lib/utils";
 import { Box, Ratio } from "lucide-react";
@@ -10,7 +10,11 @@ import Link from "next/link";
 import { useState } from "react";
 type ImageType = "model" | "dieline";
 
-const DielinesGrid = ({ dielines }: { dielines: Dieline[] }) => {
+const DielinesGrid = ({
+  dielines,
+}: {
+  dielines: Omit<DielineType, "settings">[];
+}) => {
   const [imageType, setImageType] = useState<ImageType>("dieline");
 
   return (
@@ -49,21 +53,21 @@ const DielineCard = ({
   dieline,
 }: {
   imageType: ImageType;
-  dieline: Dieline;
+  dieline: Omit<DielineType, "settings">;
 }) => {
   return (
     <Link href={`/dieline/${dieline.slug}`} target="_blank">
       <div className="space-y-3 relative">
         <Image
           alt=""
-          src={tuckEndModel}
+          src={dieline.image?.url ?? placeholder}
           width={500}
           height={500}
           className={cn(
             imageType === "model"
               ? "opacity-100 hover:opacity-0"
               : "opacity-0 hover:opacity-100",
-            `w-full aspect-square rounded-2xl absolute transition-opacity duration-400`,
+            `w-full aspect-square rounded-2xl absolute transition-opacity duration-400 object-cover`,
           )}
         />
         <Image
@@ -71,7 +75,7 @@ const DielineCard = ({
           src={tuckEnd}
           width={500}
           height={500}
-          className="w-full aspect-square border rounded-2xl p-6"
+          className="w-full aspect-square border rounded-2xl p-6 object-cover"
         />
         <div className="text-sm text-muted-foreground">{dieline.title}</div>
       </div>
