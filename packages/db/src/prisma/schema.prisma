@@ -84,7 +84,7 @@ model Image {
   url       String
   publicId  String   @unique
   createdAt DateTime @default(now())
-  dieline   Dieline  @relation(fields: [dielineId], references: [id])
+  dieline   Dieline  @relation(fields: [dielineId], references: [id], onDelete: Cascade)
   dielineId Int      @unique
 }
 

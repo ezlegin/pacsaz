@@ -53,7 +53,7 @@ export function Section({
               </TooltipTrigger>
 
               <TooltipContent side="left">
-                <p className="p-1">فقط در اشتراک حرفه‌ای و سازمانی</p>
+                <p className="p-1">فقط در پلن حرفه‌ای و سازمانی</p>
               </TooltipContent>
             </Tooltip>
           </div>

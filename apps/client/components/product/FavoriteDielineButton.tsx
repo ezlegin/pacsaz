@@ -2,6 +2,8 @@
 
 import { faveDieline, unfaveDieline } from "@/actions/dieline";
 import { handleRes } from "@/lib/handleRes";
+import { loginPageRoute } from "@/proxy";
+import { User } from "@repo/db";
 import { useLoading } from "@repo/lib/utils/useLoading";
 import { Button } from "@repo/ui/components/button";
 import { cn } from "@repo/ui/lib/utils";
@@ -11,13 +13,20 @@ import { useRouter } from "next/navigation";
 const FavoriteDieline = ({
   isFaved,
   dielineId,
+  user,
 }: {
   isFaved: boolean;
   dielineId: number;
+  user: User | null;
 }) => {
   const { isLoading, startLoading, stopLoading } = useLoading();
   const router = useRouter();
   const onFave = async () => {
+    if (!user) {
+      router.push(loginPageRoute);
+      return;
+    }
+
     startLoading();
     const res = isFaved
       ? await unfaveDieline(dielineId)

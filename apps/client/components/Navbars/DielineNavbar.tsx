@@ -30,7 +30,11 @@ const DielineNavbar = async ({ dieline }: Props) => {
           </Link>
           <ArrowLeft size={16} />
           <p className="font-semibold">{dieline.title}</p>
-          <FavoriteDieline isFaved={!!favedDieline} dielineId={dieline.id} />
+          <FavoriteDieline
+            isFaved={!!favedDieline}
+            dielineId={dieline.id}
+            user={user}
+          />
         </div>
         <NavbarButtons />
       </div>

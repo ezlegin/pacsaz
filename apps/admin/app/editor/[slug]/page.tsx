@@ -25,8 +25,6 @@ const page = async ({ params }: Props) => {
 
   if (!dieline) notFound();
 
-  console.log("dieline", dieline);
-
   return <DielineEditor dieline={dieline} categories={categories} />;
 };
 

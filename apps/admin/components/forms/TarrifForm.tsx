@@ -53,7 +53,6 @@ export function TarrifForm({
   tarrif?: TarrifType;
   features: TarrifFeature[];
 }) {
-  console.log("tarrif", tarrif);
   const router = useRouter();
 
   const { startLoading, stopLoading, isLoading } = useLoading();

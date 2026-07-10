@@ -47,4 +47,6 @@ export default page;
 
 export const metadata = {
   title: "قالب ها",
+  description:
+    "صفحه قالب‌ها در وبسایت پکساز. در این صفحه می‌توانید انواع قالب‌های دایلاین را مشاهده و انتخاب کنید.",
 };

@@ -39,7 +39,6 @@ const DielineEditor = ({
   );
 
   useEffect(() => {
-    console.log("dieline.specification", dieline.specification);
     if (dieline) {
       setSpecs(JSON.parse(dieline.specification));
     }

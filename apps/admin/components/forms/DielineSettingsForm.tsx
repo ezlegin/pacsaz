@@ -88,7 +88,6 @@ const DielineSettingsForm = ({
     });
     stopLoading();
   };
-  console.log(form.formState.errors);
 
   return (
     <Form {...form}>

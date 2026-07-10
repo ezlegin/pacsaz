@@ -55,6 +55,24 @@ export async function generateMetadata({
 
   return {
     title: `دایلاین ${dieline.title}`,
-    description: `دانلود دایلاین ${dieline.title}`,
+    description: `صفحه دایلاین ${dieline.title} در وبسایت پکساز. با استفاده از این دایلاین می‌توانید بسته‌بندی‌های خود را به صورت آنلاین طراحی و تولید کنید.`,
+    openGraph: {
+      title: dieline.title,
+      description: `صفحه دایلاین ${dieline.title} در وبسایت پکساز. با استفاده از این دایلاین می‌توانید بسته‌بندی‌های خود را به صورت آنلاین طراحی و تولید کنید.`,
+      images: [
+        {
+          url: dieline.image?.url || "/og-cover.png",
+          width: 1200,
+          height: 630,
+          alt: dieline.title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: dieline.title,
+      description: `صفحه دایلاین ${dieline.title} در وبسایت پکساز. با استفاده از این دایلاین می‌توانید بسته‌بندی‌های خود را به صورت آنلاین طراحی و تولید کنید.`,
+      images: [dieline.image?.url || "/og-cover.png"],
+    },
   };
 }
