@@ -19,11 +19,11 @@ const page = async () => {
 
   return (
     <div className="space-y-48">
-      {/* <div className="px-20 mx-auto pt-20">
+      <div className="p-5 md:px-20 mx-auto md:pt-20">
         <LandingPage dieline={dieline} />
       </div>
 
-      <div className="max-w-6xl mx-auto">
+      {/* <div className="max-w-6xl mx-auto">
         <HomeFeatures />
       </div>
 

@@ -8,11 +8,11 @@ import HomeDieline from "./HomeDieline";
 
 const LandingPage = async ({ dieline }: { dieline: DielineType | null }) => {
   return (
-    <div className="space-y-28">
+    <div>
       <SquarePattern />
 
-      <div className="flex justify-between items-center">
-        <div className="space-y-6">
+      <div className="flex justify-between items-center ">
+        <div className="space-y-6 text-center xl:text-right flex flex-col items-center xl:items-start w-full">
           <div className="w-fit">
             <Link href={"/dielines"}>
               <Badge
@@ -56,7 +56,9 @@ const LandingPage = async ({ dieline }: { dieline: DielineType | null }) => {
           </div>
         </div>
 
-        <HomeDieline dieline={dieline} />
+        <div className="hidden xl:block">
+          <HomeDieline dieline={dieline} />
+        </div>
       </div>
     </div>
   );
