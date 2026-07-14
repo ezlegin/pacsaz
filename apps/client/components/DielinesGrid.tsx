@@ -8,6 +8,7 @@ import { Box, Ratio } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+
 type ImageType = "model" | "dieline";
 
 const DielinesGrid = ({
@@ -37,7 +38,7 @@ const DielinesGrid = ({
           <Ratio />
         </ToggleGroupItem>
       </ToggleGroup>
-      <div className="grid grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
         {dielines.map((d, idx) => (
           <DielineCard key={idx} dieline={d} imageType={imageType} />
         ))}
