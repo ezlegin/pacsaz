@@ -32,17 +32,18 @@ const SubscriptionList = ({
   const [period, setPeriod] = useState<PlanPeriod>("monthly");
 
   return (
-    <div className="h-full flex flex-col items-center justify-center gap-6 z-10">
-      <div className="w-sm text-center flex flex-col items-center gap-3">
-        <Badge variant={"lightPrimary"}>
+    <div className="flex h-full flex-col items-center justify-center gap-6 z-10">
+      <div className="flex max-w-xl flex-col items-center gap-3 text-center px-4">
+        <Badge variant="lightPrimary">
           <Flag />
           اشتراک
         </Badge>
 
-        <h1 className="text-3xl font-semibold">
+        <h1 className="text-2xl font-semibold md:text-3xl">
           یک اشتراک، بی‌نهایت دایلاین...
         </h1>
-        <p className="text-xs text-muted-foreground">
+
+        <p className="text-xs text-muted-foreground md:text-sm">
           با فعال‌سازی اشتراک، به تمام قالب‌ها، اندازه‌ها و ابزارهای حرفه‌ای
           دسترسی کامل داشته باش. بدون محدودیت، بدون دغدغه.
         </p>
@@ -50,7 +51,7 @@ const SubscriptionList = ({
 
       <PeriodSwitch period={period} setPeriod={setPeriod} />
 
-      <div className="flex gap-5">
+      <div className="grid w-full max-w-7xl grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
         {tarrif.map((t, idx) => (
           <SubscriptionCard
             key={idx}

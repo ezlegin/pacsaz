@@ -19,33 +19,33 @@ const page = async () => {
 
   return (
     <div className="space-y-48">
-      <div className="p-5 md:px-20 mx-auto md:pt-20">
+      <div className="p-4 md:px-20 mx-auto md:pt-20">
         <LandingPage dieline={dieline} />
       </div>
 
-      {/* <div className="max-w-6xl mx-auto">
+      <div className="p-4 max-w-6xl mx-auto">
         <HomeFeatures />
       </div>
 
-      <div className="p-20 mx-auto bg-muted/70">
+      <div className="p-4 md:p-20 mx-auto bg-muted/70">
         <HomeCategories />
       </div>
 
-      <div className="space-y-10" id="subscription">
+      <div className="p-4 space-y-10" id="subscription">
         <SubscriptionList tarrif={tarrif} features={features} />
       </div>
 
-      <div className="max-w-6xl mx-auto">
+      <div className="p-4 max-w-6xl mx-auto">
         <FAQ />
       </div>
 
-      <div className="max-w-6xl mx-auto">
+      <div className="p-4 max-w-6xl mx-auto">
         <HomeSUbFAQ />
       </div>
 
-      <div className="max-w-6xl mx-auto">
+      <div className="p-4 max-w-6xl mx-auto">
         <HomeCourseIntro />
-      </div> */}
+      </div>
     </div>
   );
 };

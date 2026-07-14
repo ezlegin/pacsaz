@@ -10,23 +10,25 @@ import Card from "@repo/ui/components/custom/Card";
 const HomeCategories = () => {
   return (
     <div className="space-y-8">
-      <div className="flex justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-5">
           <Icon icon={LayoutTemplate} />
           <div>
-            <h2 className="font-semibold text-2xl">دسته بندی قالب‌ها</h2>
+            <h2 className="text-2xl font-semibold">دسته بندی قالب‌ها</h2>
             <p className="text-sm text-muted-foreground">
               %100 لایه باز و 100% قابل شخصی سازی
             </p>
           </div>
         </div>
 
-        <Link href={"/dielines"}>
-          <Button variant={"gradient"}>همه دسته ها</Button>
+        <Link href="/dielines" className="w-full sm:w-auto">
+          <Button variant="gradient" className="w-full sm:w-auto">
+            همه دسته ها
+          </Button>
         </Link>
       </div>
 
-      <div className="grid grid-cols-5 grid-rows-2 gap-5 items-center">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-5 lg:grid-rows-2">
         {dielineCategories.map((c, idx) => (
           <CategoryCard key={idx} category={c} />
         ))}
@@ -44,18 +46,19 @@ const CategoryCard = ({
 }) => {
   return (
     <Link href={`/dielines?category=${slug}`} className={className}>
-      <Card className="p-4 gap-3 bg-background hover:shadow transition-shadow flex flex-col items-center">
+      <Card className="flex h-full flex-col items-center gap-3 p-4 transition-shadow hover:shadow bg-background">
         <Image
           alt=""
           src={tuckEnd}
           width={500}
           height={500}
-          className={imgClass ? imgClass : " h-50 w-auto"}
+          className={imgClass ?? "h-40 w-auto object-contain sm:h-48 lg:h-52"}
         />
-        <div className="flex justify-between items-end w-full">
+
+        <div className="flex w-full items-end justify-between">
           <h3>
             <span className="block text-xs text-muted-foreground">قالب</span>
-            <span className="text-primary font-medium">{title}</span>
+            <span className="font-medium text-primary">{title}</span>
           </h3>
 
           <span className="text-xs text-muted-foreground">{count} قالب</span>
@@ -78,8 +81,8 @@ const dielineCategories: Category[] = [
     title: "جعبه‌های تاشو",
     slug: "folding-boxes",
     count: 184,
-    className: "row-span-2 col-span-2 h-full",
-    imgClass: "mx-auto w-auto h-[500px]",
+    className: "lg:row-span-2 lg:col-span-2 lg:h-full",
+    imgClass: "mx-auto h-64 w-auto object-contain lg:h-[500px]",
   },
   {
     title: "جعبه‌های تاشو",

@@ -9,8 +9,8 @@ import Card from "@repo/ui/components/custom/Card";
 
 const HomeSUbFAQ = () => {
   return (
-    <div className="flex gap-10">
-      <div className="space-y-3 w-1/2">
+    <div className="flex flex-wrap lg:flex-nowrap gap-10">
+      <div className="space-y-3 w-full">
         <HomeTitle
           title="سوالات متداول درباره اشتراک پک ساز"
           description="در این بخش به سوالات متداول درباره‌ی اشتراک پک‌ساز پاسخ داده شده است.
@@ -20,7 +20,7 @@ const HomeSUbFAQ = () => {
         />
       </div>
 
-      <div className="w-1/2">
+      <div className="w-full">
         <Accordion type="single" collapsible className="space-y-2">
           {faqs.map((faq, idx) => (
             <AccordionItem key={idx} value={`${idx}`} className="border-none">

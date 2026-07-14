@@ -22,7 +22,7 @@ export const SubscriptionCard = ({
     <div
       className={cn(
         tarrif.isRecommended && "bg-linear-to-r from-violet-500 to-purple-500",
-        "p-1 rounded-2xl group",
+        "rounded-2xl p-1 h-full",
       )}
     >
       {tarrif.isRecommended && (
@@ -37,7 +37,7 @@ export const SubscriptionCard = ({
           tarrif.isRecommended
             ? "mt-2 rounded-lg bg-background"
             : "mt-9 rounded-2xl",
-          "p-5 space-y-8 w-xs",
+          "w-full h-full space-y-8 p-5",
         )}
       >
         <div className="flex flex-col gap-3">

@@ -12,8 +12,8 @@ import Card from "@repo/ui/components/custom/Card";
 
 const FAQ = () => {
   return (
-    <div className="flex gap-10">
-      <div className="space-y-3 w-1/2">
+    <div className="flex flex-wrap lg:flex-nowrap w-full gap-10">
+      <div className="space-y-3 w-full ">
         <Badge variant={"primaryForeground"}>
           Frequently Asked Questions
           <CircleQuestionMark />
@@ -30,7 +30,7 @@ const FAQ = () => {
         <Button variant={"default"}>صفحه سوالات متداول</Button>
       </div>
 
-      <div className="w-1/2">
+      <div className="w-full">
         <Accordion type="single" collapsible className="space-y-2">
           {faqs.map((faq, idx) => (
             <AccordionItem key={idx} value={`${idx}`} className="border-none">

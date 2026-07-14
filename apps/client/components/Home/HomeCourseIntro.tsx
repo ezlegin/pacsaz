@@ -8,7 +8,7 @@ import Card from "@repo/ui/components/custom/Card";
 
 const HomeCourseIntro = () => {
   return (
-    <Card className="flex justify-between items-center relative">
+    <Card className="flex justify-center lg:justify-between items-center text-center lg:text-right relative">
       <div className="space-y-3">
         <h2 className="font-semibold text-2xl">
           دوره جامع طراحی بسته بندی و لیبل
@@ -20,7 +20,7 @@ const HomeCourseIntro = () => {
           <li>پشتیبانی و رفع اشکال آنلاین</li>
         </ul>
 
-        <div className="flex items-center gap-2">
+        <div className="flex justify-center lg:justify-start items-center gap-2">
           <Image
             alt="img"
             src={alirezaEzleginiPic}
@@ -52,7 +52,7 @@ const HomeCourseIntro = () => {
         src={packagingCoursePic}
         width={375}
         height={375}
-        className="rounded-2xl absolute left-4 bottom-4"
+        className="rounded-2xl absolute left-4 bottom-4 hidden lg:block"
       />
     </Card>
   );
