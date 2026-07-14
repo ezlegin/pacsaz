@@ -7,43 +7,51 @@ import { Button } from "@repo/ui/components/button";
 import Link from "next/link";
 import Card from "@repo/ui/components/custom/Card";
 
+const Enamad = () => (
+  <Image
+    alt="e-namad"
+    src="/enamad.png"
+    width={100}
+    height={120}
+    className="rounded-lg border bg-accent"
+  />
+);
+
 const Footer = () => {
   return (
     <div className={cn(layoutPaddings, "pb-0 z-10")}>
       <Card className="rounded-b-none">
-        <div className="flex justify-between items-start">
-          <div className="space-y-2 max-w-md">
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
+          <div className="space-y-3 max-w-md">
             <PacsazLogo scale={1.2} type="full" />
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground leading-7">
               پک‌ساز ابزاری هوشمند برای طراحی دقیق دایلاین‌های بسته‌بندی؛
-              <br />
+              <br className="hidden sm:block" />
               ساخته‌شده برای طراحان، چاپخانه‌ها و تیم‌های حرفه‌ای.
             </p>
           </div>
 
-          <div className="flex gap-10">
-            <div className="grid grid-cols-2 text-sm">
+          <div className="flex flex-col-reverse md:items-center gap-6 sm:flex-row sm:items-start sm:justify-between lg:gap-10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-sm">
               {menu.map((m, idx) => (
                 <Link key={idx} href={m.href}>
                   <Button
-                    variant={"ghost"}
-                    size={"sm"}
-                    className="text-muted-foreground w-full"
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start text-muted-foreground"
                   >
                     {m.label}
                   </Button>
                 </Link>
               ))}
             </div>
-            <div>
-              <Image
-                alt="e-namad"
-                src={"/enamad.png"}
-                width={100}
-                height={120}
-                className="border rounded-lg bg-accent"
-              />
+
+            <div className="hidden md:block">
+              <Enamad />
             </div>
+          </div>
+          <div className="md:hidden">
+            <Enamad />
           </div>
         </div>
       </Card>

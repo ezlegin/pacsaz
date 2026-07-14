@@ -1,4 +1,3 @@
-import DemoContainer from "@/components/DemoContainer";
 import ProgressBarProvider from "@/components/ProgressBarProvider";
 import { favIcon } from "@/public";
 import { Toaster } from "@repo/ui/components/sonner";
@@ -14,10 +13,7 @@ export default async function RootLayout({
   return (
     <html lang="fa" dir="rtl" suppressHydrationWarning>
       <body style={{ fontFamily }} className="antialiased">
-        <div className="hidden md:block">
-          <ProgressBarProvider>{children}</ProgressBarProvider>
-        </div>
-        <DemoContainer />
+        <ProgressBarProvider>{children}</ProgressBarProvider>
         <Toaster
           richColors
           theme="light"

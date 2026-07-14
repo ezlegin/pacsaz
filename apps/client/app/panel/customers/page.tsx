@@ -8,6 +8,7 @@ import { DialogTitle } from "@repo/ui/components/dialog";
 import CustomersList from "./CustomersList";
 import { pagination } from "@repo/lib/utils/pagination";
 import { getSessionUser } from "@repo/auth/session";
+import { Badge } from "@repo/ui/components/badge";
 
 interface Props {
   searchParams: Promise<{ page: string }>;
@@ -26,6 +27,9 @@ const page = async ({ searchParams }: Props) => {
   });
 
   const totalCustomers = await prisma.customer.count({ where });
+
+  if (!user?.plan?.isPremium)
+    return <Badge variant={"lightRed"}>فقط در اشتراک حرفه ای و سازمانی</Badge>;
 
   // todo: searching
 
