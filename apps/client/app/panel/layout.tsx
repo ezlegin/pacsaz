@@ -1,7 +1,7 @@
 import PanelNavbar from "@/components/Navbars/PanelNavbar";
 import PanelSidebar from "@/components/PanelSidebar";
 import { getSessionUser } from "@repo/auth/session";
-import { SidebarProvider } from "@repo/ui/components/sidebar";
+import { SidebarProvider, SidebarTrigger } from "@repo/ui/components/sidebar";
 import { redirect } from "next/navigation";
 
 export default async function Layout({
@@ -16,7 +16,11 @@ export default async function Layout({
     <SidebarProvider>
       <PanelSidebar />
       <div className="w-full max-w-7xl mx-auto p-5 space-y-5">
-        <PanelNavbar />
+        <div className="flex items-center gap-3">
+          <SidebarTrigger />
+          <PanelNavbar />
+        </div>
+
         {children}
       </div>
     </SidebarProvider>

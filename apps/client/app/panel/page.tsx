@@ -39,33 +39,42 @@ const Page = async () => {
   });
 
   return (
-    <div className="grid grid-cols-6 gap-5">
-      <UserSubscriptionCard plan={user.plan} tarrif={tarrif} />
+    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-6">
+      <div className="xl:col-span-3">
+        <UserSubscriptionCard plan={user.plan} tarrif={tarrif} />
+      </div>
 
-      <RemainingDownloads downloaded={downloaded} fairDownload={fairDownload} />
+      <div className="xl:col-span-3">
+        <RemainingDownloads
+          downloaded={downloaded}
+          fairDownload={fairDownload}
+        />
+      </div>
 
       <StatCard
         title="دانلود این پلن"
         value={`${downloaded} دانلود`}
         icon={Download}
-        className="col-span-2"
+        className="md:col-span-1 xl:col-span-2"
       />
 
       <StatCard
         title="تعداد کل دانلودها"
         value={`${allDownloads} دانلود`}
         icon={FolderDown}
-        className="col-span-2"
+        className="md:col-span-1 xl:col-span-2"
       />
 
       <StatCard
         title="پایان اشتراک"
-        value={formatDate(user.plan?.endsAt!, "PP")}
+        value={formatDate(user.plan.endsAt, "PP")}
         icon={Calendar}
-        className="col-span-2"
+        className="md:col-span-2 xl:col-span-2"
       />
 
-      <LastDownloads data={downloadRecords} />
+      <div className="md:col-span-2 xl:col-span-6">
+        <LastDownloads data={downloadRecords} />
+      </div>
     </div>
   );
 };

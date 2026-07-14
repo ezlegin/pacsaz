@@ -10,7 +10,7 @@ const RemainingDownloads = ({
   downloaded: number;
 }) => {
   return (
-    <Card className="col-span-3 space-y-4 text-sm font-medium text-muted-foreground">
+    <Card className="space-y-4 text-sm font-medium text-muted-foreground">
       <div>دانلود مجاز: {fairDownload} عدد</div>
 
       <div>

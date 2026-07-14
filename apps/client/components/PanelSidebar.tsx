@@ -1,4 +1,5 @@
 import { getSessionUser } from "@repo/auth/session";
+import { Button } from "@repo/ui/components/button";
 import {
   Sidebar,
   SidebarContent,
@@ -12,7 +13,6 @@ import {
 import { Bookmark, CreditCard, Flag, Heart, User, Users } from "lucide-react";
 import Link from "next/link";
 import PacsazLogo from "./PacsazLogo";
-import { Button } from "@repo/ui/components/button";
 
 const PanelSidebar = async () => {
   const user = await getSessionUser();

@@ -31,10 +31,7 @@ const UserSubscriptionCard = ({
         </DialogContent>
       </Dialog>
 
-      <Card
-        className="flex justify-between items-center col-span-3"
-        primaryTheme
-      >
+      <Card className="flex justify-between items-center" primaryTheme>
         <div>
           <div className="text-sm text-muted-foreground">پلن</div>
           <div className="text-2xl font-semibold">{mapPlanTitle(plan.key)}</div>
