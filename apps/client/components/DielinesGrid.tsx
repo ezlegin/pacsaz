@@ -1,7 +1,7 @@
 "use client";
 
 import { DielineType } from "@/data/types";
-import { placeholder, tuckEnd } from "@/public";
+import { placeholder } from "@/public";
 import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import { cn } from "@repo/ui/lib/utils";
 import { Box, Ratio } from "lucide-react";
@@ -60,23 +60,23 @@ const DielineCard = ({
     <Link href={`/dieline/${dieline.slug}`} target="_blank">
       <div className="space-y-3 relative">
         <Image
-          alt=""
-          src={dieline.image?.url ?? placeholder}
+          alt={dieline.title}
+          src={dieline.modelImage?.url ?? placeholder}
           width={500}
           height={500}
           className={cn(
             imageType === "model"
               ? "opacity-100 hover:opacity-0"
               : "opacity-0 hover:opacity-100",
-            `w-full aspect-square rounded-2xl absolute transition-opacity duration-400 object-cover`,
+            `w-full aspect-square absolute transition-opacity duration-400 object-cover border rounded-2xl`,
           )}
         />
         <Image
           alt=""
-          src={tuckEnd}
+          src={dieline.dielineImage?.url ?? placeholder}
           width={500}
           height={500}
-          className="w-full aspect-square border rounded-2xl p-6 object-cover"
+          className="w-full aspect-square object-cover border rounded-2xl"
         />
         <div className="text-sm text-muted-foreground">{dieline.title}</div>
       </div>

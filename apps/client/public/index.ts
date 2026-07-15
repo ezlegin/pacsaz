@@ -15,8 +15,8 @@ export const pacsazPattern = "/pacsaz-pattern.png";
 export const squarePattern = "/square-pattern.png";
 
 // TEMP
-export const tuckEnd = "/tuck-end.png";
-export const tuckEndModel = "/tuck-end-model.jpg";
+export const tuckEnd = "/tuck-end.png"; // todo: remove
+export const tuckEndModel = "/tuck-end-model.jpg"; // todo: remove
 export const loginPic = "/login-pic.png";
 
 // IMAGES

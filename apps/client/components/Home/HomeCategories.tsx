@@ -2,10 +2,10 @@ import { Button } from "@repo/ui/components/button";
 import Link from "next/link";
 import React from "react";
 import Image from "next/image";
-import { tuckEnd } from "@/public";
 import Icon from "../Icon";
 import { LayoutTemplate } from "lucide-react";
 import Card from "@repo/ui/components/custom/Card";
+import { tuckEnd } from "@/public";
 
 const HomeCategories = () => {
   return (

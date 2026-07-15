@@ -168,6 +168,7 @@ export const updateDieline = async (
           },
         },
       },
+      include: { dielineImage: true, modelImage: true },
     });
 
     const images = { dielineImage, modelImage };
@@ -178,6 +179,10 @@ export const updateDieline = async (
       if (img && img instanceof File) {
         const buffer = Buffer.from(await img.arrayBuffer());
 
+        const publicId = updatedDieline[image as keyof typeof images]?.publicId;
+
+        if (publicId) await deleteImage(publicId);
+
         const { secure_url, public_id } = (await uploadCloudFile(buffer, {
           folder: "dieline",
           width: 800,
@@ -187,18 +192,17 @@ export const updateDieline = async (
         const data = {
           publicId: public_id,
           url: secure_url,
-          dieline: {
-            connect: { id: updatedDieline.id },
-          },
         };
 
         if (image === "dielineImage")
-          await prisma.dielineImage.create({
+          await prisma.dielineImage.update({
+            where: { publicId: updatedDieline.dielineImage?.publicId },
             data,
           });
 
         if (image === "modelImage")
-          await prisma.modelImage.create({
+          await prisma.modelImage.update({
+            where: { publicId: updatedDieline.modelImage?.publicId },
             data,
           });
       }

@@ -33,7 +33,7 @@ const page = async ({ searchParams }: Props) => {
   const dielines = await prisma.dieline.findMany({
     orderBy: { id: "desc" },
     where,
-    include: { image: true },
+    include: { dielineImage: true, modelImage: true },
     skip,
     take,
   });

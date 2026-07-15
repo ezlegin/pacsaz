@@ -1,8 +1,9 @@
-import { Dieline, DielineSettings, Image } from "@repo/db";
+import { Dieline, DielineSettings, DielineImage as Image } from "@repo/db";
 
 export interface DielineType extends Dieline {
   settings: DielineSettings;
-  image: Image | null;
+  dielineImage: Image | null;
+  modelImage: Image | null;
 }
 
 export type ServerAction =
