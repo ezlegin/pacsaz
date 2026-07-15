@@ -133,7 +133,8 @@ export const dielineMetadataFormSchema = z.object({
   materials: z.string(),
   categoryByModel: z.array(z.string()),
   categoryByUsage: z.array(z.string()),
-  image: z.instanceof(File).optional(),
+  dielineImage: z.instanceof(File).optional(),
+  modelImage: z.instanceof(File).optional(),
 });
 
 export type DielineMetadataFormType = z.infer<typeof dielineMetadataFormSchema>;

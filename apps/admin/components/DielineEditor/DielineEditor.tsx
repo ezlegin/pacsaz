@@ -36,6 +36,8 @@ const DielineEditor = ({
       specification: specs,
     },
     "editor",
+    null,
+    false,
   );
 
   useEffect(() => {

@@ -12,6 +12,7 @@ const page = async ({ params }: Props) => {
   const dieline = await prisma.dieline.findFirst({
     where: { slug },
     include: {
+      image: true,
       settings: true,
       categoryByModel: true,
       categoryByUsage: true,

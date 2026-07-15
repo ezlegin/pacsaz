@@ -1,6 +1,11 @@
 "use client";
 
-import { createDieline, updateDieline } from "@/actions/dieline";
+import {
+  createDieline,
+  deleteDielineImage,
+  deleteModelImage,
+  updateDieline,
+} from "@/actions/dieline";
 import { Categories, DielineType } from "@/app/(PANEL)/dielines/DielinesList";
 import {
   dielineMetadataFormSchema,
@@ -28,7 +33,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@repo/ui/components/select";
-import { Separator } from "@repo/ui/components/separator";
 import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -91,41 +95,63 @@ const DielineSettingsForm = ({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Title</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Untitled" />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="grid grid-cols-2 gap-5"
+      >
+        <div className="space-y-5">
+          <FormField
+            control={form.control}
+            name="title"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel>Title</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="Untitled" />
+                </FormControl>
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="slug"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Slug</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="slug" />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="slug"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel>Slug</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="slug" />
+                </FormControl>
+              </FormItem>
+            )}
+          />
 
-        <ImageField
-          control={form.control}
-          setValue={form.setValue}
-          public_id={dieline?.image?.publicId}
-          image={dieline?.image?.url}
-        />
+          <div className="flex gap-3">
+            <div className="space-y-1">
+              <Label>Dieline Image</Label>
+              <ImageField
+                control={form.control}
+                setValue={form.setValue}
+                public_id={dieline?.dielineImage?.publicId}
+                image={dieline?.dielineImage?.url}
+                formFieldName="dielineImage"
+                deleteImageFn={deleteDielineImage}
+              />
+            </div>
 
-        <div className="grid grid-cols-2">
+            <div className="space-y-1">
+              <Label>Model Image</Label>
+              <ImageField
+                control={form.control}
+                setValue={form.setValue}
+                public_id={dieline?.modelImage?.publicId}
+                image={dieline?.modelImage?.url}
+                formFieldName="modelImage"
+                deleteImageFn={deleteModelImage}
+              />
+            </div>
+          </div>
+
           <div className="space-y-2">
             <Label>Categories By Model</Label>
             <FormField
@@ -199,194 +225,194 @@ const DielineSettingsForm = ({
           </div>
         </div>
 
-        <Separator />
-
-        <FormField
-          control={form.control}
-          name="bleed"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Bleed</FormLabel>
-              <FormControl>
-                <Select
-                  defaultValue={String(field.value)}
-                  onValueChange={(val) => {
-                    field.onChange(+val);
-                  }}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Bleed Amount" />
-                  </SelectTrigger>
-                  <SelectContent position="popper">
-                    <SelectItem value="3">3</SelectItem>
-                    <SelectItem value="5">5</SelectItem>
-                    <SelectItem value="7">7</SelectItem>
-                    <SelectItem value="10">10</SelectItem>
-                  </SelectContent>
-                </Select>
-              </FormControl>
-            </FormItem>
-          )}
-        />
-
-        <div className="space-y-1">
-          <Label>Default Dimensions</Label>
-          <div className="grid grid-cols-3 gap-3">
-            <FormField
-              control={form.control}
-              name="defaultDimensions.width"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <NumberInput field={field} placeHolder="Width" />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="defaultDimensions.length"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <NumberInput field={field} placeHolder="Length" />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="defaultDimensions.height"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <NumberInput field={field} placeHolder="Height" />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-          </div>
-        </div>
-
-        <div className="space-y-1">
-          <Label>Min Dimensions</Label>
-          <div className="grid grid-cols-3 gap-3">
-            <FormField
-              control={form.control}
-              name="minDimensions.width"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <NumberInput field={field} placeHolder="Width" />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="minDimensions.length"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <NumberInput field={field} placeHolder="Length" />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="minDimensions.height"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <NumberInput field={field} placeHolder="Height" />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-          </div>
-        </div>
-
-        <FormField
-          control={form.control}
-          name="dimensionTypes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Dimension Types</FormLabel>
-              <FormControl>
-                <ToggleGroup
-                  variant={"outline"}
-                  defaultValue={field.value.split(",")}
-                  type="multiple"
-                  onValueChange={(val) => {
-                    if (val.length === 0) return;
-
-                    const stringVal = val.join(",");
-                    field.onChange(stringVal);
-                  }}
-                >
-                  <ToggleGroupItem value="manufacture">
-                    Manufacture
-                  </ToggleGroupItem>
-                  <ToggleGroupItem value="inner">Inner</ToggleGroupItem>
-                  <ToggleGroupItem value="outer">Outer</ToggleGroupItem>
-                </ToggleGroup>
-              </FormControl>
-            </FormItem>
-          )}
-        />
-
-        <div className="space-y-1">
-          <Label>Materials</Label>
+        <div className="space-y-5">
           <FormField
             control={form.control}
-            name="materials"
+            name="bleed"
             render={({ field }) => (
-              <div className="grid grid-cols-2">
-                {materials.map((item, idx) => {
-                  const isChecked = field.value
-                    ?.split(",")
-                    .includes(item.value);
-                  return (
-                    <FormItem
-                      key={idx}
-                      className="flex flex-row items-center gap-3 pb-1.5"
-                    >
-                      <FormControl>
-                        <Checkbox
-                          checked={isChecked}
-                          onCheckedChange={(checked) => {
-                            const materials = field.value.split(",");
-                            const updatedMaterials = checked
-                              ? [...materials, item.value].join(",")
-                              : materials
-                                  .filter((i) => i !== item.value)
-                                  .join(",");
-
-                            field.onChange(updatedMaterials);
-                          }}
-                        />
-                      </FormControl>
-                      <FormLabel className="text-sm font-normal cursor-pointer">
-                        {item.value}
-                        <span className="text-xs text-muted-foreground">
-                          ({item.thickness}mm)
-                        </span>
-                      </FormLabel>
-                    </FormItem>
-                  );
-                })}
-              </div>
+              <FormItem>
+                <FormLabel>Bleed</FormLabel>
+                <FormControl>
+                  <Select
+                    defaultValue={String(field.value)}
+                    onValueChange={(val) => {
+                      field.onChange(+val);
+                    }}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Bleed Amount" />
+                    </SelectTrigger>
+                    <SelectContent position="popper">
+                      <SelectItem value="3">3</SelectItem>
+                      <SelectItem value="5">5</SelectItem>
+                      <SelectItem value="7">7</SelectItem>
+                      <SelectItem value="10">10</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+              </FormItem>
             )}
           />
-        </div>
 
-        <Button
-          className="w-full"
-          disabled={!form.formState.isValid || isLoading}
-        >
-          {dieline ? "Update" : "Create New"} Dieline
-        </Button>
+          <div className="space-y-1">
+            <Label>Default Dimensions</Label>
+            <div className="grid grid-cols-3 gap-3">
+              <FormField
+                control={form.control}
+                name="defaultDimensions.width"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <NumberInput field={field} placeHolder="Width" />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="defaultDimensions.length"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <NumberInput field={field} placeHolder="Length" />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="defaultDimensions.height"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <NumberInput field={field} placeHolder="Height" />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <Label>Min Dimensions</Label>
+            <div className="grid grid-cols-3 gap-3">
+              <FormField
+                control={form.control}
+                name="minDimensions.width"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <NumberInput field={field} placeHolder="Width" />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="minDimensions.length"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <NumberInput field={field} placeHolder="Length" />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="minDimensions.height"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <NumberInput field={field} placeHolder="Height" />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+
+          <FormField
+            control={form.control}
+            name="dimensionTypes"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Dimension Types</FormLabel>
+                <FormControl>
+                  <ToggleGroup
+                    variant={"outline"}
+                    defaultValue={field.value.split(",")}
+                    type="multiple"
+                    onValueChange={(val) => {
+                      if (val.length === 0) return;
+
+                      const stringVal = val.join(",");
+                      field.onChange(stringVal);
+                    }}
+                  >
+                    <ToggleGroupItem value="manufacture">
+                      Manufacture
+                    </ToggleGroupItem>
+                    <ToggleGroupItem value="inner">Inner</ToggleGroupItem>
+                    <ToggleGroupItem value="outer">Outer</ToggleGroupItem>
+                  </ToggleGroup>
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
+          <div className="space-y-1">
+            <Label>Materials</Label>
+            <FormField
+              control={form.control}
+              name="materials"
+              render={({ field }) => (
+                <div className="grid grid-cols-2">
+                  {materials.map((item, idx) => {
+                    const isChecked = field.value
+                      ?.split(",")
+                      .includes(item.value);
+                    return (
+                      <FormItem
+                        key={idx}
+                        className="flex flex-row items-center gap-3 pb-1.5"
+                      >
+                        <FormControl>
+                          <Checkbox
+                            checked={isChecked}
+                            onCheckedChange={(checked) => {
+                              const materials = field.value.split(",");
+                              const updatedMaterials = checked
+                                ? [...materials, item.value].join(",")
+                                : materials
+                                    .filter((i) => i !== item.value)
+                                    .join(",");
+
+                              field.onChange(updatedMaterials);
+                            }}
+                          />
+                        </FormControl>
+                        <FormLabel className="text-sm font-normal cursor-pointer">
+                          {item.value}
+                          <span className="text-xs text-muted-foreground">
+                            ({item.thickness}mm)
+                          </span>
+                        </FormLabel>
+                      </FormItem>
+                    );
+                  })}
+                </div>
+              )}
+            />
+          </div>
+
+          <Button
+            className="w-full"
+            disabled={!form.formState.isValid || isLoading}
+          >
+            {dieline ? "Update" : "Create New"} Dieline
+          </Button>
+        </div>
       </form>
     </Form>
   );

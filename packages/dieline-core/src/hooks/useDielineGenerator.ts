@@ -38,7 +38,8 @@ interface DielineType extends Dieline {
 export function useDielineGenerator(
   dieline: DielineType,
   app: "client" | "editor",
-  user?: any | null, // todo
+  user?: any | null, // todo,
+  showWatermark?: boolean,
 ) {
   const specs = dieline.specification;
   const setts = dieline.settings;
@@ -85,7 +86,7 @@ export function useDielineGenerator(
       showOverallRulers: false,
     });
 
-    setDeveloperTools("showWatermark", !!!user);
+    setDeveloperTools("showWatermark", showWatermark ?? !!!user);
   }, []);
 
   useEffect(() => {

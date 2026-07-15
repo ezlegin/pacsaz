@@ -8,8 +8,9 @@ import {
   Dieline,
   DielineCategoryByModel,
   DielineCategoryByUsage,
+  DielineImage,
   DielineSettings,
-  Image as ImageType,
+  ModelImage,
 } from "@repo/db";
 import { Badge } from "@repo/ui/components/badge";
 import ActionButton from "@repo/ui/components/custom/ActionButton";
@@ -27,7 +28,8 @@ import Image from "next/image";
 
 export interface DielineType extends Dieline {
   settings: DielineSettings;
-  image: ImageType | null;
+  dielineImage: DielineImage | null;
+  modelImage: ModelImage | null;
   categoryByUsage: DielineCategoryByUsage[];
   categoryByModel: DielineCategoryByModel[];
   _count: { downloadHistory: number };
@@ -50,7 +52,7 @@ const DielinesList = ({
       <TableRow key={dieline.id}>
         <TableCell>
           <Image
-            src={dieline.image?.url ?? placeholder}
+            src={dieline.dielineImage?.url ?? placeholder}
             alt=""
             width={45}
             height={45}
@@ -98,7 +100,7 @@ const DielinesList = ({
         </TableCell>
         <TableCell>
           <div className="flex justify-end gap-2">
-            <ActionButton icon={Settings}>
+            <ActionButton dialogClassName="min-w-4xl" icon={Settings}>
               <DialogTitle>Update Dieline</DialogTitle>
               <DielineSettingsForm categories={categories} dieline={dieline} />
             </ActionButton>

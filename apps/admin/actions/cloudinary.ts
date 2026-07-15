@@ -1,6 +1,5 @@
 "use server";
 
-import { prisma } from "@repo/db";
 import { v2 as cloudinary } from "cloudinary";
 
 export interface FileUploadOptions {
@@ -108,11 +107,7 @@ export const deleteManyCloudFiles = async (
 
 export const deleteImage = async (public_id: string) => {
   try {
-    const deletedImage = await prisma.image.delete({
-      where: { publicId: public_id },
-    });
-
-    const res = (await deleteCloudFile(deletedImage.publicId)) as {
+    const res = (await deleteCloudFile(public_id)) as {
       result: "ok";
     };
 

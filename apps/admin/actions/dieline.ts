@@ -6,8 +6,8 @@ import {
 } from "@/lib/validationSchema/validatoinSchema";
 import { prisma } from "@repo/db";
 import { materials as allMats } from "@repo/store/data/dieline";
-import { uploadCloudFile } from "./cloudinary";
 import { UploadApiResponse } from "cloudinary";
+import { deleteImage, uploadCloudFile } from "./cloudinary";
 
 export const createDieline = async (data: DielineMetadataFormType) => {
   const {
@@ -20,7 +20,8 @@ export const createDieline = async (data: DielineMetadataFormType) => {
     minDimensions,
     categoryByModel,
     categoryByUsage,
-    image,
+    dielineImage,
+    modelImage,
   } = data;
 
   try {
@@ -68,26 +69,38 @@ export const createDieline = async (data: DielineMetadataFormType) => {
       },
     });
 
-    if (image && image instanceof File) {
-      const buffer = Buffer.from(await image.arrayBuffer());
+    const images = { dielineImage, modelImage };
 
-      const { secure_url, public_id } = (await uploadCloudFile(buffer, {
-        folder: "dieline",
-        width: 800,
-        resource_type: "image",
-      })) as UploadApiResponse;
+    for (const image in images) {
+      const img = images[image as keyof typeof images];
 
-      await prisma.image.create({
-        data: {
+      if (img && img instanceof File) {
+        const buffer = Buffer.from(await img.arrayBuffer());
+
+        const { secure_url, public_id } = (await uploadCloudFile(buffer, {
+          folder: "dieline",
+          width: 800,
+          resource_type: "image",
+        })) as UploadApiResponse;
+
+        const data = {
           publicId: public_id,
           url: secure_url,
           dieline: {
-            connect: {
-              id: newDieline.id,
-            },
+            connect: { id: newDieline.id },
           },
-        },
-      });
+        };
+
+        if (image === "dielineImage")
+          await prisma.dielineImage.create({
+            data,
+          });
+
+        if (image === "modelImage")
+          await prisma.modelImage.create({
+            data,
+          });
+      }
     }
 
     return { success: "Dieline Created Successfully.", slug };
@@ -111,6 +124,8 @@ export const updateDieline = async (
     minDimensions,
     categoryByModel,
     categoryByUsage,
+    dielineImage,
+    modelImage,
   } = data;
 
   try {
@@ -122,7 +137,7 @@ export const updateDieline = async (
     }
 
     const defaultMaterial = materials.split(",")[0]!;
-    await prisma.dieline.update({
+    const updatedDieline = await prisma.dieline.update({
       where: { id },
       data: {
         minHeight: minDimensions.height,
@@ -154,6 +169,40 @@ export const updateDieline = async (
         },
       },
     });
+
+    const images = { dielineImage, modelImage };
+
+    for (const image in images) {
+      const img = images[image as keyof typeof images];
+
+      if (img && img instanceof File) {
+        const buffer = Buffer.from(await img.arrayBuffer());
+
+        const { secure_url, public_id } = (await uploadCloudFile(buffer, {
+          folder: "dieline",
+          width: 800,
+          resource_type: "image",
+        })) as UploadApiResponse;
+
+        const data = {
+          publicId: public_id,
+          url: secure_url,
+          dieline: {
+            connect: { id: updatedDieline.id },
+          },
+        };
+
+        if (image === "dielineImage")
+          await prisma.dielineImage.create({
+            data,
+          });
+
+        if (image === "modelImage")
+          await prisma.modelImage.create({
+            data,
+          });
+      }
+    }
 
     return { success: "Dieline Settings Updated Successfully.", slug };
   } catch (error) {
@@ -210,6 +259,34 @@ export const setDielineStatus = async (status: boolean, id: number) => {
     const statusLabel = status ? "Active" : "Inactive";
 
     return { success: `Dieline Set ${statusLabel}` };
+  } catch (error) {
+    console.error(error);
+    return { error: (error as Error).message };
+  }
+};
+
+export const deleteDielineImage = async (publicId: string) => {
+  try {
+    const { error } = await deleteImage(publicId);
+    if (error) throw new Error(error);
+
+    await prisma.dielineImage.delete({ where: { publicId } });
+
+    return { success: "Dieline Image Deleted Successfully." };
+  } catch (error) {
+    console.error(error);
+    return { error: (error as Error).message };
+  }
+};
+
+export const deleteModelImage = async (publicId: string) => {
+  try {
+    const { error } = await deleteImage(publicId);
+    if (error) throw new Error(error);
+
+    await prisma.modelImage.delete({ where: { publicId } });
+
+    return { success: "Model Image Deleted Successfully." };
   } catch (error) {
     console.error(error);
     return { error: (error as Error).message };

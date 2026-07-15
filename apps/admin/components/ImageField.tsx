@@ -1,7 +1,7 @@
 "use client";
 
-import { deleteImage } from "@/actions/cloudinary";
 import { placeholder } from "@/public";
+import { ServerResponse } from "@repo/lib/data/types";
 import { useLoading } from "@repo/lib/utils/useLoading";
 import { Button } from "@repo/ui/components/button";
 import {
@@ -24,9 +24,18 @@ interface Props {
   setValue: any;
   public_id?: string;
   image?: string | null;
+  formFieldName?: string;
+  deleteImageFn: (publicId: string) => ServerResponse;
 }
 
-const ImageField = ({ control, setValue, public_id, image }: Props) => {
+const ImageField = ({
+  control,
+  setValue,
+  public_id,
+  image,
+  formFieldName,
+  deleteImageFn,
+}: Props) => {
   //HOOKS
   const [imagePreview, setImagePreview] = useState<string | null | undefined>(
     image,
@@ -72,7 +81,7 @@ const ImageField = ({ control, setValue, public_id, image }: Props) => {
     startLoading();
 
     if (public_id) {
-      const res = await deleteImage(public_id);
+      const res = await deleteImageFn(public_id);
 
       if (res.error) {
         toast.error(res.error);
@@ -82,7 +91,7 @@ const ImageField = ({ control, setValue, public_id, image }: Props) => {
 
       if (res.success) {
         toast.success(res.success);
-        setValue("image", undefined);
+        setValue(formFieldName || "image", undefined);
         stopLoading();
         router.refresh();
       }
@@ -94,15 +103,16 @@ const ImageField = ({ control, setValue, public_id, image }: Props) => {
     }
   };
 
+  const inputId = `file-upload-${formFieldName}`;
   return (
     <div className="flex flex-col items-center justify-center gap-2">
       <FormField
         control={control}
-        name="image"
+        name={formFieldName ?? "image"}
         render={({ field }) => (
           <FormItem className="w-full">
             <div className="relative overflow-hidden rounded-md">
-              <FormLabel htmlFor="file-upload">
+              <FormLabel htmlFor={inputId}>
                 <Image
                   alt=""
                   src={imagePreview || placeholder}
@@ -136,7 +146,7 @@ const ImageField = ({ control, setValue, public_id, image }: Props) => {
                 accept="image/*"
                 className="hidden"
                 onChange={(e) => handleImageChange(e, field)}
-                id="file-upload"
+                id={inputId}
               />
             </FormControl>
             <FormMessage />

@@ -8,6 +8,7 @@ const ActionButton = (param: {
   href?: string;
   target?: HTMLAttributeAnchorTarget;
   className?: string;
+  dialogClassName?: string;
   iconClass?: string;
   children?: ReactNode;
 }) => {
@@ -27,7 +28,9 @@ const ActionButton = (param: {
           <param.icon size={14} className={param.iconClass} />
         </ActButton>
       </DialogTrigger>
-      <DialogContent>{param.children}</DialogContent>
+      <DialogContent className={param.dialogClassName}>
+        {param.children}
+      </DialogContent>
     </Dialog>
   );
 };

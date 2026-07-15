@@ -77,17 +77,6 @@ model Otp {
   @@unique([code, phoneNumber])
 }
 
-//! IMAGE  --------------------------------
-
-model Image {
-  id        Int      @id @default(autoincrement())
-  url       String
-  publicId  String   @unique
-  createdAt DateTime @default(now())
-  dieline   Dieline  @relation(fields: [dielineId], references: [id], onDelete: Cascade)
-  dielineId Int      @unique
-}
-
 //! DIELINE --------------------------------
 model Dieline {
   id             Int      @id @default(autoincrement())
@@ -104,7 +93,6 @@ model Dieline {
   minLength      Float
   minHeight      Float
 
-  image           Image?
   categoryByUsage DielineCategoryByUsage[]
   categoryByModel DielineCategoryByModel[]
   downloadHistory DownloadHistory[]
@@ -112,6 +100,26 @@ model Dieline {
   savedDielines   SavedDieline[]
   settings        DielineSettings          @relation(fields: [settingsId], references: [id])
   settingsId      Int                      @unique
+  dielineImage    DielineImage?
+  modelImage      ModelImage?
+}
+
+model DielineImage {
+  id        Int      @id @default(autoincrement())
+  url       String
+  publicId  String   @unique
+  createdAt DateTime @default(now())
+  dieline   Dieline  @relation(fields: [dielineId], references: [id], onDelete: Cascade)
+  dielineId Int      @unique
+}
+
+model ModelImage {
+  id        Int      @id @default(autoincrement())
+  url       String
+  publicId  String   @unique
+  createdAt DateTime @default(now())
+  dieline   Dieline  @relation(fields: [dielineId], references: [id], onDelete: Cascade)
+  dielineId Int      @unique
 }
 
 model DielineSettings {
