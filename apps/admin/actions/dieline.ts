@@ -22,6 +22,7 @@ export const createDieline = async (data: DielineMetadataFormType) => {
     categoryByUsage,
     dielineImage,
     modelImage,
+    defaultMaterial,
   } = data;
 
   try {
@@ -31,7 +32,6 @@ export const createDieline = async (data: DielineMetadataFormType) => {
       return { error: "Slug Should Be Unique." };
     }
 
-    const defaultMaterial = materials.split(",")[0]!; // todo: get from form
     const newDieline = await prisma.dieline.create({
       data: {
         slug,
@@ -41,6 +41,7 @@ export const createDieline = async (data: DielineMetadataFormType) => {
         minWidth: minDimensions.width,
         dimensionTypes,
         materials,
+        defaultMaterial,
         specification: JSON.stringify({
           shapes: {},
           rulers: [],
@@ -126,6 +127,7 @@ export const updateDieline = async (
     categoryByUsage,
     dielineImage,
     modelImage,
+    defaultMaterial,
   } = data;
 
   try {
@@ -136,7 +138,6 @@ export const updateDieline = async (
       return { error: "Slug Should Be Unique." };
     }
 
-    const defaultMaterial = materials.split(",")[0]!;
     const updatedDieline = await prisma.dieline.update({
       where: { id },
       data: {
@@ -145,7 +146,7 @@ export const updateDieline = async (
         minWidth: minDimensions.width,
         materials,
         dimensionTypes,
-
+        defaultMaterial,
         slug,
         title,
         categoryByModel: {

@@ -13,6 +13,7 @@ import Drawer from "../core/dieline/Drawer";
 
 interface Dieline {
   materials: string;
+  defaultMaterial: string;
   specification: ISpec.Specs;
   dimensionTypes: string;
   minWidth: number;
@@ -63,7 +64,9 @@ export function useDielineGenerator(
       .split(",")
       .map((i) => materials.find((m) => m.value === i))
       .filter((i) => i !== undefined);
-    const material = materials.find((m) => m.value === setts.material)!;
+    const material = materials.find(
+      (m) => m.value === dieline.defaultMaterial,
+    )!;
 
     setDefaultSettings({
       bleed: setts.bleed,

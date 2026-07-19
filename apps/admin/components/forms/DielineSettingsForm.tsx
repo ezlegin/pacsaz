@@ -66,6 +66,7 @@ const DielineSettingsForm = ({
       slug: dieline?.slug ?? "",
       dimensionTypes: dieline?.dimensionTypes ?? "manufacture,inner,outer",
       materials: dieline?.materials ?? "fFlute,glossyCardboard,eFlute,artPaper",
+      defaultMaterial: dieline?.defaultMaterial ?? "glossyCardboard",
       categoryByModel:
         dieline && dieline.categoryByModel.length > 0
           ? dieline.categoryByModel.map((i) => i.slug)
@@ -92,6 +93,8 @@ const DielineSettingsForm = ({
     });
     stopLoading();
   };
+
+  const selectedMaterials = form.watch("materials").split(",");
 
   return (
     <Form {...form}>
@@ -405,6 +408,35 @@ const DielineSettingsForm = ({
               )}
             />
           </div>
+
+          <FormField
+            control={form.control}
+            name="defaultMaterial"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Default Material</FormLabel>
+                <FormControl>
+                  <Select
+                    defaultValue={field.value}
+                    onValueChange={(val) => {
+                      field.onChange(val);
+                    }}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Bleed Amount" />
+                    </SelectTrigger>
+                    <SelectContent position="popper">
+                      {selectedMaterials.map((mat, idx) => (
+                        <SelectItem value={mat} key={idx}>
+                          {mat}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+              </FormItem>
+            )}
+          />
 
           <Button
             className="w-full"

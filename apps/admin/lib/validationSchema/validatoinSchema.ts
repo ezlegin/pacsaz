@@ -131,6 +131,7 @@ export const dielineMetadataFormSchema = z.object({
   minDimensions: dimension,
   dimensionTypes: z.string(),
   materials: z.string(),
+  defaultMaterial: z.string(),
   categoryByModel: z.array(z.string()),
   categoryByUsage: z.array(z.string()),
   dielineImage: z.instanceof(File).optional(),

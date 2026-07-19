@@ -79,19 +79,20 @@ model Otp {
 
 //! DIELINE --------------------------------
 model Dieline {
-  id             Int      @id @default(autoincrement())
-  title          String
-  slug           String   @unique
-  specification  String   @db.MediumText
-  variable       String
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  active         Boolean  @default(true)
-  materials      String
-  dimensionTypes String
-  minWidth       Float
-  minLength      Float
-  minHeight      Float
+  id              Int      @id @default(autoincrement())
+  title           String
+  slug            String   @unique
+  specification   String   @db.MediumText
+  variable        String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  active          Boolean  @default(true)
+  materials       String
+  defaultMaterial String   @default("eFlute")
+  dimensionTypes  String
+  minWidth        Float
+  minLength       Float
+  minHeight       Float
 
   categoryByUsage DielineCategoryByUsage[]
   categoryByModel DielineCategoryByModel[]
