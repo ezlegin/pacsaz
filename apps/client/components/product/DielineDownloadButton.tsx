@@ -64,7 +64,14 @@ const DielineDownloadButton = ({ slug, isRendering, user }: Props) => {
 
     const createRecord = await createDownloadHistory(slug, setts, user.plan.id);
     if (createRecord.error) {
-      toast.error(createRecord.error);
+      toast.error(createRecord.error, {
+        action: {
+          label: "تمدید اشتراک",
+          onClick: () => {
+            router.push("/subscription");
+          },
+        },
+      });
       stopLoading();
       return;
     }

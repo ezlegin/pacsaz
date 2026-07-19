@@ -59,7 +59,7 @@ const page = async ({ searchParams }: Props) => {
           />
         </div>
 
-        <PopupNewDialog buttonTitle="New Dieline">
+        <PopupNewDialog buttonTitle="New Dieline" dialogClassName="min-w-4xl">
           <DialogTitle>New Dieline</DialogTitle>
           <DielineSettingsForm categories={categories} />
         </PopupNewDialog>

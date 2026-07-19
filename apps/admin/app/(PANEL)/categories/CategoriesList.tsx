@@ -7,7 +7,7 @@ import Card from "@repo/ui/components/custom/Card";
 import Table from "@repo/ui/components/custom/Table";
 import { DialogTitle } from "@repo/ui/components/dialog";
 import { TableCell, TableRow } from "@repo/ui/components/table";
-import { Pencil, Trash } from "lucide-react";
+import { Pencil } from "lucide-react";
 
 export type Category = {
   id: number;

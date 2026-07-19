@@ -1,7 +1,6 @@
 import {
   Dialog,
   DialogContent,
-  DialogTitle,
   DialogTrigger,
 } from "@repo/ui/components/dialog";
 import { ReactNode } from "react";
@@ -11,10 +10,12 @@ const PopupNewDialog = ({
   children,
   buttonTitle,
   icon = false,
+  dialogClassName,
 }: {
   children: ReactNode;
   buttonTitle: string;
   icon?: boolean;
+  dialogClassName?: string;
 }) => {
   return (
     <Dialog>
@@ -22,7 +23,7 @@ const PopupNewDialog = ({
         <NewButton title={buttonTitle} icon={icon} />
         {/* INSTALL LUDICE REACT V0.562.0 TO FIX TYPE ERROR */}
       </DialogTrigger>
-      <DialogContent>{children}</DialogContent>
+      <DialogContent className={dialogClassName}>{children}</DialogContent>
     </Dialog>
   );
 };

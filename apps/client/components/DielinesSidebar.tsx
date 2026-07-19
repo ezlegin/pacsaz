@@ -14,9 +14,14 @@ import { ChevronLeft, Search } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
+type DielineCount = {
+  _count: {
+    dieline: number;
+  };
+};
 interface Props {
-  categoriesByUsage: DielineCategoryByUsage[];
-  categoriesByModel: DielineCategoryByModel[];
+  categoriesByUsage: (DielineCategoryByUsage & DielineCount)[];
+  categoriesByModel: (DielineCategoryByModel & DielineCount)[];
 }
 
 const DielinesSidebar = ({ categoriesByModel, categoriesByUsage }: Props) => {
@@ -94,9 +99,11 @@ const DielinesSidebar = ({ categoriesByModel, categoriesByUsage }: Props) => {
                     value={cc.slug}
                   >
                     <div className="flex gap-2 items-center">
-                      <ChevronLeft className="scale-[80%] text-muted-foreground" />{" "}
+                      <ChevronLeft className="scale-[80%] text-muted-foreground" />
                       <span>{cc.title}</span>
-                      <span className="text-muted-foreground">116</span>
+                      <span className="text-muted-foreground">
+                        {cc._count.dieline}
+                      </span>
                     </div>
                   </ToggleGroupItem>
                 ))}

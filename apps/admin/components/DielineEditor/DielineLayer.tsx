@@ -156,6 +156,7 @@ const DielineLayer = ({
           <DialogContent
             showCloseButton={false}
             overlayClassname="backdrop-blur-xs bg-transparent"
+            className="min-w-3xl"
           >
             <DialogTitle className="sr-only" />
             <DielineSettingsForm categories={categories} dieline={dieline} />

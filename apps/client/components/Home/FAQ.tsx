@@ -1,14 +1,12 @@
 import {
   Accordion,
+  AccordionContent,
   AccordionItem,
   AccordionTrigger,
-  AccordionContent,
 } from "@repo/ui/components/accordion";
 import { Badge } from "@repo/ui/components/badge";
-import { CircleQuestionMark } from "lucide-react";
-import React from "react";
-import { Button } from "@repo/ui/components/button";
 import Card from "@repo/ui/components/custom/Card";
+import { CircleQuestionMark } from "lucide-react";
 
 const FAQ = () => {
   return (
@@ -27,7 +25,7 @@ const FAQ = () => {
           ارتباط باشید.
         </p>
 
-        <Button variant={"default"}>صفحه سوالات متداول</Button>
+        {/* <Button variant={"default"}>صفحه سوالات متداول</Button> */}
       </div>
 
       <div className="w-full">

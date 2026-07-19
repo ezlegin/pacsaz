@@ -24,6 +24,7 @@ const page = async ({ searchParams }: Props) => {
   const { skip, take } = pagination(page, pageSize);
 
   const where: Prisma.DielineWhereInput = {
+    active: true,
     OR: [
       { categoryByModel: { some: { slug: category } } },
       { categoryByUsage: { some: { slug: category } } },
@@ -33,19 +34,41 @@ const page = async ({ searchParams }: Props) => {
   const dielines = await prisma.dieline.findMany({
     orderBy: { id: "desc" },
     where,
-    include: { dielineImage: true, modelImage: true },
+    include: {
+      dielineImage: true,
+      modelImage: true,
+      categoryByModel: true,
+      categoryByUsage: true,
+    },
     skip,
     take,
   });
   const totalDielines = await prisma.dieline.count({ where });
 
-  const categoriesByModel = (
-    await prisma.dielineCategoryByModel.findMany({ include: { dieline: true } })
-  ).filter((c) => c.dieline.length > 0);
+  const include = {
+    _count: {
+      select: {
+        dieline: {
+          where: { active: true },
+        },
+      },
+    },
+  };
+  const categoriesByModel = await prisma.dielineCategoryByModel.findMany({
+    include,
+  });
 
-  const categoriesByUsage = (
-    await prisma.dielineCategoryByUsage.findMany({ include: { dieline: true } })
-  ).filter((c) => c.dieline.length > 0);
+  const categoriesByUsage = await prisma.dielineCategoryByUsage.findMany({
+    include,
+  });
+
+  const filteredCategoriesByModel = categoriesByModel.filter(
+    (c) => c._count.dieline > 0,
+  );
+
+  const filteredCategoriesByUsage = categoriesByUsage.filter(
+    (c) => c._count.dieline > 0,
+  );
 
   return (
     <div className="md:flex gap-14">
@@ -62,8 +85,8 @@ const page = async ({ searchParams }: Props) => {
               <SheetTitle>فیلتر کردن جستجو</SheetTitle>
               <SheetDescription></SheetDescription>
               <DielinesSidebar
-                categoriesByModel={categoriesByModel}
-                categoriesByUsage={categoriesByUsage}
+                categoriesByModel={filteredCategoriesByModel}
+                categoriesByUsage={filteredCategoriesByUsage}
               />
             </SheetHeader>
           </SheetContent>
@@ -72,8 +95,8 @@ const page = async ({ searchParams }: Props) => {
 
       <div className="w-100 hidden md:block">
         <DielinesSidebar
-          categoriesByModel={categoriesByModel}
-          categoriesByUsage={categoriesByUsage}
+          categoriesByModel={filteredCategoriesByModel}
+          categoriesByUsage={filteredCategoriesByUsage}
         />
       </div>
 

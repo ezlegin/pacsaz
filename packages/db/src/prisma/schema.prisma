@@ -185,7 +185,7 @@ model DownloadHistory {
   id           Int      @id @default(autoincrement())
   downloadedAt DateTime @default(now())
 
-  dieline   Dieline @relation(fields: [dielineId], references: [id])
+  dieline   Dieline @relation(fields: [dielineId], references: [id], onDelete: Cascade)
   dielineId Int
   user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    Int

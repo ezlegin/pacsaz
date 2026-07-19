@@ -1,7 +1,7 @@
 "use server";
 
 import { TarrifFormType } from "@/lib/validationSchema/validatoinSchema";
-import { prisma } from "@repo/db";
+import { PlanKey, prisma } from "@repo/db";
 
 export const createTarrif = async (data: TarrifFormType) => {
   const {
@@ -31,6 +31,7 @@ export const createTarrif = async (data: TarrifFormType) => {
 
     await prisma.tarrif.create({
       data: {
+        level: mapPlanLevel(key),
         description,
         isRecommended,
         key,
@@ -98,6 +99,7 @@ export const updateTarrif = async (data: TarrifFormType, id: number) => {
     await prisma.tarrif.update({
       where: { id },
       data: {
+        level: mapPlanLevel(key),
         description,
         isRecommended,
         key,
@@ -149,5 +151,16 @@ export const deleteTarrif = async (id: number) => {
   } catch (error) {
     console.error(error);
     return { error: (error as Error).name };
+  }
+};
+
+const mapPlanLevel = (key: PlanKey) => {
+  switch (key) {
+    case "standard":
+      return 1;
+    case "pro":
+      return 2;
+    case "organization":
+      return 3;
   }
 };
