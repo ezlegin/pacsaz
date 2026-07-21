@@ -38,11 +38,13 @@ const HomeDieline = ({ dieline }: { dieline: DielineType | null }) => {
   dieline.settings.length = 130;
   dieline.settings.height = 40;
   const specs = JSON.parse(dieline.specification);
+  const variables = JSON.parse(dieline.variable);
   const { isRendering } = useDielineGenerator(
     {
       ...dieline,
       specification: specs,
       settings: dieline.settings!,
+      variables,
     },
     "client",
   );

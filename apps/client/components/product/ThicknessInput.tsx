@@ -34,7 +34,8 @@ const ThicknessInput = ({ isRendering, isPremium }: Props) => {
   ) => {
     if (type !== "custom") {
       startMThicknessLoading();
-      const newThickness = val + (type === "inc" ? 0.1 : -0.1);
+      const delta = type === "inc" ? 0.1 : -0.1;
+      const newThickness = Math.round((val + delta) * 10) / 10;
       if (newThickness < mMinThick || newThickness > mMaxThick) return;
       setSetting("thickness", newThickness);
     } else {

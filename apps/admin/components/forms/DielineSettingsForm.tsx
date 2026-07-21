@@ -65,7 +65,7 @@ const DielineSettingsForm = ({
       title: dieline?.title ?? "",
       slug: dieline?.slug ?? "",
       dimensionTypes: dieline?.dimensionTypes ?? "manufacture,inner,outer",
-      materials: dieline?.materials ?? "fFlute,glossyCardboard,eFlute,artPaper",
+      materials: dieline?.materials ?? "glossyCardboard,artPaper,fFlute,eFlute",
       defaultMaterial: dieline?.defaultMaterial ?? "glossyCardboard",
       categoryByModel:
         dieline && dieline.categoryByModel.length > 0

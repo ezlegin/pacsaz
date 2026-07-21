@@ -11,6 +11,7 @@ import { UserType } from "./DielineDownloadButton";
 import DielineLoadingOverlay from "./DielineLoadingOverlay";
 import DielineSettings from "./DielineSettings";
 import ProductInfo from "./ProductInfo";
+import { IVar } from "@repo/store/editor/variables.store";
 const SVGPreview = dynamic(
   () => import("@repo/ui/components/custom/SVGPreview"),
   { ssr: false },
@@ -27,11 +28,13 @@ const DielineGenerator = ({
 }) => {
   const { setDeveloperTools } = useDeveloperToolsStore();
   const specs = JSON.parse(dieline.specification) as ISpec.Specs;
+  const variables = JSON.parse(dieline.variable) as IVar.VariableMap;
   const { isRendering } = useDielineGenerator(
     {
       ...dieline,
       specification: specs,
       settings: customSettings ?? dieline.settings!,
+      variables,
     },
     "client",
     user,

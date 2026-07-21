@@ -4,8 +4,7 @@ import {
   dielineUpdateFormSchema,
 } from "@/lib/validationSchema/validatoinSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Dieline } from "@repo/db";
-import { DielineSettings } from "@repo/dieline-core/hooks/useDielineGenerator";
+import { Dieline, DielineSettings } from "@repo/db";
 import { useDielineSpecStore } from "@repo/store/editor/dielineSpec.store";
 import { useVariableStore } from "@repo/store/editor/variables.store";
 import { useEffect } from "react";

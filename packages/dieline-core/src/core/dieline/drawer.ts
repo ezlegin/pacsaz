@@ -307,25 +307,33 @@ export class Drawer extends Dieline {
   private get scope() {
     let vars: Record<string, string> = {};
 
-    for (const v of this.variables) {
-      vars[v.name] = v.value;
-    }
-
     let scope: Record<string, number> = {
       width: this.width,
-      twoWidth: this.width * 2,
       length: this.length,
-      twoLength: this.length * 2,
       height: this.height,
-      twoHeight: this.height * 2,
       safeOffset: this.thickness,
     };
 
-    for (const v in vars) {
-      if (vars[v]) {
-        const res = evaluate(vars[v], scope);
-        scope[v] = res;
+    for (const v of this.variables) {
+      let matched = false;
+
+      if (v.conditions && v.conditions.length > 0) {
+        for (const c of v.conditions) {
+          if (evaluate(c.if, scope)) {
+            vars[v.name] = c.then;
+            matched = true;
+            break;
+          }
+        }
       }
+
+      if (!matched) {
+        vars[v.name] = v.value;
+      }
+    }
+
+    for (const [name, expression] of Object.entries(vars)) {
+      scope[name] = evaluate(expression, scope);
     }
 
     return scope;

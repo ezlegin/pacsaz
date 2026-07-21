@@ -13,16 +13,19 @@ import { Input } from "@repo/ui/components/input";
 import { Label } from "@repo/ui/components/label";
 import { Separator } from "@repo/ui/components/separator";
 import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
-import { Plus, Trash } from "lucide-react";
+import { Minus, Plus, Trash } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
 
 const formSchema = z.object({
   id: z.string(),
   name: z.string().min(1),
+  conditions: z
+    .array(z.object({ if: z.string(), then: z.string() }))
+    .optional(),
   value: z.string().min(1),
 });
 type FormType = z.infer<typeof formSchema>;
@@ -38,6 +41,7 @@ const Variables = () => {
       id: "",
       name: "",
       value: "",
+      conditions: undefined,
     },
     mode: "onChange",
   });
@@ -118,9 +122,14 @@ const Variables = () => {
     if (selectedVar) {
       form.reset(selectedVar);
     } else {
-      form.reset({ id: "", name: "", value: "" });
+      form.reset({ id: "", name: "", value: "", conditions: [] });
     }
   }, [selectedVar]);
+
+  const { append, fields, remove } = useFieldArray({
+    control: form.control,
+    name: "conditions",
+  });
 
   return (
     <div className="space-y-6">
@@ -151,6 +160,58 @@ const Variables = () => {
               </FormItem>
             )}
           />
+
+          {fields.map((field, idx) => (
+            <div key={field.id} className="flex gap-3 items-center">
+              <Button
+                size={"icon"}
+                variant={"ghost"}
+                className="size-2 group text-muted-foreground"
+                onClick={() => remove(idx)}
+              >
+                <span className="group-hover:hidden">{idx + 1}</span>
+                <span className="hidden group-hover:block">
+                  <Minus />
+                </span>
+              </Button>
+
+              <div className="flex gap-3">
+                <FormField
+                  control={form.control}
+                  name={`conditions.${idx}.if`}
+                  render={({ field }) => (
+                    <FormItem className="gap-0">
+                      <FormLabel className="text-xs">If</FormLabel>
+                      <FormControl>
+                        <Input {...field} className="h-9" />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name={`conditions.${idx}.then`}
+                  render={({ field }) => (
+                    <FormItem className="gap-0">
+                      <FormLabel className="text-xs">Then</FormLabel>
+                      <FormControl>
+                        <Input {...field} className="h-9" />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+          ))}
+
+          <Button
+            size={"sm"}
+            variant={"outline"}
+            type="button"
+            onClick={() => append({ if: "", then: "" })}
+          >
+            + Condition
+          </Button>
 
           <Button
             disabled={!form.formState.isValid}
@@ -185,9 +246,16 @@ const Variables = () => {
                 className="text-xs font-medium data-[state=on]:bg-gray-200/50 data-[state=on]:border cursor-pointer w-full justify-start group"
               >
                 <div className="flex justify-between items-center w-full">
-                  <div>
-                    <span className="medium text-blue-500">{item.name}</span> ={" "}
-                    <span className="text-amber-700">{item.value}</span>
+                  <div className="flex justify-between w-full">
+                    <div>
+                      <span className="medium text-blue-500">{item.name}</span>{" "}
+                      = <span className="text-amber-700">{item.value}</span>
+                    </div>
+                    {item.conditions && item.conditions.length > 0 && (
+                      <span className="text-muted-foreground">
+                        + Conditions
+                      </span>
+                    )}
                   </div>
                   <div
                     onClick={(e) => {
