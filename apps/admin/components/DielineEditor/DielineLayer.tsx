@@ -73,7 +73,7 @@ const DielineLayer = ({
     push(shapes);
   }, [shapes]);
 
-  //todo:
+  //todo: implement undo/redo
   // useEffect(() => {
   // if (present) {
   //     setShapes(present);
@@ -90,14 +90,14 @@ const DielineLayer = ({
         const shape = item as ISpec.ShapesSpec;
         switch (type) {
           case "delete":
-            removeShape(shape.type, shape.id);
+            removeShape(shape.id);
             clearSelection();
             break;
           case "visibility":
-            setShapeVisibility(shape.type, shape.id);
+            setShapeVisibility(shape.id);
             break;
           case "dup":
-            setShape(shape.type, { ...shape, key: shape.key + "-dup" });
+            setShape({ ...shape, key: shape.key + "-dup" });
             break;
         }
         break;

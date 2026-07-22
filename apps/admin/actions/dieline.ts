@@ -43,7 +43,7 @@ export const createDieline = async (data: DielineMetadataFormType) => {
         materials,
         defaultMaterial,
         specification: JSON.stringify({
-          shapes: {},
+          shapes: [],
           rulers: [],
           models: [],
         }),

@@ -107,11 +107,13 @@ function ShapesPropsProvider<T extends ISpec.ShapesSpec>({
   });
 
   const onSubmit = (data: FormType) => {
+    console.log("data", data);
+
     if (isUpdateType) {
-      updateShape(selection.type as ISpec.ShapesKey, selection.id, data);
+      updateShape(selection.id, data);
       toast.info("Shape Updated.");
     } else {
-      setShape(shapeKey, data);
+      setShape(data);
       toast.info("Shape Created.");
       close();
     }

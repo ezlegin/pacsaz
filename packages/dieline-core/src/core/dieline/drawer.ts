@@ -17,14 +17,14 @@ export class Drawer extends Dieline {
 
   //! ------------------------ Shapes ------------------------
 
-  private line(line: NonNullable<ISpec.Shapes["line"]>) {
+  private line(line: ISpec.LineSpec) {
     this.$pusher(line, ({ angle, length }, scope) => {
       const lineLength = this.$parseMathStr(length, scope);
       return new Pacsaz.shapes.Line(lineLength, +angle);
     });
   }
 
-  private lines(lines: NonNullable<ISpec.Shapes["lines"]>) {
+  private lines(lines: ISpec.LinesSpec) {
     this.$pusher(
       lines,
       (
@@ -89,7 +89,7 @@ export class Drawer extends Dieline {
     );
   }
 
-  private rectangle(rectangle: NonNullable<ISpec.Shapes["rectangle"]>) {
+  private rectangle(rectangle: ISpec.RectangleSpec) {
     this.$pusher(rectangle, ({ height, width, radius, deleteSide }, scope) => {
       const rectWidth = this.$parseMathStr(width, scope);
       const rectHeight = this.$parseMathStr(height, scope);
@@ -100,7 +100,7 @@ export class Drawer extends Dieline {
     });
   }
 
-  private circle(circle: NonNullable<ISpec.Shapes["circle"]>) {
+  private circle(circle: ISpec.CircleSpec) {
     this.$pusher(circle, ({ radius, semiCircleDirection }, scope) => {
       const circleRadius = this.$parseMathStr(radius, scope);
       if (semiCircleDirection) {
@@ -111,14 +111,14 @@ export class Drawer extends Dieline {
     });
   }
 
-  private polygon(polygon: NonNullable<ISpec.Shapes["polygon"]>) {
+  private polygon(polygon: ISpec.PolygonSpec) {
     this.$pusher(polygon, ({ radius, sides }, scope) => {
       const polygonRadius = this.$parseMathStr(radius, scope);
       return new Pacsaz.shapes.Polygon(polygonRadius, +sides);
     });
   }
 
-  private arc(arc: NonNullable<ISpec.Shapes["arc"]>) {
+  private arc(arc: ISpec.ArcSpec) {
     this.$pusher(arc, ({ radius, startAngle, endAngle }, scope) => {
       const polygonRadius = this.$parseMathStr(radius, scope);
       const start = this.$parseMathStr(startAngle, scope);
@@ -128,61 +128,69 @@ export class Drawer extends Dieline {
   }
 
   private drawShapes() {
-    const shapes = this.specs.shapes;
-    const line = this.$checkExistance(shapes.line);
-    const lines = this.$checkExistance(shapes.lines);
-    const rectangle = this.$checkExistance(shapes.rectangle);
-    const circle = this.$checkExistance(shapes.circle);
-    const polygon = this.$checkExistance(shapes.polygon);
-    const arc = this.$checkExistance(shapes.arc);
-
-    if (line) this.line(line);
-    if (lines) this.lines(lines);
-    if (rectangle) this.rectangle(rectangle);
-    if (circle) this.circle(circle);
-    if (polygon) this.polygon(polygon);
-    if (arc) this.arc(arc);
+    for (const shape of this.specs.shapes) {
+      switch (shape.type) {
+        case "line":
+          this.line(shape);
+          break;
+        case "circle":
+          this.circle(shape);
+          break;
+        case "arc":
+          this.arc(shape);
+          break;
+        case "lines":
+          this.lines(shape);
+          break;
+        case "polygon":
+          this.polygon(shape);
+          break;
+        case "rectangle":
+          this.rectangle(shape);
+          break;
+      }
+    }
   }
 
   //! ------------------------ Models ------------------------
-  private glue(glue: NonNullable<ISpec.Models["glue"]>) {
-    this.$pusher(glue, ({ from, to }, scope) => {
-      const glueFrom = [
-        this.$parseMathStr(from[0], scope),
-        this.$parseMathStr(from[1], scope),
-      ];
-      const glueTo = [
-        this.$parseMathStr(to[0], scope),
-        this.$parseMathStr(to[1], scope),
-      ];
-      return new Pacsaz.models.Glue(glueFrom, glueTo);
-    });
-  }
+  // private glue(glue: NonNullable<ISpec.Models["glue"]>) {
+  //   this.$pusher(glue, ({ from, to }, scope) => {
+  //     const glueFrom = [
+  //       this.$parseMathStr(from[0], scope),
+  //       this.$parseMathStr(from[1], scope),
+  //     ];
+  //     const glueTo = [
+  //       this.$parseMathStr(to[0], scope),
+  //       this.$parseMathStr(to[1], scope),
+  //     ];
+  //     return new Pacsaz.models.Glue(glueFrom, glueTo);
+  //   });
+  // }
 
-  private door(door: NonNullable<ISpec.Models["door"]>) {
-    this.$pusher(door, ({ dustSide, mirror, indentAt }) => {
-      const door = new Pacsaz.models.Door(dustSide, indentAt);
-      if (mirror.x || mirror.y) {
-        door.mirror(mirror.x, mirror.y);
-      }
-      return door;
-    });
-  }
+  // private door(door: NonNullable<ISpec.Models["door"]>) {
+  //   this.$pusher(door, ({ dustSide, mirror, indentAt }) => {
+  //     const door = new Pacsaz.models.Door(dustSide, indentAt);
+  //     if (mirror.x || mirror.y) {
+  //       door.mirror(mirror.x, mirror.y);
+  //     }
+  //     return door;
+  //   });
+  // }
 
-  private snapLock(snapLock: NonNullable<ISpec.Models["snapLock"]>) {
-    this.$pusher(snapLock, ({}) => {
-      return new Pacsaz.models.SnapLock();
-    });
-  }
+  // private snapLock(snapLock: NonNullable<ISpec.Models["snapLock"]>) {
+  //   this.$pusher(snapLock, ({}) => {
+  //     return new Pacsaz.models.SnapLock();
+  //   });
+  // }
 
-  private drawModels() {
-    const glue = this.$checkExistance(this.specs.models.glue);
-    const door = this.$checkExistance(this.specs.models.door);
-    const snapLock = this.$checkExistance(this.specs.models.snapLock);
-    if (glue) this.glue(glue);
-    if (door) this.door(door);
-    if (snapLock) this.snapLock(snapLock);
-  }
+  // private drawModels() {
+  //   const glue = this.$checkExistance(this.specs.models.glue);
+  //   const door = this.$checkExistance(this.specs.models.door);
+  //   const snapLock = this.$checkExistance(this.specs.models.snapLock);
+  //   if (glue) this.glue(glue);
+  //   if (door) this.door(door);
+  //   if (snapLock) this.snapLock(snapLock);
+  // }
 
   //! ------------------------ Rulers ------------------------
   private drawRulers() {
@@ -215,7 +223,7 @@ export class Drawer extends Dieline {
 
   protected override drawer() {
     this.drawShapes();
-    this.drawModels();
+    // this.drawModels();
   }
 
   protected override rulerDrawer() {
@@ -225,86 +233,86 @@ export class Drawer extends Dieline {
   // -------------------- UTILS --------------------
 
   private $checkExistance<
-    T extends ISpec.ShapesMap | ISpec.ModelsMap | ISpec.Rulers,
+    T extends ISpec.Shapes | ISpec.ModelsMap | ISpec.Rulers,
   >(shapes: T | undefined) {
     if (shapes && shapes.length > 0) return shapes;
   }
 
-  private $pusher<T extends ISpec.ModelsMap | ISpec.ShapesMap>(
-    items: T,
-    callBack: (val: T[number], scope: Record<string, number>) => Shape,
+  private $pusher<T extends ISpec.ShapesSpec>(
+    item: T,
+    callBack: (val: T, scope: Record<string, number>) => Shape,
   ) {
     const scope = this.scope;
-    for (const item of items) {
-      if (item.hidden) continue;
+    if (item.hidden) return;
 
-      const model = callBack(item, scope);
+    const model = callBack(item, scope);
 
-      model.moveTo([
-        this.$parseMathStr(item.origin[0], scope),
-        this.$parseMathStr(item.origin[1], scope),
-      ]);
+    model.moveTo([
+      this.$parseMathStr(item.origin[0], scope),
+      this.$parseMathStr(item.origin[1], scope),
+    ]);
 
-      const dupScope = {
-        ...scope,
-        selfWidth: model.size.width,
-        selfHeight: model.size.height,
-      };
+    const dupScope = {
+      ...scope,
+      selfWidth: model.size.width,
+      selfHeight: model.size.height,
+    };
 
-      const dup = item.dup;
-      if (dup && dup.length > 0) {
-        for (const d of dup) {
-          model.dup();
+    const dup = item.dup;
+    if (dup && dup.length > 0) {
+      for (const d of dup) {
+        model.dup();
 
-          for (const op of d.operations) {
-            switch (op.type) {
-              case "zero":
-                model.zero();
-                break;
+        for (const op of d.operations) {
+          switch (op.type) {
+            case "zero":
+              model.zero();
+              break;
 
-              case "center":
-                model.center();
-                break;
+            case "center":
+              model.center();
+              break;
 
-              case "mirror":
-                if (op.x || op.y) model.mirror(op.x, op.y);
-                break;
+            case "mirror":
+              if (op.x || op.y) model.mirror(op.x, op.y);
+              break;
 
-              case "move":
-                const move = {
-                  x: this.$parseMathStr(op.value[0], dupScope),
-                  y: this.$parseMathStr(op.value[1], dupScope),
-                };
-                if (move.x > 0 || move.y > 0) model.move([move.x, move.y]);
-                break;
+            case "move":
+              const move = {
+                x: this.$parseMathStr(op.value[0], dupScope),
+                y: this.$parseMathStr(op.value[1], dupScope),
+              };
+              if (move.x > 0 || move.y > 0) model.move([move.x, move.y]);
+              break;
 
-              case "moveTo":
-                const moveTo = {
-                  x: this.$parseMathStr(op.value[0], dupScope),
-                  y: this.$parseMathStr(op.value[1], dupScope),
-                };
-                if (moveTo.x > 0 || moveTo.y > 0)
-                  model.moveTo([moveTo.x, moveTo.y]);
-                break;
+            case "moveTo":
+              const moveTo = {
+                x: this.$parseMathStr(op.value[0], dupScope),
+                y: this.$parseMathStr(op.value[1], dupScope),
+              };
+              if (moveTo.x > 0 || moveTo.y > 0)
+                model.moveTo([moveTo.x, moveTo.y]);
+              break;
 
-              case "rotate":
-                model.rotate(+op.value);
-                break;
+            case "rotate":
+              model.rotate(+op.value);
+              break;
 
-              case "scale":
-                model.scale(+op.value);
-                break;
-            }
+            case "scale":
+              model.scale(+op.value);
+              break;
           }
         }
       }
-
-      if ("layer" in item) {
-        this.$pushShape(model, item.key, item.layer);
-      } else {
-        this.$pushModels({ [item.key]: model });
-      }
     }
+
+    // if ("layer" in items) {
+    //   this.$pushShape(model, items.key, items.layer);
+    // } else {
+    //   this.$pushModels({ [items.key]: model });
+    // }
+
+    this.$pushShape(model, item.key, item.layer);
   }
 
   private get scope() {
