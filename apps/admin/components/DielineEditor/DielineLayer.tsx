@@ -105,14 +105,14 @@ const DielineLayer = ({
         const model = item as ISpec.ModelsSpec;
         switch (type) {
           case "delete":
-            removeModel(model.type, model.id);
+            removeModel(model.id);
             clearSelection();
             break;
           case "visibility":
-            setModelVisibility(model.type, model.id);
+            setModelVisibility(model.id);
             break;
           case "dup":
-            setModel(model.type, { ...model, key: model.key + "-dup" });
+            setModel({ ...model, key: model.key + "-dup" });
             break;
         }
         break;

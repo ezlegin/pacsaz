@@ -78,23 +78,21 @@ export namespace ISpec {
 
   //! Models --------------------------------------
   type DustSide = "left" | "right" | "both";
-  type ModelGenerals = Omit<Generals, "layer" | "type"> & { type: ModelsKey };
-  export type GlueSpec = { from: Point; to: Point } & ModelGenerals;
+  type ModelGenerals = Omit<Generals, "layer">;
+  export type GlueSpec = { from: Point; to: Point } & ModelGenerals & {
+      type: "glue";
+    };
   export type DoorSpec = {
     dustSide?: DustSide;
     mirror: { x: boolean; y: boolean };
     indentAt: { l: boolean; r: boolean };
-  } & ModelGenerals;
-  export type SnapLockSpec = ModelGenerals;
+  } & ModelGenerals & { type: "door" };
+  export type SnapLockSpec = ModelGenerals & { type: "snapLock" };
 
-  export type Models = Partial<{
-    glue: GlueSpec[];
-    door: DoorSpec[];
-    snapLock: SnapLockSpec[];
-  }>;
-  export type ModelsKey = keyof Models;
-  export type ModelsMap = NonNullable<Models[ModelsKey]>;
-  export type ModelsSpec = ModelsMap[number];
+  export type ModelsSpec = GlueSpec | DoorSpec | SnapLockSpec;
+
+  export type ModelsKey = ModelsSpec["type"];
+  export type Models = ModelsSpec[];
 
   //! Rulers --------------------------------------
   export type Ruler = {
@@ -103,7 +101,7 @@ export namespace ISpec {
     value: string;
     offset: string;
     type: "ruler";
-  } & Omit<Generals, "type" | "layer" | "origin" | "dup">;
+  } & Omit<Generals, "layer" | "origin" | "dup">;
   export type Rulers = Ruler[];
 
   //! Specs --------------------------------------
@@ -132,17 +130,10 @@ interface DielineSpecStore {
   setRulerVisibility: (id: string) => void;
 
   //! Models
-  setModel: <T extends ISpec.ModelsKey>(
-    type: T,
-    spec: NonNullable<ISpec.Models[T]>[number],
-  ) => void;
-  updateModel: <T extends ISpec.ModelsKey>(
-    type: T,
-    id: string,
-    newSpec: NonNullable<ISpec.Models[T]>[number],
-  ) => void;
-  setModelVisibility: (type: ISpec.ModelsKey, id: string) => void;
-  removeModel: (type: ISpec.ModelsKey, id: string) => void;
+  setModel: (spec: ISpec.ModelsSpec) => void;
+  updateModel: (id: string, newSpec: Partial<ISpec.ModelsSpec>) => void;
+  setModelVisibility: (id: string) => void;
+  removeModel: (id: string) => void;
 }
 
 export const useDielineSpecStore = create<DielineSpecStore>()((set) => ({
@@ -209,9 +200,9 @@ export const useDielineSpecStore = create<DielineSpecStore>()((set) => ({
     })),
 
   //! Models ------------------------------------
-  setModel: (type, spec) =>
+  setModel: (spec) =>
     set((state) => {
-      const currentModels = state.specs.models[type] || [];
+      const currentModels = state.specs.models;
 
       let id = uuidv4();
       while (currentModels.some((model) => model.id === id)) {
@@ -221,38 +212,30 @@ export const useDielineSpecStore = create<DielineSpecStore>()((set) => ({
       return {
         specs: {
           ...state.specs,
-          models: {
-            ...state.specs.models,
-            [type]: [...currentModels, { ...spec, id }],
-          },
+          models: currentModels.concat({ ...spec, id }),
         },
       };
     }),
 
-  updateModel: (type, id, newSpec) =>
+  updateModel: (id, newSpec) =>
     set((state) => {
-      const currentModels = state.specs.models[type];
-      if (!currentModels) return state;
+      const currentModels = state.specs.models;
 
       const updatedModels = currentModels.map((item) =>
-        item.id === id ? { ...item, ...newSpec } : item,
+        item.id === id ? ({ ...item, ...newSpec } as ISpec.ModelsSpec) : item,
       );
 
       return {
         specs: {
           ...state.specs,
-          models: {
-            ...state.specs.models,
-            [type]: updatedModels,
-          },
+          models: updatedModels,
         },
       };
     }),
 
-  setModelVisibility: (type, id) =>
+  setModelVisibility: (id) =>
     set((state) => {
-      const currentModels = state.specs.models[type];
-      if (!currentModels) return state;
+      const currentModels = state.specs.models;
 
       const updatedModels = currentModels.map((item) =>
         item.id === id ? { ...item, hidden: !item.hidden } : item,
@@ -261,22 +244,16 @@ export const useDielineSpecStore = create<DielineSpecStore>()((set) => ({
       return {
         specs: {
           ...state.specs,
-          models: {
-            ...state.specs.models,
-            [type]: updatedModels,
-          },
+          models: updatedModels,
         },
       };
     }),
 
-  removeModel: (type, key) =>
+  removeModel: (key) =>
     set((state) => ({
       specs: {
         ...state.specs,
-        models: {
-          ...state.specs.models,
-          [type]: state.specs.models[type]?.filter((spec) => spec.id !== key),
-        },
+        models: state.specs.models.filter((model) => model.id !== key),
       },
     })),
 

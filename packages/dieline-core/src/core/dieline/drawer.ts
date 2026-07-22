@@ -153,44 +153,51 @@ export class Drawer extends Dieline {
   }
 
   //! ------------------------ Models ------------------------
-  // private glue(glue: NonNullable<ISpec.Models["glue"]>) {
-  //   this.$pusher(glue, ({ from, to }, scope) => {
-  //     const glueFrom = [
-  //       this.$parseMathStr(from[0], scope),
-  //       this.$parseMathStr(from[1], scope),
-  //     ];
-  //     const glueTo = [
-  //       this.$parseMathStr(to[0], scope),
-  //       this.$parseMathStr(to[1], scope),
-  //     ];
-  //     return new Pacsaz.models.Glue(glueFrom, glueTo);
-  //   });
-  // }
+  private glue(glue: ISpec.GlueSpec) {
+    this.$pusher(glue, ({ from, to }, scope) => {
+      const glueFrom = [
+        this.$parseMathStr(from[0], scope),
+        this.$parseMathStr(from[1], scope),
+      ];
+      const glueTo = [
+        this.$parseMathStr(to[0], scope),
+        this.$parseMathStr(to[1], scope),
+      ];
+      return new Pacsaz.models.Glue(glueFrom, glueTo);
+    });
+  }
 
-  // private door(door: NonNullable<ISpec.Models["door"]>) {
-  //   this.$pusher(door, ({ dustSide, mirror, indentAt }) => {
-  //     const door = new Pacsaz.models.Door(dustSide, indentAt);
-  //     if (mirror.x || mirror.y) {
-  //       door.mirror(mirror.x, mirror.y);
-  //     }
-  //     return door;
-  //   });
-  // }
+  private door(door: ISpec.DoorSpec) {
+    this.$pusher(door, ({ dustSide, mirror, indentAt }) => {
+      const door = new Pacsaz.models.Door(dustSide, indentAt);
+      if (mirror.x || mirror.y) {
+        door.mirror(mirror.x, mirror.y);
+      }
+      return door;
+    });
+  }
 
-  // private snapLock(snapLock: NonNullable<ISpec.Models["snapLock"]>) {
-  //   this.$pusher(snapLock, ({}) => {
-  //     return new Pacsaz.models.SnapLock();
-  //   });
-  // }
+  private snapLock(snapLock: ISpec.SnapLockSpec) {
+    this.$pusher(snapLock, ({}) => {
+      return new Pacsaz.models.SnapLock();
+    });
+  }
 
-  // private drawModels() {
-  //   const glue = this.$checkExistance(this.specs.models.glue);
-  //   const door = this.$checkExistance(this.specs.models.door);
-  //   const snapLock = this.$checkExistance(this.specs.models.snapLock);
-  //   if (glue) this.glue(glue);
-  //   if (door) this.door(door);
-  //   if (snapLock) this.snapLock(snapLock);
-  // }
+  private drawModels() {
+    for (const model of this.specs.models) {
+      switch (model.type) {
+        case "glue":
+          this.glue(model);
+          break;
+        case "door":
+          this.door(model);
+          break;
+        case "snapLock":
+          this.snapLock(model);
+          break;
+      }
+    }
+  }
 
   //! ------------------------ Rulers ------------------------
   private drawRulers() {
@@ -223,7 +230,7 @@ export class Drawer extends Dieline {
 
   protected override drawer() {
     this.drawShapes();
-    // this.drawModels();
+    this.drawModels();
   }
 
   protected override rulerDrawer() {
@@ -232,13 +239,13 @@ export class Drawer extends Dieline {
 
   // -------------------- UTILS --------------------
 
-  private $checkExistance<
-    T extends ISpec.Shapes | ISpec.ModelsMap | ISpec.Rulers,
-  >(shapes: T | undefined) {
+  private $checkExistance<T extends ISpec.Shapes | ISpec.Models | ISpec.Rulers>(
+    shapes: T | undefined,
+  ) {
     if (shapes && shapes.length > 0) return shapes;
   }
 
-  private $pusher<T extends ISpec.ShapesSpec>(
+  private $pusher<T extends ISpec.ShapesSpec | ISpec.ModelsSpec>(
     item: T,
     callBack: (val: T, scope: Record<string, number>) => Shape,
   ) {
@@ -252,14 +259,14 @@ export class Drawer extends Dieline {
       this.$parseMathStr(item.origin[1], scope),
     ]);
 
-    const dupScope = {
-      ...scope,
-      selfWidth: model.size.width,
-      selfHeight: model.size.height,
-    };
-
     const dup = item.dup;
     if (dup && dup.length > 0) {
+      const dupScope = {
+        ...scope,
+        selfWidth: model.size.width,
+        selfHeight: model.size.height,
+      };
+
       for (const d of dup) {
         model.dup();
 
@@ -306,13 +313,11 @@ export class Drawer extends Dieline {
       }
     }
 
-    // if ("layer" in items) {
-    //   this.$pushShape(model, items.key, items.layer);
-    // } else {
-    //   this.$pushModels({ [items.key]: model });
-    // }
-
-    this.$pushShape(model, item.key, item.layer);
+    if ("layer" in item) {
+      this.$pushShape(model, item.key, item.layer);
+    } else {
+      this.$pushModels({ [item.key]: model });
+    }
   }
 
   private get scope() {

@@ -80,10 +80,10 @@ function ModelsPropsProvider<T extends ISpec.ModelsSpec>({
 
   const onSubmit = (data: FormType) => {
     if (isUpdateType) {
-      updateModel(selection.type as ISpec.ModelsKey, selection.id, data);
+      updateModel(selection.id, data);
       toast.info("Model Updated.");
     } else {
-      setModel(modelKey, data);
+      setModel(data);
       toast.info("Model Created.");
       close();
     }
