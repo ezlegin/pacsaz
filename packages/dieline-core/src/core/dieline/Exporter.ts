@@ -63,6 +63,7 @@ export class Exporter {
         dielineRulerText: {
           stroke: "none",
           fill: "#00BFFF",
+          cssStyle: `font-size:${toMm(20)}px`,
         },
         overallRuler: {
           stroke: "gray",
@@ -78,6 +79,11 @@ export class Exporter {
 
     return showWatermark ? this.$injectWatermark(svg) : svg;
   }
+
+  // private get rulerFontSize() {
+  //   const area = this.overallSizes.trim!.width * this.overallSizes.trim!.height;
+  //   return Math.max(9, Math.min(27, 9 + Math.sqrt(area / 1000) * 3));
+  // }
 
   private dxf() {
     return M.exporter.toDXF(this.main, {

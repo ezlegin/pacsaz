@@ -216,6 +216,9 @@ export class Drawer extends Dieline {
   protected override drawer() {
     this.drawShapes();
     this.drawModels();
+  }
+
+  protected override rulerDrawer() {
     this.drawRulers();
   }
 

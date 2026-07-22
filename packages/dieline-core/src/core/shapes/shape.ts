@@ -61,7 +61,6 @@ export abstract class Shape implements IModel {
   }
 
   zero(): this {
-    console.log("last model:", this.lastModel);
     M.model.zero(this.lastModel);
     return this;
   }

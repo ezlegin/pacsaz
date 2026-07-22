@@ -19,7 +19,7 @@ export async function dielineDownloder(slug: string) {
     const pdf = await PDFGenerator({
       svg: file,
       bleedAmount: 5,
-      overallSizes: overallSizes,
+      overallSizes,
       slug,
     });
 
