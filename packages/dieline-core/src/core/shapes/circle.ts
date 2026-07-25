@@ -3,8 +3,8 @@ import { zero } from "../../data/consts";
 import { Shape } from "./Shape";
 
 export class Circle extends Shape {
-  constructor(radius: number) {
-    super();
+  constructor(id: string, radius: number) {
+    super(id);
     const circle = new M.paths.Circle(radius);
     const model: IModel = { paths: { circle } };
     this.$pushShape("circle", model);
@@ -18,8 +18,12 @@ export class Circle extends Shape {
 }
 
 export class SemiCircle extends Shape {
-  constructor(radius: number, side?: "left" | "right" | "up" | "down") {
-    super();
+  constructor(
+    id: string,
+    radius: number,
+    side?: "left" | "right" | "up" | "down",
+  ) {
+    super(id);
 
     let startAngle = 180;
     let endAngle = 360;

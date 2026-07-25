@@ -1,6 +1,7 @@
 import { ISpec } from "@repo/store/editor/dielineSpec.store";
+import { IEffect } from "@repo/store/editor/effects.store";
 import { IVar } from "@repo/store/editor/variables.store";
-import { IModel } from "makerjs";
+import M, { IModel } from "makerjs";
 import { evaluate } from "mathjs";
 import { toMm } from "../../utils/sizeConvertor";
 import Pacsaz from "../Pacsaz";
@@ -11,16 +12,16 @@ export class Drawer extends Dieline {
   constructor(
     private specs: ISpec.Specs,
     private variables: IVar.VariableMap,
+    private effects: IEffect.EffectsMap,
   ) {
     super();
   }
+  tempModels = new Map<string, Shape & { layer: ISpec.Layer }>();
 
   //! ------------------------ Shapes ------------------------
-
   private line(line: ISpec.LineSpec) {
     this.$pusher(line, ({ angle, length }, scope) => {
-      const lineLength = this.$parseMathStr(length, scope);
-      return new Pacsaz.shapes.Line(lineLength, +angle);
+      return new Pacsaz.shapes.Line(this.$parseMathStr(length, scope), +angle);
     });
   }
 
@@ -90,66 +91,56 @@ export class Drawer extends Dieline {
   }
 
   private rectangle(rectangle: ISpec.RectangleSpec) {
-    this.$pusher(rectangle, ({ height, width, radius, deleteSide }, scope) => {
-      const rectWidth = this.$parseMathStr(width, scope);
-      const rectHeight = this.$parseMathStr(height, scope);
-      return new Pacsaz.shapes.Rectangle(rectWidth, rectHeight, {
-        radius: toMm(+radius),
-        deleteSide,
-      });
-    });
+    this.$pusher(
+      rectangle,
+      ({ id, height, width, radius, deleteSide }, scope) => {
+        return new Pacsaz.shapes.Rectangle(
+          id,
+          this.$parseMathStr(width, scope),
+          this.$parseMathStr(height, scope),
+          {
+            radius: toMm(+radius),
+            deleteSide,
+          },
+        );
+      },
+    );
   }
 
   private circle(circle: ISpec.CircleSpec) {
-    this.$pusher(circle, ({ radius, semiCircleDirection }, scope) => {
+    this.$pusher(circle, ({ id, radius, semiCircleDirection }, scope) => {
       const circleRadius = this.$parseMathStr(radius, scope);
       if (semiCircleDirection) {
-        return new Pacsaz.shapes.SemiCircle(circleRadius, semiCircleDirection);
+        return new Pacsaz.shapes.SemiCircle(
+          id,
+          circleRadius,
+          semiCircleDirection,
+        );
       } else {
-        return new Pacsaz.shapes.Circle(circleRadius);
+        return new Pacsaz.shapes.Circle(id, circleRadius);
       }
     });
   }
 
   private polygon(polygon: ISpec.PolygonSpec) {
     this.$pusher(polygon, ({ radius, sides }, scope) => {
-      const polygonRadius = this.$parseMathStr(radius, scope);
-      return new Pacsaz.shapes.Polygon(polygonRadius, +sides);
+      return new Pacsaz.shapes.Polygon(
+        this.$parseMathStr(radius, scope),
+        +sides,
+      );
     });
   }
 
   private arc(arc: ISpec.ArcSpec) {
     this.$pusher(arc, ({ radius, startAngle, endAngle }, scope) => {
-      const polygonRadius = this.$parseMathStr(radius, scope);
       const start = this.$parseMathStr(startAngle, scope);
       const end = this.$parseMathStr(endAngle, scope);
-      return new Pacsaz.shapes.Arc(polygonRadius, start, end);
+      return new Pacsaz.shapes.Arc(
+        this.$parseMathStr(radius, scope),
+        start,
+        end,
+      );
     });
-  }
-
-  private drawShapes() {
-    for (const shape of this.specs.shapes) {
-      switch (shape.type) {
-        case "line":
-          this.line(shape);
-          break;
-        case "circle":
-          this.circle(shape);
-          break;
-        case "arc":
-          this.arc(shape);
-          break;
-        case "lines":
-          this.lines(shape);
-          break;
-        case "polygon":
-          this.polygon(shape);
-          break;
-        case "rectangle":
-          this.rectangle(shape);
-          break;
-      }
-    }
   }
 
   //! ------------------------ Models ------------------------
@@ -183,22 +174,6 @@ export class Drawer extends Dieline {
     });
   }
 
-  private drawModels() {
-    for (const model of this.specs.models) {
-      switch (model.type) {
-        case "glue":
-          this.glue(model);
-          break;
-        case "door":
-          this.door(model);
-          break;
-        case "snapLock":
-          this.snapLock(model);
-          break;
-      }
-    }
-  }
-
   //! ------------------------ Rulers ------------------------
   private drawRulers() {
     const rulers = this.$checkExistance(this.specs.rulers);
@@ -207,7 +182,7 @@ export class Drawer extends Dieline {
         overall: new Pacsaz.ruler.OverallRuler(this.trimModel),
       };
       for (const r of rulers) {
-        if (r.hidden) break;
+        if (r.hidden) continue;
 
         const from = [
           this.$parseMathStr(r.from[0], this.scope),
@@ -229,21 +204,123 @@ export class Drawer extends Dieline {
   }
 
   protected override drawer() {
-    this.drawShapes();
-    this.drawModels();
-  }
+    for (const shape of this.specs.shapes) {
+      switch (shape.type) {
+        case "line":
+          this.line(shape);
+          break;
+        case "circle":
+          this.circle(shape);
+          break;
+        case "arc":
+          this.arc(shape);
+          break;
+        case "lines":
+          this.lines(shape);
+          break;
+        case "polygon":
+          this.polygon(shape);
+          break;
+        case "rectangle":
+          this.rectangle(shape);
+          break;
+      }
+    }
 
-  protected override rulerDrawer() {
+    if (this.effects.length > 0) {
+      for (const e of this.effects) {
+        if (e.hidden) continue;
+        switch (e.type) {
+          case "boolean": {
+            const originModel = M.model.clone(
+              this.tempModels.get(e.originModelId)!,
+            );
+            const targetModel = M.model.clone(
+              this.tempModels.get(e.targetModelId)!,
+            );
+
+            this.tempModels.delete(e.originModelId)!;
+            this.tempModels.delete(e.targetModelId)!;
+
+            let combinedModel: IModel;
+            switch (e.booleanType) {
+              case "union":
+                combinedModel = M.model.combineUnion(
+                  originModel!,
+                  targetModel!,
+                );
+                break;
+              case "subtract":
+                combinedModel = M.model.combineSubtraction(
+                  originModel!,
+                  targetModel!,
+                );
+                break;
+              case "intersect":
+                combinedModel = M.model.combineIntersection(
+                  originModel!,
+                  targetModel!,
+                );
+                break;
+            }
+
+            this.tempModels.set(
+              e.id,
+              Object.assign(combinedModel, {
+                layer: originModel.layer,
+              }) as Shape & { layer: ISpec.Layer },
+            );
+            break;
+          }
+          case "radius": {
+            const targetModel = M.model.clone(
+              this.tempModels.get(e.targetModelId)!,
+            );
+            this.tempModels.delete(e.targetModelId)!;
+            const chain = M.model.findSingleChain(targetModel);
+            const fillet = M.chain.fillet(chain, e.radius);
+
+            const combined: IModel = {
+              models: {
+                targetModel,
+                fillet,
+              },
+            };
+
+            this.tempModels.set(
+              e.id,
+              Object.assign(combined, {
+                layer: targetModel.layer,
+              }) as Shape & { layer: ISpec.Layer },
+            );
+            break;
+          }
+        }
+      }
+    }
+
+    for (const [id, m] of this.tempModels) {
+      this.$pushShape(m, id, m.layer);
+    }
+
+    for (const model of this.specs.models) {
+      switch (model.type) {
+        case "glue":
+          this.glue(model);
+          break;
+        case "door":
+          this.door(model);
+          break;
+        case "snapLock":
+          this.snapLock(model);
+          break;
+      }
+    }
+
     this.drawRulers();
   }
 
   // -------------------- UTILS --------------------
-
-  private $checkExistance<T extends ISpec.Shapes | ISpec.Models | ISpec.Rulers>(
-    shapes: T | undefined,
-  ) {
-    if (shapes && shapes.length > 0) return shapes;
-  }
 
   private $pusher<T extends ISpec.ShapesSpec | ISpec.ModelsSpec>(
     item: T,
@@ -259,15 +336,14 @@ export class Drawer extends Dieline {
       this.$parseMathStr(item.origin[1], scope),
     ]);
 
-    const dup = item.dup;
-    if (dup && dup.length > 0) {
+    if (item.dup && item.dup.length > 0) {
       const dupScope = {
         ...scope,
         selfWidth: model.size.width,
         selfHeight: model.size.height,
       };
 
-      for (const d of dup) {
+      for (const d of item.dup) {
         model.dup();
 
         for (const op of d.operations) {
@@ -289,7 +365,7 @@ export class Drawer extends Dieline {
                 x: this.$parseMathStr(op.value[0], dupScope),
                 y: this.$parseMathStr(op.value[1], dupScope),
               };
-              if (move.x > 0 || move.y > 0) model.move([move.x, move.y]);
+              model.move([move.x, move.y]);
               break;
 
             case "moveTo":
@@ -297,8 +373,7 @@ export class Drawer extends Dieline {
                 x: this.$parseMathStr(op.value[0], dupScope),
                 y: this.$parseMathStr(op.value[1], dupScope),
               };
-              if (moveTo.x > 0 || moveTo.y > 0)
-                model.moveTo([moveTo.x, moveTo.y]);
+              model.moveTo([moveTo.x, moveTo.y]);
               break;
 
             case "rotate":
@@ -314,10 +389,16 @@ export class Drawer extends Dieline {
     }
 
     if ("layer" in item) {
-      this.$pushShape(model, item.key, item.layer);
+      this.tempModels.set(item.id, Object.assign(model, { layer: item.layer }));
     } else {
       this.$pushModels({ [item.key]: model });
     }
+  }
+
+  private $checkExistance<T extends ISpec.Shapes | ISpec.Models | ISpec.Rulers>(
+    shapes: T | undefined,
+  ) {
+    if (shapes && shapes.length > 0) return shapes;
   }
 
   private get scope() {

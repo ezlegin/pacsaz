@@ -7,7 +7,6 @@ import { Bleed } from "./Bleed";
 import { Exporter } from "./Exporter";
 
 export abstract class Dieline {
-  // -------------- Models --------------
   protected main: IModel = {};
   protected trimModel: IModel = { layer: "trim" };
   protected foldModel: IModel = { layer: "fold" };
@@ -16,12 +15,8 @@ export abstract class Dieline {
 
   // -------------- Dieline Factory --------------
   protected abstract drawer(): void;
-  protected abstract rulerDrawer(): void;
-  protected fold(): void {}
-  protected perf(): void {}
 
   // -------------- Settings --------------
-
   protected get settings() {
     return getDielineSettings();
   }
@@ -39,21 +34,18 @@ export abstract class Dieline {
   }
 
   // -------------- Model Generator --------------
-
   model() {
-    console.group("Dieline");
     this.buildLayers();
     this.postProcess();
     this.buildRulers();
+    console.group("Dieline");
     onDevelepe && console.log("Main:", this.main);
-    onDevelepe && console.log("Dieline:", this.main.models?.dieline?.models);
     console.groupEnd();
 
     return new Exporter(this.main).build();
   }
 
   // -------------- Layers --------------
-
   private buildLayers() {
     // Reset
     this.main = {};
@@ -88,13 +80,10 @@ export abstract class Dieline {
     // Reset
     this.rulerModel = { layer: "ruler" };
 
-    this.rulerDrawer();
-
     Pacsaz.shape.push(this.main, "ruler", this.rulerModel, "ruler");
   }
 
   // -------------- Post Process --------------
-
   private postProcess() {
     const trimModel = this.main.models?.dieline?.models?.trim;
     if (!trimModel) throw new Error("TrimModel not ready. [postProcess()]");
@@ -117,7 +106,6 @@ export abstract class Dieline {
   }
 
   // -------------- Utils --------------
-
   protected $pushModels(models: IModelMap) {
     for (const m in models) {
       const parentModel = models[m]!;
@@ -146,13 +134,8 @@ export abstract class Dieline {
     key: string,
     layer: "trim" | "fold" | "perf" = "trim",
   ) {
-    const pushTo =
-      layer === "trim"
-        ? this.trimModel
-        : layer === "fold"
-          ? this.foldModel
-          : this.perfModel;
-    Pacsaz.shape.push(pushTo, key, model);
+    console.log("modelssssss", model);
+    Pacsaz.shape.push(this[`${layer}Model`], key, model);
   }
 
   protected $pushRuler(models: IModelMap) {

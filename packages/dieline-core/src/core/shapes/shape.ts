@@ -13,6 +13,10 @@ export type RotateRefPoint =
   | "right";
 
 export abstract class Shape implements IModel {
+  constructor(id: string) {
+    this.id = id;
+  }
+  id: string;
   models: M.IModelMap = {};
 
   dup(): this {

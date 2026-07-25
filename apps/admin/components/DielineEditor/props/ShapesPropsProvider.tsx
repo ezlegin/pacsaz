@@ -28,7 +28,7 @@ import {
 } from "@repo/ui/components/form";
 import { Separator } from "@repo/ui/components/separator";
 import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
-import { Layers2 } from "lucide-react";
+import { Layers2, SquareRoundCorner, SquaresUnite } from "lucide-react";
 import { ReactNode } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -36,6 +36,7 @@ import { z } from "zod";
 import PropsHeader from "./PropsHeader";
 import { DupOperationEditor } from "./shapes/DupOperationEditor";
 import PointInput from "./shapes/PointInput";
+import { Label } from "@repo/ui/components/label";
 
 const getShapeSchema = (shapeKey: ISpec.ShapesKey) => {
   const schemas: Record<ISpec.ShapesKey, any> = {
@@ -107,8 +108,6 @@ function ShapesPropsProvider<T extends ISpec.ShapesSpec>({
   });
 
   const onSubmit = (data: FormType) => {
-    console.log("data", data);
-
     if (isUpdateType) {
       updateShape(selection.id, data);
       toast.info("Shape Updated.");
@@ -221,6 +220,29 @@ function ShapesPropsProvider<T extends ISpec.ShapesSpec>({
             </Button>
           </>
         )}
+        <Separator />
+
+        <Label>Effects</Label>
+        <Button
+          onClick={() => append({})}
+          size={"sm"}
+          variant={"outline"}
+          className="w-full"
+          type="button"
+        >
+          <SquaresUnite />
+          Boolean
+        </Button>
+        <Button
+          onClick={() => append({})}
+          size={"sm"}
+          variant={"outline"}
+          className="w-full"
+          type="button"
+        >
+          <SquareRoundCorner />
+          Radius
+        </Button>
       </form>
     </Form>
   );

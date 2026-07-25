@@ -8,8 +8,8 @@ interface Options {
 }
 
 export class Rectangle extends Shape {
-  constructor(width: number, height: number, options?: Options) {
-    super();
+  constructor(id: string, width: number, height: number, options?: Options) {
+    super(id);
     const rect = new M.models.RoundRectangle(
       width,
       height,
