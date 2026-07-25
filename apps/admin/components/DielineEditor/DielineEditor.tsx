@@ -4,6 +4,7 @@ import { Categories, DielineType } from "@/app/(PANEL)/dielines/DielinesList";
 import DielineLayer from "@/components/DielineEditor/DielineLayer";
 import { useDielineGenerator } from "@repo/dieline-core/hooks/useDielineGenerator";
 import { useDielineSpecStore } from "@repo/store/editor/dielineSpec.store";
+import { IEffect, useEffectStore } from "@repo/store/editor/effects.store";
 import { IVar, useVariableStore } from "@repo/store/editor/variables.store";
 import {
   Tabs,
@@ -31,12 +32,14 @@ const DielineEditor = ({
   categories: Categories;
 }) => {
   const { specs, setSpecs } = useDielineSpecStore();
+  const { effects, setEffects } = useEffectStore();
   const { variables, setVariables } = useVariableStore();
   const { isRendering } = useDielineGenerator(
     {
       ...dieline,
       specification: specs,
       variables: variables,
+      effects: effects,
     },
     "editor",
     null,
@@ -47,6 +50,7 @@ const DielineEditor = ({
     if (dieline) {
       setSpecs(JSON.parse(dieline.specification));
       setVariables(JSON.parse(dieline.variable) as IVar.VariableMap);
+      setEffects(JSON.parse(dieline.effect) as IEffect.EffectsMap);
     }
   }, []);
 

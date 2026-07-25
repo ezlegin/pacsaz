@@ -4,6 +4,7 @@ import { useDeveloperToolsStore } from "@repo/store/dieline/developerTools.store
 import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
 import { useSVGStore } from "@repo/store/dieline/svg.store";
 import { ISpec } from "@repo/store/editor/dielineSpec.store";
+import { IEffect } from "@repo/store/editor/effects.store";
 import { IVar, useVariableStore } from "@repo/store/editor/variables.store";
 import { useEffect, useTransition } from "react";
 import Pacsaz from "../core/Pacsaz";
@@ -13,6 +14,7 @@ import Drawer from "../core/dieline/Drawer";
 
 interface Dieline {
   materials: string;
+  effects: IEffect.EffectsMap;
   defaultMaterial: string;
   variables: IVar.VariableMap;
   specification: ISpec.Specs;
@@ -45,11 +47,12 @@ export function useDielineGenerator(
 ) {
   const specs = dieline.specification;
   const setts = dieline.settings;
+  const effects = dieline.effects;
   const [isRendering, startTransition] = useTransition();
   const { setDefaultSettings, settings } = useDielineSettingsStore();
   const { developerTools, setDeveloperTools } = useDeveloperToolsStore();
   const { variables } = useVariableStore();
-  const drawer = new Pacsaz.models.Drawer(specs, dieline.variables);
+  const drawer = new Pacsaz.models.Drawer(specs, dieline.variables, effects);
 
   const offsets = resolveOffsets();
   const { setSvg } = useSVGStore();

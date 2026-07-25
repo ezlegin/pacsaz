@@ -84,6 +84,7 @@ model Dieline {
   slug            String   @unique
   specification   String   @db.MediumText
   variable        String   @db.MediumText
+  effect          String   @db.MediumText
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   active          Boolean  @default(true)
