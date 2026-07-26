@@ -4,18 +4,19 @@ import { create } from "zustand";
 export namespace IEffect {
   export type EffectOn = "shape" | "effect";
   export type EffectTypes = "boolean" | "radius";
+  export type BooleanType = "union" | "subtract" | "intersect";
   type ModelId = string;
 
   interface EffectBase {
     id: string;
     hidden?: boolean;
-    effectOn: EffectOn;
     key: string;
+    effectOn: EffectOn;
   }
 
   export interface BooleanEffectSpec extends EffectBase {
     type: "boolean";
-    booleanType: "union" | "subtract" | "intersect";
+    booleanType: BooleanType;
     targetModelId: ModelId;
     originModelId: ModelId;
   }
@@ -24,7 +25,6 @@ export namespace IEffect {
     type: "radius";
     targetModelId: ModelId;
     radius: number;
-    // indices?: number[];
   }
 
   export type EffectSpec = BooleanEffectSpec | RadiusEffectSpec;

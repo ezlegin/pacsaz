@@ -20,13 +20,30 @@ const radiusFormSchema = z.object({
 });
 export type RadiusFormType = z.infer<typeof radiusFormSchema>;
 
+const booleanFormSchema = z.object({
+  booleanType: z.enum(["intersect", "subtract", "union"]),
+  originModelId: z.string().min(1),
+  targetModelId: z.string().min(1),
+  key: z.string().min(1),
+});
+export type BooleanFormType = z.infer<typeof booleanFormSchema>;
+
 export const Effects = () => {
   const radiusForm = useForm<RadiusFormType>({
     resolver: zodResolver(radiusFormSchema),
     defaultValues: {
-      radius: "10",
+      radius: "12",
       targetModelId: "",
-      key: "",
+      key: "radius",
+    },
+  });
+  const booleanForm = useForm<BooleanFormType>({
+    resolver: zodResolver(booleanFormSchema),
+    defaultValues: {
+      booleanType: "union",
+      originModelId: "",
+      targetModelId: "",
+      key: "boolean",
     },
   });
 
@@ -45,7 +62,14 @@ export const Effects = () => {
         shapes={shapes}
       />
     );
-  if (effectFormType === "boolean") return <BooleanEffectForm />;
+  if (effectFormType === "boolean")
+    return (
+      <BooleanEffectForm
+        form={booleanForm}
+        closeForm={() => setEffectFormType(null)}
+        shapes={shapes}
+      />
+    );
 
   return (
     <div className="space-y-5">
@@ -77,6 +101,7 @@ export const Effects = () => {
         effects={effects}
         shapes={shapes}
         radiusForm={radiusForm}
+        booleanForm={booleanForm}
         setEffectFormType={setEffectFormType}
       />
     </div>

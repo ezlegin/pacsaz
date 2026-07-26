@@ -37,8 +37,8 @@ const RadiusEffectForm = ({
 
     setEffect({
       key: data.key,
-      effectOn: "shape",
       type: "radius",
+      effectOn,
       radius: +data.radius,
       targetModelId: data.targetModelId,
       hidden: false,
@@ -93,7 +93,7 @@ const RadiusEffectForm = ({
                   onValueChange={(val) => {
                     setEffectOn(val as IEffect.EffectOn);
                   }}
-                  size={"sm"}
+                  size={"xs"}
                   type="single"
                   defaultValue={effectOn}
                 >
@@ -112,7 +112,7 @@ const RadiusEffectForm = ({
                 </ToggleGroup>
               </FormLabel>
               <ToggleGroup
-                size={"sm"}
+                size={"xs"}
                 spacing={1}
                 variant={"outline"}
                 type="single"

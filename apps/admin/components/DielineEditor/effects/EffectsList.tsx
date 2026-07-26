@@ -1,21 +1,22 @@
 import { ISpec } from "@repo/store/editor/dielineSpec.store";
 import { IEffect, useEffectStore } from "@repo/store/editor/effects.store";
-import { Button } from "@repo/ui/components/button";
 import { Label } from "@repo/ui/components/label";
+import { Trash } from "lucide-react";
 import { useMemo } from "react";
 import { UseFormReturn } from "react-hook-form";
-import { RadiusFormType } from "./Effects";
-import { Trash } from "lucide-react";
+import { BooleanFormType, RadiusFormType } from "./Effects";
 
 const EffectsList = ({
   effects,
   shapes,
   radiusForm,
   setEffectFormType,
+  booleanForm,
 }: {
   effects: IEffect.EffectsMap;
   shapes: ISpec.Shapes;
   radiusForm: UseFormReturn<RadiusFormType, any, RadiusFormType>;
+  booleanForm: UseFormReturn<BooleanFormType, any, BooleanFormType>;
   setEffectFormType: (type: IEffect.EffectTypes) => void;
 }) => {
   const { removeEffect } = useEffectStore();
@@ -84,7 +85,14 @@ const EffectsList = ({
       });
       setEffectFormType("radius");
     } else {
+      booleanForm.reset({
+        originModelId: e.originModelId,
+        booleanType: e.booleanType,
+        targetModelId: e.targetModelId,
+        key: e.key,
+      });
       console.log("todo");
+      setEffectFormType("boolean");
     }
   };
 
@@ -92,49 +100,43 @@ const EffectsList = ({
     removeEffect(id);
   };
 
+  const effectsArr = [
+    { key: "Boolean", effects: booleanEffects },
+    { key: "Radius", effects: radiusEffects },
+  ];
+
   return (
     <div className="space-y-4">
-      <div>
-        <Label>Boolean</Label>
-        {booleanEffects.map((e, idx) => (
-          <Button
-            size={"sm"}
-            variant={"ghost"}
-            key={idx}
-            className="justify-between w-full border-b rounded-none py-4"
-            onClick={() => console.log(e.id)}
-          >
-            <span className="text-xs">{e.key}</span>
-            <span className="text-muted-foreground text-xs">
-              {e.booleanType}
-            </span>
-          </Button>
-        ))}
-      </div>
-
-      <div>
-        <Label>Radius</Label>
-        {radiusEffects.map((e, idx) => (
-          <div
-            key={idx}
-            className="flex justify-between w-full border-b rounded-sm items-center cursor-pointer hover:bg-muted-foreground/10 py-2 group px-2"
-            onClick={() => handleEffectSelection(e)}
-          >
-            <span className="text-xs">{e.key}</span>
-            <span className="text-muted-foreground text-xs group-hover:hidden">
-              {e.radius}pt
-            </span>
-            <Trash
-              className="hidden group-hover:block text-muted-foreground hover:text-destructive"
-              size={12}
-              onClick={(event) => {
-                event.stopPropagation();
-                onRemoveEffect(e.id);
-              }}
-            />
-          </div>
-        ))}
-      </div>
+      {effectsArr.map((e, idx) => (
+        <div key={idx}>
+          <Label>{e.key}</Label>
+          {e.effects.length < 1 && (
+            <div className="text-center text-xs text-muted-foreground py-2">
+              No Effects.
+            </div>
+          )}
+          {e.effects.map((effect, idx) => (
+            <div
+              key={idx}
+              className="flex justify-between w-full border-b rounded-sm items-center cursor-pointer hover:bg-muted-foreground/10 py-2 group px-2"
+              onClick={() => handleEffectSelection(effect)}
+            >
+              <span className="text-xs">{effect.key}</span>
+              <span className="text-muted-foreground text-xs group-hover:hidden">
+                {effect.type === "boolean" ? effect.booleanType : effect.radius}
+              </span>
+              <Trash
+                className="hidden group-hover:block text-muted-foreground hover:text-destructive"
+                size={12}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onRemoveEffect(effect.id);
+                }}
+              />
+            </div>
+          ))}
+        </div>
+      ))}
     </div>
   );
 };
