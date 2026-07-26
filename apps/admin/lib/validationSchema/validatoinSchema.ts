@@ -153,5 +153,6 @@ export type CouponFormType = z.infer<typeof couponFormSchema>;
 export const dielineUpdateFormSchema = z.object({
   specification: z.string().min(1),
   variable: z.string(),
+  effect: z.string(),
 });
 export type DielineUpdateFormType = z.infer<typeof dielineUpdateFormSchema>;

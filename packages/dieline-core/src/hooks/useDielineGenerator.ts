@@ -107,6 +107,7 @@ export function useDielineGenerator(
     Drawer,
     app === "editor" ? specs : undefined,
     variables,
+    effects,
     developerTools,
   ]);
 

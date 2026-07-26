@@ -278,7 +278,7 @@ export class Drawer extends Dieline {
             );
             this.tempModels.delete(e.targetModelId)!;
             const chain = M.model.findSingleChain(targetModel);
-            const fillet = M.chain.fillet(chain, e.radius);
+            const fillet = M.chain.fillet(chain, toMm(e.radius));
 
             const combined: IModel = {
               models: {

@@ -6,17 +6,28 @@ import { useDielineGenerator } from "@repo/dieline-core/hooks/useDielineGenerato
 import { useDielineSpecStore } from "@repo/store/editor/dielineSpec.store";
 import { IEffect, useEffectStore } from "@repo/store/editor/effects.store";
 import { IVar, useVariableStore } from "@repo/store/editor/variables.store";
+import { Button } from "@repo/ui/components/button";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@repo/ui/components/drawer";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@repo/ui/components/tabs";
+import { Settings as SettingsIcon } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useEffect } from "react";
-import Settings from "./settings/Settings";
+import { Effects } from "./effects/Effects";
 import Tools from "./Tools";
 import Variables from "./Variables";
+import Settings from "./settings/Settings";
+
 const SVGPreview = dynamic(
   () => import("@repo/ui/components/custom/SVGPreview"),
   { ssr: false },
@@ -60,13 +71,11 @@ const DielineEditor = ({
         <div className="bg-muted border-r p-3 z-10">
           <DielineLayer dieline={dieline} categories={categories} />
         </div>
-
         <div className="relative bg-gray-50">
           <div className="absolute top-1/2 right-1/2 -translate-y-1/2 translate-x-1/2 h-full w-full pb-10">
             <SVGPreview isRendering={isRendering} type="editor" />
           </div>
         </div>
-
         <div className="bg-muted border-l p-3 z-10">
           <Tabs defaultValue="tools">
             <TabsList className="w-full px-0">
@@ -77,7 +86,7 @@ const DielineEditor = ({
                 Variables
               </TabsTrigger>
               <TabsTrigger className="cursor-pointer" value="settings">
-                Settings
+                Effects
               </TabsTrigger>
             </TabsList>
 
@@ -88,9 +97,28 @@ const DielineEditor = ({
               <Variables />
             </TabsContent>
             <TabsContent value="settings">
-              <Settings isRendering={isRendering} />
+              <Effects />
             </TabsContent>
           </Tabs>
+
+          <Drawer direction="right">
+            <DrawerTrigger asChild>
+              <Button
+                variant={"primaryForeground"}
+                className="absolute right-0 bottom-4 rounded-l-full rounded-r-none"
+              >
+                <SettingsIcon />
+              </Button>
+            </DrawerTrigger>
+            <DrawerContent>
+              <DrawerHeader>
+                <DrawerTitle>Settings</DrawerTitle>
+              </DrawerHeader>
+              <div className="p-4">
+                <Settings isRendering={isRendering} />
+              </div>
+            </DrawerContent>
+          </Drawer>
         </div>
       </div>
     </div>

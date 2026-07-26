@@ -2,25 +2,29 @@ import { v4 as uuidv4 } from "uuid";
 import { create } from "zustand";
 
 export namespace IEffect {
+  export type EffectOn = "shape" | "effect";
+  export type EffectTypes = "boolean" | "radius";
   type ModelId = string;
 
   interface EffectBase {
     id: string;
     hidden?: boolean;
+    effectOn: EffectOn;
+    key: string;
   }
 
-  interface BooleanEffectSpec extends EffectBase {
+  export interface BooleanEffectSpec extends EffectBase {
     type: "boolean";
     booleanType: "union" | "subtract" | "intersect";
     targetModelId: ModelId;
     originModelId: ModelId;
   }
 
-  interface RadiusEffectSpec extends EffectBase {
+  export interface RadiusEffectSpec extends EffectBase {
     type: "radius";
     targetModelId: ModelId;
     radius: number;
-    indices?: number[];
+    // indices?: number[];
   }
 
   export type EffectSpec = BooleanEffectSpec | RadiusEffectSpec;
@@ -47,7 +51,7 @@ export const useEffectStore = create<VariableStore>()((set) => ({
       }
 
       return {
-        effects: [...currentEffects, { ...effect, id }],
+        effects: [...currentEffects, { ...effect, id } as IEffect.EffectSpec],
       };
     }),
 

@@ -48,6 +48,7 @@ export const createDieline = async (data: DielineMetadataFormType) => {
           models: [],
         }),
         variable: JSON.stringify([]),
+        effect: JSON.stringify([]),
         categoryByModel: {
           connect: categoryByModel.map((i) => ({ slug: i })),
         },
@@ -220,7 +221,7 @@ export const saveDielineChanges = async (
   data: DielineUpdateFormType,
   id: number,
 ) => {
-  const { specification, variable } = data;
+  const { specification, variable, effect } = data;
   try {
     const existingDieline = await prisma.dieline.findFirst({ where: { id } });
     if (!existingDieline) throw new Error("Dieline Not Found.");
@@ -230,6 +231,7 @@ export const saveDielineChanges = async (
       data: {
         specification,
         variable,
+        effect,
       },
     });
 

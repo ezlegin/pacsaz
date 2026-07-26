@@ -12,6 +12,7 @@ import DielineLoadingOverlay from "./DielineLoadingOverlay";
 import DielineSettings from "./DielineSettings";
 import ProductInfo from "./ProductInfo";
 import { IVar } from "@repo/store/editor/variables.store";
+import { IEffect } from "@repo/store/editor/effects.store";
 const SVGPreview = dynamic(
   () => import("@repo/ui/components/custom/SVGPreview"),
   { ssr: false },
@@ -29,12 +30,14 @@ const DielineGenerator = ({
   const { setDeveloperTools } = useDeveloperToolsStore();
   const specs = JSON.parse(dieline.specification) as ISpec.Specs;
   const variables = JSON.parse(dieline.variable) as IVar.VariableMap;
+  const effects = JSON.parse(dieline.effect) as IEffect.EffectsMap;
   const { isRendering } = useDielineGenerator(
     {
       ...dieline,
       specification: specs,
       settings: customSettings ?? dieline.settings!,
       variables,
+      effects,
     },
     "client",
     user,

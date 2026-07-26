@@ -134,7 +134,6 @@ export abstract class Dieline {
     key: string,
     layer: "trim" | "fold" | "perf" = "trim",
   ) {
-    console.log("modelssssss", model);
     Pacsaz.shape.push(this[`${layer}Model`], key, model);
   }
 
