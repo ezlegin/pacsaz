@@ -10,7 +10,7 @@ import { setDeveloperTool } from "@repo/store/slices/developerToolsSlice";
 import { setSvg } from "@repo/store/slices/svgSlice";
 import { variablesSelectors } from "@repo/store/slices/variablesSlice";
 import { effectsSelectors } from "@repo/store/slices/effectsSlice";
-import Drawer from "../core/dieline/Drawer";
+import Drawer from "../core/dieline/Dawer";
 
 interface Dieline {
   materials: string;
