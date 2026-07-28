@@ -1,4 +1,4 @@
-import { ISpec } from "@repo/store/editor/dielineSpec.store";
+import { ISpec } from "@repo/store/types";
 import { Button } from "@repo/ui/components/button";
 import { FormControl, FormField, FormItem } from "@repo/ui/components/form";
 import { Input } from "@repo/ui/components/input";

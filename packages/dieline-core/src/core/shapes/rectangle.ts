@@ -1,6 +1,6 @@
-import { ISpec } from "@repo/store/editor/dielineSpec.store";
 import M from "makerjs";
 import { Shape } from "./Shape";
+import { ISpec } from "@repo/store/types";
 
 interface Options {
   deleteSide?: ISpec.Direction;

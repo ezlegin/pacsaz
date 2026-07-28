@@ -1,9 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
-import { shapesSelectors } from "@repo/store/slices/shapesSlice";
 import {
-  removeVariable,
   addVariable,
+  removeVariable,
   updateVariable,
   variablesSelectors,
 } from "@repo/store/slices/variablesSlice";
@@ -78,7 +77,7 @@ const Variables = () => {
     }
 
     toast.success(`Variable Crated Successfully.`);
-    refresh(); //todo: this dosen't work. so input of shapes doesn't get the latest var created and needs a tab reload.
+    refresh();
   };
 
   const handleVarSelection = (id: string) => {
@@ -91,7 +90,8 @@ const Variables = () => {
     if (variable) setSelectedVar(variable);
   };
 
-  const shapes = useAppSelector(shapesSelectors.selectAll);
+  // const shapes = useAppSelector(shapesSelectors.selectAll);
+
   const handleVarDelesion = (id: string) => {
     const variable = variables.find((v) => v.id === id);
     if (!variable) {
@@ -99,25 +99,24 @@ const Variables = () => {
       return;
     }
 
-    for (const shape of Object.entries(shapes)) {
-      //todo: ask AI if we can write this code more optimized.
-      const val = shape[1][0];
-      if (!val) continue;
-      let strings: string[] = [];
+    //todo: check if this variable is being used in another shape/model/ruler and ...
+    //    for (const [, shape] of Object.entries(shapes)) {
+    //   for (const sh in shape) {
+    //     const val = shape[sh];
+    //     if (!val) continue;
 
-      Object.entries(val).forEach(
-        (v) => typeof v[1] === "string" && strings.push(v[1]),
-      );
+    //     const usesVariable = Object.values(val).some(
+    //       (v) => typeof v === "string" && v.includes(variable.name),
+    //     );
 
-      for (const str of strings) {
-        if (str.includes(variable.name)) {
-          toast.error(
-            `This variable is being used in the ${val.type} -> ${val.key}`,
-          );
-          return;
-        }
-      }
-    }
+    //     if (usesVariable) {
+    //       toast.error(
+    //         `This variable is being used in the ${val.type} -> ${val.key}`,
+    //       );
+    //       return;
+    //     }
+    //   }
+    // }
 
     dispatch(removeVariable(id));
     form.reset({ id: "", name: "", value: "" });

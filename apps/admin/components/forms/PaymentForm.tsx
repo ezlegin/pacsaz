@@ -69,9 +69,9 @@ export function PaymentForm({
     resolver: zodResolver(paymentFormSchema),
     defaultValues: {
       userId: payment?.userId.toString() ?? "",
-      planKey: payment?.plan.key ?? "standard",
-      period: payment?.plan.period ?? "monthly",
-      from: payment?.plan.startedAt ?? new Date(),
+      planKey: payment?.plan?.key ?? "standard",
+      period: payment?.plan?.period ?? "monthly",
+      from: payment?.plan?.startedAt ?? new Date(),
       discountCode: payment?.coupon?.code ?? "",
       status: payment?.status ?? "success",
       amount: payment?.amount ?? 0,

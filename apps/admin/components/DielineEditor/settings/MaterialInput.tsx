@@ -1,4 +1,4 @@
-import { MaterialKey, MaterialValue } from "@repo/store/data/types";
+import { MaterialKey, MaterialValue } from "@repo/store/types";
 import {
   Select,
   SelectContent,

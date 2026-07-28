@@ -1,8 +1,8 @@
-import { DimensionType } from "@repo/store/data/types";
 import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import React from "react";
 import { SetSetting } from "./Settings";
 import { DimensionsType } from "@repo/dieline-core/data/types";
+import { DimensionType } from "@repo/db";
 
 const DimensionTypeInput = ({
   dimensionsType,

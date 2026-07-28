@@ -1,7 +1,7 @@
-import { ISpec } from "@repo/store/editor/dielineSpec.store";
 import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import { HandleLayerActoin } from "../DielineLayer";
 import LayerActions from "./LayerAction";
+import { ISpec } from "@repo/store/types";
 
 export default function ModelLayers({
   handleLayerAction,

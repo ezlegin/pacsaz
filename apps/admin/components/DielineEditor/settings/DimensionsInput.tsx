@@ -1,6 +1,6 @@
 import { resolveDimension } from "@repo/dieline-core/utils/dimensionResolver";
 import { resolveOffsets } from "@repo/dieline-core/utils/offsetResolver";
-import { DimensionKey, Dimensions } from "@repo/store/data/types";
+import { DimensionKey, Dimensions } from "@repo/store/types";
 import { Input } from "@repo/ui/components/input";
 import { Spinner } from "@repo/ui/components/spinner";
 import { useEffect, useState } from "react";

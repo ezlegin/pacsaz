@@ -1,4 +1,3 @@
-import { ISpec } from "@repo/store/editor/dielineSpec.store";
 import {
   FormControl,
   FormField,
@@ -11,6 +10,7 @@ import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import { ArrowLeft, ArrowRight, ArrowRightLeft } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
 import PropsFormContent from "../shapes/PropsFormContent";
+import { ISpec } from "@repo/store/types";
 
 interface Props {
   form: UseFormReturn<ISpec.DoorSpec, any, ISpec.DoorSpec>;

@@ -18,7 +18,9 @@ const UsersList = ({ data }: { data: User[] }) => {
         <TableCell className="text-center">{data.fullName}</TableCell>
         <TableCell className="text-center">{data.phoneNumber}</TableCell>
         <TableCell className="text-center">{data.email}</TableCell>
-        <TableCell className="text-center capitalize">{data.type}</TableCell>
+        <TableCell className="text-center capitalize">
+          {data.usageGoal}
+        </TableCell>
         <TableCell className="text-center">
           {formatDate(data.joinedAt, "PPP")}
         </TableCell>

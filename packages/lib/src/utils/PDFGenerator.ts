@@ -1,6 +1,6 @@
 "use server";
 
-import { OverallSizes } from "@repo/store/dieline/overallSize.store";
+import { OverallSizes } from "@repo/store/types";
 import path from "path";
 import PDFDocument from "pdfkit";
 import SVGtoPDF from "svg-to-pdfkit";

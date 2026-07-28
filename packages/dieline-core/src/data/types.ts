@@ -1,8 +1,4 @@
-import {
-  Dimension,
-  DimensionType,
-  MaterialValue,
-} from "@repo/store/data/types";
+import { Dimension, DimensionType, MaterialValue } from "@repo/store/types";
 
 export type DimensionsType = DimensionType[];
 export interface Dieline {

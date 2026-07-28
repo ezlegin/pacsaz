@@ -12,7 +12,7 @@ const page = async ({ params }: Props) => {
   const { id } = await params;
   const payment = await prisma.payment.findUnique({
     where: { id: +id },
-    include: { plan: true, user: true, coupon: true, tarrif: true },
+    include: { plan: true, user: true, coupon: { include: { tarrif: true } } },
   });
   const tarrif = await prisma.tarrif.findMany({ include: { price: true } });
 

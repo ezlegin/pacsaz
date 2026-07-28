@@ -1,4 +1,4 @@
-import { PlanPeriod, PlanKey } from "@repo/lib/data/plans";
+import { PlanKey, PlanPeriod } from "@repo/db";
 import { Badge } from "@repo/ui/components/badge";
 
 const PlanCard = ({

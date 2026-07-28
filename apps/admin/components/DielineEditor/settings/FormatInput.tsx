@@ -1,9 +1,9 @@
-import { Format } from "@repo/store/data/types";
 import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import React from "react";
 import { SetSetting } from "./Settings";
 import Image from "next/image";
 import { pdfIcon, aiIcon, dxfIcon } from "@/public";
+import { Format } from "@repo/store/types";
 
 const FormatInput = ({
   setSetting,
