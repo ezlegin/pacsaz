@@ -86,7 +86,7 @@ const DielineLayer = ({
             dispatch(setShapeVisibility(shape.id));
             break;
           case "dup":
-            dispatch(addShape({ ...shape, key: shape.key + "-dup" }));
+            dispatch(addShape({ ...shape, key: shape.key + "-dup" })); //todo: it needs unique/new id
             break;
         }
         break;
@@ -113,7 +113,7 @@ const DielineLayer = ({
             dispatch(clearSelection());
             break;
           case "visibility":
-            setRulerVisibility(ruler.id);
+            dispatch(setRulerVisibility(ruler.id));
             break;
           case "dup":
             dispatch(addRuler({ ...ruler, key: ruler.key + "-dup" }));

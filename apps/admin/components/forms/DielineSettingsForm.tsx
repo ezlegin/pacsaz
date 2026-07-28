@@ -370,7 +370,7 @@ const DielineSettingsForm = ({
               control={form.control}
               name="materials"
               render={({ field }) => (
-                <div className="grid grid-cols-2">
+                <div className="max-h-30 overflow-y-scroll">
                   {materials.map((item, idx) => {
                     const isChecked = field.value
                       ?.split(",")
