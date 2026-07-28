@@ -1,5 +1,6 @@
-import { MaterialKey } from "@repo/store/data/types";
-import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
+import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
+import { setSetting } from "@repo/store/slices/dielineSettingsSlice";
+import { MaterialKey } from "@repo/store/types";
 import {
   Select,
   SelectContent,
@@ -10,17 +11,15 @@ import {
 import { cn } from "@repo/ui/lib/utils";
 
 const MaterialInput = () => {
-  const {
-    setSetting,
-    settings: { materials, material },
-  } = useDielineSettingsStore();
+  const { material, materials } = useAppSelector((s) => s.dielineSettings);
+  const dispatch = useAppDispatch();
 
   const onSelectMaterial = (val: MaterialKey) => {
     const material = materials.find((m) => m.value === val);
     if (!material) throw new Error("Material not found. [MaterialInput]");
 
-    setSetting("material", material);
-    setSetting("thickness", material.thickness);
+    dispatch(setSetting({ key: "material", value: material }));
+    dispatch(setSetting({ key: "thickness", value: material.thickness }));
   };
 
   return (

@@ -1,10 +1,28 @@
 import { Categories, DielineType } from "@/app/(PANEL)/dielines/DielinesList";
-import { useSelectionStore } from "@repo/store/app/selection.store";
-import { useDielineHistoryStore } from "@repo/store/editor/dielineHistory.store";
+import { useAppDispatch, useAppSelector, useUndoRedo } from "@repo/store/hooks";
 import {
-  ISpec,
-  useDielineSpecStore,
-} from "@repo/store/editor/dielineSpec.store";
+  addModel,
+  modelsSelectors,
+  removeModel,
+  setModelVisibility,
+} from "@repo/store/slices/modelsSlice";
+import {
+  addRuler,
+  removeRuler,
+  rulersSelectors,
+  setRulerVisibility,
+} from "@repo/store/slices/rulersSlice";
+import {
+  clearSelection,
+  setSelection,
+} from "@repo/store/slices/selectionSlice";
+import {
+  addShape,
+  removeShape,
+  setShapeVisibility,
+  shapesSelectors,
+} from "@repo/store/slices/shapesSlice";
+import { ISpec } from "@repo/store/types";
 import { Button } from "@repo/ui/components/button";
 import { ActButton } from "@repo/ui/components/custom/ActionButton";
 import {
@@ -21,7 +39,6 @@ import {
   TabsTrigger,
 } from "@repo/ui/components/tabs";
 import { Redo, Settings, Undo } from "lucide-react";
-import { useEffect } from "react";
 import DielineChangesSaver from "../forms/dielineChagesSaver";
 import DielineSettingsForm from "../forms/DielineSettingsForm";
 import ModelLayers from "./layers/ModelLayers";
@@ -47,38 +64,10 @@ const DielineLayer = ({
   dieline: DielineType;
   categories: Categories;
 }) => {
-  const {
-    specs: { models, shapes, rulers },
-    removeShape,
-    removeRuler,
-    setRulerVisibility,
-    setRuler,
-    setModelVisibility,
-    setModel,
-    removeModel,
-    setShapeVisibility,
-    setShape,
-  } = useDielineSpecStore();
-  const { setSelection, clearSelection } = useSelectionStore();
-  const { setInitial, push, undo, redo } = useDielineHistoryStore();
-
-  const flattedShapes = Object.values(shapes).flat();
-  const flattenedModels = Object.values(models).flat();
-
-  useEffect(() => {
-    setInitial(shapes);
-  }, []);
-
-  useEffect(() => {
-    push(shapes);
-  }, [shapes]);
-
-  //todo: implement undo/redo
-  // useEffect(() => {
-  // if (present) {
-  //     setShapes(present);
-  //   }
-  // }, [present]);
+  const dispatch = useAppDispatch();
+  const shapes = useAppSelector(shapesSelectors.selectAll);
+  const models = useAppSelector(modelsSelectors.selectAll);
+  const rulers = useAppSelector(rulersSelectors.selectAll);
 
   function handleLayerAction(
     layerItemType: keyof ItemType,
@@ -90,14 +79,14 @@ const DielineLayer = ({
         const shape = item as ISpec.ShapesSpec;
         switch (type) {
           case "delete":
-            removeShape(shape.id);
-            clearSelection();
+            dispatch(removeShape(shape.id));
+            dispatch(clearSelection());
             break;
           case "visibility":
-            setShapeVisibility(shape.id);
+            dispatch(setShapeVisibility(shape.id));
             break;
           case "dup":
-            setShape({ ...shape, key: shape.key + "-dup" });
+            dispatch(addShape({ ...shape, key: shape.key + "-dup" }));
             break;
         }
         break;
@@ -105,14 +94,14 @@ const DielineLayer = ({
         const model = item as ISpec.ModelsSpec;
         switch (type) {
           case "delete":
-            removeModel(model.id);
-            clearSelection();
+            dispatch(removeModel(model.id));
+            dispatch(clearSelection());
             break;
           case "visibility":
-            setModelVisibility(model.id);
+            dispatch(setModelVisibility(model.id));
             break;
           case "dup":
-            setModel({ ...model, key: model.key + "-dup" });
+            dispatch(addModel({ ...model, key: model.key + "-dup" }));
             break;
         }
         break;
@@ -121,28 +110,40 @@ const DielineLayer = ({
         switch (type) {
           case "delete":
             removeRuler(ruler.id);
-            clearSelection();
+            dispatch(clearSelection());
             break;
           case "visibility":
             setRulerVisibility(ruler.id);
             break;
           case "dup":
-            setRuler({ ...ruler, key: ruler.key + "-dup" });
+            dispatch(addRuler({ ...ruler, key: ruler.key + "-dup" }));
             break;
         }
         break;
     }
   }
 
+  const { canRedo, canUndo, redo, undo } = useUndoRedo();
+
   return (
     <div className="space-y-2">
       <DielineChangesSaver dieline={dieline} />
       <div className="flex items-center justify-between">
         <div className="flex gap-2">
-          <Button onClick={undo} variant={"outline"}>
+          <Button
+            onClick={() => undo()}
+            disabled={!canUndo}
+            variant={"outline"}
+          >
+            undo
             <Undo />
           </Button>
-          <Button onClick={redo} variant={"outline"}>
+          <Button
+            onClick={() => redo()}
+            disabled={!canRedo}
+            variant={"outline"}
+          >
+            redo
             <Redo />
           </Button>
         </div>
@@ -176,12 +177,7 @@ const DielineLayer = ({
         </div>
 
         <TabsContent value="layers">
-          <ShapeLayers
-            clearSelection={clearSelection}
-            handleLayerAction={handleLayerAction}
-            setSelection={setSelection}
-            shapes={flattedShapes}
-          />
+          <ShapeLayers handleLayerAction={handleLayerAction} shapes={shapes} />
         </TabsContent>
         <TabsContent value="rulers">
           <RulerLayers
@@ -196,7 +192,7 @@ const DielineLayer = ({
             clearSelection={clearSelection}
             handleLayerAction={handleLayerAction}
             setSelection={setSelection}
-            models={flattenedModels}
+            models={models}
           />
         </TabsContent>
       </Tabs>

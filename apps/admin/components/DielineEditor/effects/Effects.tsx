@@ -1,7 +1,5 @@
 "use client";
 
-import { useDielineSpecStore } from "@repo/store/editor/dielineSpec.store";
-import { IEffect, useEffectStore } from "@repo/store/editor/effects.store";
 import { Button } from "@repo/ui/components/button";
 import { Label } from "@repo/ui/components/label";
 import { SquareRoundCorner, SquaresUnite } from "lucide-react";
@@ -12,6 +10,10 @@ import RadiusEffectForm from "./RadiusEffectForm";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { IEffect } from "@repo/store/types";
+import { useAppSelector } from "@repo/store/hooks";
+import { shapesSelectors } from "@repo/store/slices/shapesSlice";
+import { effectsSelectors } from "@repo/store/slices/effectsSlice";
 
 const radiusFormSchema = z.object({
   radius: z.string().min(1),
@@ -47,10 +49,8 @@ export const Effects = () => {
     },
   });
 
-  const { effects } = useEffectStore();
-  const {
-    specs: { shapes },
-  } = useDielineSpecStore();
+  const effects = useAppSelector(effectsSelectors.selectAll);
+  const shapes = useAppSelector(shapesSelectors.selectAll);
   const [effectFormType, setEffectFormType] =
     useState<IEffect.EffectTypes | null>(null);
 

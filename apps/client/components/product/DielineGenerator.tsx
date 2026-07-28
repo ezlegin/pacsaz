@@ -3,16 +3,15 @@
 import { DielineType } from "@/data/types";
 import { CustomDielineSettings } from "@repo/db";
 import { useDielineGenerator } from "@repo/dieline-core/hooks/useDielineGenerator";
-import { useDeveloperToolsStore } from "@repo/store/dieline/developerTools.store";
-import { ISpec } from "@repo/store/editor/dielineSpec.store";
 import dynamic from "next/dynamic";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { UserType } from "./DielineDownloadButton";
 import DielineLoadingOverlay from "./DielineLoadingOverlay";
 import DielineSettings from "./DielineSettings";
 import ProductInfo from "./ProductInfo";
-import { IVar } from "@repo/store/editor/variables.store";
-import { IEffect } from "@repo/store/editor/effects.store";
+import { IVar, IEffect, ISpec } from "@repo/store/types";
+import { useAppDispatch } from "@repo/store/hooks";
+import { setDeveloperTool } from "@repo/store/slices/developerToolsSlice";
 const SVGPreview = dynamic(
   () => import("@repo/ui/components/custom/SVGPreview"),
   { ssr: false },
@@ -27,10 +26,21 @@ const DielineGenerator = ({
   dieline: DielineType;
   customSettings?: CustomDielineSettings | null;
 }) => {
-  const { setDeveloperTools } = useDeveloperToolsStore();
-  const specs = JSON.parse(dieline.specification) as ISpec.Specs;
-  const variables = JSON.parse(dieline.variable) as IVar.VariableMap;
-  const effects = JSON.parse(dieline.effect) as IEffect.EffectsMap;
+  const dispatch = useAppDispatch();
+
+  const specs = useMemo(
+    () => JSON.parse(dieline.specification) as ISpec.Specs,
+    [dieline.specification],
+  );
+  const variables = useMemo(
+    () => JSON.parse(dieline.variable) as IVar.VariableMap,
+    [dieline.variable],
+  );
+  const effects = useMemo(
+    () => JSON.parse(dieline.effect) as IEffect.EffectsMap,
+    [dieline.effect],
+  );
+
   const { isRendering } = useDielineGenerator(
     {
       ...dieline,
@@ -39,12 +49,11 @@ const DielineGenerator = ({
       variables,
       effects,
     },
-    "client",
     user,
   );
 
   useEffect(() => {
-    setDeveloperTools("showContainer", true);
+    dispatch(setDeveloperTool({ key: "showContainer", value: true }));
     // this is because: if the user comes dierectly from home screen, doesn't get container.
   }, []);
 

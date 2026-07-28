@@ -1,8 +1,6 @@
 "use client";
 
 import { useLoading } from "@repo/lib/utils/useLoading";
-import { ISpec } from "@repo/store/editor/dielineSpec.store";
-import { IEffect, useEffectStore } from "@repo/store/editor/effects.store";
 import { Button } from "@repo/ui/components/button";
 import {
   Form,
@@ -18,6 +16,9 @@ import { useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { toast } from "sonner";
 import { RadiusFormType } from "./Effects";
+import { ISpec, IEffect } from "@repo/store/types";
+import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
+import { addEffect, effectsSelectors } from "@repo/store/slices/effectsSlice";
 
 const RadiusEffectForm = ({
   closeForm,
@@ -29,21 +30,24 @@ const RadiusEffectForm = ({
   shapes: ISpec.Shapes;
 }) => {
   const [effectOn, setEffectOn] = useState<IEffect.EffectOn>("shape");
-  const { setEffect, effects } = useEffectStore();
+  const dispatch = useAppDispatch();
+  const effects = useAppSelector(effectsSelectors.selectAll);
   const { startLoading, stopLoading, isLoading } = useLoading();
 
   const onSubmit = async (data: RadiusFormType) => {
     startLoading();
 
-    setEffect({
-      key: data.key,
-      type: "radius",
-      effectOn,
-      radius: +data.radius,
-      targetModelId: data.targetModelId,
-      hidden: false,
-      id: "",
-    });
+    dispatch(
+      addEffect({
+        key: data.key,
+        type: "radius",
+        effectOn,
+        radius: +data.radius,
+        targetModelId: data.targetModelId,
+        hidden: false,
+        id: "",
+      }),
+    );
 
     toast.success("Effect Applied.");
     closeForm();

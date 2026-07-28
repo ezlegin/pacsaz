@@ -1,5 +1,5 @@
-import { Dimension } from "@repo/store/data/types";
-import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
+import { getDielineSettings } from "@repo/store/getters";
+import { Dimension } from "@repo/store/types";
 import { Offset, OffsetValue } from "./offsetResolver";
 
 function applyDimensionOffset(value: number, offset: OffsetValue): number {
@@ -15,7 +15,7 @@ function applyDimensionOffset(value: number, offset: OffsetValue): number {
 
 export function resolveDimensions(
   dimension: Dimension,
-  offsets: Offset
+  offsets: Offset,
 ): Dimension {
   return {
     width: applyDimensionOffset(dimension.width, offsets.width)!,

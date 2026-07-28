@@ -1,13 +1,13 @@
 import { onDevelepe } from "@repo/lib/data/consts";
-import { useDeveloperToolsStore } from "@repo/store/dieline/developerTools.store";
+import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
+import { setDeveloperTool } from "@repo/store/slices/developerToolsSlice";
 import { Switch } from "@repo/ui/components/switch";
 
 const DeveloperTools = () => {
-  const {
-    developerTools: { showAnchors, doCenterSVG, showWatermark },
-    setDeveloperTools: setDeveloperToolsCTX,
-  } = useDeveloperToolsStore();
-
+  const dispatch = useAppDispatch();
+  const { showAnchors, doCenterSVG, showWatermark } = useAppSelector(
+    (s) => s.developerTools,
+  );
   return (
     onDevelepe && (
       <div className="p-1 text-sm flex flex-col gap-2">
@@ -15,7 +15,9 @@ const DeveloperTools = () => {
           <p>Show Anchors</p>
           <Switch
             checked={showAnchors}
-            onCheckedChange={(val) => setDeveloperToolsCTX("showAnchors", val)}
+            onCheckedChange={(val) =>
+              dispatch(setDeveloperTool({ key: "showAnchors", value: val }))
+            }
           />
         </div>
         <div className="flex justify-between">
@@ -23,7 +25,7 @@ const DeveloperTools = () => {
           <Switch
             checked={showWatermark}
             onCheckedChange={(val) =>
-              setDeveloperToolsCTX("showWatermark", val)
+              dispatch(setDeveloperTool({ key: "showWatermark", value: val }))
             }
           />
         </div>
@@ -31,7 +33,9 @@ const DeveloperTools = () => {
           <p>Do Center the SVG</p>
           <Switch
             checked={doCenterSVG}
-            onCheckedChange={(val) => setDeveloperToolsCTX("doCenterSVG", val)}
+            onCheckedChange={(val) =>
+              dispatch(setDeveloperTool({ key: "doCenterSVG", value: val }))
+            }
           />
         </div>
       </div>

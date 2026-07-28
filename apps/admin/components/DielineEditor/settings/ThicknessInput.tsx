@@ -1,6 +1,7 @@
 import { useLoading } from "@repo/lib/utils/useLoading";
-import { MaterialValue } from "@repo/store/data/types";
-import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
+import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
+import { setSetting } from "@repo/store/slices/dielineSettingsSlice";
+import { MaterialValue } from "@repo/store/types";
 import { Button } from "@repo/ui/components/button";
 import { Input } from "@repo/ui/components/input";
 import { Spinner } from "@repo/ui/components/spinner";
@@ -14,10 +15,8 @@ interface Props {
 const ThicknessInput = ({ isRendering, materialsIncluded }: Props) => {
   const [localInput, setLocalInput] = useState<string | undefined>();
 
-  const {
-    setSetting,
-    settings: { thickness },
-  } = useDielineSettingsStore();
+  const thickness = useAppSelector((s) => s.dielineSettings.thickness);
+  const dispatch = useAppDispatch();
 
   const { min: mMinThick, max: mMaxThick } =
     getThicknessRange(materialsIncluded);
@@ -36,17 +35,17 @@ const ThicknessInput = ({ isRendering, materialsIncluded }: Props) => {
       startMThicknessLoading();
       const newThickness = val + (type === "inc" ? 0.1 : -0.1);
       if (newThickness < mMinThick || newThickness > mMaxThick) return;
-      setSetting("thickness", newThickness);
+      dispatch(setSetting({ key: "thickness", value: newThickness }));
     } else {
       if (val < mMinThick) {
-        setSetting("thickness", mMinThick);
+        dispatch(setSetting({ key: "thickness", value: mMinThick }));
         return;
       }
       if (val > mMaxThick) {
-        setSetting("thickness", mMaxThick);
+        dispatch(setSetting({ key: "thickness", value: mMaxThick }));
         return;
       }
-      setSetting("thickness", val);
+      dispatch(setSetting({ key: "thickness", value: val }));
     }
   };
 

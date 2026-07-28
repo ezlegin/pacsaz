@@ -4,11 +4,6 @@ import {
   snapLockFormSchema,
 } from "@/lib/validationSchema/PropsSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useSelectionStore } from "@repo/store/app/selection.store";
-import {
-  ISpec,
-  useDielineSpecStore,
-} from "@repo/store/editor/dielineSpec.store";
 import {
   Accordion,
   AccordionContent,
@@ -26,6 +21,9 @@ import { z } from "zod";
 import PropsHeader from "./PropsHeader";
 import { DupOperationEditor } from "./shapes/DupOperationEditor";
 import PointInput from "./shapes/PointInput";
+import { ISpec } from "@repo/store/types";
+import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
+import { addModel, updateModel } from "@repo/store/slices/modelsSlice";
 
 const getModelSchema = (modelKey: ISpec.ModelsKey) => {
   const schemas: Record<ISpec.ModelsKey, any> = {
@@ -50,9 +48,9 @@ function ModelsPropsProvider<T extends ISpec.ModelsSpec>({
   close,
   modelKey,
 }: ModelsPropsProvider<T>) {
-  const { setModel, updateModel } = useDielineSpecStore();
+  const dispatch = useAppDispatch();
 
-  const { selection } = useSelectionStore();
+  const selection = useAppSelector((s) => s.selection.selection);
   const isUpdateType = !!selection;
 
   const schema = getModelSchema(modelKey);
@@ -80,10 +78,10 @@ function ModelsPropsProvider<T extends ISpec.ModelsSpec>({
 
   const onSubmit = (data: FormType) => {
     if (isUpdateType) {
-      updateModel(selection.id, data);
+      dispatch(updateModel({ id: selection.id, changes: data }));
       toast.info("Model Updated.");
     } else {
-      setModel(data);
+      dispatch(addModel(data));
       toast.info("Model Created.");
       close();
     }

@@ -1,10 +1,6 @@
 import { rulerFormSchema } from "@/lib/validationSchema/PropsSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  ISpec,
-  useDielineSpecStore,
-} from "@repo/store/editor/dielineSpec.store";
-import {
   Form,
   FormField,
   FormItem,
@@ -17,6 +13,13 @@ import { toast } from "sonner";
 import z from "zod";
 import PropsHeader from "./PropsHeader";
 import PointInput from "./shapes/PointInput";
+import { ISpec } from "@repo/store/types";
+import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
+import {
+  addRuler,
+  rulersSelectors,
+  updateRuler,
+} from "@repo/store/slices/rulersSlice";
 
 type FormType = z.infer<typeof rulerFormSchema>;
 
@@ -27,11 +30,8 @@ const RulerProps = ({
   close: () => void;
   selection: ISpec.ShapesSpec | ISpec.Ruler | null;
 }) => {
-  const {
-    setRuler,
-    specs: { rulers },
-    updateRuler,
-  } = useDielineSpecStore();
+  const rulers = useAppSelector(rulersSelectors.selectAll);
+  const dispatch = useAppDispatch();
   const form = useForm<FormType>({
     resolver: zodResolver(rulerFormSchema),
     defaultValues: (selection as ISpec.Ruler) ?? {
@@ -50,7 +50,7 @@ const RulerProps = ({
 
   const onSubmit = (data: FormType) => {
     if (selection) {
-      updateRuler(data);
+      dispatch(updateRuler({ id: data.id, changes: data }));
       toast.success("Ruler Updated.");
     } else {
       for (const r of rulers) {
@@ -60,7 +60,7 @@ const RulerProps = ({
         }
       }
 
-      setRuler(data);
+      dispatch(addRuler(data));
       toast.info("Ruler Created.");
 
       close();

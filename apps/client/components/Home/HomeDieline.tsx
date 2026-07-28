@@ -4,7 +4,6 @@ import { DIMENSIONS } from "@/data/consts";
 import { DielineType } from "@/data/types";
 import { tuckEnd } from "@/public";
 import { useDielineGenerator } from "@repo/dieline-core/hooks/useDielineGenerator";
-import { useDeveloperToolsStore } from "@repo/store/dieline/developerTools.store";
 import { Card } from "@repo/ui/components/card";
 import { cn } from "@repo/ui/lib/utils";
 import dynamic from "next/dynamic";
@@ -12,6 +11,8 @@ import Image from "next/image";
 import { useEffect } from "react";
 import DielineLoadingOverlay from "../product/DielineLoadingOverlay";
 import { DimensionInput } from "../product/DimensionsInput";
+import { useAppDispatch } from "@repo/store/hooks";
+import { setDeveloperTool } from "@repo/store/slices/developerToolsSlice";
 const SVGPreview = dynamic(
   () => import("@repo/ui/components/custom/SVGPreview"),
   {
@@ -50,12 +51,12 @@ const HomeDieline = ({ dieline }: { dieline: DielineType | null }) => {
     },
     "client",
   );
-  const { setDeveloperTools: setDeveloperToolsCTX } = useDeveloperToolsStore();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
-    setDeveloperToolsCTX("showWatermark", false);
-    setDeveloperToolsCTX("showContainer", false);
-    setDeveloperToolsCTX("doCenterSVG", true);
+    dispatch(setDeveloperTool({ key: "showContainer", value: false }));
+    dispatch(setDeveloperTool({ key: "showWatermark", value: false }));
+    dispatch(setDeveloperTool({ key: "doCenterSVG", value: true }));
   }, []);
 
   return (

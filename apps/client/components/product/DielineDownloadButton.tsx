@@ -3,8 +3,6 @@ import Diamond from "@/public/icons/Diamond";
 import { Plan, User } from "@repo/db";
 import { dielineDownloder } from "@repo/lib/utils/dielineDownloader";
 import { useLoading } from "@repo/lib/utils/useLoading";
-import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
-import { useSVGStore } from "@repo/store/dieline/svg.store";
 import { Button } from "@repo/ui/components/button";
 import { Dialog, DialogContent, DialogTitle } from "@repo/ui/components/dialog";
 import { Spinner } from "@repo/ui/components/spinner";
@@ -15,6 +13,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import LoginCard from "../forms/LoginCard";
 import SaveDielineForm from "../forms/SaveDielineForm";
+import { useAppSelector } from "@repo/store/hooks";
 
 export interface UserType extends User {
   plan: Plan | null;
@@ -28,8 +27,8 @@ interface Props {
 
 const DielineDownloadButton = ({ slug, isRendering, user }: Props) => {
   const router = useRouter();
-  const { settings } = useDielineSettingsStore();
-  const { svg } = useSVGStore();
+  const settings = useAppSelector((s) => s.dielineSettings);
+  const svg = useAppSelector((s) => s.svg.svg);
   const { startLoading, stopLoading, isLoading } = useLoading();
   const [openPopup, setOpenPopup] = useState<"login" | "save" | null>(null);
 

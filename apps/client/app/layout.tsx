@@ -1,4 +1,5 @@
 import ProgressBarProvider from "@/components/ProgressBarProvider";
+import ReduxProvider from "@/components/ReduxProvider";
 import { favIcon } from "@/public";
 import { Toaster } from "@repo/ui/components/sonner";
 import "@repo/ui/globals.css";
@@ -13,7 +14,9 @@ export default async function RootLayout({
   return (
     <html lang="fa" dir="rtl" suppressHydrationWarning>
       <body style={{ fontFamily }} className="antialiased">
-        <ProgressBarProvider>{children}</ProgressBarProvider>
+        <ProgressBarProvider>
+          <ReduxProvider>{children}</ReduxProvider>
+        </ProgressBarProvider>
         <Toaster
           richColors
           theme="light"

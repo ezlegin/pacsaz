@@ -1,8 +1,5 @@
 "use client";
 
-import { useDeveloperToolsStore } from "@repo/store/dieline/developerTools.store";
-import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
-import { useSVGStore } from "@repo/store/dieline/svg.store";
 import { Button } from "@repo/ui/components/button";
 import { Card } from "@repo/ui/components/card";
 import { Separator } from "@repo/ui/components/separator";
@@ -15,6 +12,8 @@ import {
   TransformComponent,
   TransformWrapper,
 } from "react-zoom-pan-pinch";
+import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
+import { setSetting } from "@repo/store/slices/dielineSettingsSlice";
 
 interface Props {
   isRendering: boolean;
@@ -32,17 +31,17 @@ export default function SvgPreview({
   showControls = true,
 }: Props) {
   const isEditorType = type === "editor";
-  let svg = useSVGStore((s) => s.svg);
-  const {
-    developerTools: { doCenterSVG },
-  } = useDeveloperToolsStore();
+
+  let svg = useAppSelector((s) => s.svg.svg);
+  const doCenterSVG = useAppSelector((s) => s.developerTools.doCenterSVG);
+  const dispatch = useAppDispatch();
 
   const transformRef = useRef<ReactZoomPanPinchRef | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState<number>();
   const [scaleFraction, setScaleFraction] = useState(1);
-  const { setSetting, settings } = useDielineSettingsStore();
+  const settings = useAppSelector((s) => s.dielineSettings);
 
   useLayoutEffect(() => {
     if (!contentRef.current || !wrapperRef.current) return;
@@ -92,7 +91,12 @@ export default function SvgPreview({
   }, [svg, doCenterSVG]);
 
   const handleRulers = () => {
-    setSetting("showOverallRulers", !settings.showOverallRulers);
+    dispatch(
+      setSetting({
+        key: "showOverallRulers",
+        value: !settings.showOverallRulers,
+      }),
+    );
   };
 
   const getScaleFraction = (containerScale: number) => {

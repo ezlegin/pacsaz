@@ -1,9 +1,10 @@
 import { placeholder } from "@/public";
 import { formatDimensions } from "@/utils/formatDimensions";
+import { DimensionType } from "@repo/db";
 import { applyDimensionOffset } from "@repo/dieline-core/utils/applyDimensionOffset";
 import { resolveOffsets } from "@repo/dieline-core/utils/offsetResolver";
-import { DimensionType } from "@repo/store/data/types";
-import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
+import { useAppSelector } from "@repo/store/hooks";
+
 import {
   Dialog,
   DialogContent,
@@ -17,14 +18,12 @@ const ProductInfo = ({ imageSrc }: { imageSrc?: string | null }) => {
   const offset = resolveOffsets();
 
   const {
-    settings: {
-      dimension: {
-        raw: { height, length, width },
-      },
-      dimensionTypes,
-      dimensionType,
+    dimensionType,
+    dimensionTypes,
+    dimension: {
+      raw: { height, length, width },
     },
-  } = useDielineSettingsStore();
+  } = useAppSelector((s) => s.dielineSettings);
 
   const calcManufacture = (value: number, axis: "width" | "length") =>
     applyDimensionOffset(

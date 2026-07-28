@@ -1,3 +1,4 @@
+import ReduxProvider from "@/components/ReduxProvider";
 import { favIcon } from "@/public";
 import { Toaster } from "@repo/ui/components/sonner";
 import "@repo/ui/globals.css";
@@ -12,7 +13,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body style={{ fontFamily }} className="antialiased">
-        {children}
+        <ReduxProvider>{children}</ReduxProvider>
         <Toaster
           richColors
           theme="light"

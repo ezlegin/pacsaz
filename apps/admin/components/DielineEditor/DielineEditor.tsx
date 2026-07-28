@@ -3,9 +3,16 @@
 import { Categories, DielineType } from "@/app/(PANEL)/dielines/DielinesList";
 import DielineLayer from "@/components/DielineEditor/DielineLayer";
 import { useDielineGenerator } from "@repo/dieline-core/hooks/useDielineGenerator";
-import { useDielineSpecStore } from "@repo/store/editor/dielineSpec.store";
-import { IEffect, useEffectStore } from "@repo/store/editor/effects.store";
-import { IVar, useVariableStore } from "@repo/store/editor/variables.store";
+import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
+import { addEffects, effectsSelectors } from "@repo/store/slices/effectsSlice";
+import { addModels, modelsSelectors } from "@repo/store/slices/modelsSlice";
+import { addRulers, rulersSelectors } from "@repo/store/slices/rulersSlice";
+import { addShapes, shapesSelectors } from "@repo/store/slices/shapesSlice";
+import {
+  addVariables,
+  variablesSelectors,
+} from "@repo/store/slices/variablesSlice";
+import { IEffect, IVar } from "@repo/store/types";
 import { Button } from "@repo/ui/components/button";
 import {
   Drawer,
@@ -24,9 +31,10 @@ import { Settings as SettingsIcon } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useEffect } from "react";
 import { Effects } from "./effects/Effects";
+import Settings from "./settings/Settings";
 import Tools from "./Tools";
 import Variables from "./Variables";
-import Settings from "./settings/Settings";
+import { useMemo } from "react";
 
 const SVGPreview = dynamic(
   () => import("@repo/ui/components/custom/SVGPreview"),
@@ -42,27 +50,32 @@ const DielineEditor = ({
   dieline: DielineType;
   categories: Categories;
 }) => {
-  const { specs, setSpecs } = useDielineSpecStore();
-  const { effects, setEffects } = useEffectStore();
-  const { variables, setVariables } = useVariableStore();
-  const { isRendering } = useDielineGenerator(
-    {
-      ...dieline,
-      specification: specs,
-      variables: variables,
-      effects: effects,
-    },
-    "editor",
-    null,
-    false,
+  const dispatch = useAppDispatch();
+
+  const shapes = useAppSelector(shapesSelectors.selectAll);
+  const rulers = useAppSelector(rulersSelectors.selectAll);
+  const models = useAppSelector(modelsSelectors.selectAll);
+
+  const specification = useMemo(
+    () => ({ shapes, rulers, models }),
+    [shapes, rulers, models],
+  );
+  const variables = useAppSelector(variablesSelectors.selectAll);
+  const effects = useAppSelector(effectsSelectors.selectAll);
+
+  const dielineForGenerator = useMemo(
+    () => ({ ...dieline, specification, variables, effects }),
+    [dieline, specification, variables, effects],
   );
 
+  const { isRendering } = useDielineGenerator(dielineForGenerator, null, false);
+
   useEffect(() => {
-    if (dieline) {
-      setSpecs(JSON.parse(dieline.specification));
-      setVariables(JSON.parse(dieline.variable) as IVar.VariableMap);
-      setEffects(JSON.parse(dieline.effect) as IEffect.EffectsMap);
-    }
+    dispatch(addShapes(JSON.parse(dieline.specification).shapes));
+    dispatch(addModels(JSON.parse(dieline.specification).models));
+    dispatch(addRulers(JSON.parse(dieline.specification).rulers));
+    dispatch(addVariables(JSON.parse(dieline.variable) as IVar.VariableMap));
+    dispatch(addEffects(JSON.parse(dieline.effect) as IEffect.EffectsMap));
   }, []);
 
   return (

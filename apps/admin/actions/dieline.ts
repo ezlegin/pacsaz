@@ -5,9 +5,9 @@ import {
   DielineUpdateFormType,
 } from "@/lib/validationSchema/validatoinSchema";
 import { prisma } from "@repo/db";
-import { materials as allMats } from "@repo/store/data/dieline";
 import { UploadApiResponse } from "cloudinary";
 import { deleteImage, uploadCloudFile } from "./cloudinary";
+import { materials as allMats } from "@repo/dieline-core/data/materials";
 
 export const createDieline = async (data: DielineMetadataFormType) => {
   const {

@@ -1,8 +1,8 @@
-import { ISpec } from "@repo/store/editor/dielineSpec.store";
 import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import { Ruler } from "lucide-react";
 import { HandleLayerActoin } from "../DielineLayer";
 import LayerActions from "./LayerAction";
+import { ISpec } from "@repo/store/types";
 
 export default function RulerLayers({
   handleLayerAction,

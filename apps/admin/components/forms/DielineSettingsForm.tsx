@@ -14,7 +14,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { handleRes } from "@repo/lib/utils/handleRes";
 import { useLoading } from "@repo/lib/utils/useLoading";
-import { materials } from "@repo/store/data/dieline";
+import { materials } from "@repo/dieline-core/data/materials";
 import { Button } from "@repo/ui/components/button";
 import { Checkbox } from "@repo/ui/components/checkbox";
 import {

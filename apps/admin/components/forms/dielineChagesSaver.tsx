@@ -5,9 +5,12 @@ import {
 } from "@/lib/validationSchema/validatoinSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Dieline, DielineSettings } from "@repo/db";
-import { useDielineSpecStore } from "@repo/store/editor/dielineSpec.store";
-import { useEffectStore } from "@repo/store/editor/effects.store";
-import { useVariableStore } from "@repo/store/editor/variables.store";
+import { useAppSelector } from "@repo/store/hooks";
+import { effectsSelectors } from "@repo/store/slices/effectsSlice";
+import { modelsSelectors } from "@repo/store/slices/modelsSlice";
+import { rulersSelectors } from "@repo/store/slices/rulersSlice";
+import { shapesSelectors } from "@repo/store/slices/shapesSlice";
+import { variablesSelectors } from "@repo/store/slices/variablesSlice";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -15,9 +18,13 @@ import { toast } from "sonner";
 type DielineType = Dieline & { settings: DielineSettings };
 
 const DielineChangesSaver = ({ dieline }: { dieline: DielineType }) => {
-  const { specs } = useDielineSpecStore();
-  const { variables } = useVariableStore();
-  const { effects } = useEffectStore();
+  const specs = {
+    shapes: useAppSelector(shapesSelectors.selectAll),
+    rulers: useAppSelector(rulersSelectors.selectAll),
+    models: useAppSelector(modelsSelectors.selectAll),
+  };
+  const variables = useAppSelector(variablesSelectors.selectAll);
+  const effects = useAppSelector(effectsSelectors.selectAll);
 
   const form = useForm<DielineUpdateFormType>({
     resolver: zodResolver(dielineUpdateFormSchema as any),

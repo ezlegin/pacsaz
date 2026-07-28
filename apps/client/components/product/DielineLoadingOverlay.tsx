@@ -1,6 +1,6 @@
 "use client";
 
-import { useSVGStore } from "@repo/store/dieline/svg.store";
+import { useAppSelector } from "@repo/store/hooks";
 import { Card } from "@repo/ui/components/card";
 import { Spinner } from "@repo/ui/components/spinner";
 import { cn } from "@repo/ui/lib/utils";
@@ -15,7 +15,7 @@ export default function DielineLoadingOverlay({
   message = "در حال تولید...",
   className,
 }: LoadingOverlayProps) {
-  const { svg } = useSVGStore();
+  const svg = useAppSelector((s) => s.svg.svg);
 
   const [isRenderingLoading, setIsRenderingLoading] = useState(true);
   useEffect(() => {

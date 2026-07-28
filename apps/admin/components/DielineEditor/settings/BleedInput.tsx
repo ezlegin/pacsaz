@@ -1,4 +1,4 @@
-import { bleeds as BLEEDS } from "@repo/store/data/dieline";
+import { bleeds as BLEEDS } from "@repo/dieline-core/data/materials";
 import {
   Select,
   SelectContent,

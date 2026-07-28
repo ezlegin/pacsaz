@@ -8,10 +8,11 @@
     "check-types": "tsc --noEmit"
   },
   "exports": {
-    "./dieline/*": "./src/store/dieline/*.ts",
-    "./app/*": "./src/store/app/*.ts",
-    "./editor/*": "./src/store/editor/*.ts",
-    "./data/*": "./src/data/*.ts"
+    "./store": "./src/store/store.ts",
+    "./slices/*": "./src/store/slices/*.ts",
+    "./getters": "./src/store/getters.ts",
+    "./types": "./src/store/types.ts",
+    "./hooks": "./src/store/hooks.ts"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
@@ -19,8 +20,10 @@
     "@types/node": "^22.15.3"
   },
   "dependencies": {
-    "@repo/db": "workspace:*",
-    "@repo/auth": "workspace:*",
+    "@reduxjs/toolkit": "^2.12.0",
+    "react-redux": "^9.3.0",
+    "redux-persist": "^6.0.0",
+    "redux-undo": "^1.1.0",
     "uuid": "^13.0.0",
     "zustand": "^5.0.10"
   }

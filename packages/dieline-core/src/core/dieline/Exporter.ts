@@ -1,8 +1,8 @@
-import { getDevCTX } from "@repo/store/dieline/developerTools.store";
-import { setDielineFile } from "@repo/store/dieline/dielineFile.store";
-import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
+import { setFile } from "@repo/store/slices/dielineFileSlice";
 import M, { IModel } from "makerjs";
 import { toMm } from "../../utils/sizeConvertor";
+import { getDevCTX, getDielineSettings } from "@repo/store/getters";
+import { store } from "@repo/store/store";
 
 export class Exporter {
   constructor(private main: IModel) {}
@@ -15,13 +15,9 @@ export class Exporter {
     const svg = this.svg();
 
     if (this.format === "dxf") {
-      setDielineFile(() => ({
-        file: this.dxf(),
-      }));
+      store.dispatch(setFile(this.dxf()));
     } else {
-      setDielineFile(() => ({
-        file: svg,
-      }));
+      store.dispatch(setFile(svg));
     }
 
     return svg;

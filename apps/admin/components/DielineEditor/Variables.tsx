@@ -1,6 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useDielineSpecStore } from "@repo/store/editor/dielineSpec.store";
-import { IVar, useVariableStore } from "@repo/store/editor/variables.store";
+import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
+import { shapesSelectors } from "@repo/store/slices/shapesSlice";
+import {
+  removeVariable,
+  addVariable,
+  updateVariable,
+  variablesSelectors,
+} from "@repo/store/slices/variablesSlice";
+import { IVar } from "@repo/store/types";
 import { Button } from "@repo/ui/components/button";
 import {
   Form,
@@ -33,8 +40,8 @@ type FormType = z.infer<typeof formSchema>;
 const Variables = () => {
   const [selectedVar, setSelectedVar] = useState<IVar.Variable | null>(null);
   const { refresh } = useRouter();
-  const { setVariable, variables, removeVariable, updateVariable } =
-    useVariableStore();
+  const variables = useAppSelector(variablesSelectors.selectAll);
+  const dispatch = useAppDispatch();
   const form = useForm<FormType>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -63,10 +70,10 @@ const Variables = () => {
     }
 
     if (selectedVar) {
-      updateVariable(data);
+      dispatch(updateVariable({ id: data.id, changes: data }));
       setSelectedVar(data);
     } else {
-      setVariable(data);
+      dispatch(addVariable(data));
       form.reset();
     }
 
@@ -84,9 +91,7 @@ const Variables = () => {
     if (variable) setSelectedVar(variable);
   };
 
-  const {
-    specs: { shapes },
-  } = useDielineSpecStore();
+  const shapes = useAppSelector(shapesSelectors.selectAll);
   const handleVarDelesion = (id: string) => {
     const variable = variables.find((v) => v.id === id);
     if (!variable) {
@@ -114,7 +119,7 @@ const Variables = () => {
       }
     }
 
-    removeVariable(id);
+    dispatch(removeVariable(id));
     form.reset({ id: "", name: "", value: "" });
   };
 

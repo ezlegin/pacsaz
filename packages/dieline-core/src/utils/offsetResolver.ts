@@ -1,4 +1,4 @@
-import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
+import { getDielineSettings } from "@repo/store/getters";
 
 type OffsetKey = "width" | "length" | "height";
 export type OffsetValue = { inner: number; outer: number };

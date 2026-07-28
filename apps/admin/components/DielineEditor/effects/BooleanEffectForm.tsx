@@ -1,8 +1,6 @@
 "use client";
 
 import { useLoading } from "@repo/lib/utils/useLoading";
-import { ISpec } from "@repo/store/editor/dielineSpec.store";
-import { IEffect, useEffectStore } from "@repo/store/editor/effects.store";
 import { Button } from "@repo/ui/components/button";
 import {
   Form,
@@ -26,6 +24,9 @@ import { useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { toast } from "sonner";
 import { BooleanFormType } from "./Effects";
+import { ISpec, IEffect } from "@repo/store/types";
+import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
+import { addEffect, effectsSelectors } from "@repo/store/slices/effectsSlice";
 
 const BooleanEffectForm = ({
   closeForm,
@@ -40,22 +41,25 @@ const BooleanEffectForm = ({
     useState<IEffect.EffectOn>("shape");
   const [targetEffectOn, setTargetEffectOn] =
     useState<IEffect.EffectOn>("shape");
-  const { setEffect, effects } = useEffectStore();
+  const effects = useAppSelector(effectsSelectors.selectAll);
+  const dispatch = useAppDispatch();
   const { startLoading, stopLoading, isLoading } = useLoading();
 
   const onSubmit = async (data: BooleanFormType) => {
     startLoading();
 
-    setEffect({
-      key: data.key,
-      booleanType: data.booleanType,
-      type: "boolean",
-      effectOn: originEffectOn,
-      originModelId: data.originModelId,
-      targetModelId: data.targetModelId,
-      hidden: false,
-      id: "",
-    });
+    dispatch(
+      addEffect({
+        key: data.key,
+        booleanType: data.booleanType,
+        type: "boolean",
+        effectOn: originEffectOn,
+        originModelId: data.originModelId,
+        targetModelId: data.targetModelId,
+        hidden: false,
+        id: "",
+      }),
+    );
 
     toast.success("Effect Applied.");
     closeForm();

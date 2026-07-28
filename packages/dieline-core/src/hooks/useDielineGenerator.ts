@@ -1,15 +1,15 @@
-import { materials } from "@repo/store/data/dieline";
-import { DimensionType } from "@repo/store/data/types";
-import { useDeveloperToolsStore } from "@repo/store/dieline/developerTools.store";
-import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
-import { useSVGStore } from "@repo/store/dieline/svg.store";
-import { ISpec } from "@repo/store/editor/dielineSpec.store";
-import { IEffect, useEffectStore } from "@repo/store/editor/effects.store";
-import { IVar, useVariableStore } from "@repo/store/editor/variables.store";
+import { materials } from "@repo/dieline-core/data/materials";
 import { useEffect, useTransition } from "react";
 import Pacsaz from "../core/Pacsaz";
 import { resolveDimensions } from "../utils/dimensionResolver";
 import { resolveOffsets } from "../utils/offsetResolver";
+import { IEffect, IVar, ISpec, DimensionType } from "@repo/store/types";
+import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
+import { setDefaultSettings } from "@repo/store/slices/dielineSettingsSlice";
+import { setDeveloperTool } from "@repo/store/slices/developerToolsSlice";
+import { setSvg } from "@repo/store/slices/svgSlice";
+import { variablesSelectors } from "@repo/store/slices/variablesSlice";
+import { effectsSelectors } from "@repo/store/slices/effectsSlice";
 import Drawer from "../core/dieline/Drawer";
 
 interface Dieline {
@@ -41,25 +41,27 @@ interface DielineType extends Dieline {
 
 export function useDielineGenerator(
   dieline: DielineType,
-  app: "client" | "editor",
-  user?: any | null, // todo,
+  user?: any | null,
   showWatermark?: boolean,
 ) {
   const specs = dieline.specification;
   const setts = dieline.settings;
   const [isRendering, startTransition] = useTransition();
-  const { setDefaultSettings, settings } = useDielineSettingsStore();
-  const { developerTools, setDeveloperTools } = useDeveloperToolsStore();
-  const { variables } = useVariableStore();
-  const { effects } = useEffectStore();
+  const dispatch = useAppDispatch();
+
+  const settings = useAppSelector((state) => state.dielineSettings);
+  const developerTools = useAppSelector((state) => state.developerTools);
+  const variables = useAppSelector((state) =>
+    variablesSelectors.selectAll(state),
+  );
+  const effects = useAppSelector((state) => effectsSelectors.selectAll(state));
+
   const drawer = new Pacsaz.models.Drawer(
     specs,
     dieline.variables,
     dieline.effects,
   );
-
   const offsets = resolveOffsets();
-  const { setSvg } = useSVGStore();
 
   // set defaults
   useEffect(() => {
@@ -77,43 +79,42 @@ export function useDielineGenerator(
       (m) => m.value === dieline.defaultMaterial,
     )!;
 
-    setDefaultSettings({
-      bleed: setts.bleed,
-      dimension: {
-        raw: dims,
-        resolved: resolveDimensions(dims, offsets),
-      },
-      dimensionTypes: dimensionTypes,
-      minDimension: {
-        width: dieline.minWidth,
-        height: dieline.minHeight,
-        length: dieline.minLength,
-      },
-      material: material,
-      materials: mats,
-      thickness: setts.thickness,
+    dispatch(
+      setDefaultSettings({
+        bleed: setts.bleed,
+        dimension: {
+          raw: dims,
+          resolved: resolveDimensions(dims, offsets),
+        },
+        dimensionTypes: dimensionTypes,
+        minDimension: {
+          width: dieline.minWidth,
+          height: dieline.minHeight,
+          length: dieline.minLength,
+        },
+        material: material,
+        materials: mats,
+        thickness: setts.thickness,
+        dimensionType: setts.dimensionType as DimensionType,
+        format: "pdf",
+        showOverallRulers: false,
+      }),
+    );
 
-      dimensionType: setts.dimensionType as DimensionType,
-      format: "pdf",
-      showOverallRulers: false,
-    });
-
-    setDeveloperTools("showWatermark", showWatermark ?? !!!user);
+    dispatch(
+      setDeveloperTool({
+        key: "showWatermark",
+        value: showWatermark ?? !!!user,
+      }),
+    );
   }, []);
 
   useEffect(() => {
     startTransition(() => {
       const svg = drawer.model();
-      setSvg(svg);
+      dispatch(setSvg(svg));
     });
-  }, [
-    settings,
-    Drawer,
-    app === "editor" ? specs : undefined,
-    developerTools,
-    variables,
-    effects,
-  ]);
+  }, [settings, Drawer, specs, developerTools, variables, effects]);
 
   return {
     isRendering,

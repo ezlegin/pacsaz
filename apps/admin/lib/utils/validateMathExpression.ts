@@ -1,4 +1,4 @@
-import { getVariables } from "@repo/store/editor/variables.store";
+import { getVariables } from "@repo/store/getters";
 
 const baseVariables = [
   "width",

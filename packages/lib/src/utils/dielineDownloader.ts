@@ -1,17 +1,15 @@
-import { getDielineFile } from "@repo/store/dieline/dielineFile.store";
-import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
-import { getOverallSizes } from "@repo/store/dieline/overallSize.store";
+import { useAppSelector } from "@repo/store/hooks";
 import { PDFGenerator } from "./PDFGenerator";
 
 export async function dielineDownloder(slug: string) {
+  const overallSizes = useAppSelector((s) => s.overallSizes);
+  const { file } = useAppSelector((s) => s.dielineFile);
   const {
     dimension: {
       raw: { height, length, width },
     },
     format,
-  } = getDielineSettings();
-  const overallSizes = getOverallSizes();
-  const { file } = getDielineFile();
+  } = useAppSelector((s) => s.dielineSettings);
 
   let blob = new Blob([file], { type: "application/dxf" });
 

@@ -1,7 +1,7 @@
-import {
-  DielineSettings,
-  useDielineSettingsStore,
-} from "@repo/store/dieline/dielineSettings.store";
+import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
+import { setSetting as setSettings } from "@repo/store/slices/dielineSettingsSlice";
+import { DielineSettings } from "@repo/store/types";
+import DeveloperTools from "../DeveloperTools";
 import BleedInput from "./BleedInput";
 import DielineDownloadButton from "./DielineDownloadButton";
 import { DimensionInput } from "./DimensionsInput";
@@ -9,7 +9,6 @@ import DimensionTypeInput from "./DimensionTypeInput";
 import FormatInput from "./FormatInput";
 import MaterialInput from "./MaterialInput";
 import ThicknessInput from "./ThicknessInput";
-import DeveloperTools from "../DeveloperTools";
 
 export type SetSetting = <K extends keyof DielineSettings>(
   key: K,
@@ -17,17 +16,13 @@ export type SetSetting = <K extends keyof DielineSettings>(
 ) => void;
 
 const Settings = ({ isRendering }: { isRendering: boolean }) => {
-  const {
-    setSetting,
-    settings: {
-      bleed,
-      dimension,
-      dimensionType,
-      format,
-      materials,
-      dimensionTypes,
-    },
-  } = useDielineSettingsStore();
+  const { bleed, dimension, dimensionType, format, materials, dimensionTypes } =
+    useAppSelector((s) => s.dielineSettings);
+  const dispatch = useAppDispatch();
+
+  const setSetting: SetSetting = (key, value) => {
+    dispatch(setSettings({ key, value }));
+  };
 
   return (
     <div className="space-y-6">

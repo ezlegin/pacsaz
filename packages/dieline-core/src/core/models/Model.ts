@@ -1,7 +1,7 @@
-import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
 import { IModelMap } from "makerjs";
 import { zero } from "../../data/consts";
 import { Shape } from "../shapes/Shape";
+import { getDielineSettings } from "@repo/store/getters";
 
 export abstract class Model extends Shape {
   protected abstract trim(): IModelMap;

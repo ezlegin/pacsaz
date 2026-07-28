@@ -1,6 +1,5 @@
-import { ISpec } from "@repo/store/editor/dielineSpec.store";
-import { IEffect } from "@repo/store/editor/effects.store";
-import { IVar } from "@repo/store/editor/variables.store";
+import { ISpec, IVar, IEffect } from "@repo/store/types";
+
 import M, { IModel } from "makerjs";
 import { evaluate } from "mathjs";
 import { toMm } from "../../utils/sizeConvertor";

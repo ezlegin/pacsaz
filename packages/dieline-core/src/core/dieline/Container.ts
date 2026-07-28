@@ -1,7 +1,7 @@
-import { getDevCTX } from "@repo/store/dieline/developerTools.store";
 import M, { IModel } from "makerjs";
 import Pacsaz from "../Pacsaz";
 import { containerSize } from "../../data/consts";
+import { getDevCTX } from "@repo/store/getters";
 
 export class Container implements IModel {
   constructor(trimModel: IModel) {

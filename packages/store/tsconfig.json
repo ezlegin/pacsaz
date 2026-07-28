@@ -9,7 +9,9 @@
     "**/*.tsx",
     "next-env.d.ts",
     "next.config.js",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "../dieline-core/src/data/materials.ts",
+    "../../apps/admin/components/ReduxProvider.tsx"
   ],
   "exclude": ["node_modules"]
 }

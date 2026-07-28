@@ -1,9 +1,7 @@
 import { DIMENSIONS, DIMENSIONS_TYPE } from "@/data/consts";
 import { aiIcon, dxfIcon, pdfIcon } from "@/public";
 import { isPackagingSizeLogical } from "@repo/dieline-core/utils/isPackagingSizeLogical";
-import { bleeds as BLEEDS } from "@repo/store/data/dieline";
-import { DimensionType, Format } from "@repo/store/data/types";
-import { useDielineSettingsStore } from "@repo/store/dieline/dielineSettings.store";
+import { bleeds as BLEEDS } from "@repo/dieline-core/data/materials";
 import { Badge } from "@repo/ui/components/badge";
 import { Card } from "@repo/ui/components/card";
 import {
@@ -32,6 +30,10 @@ import MeterialGuide from "./guides/materialGuide";
 import ThicknessGuide from "./guides/ThicknessGuide";
 import MaterialInput from "./MaterialInput";
 import ThicknessInput from "./ThicknessInput";
+import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
+import { setSetting } from "@repo/store/slices/dielineSettingsSlice";
+import { DimensionType } from "@repo/db";
+import { Format } from "@repo/store/types";
 
 interface Props {
   slug: string;
@@ -41,16 +43,14 @@ interface Props {
 
 export default function DielineSettings({ slug, isRendering, user }: Props) {
   const {
-    setSetting,
-    settings: {
-      bleed,
-      dimensionType,
-      format,
-      dimension,
-      minDimension,
-      dimensionTypes,
-    },
-  } = useDielineSettingsStore();
+    bleed,
+    dimensionType,
+    format,
+    dimension,
+    minDimension,
+    dimensionTypes,
+  } = useAppSelector((s) => s.dielineSettings);
+  const dispatch = useAppDispatch();
 
   const bleeds = Object.entries(BLEEDS).map(([type, size]) => ({
     type,
@@ -129,7 +129,9 @@ export default function DielineSettings({ slug, isRendering, user }: Props) {
           <Select
             disabled={!isPremium}
             value={String(bleed)}
-            onValueChange={(val: string) => setSetting("bleed", +val)}
+            onValueChange={(val: string) =>
+              dispatch(setSetting({ key: "bleed", value: +val }))
+            }
             dir="rtl"
           >
             <SelectTrigger className="w-full">
@@ -172,7 +174,13 @@ export default function DielineSettings({ slug, isRendering, user }: Props) {
             dir="rtl"
             value={dimensionType}
             onValueChange={(val) => {
-              if (val) setSetting("dimensionType", val as DimensionType);
+              if (val)
+                dispatch(
+                  setSetting({
+                    key: "dimensionType",
+                    value: val as DimensionType,
+                  }),
+                );
             }}
             className="w-full"
           >
@@ -204,7 +212,7 @@ export default function DielineSettings({ slug, isRendering, user }: Props) {
             spacing={1}
             value={format}
             onValueChange={(val) => {
-              if (val) setSetting("format", val as Format);
+              if (val) setSetting({ key: "format", value: val as Format });
             }}
             className="w-full"
           >

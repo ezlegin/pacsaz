@@ -1,6 +1,6 @@
 import { dielineDownloder } from "@repo/lib/utils/dielineDownloader";
 import { useLoading } from "@repo/lib/utils/useLoading";
-import { useSVGStore } from "@repo/store/dieline/svg.store";
+import { useAppSelector } from "@repo/store/hooks";
 import { Button } from "@repo/ui/components/button";
 import { Spinner } from "@repo/ui/components/spinner";
 import { Download } from "lucide-react";
@@ -12,7 +12,7 @@ interface Props {
 }
 
 const DielineDownloadButton = ({ slug, isRendering }: Props) => {
-  const { svg } = useSVGStore();
+  const svg = useAppSelector((s) => s.svg.svg);
   const { startLoading, stopLoading, isLoading } = useLoading();
 
   const onDownload = async () => {

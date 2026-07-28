@@ -1,10 +1,11 @@
-import { ISpec } from "@repo/store/editor/dielineSpec.store";
-import { IEffect, useEffectStore } from "@repo/store/editor/effects.store";
 import { Label } from "@repo/ui/components/label";
 import { Trash } from "lucide-react";
 import { useMemo } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { BooleanFormType, RadiusFormType } from "./Effects";
+import { IEffect, ISpec } from "@repo/store/types";
+import { useAppDispatch } from "@repo/store/hooks";
+import { removeEffect } from "@repo/store/slices/effectsSlice";
 
 const EffectsList = ({
   effects,
@@ -19,7 +20,8 @@ const EffectsList = ({
   booleanForm: UseFormReturn<BooleanFormType, any, BooleanFormType>;
   setEffectFormType: (type: IEffect.EffectTypes) => void;
 }) => {
-  const { removeEffect } = useEffectStore();
+  const dispatch = useAppDispatch();
+
   function resolveRef(
     id: string,
     effectOn: "effect" | "shape",
@@ -97,7 +99,7 @@ const EffectsList = ({
   };
 
   const onRemoveEffect = (id: string) => {
-    removeEffect(id);
+    dispatch(removeEffect(id));
   };
 
   const effectsArr = [

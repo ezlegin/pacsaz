@@ -1,10 +1,11 @@
 import { onDevelepe } from "@repo/lib/data/consts";
-import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
-import { setOverallSize } from "@repo/store/dieline/overallSize.store";
 import M, { IModel, IModelMap } from "makerjs";
 import Pacsaz from "../Pacsaz";
 import { Bleed } from "./Bleed";
 import { Exporter } from "./Exporter";
+import { store } from "@repo/store/store";
+import { setOverallSizes } from "@repo/store/slices/overallSizesSlice";
+import { getDielineSettings } from "@repo/store/getters";
 
 export abstract class Dieline {
   protected main: IModel = {};
@@ -96,13 +97,13 @@ export abstract class Dieline {
     const bleedSize = M.measure.modelExtents(bleed);
     const containerSize = M.measure.modelExtents(container);
     const trimSize = M.measure.modelExtents(trimModel);
-    setOverallSize(() => ({
-      overallSizes: {
+    store.dispatch(
+      setOverallSizes({
         bleed: bleedSize,
         container: containerSize,
         trim: trimSize,
-      },
-    }));
+      }),
+    );
   }
 
   // -------------- Utils --------------

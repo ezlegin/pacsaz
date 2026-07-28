@@ -1,4 +1,3 @@
-import { ISpec } from "@repo/store/editor/dielineSpec.store";
 import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import { cn } from "@repo/ui/lib/utils";
 import {
@@ -11,35 +10,39 @@ import {
 } from "lucide-react";
 import { HandleLayerActoin } from "../DielineLayer";
 import LayerActions from "./LayerAction";
+import { ISpec } from "@repo/store/types";
+import { useAppDispatch } from "@repo/store/hooks";
+import {
+  clearSelection,
+  setSelection,
+} from "@repo/store/slices/selectionSlice";
 
 export default function ShapeLayers({
   handleLayerAction,
-  clearSelection,
-  setSelection,
   shapes,
 }: {
   shapes: ISpec.ShapesSpec[];
   handleLayerAction: HandleLayerActoin;
-  clearSelection: () => void;
-  setSelection: (shape: ISpec.ShapesSpec) => void;
 }) {
+  const dispatch = useAppDispatch();
+
   return (
     <ToggleGroup
       type="single"
       spacing={0.01}
       className="flex-col w-full"
       onValueChange={(val) => {
-        if (val === "") clearSelection();
+        if (val === "") dispatch(clearSelection());
 
         const shape = shapes.find((i) => i.id === val);
         if (!shape) return;
 
-        setSelection(shape);
+        dispatch(setSelection(shape));
       }}
     >
-      {shapes.map((shape) => (
+      {shapes.map((shape, idx) => (
         <ToggleGroupItem
-          key={shape.id}
+          key={idx}
           value={shape.id}
           className="justify-between w-full data-[state=on]:bg-gray-200/50 data-[state=on]:border cursor-pointer group"
         >

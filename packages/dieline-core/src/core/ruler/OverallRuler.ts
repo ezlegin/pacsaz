@@ -1,7 +1,7 @@
-import { getDielineSettings } from "@repo/store/dieline/dielineSettings.store";
 import M, { IModel } from "makerjs";
 import Pacsaz from "../Pacsaz";
 import { Ruler } from "./Ruler";
+import { getDielineSettings } from "@repo/store/getters";
 
 export class OverallRuler extends Ruler {
   constructor(private trimModel: IModel) {

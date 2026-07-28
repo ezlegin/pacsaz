@@ -1,6 +1,6 @@
 import M, { IChain, IModel } from "makerjs";
 import Pacsaz from "../Pacsaz";
-import { getDevCTX } from "@repo/store/dieline/developerTools.store";
+import { getDevCTX } from "@repo/store/getters";
 
 export class Anchor implements IModel {
   constructor(main: IModel, trimModel: IModel) {

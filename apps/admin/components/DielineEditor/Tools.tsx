@@ -1,7 +1,5 @@
 "use client";
 
-import { useSelectionStore } from "@repo/store/app/selection.store";
-import { ISpec } from "@repo/store/editor/dielineSpec.store";
 import { Label } from "@repo/ui/components/label";
 import {
   ChevronUp,
@@ -27,6 +25,9 @@ import LinesProps from "./props/shapes/LinesProps";
 import PolygonProps from "./props/shapes/PolygonProps";
 import RectangleProps from "./props/shapes/RectangleProps";
 import SnapLockProps from "./props/models/SnapLockProps";
+import { ISpec } from "@repo/store/types";
+import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
+import { clearSelection } from "@repo/store/slices/selectionSlice";
 
 type EditorMode = {
   stack: ISpec.Stack;
@@ -46,7 +47,8 @@ const Tools = () => {
   ];
   const modelsList: ISpec.ModelsKey[] = ["glue", "door", "snapLock"];
 
-  const { selection, clearSelection } = useSelectionStore();
+  const selection = useAppSelector((s) => s.selection.selection);
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     switch (selection?.stack) {
@@ -67,7 +69,7 @@ const Tools = () => {
 
   const handleCloseEditor = () => {
     setEditorMode(null);
-    clearSelection();
+    dispatch(clearSelection());
   };
   const shapePropsComponents = {
     line: LineProps,
