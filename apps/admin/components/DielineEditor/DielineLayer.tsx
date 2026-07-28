@@ -44,6 +44,7 @@ import DielineSettingsForm from "../forms/DielineSettingsForm";
 import ModelLayers from "./layers/ModelLayers";
 import RulerLayers from "./layers/RulerLayers";
 import ShapeLayers from "./layers/ShapeLayers";
+import { nanoid } from "nanoid";
 
 export type ItemType = {
   ShapesSpec: ISpec.ShapesSpec;
@@ -86,7 +87,9 @@ const DielineLayer = ({
             dispatch(setShapeVisibility(shape.id));
             break;
           case "dup":
-            dispatch(addShape({ ...shape, key: shape.key + "-dup" })); //todo: it needs unique/new id
+            dispatch(
+              addShape({ ...shape, key: shape.key + "-dup", id: nanoid() }),
+            );
             break;
         }
         break;

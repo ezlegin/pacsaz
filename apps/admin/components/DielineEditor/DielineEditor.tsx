@@ -95,22 +95,22 @@ const DielineEditor = ({
               <TabsTrigger className="cursor-pointer" value="tools">
                 Tools
               </TabsTrigger>
-              <TabsTrigger className="cursor-pointer" value="variables">
-                Variables
-              </TabsTrigger>
               <TabsTrigger className="cursor-pointer" value="settings">
                 Effects
+              </TabsTrigger>
+              <TabsTrigger className="cursor-pointer" value="variables">
+                Variables
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="tools" className="space-y-3">
               <Tools />
             </TabsContent>
-            <TabsContent value="variables">
-              <Variables />
-            </TabsContent>
             <TabsContent value="settings">
               <Effects />
+            </TabsContent>
+            <TabsContent value="variables">
+              <Variables />
             </TabsContent>
           </Tabs>
 

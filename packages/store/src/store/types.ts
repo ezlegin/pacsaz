@@ -64,12 +64,10 @@ export namespace ISpec {
       startPt: Point;
     };
     isClosed: boolean;
-    filletRadius?: string;
-    indices?: string;
     isRelative: boolean;
   } & Generals & { type: "lines" };
 
-  export type RectangleSpec = Record<"width" | "height" | "radius", string> & {
+  export type RectangleSpec = Record<"width" | "height", string> & {
     deleteSide?: Direction;
   } & Generals & { type: "rectangle" };
 

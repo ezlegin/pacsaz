@@ -7,6 +7,9 @@ import {
   rectangleFormSchema,
 } from "@/lib/validationSchema/PropsSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
+import { addShape, updateShape } from "@repo/store/slices/shapesSlice";
+import { ISpec } from "@repo/store/types";
 import {
   Accordion,
   AccordionContent,
@@ -31,9 +34,7 @@ import { z } from "zod";
 import PropsHeader from "./PropsHeader";
 import { DupOperationEditor } from "./shapes/DupOperationEditor";
 import PointInput from "./shapes/PointInput";
-import { ISpec } from "@repo/store/types";
-import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
-import { addShape, updateShape } from "@repo/store/slices/shapesSlice";
+import { nanoid } from "nanoid";
 
 const getShapeSchema = (shapeKey: ISpec.ShapesKey) => {
   const schemas: Record<ISpec.ShapesKey, any> = {
@@ -79,30 +80,31 @@ function ShapesPropsProvider<T extends ISpec.ShapesSpec>({
       height: "",
       length: "",
       width: "",
-      radius: "",
       sides: "5",
+      radius: "",
       isRelative: true,
       pts: undefined,
+      absolutePts: [["", ""]],
       relativePts: {
         pts: [
-          ["", undefined, "up"],
-          ["", undefined, "right"],
+          ["0", "0", "up"],
+          ["0", "0", "right"],
         ],
         startPt: ["0", "0"],
       },
       isClosed: false,
-      filletRadius: "",
-      indices: "",
       startAngle: "",
       endAngle: "",
 
-      id: "0",
+      id: nanoid(),
       layer: "trim",
       origin: ["0", "0"],
       hidden: false,
     },
     mode: "onChange",
   });
+
+  console.log("form", form.getValues());
 
   const onSubmit = (data: FormType) => {
     if (isUpdateType) {

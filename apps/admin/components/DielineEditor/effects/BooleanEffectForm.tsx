@@ -27,6 +27,7 @@ import { BooleanFormType } from "./Effects";
 import { ISpec, IEffect } from "@repo/store/types";
 import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
 import { addEffect, effectsSelectors } from "@repo/store/slices/effectsSlice";
+import { nanoid } from "nanoid";
 
 const BooleanEffectForm = ({
   closeForm,
@@ -57,7 +58,7 @@ const BooleanEffectForm = ({
         originModelId: data.originModelId,
         targetModelId: data.targetModelId,
         hidden: false,
-        id: "",
+        id: nanoid(),
       }),
     );
 

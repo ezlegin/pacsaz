@@ -51,19 +51,6 @@ const RectangleProps = ({ form }: Props) => {
 
       <FormField
         control={form.control}
-        name="radius"
-        render={({ field }) => (
-          <FormItem className="flex justify-between">
-            <FormLabel>Radius</FormLabel>
-            <FormControl>
-              <Input {...field} placeholder="12 px" className="h-9" />
-            </FormControl>
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={form.control}
         name="deleteSide"
         render={({ field }) => (
           <FormItem className="flex justify-between items-center">

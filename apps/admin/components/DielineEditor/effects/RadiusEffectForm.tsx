@@ -19,6 +19,7 @@ import { RadiusFormType } from "./Effects";
 import { ISpec, IEffect } from "@repo/store/types";
 import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
 import { addEffect, effectsSelectors } from "@repo/store/slices/effectsSlice";
+import { nanoid } from "nanoid";
 
 const RadiusEffectForm = ({
   closeForm,
@@ -45,7 +46,7 @@ const RadiusEffectForm = ({
         radius: +data.radius,
         targetModelId: data.targetModelId,
         hidden: false,
-        id: "",
+        id: nanoid(),
       }),
     );
 
@@ -54,8 +55,6 @@ const RadiusEffectForm = ({
 
     stopLoading();
   };
-
-  const flattedShapes = Object.values(shapes).flat();
 
   return (
     <Form {...form}>
@@ -121,19 +120,20 @@ const RadiusEffectForm = ({
                 variant={"outline"}
                 type="single"
                 className="flex-col items-start"
-                onValueChange={(val) => field.onChange(val)}
+                onValueChange={(val) => {
+                  console.log(val);
+                  field.onChange(val);
+                }}
               >
-                {(effectOn === "shape" ? flattedShapes : effects).map(
-                  (shape, idx) => (
-                    <ToggleGroupItem
-                      className="data-[state=on]:bg-muted-foreground/20"
-                      key={idx}
-                      value={shape.id}
-                    >
-                      {shape.key}
-                    </ToggleGroupItem>
-                  ),
-                )}
+                {(effectOn === "shape" ? shapes : effects).map((item, idx) => (
+                  <ToggleGroupItem
+                    className="data-[state=on]:bg-muted-foreground/20"
+                    key={idx}
+                    value={item.id}
+                  >
+                    {item.key}
+                  </ToggleGroupItem>
+                ))}
               </ToggleGroup>
             </FormItem>
           )}

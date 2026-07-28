@@ -22,10 +22,10 @@ import {
   Minus,
   Plus,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
-import PropsFormContent from "./PropsFormContent";
 import PointInput from "./PointInput";
+import PropsFormContent from "./PropsFormContent";
 
 interface Props {
   form: UseFormReturn<ISpec.LinesSpec, any, ISpec.LinesSpec>;
@@ -33,7 +33,6 @@ interface Props {
 
 const LinesProps = ({ form }: Props) => {
   const isRelative = form.watch("isRelative");
-  const [applyRadius, setApplyRadius] = useState(!!form.watch("filletRadius"));
 
   useEffect(() => {
     form.setValue(isRelative ? "absolutePts" : "relativePts", undefined);
@@ -84,59 +83,6 @@ const LinesProps = ({ form }: Props) => {
           </FormItem>
         )}
       />
-
-      <div className="space-y-1">
-        <div className="flex justify-between">
-          <Label>Radius</Label>
-          <Switch checked={applyRadius} onCheckedChange={setApplyRadius} />
-        </div>
-        {applyRadius && (
-          <div className="flex gap-3">
-            <FormField
-              control={form.control}
-              name={`filletRadius`}
-              render={({ field }) => (
-                <FormItem>
-                  <div className="relative">
-                    <span className="text-xs text-muted-foreground absolute translate-y-2.5 pl-3">
-                      Amount
-                    </span>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        autoFocus
-                        autoCapitalize="characters"
-                        placeholder="0"
-                        className="h-9 pl-16"
-                      />
-                    </FormControl>
-                  </div>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name={`indices`}
-              render={({ field }) => (
-                <FormItem>
-                  <div className="relative">
-                    <span className="text-xs text-muted-foreground absolute translate-y-2.5 pl-3">
-                      Indices
-                    </span>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="0,1,2"
-                        className="h-9 pl-16"
-                      />
-                    </FormControl>
-                  </div>
-                </FormItem>
-              )}
-            />
-          </div>
-        )}
-      </div>
     </PropsFormContent>
   );
 };

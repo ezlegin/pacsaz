@@ -31,10 +31,10 @@ export default function ShapeLayers({
       type="single"
       spacing={0.01}
       className="flex-col w-full"
-      onValueChange={(val) => {
-        if (val === "") dispatch(clearSelection());
+      onValueChange={(shapeId) => {
+        if (shapeId === "") dispatch(clearSelection());
 
-        const shape = shapes.find((i) => i.id === val);
+        const shape = shapes.find((i) => i.id === shapeId);
         if (!shape) return;
 
         dispatch(setSelection(shape));

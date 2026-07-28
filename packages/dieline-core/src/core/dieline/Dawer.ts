@@ -1,5 +1,4 @@
 import { ISpec, IVar, IEffect } from "@repo/store/types";
-
 import M, { IModel } from "makerjs";
 import { evaluate } from "mathjs";
 import { toMm } from "../../utils/sizeConvertor";
@@ -27,30 +26,14 @@ export class Drawer extends Dieline {
   private lines(lines: ISpec.LinesSpec) {
     this.$pusher(
       lines,
-      (
-        {
-          absolutePts,
-          relativePts,
-          isRelative,
-          filletRadius,
-          indices,
-          isClosed,
-        },
-        scope,
-      ) => {
-        const options = {
-          closed: isClosed,
-          filletRadius: filletRadius ? toMm(+filletRadius) : undefined,
-          indices: indices ? indices.split(",").map((i) => +i) : undefined,
-        };
-
+      ({ absolutePts, relativePts, isRelative, isClosed }, scope) => {
         if (isRelative) {
           if (!relativePts) throw new Error("Points Not Avaiable.");
 
           const pb = new Pacsaz.point.Builder([
             this.$parseMathStr(relativePts.startPt[0], scope),
             this.$parseMathStr(relativePts.startPt[1], scope),
-          ]);
+          ]); //todo: this doesn't work.
 
           for (const pt of relativePts.pts) {
             const direction = pt[2];
@@ -76,34 +59,32 @@ export class Drawer extends Dieline {
             }
           }
 
-          return new Pacsaz.shapes.Lines(pb.build(), options);
+          return new Pacsaz.shapes.Lines(pb.build(), {
+            closed: isClosed,
+          });
         } else {
           if (!absolutePts) throw new Error("Points Not Avaiable.");
           const parsedPts = absolutePts.map((pt) => [
             this.$parseMathStr(pt[0], scope),
             this.$parseMathStr(pt[1], scope),
           ]);
-          return new Pacsaz.shapes.Lines(parsedPts, options);
+          return new Pacsaz.shapes.Lines(parsedPts, { closed: isClosed });
         }
       },
     );
   }
 
   private rectangle(rectangle: ISpec.RectangleSpec) {
-    this.$pusher(
-      rectangle,
-      ({ id, height, width, radius, deleteSide }, scope) => {
-        return new Pacsaz.shapes.Rectangle(
-          id,
-          this.$parseMathStr(width, scope),
-          this.$parseMathStr(height, scope),
-          {
-            radius: toMm(+radius),
-            deleteSide,
-          },
-        );
-      },
-    );
+    this.$pusher(rectangle, ({ id, height, width, deleteSide }, scope) => {
+      return new Pacsaz.shapes.Rectangle(
+        id,
+        this.$parseMathStr(width, scope),
+        this.$parseMathStr(height, scope),
+        {
+          deleteSide,
+        },
+      );
+    });
   }
 
   private circle(circle: ISpec.CircleSpec) {
@@ -299,7 +280,8 @@ export class Drawer extends Dieline {
     }
 
     for (const [id, m] of this.tempModels) {
-      this.$pushShape(m, id, m.layer);
+      const model: IModel = { models: m.models }; // simplify model
+      this.$pushShape(model, id, m.layer);
     }
 
     for (const model of this.specs.models) {

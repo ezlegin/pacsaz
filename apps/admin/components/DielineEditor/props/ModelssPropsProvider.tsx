@@ -24,6 +24,7 @@ import PointInput from "./shapes/PointInput";
 import { ISpec } from "@repo/store/types";
 import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
 import { addModel, updateModel } from "@repo/store/slices/modelsSlice";
+import { nanoid } from "nanoid";
 
 const getModelSchema = (modelKey: ISpec.ModelsKey) => {
   const schemas: Record<ISpec.ModelsKey, any> = {
@@ -69,7 +70,7 @@ function ModelsPropsProvider<T extends ISpec.ModelsSpec>({
         y: false,
       },
 
-      id: "0",
+      id: nanoid(),
       origin: ["0", "0"],
       hidden: false,
     },

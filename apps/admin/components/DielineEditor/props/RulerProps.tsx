@@ -20,6 +20,7 @@ import {
   rulersSelectors,
   updateRuler,
 } from "@repo/store/slices/rulersSlice";
+import { nanoid } from "nanoid";
 
 type FormType = z.infer<typeof rulerFormSchema>;
 
@@ -35,7 +36,7 @@ const RulerProps = ({
   const form = useForm<FormType>({
     resolver: zodResolver(rulerFormSchema),
     defaultValues: (selection as ISpec.Ruler) ?? {
-      id: "",
+      id: nanoid(),
       stack: "ruler",
       hidden: false,
       from: ["0", "length / 4"],

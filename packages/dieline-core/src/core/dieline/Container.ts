@@ -1,10 +1,10 @@
 import M, { IModel } from "makerjs";
 import Pacsaz from "../Pacsaz";
-import { containerSize } from "../../data/consts";
 import { getDevCTX } from "@repo/store/getters";
 
 export class Container implements IModel {
   constructor(trimModel: IModel) {
+    const containerSize = 35;
     if (!trimModel.models) {
       return;
     }
