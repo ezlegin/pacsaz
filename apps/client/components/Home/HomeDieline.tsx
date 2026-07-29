@@ -4,7 +4,7 @@ import { DIMENSIONS } from "@/data/consts";
 import { DielineType } from "@/data/types";
 import { tuckEnd } from "@/public";
 import { useDielineGenerator } from "@repo/dieline-core/hooks/useDielineGenerator";
-import { useAppDispatch } from "@repo/store/hooks";
+import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
 import { setDeveloperTool } from "@repo/store/slices/developerToolsSlice";
 import { IEffect, ISpec, IVar } from "@repo/store/types";
 import { Card } from "@repo/ui/components/card";
@@ -36,9 +36,10 @@ const HomeDieline = ({ dieline }: { dieline: DielineType | null }) => {
       </div>
     );
 
-  dieline.settings.width = 80;
-  dieline.settings.length = 130;
-  dieline.settings.height = 40;
+  const { minDimension, maxDimension } = useAppSelector(
+    (s) => s.dielineSettings,
+  );
+
   const specs = useMemo(
     () => JSON.parse(dieline.specification) as ISpec.Specs,
     [dieline.specification],
@@ -88,7 +89,8 @@ const HomeDieline = ({ dieline }: { dieline: DielineType | null }) => {
           <DimensionInput
             key={key}
             label={label}
-            min={dieline.settings[key]}
+            min={minDimension[key]}
+            max={maxDimension[key]}
             dimKey={key}
             isRendering={isRendering}
           />

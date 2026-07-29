@@ -129,6 +129,7 @@ export const dielineMetadataFormSchema = z.object({
   bleed: z.number(),
   defaultDimensions: dimension,
   minDimensions: dimension,
+  maxDimensions: dimension,
   dimensionTypes: z.string(),
   materials: z.string(),
   defaultMaterial: z.string(),

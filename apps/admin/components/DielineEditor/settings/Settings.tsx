@@ -16,8 +16,16 @@ export type SetSetting = <K extends keyof DielineSettings>(
 ) => void;
 
 const Settings = ({ isRendering }: { isRendering: boolean }) => {
-  const { bleed, dimension, dimensionType, format, materials, dimensionTypes } =
-    useAppSelector((s) => s.dielineSettings);
+  const {
+    bleed,
+    dimension,
+    dimensionType,
+    format,
+    materials,
+    dimensionTypes,
+    minDimension,
+    maxDimension,
+  } = useAppSelector((s) => s.dielineSettings);
   const dispatch = useAppDispatch();
 
   const setSetting: SetSetting = (key, value) => {
@@ -32,7 +40,8 @@ const Settings = ({ isRendering }: { isRendering: boolean }) => {
             <DimensionInput
               key={key}
               label={key}
-              min={30}
+              min={minDimension[key]}
+              max={maxDimension[key]}
               dimKey={key}
               isRendering={isRendering}
               dimension={dimension}

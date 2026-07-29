@@ -5,10 +5,12 @@ import { Input } from "@repo/ui/components/input";
 import { Spinner } from "@repo/ui/components/spinner";
 import { useEffect, useState } from "react";
 import { SetSetting } from "./Settings";
+import { clamp } from "@repo/lib/utils/clamp";
 
 export function DimensionInput({
   label,
   min,
+  max,
   dimKey,
   isRendering,
   setSetting,
@@ -16,6 +18,7 @@ export function DimensionInput({
 }: {
   label: string;
   min: number;
+  max?: number;
   dimKey: DimensionKey;
   isRendering: boolean;
   dimension: Dimensions;
@@ -34,14 +37,9 @@ export function DimensionInput({
 
   const offsets = resolveOffsets();
 
-  function clamp(value: number, min: number) {
-    if (value < min) return min;
-    return value;
-  }
-
   const handleSubmit = () => {
     setBlurredInput(dimKey);
-    const clamped = clamp(localValue ?? 0, min);
+    const clamped = clamp(localValue ?? 0, min, max);
     setLocalValue(clamped);
 
     setSetting("dimension", {

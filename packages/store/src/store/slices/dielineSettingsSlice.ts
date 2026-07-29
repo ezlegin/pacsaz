@@ -14,6 +14,7 @@ const initialState: DielineSettings = {
     resolved: { width: 0, length: 0, height: 0 },
   },
   minDimension: { width: 0, length: 0, height: 0 },
+  maxDimension: { width: 0, length: 0, height: 0 },
   dimensionTypes: [],
   bleed: 0,
   dimensionType: "manufacture",

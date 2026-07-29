@@ -22,6 +22,9 @@ interface Dieline {
   minWidth: number;
   minLength: number;
   minHeight: number;
+  maxWidth: number;
+  maxLength: number;
+  maxHeight: number;
   settings: DielineSettings;
 }
 
@@ -91,6 +94,11 @@ export function useDielineGenerator(
           width: dieline.minWidth,
           height: dieline.minHeight,
           length: dieline.minLength,
+        },
+        maxDimension: {
+          width: dieline.maxWidth,
+          height: dieline.maxHeight,
+          length: dieline.maxLength,
         },
         material: material,
         materials: mats,

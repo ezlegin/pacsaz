@@ -94,6 +94,9 @@ model Dieline {
   minWidth        Float
   minLength       Float
   minHeight       Float
+  maxWidth        Float
+  maxLength       Float
+  maxHeight       Float
 
   categoryByUsage DielineCategoryByUsage[]
   categoryByModel DielineCategoryByModel[]

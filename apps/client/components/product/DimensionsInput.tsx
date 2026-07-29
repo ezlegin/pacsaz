@@ -1,4 +1,3 @@
-import { clamp } from "@/utils/clamp";
 import { resolveDimension } from "@repo/dieline-core/utils/dimensionResolver";
 import { resolveOffsets } from "@repo/dieline-core/utils/offsetResolver";
 import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
@@ -7,15 +6,18 @@ import { DimensionKey } from "@repo/store/types";
 import { Input } from "@repo/ui/components/input";
 import { Spinner } from "@repo/ui/components/spinner";
 import { useEffect, useState } from "react";
+import { clamp } from "@repo/lib/utils/clamp";
 
 export function DimensionInput({
   label,
   min,
+  max,
   dimKey,
   isRendering,
 }: {
   label: string;
   min: number;
+  max?: number;
   dimKey: DimensionKey;
   isRendering: boolean;
 }) {
@@ -35,7 +37,7 @@ export function DimensionInput({
 
   const handleSubmit = () => {
     setBlurredInput(dimKey);
-    const clamped = clamp(localValue ?? 0, min);
+    const clamped = clamp(localValue ?? 0, min, max);
     setLocalValue(clamped);
 
     dispatch(

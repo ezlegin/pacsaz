@@ -62,6 +62,11 @@ const DielineSettingsForm = ({
         height: dieline?.minHeight ?? 30,
         length: dieline?.minLength ?? 30,
       },
+      maxDimensions: {
+        width: dieline?.maxWidth ?? 300,
+        height: dieline?.maxHeight ?? 300,
+        length: dieline?.maxLength ?? 300,
+      },
       title: dieline?.title ?? "",
       slug: dieline?.slug ?? "",
       dimensionTypes: dieline?.dimensionTypes ?? "manufacture,inner,outer",
@@ -324,6 +329,45 @@ const DielineSettingsForm = ({
               <FormField
                 control={form.control}
                 name="minDimensions.height"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <NumberInput field={field} placeHolder="Height" />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <Label>Max Dimensions</Label>
+            <div className="grid grid-cols-3 gap-3">
+              <FormField
+                control={form.control}
+                name="maxDimensions.width"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <NumberInput field={field} placeHolder="Width" />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="maxDimensions.length"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <NumberInput field={field} placeHolder="Length" />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="maxDimensions.height"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>

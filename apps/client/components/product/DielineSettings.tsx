@@ -49,6 +49,7 @@ export default function DielineSettings({ slug, isRendering, user }: Props) {
     dimension,
     minDimension,
     dimensionTypes,
+    maxDimension,
   } = useAppSelector((s) => s.dielineSettings);
   const dispatch = useAppDispatch();
 
@@ -81,6 +82,7 @@ export default function DielineSettings({ slug, isRendering, user }: Props) {
                 key={key}
                 label={label}
                 min={minDimension[key]}
+                max={maxDimension[key]}
                 dimKey={key}
                 isRendering={isRendering}
               />

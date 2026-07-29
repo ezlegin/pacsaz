@@ -23,6 +23,7 @@ export const createDieline = async (data: DielineMetadataFormType) => {
     dielineImage,
     modelImage,
     defaultMaterial,
+    maxDimensions,
   } = data;
 
   try {
@@ -39,6 +40,9 @@ export const createDieline = async (data: DielineMetadataFormType) => {
         minHeight: minDimensions.height,
         minLength: minDimensions.length,
         minWidth: minDimensions.width,
+        maxHeight: maxDimensions.height,
+        maxLength: maxDimensions.length,
+        maxWidth: maxDimensions.width,
         dimensionTypes,
         materials,
         defaultMaterial,
@@ -129,6 +133,7 @@ export const updateDieline = async (
     dielineImage,
     modelImage,
     defaultMaterial,
+    maxDimensions,
   } = data;
 
   try {
@@ -145,6 +150,9 @@ export const updateDieline = async (
         minHeight: minDimensions.height,
         minLength: minDimensions.length,
         minWidth: minDimensions.width,
+        maxHeight: maxDimensions.height,
+        maxLength: maxDimensions.length,
+        maxWidth: maxDimensions.width,
         materials,
         dimensionTypes,
         defaultMaterial,

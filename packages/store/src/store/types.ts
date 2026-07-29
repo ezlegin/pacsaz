@@ -194,6 +194,7 @@ export type Dimensions = Record<"raw" | "resolved", Dimension>;
 export type DielineSettings = {
   dimension: Dimensions;
   minDimension: Dimension;
+  maxDimension: Dimension;
   material: MaterialValue;
   materials: MaterialValue[];
   bleed: number;

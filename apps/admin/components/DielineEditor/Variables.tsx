@@ -20,6 +20,7 @@ import { Label } from "@repo/ui/components/label";
 import { Separator } from "@repo/ui/components/separator";
 import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import { Minus, Plus, Trash } from "lucide-react";
+import { nanoid } from "nanoid";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -44,7 +45,7 @@ const Variables = () => {
   const form = useForm<FormType>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      id: "",
+      id: nanoid(),
       name: "",
       value: "",
       conditions: undefined,
@@ -126,7 +127,7 @@ const Variables = () => {
     if (selectedVar) {
       form.reset(selectedVar);
     } else {
-      form.reset({ id: "", name: "", value: "", conditions: [] });
+      form.reset({ id: nanoid(), name: "", value: "", conditions: [] });
     }
   }, [selectedVar]);
 
