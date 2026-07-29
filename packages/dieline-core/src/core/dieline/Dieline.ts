@@ -68,7 +68,6 @@ export abstract class Dieline {
       bleed: new Bleed(this.trimModel, this.settings.bleed),
       container: new Pacsaz.layer.Container(this.trimModel),
       dieline,
-      ruler: this.rulerModel,
       anchor: new Pacsaz.layer.Anchor(this.main, this.trimModel),
     };
 
@@ -78,9 +77,6 @@ export abstract class Dieline {
   }
 
   private buildRulers() {
-    // Reset
-    this.rulerModel = { layer: "ruler" };
-
     Pacsaz.shape.push(this.main, "ruler", this.rulerModel, "ruler");
   }
 
@@ -128,14 +124,6 @@ export abstract class Dieline {
         Pacsaz.shape.push(this.foldModel, m, folds);
       }
     }
-  }
-
-  protected $pushShape(
-    model: IModel,
-    key: string,
-    layer: "trim" | "fold" | "perf" = "trim",
-  ) {
-    Pacsaz.shape.push(this[`${layer}Model`], key, model);
   }
 
   protected $pushRuler(models: IModelMap) {

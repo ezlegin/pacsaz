@@ -6,6 +6,9 @@ import Pacsaz from "../Pacsaz";
 import { Shape } from "../shapes/Shape";
 import { Dieline } from "./Dieline";
 
+type TempModel = Shape & { layer: ISpec.Layer };
+type Chain = ReturnType<typeof M.model.findSingleChain>;
+
 export class Drawer extends Dieline {
   constructor(
     private specs: ISpec.Specs,
@@ -14,7 +17,8 @@ export class Drawer extends Dieline {
   ) {
     super();
   }
-  tempModels = new Map<string, Shape & { layer: ISpec.Layer }>();
+
+  tempModels = new Map<string, TempModel>();
 
   //! ------------------------ Shapes ------------------------
   private line(line: ISpec.LineSpec) {
@@ -128,67 +132,7 @@ export class Drawer extends Dieline {
     });
   }
 
-  //! ------------------------ Models ------------------------
-  private glue(glue: ISpec.GlueSpec) {
-    this.$pusher(glue, ({ from, to }, scope) => {
-      const glueFrom = [
-        this.$parseMathStr(from[0], scope),
-        this.$parseMathStr(from[1], scope),
-      ];
-      const glueTo = [
-        this.$parseMathStr(to[0], scope),
-        this.$parseMathStr(to[1], scope),
-      ];
-      return new Pacsaz.models.Glue(glueFrom, glueTo);
-    });
-  }
-
-  private door(door: ISpec.DoorSpec) {
-    this.$pusher(door, ({ dustSide, mirror, indentAt }) => {
-      const door = new Pacsaz.models.Door(dustSide, indentAt);
-      if (mirror.x || mirror.y) {
-        door.mirror(mirror.x, mirror.y);
-      }
-      return door;
-    });
-  }
-
-  private snapLock(snapLock: ISpec.SnapLockSpec) {
-    this.$pusher(snapLock, ({}) => {
-      return new Pacsaz.models.SnapLock();
-    });
-  }
-
-  //! ------------------------ Rulers ------------------------
-  private drawRulers() {
-    const rulers = this.$checkExistance(this.specs.rulers);
-    if (rulers) {
-      let models: Record<string, IModel> = {
-        overall: new Pacsaz.ruler.OverallRuler(this.trimModel),
-      };
-      for (const r of rulers) {
-        if (r.hidden) continue;
-
-        const from = [
-          this.$parseMathStr(r.from[0], this.scope),
-          this.$parseMathStr(r.from[1], this.scope),
-        ];
-        const to = [
-          this.$parseMathStr(r.to[0], this.scope),
-          this.$parseMathStr(r.to[1], this.scope),
-        ];
-        const value = this.$parseMathStr(r.value, this.scope);
-        const offset = this.$parseMathStr(r.offset, this.scope);
-
-        const model = new Pacsaz.ruler.DielineRuler(from, to, value, offset);
-        models[r.key] = model;
-      }
-
-      this.$pushRuler(models);
-    }
-  }
-
-  protected override drawer() {
+  private drawShapes() {
     for (const shape of this.specs.shapes) {
       switch (shape.type) {
         case "line":
@@ -211,115 +155,40 @@ export class Drawer extends Dieline {
           break;
       }
     }
+  }
 
-    if (this.effects.length > 0) {
-      for (const e of this.effects) {
-        if (e.hidden) continue;
-        switch (e.type) {
-          case "boolean": {
-            const originModel = M.model.clone(
-              this.tempModels.get(e.originModelId)!,
-            );
-            const targetModel = M.model.clone(
-              this.tempModels.get(e.targetModelId)!,
-            );
+  //! ------------------------ Models ------------------------
+  private glue(glue: ISpec.GlueSpec) {
+    this.$pusher(glue, ({ from, to }, scope) => {
+      const glueFrom = [
+        this.$parseMathStr(from[0], scope),
+        this.$parseMathStr(from[1], scope),
+      ];
+      const glueTo = [
+        this.$parseMathStr(to[0], scope),
+        this.$parseMathStr(to[1], scope),
+      ];
+      return new Pacsaz.models.Glue(glueFrom, glueTo);
+    });
+  }
 
-            this.tempModels.delete(e.originModelId)!;
-            this.tempModels.delete(e.targetModelId)!;
-
-            let combinedModel: IModel;
-            switch (e.booleanType) {
-              case "union":
-                combinedModel = M.model.combineUnion(
-                  originModel!,
-                  targetModel!,
-                );
-                break;
-              case "subtract":
-                combinedModel = M.model.combineSubtraction(
-                  originModel!,
-                  targetModel!,
-                );
-                break;
-              case "intersect":
-                combinedModel = M.model.combineIntersection(
-                  originModel!,
-                  targetModel!,
-                );
-                break;
-            }
-
-            this.tempModels.set(
-              e.id,
-              Object.assign(combinedModel, {
-                layer: originModel.layer,
-              }) as Shape & { layer: ISpec.Layer },
-            );
-            break;
-          }
-          case "radius": {
-            const targetModel = M.model.clone(
-              this.tempModels.get(e.targetModelId)!,
-            );
-            this.tempModels.delete(e.targetModelId)!;
-            let combined: IModel = {};
-            if (e.indices.length > 0) {
-              const chain = M.model.findSingleChain(targetModel);
-              const links = chain.links;
-              const n = links.length;
-              const fillets: IModel = { paths: {} };
-
-              for (const { indice, radius } of e.indices) {
-                const vertexIndex = Number(indice);
-                if (Number.isNaN(vertexIndex)) continue;
-
-                const nextIndex = vertexIndex + 1;
-                if (!chain.endless && nextIndex >= n) continue;
-
-                const path1 = links[vertexIndex % n]!.walkedPath.pathContext;
-                const path2 = links[nextIndex % n]!.walkedPath.pathContext;
-
-                const filletArc = M.path.fillet(path1, path2, toMm(+radius));
-                if (filletArc) {
-                  fillets.paths![`fillet_${indice}`] = filletArc;
-                }
-              }
-
-              combined = {
-                models: {
-                  targetModel,
-                  fillets,
-                },
-              };
-            } else {
-              const chain = M.model.findSingleChain(targetModel);
-              const fillet = M.chain.fillet(chain, toMm(e.radius));
-
-              combined = {
-                models: {
-                  targetModel,
-                  fillet,
-                },
-              };
-            }
-
-            this.tempModels.set(
-              e.id,
-              Object.assign(combined, {
-                layer: targetModel.layer,
-              }) as Shape & { layer: ISpec.Layer },
-            );
-            break;
-          }
-        }
+  private door(door: ISpec.DoorSpec) {
+    this.$pusher(door, ({ dustSide, mirror, indentAt }) => {
+      const doorModel = new Pacsaz.models.Door(dustSide, indentAt);
+      if (mirror.x || mirror.y) {
+        doorModel.mirror(mirror.x, mirror.y);
       }
-    }
+      return doorModel;
+    });
+  }
 
-    for (const [id, m] of this.tempModels) {
-      const model: IModel = { models: m.models }; // simplify model
-      this.$pushShape(model, id, m.layer);
-    }
+  private snapLock(snapLock: ISpec.SnapLockSpec) {
+    this.$pusher(snapLock, () => {
+      return new Pacsaz.models.SnapLock();
+    });
+  }
 
+  private drawModels() {
     for (const model of this.specs.models) {
       switch (model.type) {
         case "glue":
@@ -333,7 +202,134 @@ export class Drawer extends Dieline {
           break;
       }
     }
+  }
 
+  //! ------------------------ Effects ------------------------
+  private readonly booleanOps: Record<
+    IEffect.BooleanEffectSpec["booleanType"],
+    (a: IModel, b: IModel) => IModel
+  > = {
+    union: M.model.combineUnion,
+    subtract: M.model.combineSubtraction,
+    intersect: M.model.combineIntersection,
+  };
+
+  private applyBooleanEffect(effect: IEffect.BooleanEffectSpec) {
+    const origin = this.$consumeTempModel(effect.originModelId);
+    const target = this.$consumeTempModel(effect.targetModelId);
+
+    const combine = this.booleanOps[effect.booleanType];
+    const result = combine(origin, target);
+
+    this.$setTempModel(effect.id, result, origin.layer);
+  }
+
+  private applyRadiusEffect(effect: IEffect.RadiusEffectSpec) {
+    const target = this.$consumeTempModel(effect.targetModelId);
+    const chain = M.model.findSingleChain(target);
+
+    const combined: IModel =
+      effect.indices.length > 0
+        ? {
+            models: {
+              targetModel: target,
+              fillets: this.$filletAtIndices(chain, effect.indices),
+            },
+          }
+        : {
+            models: {
+              targetModel: target,
+              fillet: M.chain.fillet(chain, toMm(effect.radius)),
+            },
+          };
+
+    this.$setTempModel(effect.id, combined, target.layer);
+  }
+
+  private $filletAtIndices(
+    chain: Chain,
+    indices: IEffect.RadiusEffectSpec["indices"],
+  ): IModel {
+    const fillets: IModel = { paths: {} };
+    const { links, endless } = chain;
+    const n = links.length;
+
+    for (const { indice, radius } of indices) {
+      const vertexIndex = Number(indice);
+      if (Number.isNaN(vertexIndex)) continue;
+
+      const nextIndex = vertexIndex + 1;
+      if (!endless && nextIndex >= n) continue;
+
+      const path1 = links[vertexIndex % n]!.walkedPath.pathContext;
+      const path2 = links[nextIndex % n]!.walkedPath.pathContext;
+
+      const filletArc = M.path.fillet(path1, path2, toMm(+radius));
+      if (filletArc) {
+        fillets.paths![`fillet_${indice}`] = filletArc;
+      }
+    }
+
+    return fillets;
+  }
+
+  private applyEffects() {
+    for (const effect of this.effects) {
+      if (effect.hidden) continue;
+      switch (effect.type) {
+        case "boolean":
+          this.applyBooleanEffect(effect);
+          break;
+        case "radius":
+          this.applyRadiusEffect(effect);
+          break;
+      }
+    }
+  }
+
+  /** Pushes every remaining temp model onto its target layer's model. */
+  private flushTempModels() {
+    for (const [id, m] of this.tempModels) {
+      const model: IModel = { models: m.models }; // simplify model
+      Pacsaz.shape.push(this[`${m.layer}Model`], id, model);
+    }
+  }
+
+  //! ------------------------ Rulers ------------------------
+  private drawRulers() {
+    const rulers = this.$checkExistance(this.specs.rulers);
+    if (rulers) {
+      let models: Record<string, IModel> = {
+        overall: new Pacsaz.ruler.OverallRuler(this.trimModel),
+      };
+      for (const r of rulers) {
+        if (r.hidden) continue;
+        const from = [
+          this.$parseMathStr(r.from[0], this.scope),
+          this.$parseMathStr(r.from[1], this.scope),
+        ];
+        const to = [
+          this.$parseMathStr(r.to[0], this.scope),
+          this.$parseMathStr(r.to[1], this.scope),
+        ];
+        const value = this.$parseMathStr(r.value, this.scope);
+        const offset = this.$parseMathStr(r.offset, this.scope);
+        const model = new Pacsaz.ruler.DielineRuler(from, to, value, offset);
+        models[r.key] = model;
+      }
+      this.$pushRuler(models);
+    }
+  }
+
+  protected override drawer() {
+    this.drawShapes();
+
+    if (this.effects.length > 0) {
+      this.applyEffects();
+    }
+
+    this.flushTempModels();
+    this.drawModels();
     this.drawRulers();
   }
 
@@ -377,21 +373,23 @@ export class Drawer extends Dieline {
               if (op.x || op.y) model.mirror(op.x, op.y);
               break;
 
-            case "move":
+            case "move": {
               const move = {
                 x: this.$parseMathStr(op.value[0], dupScope),
                 y: this.$parseMathStr(op.value[1], dupScope),
               };
               model.move([move.x, move.y]);
               break;
+            }
 
-            case "moveTo":
+            case "moveTo": {
               const moveTo = {
                 x: this.$parseMathStr(op.value[0], dupScope),
                 y: this.$parseMathStr(op.value[1], dupScope),
               };
               model.moveTo([moveTo.x, moveTo.y]);
               break;
+            }
 
             case "rotate":
               model.rotate(+op.value);
@@ -412,10 +410,24 @@ export class Drawer extends Dieline {
     }
   }
 
+  /** Retrieves a temp model by id, removes it from the store, and returns a clone. Throws if not found. */
+  private $consumeTempModel(id: string): TempModel {
+    const model = this.tempModels.get(id);
+    if (!model) {
+      throw new Error(`Temp model "${id}" was not found.`);
+    }
+    this.tempModels.delete(id);
+    return M.model.clone(model) as TempModel;
+  }
+
+  private $setTempModel(id: string, model: IModel, layer: ISpec.Layer) {
+    this.tempModels.set(id, Object.assign(model, { layer }) as TempModel);
+  }
+
   private $checkExistance<T extends ISpec.Shapes | ISpec.Models | ISpec.Rulers>(
-    shapes: T | undefined,
+    item: T | undefined,
   ) {
-    if (shapes && shapes.length > 0) return shapes;
+    if (item && item.length > 0) return item;
   }
 
   private get scope() {

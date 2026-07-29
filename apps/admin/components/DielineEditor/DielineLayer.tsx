@@ -109,7 +109,7 @@ const DielineLayer = ({
         const ruler = item as ISpec.Ruler;
         switch (type) {
           case "delete":
-            removeRuler(ruler.id);
+            dispatch(removeRuler(ruler.id));
             dispatch(clearSelection());
             break;
           case "visibility":
