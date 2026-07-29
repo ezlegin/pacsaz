@@ -4,15 +4,16 @@ import { DIMENSIONS } from "@/data/consts";
 import { DielineType } from "@/data/types";
 import { tuckEnd } from "@/public";
 import { useDielineGenerator } from "@repo/dieline-core/hooks/useDielineGenerator";
+import { useAppDispatch } from "@repo/store/hooks";
+import { setDeveloperTool } from "@repo/store/slices/developerToolsSlice";
+import { IEffect, ISpec, IVar } from "@repo/store/types";
 import { Card } from "@repo/ui/components/card";
 import { cn } from "@repo/ui/lib/utils";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import DielineLoadingOverlay from "../product/DielineLoadingOverlay";
 import { DimensionInput } from "../product/DimensionsInput";
-import { useAppDispatch } from "@repo/store/hooks";
-import { setDeveloperTool } from "@repo/store/slices/developerToolsSlice";
 const SVGPreview = dynamic(
   () => import("@repo/ui/components/custom/SVGPreview"),
   {
@@ -38,9 +39,18 @@ const HomeDieline = ({ dieline }: { dieline: DielineType | null }) => {
   dieline.settings.width = 80;
   dieline.settings.length = 130;
   dieline.settings.height = 40;
-  const specs = JSON.parse(dieline.specification);
-  const variables = JSON.parse(dieline.variable);
-  const effects = JSON.parse(dieline.effect);
+  const specs = useMemo(
+    () => JSON.parse(dieline.specification) as ISpec.Specs,
+    [dieline.specification],
+  );
+  const variables = useMemo(
+    () => JSON.parse(dieline.variable) as IVar.VariableMap,
+    [dieline.variable],
+  );
+  const effects = useMemo(
+    () => JSON.parse(dieline.effect) as IEffect.EffectsMap,
+    [dieline.effect],
+  );
   const { isRendering } = useDielineGenerator(
     {
       ...dieline,

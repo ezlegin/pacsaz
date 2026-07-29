@@ -3,30 +3,32 @@ import { Ruler } from "lucide-react";
 import { HandleLayerActoin } from "../DielineLayer";
 import LayerActions from "./LayerAction";
 import { ISpec } from "@repo/store/types";
+import { useAppDispatch } from "@repo/store/hooks";
+import {
+  clearSelection,
+  setSelection,
+} from "@repo/store/slices/selectionSlice";
 
 export default function RulerLayers({
   handleLayerAction,
-  clearSelection,
-  setSelection,
   rulers,
 }: {
   rulers: ISpec.Rulers;
   handleLayerAction: HandleLayerActoin;
-  clearSelection: () => void;
-  setSelection: (ruler: ISpec.Ruler) => void;
 }) {
+  const dispatch = useAppDispatch();
   return (
     <ToggleGroup
       type="single"
       spacing={0.01}
       className="flex-col w-full"
       onValueChange={(val) => {
-        if (val === "") clearSelection();
+        if (val === "") dispatch(clearSelection());
 
         const ruler = rulers.find((i) => i.id === val);
         if (!ruler) return;
 
-        setSelection(ruler);
+        dispatch(setSelection(ruler));
       }}
     >
       {rulers.map((ruler) => (

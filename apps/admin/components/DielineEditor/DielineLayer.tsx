@@ -12,10 +12,7 @@ import {
   rulersSelectors,
   setRulerVisibility,
 } from "@repo/store/slices/rulersSlice";
-import {
-  clearSelection,
-  setSelection,
-} from "@repo/store/slices/selectionSlice";
+import { clearSelection } from "@repo/store/slices/selectionSlice";
 import {
   addShape,
   removeShape,
@@ -39,12 +36,12 @@ import {
   TabsTrigger,
 } from "@repo/ui/components/tabs";
 import { Redo, Settings, Undo } from "lucide-react";
+import { nanoid } from "nanoid";
 import DielineChangesSaver from "../forms/dielineChagesSaver";
 import DielineSettingsForm from "../forms/DielineSettingsForm";
 import ModelLayers from "./layers/ModelLayers";
 import RulerLayers from "./layers/RulerLayers";
 import ShapeLayers from "./layers/ShapeLayers";
-import { nanoid } from "nanoid";
 
 export type ItemType = {
   ShapesSpec: ISpec.ShapesSpec;
@@ -183,20 +180,10 @@ const DielineLayer = ({
           <ShapeLayers handleLayerAction={handleLayerAction} shapes={shapes} />
         </TabsContent>
         <TabsContent value="rulers">
-          <RulerLayers
-            clearSelection={clearSelection}
-            handleLayerAction={handleLayerAction}
-            setSelection={setSelection}
-            rulers={rulers}
-          />
+          <RulerLayers handleLayerAction={handleLayerAction} rulers={rulers} />
         </TabsContent>
         <TabsContent value="models">
-          <ModelLayers
-            clearSelection={clearSelection}
-            handleLayerAction={handleLayerAction}
-            setSelection={setSelection}
-            models={models}
-          />
+          <ModelLayers handleLayerAction={handleLayerAction} models={models} />
         </TabsContent>
       </Tabs>
     </div>

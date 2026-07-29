@@ -84,6 +84,7 @@ const EffectsList = ({
         radius: String(e.radius),
         targetModelId: e.targetModelId,
         key: e.key,
+        indices: e.indices,
       });
       setEffectFormType("radius");
     } else {
@@ -93,7 +94,6 @@ const EffectsList = ({
         targetModelId: e.targetModelId,
         key: e.key,
       });
-      console.log("todo");
       setEffectFormType("boolean");
     }
   };
@@ -125,7 +125,11 @@ const EffectsList = ({
             >
               <span className="text-xs">{effect.key}</span>
               <span className="text-muted-foreground text-xs group-hover:hidden">
-                {effect.type === "boolean" ? effect.booleanType : effect.radius}
+                {effect.type === "boolean"
+                  ? effect.booleanType
+                  : effect.indices.length > 0
+                    ? "Ind"
+                    : effect.radius}
               </span>
               <Trash
                 className="hidden group-hover:block text-muted-foreground hover:text-destructive"

@@ -257,15 +257,46 @@ export class Drawer extends Dieline {
               this.tempModels.get(e.targetModelId)!,
             );
             this.tempModels.delete(e.targetModelId)!;
-            const chain = M.model.findSingleChain(targetModel);
-            const fillet = M.chain.fillet(chain, toMm(e.radius));
+            let combined: IModel = {};
+            if (e.indices.length > 0) {
+              const chain = M.model.findSingleChain(targetModel);
+              const links = chain.links;
+              const n = links.length;
+              const fillets: IModel = { paths: {} };
 
-            const combined: IModel = {
-              models: {
-                targetModel,
-                fillet,
-              },
-            };
+              for (const { indice, radius } of e.indices) {
+                const vertexIndex = Number(indice);
+                if (Number.isNaN(vertexIndex)) continue;
+
+                const nextIndex = vertexIndex + 1;
+                if (!chain.endless && nextIndex >= n) continue;
+
+                const path1 = links[vertexIndex % n]!.walkedPath.pathContext;
+                const path2 = links[nextIndex % n]!.walkedPath.pathContext;
+
+                const filletArc = M.path.fillet(path1, path2, toMm(+radius));
+                if (filletArc) {
+                  fillets.paths![`fillet_${indice}`] = filletArc;
+                }
+              }
+
+              combined = {
+                models: {
+                  targetModel,
+                  fillets,
+                },
+              };
+            } else {
+              const chain = M.model.findSingleChain(targetModel);
+              const fillet = M.chain.fillet(chain, toMm(e.radius));
+
+              combined = {
+                models: {
+                  targetModel,
+                  fillet,
+                },
+              };
+            }
 
             this.tempModels.set(
               e.id,

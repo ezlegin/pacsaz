@@ -2,30 +2,32 @@ import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import { HandleLayerActoin } from "../DielineLayer";
 import LayerActions from "./LayerAction";
 import { ISpec } from "@repo/store/types";
+import {
+  clearSelection,
+  setSelection,
+} from "@repo/store/slices/selectionSlice";
+import { useAppDispatch } from "@repo/store/hooks";
 
 export default function ModelLayers({
   handleLayerAction,
-  clearSelection,
-  setSelection,
   models,
 }: {
   models: ISpec.ModelsSpec[];
   handleLayerAction: HandleLayerActoin;
-  clearSelection: () => void;
-  setSelection: (shape: ISpec.ModelsSpec) => void;
 }) {
+  const dispatch = useAppDispatch();
   return (
     <ToggleGroup
       type="single"
       spacing={0.01}
       className="flex-col w-full"
       onValueChange={(val) => {
-        if (val === "") clearSelection();
+        if (val === "") dispatch(clearSelection());
 
         const shape = models.find((i) => i.id === val);
         if (!shape) return;
 
-        setSelection(shape);
+        dispatch(setSelection(shape));
       }}
     >
       {models.map((model) => (

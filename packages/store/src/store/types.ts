@@ -133,6 +133,7 @@ export namespace ISpec {
 
 //! IEffect ----------------------------------------------------------------
 export namespace IEffect {
+  export type RadiusType = "full" | "indices";
   export type EffectOn = "shape" | "effect";
   export type EffectTypes = "boolean" | "radius";
   export type BooleanType = "union" | "subtract" | "intersect";
@@ -156,6 +157,7 @@ export namespace IEffect {
     type: "radius";
     targetModelId: ModelId;
     radius: number;
+    indices: { indice: string; radius: string }[];
   }
 
   export type EffectSpec = BooleanEffectSpec | RadiusEffectSpec;

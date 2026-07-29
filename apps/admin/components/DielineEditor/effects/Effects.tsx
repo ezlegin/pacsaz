@@ -19,7 +19,14 @@ const radiusFormSchema = z.object({
   radius: z.string().min(1),
   targetModelId: z.string().min(1),
   key: z.string().min(1),
+  indices: z.array(
+    z.object({
+      indice: z.string().min(1),
+      radius: z.string().min(1),
+    }),
+  ),
 });
+
 export type RadiusFormType = z.infer<typeof radiusFormSchema>;
 
 const booleanFormSchema = z.object({
@@ -31,12 +38,15 @@ const booleanFormSchema = z.object({
 export type BooleanFormType = z.infer<typeof booleanFormSchema>;
 
 export const Effects = () => {
+  const [effectFormType, setEffectFormType] =
+    useState<IEffect.EffectTypes | null>(null);
   const radiusForm = useForm<RadiusFormType>({
     resolver: zodResolver(radiusFormSchema),
     defaultValues: {
       radius: "12",
       targetModelId: "",
       key: "radius",
+      indices: [],
     },
   });
   const booleanForm = useForm<BooleanFormType>({
@@ -51,8 +61,6 @@ export const Effects = () => {
 
   const effects = useAppSelector(effectsSelectors.selectAll);
   const shapes = useAppSelector(shapesSelectors.selectAll);
-  const [effectFormType, setEffectFormType] =
-    useState<IEffect.EffectTypes | null>(null);
 
   if (effectFormType === "radius")
     return (

@@ -104,8 +104,6 @@ function ShapesPropsProvider<T extends ISpec.ShapesSpec>({
     mode: "onChange",
   });
 
-  console.log("form", form.getValues());
-
   const onSubmit = (data: FormType) => {
     if (isUpdateType) {
       dispatch(updateShape({ id: selection.id, changes: data }));
