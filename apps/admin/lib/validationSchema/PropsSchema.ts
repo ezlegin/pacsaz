@@ -99,6 +99,8 @@ export const rectangleFormSchema = z
 export const circleFormSchema = z
   .object({
     radius: mathInput,
+    radiusX: mathInput,
+    radiusY: mathInput,
     semiCircleDirection: z.enum(direction).optional(),
   })
   .merge(generalSchema);

@@ -32,28 +32,63 @@ const CircleProps = ({ form }: Props) => {
 
   return (
     <PropsFormContent>
-      <FormField
-        control={form.control}
-        name="radius"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Radius</FormLabel>
-            <FormControl>
-              <Input
-                {...field}
-                placeholder="expr.."
-                autoFocus
-                className="h-9"
-              />
-            </FormControl>
-          </FormItem>
-        )}
-      />
-
       <div className="flex justify-between">
         <Label>Semi-Circle</Label>
         <Switch checked={isSemiCircle} onCheckedChange={setIsSemiCircle} />
       </div>
+
+      {isSemiCircle ? (
+        <FormField
+          control={form.control}
+          name="radius"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Radius</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  placeholder="expr.."
+                  autoFocus
+                  className="h-9"
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+      ) : (
+        <div className="flex">
+          <FormField
+            control={form.control}
+            name="radiusX"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Radius X</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    placeholder="expr.."
+                    autoFocus
+                    className="h-9"
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="radiusY"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Radius Y</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="expr.." className="h-9" />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        </div>
+      )}
 
       {isSemiCircle && (
         <FormField

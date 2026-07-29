@@ -12,7 +12,7 @@ import { CustomRuler } from "./ruler/CustomRuler";
 import { DielineRuler } from "./ruler/DielineRuler";
 import { OverallRuler } from "./ruler/OverallRuler";
 import { Arc } from "./shapes/Arc";
-import { Circle, SemiCircle } from "./shapes/Circle";
+import { Ellipse, SemiCircle } from "./shapes/Circle";
 import { Line, Lines } from "./shapes/Line";
 import { Polygon } from "./shapes/Polygon";
 import { Rectangle } from "./shapes/Rectangle";
@@ -29,7 +29,7 @@ export default class Pacsaz {
     Rectangle,
     Line,
     Lines,
-    Circle,
+    Ellipse,
     SemiCircle,
     Polygon,
     Text,

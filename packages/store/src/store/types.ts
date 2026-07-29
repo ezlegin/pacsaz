@@ -73,6 +73,8 @@ export namespace ISpec {
 
   export type CircleSpec = {
     radius: string;
+    radiusX: string;
+    radiusY: string;
     semiCircleDirection: Direction;
   } & Generals & { type: "circle" };
 

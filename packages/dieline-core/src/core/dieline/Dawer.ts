@@ -88,18 +88,23 @@ export class Drawer extends Dieline {
   }
 
   private circle(circle: ISpec.CircleSpec) {
-    this.$pusher(circle, ({ id, radius, semiCircleDirection }, scope) => {
-      const circleRadius = this.$parseMathStr(radius, scope);
-      if (semiCircleDirection) {
-        return new Pacsaz.shapes.SemiCircle(
-          id,
-          circleRadius,
-          semiCircleDirection,
-        );
-      } else {
-        return new Pacsaz.shapes.Circle(id, circleRadius);
-      }
-    });
+    this.$pusher(
+      circle,
+      ({ id, radiusX, radiusY, radius, semiCircleDirection }, scope) => {
+        const circleRadius = this.$parseMathStr(radius, scope);
+        if (semiCircleDirection) {
+          return new Pacsaz.shapes.SemiCircle(
+            id,
+            circleRadius,
+            semiCircleDirection,
+          );
+        } else {
+          const circleRadiusX = this.$parseMathStr(radiusX, scope);
+          const circleRadiusY = this.$parseMathStr(radiusY, scope);
+          return new Pacsaz.shapes.Ellipse(id, circleRadiusX, circleRadiusY);
+        }
+      },
+    );
   }
 
   private polygon(polygon: ISpec.PolygonSpec) {

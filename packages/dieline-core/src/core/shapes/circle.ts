@@ -2,17 +2,16 @@ import M, { IModel } from "makerjs";
 import { zero } from "../../data/consts";
 import { Shape } from "./Shape";
 
-export class Circle extends Shape {
-  constructor(id: string, radius: number) {
+export class Ellipse extends Shape {
+  constructor(id: string, radiusX: number, radiusY: number) {
     super(id);
-    const circle = new M.paths.Circle(radius);
-    const model: IModel = { paths: { circle } };
-    this.$pushShape("circle", model);
+    const ellipse = new M.models.Ellipse(radiusX, radiusY);
+    this.$pushShape("circle", ellipse);
   }
 
   override mirror(): this {
     throw new Error(
-      "Mirror function is nonesense for circle. If you want to mirror it, just duplicate it and move to the opposite direction.",
+      "Mirror function is nonesense for ellipse. If you want to mirror it, just duplicate it and move to the opposite direction.",
     );
   }
 }
