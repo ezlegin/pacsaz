@@ -5,9 +5,9 @@ import {
   DielineUpdateFormType,
 } from "@/lib/validationSchema/validatoinSchema";
 import { prisma } from "@repo/db";
+import { materials as allMats } from "@repo/dieline-core/data/materials";
 import { UploadApiResponse } from "cloudinary";
 import { deleteImage, uploadCloudFile } from "./cloudinary";
-import { materials as allMats } from "@repo/dieline-core/data/materials";
 
 export const createDieline = async (data: DielineMetadataFormType) => {
   const {
@@ -205,15 +205,23 @@ export const updateDieline = async (
         };
 
         if (image === "dielineImage")
-          await prisma.dielineImage.update({
-            where: { publicId: updatedDieline.dielineImage?.publicId },
-            data,
+          await prisma.dielineImage.upsert({
+            where: { dielineId: updatedDieline.id },
+            update: data,
+            create: {
+              ...data,
+              dielineId: updatedDieline.id,
+            },
           });
 
         if (image === "modelImage")
-          await prisma.modelImage.update({
-            where: { publicId: updatedDieline.modelImage?.publicId },
-            data,
+          await prisma.modelImage.upsert({
+            where: { dielineId: updatedDieline.id },
+            update: data,
+            create: {
+              ...data,
+              dielineId: updatedDieline.id,
+            },
           });
       }
     }
@@ -302,6 +310,74 @@ export const deleteModelImage = async (publicId: string) => {
     await prisma.modelImage.delete({ where: { publicId } });
 
     return { success: "Model Image Deleted Successfully." };
+  } catch (error) {
+    console.error(error);
+    return { error: (error as Error).message };
+  }
+};
+
+export const duplicateDieline = async (dielineId: number) => {
+  try {
+    const existingDieline = await prisma.dieline.findFirst({
+      where: { id: dielineId },
+      include: {
+        categoryByModel: true,
+        categoryByUsage: true,
+        dielineImage: true,
+        modelImage: true,
+        settings: true,
+      },
+    });
+    if (!existingDieline) throw new Error("Dieline Not Found.");
+
+    const duplicatedSlug = `${existingDieline.slug}-copy-${Date.now()}`;
+    const duplicatedTitle = `${existingDieline.title} Copy`;
+
+    await prisma.dieline.create({
+      data: {
+        slug: duplicatedSlug,
+        title: duplicatedTitle,
+        minHeight: existingDieline.minHeight,
+        minLength: existingDieline.minLength,
+        minWidth: existingDieline.minWidth,
+        maxHeight: existingDieline.maxHeight,
+        maxLength: existingDieline.maxLength,
+        maxWidth: existingDieline.maxWidth,
+        dimensionTypes: existingDieline.dimensionTypes,
+        materials: existingDieline.materials,
+        defaultMaterial: existingDieline.defaultMaterial,
+        specification: existingDieline.specification,
+        variable: existingDieline.variable,
+        effect: existingDieline.effect,
+        active: existingDieline.active,
+        categoryByModel: {
+          connect: existingDieline.categoryByModel.map((item) => ({
+            slug: item.slug,
+          })),
+        },
+        categoryByUsage: {
+          connect: existingDieline.categoryByUsage.map((item) => ({
+            slug: item.slug,
+          })),
+        },
+        settings: {
+          create: {
+            material: existingDieline.settings?.material ?? "",
+            dimensionType:
+              existingDieline.settings?.dimensionType ?? "manufacture",
+            thickness: existingDieline.settings?.thickness ?? 0.5,
+            bleed: existingDieline.settings?.bleed ?? 0,
+            height: existingDieline.settings?.height ?? 0,
+            length: existingDieline.settings?.length ?? 0,
+            width: existingDieline.settings?.width ?? 0,
+          },
+        },
+      },
+    });
+
+    return {
+      success: "Dieline Duplicated Successfully.",
+    };
   } catch (error) {
     console.error(error);
     return { error: (error as Error).message };

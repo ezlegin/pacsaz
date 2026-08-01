@@ -45,7 +45,8 @@ const DielineGenerator = ({
     {
       ...dieline,
       specification: specs,
-      settings: customSettings ?? dieline.settings!,
+      settings: dieline.settings,
+      customSettings,
       variables,
       effects,
     },

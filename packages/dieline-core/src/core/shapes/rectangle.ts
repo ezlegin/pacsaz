@@ -12,18 +12,20 @@ export class Rectangle extends Shape {
     super(id);
     const rect = new M.models.Rectangle(width, height);
 
+    console.log(rect);
+
     switch (options?.deleteSide) {
       case "down":
-        delete rect.paths?.["Bottom"];
+        delete rect.paths?.["ShapeLine1"];
         break;
       case "left":
-        delete rect.paths?.["Left"];
+        delete rect.paths?.["ShapeLine4"];
         break;
       case "right":
-        delete rect.paths?.["Right"];
+        delete rect.paths?.["ShapeLine2"];
         break;
       case "up":
-        delete rect.paths?.["Top"];
+        delete rect.paths?.["ShapeLine3"];
         break;
     }
 

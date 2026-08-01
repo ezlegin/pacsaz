@@ -26,6 +26,7 @@ interface Dieline {
   maxLength: number;
   maxHeight: number;
   settings: DielineSettings;
+  customSettings?: DielineSettings | null;
 }
 
 type DielineSettings = {
@@ -38,17 +39,13 @@ type DielineSettings = {
   dimensionType: string;
 };
 
-interface DielineType extends Dieline {
-  settings: DielineSettings;
-}
-
 export function useDielineGenerator(
-  dieline: DielineType,
+  dieline: Dieline,
   user?: any | null,
   showWatermark?: boolean,
 ) {
   const specs = dieline.specification;
-  const setts = dieline.settings;
+  const dielineSettings = dieline.customSettings ?? dieline.settings;
   const [isRendering, startTransition] = useTransition();
   const dispatch = useAppDispatch();
 
@@ -69,22 +66,25 @@ export function useDielineGenerator(
   // set defaults
   useEffect(() => {
     const dims = {
-      width: setts.width,
-      length: setts.length,
-      height: setts.height,
+      width: dielineSettings.width,
+      length: dielineSettings.length,
+      height: dielineSettings.height,
     };
     const dimensionTypes = dieline.dimensionTypes.split(",") as DimensionType[];
     const mats = dieline.materials
       .split(",")
       .map((i) => materials.find((m) => m.value === i))
       .filter((i) => i !== undefined);
+    console.log(dieline.customSettings);
     const material = materials.find(
-      (m) => m.value === dieline.defaultMaterial,
+      (m) =>
+        m.value ===
+        (dieline.customSettings?.material ?? dieline.defaultMaterial),
     )!;
 
     dispatch(
       setDefaultSettings({
-        bleed: setts.bleed,
+        bleed: dielineSettings.bleed,
         dimension: {
           raw: dims,
           resolved: resolveDimensions(dims, offsets),
@@ -102,8 +102,8 @@ export function useDielineGenerator(
         },
         material: material,
         materials: mats,
-        thickness: setts.thickness,
-        dimensionType: setts.dimensionType as DimensionType,
+        thickness: dielineSettings.thickness,
+        dimensionType: dielineSettings.dimensionType as DimensionType,
         format: "pdf",
         showOverallRulers: false,
       }),

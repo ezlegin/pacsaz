@@ -1,6 +1,7 @@
 import { deleteDieline } from "@/actions/dieline";
 import DeleteButton from "@/components/DeleteButton";
 import DielineStatusSetter from "@/components/DielineStatusSetter";
+import DuplicateButton from "@/components/DuplicateButton";
 import DielineSettingsForm from "@/components/forms/DielineSettingsForm";
 import { mainURL } from "@/data/envs";
 import { placeholder } from "@/public";
@@ -109,6 +110,7 @@ const DielinesList = ({
               href={`/editor/${dieline.slug}`}
               target="_blank"
             />
+            <DuplicateButton dielineId={dieline.id} />
             <DeleteButton id={dieline.id} deleteFn={deleteDieline} />
           </div>
         </TableCell>

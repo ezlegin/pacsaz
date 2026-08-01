@@ -1,7 +1,11 @@
 import { setFile } from "@repo/store/slices/dielineFileSlice";
 import M, { IModel } from "makerjs";
 import { toMm } from "../../utils/sizeConvertor";
-import { getDevCTX, getDielineSettings } from "@repo/store/getters";
+import {
+  getDevCTX,
+  getDielineSettings,
+  getOverallSizes,
+} from "@repo/store/getters";
 import { store } from "@repo/store/store";
 
 export class Exporter {
@@ -10,6 +14,7 @@ export class Exporter {
     const { format } = getDielineSettings();
     return format;
   }
+  overallSizes = getOverallSizes();
 
   build() {
     const svg = this.svg();
@@ -59,7 +64,7 @@ export class Exporter {
         dielineRulerText: {
           stroke: "none",
           fill: "#00BFFF",
-          cssStyle: `font-size:${toMm(20)}px`,
+          cssStyle: `font-size:${toMm(this.rulerFontSize)}px`,
         },
         overallRuler: {
           stroke: "gray",
@@ -68,7 +73,7 @@ export class Exporter {
         overallRulerText: {
           fill: "gray",
           stroke: "none",
-          cssStyle: `font-size: ${toMm(14)};`,
+          cssStyle: `font-size: ${toMm(this.rulerFontSize)};`,
         },
       },
     });
@@ -76,10 +81,10 @@ export class Exporter {
     return showWatermark ? this.$injectWatermark(svg) : svg;
   }
 
-  // private get rulerFontSize() {
-  //   const area = this.overallSizes.trim!.width * this.overallSizes.trim!.height;
-  //   return Math.max(9, Math.min(27, 9 + Math.sqrt(area / 1000) * 3));
-  // }
+  private get rulerFontSize() {
+    const area = this.overallSizes.trim!.width * this.overallSizes.trim!.height;
+    return Math.max(9, Math.min(27, 9 + Math.sqrt(area / 1000) * 3));
+  }
 
   private dxf() {
     return M.exporter.toDXF(this.main, {

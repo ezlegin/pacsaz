@@ -1,11 +1,11 @@
 import { onDevelepe } from "@repo/lib/data/consts";
+import { getDielineSettings } from "@repo/store/getters";
+import { setOverallSizes } from "@repo/store/slices/overallSizesSlice";
+import { store } from "@repo/store/store";
 import M, { IModel, IModelMap } from "makerjs";
 import Pacsaz from "../Pacsaz";
 import { Bleed } from "./Bleed";
 import { Exporter } from "./Exporter";
-import { store } from "@repo/store/store";
-import { setOverallSizes } from "@repo/store/slices/overallSizesSlice";
-import { getDielineSettings } from "@repo/store/getters";
 
 export abstract class Dieline {
   protected main: IModel = {};
