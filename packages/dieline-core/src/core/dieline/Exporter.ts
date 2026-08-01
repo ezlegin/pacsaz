@@ -14,7 +14,7 @@ export class Exporter {
     const { format } = getDielineSettings();
     return format;
   }
-  overallSizes = getOverallSizes();
+  private overallSizes = getOverallSizes();
 
   build() {
     const svg = this.svg();

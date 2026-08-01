@@ -15,7 +15,9 @@ export abstract class Dieline {
   protected rulerModel: IModel = { layer: "ruler" };
 
   // -------------- Dieline Factory --------------
-  protected abstract drawer(): void;
+  protected abstract drawShapes(): void;
+  protected abstract drawModels(): void;
+  protected abstract drawRulers(): void;
 
   // -------------- Settings --------------
   protected get settings() {
@@ -38,7 +40,7 @@ export abstract class Dieline {
   model() {
     this.buildLayers();
     this.postProcess();
-    this.buildRulers();
+    this.drawRulers();
     console.group("Dieline");
     onDevelepe && console.log("Main:", this.main);
     console.groupEnd();
@@ -54,7 +56,8 @@ export abstract class Dieline {
     this.foldModel = { layer: "fold" };
     this.perfModel = { layer: "perf" };
 
-    this.drawer();
+    this.drawShapes();
+    this.drawModels();
 
     const dieline: IModel = {
       models: {
@@ -74,10 +77,6 @@ export abstract class Dieline {
     for (const l in layers) {
       Pacsaz.shape.push(this.main, l, layers[l]!, l);
     }
-  }
-
-  private buildRulers() {
-    Pacsaz.shape.push(this.main, "ruler", this.rulerModel, "ruler");
   }
 
   // -------------- Post Process --------------

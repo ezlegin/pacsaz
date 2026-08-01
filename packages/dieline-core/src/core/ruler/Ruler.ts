@@ -1,9 +1,11 @@
 import M, { IModel, IPoint } from "makerjs";
 import Pacsaz from "../Pacsaz";
+import { getOverallSizes } from "@repo/store/getters";
 
 export class Ruler implements IModel {
   models?: M.IModelMap | undefined;
   protected rulerAngle: number = 0;
+  private overallSizes = getOverallSizes();
 
   ruler(from: IPoint, to: IPoint, value: number, textLayer?: string): IModel {
     const line = this.line(from, to);
@@ -57,7 +59,8 @@ export class Ruler implements IModel {
   }
 
   private pointer(from: IPoint, to: IPoint): IModel {
-    const pointerRadius = 1.8;
+    const pointerRadius = this.pointerRadius;
+    console.log("pointerRadius", pointerRadius);
     const pointerA = new Pacsaz.shapes.Polygon(pointerRadius, 3, -90)
       .move([from[0]!, from[1]! + pointerRadius])
       .rotate(-(90 - this.rulerAngle), "bottom");
@@ -70,7 +73,7 @@ export class Ruler implements IModel {
   }
 
   private indicator(from: IPoint, to: IPoint): IModel {
-    const indicatorSize = 3;
+    const indicatorSize = this.pointerRadius * 2;
     const IdcrA = new Pacsaz.shapes.Line(indicatorSize)
       .center()
       .move(from)
@@ -85,6 +88,12 @@ export class Ruler implements IModel {
   }
 
   // -------------- UTILS --------------
+
+  private get pointerRadius() {
+    const area = this.overallSizes.trim!.width * this.overallSizes.trim!.height;
+    console.log(Math.sqrt(area / 10000));
+    return Math.max(1.5, Math.min(3, Math.sqrt(area / 10000)));
+  }
 
   private $textPadding(angle: number) {
     if (angle < 20) {

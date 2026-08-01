@@ -1,4 +1,4 @@
-import { ISpec, IVar, IEffect } from "@repo/store/types";
+import { IEffect, ISpec, IVar } from "@repo/store/types";
 import M, { IModel } from "makerjs";
 import { evaluate } from "mathjs";
 import { toMm } from "../../utils/sizeConvertor";
@@ -132,7 +132,7 @@ export class Drawer extends Dieline {
     });
   }
 
-  private drawShapes() {
+  override drawShapes() {
     for (const shape of this.specs.shapes) {
       switch (shape.type) {
         case "line":
@@ -155,6 +155,11 @@ export class Drawer extends Dieline {
           break;
       }
     }
+
+    if (this.effects.length > 0) {
+      this.applyEffects();
+    }
+    this.flushTempModels();
   }
 
   //! ------------------------ Models ------------------------
@@ -188,7 +193,7 @@ export class Drawer extends Dieline {
     });
   }
 
-  private drawModels() {
+  override drawModels() {
     for (const model of this.specs.models) {
       switch (model.type) {
         case "glue":
@@ -287,7 +292,6 @@ export class Drawer extends Dieline {
     }
   }
 
-  /** Pushes every remaining temp model onto its target layer's model. */
   private flushTempModels() {
     for (const [id, m] of this.tempModels) {
       const model: IModel = { models: m.models }; // simplify model
@@ -296,7 +300,7 @@ export class Drawer extends Dieline {
   }
 
   //! ------------------------ Rulers ------------------------
-  private drawRulers() {
+  override drawRulers() {
     const rulers = this.$checkExistance(this.specs.rulers);
     if (rulers) {
       let models: Record<string, IModel> = {
@@ -319,18 +323,8 @@ export class Drawer extends Dieline {
       }
       this.$pushRuler(models);
     }
-  }
 
-  protected override drawer() {
-    this.drawShapes();
-
-    if (this.effects.length > 0) {
-      this.applyEffects();
-    }
-
-    this.flushTempModels();
-    this.drawModels();
-    this.drawRulers();
+    Pacsaz.shape.push(this.main, "ruler", this.rulerModel, "ruler");
   }
 
   // -------------------- UTILS --------------------

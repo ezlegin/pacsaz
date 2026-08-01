@@ -75,7 +75,6 @@ export function useDielineGenerator(
       .split(",")
       .map((i) => materials.find((m) => m.value === i))
       .filter((i) => i !== undefined);
-    console.log(dieline.customSettings);
     const material = materials.find(
       (m) =>
         m.value ===
