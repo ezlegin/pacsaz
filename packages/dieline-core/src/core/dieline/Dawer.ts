@@ -229,6 +229,32 @@ export class Drawer extends Dieline {
     this.$setTempModel(effect.id, result, origin.layer);
   }
 
+  private applyArrayEffect(effect: IEffect.ArrayEffectSpec) {
+    const target = this.$consumeTempModel(effect.targetModelId);
+    const from = [
+      this.$parseMathStr(effect.from[0], this.scope),
+      this.$parseMathStr(effect.from[1], this.scope),
+    ];
+    const to = [
+      this.$parseMathStr(effect.to[0], this.scope),
+      this.$parseMathStr(effect.to[1], this.scope),
+    ];
+
+    const parsedCount = this.$parseMathStr(effect.count, this.scope);
+    const row = M.layout.cloneToRow(target, parsedCount);
+    const path = new M.paths.Line([from, to]);
+    M.layout.childrenOnPath(
+      row,
+      path,
+      undefined,
+      undefined,
+      undefined,
+      effect.rotate,
+    );
+
+    this.$setTempModel(effect.id, row, target.layer);
+  }
+
   private applyRadiusEffect(effect: IEffect.RadiusEffectSpec) {
     const target = this.$consumeTempModel(effect.targetModelId);
     const chain = M.model.findSingleChain(target);
@@ -287,6 +313,9 @@ export class Drawer extends Dieline {
           break;
         case "radius":
           this.applyRadiusEffect(effect);
+          break;
+        case "array":
+          this.applyArrayEffect(effect);
           break;
       }
     }

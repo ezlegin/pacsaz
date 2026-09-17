@@ -81,7 +81,7 @@ const DielineEditor = ({
   return (
     <div className="h-screen overflow-hidden">
       <div className="h-full grid grid-cols-[280px_1fr_280px]">
-        <div className="bg-muted border-r p-3 z-10">
+        <div className="bg-muted overflow-y-auto border-r p-3 z-10">
           <DielineLayer dieline={dieline} categories={categories} />
         </div>
         <div className="relative bg-gray-50">
@@ -89,7 +89,7 @@ const DielineEditor = ({
             <SVGPreview isRendering={isRendering} type="editor" />
           </div>
         </div>
-        <div className="bg-muted border-l p-3 z-10">
+        <div className="bg-muted overflow-y-auto border-l p-3 z-10">
           <Tabs defaultValue="tools">
             <TabsList className="w-full px-0">
               <TabsTrigger className="cursor-pointer" value="tools">

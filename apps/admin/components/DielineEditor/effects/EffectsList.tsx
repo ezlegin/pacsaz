@@ -2,7 +2,7 @@ import { Label } from "@repo/ui/components/label";
 import { Trash } from "lucide-react";
 import { useMemo } from "react";
 import { UseFormReturn } from "react-hook-form";
-import { BooleanFormType, RadiusFormType } from "./Effects";
+import { ArrayFormType, BooleanFormType, RadiusFormType } from "./Effects";
 import { IEffect, ISpec } from "@repo/store/types";
 import { useAppDispatch } from "@repo/store/hooks";
 import { removeEffect } from "@repo/store/slices/effectsSlice";
@@ -11,6 +11,7 @@ const EffectsList = ({
   effects,
   shapes,
   radiusForm,
+  arrayForm,
   setEffectFormType,
   booleanForm,
 }: {
@@ -18,6 +19,7 @@ const EffectsList = ({
   shapes: ISpec.Shapes;
   radiusForm: UseFormReturn<RadiusFormType, any, RadiusFormType>;
   booleanForm: UseFormReturn<BooleanFormType, any, BooleanFormType>;
+  arrayForm: UseFormReturn<ArrayFormType, any, ArrayFormType>;
   setEffectFormType: (type: IEffect.EffectTypes) => void;
 }) => {
   const dispatch = useAppDispatch();
@@ -40,12 +42,15 @@ const EffectsList = ({
     [effects],
   );
 
-  const { booleanEffects, radiusEffects } = useMemo(() => {
+  const { booleanEffects, radiusEffects, arrayEffects } = useMemo(() => {
     const booleanEffects: (IEffect.BooleanEffectSpec & {
       targetObject?: ISpec.ShapesSpec | IEffect.EffectSpec;
       originObject?: ISpec.ShapesSpec | IEffect.EffectSpec;
     })[] = [];
     const radiusEffects: (IEffect.RadiusEffectSpec & {
+      targetObject?: ISpec.ShapesSpec | IEffect.EffectSpec;
+    })[] = [];
+    const arrayEffects: (IEffect.ArrayEffectSpec & {
       targetObject?: ISpec.ShapesSpec | IEffect.EffectSpec;
     })[] = [];
     const unresolved: string[] = [];
@@ -72,10 +77,12 @@ const EffectsList = ({
         booleanEffects.push({ ...e, targetObject, originObject });
       } else if (e.type === "radius") {
         radiusEffects.push({ ...e, targetObject });
+      } else {
+        arrayEffects.push({ ...e, targetObject });
       }
     }
 
-    return { booleanEffects, radiusEffects, unresolved };
+    return { booleanEffects, radiusEffects, arrayEffects, unresolved };
   }, [effects, shapesById, effectsById]);
 
   const handleEffectSelection = (e: IEffect.EffectSpec) => {
@@ -87,7 +94,7 @@ const EffectsList = ({
         indices: e.indices,
       });
       setEffectFormType("radius");
-    } else {
+    } else if (e.type === "boolean") {
       booleanForm.reset({
         originModelId: e.originModelId,
         booleanType: e.booleanType,
@@ -95,6 +102,15 @@ const EffectsList = ({
         key: e.key,
       });
       setEffectFormType("boolean");
+    } else {
+      arrayForm.reset({
+        targetModelId: e.targetModelId,
+        key: e.key,
+        count: String(e.count),
+        from: e.from,
+        to: e.to,
+      });
+      setEffectFormType("array");
     }
   };
 
@@ -105,6 +121,7 @@ const EffectsList = ({
   const effectsArr = [
     { key: "Boolean", effects: booleanEffects },
     { key: "Radius", effects: radiusEffects },
+    { key: "Array", effects: arrayEffects },
   ];
 
   return (
@@ -127,9 +144,11 @@ const EffectsList = ({
               <span className="text-muted-foreground text-xs group-hover:hidden">
                 {effect.type === "boolean"
                   ? effect.booleanType
-                  : effect.indices.length > 0
-                    ? "Ind"
-                    : effect.radius}
+                  : effect.type === "radius"
+                    ? effect.indices.length > 0
+                      ? "Ind"
+                      : effect.radius
+                    : effect.count}
               </span>
               <Trash
                 className="hidden group-hover:block text-muted-foreground hover:text-destructive"

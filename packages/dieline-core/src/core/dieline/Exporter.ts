@@ -82,7 +82,9 @@ export class Exporter {
   }
 
   private get rulerFontSize() {
-    const area = this.overallSizes.trim!.width * this.overallSizes.trim!.height;
+    const area =
+      (this.overallSizes.trim?.width ?? 0) *
+      (this.overallSizes.trim?.height ?? 0);
     return Math.max(9, Math.min(27, 9 + Math.sqrt(area / 1000) * 3));
   }
 

@@ -2,7 +2,7 @@ import z from "zod";
 import { validateMathExpression } from "../utils/validateMathExpression";
 
 const mathInput = z.string().min(1).refine(validateMathExpression);
-const pointInput = z.tuple([mathInput, mathInput]);
+export const pointInput = z.tuple([mathInput, mathInput]);
 
 const shapesKey = [
   "line",

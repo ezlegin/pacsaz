@@ -6,6 +6,7 @@ import { pushModel } from "./helpers/push";
 import { Door } from "./models/Door";
 import { Dust } from "./models/Dust";
 import { Glue } from "./models/Glue";
+import { KeyboardLocker } from "./models/KeyboardLocker";
 import { SnapLock } from "./models/SnapLock";
 import { PointBuilder } from "./point/PointBuilder";
 import { CustomRuler } from "./ruler/CustomRuler";
@@ -42,6 +43,7 @@ export default class Pacsaz {
     Dust,
     SnapLock,
     Drawer,
+    KeyboardLocker,
   };
 
   static point = {

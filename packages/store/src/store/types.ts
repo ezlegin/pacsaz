@@ -104,6 +104,9 @@ export namespace ISpec {
   export type GlueSpec = { from: Point; to: Point } & ModelGenerals & {
       type: "glue";
     };
+  export type KeyboardLockSpec = { length: string } & ModelGenerals & {
+      type: "keyboardLock";
+    };
   export type DoorSpec = {
     dustSide?: DustSide;
     mirror: { x: boolean; y: boolean };
@@ -111,7 +114,11 @@ export namespace ISpec {
   } & ModelGenerals & { type: "door" };
   export type SnapLockSpec = ModelGenerals & { type: "snapLock" };
 
-  export type ModelsSpec = GlueSpec | DoorSpec | SnapLockSpec;
+  export type ModelsSpec =
+    | GlueSpec
+    | DoorSpec
+    | SnapLockSpec
+    | KeyboardLockSpec;
 
   export type ModelsKey = ModelsSpec["type"];
   export type Models = ModelsSpec[];
@@ -137,7 +144,7 @@ export namespace ISpec {
 export namespace IEffect {
   export type RadiusType = "full" | "indices";
   export type EffectOn = "shape" | "effect";
-  export type EffectTypes = "boolean" | "radius";
+  export type EffectTypes = "boolean" | "radius" | "array";
   export type BooleanType = "union" | "subtract" | "intersect";
   type ModelId = string;
 
@@ -162,7 +169,19 @@ export namespace IEffect {
     indices: { indice: string; radius: string }[];
   }
 
-  export type EffectSpec = BooleanEffectSpec | RadiusEffectSpec;
+  export interface ArrayEffectSpec extends EffectBase {
+    type: "array";
+    targetModelId: ModelId;
+    count: string;
+    rotate: boolean;
+    from: [string, string];
+    to: [string, string];
+  }
+
+  export type EffectSpec =
+    | BooleanEffectSpec
+    | RadiusEffectSpec
+    | ArrayEffectSpec;
   export type EffectsMap = EffectSpec[];
 }
 

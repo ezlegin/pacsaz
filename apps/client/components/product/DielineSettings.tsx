@@ -214,7 +214,8 @@ export default function DielineSettings({ slug, isRendering, user }: Props) {
             spacing={1}
             value={format}
             onValueChange={(val) => {
-              if (val) setSetting({ key: "format", value: val as Format });
+              if (val)
+                dispatch(setSetting({ key: "format", value: val as Format }));
             }}
             className="w-full"
           >
