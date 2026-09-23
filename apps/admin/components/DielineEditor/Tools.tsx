@@ -28,6 +28,7 @@ import SnapLockProps from "./props/models/SnapLockProps";
 import { ISpec } from "@repo/store/types";
 import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
 import { clearSelection } from "@repo/store/slices/selectionSlice";
+import HoleProps from "./props/models/HoleProps";
 
 type EditorMode = {
   stack: ISpec.Stack;
@@ -45,7 +46,7 @@ const Tools = () => {
     { key: "polygon", Icon: Hexagon },
     { key: "arc", Icon: Parentheses },
   ];
-  const modelsList: ISpec.ModelsKey[] = ["glue", "door", "snapLock"];
+  const modelsList: ISpec.ModelsKey[] = ["glue", "door", "snapLock", "hole"];
 
   const selection = useAppSelector((s) => s.selection.selection);
   const dispatch = useAppDispatch();
@@ -83,6 +84,7 @@ const Tools = () => {
     glue: GlueProps,
     door: DoorProps,
     snapLock: SnapLockProps,
+    hole: HoleProps,
   };
 
   if (editorMode) {

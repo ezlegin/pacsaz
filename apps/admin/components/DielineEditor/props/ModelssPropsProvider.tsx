@@ -1,6 +1,7 @@
 import {
   doorFormSchema,
   glueFormSchema,
+  holeFormSchema,
   snapLockFormSchema,
 } from "@/lib/validationSchema/PropsSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -31,6 +32,7 @@ const getModelSchema = (modelKey: ISpec.ModelsKey) => {
     glue: glueFormSchema,
     door: doorFormSchema,
     snapLock: snapLockFormSchema,
+    hole: holeFormSchema,
   };
 
   return schemas[modelKey];
@@ -69,6 +71,10 @@ function ModelsPropsProvider<T extends ISpec.ModelsSpec>({
         x: false,
         y: false,
       },
+      handleDir: "left",
+      rotation: "0",
+      angleBetweenStartAndEnd: "0",
+      heightOfLine: "30",
 
       id: nanoid(),
       origin: ["0", "0"],

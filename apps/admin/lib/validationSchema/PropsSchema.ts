@@ -12,7 +12,7 @@ const shapesKey = [
   "polygon",
   "arc",
 ] as const;
-const modelsKey = ["glue", "door", "snapLock"] as const;
+const modelsKey = ["glue", "door", "snapLock", "hole"] as const;
 const stack = ["model", "ruler", "shape"] as const;
 const direction = ["down", "right", "up", "left"] as const;
 const pointDirection = [...direction, "draw"] as const;
@@ -166,3 +166,12 @@ export const doorFormSchema = z
   .merge(modelGenerals);
 
 export const snapLockFormSchema = modelGenerals;
+
+export const holeFormSchema = z
+  .object({
+    angleBetweenStartAndEnd: mathInput,
+    rotation: z.string(),
+    handleDir: z.enum(["left", "right"]),
+    heightOfLine: mathInput,
+  })
+  .merge(modelGenerals);

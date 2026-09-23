@@ -112,9 +112,6 @@ export namespace ISpec {
   } & ModelGenerals & {
       type: "hole";
     };
-  export type KeyboardLockSpec = { length: string } & ModelGenerals & {
-      type: "keyboardLock";
-    };
   export type DoorSpec = {
     dustSide?: DustSide;
     mirror: { x: boolean; y: boolean };
@@ -122,12 +119,7 @@ export namespace ISpec {
   } & ModelGenerals & { type: "door" };
   export type SnapLockSpec = ModelGenerals & { type: "snapLock" };
 
-  export type ModelsSpec =
-    | GlueSpec
-    | DoorSpec
-    | SnapLockSpec
-    | HoleSpec
-    | KeyboardLockSpec;
+  export type ModelsSpec = GlueSpec | DoorSpec | SnapLockSpec | HoleSpec;
 
   export type ModelsKey = ModelsSpec["type"];
   export type Models = ModelsSpec[];
