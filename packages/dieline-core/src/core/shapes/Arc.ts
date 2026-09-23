@@ -10,14 +10,12 @@ export class Arc extends Shape {
   ) {
     super();
 
-    const arc = new M.paths.Arc(
-      zero,
-      this.radius,
-      this.startAngle,
-      this.endAngle,
-    );
-
+    const arc = this.arc();
     this.$pushShape("arc", { paths: { arc }, origin: zero });
+  }
+
+  private arc() {
+    return new M.paths.Arc(zero, this.radius, this.startAngle, this.endAngle);
   }
 
   get points() {
@@ -26,5 +24,9 @@ export class Arc extends Shape {
     cloned.origin = this.lastModel?.origin ?? zero;
     const points = M.point.fromArc(cloned);
     return { start: points[0]!, end: points[1]! };
+  }
+
+  get angles() {
+    return { endAngle: M.angle.ofArcEnd(this.arc()) };
   }
 }

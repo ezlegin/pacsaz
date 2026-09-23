@@ -39,7 +39,7 @@ export namespace ISpec {
   export type Dup = {
     operations: DupOperation[];
   }[];
-  type Point = [string, string];
+  export type Point = [string, string];
 
   type Generals = {
     id: string;
@@ -104,6 +104,14 @@ export namespace ISpec {
   export type GlueSpec = { from: Point; to: Point } & ModelGenerals & {
       type: "glue";
     };
+  export type HoleSpec = {
+    angleBetweenStartAndEnd: string;
+    heightOfLine: string;
+    rotation: string;
+    handleDir: "left" | "right";
+  } & ModelGenerals & {
+      type: "hole";
+    };
   export type KeyboardLockSpec = { length: string } & ModelGenerals & {
       type: "keyboardLock";
     };
@@ -118,6 +126,7 @@ export namespace ISpec {
     | GlueSpec
     | DoorSpec
     | SnapLockSpec
+    | HoleSpec
     | KeyboardLockSpec;
 
   export type ModelsKey = ModelsSpec["type"];

@@ -6,6 +6,7 @@ import { pushModel } from "./helpers/push";
 import { Door } from "./models/Door";
 import { Dust } from "./models/Dust";
 import { Glue } from "./models/Glue";
+import { Hole } from "./models/Hole";
 import { KeyboardLocker } from "./models/KeyboardLocker";
 import { SnapLock } from "./models/SnapLock";
 import { PointBuilder } from "./point/PointBuilder";
@@ -39,6 +40,7 @@ export default class Pacsaz {
 
   static models = {
     Glue,
+    Hole,
     Door,
     Dust,
     SnapLock,
