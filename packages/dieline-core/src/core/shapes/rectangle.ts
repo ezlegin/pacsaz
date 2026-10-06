@@ -8,11 +8,9 @@ interface Options {
 }
 
 export class Rectangle extends Shape {
-  constructor(id: string, width: number, height: number, options?: Options) {
-    super(id);
+  constructor(width: number, height: number, options?: Options) {
+    super();
     const rect = new M.models.Rectangle(width, height);
-
-    console.log(rect);
 
     switch (options?.deleteSide) {
       case "down":

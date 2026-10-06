@@ -57,18 +57,12 @@ export abstract class Dieline {
 
     this.drawShapes();
 
-    const dieline: IModel = {
-      models: {
-        fold: this.foldModel,
-        perf: this.perfModel,
-        trim: this.trimModel,
-      },
-    };
-
     const layers: IModelMap = {
       bleed: new Bleed(this.trimModel, this.settings.bleed),
       container: new Pacsaz.layer.Container(this.trimModel),
-      dieline,
+      fold: this.foldModel,
+      perf: this.perfModel,
+      trim: this.trimModel,
       anchor: new Pacsaz.layer.Anchor(this.main, this.trimModel),
     };
 
@@ -79,7 +73,7 @@ export abstract class Dieline {
 
   // -------------- Post Process --------------
   private postProcess() {
-    const trimModel = this.main.models?.dieline?.models?.trim;
+    const trimModel = this.main.models?.trim;
     if (!trimModel) throw new Error("TrimModel not ready. [postProcess()]");
 
     const { bleed, container } = this.main.models ?? {};

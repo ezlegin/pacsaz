@@ -97,7 +97,6 @@ function ShapesPropsProvider<T extends ISpec.ShapesSpec>({
       isClosed: false,
       startAngle: "",
       endAngle: "",
-
       id: nanoid(),
       layer: "trim",
       origin: ["0", "0"],

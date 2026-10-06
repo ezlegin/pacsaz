@@ -1,24 +1,17 @@
-import { IEffect, ISpec, IVar } from "@repo/store/types";
-import M, { IModel } from "makerjs";
+import { ISpec, IVar } from "@repo/store/types";
+import { IModel } from "makerjs";
 import { evaluate } from "mathjs";
-import { toMm } from "../../utils/sizeConvertor";
 import Pacsaz from "../Pacsaz";
 import { Shape } from "../shapes/Shape";
 import { Dieline } from "./Dieline";
-
-type TempModel = Shape & { layer: ISpec.Layer };
-type Chain = ReturnType<typeof M.model.findSingleChain>;
 
 export class Drawer extends Dieline {
   constructor(
     private specs: ISpec.Specs,
     private variables: IVar.VariableMap,
-    private effects: IEffect.EffectsMap,
   ) {
     super();
   }
-
-  tempModels = new Map<string, TempModel>();
 
   //! ------------------------ Shapes ------------------------
   private line(line: ISpec.LineSpec) {
@@ -79,9 +72,8 @@ export class Drawer extends Dieline {
   }
 
   private rectangle(rectangle: ISpec.RectangleSpec) {
-    this.$pusher(rectangle, ({ id, height, width, deleteSide }, scope) => {
+    this.$pusher(rectangle, ({ height, width, deleteSide }, scope) => {
       return new Pacsaz.shapes.Rectangle(
-        id,
         this.$parseMathStr(width, scope),
         this.$parseMathStr(height, scope),
         {
@@ -154,130 +146,6 @@ export class Drawer extends Dieline {
           this.rectangle(shape);
           break;
       }
-    }
-
-    if (this.effects.length > 0) {
-      this.applyEffects();
-    }
-    this.flushTempModels();
-  }
-
-  //! ------------------------ Effects ------------------------
-  private readonly booleanOps: Record<
-    IEffect.BooleanEffectSpec["booleanType"],
-    (a: IModel, b: IModel) => IModel
-  > = {
-    union: M.model.combineUnion,
-    subtract: M.model.combineSubtraction,
-    intersect: M.model.combineIntersection,
-  };
-
-  private applyBooleanEffect(effect: IEffect.BooleanEffectSpec) {
-    const origin = this.$consumeTempModel(effect.originModelId);
-    const target = this.$consumeTempModel(effect.targetModelId);
-
-    const combine = this.booleanOps[effect.booleanType];
-    const result = combine(origin, target);
-
-    this.$setTempModel(effect.id, result, origin.layer);
-  }
-
-  private applyArrayEffect(effect: IEffect.ArrayEffectSpec) {
-    const target = this.$consumeTempModel(effect.targetModelId);
-    const from = [
-      this.$parseMathStr(effect.from[0], this.scope),
-      this.$parseMathStr(effect.from[1], this.scope),
-    ];
-    const to = [
-      this.$parseMathStr(effect.to[0], this.scope),
-      this.$parseMathStr(effect.to[1], this.scope),
-    ];
-
-    const parsedCount = this.$parseMathStr(effect.count, this.scope);
-    const row = M.layout.cloneToRow(target, parsedCount);
-    const path = new M.paths.Line([from, to]);
-    M.layout.childrenOnPath(
-      row,
-      path,
-      undefined,
-      undefined,
-      undefined,
-      effect.rotate,
-    );
-
-    this.$setTempModel(effect.id, row, target.layer);
-  }
-
-  private applyRadiusEffect(effect: IEffect.RadiusEffectSpec) {
-    const target = this.$consumeTempModel(effect.targetModelId);
-    const chain = M.model.findSingleChain(target);
-
-    const combined: IModel =
-      effect.indices.length > 0
-        ? {
-            models: {
-              targetModel: target,
-              fillets: this.$filletAtIndices(chain, effect.indices),
-            },
-          }
-        : {
-            models: {
-              targetModel: target,
-              fillet: M.chain.fillet(chain, toMm(effect.radius)),
-            },
-          };
-
-    this.$setTempModel(effect.id, combined, target.layer);
-  }
-
-  private $filletAtIndices(
-    chain: Chain,
-    indices: IEffect.RadiusEffectSpec["indices"],
-  ): IModel {
-    const fillets: IModel = { paths: {} };
-    const { links, endless } = chain;
-    const n = links.length;
-
-    for (const { indice, radius } of indices) {
-      const vertexIndex = Number(indice);
-      if (Number.isNaN(vertexIndex)) continue;
-
-      const nextIndex = vertexIndex + 1;
-      if (!endless && nextIndex >= n) continue;
-
-      const path1 = links[vertexIndex % n]!.walkedPath.pathContext;
-      const path2 = links[nextIndex % n]!.walkedPath.pathContext;
-
-      const filletArc = M.path.fillet(path1, path2, toMm(+radius));
-      if (filletArc) {
-        fillets.paths![`fillet_${indice}`] = filletArc;
-      }
-    }
-
-    return fillets;
-  }
-
-  private applyEffects() {
-    for (const effect of this.effects) {
-      if (effect.hidden) continue;
-      switch (effect.type) {
-        case "boolean":
-          this.applyBooleanEffect(effect);
-          break;
-        case "radius":
-          this.applyRadiusEffect(effect);
-          break;
-        case "array":
-          this.applyArrayEffect(effect);
-          break;
-      }
-    }
-  }
-
-  private flushTempModels() {
-    for (const [id, m] of this.tempModels) {
-      const model: IModel = { models: m.models }; // simplify model
-      Pacsaz.shape.push(this[`${m.layer}Model`], id, model);
     }
   }
 
@@ -379,21 +247,7 @@ export class Drawer extends Dieline {
       }
     }
 
-    this.tempModels.set(item.id, Object.assign(model, { layer: item.layer }));
-  }
-
-  /** Retrieves a temp model by id, removes it from the store, and returns a clone. Throws if not found. */
-  private $consumeTempModel(id: string): TempModel {
-    const model = this.tempModels.get(id);
-    if (!model) {
-      throw new Error(`Temp model "${id}" was not found.`);
-    }
-    this.tempModels.delete(id);
-    return M.model.clone(model) as TempModel;
-  }
-
-  private $setTempModel(id: string, model: IModel, layer: ISpec.Layer) {
-    this.tempModels.set(id, Object.assign(model, { layer }) as TempModel);
+    Pacsaz.shape.push(this.trimModel, item.id, model); //todo: push to fold/perf/trim based on layer.
   }
 
   private $checkExistance<T extends ISpec.Shapes | ISpec.Rulers>(
