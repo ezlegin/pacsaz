@@ -15,7 +15,7 @@ export default function LayerActions<T extends ISpec.Node | ISpec.Ruler>({
   handleLayerAction: HandleLayerActoin;
 }) {
   return (
-    <div className="flex gap-2">
+    <div className="flex ">
       {children}
 
       <div
@@ -25,7 +25,7 @@ export default function LayerActions<T extends ISpec.Node | ISpec.Ruler>({
           handleLayerAction(layerItemType, item, "dup");
         }}
       >
-        <Copy className="scale-[0.85]" />
+        <Copy className="scale-[0.55]" />
       </div>
 
       <div
@@ -45,7 +45,7 @@ export default function LayerActions<T extends ISpec.Node | ISpec.Ruler>({
           handleLayerAction(layerItemType, item, "delete");
         }}
       >
-        <Trash className="scale-[0.85]" />
+        <Trash className="scale-[0.55]" />
       </div>
     </div>
   );
@@ -53,8 +53,8 @@ export default function LayerActions<T extends ISpec.Node | ISpec.Ruler>({
 
 const VisibilityIcon = ({ hidden }: { hidden: boolean }) => {
   return hidden ? (
-    <EyeClosed className="scale-[0.85]" />
+    <EyeClosed className="scale-[0.55]" />
   ) : (
-    <Eye className="scale-[0.85]" />
+    <Eye className="scale-[0.55]" />
   );
 };
