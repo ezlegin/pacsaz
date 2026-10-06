@@ -4,14 +4,10 @@ import { Categories, DielineType } from "@/app/(PANEL)/dielines/DielinesList";
 import DielineLayer from "@/components/DielineEditor/DielineLayer";
 import { useDielineGenerator } from "@repo/dieline-core/hooks/useDielineGenerator";
 import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
-import { addEffects, effectsSelectors } from "@repo/store/slices/effectsSlice";
-import { addRulers, rulersSelectors } from "@repo/store/slices/rulersSlice";
-import { addShapes, shapesSelectors } from "@repo/store/slices/shapesSlice";
-import {
-  addVariables,
-  variablesSelectors,
-} from "@repo/store/slices/variablesSlice";
-import { IEffect, IVar } from "@repo/store/types";
+import { effectsSelectors } from "@repo/store/slices/effectsSlice";
+import { rulersSelectors } from "@repo/store/slices/rulersSlice";
+import { addNodes, nodesSelector } from "@repo/store/slices/nodesSlice";
+import { variablesSelectors } from "@repo/store/slices/variablesSlice";
 import { Button } from "@repo/ui/components/button";
 import {
   Drawer,
@@ -28,12 +24,11 @@ import {
 } from "@repo/ui/components/tabs";
 import { Settings as SettingsIcon } from "lucide-react";
 import dynamic from "next/dynamic";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { Effects } from "./effects/Effects";
 import Settings from "./settings/Settings";
 import Tools from "./Tools";
 import Variables from "./Variables";
-import { useMemo } from "react";
 
 const SVGPreview = dynamic(
   () => import("@repo/ui/components/custom/SVGPreview"),
@@ -51,10 +46,10 @@ const DielineEditor = ({
 }) => {
   const dispatch = useAppDispatch();
 
-  const shapes = useAppSelector(shapesSelectors.selectAll);
+  const nodes = useAppSelector(nodesSelector);
   const rulers = useAppSelector(rulersSelectors.selectAll);
 
-  const specification = useMemo(() => ({ shapes, rulers }), [shapes, rulers]);
+  const specification = useMemo(() => ({ nodes, rulers }), [nodes, rulers]);
   const variables = useAppSelector(variablesSelectors.selectAll);
   const effects = useAppSelector(effectsSelectors.selectAll);
 
@@ -66,10 +61,10 @@ const DielineEditor = ({
   const { isRendering } = useDielineGenerator(dielineForGenerator, null, false);
 
   useEffect(() => {
-    dispatch(addShapes(JSON.parse(dieline.specification).shapes));
-    dispatch(addRulers(JSON.parse(dieline.specification).rulers));
-    dispatch(addVariables(JSON.parse(dieline.variable) as IVar.VariableMap));
-    dispatch(addEffects(JSON.parse(dieline.effect) as IEffect.EffectsMap));
+    dispatch(addNodes(JSON.parse(dieline.specification).nodes));
+    // dispatch(addRulers(JSON.parse(dieline.specification).rulers));
+    // dispatch(addVariables(JSON.parse(dieline.variable) as IVar.VariableMap));
+    // dispatch(addEffects(JSON.parse(dieline.effect) as IEffect.EffectsMap));
   }, []);
 
   return (

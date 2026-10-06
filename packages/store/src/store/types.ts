@@ -23,7 +23,7 @@ export type MaterialValue = {
 };
 export type Materials = Record<MaterialKey, MaterialValue>;
 
-//! ISpec — shapes / models / rulers --------------------------------------
+//! ISpec — shapes / rulers --------------------------------------
 export namespace ISpec {
   type DupOperation =
     | { type: "zero" }
@@ -36,10 +36,11 @@ export namespace ISpec {
 
   export type Stack = "shape" | "ruler";
   export type Layer = "trim" | "fold" | "perf";
+  export type Point = [string, string];
+
   export type Dup = {
     operations: DupOperation[];
   }[];
-  export type Point = [string, string];
 
   type Generals = {
     id: string;
@@ -54,8 +55,11 @@ export namespace ISpec {
   export type Direction = "up" | "down" | "right" | "left";
 
   //! Shapes --------------------------------------
+
   export type LineSpec = Record<"length" | "angle", string> &
-    Generals & { type: "line" };
+    Generals & {
+      type: "line";
+    };
 
   export type LinesSpec = {
     absolutePts?: [string, string][];
@@ -65,29 +69,39 @@ export namespace ISpec {
     };
     isClosed: boolean;
     isRelative: boolean;
-  } & Generals & { type: "lines" };
+  } & Generals & {
+      type: "lines";
+    };
 
   export type RectangleSpec = Record<"width" | "height", string> & {
     deleteSide?: Direction;
-  } & Generals & { type: "rectangle" };
+  } & Generals & {
+      type: "rectangle";
+    };
 
   export type CircleSpec = {
     radius: string;
     radiusX: string;
     radiusY: string;
     semiCircleDirection: Direction;
-  } & Generals & { type: "circle" };
+  } & Generals & {
+      type: "circle";
+    };
 
   export type PolygonSpec = Record<
     "radius" | "sides" | "firstCornerAngle",
     string
   > &
-    Generals & { type: "polygon" };
+    Generals & {
+      type: "polygon";
+    };
 
   export type ArcSpec = Record<"radius" | "startAngle" | "endAngle", string> &
-    Generals & { type: "arc" };
+    Generals & {
+      type: "arc";
+    };
 
-  export type ShapesSpec =
+  export type Shape =
     | LineSpec
     | LinesSpec
     | RectangleSpec
@@ -95,10 +109,26 @@ export namespace ISpec {
     | PolygonSpec
     | ArcSpec;
 
-  export type ShapesKey = ShapesSpec["type"];
-  export type Shapes = ShapesSpec[];
+  export type ShapesKey = Shape["type"];
+
+  //! Node ----------------------------------------
+
+  export type Group = {
+    id: string;
+    type: "group";
+    name: string;
+    hidden: boolean;
+    nodes: Node[];
+    origin: Point;
+    dup?: Dup;
+  };
+
+  export type Node = Shape | Group;
+
+  export type Nodes = Node[];
 
   //! Rulers --------------------------------------
+
   export type Ruler = {
     from: Point;
     to: Point;
@@ -106,11 +136,14 @@ export namespace ISpec {
     offset: string;
     type: "ruler";
   } & Omit<Generals, "layer" | "origin" | "dup">;
+
   export type Rulers = Ruler[];
 
+  //! Specs ---------------------------------------
+
   export type Specs = {
-    shapes: ISpec.Shapes;
-    rulers: ISpec.Rulers;
+    nodes: Nodes;
+    rulers: Rulers;
   };
 }
 

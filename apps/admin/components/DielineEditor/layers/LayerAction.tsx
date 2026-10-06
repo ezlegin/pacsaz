@@ -3,9 +3,7 @@ import { ReactNode } from "react";
 import { HandleLayerActoin, ItemType } from "../DielineLayer";
 import { ISpec } from "@repo/store/types";
 
-export default function LayerActions<
-  T extends ISpec.ShapesSpec | ISpec.ModelsSpec | ISpec.Ruler,
->({
+export default function LayerActions<T extends ISpec.Node | ISpec.Ruler>({
   item,
   handleLayerAction,
   children,

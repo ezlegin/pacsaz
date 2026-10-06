@@ -8,7 +8,6 @@ import {
 } from "@/lib/validationSchema/PropsSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
-import { addShape, updateShape } from "@repo/store/slices/shapesSlice";
 import { ISpec } from "@repo/store/types";
 import {
   Accordion,
@@ -35,6 +34,8 @@ import PropsHeader from "./PropsHeader";
 import { DupOperationEditor } from "./shapes/DupOperationEditor";
 import PointInput from "./shapes/PointInput";
 import { nanoid } from "nanoid";
+import { addNode, updateNode } from "@repo/store/slices/nodesSlice";
+import { getNodes } from "@repo/store/getters";
 
 const getShapeSchema = (shapeKey: ISpec.ShapesKey) => {
   const schemas: Record<ISpec.ShapesKey, any> = {
@@ -49,14 +50,14 @@ const getShapeSchema = (shapeKey: ISpec.ShapesKey) => {
   return schemas[shapeKey];
 };
 
-interface ShapesPropsProvider<T extends ISpec.ShapesSpec> {
+interface ShapesPropsProvider<T extends ISpec.Nodes> {
   data: T | null;
   children: (props: { form: any }) => ReactNode;
   close: () => void;
   shapeKey: ISpec.ShapesKey;
 }
 
-function ShapesPropsProvider<T extends ISpec.ShapesSpec>({
+function ShapesPropsProvider<T extends ISpec.Nodes>({
   children,
   data,
   close,
@@ -107,10 +108,12 @@ function ShapesPropsProvider<T extends ISpec.ShapesSpec>({
 
   const onSubmit = (data: FormType) => {
     if (isUpdateType) {
-      dispatch(updateShape({ id: selection.id, changes: data }));
+      dispatch(updateNode({ id: selection.id, changes: data }));
       toast.info("Shape Updated.");
     } else {
-      dispatch(addShape(data));
+      console.log("data", data);
+      dispatch(addNode(data));
+      console.log("getNodes(", getNodes());
       toast.info("Shape Created.");
       close();
     }

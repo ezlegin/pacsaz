@@ -6,7 +6,7 @@ import dielineFileReducer from "./slices/dielineFileSlice";
 import dielineSettingsReducer from "./slices/dielineSettingsSlice";
 import overallSizesReducer from "./slices/overallSizesSlice";
 import svgReducer from "./slices/svgSlice";
-import shapesReducer from "./slices/shapesSlice";
+import shapesReducer from "./slices/nodesSlice";
 import modelsReducer from "./slices/modelsSlice";
 import rulersReducer from "./slices/rulersSlice";
 import effectsReducer from "./slices/effectsSlice";

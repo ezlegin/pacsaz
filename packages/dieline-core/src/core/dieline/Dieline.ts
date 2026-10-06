@@ -16,7 +16,6 @@ export abstract class Dieline {
 
   // -------------- Dieline Factory --------------
   protected abstract drawShapes(): void;
-  protected abstract drawRulers(): void;
 
   // -------------- Settings --------------
   protected get settings() {
@@ -39,7 +38,6 @@ export abstract class Dieline {
   model() {
     this.buildLayers();
     this.postProcess();
-    this.drawRulers();
     console.group("Dieline");
     onDevelepe && console.log("Main:", this.main);
     console.groupEnd();

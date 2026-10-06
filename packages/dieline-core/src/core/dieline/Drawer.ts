@@ -1,5 +1,4 @@
 import { ISpec, IVar } from "@repo/store/types";
-import { IModel } from "makerjs";
 import { evaluate } from "mathjs";
 import Pacsaz from "../Pacsaz";
 import { Shape } from "../shapes/Shape";
@@ -7,7 +6,7 @@ import { Dieline } from "./Dieline";
 
 export class Drawer extends Dieline {
   constructor(
-    private specs: ISpec.Specs,
+    private nodes: ISpec.Nodes,
     private variables: IVar.VariableMap,
   ) {
     super();
@@ -125,61 +124,52 @@ export class Drawer extends Dieline {
   }
 
   override drawShapes() {
-    for (const shape of this.specs.shapes) {
-      switch (shape.type) {
-        case "line":
-          this.line(shape);
-          break;
-        case "circle":
-          this.circle(shape);
-          break;
-        case "arc":
-          this.arc(shape);
-          break;
-        case "lines":
-          this.lines(shape);
-          break;
-        case "polygon":
-          this.polygon(shape);
-          break;
-        case "rectangle":
-          this.rectangle(shape);
-          break;
-      }
+    for (const node of this.nodes) {
+      this.renderNode(node);
     }
   }
 
-  //! ------------------------ Rulers ------------------------
-  override drawRulers() {
-    const rulers = this.$checkExistance(this.specs.rulers);
-    if (rulers) {
-      let models: Record<string, IModel> = {
-        overall: new Pacsaz.ruler.OverallRuler(this.trimModel),
-      };
-      for (const r of rulers) {
-        if (r.hidden) continue;
-        const from = [
-          this.$parseMathStr(r.from[0], this.scope),
-          this.$parseMathStr(r.from[1], this.scope),
-        ];
-        const to = [
-          this.$parseMathStr(r.to[0], this.scope),
-          this.$parseMathStr(r.to[1], this.scope),
-        ];
-        const value = this.$parseMathStr(r.value, this.scope);
-        const offset = this.$parseMathStr(r.offset, this.scope);
-        const model = new Pacsaz.ruler.DielineRuler(from, to, value, offset);
-        models[r.key] = model;
+  private renderNode(node: ISpec.Node) {
+    if (node.hidden) return;
+
+    if (node.type === "group") {
+      for (const child of node.nodes) {
+        this.renderNode(child);
       }
-      this.$pushRuler(models);
+
+      return;
     }
 
-    Pacsaz.shape.push(this.main, "ruler", this.rulerModel, "ruler");
+    switch (node.type) {
+      case "line":
+        this.line(node);
+        break;
+
+      case "circle":
+        this.circle(node);
+        break;
+
+      case "arc":
+        this.arc(node);
+        break;
+
+      case "lines":
+        this.lines(node);
+        break;
+
+      case "polygon":
+        this.polygon(node);
+        break;
+
+      case "rectangle":
+        this.rectangle(node);
+        break;
+    }
   }
 
   // -------------------- UTILS --------------------
 
-  private $pusher<T extends ISpec.ShapesSpec>(
+  private $pusher<T extends ISpec.Node>(
     item: T,
     callBack: (val: T, scope: Record<string, number>) => Shape,
   ) {
@@ -248,12 +238,6 @@ export class Drawer extends Dieline {
     }
 
     Pacsaz.shape.push(this.trimModel, item.id, model); //todo: push to fold/perf/trim based on layer.
-  }
-
-  private $checkExistance<T extends ISpec.Shapes | ISpec.Rulers>(
-    item: T | undefined,
-  ) {
-    if (item && item.length > 0) return item;
   }
 
   private get scope() {

@@ -1,4 +1,5 @@
 import { Categories, DielineType } from "@/app/(PANEL)/dielines/DielinesList";
+import { getNodes } from "@repo/store/getters";
 import { useAppDispatch, useAppSelector, useUndoRedo } from "@repo/store/hooks";
 import {
   addRuler,
@@ -7,12 +8,7 @@ import {
   setRulerVisibility,
 } from "@repo/store/slices/rulersSlice";
 import { clearSelection } from "@repo/store/slices/selectionSlice";
-import {
-  addShape,
-  removeShape,
-  setShapeVisibility,
-  shapesSelectors,
-} from "@repo/store/slices/shapesSlice";
+import { removeNode, setNodeVisibility } from "@repo/store/slices/nodesSlice";
 import { ISpec } from "@repo/store/types";
 import { Button } from "@repo/ui/components/button";
 import { ActButton } from "@repo/ui/components/custom/ActionButton";
@@ -30,14 +26,13 @@ import {
   TabsTrigger,
 } from "@repo/ui/components/tabs";
 import { Redo, Settings, Undo } from "lucide-react";
-import { nanoid } from "nanoid";
-import DielineChangesSaver from "../forms/dielineChagesSaver";
+import DielineChangesSaver from "../forms/dielineChangesSaver";
 import DielineSettingsForm from "../forms/DielineSettingsForm";
 import RulerLayers from "./layers/RulerLayers";
 import ShapeLayers from "./layers/ShapeLayers";
 
 export type ItemType = {
-  ShapesSpec: ISpec.ShapesSpec;
+  nodes: ISpec.Node;
   Ruler: ISpec.Ruler;
 };
 
@@ -55,7 +50,7 @@ const DielineLayer = ({
   categories: Categories;
 }) => {
   const dispatch = useAppDispatch();
-  const shapes = useAppSelector(shapesSelectors.selectAll);
+  const nodes = getNodes();
   const rulers = useAppSelector(rulersSelectors.selectAll);
 
   function handleLayerAction(
@@ -64,20 +59,21 @@ const DielineLayer = ({
     type: "dup" | "delete" | "visibility",
   ) {
     switch (layerItemType) {
-      case "ShapesSpec":
-        const shape = item as ISpec.ShapesSpec;
+      case "nodes":
+        const node = item as ISpec.Node;
         switch (type) {
           case "delete":
-            dispatch(removeShape(shape.id));
+            dispatch(removeNode(node.id));
             dispatch(clearSelection());
             break;
           case "visibility":
-            dispatch(setShapeVisibility(shape.id));
+            dispatch(setNodeVisibility(node.id));
             break;
           case "dup":
-            dispatch(
-              addShape({ ...shape, key: shape.key + "-dup", id: nanoid() }),
-            );
+            // dispatch(
+            //   addNode({ ...shape, key: shape.key + "-dup", id: nanoid() }),
+            //   addNode({type: 'group', }),
+            // );
             break;
         }
         break;
@@ -152,7 +148,7 @@ const DielineLayer = ({
         </div>
 
         <TabsContent value="layers">
-          <ShapeLayers handleLayerAction={handleLayerAction} shapes={shapes} />
+          <ShapeLayers handleLayerAction={handleLayerAction} nodes={nodes} />
         </TabsContent>
         <TabsContent value="rulers">
           <RulerLayers handleLayerAction={handleLayerAction} rulers={rulers} />

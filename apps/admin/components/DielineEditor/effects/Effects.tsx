@@ -4,7 +4,6 @@ import { pointInput } from "@/lib/validationSchema/PropsSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAppSelector } from "@repo/store/hooks";
 import { effectsSelectors } from "@repo/store/slices/effectsSlice";
-import { shapesSelectors } from "@repo/store/slices/shapesSlice";
 import { IEffect } from "@repo/store/types";
 import { Button } from "@repo/ui/components/button";
 import { Label } from "@repo/ui/components/label";
@@ -16,6 +15,7 @@ import BooleanEffectForm from "./BooleanEffectForm";
 import EffectsList from "./EffectsList";
 import RadiusEffectForm from "./RadiusEffectForm";
 import ArrayEffectForm from "./ArrayEffectForm";
+import { getNodes } from "@repo/store/getters";
 
 const arrayFormSchema = z.object({
   count: z.string().min(1),
@@ -85,14 +85,14 @@ export const Effects = () => {
   });
 
   const effects = useAppSelector(effectsSelectors.selectAll);
-  const shapes = useAppSelector(shapesSelectors.selectAll);
+  const nodes = getNodes();
 
   if (effectFormType === "radius")
     return (
       <RadiusEffectForm
         form={radiusForm}
         closeForm={() => setEffectFormType(null)}
-        shapes={shapes}
+        shapes={nodes}
       />
     );
   if (effectFormType === "boolean")
@@ -100,7 +100,7 @@ export const Effects = () => {
       <BooleanEffectForm
         form={booleanForm}
         closeForm={() => setEffectFormType(null)}
-        shapes={shapes}
+        shapes={nodes}
       />
     );
   if (effectFormType === "array")
@@ -108,7 +108,7 @@ export const Effects = () => {
       <ArrayEffectForm
         form={arrayForm}
         closeForm={() => setEffectFormType(null)}
-        shapes={shapes}
+        shapes={nodes}
       />
     );
 
@@ -150,7 +150,7 @@ export const Effects = () => {
       <EffectsList
         arrayForm={arrayForm}
         effects={effects}
-        shapes={shapes}
+        shapes={nodes}
         radiusForm={radiusForm}
         booleanForm={booleanForm}
         setEffectFormType={setEffectFormType}

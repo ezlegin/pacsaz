@@ -16,7 +16,7 @@ import dielineSettingsReducer from "./slices/dielineSettingsSlice";
 import overallSizesReducer from "./slices/overallSizesSlice";
 import svgReducer from "./slices/svgSlice";
 import selectionReducer from "./slices/selectionSlice";
-import shapesReducer from "./slices/shapesSlice";
+import nodesReducer from "./slices/nodesSlice";
 import rulersReducer from "./slices/rulersSlice";
 import effectsReducer from "./slices/effectsSlice";
 import variablesReducer from "./slices/variablesSlice";
@@ -32,7 +32,7 @@ const persistedDeveloperTools = persistReducer(
 
 const undoableReducer = undoable(
   combineReducers({
-    shapes: shapesReducer,
+    nodes: nodesReducer,
     rulers: rulersReducer,
     effects: effectsReducer,
     variables: variablesReducer,
@@ -40,8 +40,7 @@ const undoableReducer = undoable(
   {
     limit: 20,
     filter: excludeAction([
-      "shapes/setShapeVisibility",
-      "models/setModelVisibility",
+      "nodes/setNodeVisibility",
       "rulers/setRulerVisibility",
     ]),
   },

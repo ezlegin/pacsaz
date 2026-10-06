@@ -5,7 +5,7 @@ import {
 } from "@reduxjs/toolkit";
 import type { AppDispatch, RootState } from "../store";
 import { effectsSelectors, removeEffect } from "../slices/effectsSlice";
-import { removeShape } from "../slices/shapesSlice";
+import { removeNode } from "../slices/nodesSlice";
 
 export const cascadeListenerMiddleware = createListenerMiddleware();
 
@@ -15,7 +15,7 @@ const startAppListening = cascadeListenerMiddleware.startListening.withTypes<
 >();
 
 startAppListening({
-  matcher: isAnyOf(removeShape),
+  matcher: isAnyOf(removeNode),
   effect: (action: PayloadAction<string>, listenerApi) => {
     const removedId = action.payload;
     const state = listenerApi.getState();

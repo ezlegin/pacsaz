@@ -44,7 +44,8 @@ export function useDielineGenerator(
   user?: any | null,
   showWatermark?: boolean,
 ) {
-  const specs = dieline.specification;
+  const nodes = dieline.specification.nodes;
+
   const dielineSettings = dieline.customSettings ?? dieline.settings;
   const [isRendering, startTransition] = useTransition();
   const dispatch = useAppDispatch();
@@ -56,11 +57,7 @@ export function useDielineGenerator(
   );
   const effects = useAppSelector((state) => effectsSelectors.selectAll(state));
 
-  const drawer = new Pacsaz.models.Drawer(
-    specs,
-    dieline.variables,
-    dieline.effects,
-  );
+  const drawer = new Pacsaz.models.Drawer(nodes, dieline.variables);
   const offsets = resolveOffsets();
 
   // set defaults
@@ -121,7 +118,7 @@ export function useDielineGenerator(
       const svg = drawer.model();
       dispatch(setSvg(svg));
     });
-  }, [settings, Drawer, specs, developerTools, variables, effects]);
+  }, [settings, Drawer, nodes, developerTools, variables, effects]);
 
   return {
     isRendering,
