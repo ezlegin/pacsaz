@@ -5,7 +5,6 @@ import DielineLayer from "@/components/DielineEditor/DielineLayer";
 import { useDielineGenerator } from "@repo/dieline-core/hooks/useDielineGenerator";
 import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
 import { addEffects, effectsSelectors } from "@repo/store/slices/effectsSlice";
-import { addModels, modelsSelectors } from "@repo/store/slices/modelsSlice";
 import { addRulers, rulersSelectors } from "@repo/store/slices/rulersSlice";
 import { addShapes, shapesSelectors } from "@repo/store/slices/shapesSlice";
 import {
@@ -54,12 +53,8 @@ const DielineEditor = ({
 
   const shapes = useAppSelector(shapesSelectors.selectAll);
   const rulers = useAppSelector(rulersSelectors.selectAll);
-  const models = useAppSelector(modelsSelectors.selectAll);
 
-  const specification = useMemo(
-    () => ({ shapes, rulers, models }),
-    [shapes, rulers, models],
-  );
+  const specification = useMemo(() => ({ shapes, rulers }), [shapes, rulers]);
   const variables = useAppSelector(variablesSelectors.selectAll);
   const effects = useAppSelector(effectsSelectors.selectAll);
 
@@ -72,7 +67,6 @@ const DielineEditor = ({
 
   useEffect(() => {
     dispatch(addShapes(JSON.parse(dieline.specification).shapes));
-    dispatch(addModels(JSON.parse(dieline.specification).models));
     dispatch(addRulers(JSON.parse(dieline.specification).rulers));
     dispatch(addVariables(JSON.parse(dieline.variable) as IVar.VariableMap));
     dispatch(addEffects(JSON.parse(dieline.effect) as IEffect.EffectsMap));

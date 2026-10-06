@@ -1,12 +1,6 @@
 import { Categories, DielineType } from "@/app/(PANEL)/dielines/DielinesList";
 import { useAppDispatch, useAppSelector, useUndoRedo } from "@repo/store/hooks";
 import {
-  addModel,
-  modelsSelectors,
-  removeModel,
-  setModelVisibility,
-} from "@repo/store/slices/modelsSlice";
-import {
   addRuler,
   removeRuler,
   rulersSelectors,
@@ -39,14 +33,12 @@ import { Redo, Settings, Undo } from "lucide-react";
 import { nanoid } from "nanoid";
 import DielineChangesSaver from "../forms/dielineChagesSaver";
 import DielineSettingsForm from "../forms/DielineSettingsForm";
-import ModelLayers from "./layers/ModelLayers";
 import RulerLayers from "./layers/RulerLayers";
 import ShapeLayers from "./layers/ShapeLayers";
 
 export type ItemType = {
   ShapesSpec: ISpec.ShapesSpec;
   Ruler: ISpec.Ruler;
-  ModelsSpec: ISpec.ModelsSpec;
 };
 
 export type HandleLayerActoin = (
@@ -64,7 +56,6 @@ const DielineLayer = ({
 }) => {
   const dispatch = useAppDispatch();
   const shapes = useAppSelector(shapesSelectors.selectAll);
-  const models = useAppSelector(modelsSelectors.selectAll);
   const rulers = useAppSelector(rulersSelectors.selectAll);
 
   function handleLayerAction(
@@ -87,21 +78,6 @@ const DielineLayer = ({
             dispatch(
               addShape({ ...shape, key: shape.key + "-dup", id: nanoid() }),
             );
-            break;
-        }
-        break;
-      case "ModelsSpec":
-        const model = item as ISpec.ModelsSpec;
-        switch (type) {
-          case "delete":
-            dispatch(removeModel(model.id));
-            dispatch(clearSelection());
-            break;
-          case "visibility":
-            dispatch(setModelVisibility(model.id));
-            break;
-          case "dup":
-            dispatch(addModel({ ...model, key: model.key + "-dup" }));
             break;
         }
         break;
@@ -171,7 +147,6 @@ const DielineLayer = ({
           <TabsList className="w-full px-0">
             <TabsTrigger value="layers">Layers</TabsTrigger>
             <TabsTrigger value="rulers">Rulers</TabsTrigger>
-            <TabsTrigger value="models">Models</TabsTrigger>
           </TabsList>
           <Separator />
         </div>
@@ -181,9 +156,6 @@ const DielineLayer = ({
         </TabsContent>
         <TabsContent value="rulers">
           <RulerLayers handleLayerAction={handleLayerAction} rulers={rulers} />
-        </TabsContent>
-        <TabsContent value="models">
-          <ModelLayers handleLayerAction={handleLayerAction} models={models} />
         </TabsContent>
       </Tabs>
     </div>

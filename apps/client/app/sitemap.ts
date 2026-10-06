@@ -1,8 +1,9 @@
 import { prisma } from "@repo/db";
 import type { MetadataRoute } from "next";
 
-const url = process.env.NEXT_PUBLIC_MAIN_URL || "https://pacsaz.ir";
 export const dynamic = "force-dynamic";
+
+const url = process.env.NEXT_PUBLIC_MAIN_URL || "https://pacsaz.ir";
 
 type ChangeFreq =
   | "daily"

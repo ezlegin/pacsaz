@@ -17,7 +17,6 @@ import overallSizesReducer from "./slices/overallSizesSlice";
 import svgReducer from "./slices/svgSlice";
 import selectionReducer from "./slices/selectionSlice";
 import shapesReducer from "./slices/shapesSlice";
-import modelsReducer from "./slices/modelsSlice";
 import rulersReducer from "./slices/rulersSlice";
 import effectsReducer from "./slices/effectsSlice";
 import variablesReducer from "./slices/variablesSlice";
@@ -34,7 +33,6 @@ const persistedDeveloperTools = persistReducer(
 const undoableReducer = undoable(
   combineReducers({
     shapes: shapesReducer,
-    models: modelsReducer,
     rulers: rulersReducer,
     effects: effectsReducer,
     variables: variablesReducer,

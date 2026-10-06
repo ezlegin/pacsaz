@@ -34,7 +34,7 @@ export namespace ISpec {
     | { type: "rotate"; value: string }
     | { type: "scale"; value: string };
 
-  export type Stack = "shape" | "model" | "ruler";
+  export type Stack = "shape" | "ruler";
   export type Layer = "trim" | "fold" | "perf";
   export type Dup = {
     operations: DupOperation[];
@@ -98,32 +98,6 @@ export namespace ISpec {
   export type ShapesKey = ShapesSpec["type"];
   export type Shapes = ShapesSpec[];
 
-  //! Models --------------------------------------
-  type DustSide = "left" | "right" | "both";
-  type ModelGenerals = Omit<Generals, "layer">;
-  export type GlueSpec = { from: Point; to: Point } & ModelGenerals & {
-      type: "glue";
-    };
-  export type HoleSpec = {
-    angleBetweenStartAndEnd: string;
-    heightOfLine: string;
-    rotation: string;
-    handleDir: "left" | "right";
-  } & ModelGenerals & {
-      type: "hole";
-    };
-  export type DoorSpec = {
-    dustSide?: DustSide;
-    mirror: { x: boolean; y: boolean };
-    indentAt: { l: boolean; r: boolean };
-  } & ModelGenerals & { type: "door" };
-  export type SnapLockSpec = ModelGenerals & { type: "snapLock" };
-
-  export type ModelsSpec = GlueSpec | DoorSpec | SnapLockSpec | HoleSpec;
-
-  export type ModelsKey = ModelsSpec["type"];
-  export type Models = ModelsSpec[];
-
   //! Rulers --------------------------------------
   export type Ruler = {
     from: Point;
@@ -136,7 +110,6 @@ export namespace ISpec {
 
   export type Specs = {
     shapes: ISpec.Shapes;
-    models: ISpec.Models;
     rulers: ISpec.Rulers;
   };
 }

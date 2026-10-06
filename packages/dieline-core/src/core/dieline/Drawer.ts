@@ -162,70 +162,6 @@ export class Drawer extends Dieline {
     this.flushTempModels();
   }
 
-  //! ------------------------ Models ------------------------
-  private glue(glue: ISpec.GlueSpec) {
-    this.$pusher(glue, ({ from, to }, scope) => {
-      const glueFrom = [
-        this.$parseMathStr(from[0], scope),
-        this.$parseMathStr(from[1], scope),
-      ];
-      const glueTo = [
-        this.$parseMathStr(to[0], scope),
-        this.$parseMathStr(to[1], scope),
-      ];
-      return new Pacsaz.models.Glue(glueFrom, glueTo);
-    });
-  }
-
-  private door(door: ISpec.DoorSpec) {
-    this.$pusher(door, ({ dustSide, mirror, indentAt }) => {
-      const doorModel = new Pacsaz.models.Door(dustSide, indentAt);
-      if (mirror.x || mirror.y) {
-        doorModel.mirror(mirror.x, mirror.y);
-      }
-      return doorModel;
-    });
-  }
-
-  private snapLock(snapLock: ISpec.SnapLockSpec) {
-    this.$pusher(snapLock, () => {
-      return new Pacsaz.models.SnapLock();
-    });
-  }
-
-  private hole(hole: ISpec.HoleSpec) {
-    this.$pusher(
-      hole,
-      ({ angleBetweenStartAndEnd, heightOfLine, rotation, handleDir }) => {
-        return new Pacsaz.models.Hole(
-          angleBetweenStartAndEnd,
-          heightOfLine,
-          rotation,
-          handleDir,
-        );
-      },
-    );
-  }
-
-  override drawModels() {
-    for (const model of this.specs.models) {
-      switch (model.type) {
-        case "glue":
-          this.glue(model);
-          break;
-        case "door":
-          this.door(model);
-          break;
-        case "snapLock":
-          this.snapLock(model);
-          break;
-        case "hole":
-          this.hole(model);
-          break;
-      }
-    }
-  }
-
   //! ------------------------ Effects ------------------------
   private readonly booleanOps: Record<
     IEffect.BooleanEffectSpec["booleanType"],
@@ -375,7 +311,7 @@ export class Drawer extends Dieline {
 
   // -------------------- UTILS --------------------
 
-  private $pusher<T extends ISpec.ShapesSpec | ISpec.ModelsSpec>(
+  private $pusher<T extends ISpec.ShapesSpec>(
     item: T,
     callBack: (val: T, scope: Record<string, number>) => Shape,
   ) {
@@ -443,11 +379,7 @@ export class Drawer extends Dieline {
       }
     }
 
-    if ("layer" in item) {
-      this.tempModels.set(item.id, Object.assign(model, { layer: item.layer }));
-    } else {
-      this.$pushModels({ [item.key]: model });
-    }
+    this.tempModels.set(item.id, Object.assign(model, { layer: item.layer }));
   }
 
   /** Retrieves a temp model by id, removes it from the store, and returns a clone. Throws if not found. */
@@ -464,7 +396,7 @@ export class Drawer extends Dieline {
     this.tempModels.set(id, Object.assign(model, { layer }) as TempModel);
   }
 
-  private $checkExistance<T extends ISpec.Shapes | ISpec.Models | ISpec.Rulers>(
+  private $checkExistance<T extends ISpec.Shapes | ISpec.Rulers>(
     item: T | undefined,
   ) {
     if (item && item.length > 0) return item;

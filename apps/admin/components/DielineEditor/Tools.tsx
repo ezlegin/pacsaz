@@ -1,5 +1,8 @@
 "use client";
 
+import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
+import { clearSelection } from "@repo/store/slices/selectionSlice";
+import { ISpec } from "@repo/store/types";
 import { Label } from "@repo/ui/components/label";
 import {
   ChevronUp,
@@ -13,26 +16,18 @@ import {
   Square,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import ModelsPropsProvider from "./props/ModelssPropsProvider";
 import RulerProps from "./props/RulerProps";
 import ShapesPropsProvider from "./props/ShapesPropsProvider";
-import DoorProps from "./props/models/DoorProps";
-import GlueProps from "./props/models/GlueProps";
 import ArcProps from "./props/shapes/ArcProps";
 import CircleProps from "./props/shapes/CircleProps";
 import LineProps from "./props/shapes/LineProps";
 import LinesProps from "./props/shapes/LinesProps";
 import PolygonProps from "./props/shapes/PolygonProps";
 import RectangleProps from "./props/shapes/RectangleProps";
-import SnapLockProps from "./props/models/SnapLockProps";
-import { ISpec } from "@repo/store/types";
-import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
-import { clearSelection } from "@repo/store/slices/selectionSlice";
-import HoleProps from "./props/models/HoleProps";
 
 type EditorMode = {
   stack: ISpec.Stack;
-  key: ISpec.ShapesKey | "ruler" | ISpec.ModelsKey;
+  key: ISpec.ShapesKey | "ruler";
 };
 
 const Tools = () => {
@@ -46,7 +41,6 @@ const Tools = () => {
     { key: "polygon", Icon: Hexagon },
     { key: "arc", Icon: Parentheses },
   ];
-  const modelsList: ISpec.ModelsKey[] = ["glue", "door", "snapLock", "hole"];
 
   const selection = useAppSelector((s) => s.selection.selection);
   const dispatch = useAppDispatch();
@@ -80,12 +74,6 @@ const Tools = () => {
     polygon: PolygonProps,
     arc: ArcProps,
   };
-  const modelPropsComponents = {
-    glue: GlueProps,
-    door: DoorProps,
-    snapLock: SnapLockProps,
-    hole: HoleProps,
-  };
 
   if (editorMode) {
     if (editorMode.stack === "shape") {
@@ -100,21 +88,6 @@ const Tools = () => {
         >
           {({ form }) => <Component form={form} />}
         </ShapesPropsProvider>
-      );
-    }
-
-    if (editorMode.stack === "model") {
-      const editorKey = editorMode.key as ISpec.ModelsKey;
-      const Component = modelPropsComponents[editorKey];
-      return (
-        <ModelsPropsProvider
-          key={selection?.id}
-          data={selection as ISpec.ModelsSpec}
-          close={handleCloseEditor}
-          modelKey={editorKey}
-        >
-          {({ form }) => <Component form={form} />}
-        </ModelsPropsProvider>
       );
     }
 
@@ -147,22 +120,6 @@ const Tools = () => {
                 />
                 {key}
               </Label>
-              <PlusCircle size={14} />
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <Label>Models</Label>
-        <div>
-          {modelsList.map((key, idx) => (
-            <div
-              key={idx}
-              className="flex justify-between items-center hover:bg-gray-200/50 cursor-pointer px-2 py-2.5 rounded-md group"
-              onClick={() => setEditorMode({ stack: "model", key })}
-            >
-              <Label className="capitalize cursor-pointer">{key}</Label>
               <PlusCircle size={14} />
             </div>
           ))}

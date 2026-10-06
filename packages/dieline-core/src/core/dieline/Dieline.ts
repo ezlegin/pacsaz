@@ -16,7 +16,6 @@ export abstract class Dieline {
 
   // -------------- Dieline Factory --------------
   protected abstract drawShapes(): void;
-  protected abstract drawModels(): void;
   protected abstract drawRulers(): void;
 
   // -------------- Settings --------------
@@ -57,7 +56,6 @@ export abstract class Dieline {
     this.perfModel = { layer: "perf" };
 
     this.drawShapes();
-    this.drawModels();
 
     const dieline: IModel = {
       models: {
@@ -99,30 +97,6 @@ export abstract class Dieline {
         trim: trimSize,
       }),
     );
-  }
-
-  // -------------- Utils --------------
-  protected $pushModels(models: IModelMap) {
-    for (const m in models) {
-      const parentModel = models[m]!;
-
-      for (const key in parentModel.models) {
-        const childModel = parentModel.models[key]!;
-        const origin = childModel.origin;
-
-        const trims: IModel = {
-          models: childModel.models?.trims!.models,
-          origin,
-        };
-        const folds: IModel = {
-          models: childModel.models?.folds?.models,
-          origin,
-        };
-
-        Pacsaz.shape.push(this.trimModel, m, trims);
-        Pacsaz.shape.push(this.foldModel, m, folds);
-      }
-    }
   }
 
   protected $pushRuler(models: IModelMap) {

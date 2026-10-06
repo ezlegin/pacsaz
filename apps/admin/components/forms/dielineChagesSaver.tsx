@@ -7,7 +7,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Dieline, DielineSettings } from "@repo/db";
 import { useAppSelector } from "@repo/store/hooks";
 import { effectsSelectors } from "@repo/store/slices/effectsSlice";
-import { modelsSelectors } from "@repo/store/slices/modelsSlice";
 import { rulersSelectors } from "@repo/store/slices/rulersSlice";
 import { shapesSelectors } from "@repo/store/slices/shapesSlice";
 import { variablesSelectors } from "@repo/store/slices/variablesSlice";
@@ -21,7 +20,6 @@ const DielineChangesSaver = ({ dieline }: { dieline: DielineType }) => {
   const specs = {
     shapes: useAppSelector(shapesSelectors.selectAll),
     rulers: useAppSelector(rulersSelectors.selectAll),
-    models: useAppSelector(modelsSelectors.selectAll),
   };
   const variables = useAppSelector(variablesSelectors.selectAll);
   const effects = useAppSelector(effectsSelectors.selectAll);
