@@ -116,7 +116,7 @@ export namespace ISpec {
   export type Group = {
     id: string;
     type: "group";
-    name: string;
+    key: string;
     hidden: boolean;
     nodes: Node[];
     origin: Point;

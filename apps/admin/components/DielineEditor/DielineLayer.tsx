@@ -8,7 +8,11 @@ import {
   setRulerVisibility,
 } from "@repo/store/slices/rulersSlice";
 import { clearSelection } from "@repo/store/slices/selectionSlice";
-import { removeNode, setNodeVisibility } from "@repo/store/slices/nodesSlice";
+import {
+  addNode,
+  removeNode,
+  setNodeVisibility,
+} from "@repo/store/slices/nodesSlice";
 import { ISpec } from "@repo/store/types";
 import { Button } from "@repo/ui/components/button";
 import { ActButton } from "@repo/ui/components/custom/ActionButton";
@@ -30,6 +34,7 @@ import DielineChangesSaver from "../forms/dielineChangesSaver";
 import DielineSettingsForm from "../forms/DielineSettingsForm";
 import RulerLayers from "./layers/RulerLayers";
 import ShapeLayers from "./layers/ShapeLayers";
+import { nanoid } from "nanoid";
 
 export type ItemType = {
   nodes: ISpec.Node;
@@ -70,10 +75,9 @@ const DielineLayer = ({
             dispatch(setNodeVisibility(node.id));
             break;
           case "dup":
-            // dispatch(
-            //   addNode({ ...shape, key: shape.key + "-dup", id: nanoid() }),
-            //   addNode({type: 'group', }),
-            // );
+            dispatch(
+              addNode({ ...node, key: node.key + "-dup", id: nanoid() }),
+            );
             break;
         }
         break;

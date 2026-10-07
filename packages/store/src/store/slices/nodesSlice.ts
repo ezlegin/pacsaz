@@ -1,12 +1,12 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { ISpec } from "../types";
-import type { RootState } from "../store";
 import {
+  groupNodes as _groupNodes,
   findNode,
   removeNodeById,
   ungroupNodeById,
-  groupNodes as _groupNodes,
 } from "../../hepers/node";
+import type { RootState } from "../store";
+import { ISpec } from "../types";
 
 const initialState: ISpec.Nodes = [];
 
@@ -20,6 +20,10 @@ const nodesSlice = createSlice({
 
     addNodes: (state, action: PayloadAction<ISpec.Node[]>) => {
       state.push(...action.payload);
+    },
+
+    setNodes: (state, action: PayloadAction<ISpec.Nodes>) => {
+      return action.payload;
     },
 
     updateNode: (
@@ -66,6 +70,7 @@ const nodesSlice = createSlice({
 
 export const {
   addNode,
+  setNodes,
   addNodes,
   updateNode,
   removeNode,

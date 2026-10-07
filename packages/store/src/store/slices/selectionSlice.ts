@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { ISpec } from "../types";
 
-type Selection = ISpec.ShapesSpec | ISpec.Ruler | ISpec.ModelsSpec;
+type Selection = ISpec.Node | ISpec.Ruler;
 
 const initialState: {
   selection: Selection | null;
