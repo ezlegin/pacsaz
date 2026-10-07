@@ -6,7 +6,6 @@ import {
   expandWithDescendants,
   FlatNode,
   flattenTree,
-  getProjection,
 } from "@/lib/utils/tree";
 import {
   closestCenter,
@@ -32,6 +31,7 @@ import {
   groupNodes,
   setNodes,
   ungroupNode,
+  updateNode,
 } from "@repo/store/slices/nodesSlice";
 import {
   clearSelection,
@@ -42,6 +42,7 @@ import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
+  ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@repo/ui/components/context-menu";
 import { cn } from "@repo/ui/lib/utils";
@@ -54,6 +55,7 @@ import {
   Hexagon,
   Minus,
   Parentheses,
+  Pencil,
   Square,
   Trash,
 } from "lucide-react";
@@ -69,7 +71,7 @@ import {
 import { HandleLayerActoin } from "../DielineLayer";
 import LayerActions from "./LayerAction";
 
-const INDENT = 16;
+const INDENT = 8;
 
 interface ShapeLayersProps {
   nodes: ISpec.Nodes;
@@ -82,6 +84,7 @@ export default function ShapeLayers({
 }: ShapeLayersProps) {
   const dispatch = useAppDispatch();
 
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [items, setItems] = useState<FlatNode[]>(() => flattenTree(nodes));
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set());
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -320,6 +323,22 @@ export default function ShapeLayers({
     [items, activeId],
   );
 
+  const handleRenameStart = (id: string) => setEditingId(id);
+
+  const handleRenameCommit = (id: string, nextKey: string) => {
+    const trimmed = nextKey.trim();
+    const current = items.find((i) => i.id === id)?.node;
+
+    if (trimmed && current && trimmed !== current.key) {
+      dispatch(
+        updateNode({ id, changes: { key: trimmed } as Partial<ISpec.Node> }),
+      );
+    }
+    setEditingId(null);
+  };
+
+  const handleRenameCancel = () => setEditingId(null);
+
   return (
     <DndContext
       sensors={sensors}
@@ -349,11 +368,15 @@ export default function ShapeLayers({
               isActive={item.id === activeId}
               isSelected={selectedIds.includes(item.id)}
               isCollapsed={collapsed.has(item.id)}
+              isEditing={editingId === item.id}
               selectedIds={selectedIds}
               onSelect={handleSelect}
               onToggleCollapse={toggleCollapse}
               onGroup={handleGroup}
               onUngroup={handleUngroup}
+              onRenameStart={handleRenameStart}
+              onRenameCommit={handleRenameCommit}
+              onRenameCancel={handleRenameCancel}
               handleLayerAction={handleLayerAction}
             />
           ))}
@@ -382,22 +405,30 @@ function SortableRow({
   isActive,
   isSelected,
   isCollapsed,
+  isEditing,
   selectedIds,
   onSelect,
   onToggleCollapse,
   onGroup,
   onUngroup,
+  onRenameStart,
+  onRenameCommit,
+  onRenameCancel,
   handleLayerAction,
 }: {
   item: FlatNode;
   isActive: boolean;
   isSelected: boolean;
   isCollapsed: boolean;
+  isEditing: boolean;
   selectedIds: string[];
   onSelect: (id: string, e: MouseEvent) => void;
   onToggleCollapse: (id: string) => void;
   onGroup: (ids: string[]) => void;
   onUngroup: (id: string) => void;
+  onRenameStart: (id: string) => void;
+  onRenameCommit: (id: string, key: string) => void;
+  onRenameCancel: () => void;
   handleLayerAction: HandleLayerActoin;
 }) {
   const {
@@ -427,14 +458,22 @@ function SortableRow({
             isSelected={isSelected}
             isCollapsed={isCollapsed}
             isActive={isActive}
+            isEditing={isEditing}
             onSelect={onSelect}
             onToggleCollapse={onToggleCollapse}
+            onRenameCommit={onRenameCommit}
+            onRenameCancel={onRenameCancel}
             handleLayerAction={handleLayerAction}
           />
         </div>
       </ContextMenuTrigger>
 
       <ContextMenuContent>
+        <ContextMenuItem onSelect={() => onRenameStart(item.id)}>
+          <Pencil className="mr-2 h-4 w-4" />
+          Rename
+        </ContextMenuItem>
+        <ContextMenuSeparator />
         {isGroup ? (
           <>
             <ContextMenuItem onSelect={() => onUngroup(item.id)}>
@@ -471,29 +510,45 @@ function RowContent({
   isSelected,
   isCollapsed,
   isActive,
+  isEditing,
   onSelect,
   onToggleCollapse,
+  onRenameCommit,
+  onRenameCancel,
   handleLayerAction,
 }: {
   item: FlatNode;
   isSelected: boolean;
   isCollapsed: boolean;
   isActive?: boolean;
+  isEditing?: boolean;
   onSelect?: (id: string, e: MouseEvent) => void;
   onToggleCollapse?: (id: string) => void;
+  onRenameCommit?: (id: string, key: string) => void;
+  onRenameCancel?: () => void;
   handleLayerAction?: HandleLayerActoin;
 }) {
   const node = item.node;
   const isGroup = node.type === "group";
+  const [draft, setDraft] = useState(node.key);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Refresh the draft whenever we (re)enter edit mode for this row.
+  useEffect(() => {
+    if (isEditing) setDraft(node.key);
+  }, [isEditing, node.key]);
 
   return (
     <div
       className={cn(
-        "group flex h-8 cursor-pointer select-none items-center justify-between gap-2 rounded-md px-2 ",
+        "group flex h-8 cursor-pointer select-none items-center justify-between gap-2 rounded-md px-2",
         isSelected && "border bg-gray-200/50",
       )}
       style={{ paddingLeft: `${8 + item.depth * INDENT}px` }}
-      onClick={(e) => onSelect?.(node.id, e)}
+      onClick={(e) => {
+        if (isEditing) return;
+        onSelect?.(node.id, e);
+      }}
     >
       <div className="flex min-w-0 items-center gap-1">
         {isGroup ? (
@@ -518,7 +573,8 @@ function RowContent({
 
         <span
           className={cn(
-            "truncate flex items-center text-xs font-medium",
+            "flex items-center text-xs font-medium",
+            !isEditing && "truncate",
             !isGroup &&
               (node.layer === "trim"
                 ? "text-blue-500"
@@ -532,11 +588,34 @@ function RowContent({
           ) : (
             <LayerIcon data={node.type} />
           )}
-          {node.key}
+
+          {isEditing ? (
+            <input
+              ref={inputRef}
+              autoFocus
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              onFocus={(e) => e.currentTarget.select()}
+              onPointerDown={(e) => e.stopPropagation()}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  onRenameCommit?.(node.id, draft);
+                } else if (e.key === "Escape") {
+                  e.preventDefault();
+                  onRenameCancel?.();
+                }
+              }}
+              onBlur={() => onRenameCommit?.(node.id, draft)}
+              className="ml-1 h-5 w-full min-w-0 rounded border border-input bg-background px-1 text-xs outline-none focus:ring-1 focus:ring-ring"
+            />
+          ) : (
+            <span className="ml-1">{node.key}</span>
+          )}
         </span>
       </div>
 
-      {!isActive && handleLayerAction && (
+      {!isActive && !isEditing && handleLayerAction && (
         <div onPointerDown={(e) => e.stopPropagation()}>
           <LayerActions
             layerItemType="nodes"
