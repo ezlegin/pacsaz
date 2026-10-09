@@ -1,131 +1,96 @@
 import M, { IModel } from "makerjs";
 import Pacsaz from "../Pacsaz";
 
-export function addFillet(model: IModel, radius: number = 0) {
+export function addFillet(model: IModel, radius: number = 0): IModel {
+  if (radius <= 0) return model;
+
   const chain = M.model.findSingleChain(model);
-  if (!chain || radius <= 0) return;
+  if (!chain) return model;
 
-  let fillet: IModel | null = null;
-
-  for (let r = radius; r > 0; r -= 0.2) {
-    fillet = M.chain.fillet(chain, r);
-    if (fillet) break;
-  }
-
-  if (fillet) Pacsaz.shape.push(model, "fillet", fillet);
+  const fillet = retryFillet(chain, radius);
+  return fillet ? { models: { fillet } } : model;
 }
 
 export function addFilletAt(
   model: IModel,
   indices: number[],
   radius: number = 0,
-) {
-  const filletModel: IModel = { models: {} };
-  const lineModel: IModel = { models: {} };
+): IModel {
+  if (radius <= 0 || indices.length === 0) return model;
 
   const chain = M.model.findSingleChain(model);
-  M.chain.reverse(chain);
-  const kpts = M.chain.toKeyPoints(chain);
+  if (!chain) return model;
 
-  const sorted = indices
-    .filter((i) => i > 0 && i < kpts.length - 1)
-    .sort((a, b) => a - b);
-
-  let cursor = 0;
-
-  for (const index of sorted) {
-    const pBefore = kpts[index - 1]!;
-    const pFillet = kpts[index]!;
-    const pAfter = kpts[index + 1]!;
-
-    const beforePts = kpts.slice(cursor, index);
-    if (beforePts.length >= 2) {
-      const line = new M.models.ConnectTheDots(false, beforePts);
-      Pacsaz.shape.push(lineModel, "line", line);
-    }
-
-    const overlappingIndex = sorted.filter(
-      (s) => s === index + 1 || s === index - 1,
-    );
-
-    let filletLine: IModel = {};
-
-    if (overlappingIndex.length < 1) {
-      filletLine = new M.models.ConnectTheDots(false, [
-        pBefore,
-        pFillet,
-        pAfter,
-      ]);
-    } else {
-      if (overlappingIndex.length < 2) {
-        const overlap = overlappingIndex[0]!;
-        const isBefore = overlap < index;
-        const isAfter = overlap > index;
-
-        if (isAfter) {
-          const path = new M.paths.Line([pFillet, pAfter]);
-          const middle = M.point.middle(path);
-
-          filletLine = new M.models.ConnectTheDots(false, [
-            pBefore,
-            pFillet,
-            middle,
-          ]);
-        }
-
-        if (isBefore) {
-          const path = new M.paths.Line([pFillet, pBefore]);
-          const middle = M.point.middle(path);
-
-          filletLine = new M.models.ConnectTheDots(false, [
-            middle,
-            pFillet,
-            pAfter,
-          ]);
-        }
-      } else {
-        const beforePath = new M.paths.Line([pBefore, pFillet]);
-        const beforMiddle = M.point.middle(beforePath);
-
-        const afterPath = new M.paths.Line([pAfter, pFillet]);
-        const afterMiddle = M.point.middle(afterPath);
-
-        filletLine = new M.models.ConnectTheDots(false, [
-          beforMiddle,
-          pFillet,
-          afterMiddle,
-        ]);
-      }
-    }
-
-    const filletChain = M.model.findSingleChain(filletLine);
-    if (!filletChain) throw new Error("Here");
-
-    let fillet: IModel | null = null;
-    for (let r = radius; r > 0; r--) {
-      fillet = M.chain.fillet(filletChain, r);
-      if (fillet) break;
-    }
-
-    if (fillet) {
-      Pacsaz.shape.push(filletModel, "fillet", {
-        models: { fillet, filletLine },
-      });
-    }
-
-    cursor = index + 1;
+  let kpts = M.chain.toKeyPoints(chain);
+  const closed = isClosedChain(chain);
+  if (closed && kpts.length > 1 && ptEq(kpts[0]!, kpts[kpts.length - 1]!)) {
+    kpts = kpts.slice(0, -1);
   }
 
-  const tailPts = kpts.slice(cursor);
-  if (tailPts.length >= 2) {
-    const tailLine = new M.models.ConnectTheDots(false, tailPts);
-    Pacsaz.shape.push(lineModel, "line", tailLine);
+  const N = kpts.length;
+  if (N < 3) return model;
+
+  const filletSet = new Set(indices.filter((i) => i >= 0 && i < N));
+  if (filletSet.size === 0) return model;
+
+  const lineModel: IModel = { models: {} };
+  const filletModel: IModel = { models: {} };
+
+  const edgeCount = closed ? N : N - 1;
+  for (let i = 0; i < edgeCount; i++) {
+    const j = (i + 1) % N;
+    if (filletSet.has(i) || filletSet.has(j)) continue;
+    const seg = new M.models.ConnectTheDots(false, [kpts[i]!, kpts[j]!]);
+    Pacsaz.shape.push(lineModel, `line-${i}-${j}`, seg);
+  }
+
+  for (const i of Array.from(filletSet).sort((a, b) => a - b)) {
+    const prev = (i - 1 + N) % N;
+    const next = (i + 1) % N;
+
+    let pBefore = kpts[prev]!;
+    let pAfter = kpts[next]!;
+
+    if (filletSet.has(prev)) {
+      pBefore = M.point.middle(new M.paths.Line(kpts[prev]!, kpts[i]!));
+    }
+    if (filletSet.has(next)) {
+      pAfter = M.point.middle(new M.paths.Line(kpts[i]!, kpts[next]!));
+    }
+
+    const sub = new M.models.ConnectTheDots(false, [pBefore, kpts[i]!, pAfter]);
+    const subChain = M.model.findSingleChain(sub);
+    if (!subChain) continue;
+
+    const fillet = retryFillet(subChain, radius);
+    if (fillet) {
+      Pacsaz.shape.push(filletModel, `fillet-${i}`, {
+        models: { fillet, sub },
+      });
+    }
   }
 
   return {
     models: {
-      lineModel,
-      filletModel,
+      line: lineModel,
+      fillet: filletModel,
     },
   };
+}
+
+function retryFillet(chain: M.IChain, radius: number): IModel | null {
+  const step = Math.max(0.05, radius / 50);
+  for (let r = radius; r > 0.05; r -= step) {
+    const f = M.chain.fillet(chain, r);
+    if (f) return f;
+  }
+  return null;
+}
+
+function isClosedChain(chain: M.IChain): boolean {
+  return (chain as any).endless === true;
+}
+
+function ptEq(a: M.IPoint, b: M.IPoint): boolean {
+  return Math.abs(a[0]! - b[0]!) < 1e-6 && Math.abs(a[1]! - b[1]!) < 1e-6;
 }

@@ -58,6 +58,13 @@ const generalSchema = z.object({
   stack: z.enum(stack),
   id: z.string(),
   dup: dup,
+  effects: z.array(
+    z.object({
+      type: z.enum(["readius"]),
+      value: mathInput,
+      targets: z.array(z.string()),
+    }),
+  ),
 });
 
 export const lineFormSchema = z

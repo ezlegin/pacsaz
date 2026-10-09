@@ -8,6 +8,7 @@ import {
 } from "@/lib/validationSchema/PropsSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
+import { addNode, updateNode } from "@repo/store/slices/nodesSlice";
 import { ISpec } from "@repo/store/types";
 import {
   Accordion,
@@ -26,6 +27,7 @@ import {
 import { Separator } from "@repo/ui/components/separator";
 import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import { Layers2 } from "lucide-react";
+import { nanoid } from "nanoid";
 import { ReactNode } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -33,9 +35,6 @@ import { z } from "zod";
 import PropsHeader from "./PropsHeader";
 import { DupOperationEditor } from "./shapes/DupOperationEditor";
 import PointInput from "./shapes/PointInput";
-import { nanoid } from "nanoid";
-import { addNode, updateNode } from "@repo/store/slices/nodesSlice";
-import { getNodes } from "@repo/store/getters";
 
 const getShapeSchema = (shapeKey: ISpec.ShapesKey) => {
   const schemas: Record<ISpec.ShapesKey, any> = {
@@ -102,6 +101,7 @@ function ShapesPropsProvider<T extends ISpec.Nodes>({
       layer: "trim",
       origin: ["0", "0"],
       hidden: false,
+      effects: [],
     },
     mode: "onChange",
   });
@@ -111,9 +111,7 @@ function ShapesPropsProvider<T extends ISpec.Nodes>({
       dispatch(updateNode({ id: selection.id, changes: data }));
       toast.info("Shape Updated.");
     } else {
-      console.log("data", data);
       dispatch(addNode(data));
-      console.log("getNodes(", getNodes());
       toast.info("Shape Created.");
       close();
     }

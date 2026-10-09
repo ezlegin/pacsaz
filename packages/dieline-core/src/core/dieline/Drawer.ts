@@ -22,7 +22,17 @@ export class Drawer extends Dieline {
   private lines(lines: ISpec.LinesSpec) {
     this.$pusher(
       lines,
-      ({ absolutePts, relativePts, isRelative, isClosed }, scope) => {
+      ({ absolutePts, relativePts, isRelative, isClosed, effects }, scope) => {
+        const resolved = effects?.map((fx) => {
+          if (fx.type === "radius") {
+            return {
+              ...fx,
+              value: this.$parseMathStr(fx.value, scope).toString(),
+            };
+          }
+          return fx;
+        });
+
         if (isRelative) {
           if (!relativePts) throw new Error("Points Not Avaiable.");
 
@@ -57,6 +67,7 @@ export class Drawer extends Dieline {
 
           return new Pacsaz.shapes.Lines(pb.build(), {
             closed: isClosed,
+            effects: resolved,
           });
         } else {
           if (!absolutePts) throw new Error("Points Not Avaiable.");
@@ -70,14 +81,22 @@ export class Drawer extends Dieline {
     );
   }
 
-  private rectangle(rectangle: ISpec.RectangleSpec) {
-    this.$pusher(rectangle, ({ height, width, deleteSide }, scope) => {
+  private rectangle(rect: ISpec.RectangleSpec) {
+    this.$pusher(rect, ({ width, height, deleteSide, effects }, scope) => {
+      const resolved = effects?.map((fx) => {
+        if (fx.type === "radius") {
+          return {
+            ...fx,
+            value: this.$parseMathStr(fx.value, scope).toString(),
+          };
+        }
+        return fx;
+      });
+
       return new Pacsaz.shapes.Rectangle(
         this.$parseMathStr(width, scope),
         this.$parseMathStr(height, scope),
-        {
-          deleteSide,
-        },
+        { deleteSide, effects: resolved },
       );
     });
   }
@@ -103,12 +122,27 @@ export class Drawer extends Dieline {
   }
 
   private polygon(polygon: ISpec.PolygonSpec) {
-    this.$pusher(polygon, ({ radius, sides }, scope) => {
-      return new Pacsaz.shapes.Polygon(
-        this.$parseMathStr(radius, scope),
-        +sides,
-      );
-    });
+    this.$pusher(
+      polygon,
+      ({ radius, sides, effects, firstCornerAngle }, scope) => {
+        const resolved = effects?.map((fx) => {
+          if (fx.type === "radius") {
+            return {
+              ...fx,
+              value: this.$parseMathStr(fx.value, scope).toString(),
+            };
+          }
+          return fx;
+        });
+
+        return new Pacsaz.shapes.Polygon(
+          this.$parseMathStr(radius, scope),
+          +sides,
+          this.$parseMathStr(firstCornerAngle, scope),
+          { effects: resolved },
+        );
+      },
+    );
   }
 
   private arc(arc: ISpec.ArcSpec) {

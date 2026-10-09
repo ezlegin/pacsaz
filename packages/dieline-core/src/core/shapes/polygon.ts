@@ -1,11 +1,34 @@
 import M from "makerjs";
 import { Shape } from "./Shape";
+import { ISpec } from "@repo/store/types";
+import { addFilletAt } from "../helpers/addFillet";
 
 export class Polygon extends Shape {
-  constructor(radius: number, sides: number = 5, firstCornerAngle?: number) {
+  constructor(
+    radius: number,
+    sides: number = 5,
+    firstCornerAngle?: number,
+    options?: { effects: ISpec.ShapeEffect[] },
+  ) {
     super();
 
     const polygon = new M.models.Polygon(sides, radius, firstCornerAngle ?? 90);
+
+    if (options?.effects) {
+      for (const effect of options.effects) {
+        switch (effect.type) {
+          case "radius":
+            const rounded = addFilletAt(
+              polygon,
+              effect.targets.map((t) => +t),
+              +effect.value,
+            );
+            this.$pushShape("polygon", rounded);
+            return;
+        }
+      }
+    }
+
     this.$pushShape("polygon", polygon);
   }
 }

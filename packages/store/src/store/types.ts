@@ -50,11 +50,18 @@ export namespace ISpec {
     layer: Layer;
     origin: Point;
     dup?: Dup;
+    effects: ShapeEffect[];
   };
 
   export type Direction = "up" | "down" | "right" | "left";
 
   //! Shapes --------------------------------------
+
+  export type ShapeEffect = {
+    type: "radius";
+    targets: string[];
+    value: string;
+  };
 
   export type LineSpec = Record<"length" | "angle", string> &
     Generals & {
@@ -121,6 +128,7 @@ export namespace ISpec {
     nodes: Node[];
     origin: Point;
     dup?: Dup;
+    effects: ShapeEffect[];
   };
 
   export type Node = Shape | Group;

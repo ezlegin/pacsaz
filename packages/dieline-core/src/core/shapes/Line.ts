@@ -1,7 +1,8 @@
+import { ISpec } from "@repo/store/types";
 import M, { IModel, IPoint } from "makerjs";
 import { zero } from "../../data/consts";
+import { addFillet, addFilletAt } from "../helpers/addFillet";
 import { Shape } from "./Shape";
-import { addFilletAt, addFillet } from "../helpers/addFillet";
 
 export class Line extends Shape {
   constructor(length: number, angle?: number) {
@@ -23,26 +24,43 @@ interface LineChainOption {
   closed?: boolean;
   filletRadius?: number;
   indices?: number[];
+  effects?: ISpec.ShapeEffect[];
 }
 
 export class Lines extends Shape {
   constructor(points: IPoint[], options?: LineChainOption) {
     super();
 
-    let line: IModel = new M.models.ConnectTheDots(
+    let lines: IModel = new M.models.ConnectTheDots(
       options?.closed ?? false,
       points,
     );
 
+    // todo: this probably gets removed in futue. note that remove its types from options.
     if (options?.indices) {
-      line = addFilletAt(line, options.indices, options.filletRadius);
+      lines = addFilletAt(lines, options.indices, options.filletRadius);
     } else {
-      addFillet(line, options?.filletRadius);
+      addFillet(lines, options?.filletRadius);
     }
 
     // this is used by mirror function to calculate the origin point.
-    M.model.originate(line, points[0]!);
+    M.model.originate(lines, points[0]!);
 
-    this.$pushShape("line", line);
+    if (options?.effects) {
+      for (const effect of options.effects) {
+        switch (effect.type) {
+          case "radius":
+            const rounded = addFilletAt(
+              lines,
+              effect.targets.map((t) => +t),
+              +effect.value,
+            );
+            this.$pushShape("lines", rounded);
+            return;
+        }
+      }
+    }
+
+    this.$pushShape("lines", lines);
   }
 }
