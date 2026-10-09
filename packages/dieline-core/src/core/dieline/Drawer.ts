@@ -122,27 +122,24 @@ export class Drawer extends Dieline {
   }
 
   private polygon(polygon: ISpec.PolygonSpec) {
-    this.$pusher(
-      polygon,
-      ({ radius, sides, effects, firstCornerAngle }, scope) => {
-        const resolved = effects?.map((fx) => {
-          if (fx.type === "radius") {
-            return {
-              ...fx,
-              value: this.$parseMathStr(fx.value, scope).toString(),
-            };
-          }
-          return fx;
-        });
+    this.$pusher(polygon, ({ radius, sides, effects }, scope) => {
+      const resolved = effects?.map((fx) => {
+        if (fx.type === "radius") {
+          return {
+            ...fx,
+            value: this.$parseMathStr(fx.value, scope).toString(),
+          };
+        }
+        return fx;
+      });
 
-        return new Pacsaz.shapes.Polygon(
-          this.$parseMathStr(radius, scope),
-          +sides,
-          this.$parseMathStr(firstCornerAngle, scope),
-          { effects: resolved },
-        );
-      },
-    );
+      return new Pacsaz.shapes.Polygon(
+        this.$parseMathStr(radius, scope),
+        +sides,
+        undefined,
+        { effects: resolved },
+      );
+    });
   }
 
   private arc(arc: ISpec.ArcSpec) {

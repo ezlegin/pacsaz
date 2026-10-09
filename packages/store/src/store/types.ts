@@ -50,7 +50,7 @@ export namespace ISpec {
     layer: Layer;
     origin: Point;
     dup?: Dup;
-    effects: ShapeEffect[];
+    effects?: ShapeEffect[];
   };
 
   export type Direction = "up" | "down" | "right" | "left";

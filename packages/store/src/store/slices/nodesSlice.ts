@@ -22,7 +22,7 @@ const nodesSlice = createSlice({
       state.push(...action.payload);
     },
 
-    setNodes: (state, action: PayloadAction<ISpec.Nodes>) => {
+    setNodes: (_, action: PayloadAction<ISpec.Nodes>) => {
       return action.payload;
     },
 
@@ -65,6 +65,46 @@ const nodesSlice = createSlice({
     ungroupNode: (state, action: PayloadAction<string>) => {
       ungroupNodeById(state, action.payload);
     },
+
+    addEffect: (
+      state,
+      action: PayloadAction<{
+        nodeId: string;
+        effect: ISpec.ShapeEffect;
+        index?: number; // optional insert position; default = append
+      }>,
+    ) => {
+      const node = findNode(state, action.payload.nodeId);
+      if (!node || node.type === "group") return; // groups have no geometry
+      const list = node.effects ?? (node.effects = []);
+      const at = action.payload.index ?? list.length;
+      list.splice(at, 0, action.payload.effect);
+    },
+
+    removeEffect: (
+      state,
+      action: PayloadAction<{ nodeId: string; index: number }>,
+    ) => {
+      const node = findNode(state, action.payload.nodeId);
+      if (!node || node.type === "group") return;
+      node.effects?.splice(action.payload.index, 1);
+      if (node.effects?.length === 0) delete node.effects;
+    },
+
+    updateEffect: (
+      state,
+      action: PayloadAction<{
+        nodeId: string;
+        index: number;
+        changes: Partial<ISpec.ShapeEffect>; // or a discriminated patch type
+      }>,
+    ) => {
+      const node = findNode(state, action.payload.nodeId);
+      if (!node || node.type === "group") return;
+      const fx = node.effects?.[action.payload.index];
+      if (!fx) return;
+      Object.assign(fx, action.payload.changes);
+    },
   },
 });
 
@@ -77,6 +117,9 @@ export const {
   setNodeVisibility,
   groupNodes,
   ungroupNode,
+  addEffect,
+  removeEffect,
+  updateEffect,
 } = nodesSlice.actions;
 
 export const nodesSelector = (state: RootState) => state.dieline.present.nodes;

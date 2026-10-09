@@ -28,9 +28,12 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { useAppDispatch } from "@repo/store/hooks";
 import {
+  addEffect,
   groupNodes,
+  removeEffect,
   setNodes,
   ungroupNode,
+  updateEffect,
   updateNode,
 } from "@repo/store/slices/nodesSlice";
 import {
@@ -38,13 +41,25 @@ import {
   setSelection,
 } from "@repo/store/slices/selectionSlice";
 import { ISpec } from "@repo/store/types";
+import { Button } from "@repo/ui/components/button";
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
+  ContextMenuLabel,
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@repo/ui/components/context-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@repo/ui/components/dialog";
+import { Input } from "@repo/ui/components/input";
+import { Label } from "@repo/ui/components/label";
 import { cn } from "@repo/ui/lib/utils";
 import {
   ChevronRight,
@@ -56,6 +71,7 @@ import {
   Minus,
   Parentheses,
   Pencil,
+  Plus,
   Square,
   Trash,
 } from "lucide-react";
@@ -90,6 +106,71 @@ export default function ShapeLayers({
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const offsetLeftRef = useRef(0);
+
+  const [radiusDialog, setRadiusDialog] = useState<{
+    nodeId: string;
+    effectIndex: number | null; // null = add, number = edit
+    initialTargets: string[];
+    initialValue: string;
+  } | null>(null);
+
+  const handleOpenRadius = (nodeId: string) => {
+    const node = items.find((i) => i.id === nodeId)?.node;
+    if (!node || node.type === "group") return;
+
+    const effects = node.effects ?? [];
+    const idx = effects.findIndex((e) => e.type === "radius");
+
+    if (idx >= 0) {
+      const e = effects[idx] as Extract<ISpec.ShapeEffect, { type: "radius" }>;
+      setRadiusDialog({
+        nodeId,
+        effectIndex: idx,
+        initialTargets: e.targets,
+        initialValue: e.value,
+      });
+    } else {
+      setRadiusDialog({
+        nodeId,
+        effectIndex: null,
+        initialTargets: [],
+        initialValue: "5",
+      });
+    }
+  };
+
+  const handleSubmitRadius = (targets: string[], value: string) => {
+    if (!radiusDialog) return;
+    const { nodeId, effectIndex } = radiusDialog;
+
+    if (effectIndex === null) {
+      dispatch(
+        addEffect({
+          nodeId,
+          effect: { type: "radius", targets, value },
+        }),
+      );
+    } else {
+      dispatch(
+        updateEffect({
+          nodeId,
+          index: effectIndex,
+          changes: { type: "radius", targets, value },
+        }),
+      );
+    }
+    setRadiusDialog(null);
+  };
+
+  const handleRemoveRadius = (nodeId: string) => {
+    const node = items.find((i) => i.id === nodeId)?.node;
+    if (!node || node.type === "group") return;
+
+    const idx = (node.effects ?? []).findIndex((e) => e.type === "radius");
+    if (idx < 0) return;
+
+    dispatch(removeEffect({ nodeId, index: idx }));
+  };
 
   useEffect(() => {
     setItems(flattenTree(nodes));
@@ -168,6 +249,7 @@ export default function ShapeLayers({
       hidden: false,
       origin: ["0", "0"],
       nodes: [],
+      effects: [],
     };
     dispatch(groupNodes({ ids, group }));
     setSelectedIds([]);
@@ -378,6 +460,8 @@ export default function ShapeLayers({
               onRenameCommit={handleRenameCommit}
               onRenameCancel={handleRenameCancel}
               handleLayerAction={handleLayerAction}
+              onAddRadius={handleOpenRadius}
+              onRemoveRadius={handleRemoveRadius}
             />
           ))}
         </div>
@@ -394,6 +478,15 @@ export default function ShapeLayers({
           </div>
         ) : null}
       </DragOverlay>
+
+      <RadiusDialog
+        open={radiusDialog !== null}
+        mode={radiusDialog?.effectIndex === null ? "add" : "edit"}
+        initialTargets={radiusDialog?.initialTargets ?? []}
+        initialValue={radiusDialog?.initialValue ?? "5"}
+        onOpenChange={(open) => !open && setRadiusDialog(null)}
+        onSubmit={handleSubmitRadius}
+      />
     </DndContext>
   );
 }
@@ -415,6 +508,8 @@ function SortableRow({
   onRenameCommit,
   onRenameCancel,
   handleLayerAction,
+  onAddRadius,
+  onRemoveRadius,
 }: {
   item: FlatNode;
   isActive: boolean;
@@ -430,6 +525,8 @@ function SortableRow({
   onRenameCommit: (id: string, key: string) => void;
   onRenameCancel: () => void;
   handleLayerAction: HandleLayerActoin;
+  onAddRadius: (nodeId: string) => void;
+  onRemoveRadius: (nodeId: string) => void;
 }) {
   const {
     attributes,
@@ -448,6 +545,10 @@ function SortableRow({
 
   const isGroup = item.node.type === "group";
   const canGroup = selectedIds.length >= 2 && isSelected;
+
+  const hasRadius =
+    item.node.type !== "group" &&
+    (item.node.effects ?? []).some((e) => e.type === "radius");
 
   return (
     <ContextMenu>
@@ -469,6 +570,45 @@ function SortableRow({
       </ContextMenuTrigger>
 
       <ContextMenuContent>
+        <ContextMenuLabel>Effects</ContextMenuLabel>
+        <ContextMenuItem
+          onSelect={() => {
+            setTimeout(() => onAddRadius(item.id), 0);
+          }}
+          className="flex items-center justify-between gap-3"
+        >
+          <span className="flex items-center">
+            {hasRadius ? (
+              <>
+                <Pencil className="mr-2 h-4 w-4" />
+                Edit Radius
+              </>
+            ) : (
+              <>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Radius
+              </>
+            )}
+          </span>
+
+          {hasRadius && (
+            <Button
+              variant={"ghost"}
+              type="button"
+              aria-label="Remove radius effect"
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                onRemoveRadius(item.id);
+              }}
+              className="cursor-pointer text-muted-foreground hover:text-destructive z-10"
+            >
+              <Trash className="h-3.5 w-3.5" />
+            </Button>
+          )}
+        </ContextMenuItem>
+        <ContextMenuSeparator />
         <ContextMenuItem onSelect={() => onRenameStart(item.id)}>
           <Pencil className="mr-2 h-4 w-4" />
           Rename
@@ -615,19 +755,33 @@ function RowContent({
         </span>
       </div>
 
-      {!isActive && !isEditing && handleLayerAction && (
-        <div onPointerDown={(e) => e.stopPropagation()}>
-          <LayerActions
-            layerItemType="nodes"
-            handleLayerAction={handleLayerAction}
-            item={node}
-          >
-            {node.dup && node.dup.length > 0 && (
-              <div className="scale-[0.70] text-muted-foreground group-hover:hidden">
-                dup
-              </div>
-            )}
-          </LayerActions>
+      {!isActive && !isEditing && (
+        <div
+          className="flex items-center gap-1"
+          onPointerDown={(e) => e.stopPropagation()}
+        >
+          {node.type !== "group" && node.effects && node.effects.length > 0 && (
+            <span
+              title={`${node.effects.length} effect${node.effects.length > 1 ? "s" : ""}`}
+              className="shrink-0 rounded bg-amber-100 px-1 py-px text-[10px] font-semibold leading-none text-amber-700 group-hover:hidden"
+            >
+              FX
+            </span>
+          )}
+
+          {handleLayerAction && (
+            <LayerActions
+              layerItemType="nodes"
+              handleLayerAction={handleLayerAction}
+              item={node}
+            >
+              {node.dup && node.dup.length > 0 && (
+                <div className="scale-[0.70] text-muted-foreground group-hover:hidden">
+                  dup
+                </div>
+              )}
+            </LayerActions>
+          )}
         </div>
       )}
     </div>
@@ -652,4 +806,97 @@ function LayerIcon({ data }: { data: ISpec.ShapesKey }) {
     case "arc":
       return <Parentheses className={cls} />;
   }
+}
+
+function RadiusDialog({
+  open,
+  mode,
+  initialTargets,
+  initialValue,
+  onOpenChange,
+  onSubmit,
+}: {
+  open: boolean;
+  mode: "add" | "edit";
+  initialTargets: string[];
+  initialValue: string;
+  onOpenChange: (open: boolean) => void;
+  onSubmit: (targets: string[], value: string) => void;
+}) {
+  const [targetsInput, setTargetsInput] = useState("");
+  const [valueInput, setValueInput] = useState("5");
+
+  // Reset / prefill each time the dialog opens.
+  useEffect(() => {
+    if (!open) return;
+    setTargetsInput(initialTargets.join(", "));
+    setValueInput(initialValue);
+  }, [open, initialTargets, initialValue]);
+
+  const parsedTargets = targetsInput
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  const canSubmit = parsedTargets.length > 0 && valueInput.trim().length > 0;
+
+  const submit = () => {
+    if (!canSubmit) return;
+    onSubmit(parsedTargets, valueInput.trim());
+  };
+
+  const isEdit = mode === "edit";
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>
+            {isEdit ? "Edit Radius Effect" : "Add Radius Effect"}
+          </DialogTitle>
+          <DialogDescription>
+            Enter comma-separated corner indices and a radius value. Values may
+            be math expressions (e.g. <code>thickness / 2</code>).
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4 py-2">
+          <div className="space-y-2">
+            <Label htmlFor="radius-targets">Targets</Label>
+            <Input
+              id="radius-targets"
+              placeholder="0, 1, 2"
+              value={targetsInput}
+              onChange={(e) => setTargetsInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && submit()}
+              autoFocus
+            />
+            <p className="text-xs text-muted-foreground">
+              Corner indices to fillet. Order does not matter.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="radius-value">Radius</Label>
+            <Input
+              id="radius-value"
+              placeholder="5"
+              value={valueInput}
+              onChange={(e) => setValueInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && submit()}
+            />
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button onClick={submit} disabled={!canSubmit}>
+            {isEdit ? "Save" : "Add Effect"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
 }
