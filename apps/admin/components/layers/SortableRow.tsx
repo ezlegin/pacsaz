@@ -13,7 +13,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { FolderMinus, FolderPlus, Pencil, Trash } from "lucide-react";
 import type { CSSProperties, MouseEvent } from "react";
-import { EffectMenuItem } from "./EffectMenuItem";
+import { EffectMenuItem, ToggleEffectMenuItem } from "./EffectMenuItem";
 import { RowContent } from "./RowContent";
 import { HandleLayerActoin } from "../DielineEditor/DielineLayer";
 
@@ -36,6 +36,10 @@ interface Props {
   onRemoveRadius: (nodeId: string) => void;
   onAddArray: (nodeId: string) => void;
   onRemoveArray: (nodeId: string) => void;
+  onAddBoolean: (nodeId: string) => void;
+  onRemoveBoolean: (nodeId: string) => void;
+  onAddJoin: (nodeId: string) => void;
+  onRemoveJoin: (nodeId: string) => void;
 }
 
 export function SortableRow({
@@ -57,6 +61,10 @@ export function SortableRow({
   onRemoveRadius,
   onAddArray,
   onRemoveArray,
+  onAddBoolean,
+  onAddJoin,
+  onRemoveBoolean,
+  onRemoveJoin,
 }: Props) {
   const {
     attributes,
@@ -81,6 +89,9 @@ export function SortableRow({
     (e) => e.type === "radius" || e.type === "radiusAt",
   );
   const hasArray = effects.some((e) => e.type === "array");
+  const nodeEffects = item.node.effects ?? [];
+  const hasBoolean = nodeEffects.some((e) => e.type === "boolean");
+  const hasJoin = nodeEffects.some((e) => e.type === "join");
 
   return (
     <ContextMenu>
@@ -104,7 +115,22 @@ export function SortableRow({
       <ContextMenuContent>
         <ContextMenuLabel>Effects</ContextMenuLabel>
 
-        {!isGroup && (
+        {isGroup ? (
+          <>
+            <EffectMenuItem
+              label="Boolean"
+              hasEffect={hasBoolean}
+              onOpen={() => onAddBoolean(item.id)}
+              onRemove={() => onRemoveBoolean(item.id)}
+            />
+            <ToggleEffectMenuItem
+              label="Join"
+              hasEffect={hasJoin}
+              onAdd={() => onAddJoin(item.id)}
+              onRemove={() => onRemoveJoin(item.id)}
+            />
+          </>
+        ) : (
           <>
             <EffectMenuItem
               label="Radius"

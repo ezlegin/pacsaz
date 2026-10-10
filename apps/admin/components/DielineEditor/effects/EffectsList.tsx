@@ -1,25 +1,21 @@
+import { useAppDispatch } from "@repo/store/hooks";
+import { removeEffect } from "@repo/store/slices/effectsSlice";
+import { IEffect, ISpec } from "@repo/store/types";
 import { Label } from "@repo/ui/components/label";
 import { Trash } from "lucide-react";
 import { useMemo } from "react";
 import { UseFormReturn } from "react-hook-form";
-import { ArrayFormType, BooleanFormType, RadiusFormType } from "./Effects";
-import { IEffect, ISpec } from "@repo/store/types";
-import { useAppDispatch } from "@repo/store/hooks";
-import { removeEffect } from "@repo/store/slices/effectsSlice";
+import { BooleanFormType } from "./Effects";
 
 const EffectsList = ({
   effects,
   shapes,
-  radiusForm,
-  arrayForm,
   setEffectFormType,
   booleanForm,
 }: {
   effects: IEffect.EffectsMap;
-  shapes: ISpec.Shapes;
-  radiusForm: UseFormReturn<RadiusFormType, any, RadiusFormType>;
+  shapes: ISpec.Nodes;
   booleanForm: UseFormReturn<BooleanFormType, any, BooleanFormType>;
-  arrayForm: UseFormReturn<ArrayFormType, any, ArrayFormType>;
   setEffectFormType: (type: IEffect.EffectTypes) => void;
 }) => {
   const dispatch = useAppDispatch();
@@ -27,7 +23,7 @@ const EffectsList = ({
   function resolveRef(
     id: string,
     effectOn: "effect" | "shape",
-    shapesById: Map<string, ISpec.ShapesSpec>,
+    shapesById: Map<string, ISpec.Node>,
     effectsById: Map<string, IEffect.EffectSpec>,
   ) {
     return effectOn === "effect" ? effectsById.get(id) : shapesById.get(id);
@@ -42,16 +38,10 @@ const EffectsList = ({
     [effects],
   );
 
-  const { booleanEffects, radiusEffects, arrayEffects } = useMemo(() => {
+  const { booleanEffects } = useMemo(() => {
     const booleanEffects: (IEffect.BooleanEffectSpec & {
-      targetObject?: ISpec.ShapesSpec | IEffect.EffectSpec;
-      originObject?: ISpec.ShapesSpec | IEffect.EffectSpec;
-    })[] = [];
-    const radiusEffects: (IEffect.RadiusEffectSpec & {
-      targetObject?: ISpec.ShapesSpec | IEffect.EffectSpec;
-    })[] = [];
-    const arrayEffects: (IEffect.ArrayEffectSpec & {
-      targetObject?: ISpec.ShapesSpec | IEffect.EffectSpec;
+      targetObject?: ISpec.Node | IEffect.EffectSpec;
+      originObject?: ISpec.Node | IEffect.EffectSpec;
     })[] = [];
     const unresolved: string[] = [];
 
@@ -75,54 +65,27 @@ const EffectsList = ({
         if (!originObject)
           unresolved.push(`${e.id}: origin "${e.originModelId}" not found`);
         booleanEffects.push({ ...e, targetObject, originObject });
-      } else if (e.type === "radius") {
-        radiusEffects.push({ ...e, targetObject });
-      } else {
-        arrayEffects.push({ ...e, targetObject });
       }
     }
 
-    return { booleanEffects, radiusEffects, arrayEffects, unresolved };
+    return { booleanEffects, unresolved };
   }, [effects, shapesById, effectsById]);
 
   const handleEffectSelection = (e: IEffect.EffectSpec) => {
-    if (e.type === "radius") {
-      radiusForm.reset({
-        radius: String(e.radius),
-        targetModelId: e.targetModelId,
-        key: e.key,
-        indices: e.indices,
-      });
-      setEffectFormType("radius");
-    } else if (e.type === "boolean") {
-      booleanForm.reset({
-        originModelId: e.originModelId,
-        booleanType: e.booleanType,
-        targetModelId: e.targetModelId,
-        key: e.key,
-      });
-      setEffectFormType("boolean");
-    } else {
-      arrayForm.reset({
-        targetModelId: e.targetModelId,
-        key: e.key,
-        count: String(e.count),
-        from: e.from,
-        to: e.to,
-      });
-      setEffectFormType("array");
-    }
+    booleanForm.reset({
+      originModelId: e.originModelId,
+      booleanType: e.booleanType,
+      targetModelId: e.targetModelId,
+      key: e.key,
+    });
+    setEffectFormType("boolean");
   };
 
   const onRemoveEffect = (id: string) => {
     dispatch(removeEffect(id));
   };
 
-  const effectsArr = [
-    { key: "Boolean", effects: booleanEffects },
-    { key: "Radius", effects: radiusEffects },
-    { key: "Array", effects: arrayEffects },
-  ];
+  const effectsArr = [{ key: "Boolean", effects: booleanEffects }];
 
   return (
     <div className="space-y-4">
@@ -142,13 +105,7 @@ const EffectsList = ({
             >
               <span className="text-xs">{effect.key}</span>
               <span className="text-muted-foreground text-xs group-hover:hidden">
-                {effect.type === "boolean"
-                  ? effect.booleanType
-                  : effect.type === "radius"
-                    ? effect.indices.length > 0
-                      ? "Ind"
-                      : effect.radius
-                    : effect.count}
+                {effect.booleanType}
               </span>
               <Trash
                 className="hidden group-hover:block text-muted-foreground hover:text-destructive"

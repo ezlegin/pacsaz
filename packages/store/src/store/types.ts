@@ -58,21 +58,11 @@ export namespace ISpec {
   //! Shapes --------------------------------------
 
   export type ShapeEffect =
-    | {
-        type: "radiusAt";
-        targets: string[];
-        value: string;
-      }
-    | {
-        type: "radius";
-        value: string;
-      }
-    | {
-        type: "array";
-        moveX: string;
-        moveY: string;
-        repeat: string;
-      };
+    | { type: "radiusAt"; targets: string[]; value: string }
+    | { type: "radius"; value: string }
+    | { type: "array"; moveX: string; moveY: string; repeat: string }
+    | { type: "boolean"; mode: "union" | "subtract" | "intersect" }
+    | { type: "join" };
 
   export type LineSpec = Record<"length" | "angle", string> &
     Generals & {
@@ -188,26 +178,7 @@ export namespace IEffect {
     originModelId: ModelId;
   }
 
-  export interface RadiusEffectSpec extends EffectBase {
-    type: "radius";
-    targetModelId: ModelId;
-    radius: number;
-    indices: { indice: string; radius: string }[];
-  }
-
-  export interface ArrayEffectSpec extends EffectBase {
-    type: "array";
-    targetModelId: ModelId;
-    count: string;
-    rotate: boolean;
-    from: [string, string];
-    to: [string, string];
-  }
-
-  export type EffectSpec =
-    | BooleanEffectSpec
-    | RadiusEffectSpec
-    | ArrayEffectSpec;
+  export type EffectSpec = BooleanEffectSpec;
   export type EffectsMap = EffectSpec[];
 }
 

@@ -26,6 +26,7 @@ import { ArrayDialog } from "./ArrayDialog";
 import { RadiusDialog } from "./RadiusDialog";
 import { RowContent } from "./RowContent";
 import { SortableRow } from "./SortableRow";
+import { BooleanDialog } from "./BooleanDialog";
 
 interface Props {
   nodes: ISpec.Nodes;
@@ -185,6 +186,10 @@ export default function ShapeLayers({ handleLayerAction, nodes }: Props) {
               onRemoveRadius={effects.removeRadius}
               onAddArray={effects.openArray}
               onRemoveArray={effects.removeArray}
+              onAddBoolean={effects.openBoolean}
+              onRemoveBoolean={effects.removeBoolean}
+              onAddJoin={effects.addJoin}
+              onRemoveJoin={effects.removeJoin}
             />
           ))}
         </div>
@@ -220,6 +225,14 @@ export default function ShapeLayers({ handleLayerAction, nodes }: Props) {
         initialRepeat={effects.arrayDialog?.initialRepeat ?? "3"}
         onOpenChange={(open) => !open && effects.closeArray()}
         onSubmit={effects.submitArray}
+      />
+
+      <BooleanDialog
+        open={effects.booleanDialog !== null}
+        mode={effects.booleanDialog?.effectIndex === null ? "add" : "edit"}
+        initialMode={effects.booleanDialog?.initialMode ?? "union"}
+        onOpenChange={(open) => !open && effects.closeBoolean()}
+        onSubmit={effects.submitBoolean}
       />
     </DndContext>
   );

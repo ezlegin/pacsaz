@@ -2,6 +2,7 @@
 
 import { pointInput } from "@/lib/validationSchema/PropsSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { getNodes } from "@repo/store/getters";
 import { useAppSelector } from "@repo/store/hooks";
 import { effectsSelectors } from "@repo/store/slices/effectsSlice";
 import { IEffect } from "@repo/store/types";
@@ -13,9 +14,6 @@ import { useForm } from "react-hook-form";
 import z from "zod";
 import BooleanEffectForm from "./BooleanEffectForm";
 import EffectsList from "./EffectsList";
-import RadiusEffectForm from "./RadiusEffectForm";
-import ArrayEffectForm from "./ArrayEffectForm";
-import { getNodes } from "@repo/store/getters";
 
 const arrayFormSchema = z.object({
   count: z.string().min(1),
@@ -54,26 +52,6 @@ export const Effects = () => {
   const [effectFormType, setEffectFormType] =
     useState<IEffect.EffectTypes | null>(null);
 
-  const arrayForm = useForm<ArrayFormType>({
-    resolver: zodResolver(arrayFormSchema),
-    defaultValues: {
-      count: "",
-      targetModelId: "",
-      key: "array",
-      from: ["", ""],
-      to: ["", ""],
-      rotate: false,
-    },
-  });
-  const radiusForm = useForm<RadiusFormType>({
-    resolver: zodResolver(radiusFormSchema),
-    defaultValues: {
-      radius: "12",
-      targetModelId: "",
-      key: "radius",
-      indices: [],
-    },
-  });
   const booleanForm = useForm<BooleanFormType>({
     resolver: zodResolver(booleanFormSchema),
     defaultValues: {
@@ -87,26 +65,10 @@ export const Effects = () => {
   const effects = useAppSelector(effectsSelectors.selectAll);
   const nodes = getNodes();
 
-  if (effectFormType === "radius")
-    return (
-      <RadiusEffectForm
-        form={radiusForm}
-        closeForm={() => setEffectFormType(null)}
-        shapes={nodes}
-      />
-    );
   if (effectFormType === "boolean")
     return (
       <BooleanEffectForm
         form={booleanForm}
-        closeForm={() => setEffectFormType(null)}
-        shapes={nodes}
-      />
-    );
-  if (effectFormType === "array")
-    return (
-      <ArrayEffectForm
-        form={arrayForm}
         closeForm={() => setEffectFormType(null)}
         shapes={nodes}
       />
@@ -148,10 +110,8 @@ export const Effects = () => {
       </div>
 
       <EffectsList
-        arrayForm={arrayForm}
         effects={effects}
         shapes={nodes}
-        radiusForm={radiusForm}
         booleanForm={booleanForm}
         setEffectFormType={setEffectFormType}
       />

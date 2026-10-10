@@ -1,5 +1,6 @@
 "use client";
 
+import { BooleanMode } from "@/components/layers/BooleanDialog";
 import { useAppDispatch } from "@repo/store/hooks";
 import {
   addEffect,
@@ -26,6 +27,12 @@ interface ArrayDialogState {
   initialRepeat: string;
 }
 
+interface BooleanDialogState {
+  nodeId: string;
+  effectIndex: number | null;
+  initialMode: BooleanMode;
+}
+
 function findNode(nodes: ISpec.Nodes, id: string): ISpec.Node | undefined {
   for (const node of nodes) {
     if (node.id === id) return node;
@@ -44,6 +51,63 @@ export function useEffectDialogs(nodes: ISpec.Nodes) {
     null,
   );
   const [arrayDialog, setArrayDialog] = useState<ArrayDialogState | null>(null);
+
+  const [booleanDialog, setBooleanDialog] = useState<BooleanDialogState | null>(
+    null,
+  );
+
+  // ---------- Boolean ----------
+  const openBoolean = (nodeId: string) => {
+    const node = findNode(nodes, nodeId);
+    if (!node || node.type !== "group") return;
+
+    const effects = node.effects ?? [];
+    const idx = effects.findIndex((e) => e.type === "boolean");
+
+    if (idx >= 0) {
+      const e = effects[idx] as Extract<ISpec.ShapeEffect, { type: "boolean" }>;
+      setBooleanDialog({ nodeId, effectIndex: idx, initialMode: e.mode });
+    } else {
+      setBooleanDialog({ nodeId, effectIndex: null, initialMode: "union" });
+    }
+  };
+
+  const submitBoolean = (mode: BooleanMode) => {
+    if (!booleanDialog) return;
+    const { nodeId, effectIndex } = booleanDialog;
+    const effect: ISpec.ShapeEffect = { type: "boolean", mode };
+
+    dispatch(
+      effectIndex === null
+        ? addEffect({ nodeId, effect })
+        : updateEffect({ nodeId, index: effectIndex, changes: effect }),
+    );
+    setBooleanDialog(null);
+  };
+
+  const removeBoolean = (nodeId: string) => {
+    const node = findNode(nodes, nodeId);
+    if (!node || node.type !== "group") return;
+    const idx = (node.effects ?? []).findIndex((e) => e.type === "boolean");
+    if (idx < 0) return;
+    dispatch(removeEffect({ nodeId, index: idx }));
+  };
+
+  // ---------- Join ----------
+  const addJoin = (nodeId: string) => {
+    const node = findNode(nodes, nodeId);
+    if (!node || node.type !== "group") return;
+    if ((node.effects ?? []).some((e) => e.type === "join")) return;
+    dispatch(addEffect({ nodeId, effect: { type: "join" } }));
+  };
+
+  const removeJoin = (nodeId: string) => {
+    const node = findNode(nodes, nodeId);
+    if (!node || node.type !== "group") return;
+    const idx = (node.effects ?? []).findIndex((e) => e.type === "join");
+    if (idx < 0) return;
+    dispatch(removeEffect({ nodeId, index: idx }));
+  };
 
   // ---------- Radius ----------
   const openRadius = (nodeId: string) => {
@@ -161,5 +225,14 @@ export function useEffectDialogs(nodes: ISpec.Nodes) {
     openArray,
     submitArray,
     removeArray,
+
+    booleanDialog,
+    closeBoolean: () => setBooleanDialog(null),
+    openBoolean,
+    submitBoolean,
+    removeBoolean,
+
+    addJoin,
+    removeJoin,
   };
 }
