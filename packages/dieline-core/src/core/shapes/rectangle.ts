@@ -1,7 +1,7 @@
 import { ISpec } from "@repo/store/types";
 import M from "makerjs";
 import { Shape } from "./Shape";
-import { addFilletAt } from "../helpers/addFillet";
+import { addFillet, addFilletAt } from "../helpers/addFillet";
 
 interface Options {
   deleteSide?: ISpec.Direction;
@@ -32,7 +32,7 @@ export class Rectangle extends Shape {
     if (options?.effects) {
       for (const effect of options.effects) {
         switch (effect.type) {
-          case "radius":
+          case "radiusAt": {
             const rounded = addFilletAt(
               rect,
               effect.targets.map((t) => +t),
@@ -40,6 +40,12 @@ export class Rectangle extends Shape {
             );
             this.$pushShape("rect", rounded);
             return;
+          }
+          case "radius": {
+            const rounded = addFillet(rect, +effect.value);
+            this.$pushShape("rect", rounded);
+            return;
+          }
         }
       }
     }

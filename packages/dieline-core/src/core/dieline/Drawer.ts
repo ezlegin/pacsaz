@@ -10,6 +10,7 @@ export class Drawer extends Dieline {
     private variables: IVar.VariableMap,
   ) {
     super();
+    console.log("nodes", nodes);
   }
 
   //! ------------------------ Shapes ------------------------
@@ -24,7 +25,7 @@ export class Drawer extends Dieline {
       lines,
       ({ absolutePts, relativePts, isRelative, isClosed, effects }, scope) => {
         const resolved = effects?.map((fx) => {
-          if (fx.type === "radius") {
+          if (fx.type === "radiusAt" || fx.type === "radius") {
             return {
               ...fx,
               value: this.$parseMathStr(fx.value, scope).toString(),
@@ -84,7 +85,7 @@ export class Drawer extends Dieline {
   private rectangle(rect: ISpec.RectangleSpec) {
     this.$pusher(rect, ({ width, height, deleteSide, effects }, scope) => {
       const resolved = effects?.map((fx) => {
-        if (fx.type === "radius") {
+        if (fx.type === "radiusAt" || fx.type === "radius") {
           return {
             ...fx,
             value: this.$parseMathStr(fx.value, scope).toString(),
@@ -124,7 +125,7 @@ export class Drawer extends Dieline {
   private polygon(polygon: ISpec.PolygonSpec) {
     this.$pusher(polygon, ({ radius, sides, effects }, scope) => {
       const resolved = effects?.map((fx) => {
-        if (fx.type === "radius") {
+        if (fx.type === "radiusAt" || fx.type === "radius") {
           return {
             ...fx,
             value: this.$parseMathStr(fx.value, scope).toString(),

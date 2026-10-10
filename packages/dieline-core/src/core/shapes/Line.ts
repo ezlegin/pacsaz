@@ -49,7 +49,7 @@ export class Lines extends Shape {
     if (options?.effects) {
       for (const effect of options.effects) {
         switch (effect.type) {
-          case "radius":
+          case "radiusAt": {
             const rounded = addFilletAt(
               lines,
               effect.targets.map((t) => +t),
@@ -57,6 +57,12 @@ export class Lines extends Shape {
             );
             this.$pushShape("lines", rounded);
             return;
+          }
+          case "radius": {
+            const rounded = addFillet(lines, +effect.value);
+            this.$pushShape("lines", rounded);
+            return;
+          }
         }
       }
     }

@@ -27,6 +27,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useAppDispatch } from "@repo/store/hooks";
+import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import {
   addEffect,
   groupNodes,
@@ -107,9 +108,12 @@ export default function ShapeLayers({
   const [activeId, setActiveId] = useState<string | null>(null);
   const offsetLeftRef = useRef(0);
 
+  type RadiusKind = "radius" | "radiusAt";
+
   const [radiusDialog, setRadiusDialog] = useState<{
     nodeId: string;
-    effectIndex: number | null; // null = add, number = edit
+    effectIndex: number | null;
+    initialType: RadiusKind;
     initialTargets: string[];
     initialValue: string;
   } | null>(null);
@@ -119,45 +123,50 @@ export default function ShapeLayers({
     if (!node || node.type === "group") return;
 
     const effects = node.effects ?? [];
-    const idx = effects.findIndex((e) => e.type === "radius");
+    const idx = effects.findIndex(
+      (e) => e.type === "radius" || e.type === "radiusAt",
+    );
 
     if (idx >= 0) {
-      const e = effects[idx] as Extract<ISpec.ShapeEffect, { type: "radius" }>;
+      const e = effects[idx] as Extract<
+        ISpec.ShapeEffect,
+        { type: "radius" } | { type: "radiusAt" }
+      >;
       setRadiusDialog({
         nodeId,
         effectIndex: idx,
-        initialTargets: e.targets,
+        initialType: e.type,
+        initialTargets: e.type === "radiusAt" ? e.targets : [],
         initialValue: e.value,
       });
     } else {
       setRadiusDialog({
         nodeId,
         effectIndex: null,
+        initialType: "radius",
         initialTargets: [],
         initialValue: "5",
       });
     }
   };
 
-  const handleSubmitRadius = (targets: string[], value: string) => {
+  const handleSubmitRadius = (
+    type: RadiusKind,
+    targets: string[],
+    value: string,
+  ) => {
     if (!radiusDialog) return;
     const { nodeId, effectIndex } = radiusDialog;
 
+    const effect: ISpec.ShapeEffect =
+      type === "radiusAt"
+        ? { type: "radiusAt", targets, value }
+        : { type: "radius", value };
+
     if (effectIndex === null) {
-      dispatch(
-        addEffect({
-          nodeId,
-          effect: { type: "radius", targets, value },
-        }),
-      );
+      dispatch(addEffect({ nodeId, effect }));
     } else {
-      dispatch(
-        updateEffect({
-          nodeId,
-          index: effectIndex,
-          changes: { type: "radius", targets, value },
-        }),
-      );
+      dispatch(updateEffect({ nodeId, index: effectIndex, changes: effect }));
     }
     setRadiusDialog(null);
   };
@@ -166,7 +175,9 @@ export default function ShapeLayers({
     const node = items.find((i) => i.id === nodeId)?.node;
     if (!node || node.type === "group") return;
 
-    const idx = (node.effects ?? []).findIndex((e) => e.type === "radius");
+    const idx = (node.effects ?? []).findIndex(
+      (e) => e.type === "radius" || e.type === "radiusAt",
+    );
     if (idx < 0) return;
 
     dispatch(removeEffect({ nodeId, index: idx }));
@@ -482,6 +493,7 @@ export default function ShapeLayers({
       <RadiusDialog
         open={radiusDialog !== null}
         mode={radiusDialog?.effectIndex === null ? "add" : "edit"}
+        initialType={radiusDialog?.initialType ?? "radius"}
         initialTargets={radiusDialog?.initialTargets ?? []}
         initialValue={radiusDialog?.initialValue ?? "5"}
         onOpenChange={(open) => !open && setRadiusDialog(null)}
@@ -548,7 +560,9 @@ function SortableRow({
 
   const hasRadius =
     item.node.type !== "group" &&
-    (item.node.effects ?? []).some((e) => e.type === "radius");
+    (item.node.effects ?? []).some(
+      (e) => e.type === "radius" || e.type === "radiusAt",
+    );
 
   return (
     <ContextMenu>
@@ -597,6 +611,9 @@ function SortableRow({
               type="button"
               aria-label="Remove radius effect"
               onPointerDown={(e) => e.stopPropagation()}
+              onPointerUp={(e) => e.stopPropagation()}
+              onMouseDown={(e) => e.stopPropagation()}
+              onMouseUp={(e) => e.stopPropagation()}
               onClick={(e) => {
                 e.stopPropagation();
                 e.preventDefault();
@@ -811,6 +828,7 @@ function LayerIcon({ data }: { data: ISpec.ShapesKey }) {
 function RadiusDialog({
   open,
   mode,
+  initialType,
   initialTargets,
   initialValue,
   onOpenChange,
@@ -818,31 +836,41 @@ function RadiusDialog({
 }: {
   open: boolean;
   mode: "add" | "edit";
+  initialType: "radius" | "radiusAt";
   initialTargets: string[];
   initialValue: string;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (targets: string[], value: string) => void;
+  onSubmit: (
+    type: "radius" | "radiusAt",
+    targets: string[],
+    value: string,
+  ) => void;
 }) {
+  const [effectType, setEffectType] = useState<"radius" | "radiusAt">(
+    initialType,
+  );
   const [targetsInput, setTargetsInput] = useState("");
   const [valueInput, setValueInput] = useState("5");
 
-  // Reset / prefill each time the dialog opens.
   useEffect(() => {
     if (!open) return;
+    setEffectType(initialType);
     setTargetsInput(initialTargets.join(", "));
     setValueInput(initialValue);
-  }, [open, initialTargets, initialValue]);
+  }, [open, initialType, initialTargets, initialValue]);
 
   const parsedTargets = targetsInput
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
 
-  const canSubmit = parsedTargets.length > 0 && valueInput.trim().length > 0;
+  const canSubmit =
+    valueInput.trim().length > 0 &&
+    (effectType === "radius" || parsedTargets.length > 0);
 
   const submit = () => {
     if (!canSubmit) return;
-    onSubmit(parsedTargets, valueInput.trim());
+    onSubmit(effectType, parsedTargets, valueInput.trim());
   };
 
   const isEdit = mode === "edit";
@@ -855,26 +883,46 @@ function RadiusDialog({
             {isEdit ? "Edit Radius Effect" : "Add Radius Effect"}
           </DialogTitle>
           <DialogDescription>
-            Enter comma-separated corner indices and a radius value. Values may
-            be math expressions (e.g. <code>thickness / 2</code>).
+            Round every corner, or only specific ones.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
           <div className="space-y-2">
-            <Label htmlFor="radius-targets">Targets</Label>
-            <Input
-              id="radius-targets"
-              placeholder="0, 1, 2"
-              value={targetsInput}
-              onChange={(e) => setTargetsInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && submit()}
-              autoFocus
-            />
-            <p className="text-xs text-muted-foreground">
-              Corner indices to fillet. Order does not matter.
-            </p>
+            <Label>Type</Label>
+            <ToggleGroup
+              type="single"
+              value={effectType}
+              onValueChange={(v) =>
+                v && setEffectType(v as "radius" | "radiusAt")
+              }
+              className="w-full"
+            >
+              <ToggleGroupItem value="radius" className="flex-1">
+                Radius
+              </ToggleGroupItem>
+              <ToggleGroupItem value="radiusAt" className="flex-1">
+                Radius At
+              </ToggleGroupItem>
+            </ToggleGroup>
           </div>
+
+          {effectType === "radiusAt" && (
+            <div className="space-y-2">
+              <Label htmlFor="radius-targets">Targets</Label>
+              <Input
+                id="radius-targets"
+                placeholder="0, 1, 2"
+                value={targetsInput}
+                onChange={(e) => setTargetsInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && submit()}
+                autoFocus
+              />
+              <p className="text-xs text-muted-foreground">
+                Corner indices to fillet. Order does not matter.
+              </p>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="radius-value">Radius</Label>

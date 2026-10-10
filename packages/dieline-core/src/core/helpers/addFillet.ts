@@ -8,7 +8,8 @@ export function addFillet(model: IModel, radius: number = 0): IModel {
   if (!chain) return model;
 
   const fillet = retryFillet(chain, radius);
-  return fillet ? { models: { fillet } } : model;
+
+  return fillet ? { models: { fillet, model } } : model;
 }
 
 export function addFilletAt(

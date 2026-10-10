@@ -57,11 +57,16 @@ export namespace ISpec {
 
   //! Shapes --------------------------------------
 
-  export type ShapeEffect = {
-    type: "radius";
-    targets: string[];
-    value: string;
-  };
+  export type ShapeEffect =
+    | {
+        type: "radiusAt";
+        targets: string[];
+        value: string;
+      }
+    | {
+        type: "radius";
+        value: string;
+      };
 
   export type LineSpec = Record<"length" | "angle", string> &
     Generals & {
