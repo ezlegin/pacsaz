@@ -1,5 +1,6 @@
 import M, { IModel, IPoint } from "makerjs";
 import Pacsaz from "../Pacsaz";
+import { ISpec } from "@repo/store/types";
 
 type MirrorRefPoint = "top" | "bottom" | "left" | "right";
 export type RotateRefPoint =
@@ -142,5 +143,26 @@ export abstract class Shape implements IModel {
 
   protected get lastModel() {
     return this.models![this.lastModelKey]!;
+  }
+
+  protected $applyArray(
+    model: M.IModel,
+    effect: Extract<ISpec.ShapeEffect, { type: "array" }>,
+  ): M.IModel {
+    const count = Math.max(1, Math.floor(+effect.repeat));
+    if (count === 1) return model;
+
+    const dx = +effect.moveX;
+    const dy = +effect.moveY;
+
+    const row: M.IModel = { models: {} };
+
+    for (let i = 0; i < count; i++) {
+      const copy = i === 0 ? model : (M.model.clone(model) as M.IModel);
+      if (i > 0) M.model.moveRelative(copy, [dx * i, dy * i]);
+      row.models![`array-${i}`] = copy;
+    }
+
+    return row;
   }
 }

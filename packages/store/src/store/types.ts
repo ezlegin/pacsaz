@@ -66,6 +66,12 @@ export namespace ISpec {
     | {
         type: "radius";
         value: string;
+      }
+    | {
+        type: "array";
+        moveX: string;
+        moveY: string;
+        repeat: string;
       };
 
   export type LineSpec = Record<"length" | "angle", string> &

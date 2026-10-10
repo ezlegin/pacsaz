@@ -36,37 +36,31 @@ export class Lines extends Shape {
       points,
     );
 
-    // todo: this probably gets removed in futue. note that remove its types from options.
-    if (options?.indices) {
-      lines = addFilletAt(lines, options.indices, options.filletRadius);
-    } else {
-      addFillet(lines, options?.filletRadius);
-    }
-
     // this is used by mirror function to calculate the origin point.
     M.model.originate(lines, points[0]!);
 
-    if (options?.effects) {
-      for (const effect of options.effects) {
-        switch (effect.type) {
-          case "radiusAt": {
-            const rounded = addFilletAt(
-              lines,
-              effect.targets.map((t) => +t),
-              +effect.value,
-            );
-            this.$pushShape("lines", rounded);
-            return;
-          }
-          case "radius": {
-            const rounded = addFillet(lines, +effect.value);
-            this.$pushShape("lines", rounded);
-            return;
-          }
-        }
+    let model: M.IModel = lines;
+
+    for (const effect of options?.effects ?? []) {
+      switch (effect.type) {
+        case "radiusAt":
+          model = addFilletAt(
+            model,
+            effect.targets.map((t) => +t),
+            +effect.value,
+          );
+          break;
+
+        case "radius":
+          model = addFillet(model, +effect.value);
+          break;
+
+        case "array":
+          model = this.$applyArray(model, effect);
+          break;
       }
     }
 
-    this.$pushShape("lines", lines);
+    this.$pushShape("lines", model);
   }
 }

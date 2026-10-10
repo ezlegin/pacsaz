@@ -14,27 +14,28 @@ export class Polygon extends Shape {
 
     const polygon = new M.models.Polygon(sides, radius, firstCornerAngle ?? 90);
 
-    if (options?.effects) {
-      for (const effect of options.effects) {
-        switch (effect.type) {
-          case "radiusAt": {
-            const rounded = addFilletAt(
-              polygon,
-              effect.targets.map((t) => +t),
-              +effect.value,
-            );
-            this.$pushShape("polygon", rounded);
-            return;
-          }
-          case "radius": {
-            const rounded = addFillet(polygon, +effect.value);
-            this.$pushShape("polygon", rounded);
-            return;
-          }
-        }
+    let model: M.IModel = polygon;
+
+    for (const effect of options?.effects ?? []) {
+      switch (effect.type) {
+        case "radiusAt":
+          model = addFilletAt(
+            model,
+            effect.targets.map((t) => +t),
+            +effect.value,
+          );
+          break;
+
+        case "radius":
+          model = addFillet(model, +effect.value);
+          break;
+
+        case "array":
+          model = this.$applyArray(model, effect);
+          break;
       }
     }
 
-    this.$pushShape("polygon", polygon);
+    this.$pushShape("polygon", model);
   }
 }

@@ -106,6 +106,67 @@ export default function ShapeLayers({
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set());
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
+
+  type ArrayDialogState = {
+    nodeId: string;
+    effectIndex: number | null; // null = add, number = edit
+    initialMoveX: string;
+    initialMoveY: string;
+    initialRepeat: string;
+  };
+
+  const [arrayDialog, setArrayDialog] = useState<ArrayDialogState | null>(null);
+
+  const handleOpenArray = (nodeId: string) => {
+    const node = items.find((i) => i.id === nodeId)?.node;
+    if (!node || node.type === "group") return;
+
+    const effects = node.effects ?? [];
+    const idx = effects.findIndex((e) => e.type === "array");
+
+    if (idx >= 0) {
+      const e = effects[idx] as Extract<ISpec.ShapeEffect, { type: "array" }>;
+      setArrayDialog({
+        nodeId,
+        effectIndex: idx,
+        initialMoveX: e.moveX,
+        initialMoveY: e.moveY,
+        initialRepeat: e.repeat,
+      });
+    } else {
+      setArrayDialog({
+        nodeId,
+        effectIndex: null,
+        initialMoveX: "0",
+        initialMoveY: "10",
+        initialRepeat: "3",
+      });
+    }
+  };
+
+  const handleSubmitArray = (moveX: string, moveY: string, repeat: string) => {
+    if (!arrayDialog) return;
+    const { nodeId, effectIndex } = arrayDialog;
+
+    const effect: ISpec.ShapeEffect = { type: "array", moveX, moveY, repeat };
+
+    if (effectIndex === null) {
+      dispatch(addEffect({ nodeId, effect }));
+    } else {
+      dispatch(updateEffect({ nodeId, index: effectIndex, changes: effect }));
+    }
+    setArrayDialog(null);
+  };
+
+  const handleRemoveArray = (nodeId: string) => {
+    const node = items.find((i) => i.id === nodeId)?.node;
+    if (!node || node.type === "group") return;
+
+    const idx = (node.effects ?? []).findIndex((e) => e.type === "array");
+    if (idx < 0) return;
+
+    dispatch(removeEffect({ nodeId, index: idx }));
+  };
   const offsetLeftRef = useRef(0);
 
   type RadiusKind = "radius" | "radiusAt";
@@ -473,6 +534,8 @@ export default function ShapeLayers({
               handleLayerAction={handleLayerAction}
               onAddRadius={handleOpenRadius}
               onRemoveRadius={handleRemoveRadius}
+              onAddArray={handleOpenArray}
+              onRemoveArray={handleRemoveArray}
             />
           ))}
         </div>
@@ -499,6 +562,16 @@ export default function ShapeLayers({
         onOpenChange={(open) => !open && setRadiusDialog(null)}
         onSubmit={handleSubmitRadius}
       />
+
+      <ArrayDialog
+        open={arrayDialog !== null}
+        mode={arrayDialog?.effectIndex === null ? "add" : "edit"}
+        initialMoveX={arrayDialog?.initialMoveX ?? "0"}
+        initialMoveY={arrayDialog?.initialMoveY ?? "10"}
+        initialRepeat={arrayDialog?.initialRepeat ?? "3"}
+        onOpenChange={(open) => !open && setArrayDialog(null)}
+        onSubmit={handleSubmitArray}
+      />
     </DndContext>
   );
 }
@@ -522,6 +595,8 @@ function SortableRow({
   handleLayerAction,
   onAddRadius,
   onRemoveRadius,
+  onAddArray,
+  onRemoveArray,
 }: {
   item: FlatNode;
   isActive: boolean;
@@ -539,6 +614,8 @@ function SortableRow({
   handleLayerAction: HandleLayerActoin;
   onAddRadius: (nodeId: string) => void;
   onRemoveRadius: (nodeId: string) => void;
+  onAddArray: (nodeId: string) => void;
+  onRemoveArray: (nodeId: string) => void;
 }) {
   const {
     attributes,
@@ -563,6 +640,10 @@ function SortableRow({
     (item.node.effects ?? []).some(
       (e) => e.type === "radius" || e.type === "radiusAt",
     );
+
+  const hasArray =
+    item.node.type !== "group" &&
+    (item.node.effects ?? []).some((e) => e.type === "array");
 
   return (
     <ContextMenu>
@@ -618,6 +699,46 @@ function SortableRow({
                 e.stopPropagation();
                 e.preventDefault();
                 onRemoveRadius(item.id);
+              }}
+              className="cursor-pointer text-muted-foreground hover:text-destructive z-10"
+            >
+              <Trash className="h-3.5 w-3.5" />
+            </Button>
+          )}
+        </ContextMenuItem>
+        <ContextMenuItem
+          onSelect={() => {
+            setTimeout(() => onAddArray(item.id), 0);
+          }}
+          className="flex items-center justify-between gap-3"
+        >
+          <span className="flex items-center">
+            {hasArray ? (
+              <>
+                <Pencil className="mr-2 h-4 w-4" />
+                Edit Array
+              </>
+            ) : (
+              <>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Array
+              </>
+            )}
+          </span>
+
+          {hasArray && (
+            <Button
+              variant={"ghost"}
+              type="button"
+              aria-label="Remove array effect"
+              onPointerDown={(e) => e.stopPropagation()}
+              onPointerUp={(e) => e.stopPropagation()}
+              onMouseDown={(e) => e.stopPropagation()}
+              onMouseUp={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                onRemoveArray(item.id);
               }}
               className="cursor-pointer text-muted-foreground hover:text-destructive z-10"
             >
@@ -933,6 +1054,112 @@ function RadiusDialog({
               onChange={(e) => setValueInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && submit()}
             />
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button onClick={submit} disabled={!canSubmit}>
+            {isEdit ? "Save" : "Add Effect"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function ArrayDialog({
+  open,
+  mode,
+  initialMoveX,
+  initialMoveY,
+  initialRepeat,
+  onOpenChange,
+  onSubmit,
+}: {
+  open: boolean;
+  mode: "add" | "edit";
+  initialMoveX: string;
+  initialMoveY: string;
+  initialRepeat: string;
+  onOpenChange: (open: boolean) => void;
+  onSubmit: (moveX: string, moveY: string, repeat: string) => void;
+}) {
+  const [moveX, setMoveX] = useState("0");
+  const [moveY, setMoveY] = useState("10");
+  const [repeat, setRepeat] = useState("3");
+
+  useEffect(() => {
+    if (!open) return;
+    setMoveX(initialMoveX);
+    setMoveY(initialMoveY);
+    setRepeat(initialRepeat);
+  }, [open, initialMoveX, initialMoveY, initialRepeat]);
+
+  const canSubmit =
+    moveX.trim().length > 0 &&
+    moveY.trim().length > 0 &&
+    repeat.trim().length > 0;
+
+  const submit = () => {
+    if (!canSubmit) return;
+    onSubmit(moveX.trim(), moveY.trim(), repeat.trim());
+  };
+
+  const isEdit = mode === "edit";
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>
+            {isEdit ? "Edit Array Effect" : "Add Array Effect"}
+          </DialogTitle>
+          <DialogDescription>
+            Duplicate this shape in a row. Values may be math expressions (e.g.{" "}
+            <code>width + 2</code>).
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4 py-2">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label htmlFor="array-move-x">Move X</Label>
+              <Input
+                id="array-move-x"
+                placeholder="0"
+                value={moveX}
+                onChange={(e) => setMoveX(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && submit()}
+                autoFocus
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="array-move-y">Move Y</Label>
+              <Input
+                id="array-move-y"
+                placeholder="10"
+                value={moveY}
+                onChange={(e) => setMoveY(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && submit()}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="array-repeat">Repeat</Label>
+            <Input
+              id="array-repeat"
+              placeholder="3"
+              value={repeat}
+              onChange={(e) => setRepeat(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && submit()}
+            />
+            <p className="text-xs text-muted-foreground">
+              Total number of copies, including the original.
+            </p>
           </div>
         </div>
 

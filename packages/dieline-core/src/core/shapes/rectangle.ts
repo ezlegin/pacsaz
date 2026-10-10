@@ -1,20 +1,47 @@
 import { ISpec } from "@repo/store/types";
 import M from "makerjs";
-import { Shape } from "./Shape";
 import { addFillet, addFilletAt } from "../helpers/addFillet";
+import { Shape } from "./Shape";
 
 interface Options {
   deleteSide?: ISpec.Direction;
-  radius?: number;
   effects?: ISpec.ShapeEffect[];
 }
 
 export class Rectangle extends Shape {
   constructor(width: number, height: number, options?: Options) {
     super();
-    const rect = new M.models.Rectangle(width, height);
 
-    switch (options?.deleteSide) {
+    const rect = new M.models.Rectangle(width, height);
+    this.$applyDeleteSide(rect, options?.deleteSide);
+
+    let model: M.IModel = rect;
+
+    for (const effect of options?.effects ?? []) {
+      switch (effect.type) {
+        case "radiusAt":
+          model = addFilletAt(
+            model,
+            effect.targets.map((t) => +t),
+            +effect.value,
+          );
+          break;
+
+        case "radius":
+          model = addFillet(model, +effect.value);
+          break;
+
+        case "array":
+          model = this.$applyArray(model, effect);
+          break;
+      }
+    }
+
+    this.$pushShape("rect", model);
+  }
+
+  private $applyDeleteSide(rect: M.models.Rectangle, side?: ISpec.Direction) {
+    switch (side) {
       case "down":
         delete rect.paths?.["ShapeLine1"];
         break;
@@ -28,28 +55,5 @@ export class Rectangle extends Shape {
         delete rect.paths?.["ShapeLine3"];
         break;
     }
-
-    if (options?.effects) {
-      for (const effect of options.effects) {
-        switch (effect.type) {
-          case "radiusAt": {
-            const rounded = addFilletAt(
-              rect,
-              effect.targets.map((t) => +t),
-              +effect.value,
-            );
-            this.$pushShape("rect", rounded);
-            return;
-          }
-          case "radius": {
-            const rounded = addFillet(rect, +effect.value);
-            this.$pushShape("rect", rounded);
-            return;
-          }
-        }
-      }
-    }
-
-    this.$pushShape("rect", rect);
   }
 }
