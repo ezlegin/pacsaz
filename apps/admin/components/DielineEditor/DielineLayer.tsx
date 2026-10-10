@@ -33,8 +33,8 @@ import { Redo, Settings, Undo } from "lucide-react";
 import DielineChangesSaver from "../forms/dielineChangesSaver";
 import DielineSettingsForm from "../forms/DielineSettingsForm";
 import RulerLayers from "./layers/RulerLayers";
-import ShapeLayers from "./layers/ShapeLayers";
 import { nanoid } from "nanoid";
+import ShapeLayers from "../layers/ShapeLayers";
 
 export type ItemType = {
   nodes: ISpec.Node;
