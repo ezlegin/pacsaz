@@ -1,8 +1,13 @@
 import { ISpec, IVar } from "@repo/store/types";
 import { evaluate } from "mathjs";
+import M from "makerjs";
 import Pacsaz from "../Pacsaz";
 import { Shape } from "../shapes/Shape";
 import { Dieline } from "./Dieline";
+import { applyBoolean } from "../helpers/boolean";
+import { applyJoin } from "../helpers/join";
+
+type ShapeNode = Exclude<ISpec.Node, ISpec.Group>;
 
 export class Drawer extends Dieline {
   constructor(
@@ -10,29 +15,19 @@ export class Drawer extends Dieline {
     private variables: IVar.VariableMap,
   ) {
     super();
-    console.log("nodes", nodes);
   }
 
-  //! ------------------------ Shapes ------------------------
-  private line(line: ISpec.LineSpec) {
-    this.$pusher(line, ({ angle, length }, scope) => {
+  private line(line: ISpec.LineSpec): Shape {
+    return this.$build(line, ({ angle, length }, scope) => {
       return new Pacsaz.shapes.Line(this.$parseMathStr(length, scope), +angle);
     });
   }
 
-  private lines(lines: ISpec.LinesSpec) {
-    this.$pusher(
+  private lines(lines: ISpec.LinesSpec): Shape {
+    return this.$build(
       lines,
       ({ absolutePts, relativePts, isRelative, isClosed, effects }, scope) => {
-        const resolved = effects?.map((fx) => {
-          if (fx.type === "radiusAt" || fx.type === "radius") {
-            return {
-              ...fx,
-              value: this.$parseMathStr(fx.value, scope).toString(),
-            };
-          }
-          return fx;
-        });
+        const resolved = this.$resolveEffects(effects, scope);
 
         if (isRelative) {
           if (!relativePts) throw new Error("Points Not Avaiable.");
@@ -40,7 +35,7 @@ export class Drawer extends Dieline {
           const pb = new Pacsaz.point.Builder([
             this.$parseMathStr(relativePts.startPt[0], scope),
             this.$parseMathStr(relativePts.startPt[1], scope),
-          ]); //todo: this doesn't work.
+          ]);
 
           for (const pt of relativePts.pts) {
             const direction = pt[2];
@@ -70,40 +65,37 @@ export class Drawer extends Dieline {
             closed: isClosed,
             effects: resolved,
           });
-        } else {
-          if (!absolutePts) throw new Error("Points Not Avaiable.");
-          const parsedPts = absolutePts.map((pt) => [
-            this.$parseMathStr(pt[0], scope),
-            this.$parseMathStr(pt[1], scope),
-          ]);
-          return new Pacsaz.shapes.Lines(parsedPts, { closed: isClosed });
         }
+
+        if (!absolutePts) throw new Error("Points Not Avaiable.");
+        const parsedPts = absolutePts.map((pt) => [
+          this.$parseMathStr(pt[0], scope),
+          this.$parseMathStr(pt[1], scope),
+        ]);
+        return new Pacsaz.shapes.Lines(parsedPts, {
+          closed: isClosed,
+          effects: resolved,
+        });
       },
     );
   }
 
-  private rectangle(rect: ISpec.RectangleSpec) {
-    this.$pusher(rect, ({ width, height, deleteSide, effects }, scope) => {
-      const resolved = effects?.map((fx) => {
-        if (fx.type === "radiusAt" || fx.type === "radius") {
-          return {
-            ...fx,
-            value: this.$parseMathStr(fx.value, scope).toString(),
-          };
-        }
-        return fx;
-      });
-
-      return new Pacsaz.shapes.Rectangle(
-        this.$parseMathStr(width, scope),
-        this.$parseMathStr(height, scope),
-        { deleteSide, effects: resolved },
-      );
-    });
+  private rectangle(rect: ISpec.RectangleSpec): Shape {
+    return this.$build(
+      rect,
+      ({ width, height, deleteSide, effects }, scope) => {
+        const resolved = this.$resolveEffects(effects, scope);
+        return new Pacsaz.shapes.Rectangle(
+          this.$parseMathStr(width, scope),
+          this.$parseMathStr(height, scope),
+          { deleteSide, effects: resolved },
+        );
+      },
+    );
   }
 
-  private circle(circle: ISpec.CircleSpec) {
-    this.$pusher(
+  private circle(circle: ISpec.CircleSpec): Shape {
+    return this.$build(
       circle,
       ({ id, radiusX, radiusY, radius, semiCircleDirection }, scope) => {
         const circleRadius = this.$parseMathStr(radius, scope);
@@ -113,27 +105,17 @@ export class Drawer extends Dieline {
             circleRadius,
             semiCircleDirection,
           );
-        } else {
-          const circleRadiusX = this.$parseMathStr(radiusX, scope);
-          const circleRadiusY = this.$parseMathStr(radiusY, scope);
-          return new Pacsaz.shapes.Ellipse(id, circleRadiusX, circleRadiusY);
         }
+        const circleRadiusX = this.$parseMathStr(radiusX, scope);
+        const circleRadiusY = this.$parseMathStr(radiusY, scope);
+        return new Pacsaz.shapes.Ellipse(id, circleRadiusX, circleRadiusY);
       },
     );
   }
 
-  private polygon(polygon: ISpec.PolygonSpec) {
-    this.$pusher(polygon, ({ radius, sides, effects }, scope) => {
-      const resolved = effects?.map((fx) => {
-        if (fx.type === "radiusAt" || fx.type === "radius") {
-          return {
-            ...fx,
-            value: this.$parseMathStr(fx.value, scope).toString(),
-          };
-        }
-        return fx;
-      });
-
+  private polygon(polygon: ISpec.PolygonSpec): Shape {
+    return this.$build(polygon, ({ radius, sides, effects }, scope) => {
+      const resolved = this.$resolveEffects(effects, scope);
       return new Pacsaz.shapes.Polygon(
         this.$parseMathStr(radius, scope),
         +sides,
@@ -143,8 +125,8 @@ export class Drawer extends Dieline {
     });
   }
 
-  private arc(arc: ISpec.ArcSpec) {
-    this.$pusher(arc, ({ radius, startAngle, endAngle }, scope) => {
+  private arc(arc: ISpec.ArcSpec): Shape {
+    return this.$build(arc, ({ radius, startAngle, endAngle }, scope) => {
       const start = this.$parseMathStr(startAngle, scope);
       const end = this.$parseMathStr(endAngle, scope);
       return new Pacsaz.shapes.Arc(
@@ -154,6 +136,8 @@ export class Drawer extends Dieline {
       );
     });
   }
+
+  //! ------------------------ Traversal ------------------------
 
   override drawShapes() {
     for (const node of this.nodes) {
@@ -165,49 +149,69 @@ export class Drawer extends Dieline {
     if (node.hidden) return;
 
     if (node.type === "group") {
-      for (const child of node.nodes) {
-        this.renderNode(child);
-      }
-
+      const model = this.$buildGroup(node);
+      Pacsaz.shape.push(this.trimModel, node.id, model);
       return;
     }
 
+    const shape = this.$buildShape(node);
+    Pacsaz.shape.push(this.trimModel, node.id, shape);
+  }
+
+  private $buildShape(node: ShapeNode): Shape {
     switch (node.type) {
       case "line":
-        this.line(node);
-        break;
-
+        return this.line(node);
       case "circle":
-        this.circle(node);
-        break;
-
+        return this.circle(node);
       case "arc":
-        this.arc(node);
-        break;
-
+        return this.arc(node);
       case "lines":
-        this.lines(node);
-        break;
-
+        return this.lines(node);
       case "polygon":
-        this.polygon(node);
-        break;
-
+        return this.polygon(node);
       case "rectangle":
-        this.rectangle(node);
-        break;
+        return this.rectangle(node);
     }
   }
 
-  // -------------------- UTILS --------------------
+  private $buildGroup(group: ISpec.Group): M.IModel {
+    const children: M.IModel[] = [];
 
-  private $pusher<T extends ISpec.Node>(
+    for (const child of group.nodes) {
+      if (child.hidden) continue;
+      children.push(
+        child.type === "group"
+          ? this.$buildGroup(child)
+          : this.$buildShape(child),
+      );
+    }
+
+    let combined: M.IModel = {
+      models: Object.fromEntries(children.map((c, i) => [`child-${i}`, c])),
+    };
+
+    for (const efx of group.effects ?? []) {
+      switch (efx.type) {
+        case "join":
+          combined = applyJoin(combined);
+          break;
+        case "boolean":
+          combined = applyBoolean(children, efx.mode);
+          break;
+      }
+    }
+
+    return combined;
+  }
+
+  //! ------------------------ Utils ------------------------
+
+  private $build<T extends ISpec.Node>(
     item: T,
     callBack: (val: T, scope: Record<string, number>) => Shape,
-  ) {
+  ): Shape {
     const scope = this.scope;
-    if (item.hidden) return;
-
     const model = callBack(item, scope);
 
     model.moveTo([
@@ -269,7 +273,36 @@ export class Drawer extends Dieline {
       }
     }
 
-    Pacsaz.shape.push(this.trimModel, item.id, model); //todo: push to fold/perf/trim based on layer.
+    return model;
+  }
+
+  private $resolveEffects(
+    effects: ISpec.ShapeEffect[] | undefined,
+    scope: Record<string, number>,
+  ): ISpec.ShapeEffect[] | undefined {
+    if (!effects) return undefined;
+
+    return effects.map((fx) => {
+      switch (fx.type) {
+        case "radius":
+        case "radiusAt":
+          return {
+            ...fx,
+            value: this.$parseMathStr(fx.value, scope).toString(),
+          };
+
+        case "array":
+          return {
+            ...fx,
+            moveX: this.$parseMathStr(fx.moveX, scope).toString(),
+            moveY: this.$parseMathStr(fx.moveY, scope).toString(),
+            repeat: this.$parseMathStr(fx.repeat, scope).toString(),
+          };
+
+        default:
+          return fx;
+      }
+    });
   }
 
   private get scope() {
