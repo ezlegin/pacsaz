@@ -48,6 +48,7 @@ export function RowContent({
       className={cn(
         "group flex h-8 cursor-pointer select-none items-center justify-between gap-2 rounded-md px-2",
         isSelected && "border bg-gray-200/50",
+        node.hidden && "opacity-50",
       )}
       style={{ paddingLeft: `${8 + item.depth * INDENT}px` }}
       onClick={(e) => {
@@ -125,7 +126,7 @@ export function RowContent({
           className="flex items-center gap-1"
           onPointerDown={(e) => e.stopPropagation()}
         >
-          {node.type !== "group" && node.effects && node.effects.length > 0 && (
+          {node.effects && node.effects.length > 0 && (
             <span
               title={`${node.effects.length} effect${node.effects.length > 1 ? "s" : ""}`}
               className="shrink-0 rounded bg-amber-100 px-1 py-px text-[10px] font-semibold leading-none text-amber-700 group-hover:hidden"

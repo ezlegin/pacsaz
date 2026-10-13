@@ -83,13 +83,11 @@ export function SortableRow({
 
   const isGroup = item.node.type === "group";
   const canGroup = selectedIds.length >= 2 && isSelected;
-
-  const effects = item.node.type === "group" ? [] : (item.node.effects ?? []);
-  const hasRadius = effects.some(
+  const nodeEffects = item.node.effects ?? [];
+  const hasRadius = nodeEffects.some(
     (e) => e.type === "radius" || e.type === "radiusAt",
   );
-  const hasArray = effects.some((e) => e.type === "array");
-  const nodeEffects = item.node.effects ?? [];
+  const hasArray = nodeEffects.some((e) => e.type === "array");
   const hasBoolean = nodeEffects.some((e) => e.type === "boolean");
   const hasJoin = nodeEffects.some((e) => e.type === "join");
 
@@ -115,8 +113,22 @@ export function SortableRow({
       <ContextMenuContent>
         <ContextMenuLabel>Effects</ContextMenuLabel>
 
-        {isGroup ? (
+        <EffectMenuItem
+          label="Radius"
+          hasEffect={hasRadius}
+          onOpen={() => onAddRadius(item.id)}
+          onRemove={() => onRemoveRadius(item.id)}
+        />
+        <EffectMenuItem
+          label="Array"
+          hasEffect={hasArray}
+          onOpen={() => onAddArray(item.id)}
+          onRemove={() => onRemoveArray(item.id)}
+        />
+
+        {isGroup && (
           <>
+            <ContextMenuSeparator />
             <EffectMenuItem
               label="Boolean"
               hasEffect={hasBoolean}
@@ -128,21 +140,6 @@ export function SortableRow({
               hasEffect={hasJoin}
               onOpen={() => onAddJoin(item.id)}
               onRemove={() => onRemoveJoin(item.id)}
-            />
-          </>
-        ) : (
-          <>
-            <EffectMenuItem
-              label="Radius"
-              hasEffect={hasRadius}
-              onOpen={() => onAddRadius(item.id)}
-              onRemove={() => onRemoveRadius(item.id)}
-            />
-            <EffectMenuItem
-              label="Array"
-              hasEffect={hasArray}
-              onOpen={() => onAddArray(item.id)}
-              onRemove={() => onRemoveArray(item.id)}
             />
           </>
         )}

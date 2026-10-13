@@ -6,6 +6,8 @@ import { Shape } from "../shapes/Shape";
 import { Dieline } from "./Dieline";
 import { applyBoolean } from "../helpers/boolean";
 import { applyJoin } from "../helpers/join";
+import { addFillet, addFilletAt } from "../helpers/addFillet";
+import { applyArray } from "../helpers/applyArray";
 
 type ShapeNode = Exclude<ISpec.Node, ISpec.Group>;
 
@@ -176,8 +178,9 @@ export class Drawer extends Dieline {
   }
 
   private $buildGroup(group: ISpec.Group): M.IModel {
-    const children: M.IModel[] = [];
+    const scope = this.scope;
 
+    const children: M.IModel[] = [];
     for (const child of group.nodes) {
       if (child.hidden) continue;
       children.push(
@@ -187,17 +190,46 @@ export class Drawer extends Dieline {
       );
     }
 
+    const resolved = this.$resolveEffects(group.effects, scope) ?? [];
+
+    const combiners = resolved.filter(
+      (e) => e.type === "join" || e.type === "boolean",
+    );
+    const modifiers = resolved.filter(
+      (e) => e.type === "radius" || e.type === "radiusAt" || e.type === "array",
+    );
+
     let combined: M.IModel = {
       models: Object.fromEntries(children.map((c, i) => [`child-${i}`, c])),
     };
 
-    for (const efx of group.effects ?? []) {
+    for (const efx of combiners) {
       switch (efx.type) {
         case "join":
           combined = applyJoin(children, efx.mode);
           break;
         case "boolean":
           combined = applyBoolean(children, efx.mode);
+          break;
+      }
+    }
+
+    for (const efx of modifiers) {
+      switch (efx.type) {
+        case "radius":
+          combined = addFillet(combined, +efx.value);
+          break;
+
+        case "radiusAt":
+          combined = addFilletAt(
+            combined,
+            efx.targets.map((t) => Number(t)),
+            +efx.value,
+          );
+          break;
+
+        case "array":
+          combined = applyArray(combined, efx);
           break;
       }
     }

@@ -1,4 +1,5 @@
 import M, { IModel } from "makerjs";
+import { toMm } from "../../utils/sizeConvertor";
 import Pacsaz from "../Pacsaz";
 
 export function addFillet(model: IModel, radius: number = 0): IModel {
@@ -82,7 +83,7 @@ export function addFilletAt(
 function retryFillet(chain: M.IChain, radius: number): IModel | null {
   const step = Math.max(0.05, radius / 50);
   for (let r = radius; r > 0.05; r -= step) {
-    const f = M.chain.fillet(chain, r);
+    const f = M.chain.fillet(chain, toMm(r));
     if (f) return f;
   }
   return null;

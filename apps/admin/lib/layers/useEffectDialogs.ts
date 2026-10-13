@@ -159,7 +159,7 @@ export function useEffectDialogs(nodes: ISpec.Nodes) {
   // ---------- Radius ----------
   const openRadius = (nodeId: string) => {
     const node = findNode(nodes, nodeId);
-    if (!node || node.type === "group") return;
+    if (!node) return;
 
     const effects = node.effects ?? [];
     const idx = effects.findIndex((e) => RADIUS_TYPES.has(e.type));
@@ -205,7 +205,7 @@ export function useEffectDialogs(nodes: ISpec.Nodes) {
 
   const removeRadius = (nodeId: string) => {
     const node = findNode(nodes, nodeId);
-    if (!node || node.type === "group") return;
+    if (!node) return;
     const idx = (node.effects ?? []).findIndex((e) => RADIUS_TYPES.has(e.type));
     if (idx < 0) return;
     dispatch(removeEffect({ nodeId, index: idx }));
@@ -214,7 +214,7 @@ export function useEffectDialogs(nodes: ISpec.Nodes) {
   // ---------- Array ----------
   const openArray = (nodeId: string) => {
     const node = findNode(nodes, nodeId);
-    if (!node || node.type === "group") return;
+    if (!node) return;
 
     const effects = node.effects ?? [];
     const idx = effects.findIndex((e) => e.type === "array");
@@ -254,7 +254,7 @@ export function useEffectDialogs(nodes: ISpec.Nodes) {
 
   const removeArray = (nodeId: string) => {
     const node = findNode(nodes, nodeId);
-    if (!node || node.type === "group") return;
+    if (!node) return;
     const idx = (node.effects ?? []).findIndex((e) => e.type === "array");
     if (idx < 0) return;
     dispatch(removeEffect({ nodeId, index: idx }));
