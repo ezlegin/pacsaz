@@ -34,7 +34,7 @@ export namespace ISpec {
     | { type: "rotate"; value: string }
     | { type: "scale"; value: string };
 
-  export type Stack = "shape" | "ruler";
+  export type Stack = "shape" | "ruler" | "model" | "group";
   export type Layer = "trim" | "fold" | "perf";
   export type Point = [string, string];
 
@@ -133,6 +133,7 @@ export namespace ISpec {
     type: "group";
     key: string;
     hidden: boolean;
+    stack: "group";
     nodes: Node[];
     origin: Point;
     dup?: Dup;

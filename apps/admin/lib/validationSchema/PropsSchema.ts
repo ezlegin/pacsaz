@@ -13,7 +13,7 @@ const shapesKey = [
   "arc",
 ] as const;
 const modelsKey = ["glue", "door", "snapLock", "hole"] as const;
-const stack = ["model", "ruler", "shape"] as const;
+const stack = ["model", "ruler", "shape", "group"] as const;
 const direction = ["down", "right", "up", "left"] as const;
 const pointDirection = [...direction, "draw"] as const;
 const dustSide = ["left", "right", "both"] as const;
@@ -173,6 +173,21 @@ export const doorFormSchema = z
   .merge(modelGenerals);
 
 export const snapLockFormSchema = modelGenerals;
+
+/**
+ * Groups are edited as a whole node (rename / dup); their children keep their own
+ * shapes. `nodes` is intentionally loose because it holds an arbitrary node tree.
+ */
+export const groupFormSchema = z.object({
+  id: z.string(),
+  type: z.literal("group"),
+  stack: z.literal("group"),
+  key: z.string(),
+  hidden: z.boolean(),
+  nodes: z.array(z.any()),
+  dup: dup,
+  effects: z.array(z.any()),
+});
 
 export const holeFormSchema = z
   .object({

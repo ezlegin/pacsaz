@@ -234,11 +234,14 @@ export class Drawer extends Dieline {
       }
     }
 
+    // Groups support the same dup operations as shapes.
+    this.$applyDup(combined, group.dup, scope);
+
     return combined;
   }
   //! ------------------------ Utils ------------------------
 
-  private $build<T extends ISpec.Node>(
+  private $build<T extends ShapeNode>(
     item: T,
     callBack: (val: T, scope: Record<string, number>) => Shape,
   ): Shape {
@@ -250,61 +253,145 @@ export class Drawer extends Dieline {
       this.$parseMathStr(item.origin[1], scope),
     ]);
 
-    if (item.dup && item.dup.length > 0) {
-      const dupScope = {
-        ...scope,
-        selfWidth: model.size.width,
-        selfHeight: model.size.height,
-      };
+    this.$applyDup(model, item.dup, scope);
 
-      for (const d of item.dup) {
-        model.dup();
+    return model;
+  }
 
-        for (const op of d.operations) {
-          switch (op.type) {
-            case "zero":
-              model.zero();
-              break;
+  /**
+   * Applies `dup` operations onto an already-built model.
+   *
+   * Shapes already expose the whole operation chain through the `Shape` class, so
+   * they keep using it (unchanged behaviour). Group models are plain makerjs
+   * models, so they are driven through the `M.model.*` primitives instead.
+   */
+  private $applyDup(
+    model: M.IModel,
+    dup: ISpec.Dup | undefined,
+    scope: Record<string, number>,
+  ): void {
+    if (!dup || dup.length === 0) return;
 
-            case "center":
-              model.center();
-              break;
+    // `modelExtents` returns null for models with no geometry (e.g. a group whose
+    // children are all hidden), so guard before reading width / height.
+    const size = M.measure.modelExtents(model);
 
-            case "mirror":
-              if (op.x || op.y) model.mirror(op.x, op.y);
-              break;
+    const dupScope: Record<string, number> = {
+      ...scope,
+      ...(size ? { selfWidth: size.width, selfHeight: size.height } : {}),
+    };
 
-            case "move": {
-              const move = {
-                x: this.$parseMathStr(op.value[0], dupScope),
-                y: this.$parseMathStr(op.value[1], dupScope),
-              };
-              model.move([move.x, move.y]);
-              break;
-            }
+    if (model instanceof Shape) {
+      this.$applyDupOnShape(model, dup, dupScope);
+      return;
+    }
 
-            case "moveTo": {
-              const moveTo = {
-                x: this.$parseMathStr(op.value[0], dupScope),
-                y: this.$parseMathStr(op.value[1], dupScope),
-              };
-              model.moveTo([moveTo.x, moveTo.y]);
-              break;
-            }
+    this.$applyDupOnModel(model, dup, dupScope);
+  }
 
-            case "rotate":
-              model.rotate(+op.value);
-              break;
+  /** Dup for shapes — the `Shape` class owns clone/zero/mirror/... state. */
+  private $applyDupOnShape(
+    model: Shape,
+    dup: ISpec.Dup,
+    dupScope: Record<string, number>,
+  ): void {
+    for (const d of dup) {
+      model.dup();
 
-            case "scale":
-              model.scale(+op.value);
-              break;
-          }
+      for (const op of d.operations) {
+        switch (op.type) {
+          case "zero":
+            model.zero();
+            break;
+
+          case "center":
+            model.center();
+            break;
+
+          case "mirror":
+            if (op.x || op.y) model.mirror(op.x, op.y);
+            break;
+
+          case "move":
+            model.move([
+              this.$parseMathStr(op.value[0], dupScope),
+              this.$parseMathStr(op.value[1], dupScope),
+            ]);
+            break;
+
+          case "moveTo":
+            model.moveTo([
+              this.$parseMathStr(op.value[0], dupScope),
+              this.$parseMathStr(op.value[1], dupScope),
+            ]);
+            break;
+
+          case "rotate":
+            model.rotate(+op.value);
+            break;
+
+          case "scale":
+            model.scale(+op.value);
+            break;
         }
       }
     }
+  }
 
-    return model;
+  /**
+   * Dup for groups. Each entry clones the group model into a fresh child, then
+   * mutates that child with the plain makerjs primitives.
+   */
+  private $applyDupOnModel(
+    model: M.IModel,
+    dup: ISpec.Dup,
+    dupScope: Record<string, number>,
+  ): void {
+    for (const d of dup) {
+      // `addModel` dedupes colliding ids itself (dup-0, dup-0_1, ...), so a fixed
+      // prefix is enough and every clone stays reachable as a child of the group.
+      const clone = M.model.clone(model);
+
+      M.model.addModel(model, clone, "dup");
+
+      for (const op of d.operations) {
+        switch (op.type) {
+          case "zero":
+            M.model.zero(clone);
+            break;
+
+          case "center":
+            M.model.center(clone);
+            break;
+
+          case "mirror":
+            if (op.x || op.y) M.model.mirror(clone, op.x, op.y);
+            break;
+
+          case "move":
+            M.model.moveRelative(clone, [
+              this.$parseMathStr(op.value[0], dupScope),
+              this.$parseMathStr(op.value[1], dupScope),
+            ]);
+            break;
+
+          case "moveTo":
+            M.model.move(clone, [
+              this.$parseMathStr(op.value[0], dupScope),
+              this.$parseMathStr(op.value[1], dupScope),
+            ]);
+            break;
+
+          case "rotate":
+            M.model.rotate(clone, +op.value);
+            break;
+
+          case "scale":
+            M.model.scale(clone, +op.value);
+            break;
+        }
+      }
+    }
   }
 
   private $resolveEffects(

@@ -127,7 +127,7 @@ export default function ShapeLayers({ handleLayerAction, nodes }: Props) {
       type: "group",
       key: `Group (${ids.length})`,
       hidden: false,
-      origin: ["0", "0"],
+      stack: "group",
       nodes: [],
       effects: [],
     };

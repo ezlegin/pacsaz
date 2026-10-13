@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import RulerProps from "./props/RulerProps";
+import GroupsPropsProvider from "./props/GroupsPropsProvider";
 import ShapesPropsProvider from "./props/ShapesPropsProvider";
 import ArcProps from "./props/shapes/ArcProps";
 import CircleProps from "./props/shapes/CircleProps";
@@ -27,7 +28,7 @@ import RectangleProps from "./props/shapes/RectangleProps";
 
 type EditorMode = {
   stack: ISpec.Stack;
-  key: ISpec.ShapesKey | "ruler";
+  key: ISpec.ShapesKey | "ruler" | "group";
 };
 
 const Tools = () => {
@@ -51,6 +52,9 @@ const Tools = () => {
         setEditorMode({ stack: selection.stack, key: selection.type });
         break;
       case "model":
+        setEditorMode({ stack: selection.stack, key: selection.type });
+        break;
+      case "group":
         setEditorMode({ stack: selection.stack, key: selection.type });
         break;
       case "ruler":
@@ -88,6 +92,16 @@ const Tools = () => {
         >
           {({ form }) => <Component form={form} />}
         </ShapesPropsProvider>
+      );
+    }
+
+    if (editorMode.stack === "group") {
+      return (
+        <GroupsPropsProvider
+          key={selection?.id}
+          data={selection as ISpec.Group}
+          close={handleCloseEditor}
+        />
       );
     }
 
