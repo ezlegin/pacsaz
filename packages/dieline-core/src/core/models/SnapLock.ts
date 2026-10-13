@@ -92,8 +92,13 @@ export class SnapLock extends Model {
         .up(lockHeight)
         .build(),
       {
-        filletRadius: this.cornerRadius,
-        indices: [2, 5],
+        effects: [
+          {
+            type: "radiusAt",
+            targets: ["2", "5"],
+            value: String(this.cornerRadius),
+          },
+        ],
       },
     );
 
@@ -129,7 +134,15 @@ export class SnapLock extends Model {
         .right(lockerIndent + this.height - this.lockHorizon - this.arcRadius)
         .up(this.toothWidthRaw + this.toothHeight - this.offsetFromBase)
         .build(),
-      { filletRadius: this.cornerRadius, indices: [2] },
+      {
+        effects: [
+          {
+            type: "radiusAt",
+            targets: ["2"],
+            value: String(this.cornerRadius),
+          },
+        ],
+      },
     );
 
     const endArc = new Pacsaz.shapes.Arc(this.arcRadius, 90, 180).move([
@@ -160,7 +173,15 @@ export class SnapLock extends Model {
         .up(this.toothHeight)
         .draw(this.toothWidth + difOfArcs, this.lockHorizon)
         .build(),
-      { filletRadius: this.cornerRadius, indices: [2, 3] },
+      {
+        effects: [
+          {
+            type: "radiusAt",
+            targets: ["2", "3"],
+            value: String(this.cornerRadius),
+          },
+        ],
+      },
     );
 
     arc

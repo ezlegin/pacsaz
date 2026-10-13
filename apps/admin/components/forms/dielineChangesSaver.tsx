@@ -17,8 +17,6 @@ import { toast } from "sonner";
 type DielineType = Dieline & { settings: DielineSettings };
 
 const DielineChangesSaver = ({ dieline }: { dieline: DielineType }) => {
-  const nodes = getNodes();
-
   const specs = {
     nodes: getNodes(),
     rulers: useAppSelector(rulersSelectors.selectAll),
@@ -37,9 +35,6 @@ const DielineChangesSaver = ({ dieline }: { dieline: DielineType }) => {
   });
 
   const onSubmit = async (data: DielineUpdateFormType) => {
-    console.log("start");
-    console.log("nodes saver", nodes);
-
     const res = saveDielineChanges(data, dieline.id);
     toast.promise(res, {
       loading: "Saving Dieline...",
@@ -57,7 +52,6 @@ const DielineChangesSaver = ({ dieline }: { dieline: DielineType }) => {
   }, [effects]);
 
   useEffect(() => {
-    console.log("nodes changed");
     form.setValue("specification", JSON.stringify(specs));
   }, [specs]);
 

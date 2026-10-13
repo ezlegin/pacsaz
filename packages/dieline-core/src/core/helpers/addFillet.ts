@@ -22,6 +22,7 @@ export function addFilletAt(
 
   const chain = M.model.findSingleChain(model);
   if (!chain) return model;
+  M.chain.reverse(chain);
 
   let kpts = M.chain.toKeyPoints(chain);
   const closed = isClosedChain(chain);
@@ -74,8 +75,8 @@ export function addFilletAt(
 
   return {
     models: {
-      line: lineModel,
-      fillet: filletModel,
+      lineModel,
+      filletModel,
     },
   };
 }

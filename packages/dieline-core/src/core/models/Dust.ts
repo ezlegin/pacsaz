@@ -1,6 +1,7 @@
 import M, { IModel } from "makerjs";
 import Pacsaz from "../Pacsaz";
 import { Model } from "./Model";
+import { addFilletAt } from "../helpers/addFillet";
 
 export class Dust extends Model {
   constructor(
@@ -75,14 +76,12 @@ export class Dust extends Model {
         .down(dustHeight.r.outer)
         .right(this.considerOuterIndent ? this.thickness : 0)
         .build(),
-      {
-        filletRadius: 10,
-        indices: [3],
-      },
     );
 
+    const filletedDust = addFilletAt(dust, [3], 10);
+
     const trim: IModel = {
-      models: { dust },
+      models: { dust: filletedDust },
     };
     if (this.considerDustHole) trim.models!["arc"] = arcModel;
 

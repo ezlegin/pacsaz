@@ -12,6 +12,22 @@ import { applyArray } from "../helpers/applyArray";
 /** Plain geometry nodes — everything a `Shape` can be built from directly. */
 type ShapeNode = Exclude<ISpec.Node, ISpec.Group | ISpec.Model>;
 
+/**
+ * True when a model actually carries paths somewhere in its tree. Models are
+ * routinely wrapped in empty containers (`{ models: undefined }`), which would
+ * otherwise be pushed as bogus empty entries into a layer.
+ */
+function hasGeometry(model: M.IModel | undefined): boolean {
+  if (!model) return false;
+  if (model.paths && Object.keys(model.paths).length > 0) return true;
+
+  for (const child of Object.values(model.models ?? {})) {
+    if (hasGeometry(child)) return true;
+  }
+
+  return false;
+}
+
 export class Drawer extends Dieline {
   constructor(
     private nodes: ISpec.Nodes,
@@ -168,37 +184,66 @@ export class Drawer extends Dieline {
 
   /**
    * A model is built from its params and pushed as one opaque unit. Its trim and
-   * fold halves are split out so they land in the right layer, but they keep the
-   * same node id, so the model stays a single node as far as selection, duplicate
-   * and effects are concerned.
+   * fold halves are split out so each lands in the layer it belongs to (trims ->
+   * trim, folds -> fold), but they keep the same node id, so the model stays a
+   * single node for selection, duplicate and effects.
    */
   private $pushModelNode(node: ISpec.Model) {
     const built = this.$buildModel(node);
 
     // The wrapper's own origin is inert (makerjs only moves the container), so the
     // recorded origin has to be applied to the real geometry inside it.
-    const [ox, oy] = [
-      this.$parseMathStr(node.origin[0], this.scope),
-      this.$parseMathStr(node.origin[1], this.scope),
-    ];
+    const shift = this.$modelOrigin(node);
 
-    const trims = built.models?.["trims"];
-    const folds = built.models?.["folds"];
+    const layers = this.$modelLayers(built);
 
-    if (!trims && !folds) {
+    if (!layers) {
       Pacsaz.shape.push(this.trimModel, node.id, built);
       return;
     }
 
-    if (trims) {
-      if (ox || oy) M.model.move(trims, [ox, oy]);
-      Pacsaz.shape.push(this.trimModel, node.id, trims);
+    if (layers.trims) {
+      if (shift) M.model.move(layers.trims, shift);
+      Pacsaz.shape.push(this.trimModel, node.id, layers.trims);
     }
 
-    if (folds) {
-      if (ox || oy) M.model.move(folds, [ox, oy]);
-      Pacsaz.shape.push(this.foldModel, node.id, folds);
+    if (layers.folds) {
+      if (shift) M.model.move(layers.folds, shift);
+      Pacsaz.shape.push(this.foldModel, node.id, layers.folds);
     }
+  }
+
+  /**
+   * `Model.$pushModel` wraps a model's geometry as
+   * `{ [modelKey]: { models: { trims, folds } } }`, so the layer halves sit one
+   * level deeper than the wrapper itself. `folds` is always present but holds
+   * `{ models: undefined }` for models that have no fold geometry, so each half is
+   * only reported when it actually contains something. Returns null if the wrapper
+   * has an unexpected shape.
+   */
+  private $modelLayers(
+    built: Shape,
+  ): { trims?: M.IModel; folds?: M.IModel } | null {
+    const wrapperKey = Object.keys(built.models ?? {})[0];
+    const nested = wrapperKey ? built.models![wrapperKey]?.models : undefined;
+
+    if (!nested) return null;
+
+    const trims = nested["trims"];
+    const folds = nested["folds"];
+
+    return {
+      trims: trims && hasGeometry(trims) ? trims : undefined,
+      folds: folds && hasGeometry(folds) ? folds : undefined,
+    };
+  }
+
+  /** Resolved node origin, or null when it is a no-op. */
+  private $modelOrigin(node: ISpec.Model): M.IPoint | null {
+    const x = this.$parseMathStr(node.origin[0], this.scope);
+    const y = this.$parseMathStr(node.origin[1], this.scope);
+
+    return x || y ? [x, y] : null;
   }
 
   /** Instantiates the model class for a node from its stored params. */
@@ -268,21 +313,26 @@ export class Drawer extends Dieline {
   private $buildModelParts(node: ISpec.Model): M.IModel[] {
     const built = this.$buildModel(node);
 
-    const [ox, oy] = [
-      this.$parseMathStr(node.origin[0], this.scope),
-      this.$parseMathStr(node.origin[1], this.scope),
-    ];
+    const shift = this.$modelOrigin(node);
+    const layers = this.$modelLayers(built);
+
+    if (!layers) {
+      if (shift) M.model.move(built, shift);
+      return [built];
+    }
 
     const parts: M.IModel[] = [];
 
-    for (const key of ["trims", "folds"] as const) {
-      const part = built.models?.[key];
+    for (const part of [layers.trims, layers.folds]) {
       if (!part) continue;
-      if (ox || oy) M.model.move(part, [ox, oy]);
+      if (shift) M.model.move(part, shift);
       parts.push(part);
     }
 
-    if (parts.length === 0) parts.push(built);
+    if (parts.length === 0) {
+      if (shift) M.model.move(built, shift);
+      parts.push(built);
+    }
 
     return parts;
   }

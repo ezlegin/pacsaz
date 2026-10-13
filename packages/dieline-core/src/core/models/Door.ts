@@ -2,6 +2,7 @@ import M, { IModel, IModelMap, IPoint } from "makerjs";
 import { calcualteTuckFlapSize } from "../../utils/calculate/calculateTuckFlapSize";
 import Pacsaz from "../Pacsaz";
 import { Model } from "./Model";
+import { addFillet } from "../helpers/addFillet";
 
 type DustSide = "left" | "right" | "both";
 type IndentAt = { l: boolean; r: boolean };
@@ -102,7 +103,7 @@ export class Door extends Model {
         .right(this.thickness)
         .down(this.topPanelHeight)
         .build(),
-      { filletRadius: 20 },
+      { effects: [{ type: "radius", value: "20" }] },
     );
 
     const seam = this.seam();
@@ -117,15 +118,14 @@ export class Door extends Model {
     ]);
     const seam = new Pacsaz.shapes.Lines(
       seam_pb.right(this.seamSize.w).down(this.seamSize.h).build(),
-      {
-        filletRadius: 2,
-      },
     )
       .dup()
       .mirror(true, false, "left")
       .move([this.tuckFlap.w, 0]);
 
-    return seam;
+    const filletedSeam = addFillet(seam, 2);
+
+    return filletedSeam;
   }
 
   protected override fold() {
