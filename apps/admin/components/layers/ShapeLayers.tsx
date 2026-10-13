@@ -60,8 +60,8 @@ export default function ShapeLayers({ handleLayerAction, nodes }: Props) {
     let hideDepth: number | null = null;
     for (const item of items) {
       if (hideDepth !== null) {
-        // A model row ends any collapse scope: its internals are not listed.
-        if (item.depth > hideDepth && item.node.type !== "model") continue;
+        // Anything nested under the collapsed group is hidden regardless of type.
+        if (item.depth > hideDepth) continue;
         hideDepth = null;
       }
       out.push(item);
@@ -106,6 +106,8 @@ export default function ShapeLayers({ handleLayerAction, nodes }: Props) {
           ? prev.filter((id) => id !== nodeId)
           : [...prev, nodeId],
       );
+      // The props panel is single-node only, so a multi-selection has no subject.
+      dispatch(clearSelection());
       return;
     }
 
@@ -123,6 +125,7 @@ export default function ShapeLayers({ handleLayerAction, nodes }: Props) {
   /* ---- group / ungroup ---- */
   const handleGroup = (ids: string[]) => {
     if (ids.length < 2) return;
+
     const group: ISpec.Group = {
       id: nanoid(),
       type: "group",

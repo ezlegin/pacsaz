@@ -83,8 +83,10 @@ export function SortableRow({
 
   const isGroup = item.node.type === "group";
   const isModel = item.node.type === "model";
-  // A model is a sealed unit: no effects, no ungroup, and not a group target.
-  const canGroup = selectedIds.length >= 2 && isSelected && !isModel;
+  // Effects target exactly one node, so a multi-selection only offers
+  // group / ungroup and delete.
+  const isMultiSelection = selectedIds.length > 1;
+  const canGroup = selectedIds.length >= 2 && isSelected;
   const nodeEffects = item.node.effects ?? [];
   const hasRadius = nodeEffects.some(
     (e) => e.type === "radius" || e.type === "radiusAt",
@@ -113,7 +115,7 @@ export function SortableRow({
       </ContextMenuTrigger>
 
       <ContextMenuContent>
-        {!isModel && (
+        {!isMultiSelection && (
           <>
             <ContextMenuLabel>Effects</ContextMenuLabel>
 
@@ -152,42 +154,56 @@ export function SortableRow({
           </>
         )}
 
-        <ContextMenuItem onSelect={() => onRenameStart(item.id)}>
-          <Pencil className="mr-2 h-4 w-4" />
-          Rename
-        </ContextMenuItem>
-        <ContextMenuSeparator />
+        {!isMultiSelection && (
+          <>
+            <ContextMenuItem onSelect={() => onRenameStart(item.id)}>
+              <Pencil className="mr-2 h-4 w-4" />
+              Rename
+            </ContextMenuItem>
+            <ContextMenuSeparator />
+          </>
+        )}
 
-        {isGroup ? (
+        {isGroup && (
           <>
             <ContextMenuItem onSelect={() => onUngroup(item.id)}>
               <FolderMinus className="mr-2 h-4 w-4" />
               Ungroup
             </ContextMenuItem>
+            {!isMultiSelection && (
+              <ContextMenuItem
+                onSelect={() => handleLayerAction("nodes", item.node, "delete")}
+              >
+                <Trash className="mr-2 h-4 w-4" />
+                Delete Group
+              </ContextMenuItem>
+            )}
+          </>
+        )}
+
+        {!isGroup &&
+          (canGroup ? (
+            <ContextMenuItem onSelect={() => onGroup(selectedIds)}>
+              <FolderPlus className="mr-2 h-4 w-4" />
+              Group {selectedIds.length} items
+            </ContextMenuItem>
+          ) : (
+            <ContextMenuItem disabled>
+              <FolderPlus className="mr-2 h-4 w-4" />
+              Select 2+ items to group
+            </ContextMenuItem>
+          ))}
+
+        {isModel && !isMultiSelection && (
+          <>
+            <ContextMenuSeparator />
             <ContextMenuItem
               onSelect={() => handleLayerAction("nodes", item.node, "delete")}
             >
               <Trash className="mr-2 h-4 w-4" />
-              Delete Group
+              Delete Model
             </ContextMenuItem>
           </>
-        ) : isModel ? (
-          <ContextMenuItem
-            onSelect={() => handleLayerAction("nodes", item.node, "delete")}
-          >
-            <Trash className="mr-2 h-4 w-4" />
-            Delete Model
-          </ContextMenuItem>
-        ) : canGroup ? (
-          <ContextMenuItem onSelect={() => onGroup(selectedIds)}>
-            <FolderPlus className="mr-2 h-4 w-4" />
-            Group {selectedIds.length} items
-          </ContextMenuItem>
-        ) : (
-          <ContextMenuItem disabled>
-            <FolderPlus className="mr-2 h-4 w-4" />
-            Select 2+ items to group
-          </ContextMenuItem>
         )}
       </ContextMenuContent>
     </ContextMenu>

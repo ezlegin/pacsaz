@@ -12,11 +12,6 @@ import { applyArray } from "../helpers/applyArray";
 /** Plain geometry nodes — everything a `Shape` can be built from directly. */
 type ShapeNode = Exclude<ISpec.Node, ISpec.Group | ISpec.Model>;
 
-/**
- * True when a model actually carries paths somewhere in its tree. Models are
- * routinely wrapped in empty containers (`{ models: undefined }`), which would
- * otherwise be pushed as bogus empty entries into a layer.
- */
 function hasGeometry(model: M.IModel | undefined): boolean {
   if (!model) return false;
   if (model.paths && Object.keys(model.paths).length > 0) return true;
@@ -182,12 +177,6 @@ export class Drawer extends Dieline {
     Pacsaz.shape.push(this[`${node.layer}Model`], node.id, shape);
   }
 
-  /**
-   * A model is built from its params and pushed as one opaque unit. Its trim and
-   * fold halves are split out so each lands in the layer it belongs to (trims ->
-   * trim, folds -> fold), but they keep the same node id, so the model stays a
-   * single node for selection, duplicate and effects.
-   */
   private $pushModelNode(node: ISpec.Model) {
     const built = this.$buildModel(node);
 
@@ -213,14 +202,6 @@ export class Drawer extends Dieline {
     }
   }
 
-  /**
-   * `Model.$pushModel` wraps a model's geometry as
-   * `{ [modelKey]: { models: { trims, folds } } }`, so the layer halves sit one
-   * level deeper than the wrapper itself. `folds` is always present but holds
-   * `{ models: undefined }` for models that have no fold geometry, so each half is
-   * only reported when it actually contains something. Returns null if the wrapper
-   * has an unexpected shape.
-   */
   private $modelLayers(
     built: Shape,
   ): { trims?: M.IModel; folds?: M.IModel } | null {
@@ -277,7 +258,7 @@ export class Drawer extends Dieline {
         const p = node.params as ISpec.ModelParams["hole"];
         model = new Pacsaz.models.Hole(
           p.angleBetweenStartAndEnd,
-          p.heightOfLine,
+          this.$parseMathStr(p.heightOfLine, scope),
           p.rotation,
           p.handleDir,
         );
@@ -294,11 +275,6 @@ export class Drawer extends Dieline {
     return model;
   }
 
-  /**
-   * Flattens a group child into the models that make it up. Models collapse into
-   * their trim + fold geometry, so a group can combine a model with plain shapes
-   * (and run join / boolean across the result).
-   */
   private $flattenChild(child: ISpec.Node): M.IModel[] {
     if (child.hidden) return [];
     if (child.type === "group") return [this.$buildGroup(child)];
@@ -306,10 +282,6 @@ export class Drawer extends Dieline {
     return [this.$buildShape(child)];
   }
 
-  /**
-   * Trim / fold halves of a model node, with its origin applied to the real
-   * geometry (the wrapper model's own origin is inert).
-   */
   private $buildModelParts(node: ISpec.Model): M.IModel[] {
     const built = this.$buildModel(node);
 
@@ -431,13 +403,6 @@ export class Drawer extends Dieline {
     return model;
   }
 
-  /**
-   * Applies `dup` operations onto an already-built model.
-   *
-   * Shapes already expose the whole operation chain through the `Shape` class, so
-   * they keep using it (unchanged behaviour). Group models are plain makerjs
-   * models, so they are driven through the `M.model.*` primitives instead.
-   */
   private $applyDup(
     model: M.IModel,
     dup: ISpec.Dup | undefined,
@@ -511,10 +476,6 @@ export class Drawer extends Dieline {
     }
   }
 
-  /**
-   * Dup for groups. Each entry clones the group model into a fresh child, then
-   * mutates that child with the plain makerjs primitives.
-   */
   private $applyDupOnModel(
     model: M.IModel,
     dup: ISpec.Dup,

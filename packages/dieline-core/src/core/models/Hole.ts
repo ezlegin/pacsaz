@@ -5,7 +5,7 @@ import { Model } from "./Model";
 export class Hole extends Model {
   constructor(
     private angleBetweenStartAndEnd: string,
-    private heightOfLine: string,
+    private heightOfLine: number,
     private rotation: string,
     private handleDir: "left" | "right",
   ) {
@@ -24,7 +24,7 @@ export class Hole extends Model {
     const gap = Math.sin(M.angle.toRadians(betweenAngle)) * radius;
     const lineHeight = M.solvers.solveTriangleASA(
       90,
-      +this.heightOfLine + gap,
+      this.heightOfLine + gap,
       betweenAngle,
     );
     var radians = M.angle.toRadians(startAngle + rot);
