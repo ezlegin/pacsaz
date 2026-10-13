@@ -37,10 +37,13 @@ export abstract class Dieline {
   // -------------- Model Generator --------------
   model() {
     this.buildLayers();
+    // Sizes must be resolved before the rulers are built: both `OverallRuler` and
+    // `Ruler` measure the trim model and the overall sizes through the store.
     this.postProcess();
-    console.group("Dieline");
+    this.drawRulers();
+    onDevelepe && console.group("Dieline");
     onDevelepe && console.log("Main:", this.main);
-    console.groupEnd();
+    onDevelepe && console.groupEnd();
 
     return new Exporter(this.main).build();
   }
@@ -52,6 +55,7 @@ export abstract class Dieline {
     this.trimModel = { layer: "trim" };
     this.foldModel = { layer: "fold" };
     this.perfModel = { layer: "perf" };
+    this.rulerModel = { layer: "ruler" };
 
     this.drawShapes();
 
@@ -61,6 +65,7 @@ export abstract class Dieline {
       fold: this.foldModel,
       perf: this.perfModel,
       trim: this.trimModel,
+      ruler: this.rulerModel,
       anchor: new Pacsaz.layer.Anchor(this.main, this.trimModel),
     };
 
@@ -68,6 +73,13 @@ export abstract class Dieline {
       Pacsaz.shape.push(this.main, l, layers[l]!, l);
     }
   }
+
+  // -------------- Rulers --------------
+  /**
+   * Rulers are built after `postProcess` so the resolved trim extents are already
+   * in the store, and they are pushed as their own `ruler` layer.
+   */
+  protected abstract drawRulers(): void;
 
   // -------------- Post Process --------------
   private postProcess() {

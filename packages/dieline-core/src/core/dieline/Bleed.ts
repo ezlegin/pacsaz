@@ -39,6 +39,10 @@ export class Bleed implements IModel {
     }
 
     const bleed = M.model.outline(newerModel, bleedAmount, 1);
+    // `outline` returns null when the geometry is not closed, which would crash
+    // here; skipping just the bleed is far better than losing the whole dieline.
+    if (!bleed) return;
+
     Pacsaz.shape.push(this, "bleed", bleed, "bleed");
   }
 }

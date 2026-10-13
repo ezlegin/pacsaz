@@ -27,6 +27,7 @@ export class Drawer extends Dieline {
   constructor(
     private nodes: ISpec.Nodes,
     private variables: IVar.VariableMap,
+    private rulers: ISpec.Rulers,
   ) {
     super();
   }
@@ -159,6 +160,41 @@ export class Drawer extends Dieline {
     }
   }
 
+  /**
+   * Rulers are their own layer. The overall width/height ruler is always built (it
+   * opts out internally when the setting is off); each stored ruler adds a
+   * `DielineRuler` keyed by its own key.
+   */
+  override drawRulers() {
+    this.$pushRuler({
+      overall: new Pacsaz.ruler.OverallRuler(this.trimModel),
+    });
+
+    for (const ruler of this.rulers) {
+      if (ruler.hidden) continue;
+
+      const from = this.$point(ruler.from);
+      const to = this.$point(ruler.to);
+
+      this.$pushRuler({
+        [ruler.key]: new Pacsaz.ruler.DielineRuler(
+          from,
+          to,
+          this.$parseMathStr(ruler.value, this.scope),
+          this.$parseMathStr(ruler.offset, this.scope),
+        ),
+      });
+    }
+  }
+
+  /** Parses a stored point through the current variable scope. */
+  private $point(point: ISpec.Point): M.IPoint {
+    return [
+      this.$parseMathStr(point[0], this.scope),
+      this.$parseMathStr(point[1], this.scope),
+    ];
+  }
+
   private renderNode(node: ISpec.Node) {
     if (node.hidden) return;
 
@@ -251,6 +287,9 @@ export class Drawer extends Dieline {
       case "door": {
         const p = node.params as ISpec.ModelParams["door"];
         model = new Pacsaz.models.Door(p.dustSide, p.indentAt);
+        if (p.mirror) {
+          model.mirror(p.mirror.x, p.mirror.y);
+        }
         break;
       }
 

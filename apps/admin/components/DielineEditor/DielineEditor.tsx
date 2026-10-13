@@ -5,30 +5,24 @@ import DielineLayer from "@/components/DielineEditor/DielineLayer";
 import { useDielineGenerator } from "@repo/dieline-core/hooks/useDielineGenerator";
 import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
 import { effectsSelectors } from "@repo/store/slices/effectsSlice";
-import { rulersSelectors } from "@repo/store/slices/rulersSlice";
 import { addNodes, nodesSelector } from "@repo/store/slices/nodesSlice";
-import { variablesSelectors } from "@repo/store/slices/variablesSlice";
-import { Button } from "@repo/ui/components/button";
+import { addRulers, rulersSelectors } from "@repo/store/slices/rulersSlice";
 import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@repo/ui/components/drawer";
+  addVariables,
+  variablesSelectors,
+} from "@repo/store/slices/variablesSlice";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@repo/ui/components/tabs";
-import { Settings as SettingsIcon } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo } from "react";
-import { Effects } from "./effects/Effects";
 import Settings from "./settings/Settings";
 import Tools from "./Tools";
 import Variables from "./Variables";
+import { IVar } from "@repo/store/types";
 
 const SVGPreview = dynamic(
   () => import("@repo/ui/components/custom/SVGPreview"),
@@ -62,9 +56,8 @@ const DielineEditor = ({
 
   useEffect(() => {
     dispatch(addNodes(JSON.parse(dieline.specification).nodes));
-    // dispatch(addRulers(JSON.parse(dieline.specification).rulers));
-    // dispatch(addVariables(JSON.parse(dieline.variable) as IVar.VariableMap));
-    // dispatch(addEffects(JSON.parse(dieline.effect) as IEffect.EffectsMap));
+    dispatch(addRulers(JSON.parse(dieline.specification).rulers));
+    dispatch(addVariables(JSON.parse(dieline.variable) as IVar.VariableMap));
   }, []);
 
   return (
@@ -87,7 +80,7 @@ const DielineEditor = ({
                 Tools
               </TabsTrigger>
               <TabsTrigger className="cursor-pointer" value="settings">
-                Effects
+                Settings
               </TabsTrigger>
               <TabsTrigger className="cursor-pointer" value="variables">
                 Variables
@@ -98,31 +91,12 @@ const DielineEditor = ({
               <Tools />
             </TabsContent>
             <TabsContent value="settings">
-              <Effects />
+              <Settings isRendering={isRendering} />
             </TabsContent>
             <TabsContent value="variables">
               <Variables />
             </TabsContent>
           </Tabs>
-
-          <Drawer direction="right">
-            <DrawerTrigger asChild>
-              <Button
-                variant={"primaryForeground"}
-                className="absolute right-0 bottom-4 rounded-l-full rounded-r-none"
-              >
-                <SettingsIcon />
-              </Button>
-            </DrawerTrigger>
-            <DrawerContent>
-              <DrawerHeader>
-                <DrawerTitle>Settings</DrawerTitle>
-              </DrawerHeader>
-              <div className="p-4">
-                <Settings isRendering={isRendering} />
-              </div>
-            </DrawerContent>
-          </Drawer>
         </div>
       </div>
     </div>

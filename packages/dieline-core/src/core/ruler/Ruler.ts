@@ -60,7 +60,6 @@ export class Ruler implements IModel {
 
   private pointer(from: IPoint, to: IPoint): IModel {
     const pointerRadius = this.pointerRadius;
-    console.log("pointerRadius", pointerRadius);
     const pointerA = new Pacsaz.shapes.Polygon(pointerRadius, 3, -90)
       .move([from[0]!, from[1]! + pointerRadius])
       .rotate(-(90 - this.rulerAngle), "bottom");
@@ -91,7 +90,6 @@ export class Ruler implements IModel {
 
   private get pointerRadius() {
     const area = this.overallSizes.trim!.width * this.overallSizes.trim!.height;
-    console.log(Math.sqrt(area / 10000));
     return Math.max(1.5, Math.min(3, Math.sqrt(area / 10000)));
   }
 
