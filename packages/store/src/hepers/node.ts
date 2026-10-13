@@ -1,12 +1,17 @@
 import { ISpec } from "../store/types";
 
+/** Groups and models are both containers, but only groups are user-editable. */
+export function isContainer(node: ISpec.Node): node is ISpec.Group | ISpec.Model {
+  return node.type === "group" || node.type === "model";
+}
+
 export function findNodeWithParent(
   nodes: ISpec.Nodes,
   id: string,
 ): { node: ISpec.Node; parent: ISpec.Nodes } | null {
   for (const node of nodes) {
     if (node.id === id) return { node, parent: nodes };
-    if (node.type === "group") {
+    if (isContainer(node)) {
       const found = findNodeWithParent(node.nodes, id);
       if (found) return found;
     }
@@ -62,7 +67,7 @@ export function findNode(
       return node;
     }
 
-    if (node.type === "group") {
+    if (isContainer(node)) {
       const found = findNode(node.nodes, id);
 
       if (found) {
@@ -85,7 +90,8 @@ export function removeNodeById(
   }
 
   for (const node of nodes) {
-    if (node.type !== "group") continue;
+    // Models are deletable as a unit but never ungrouped, so only groups recurse.
+    if (!isContainer(node)) continue;
 
     const removed = removeNodeById(node.nodes, id);
 

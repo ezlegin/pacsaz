@@ -9,6 +9,7 @@ import {
   Circle,
   Hexagon,
   LucideIcon,
+  Package,
   Parentheses,
   PlusCircle,
   Ruler,
@@ -18,6 +19,7 @@ import {
 import { useEffect, useState } from "react";
 import RulerProps from "./props/RulerProps";
 import GroupsPropsProvider from "./props/GroupsPropsProvider";
+import ModelsPropsProvider from "./props/ModelsPropsProvider";
 import ShapesPropsProvider from "./props/ShapesPropsProvider";
 import ArcProps from "./props/shapes/ArcProps";
 import CircleProps from "./props/shapes/CircleProps";
@@ -25,11 +27,14 @@ import LineProps from "./props/shapes/LineProps";
 import LinesProps from "./props/shapes/LinesProps";
 import PolygonProps from "./props/shapes/PolygonProps";
 import RectangleProps from "./props/shapes/RectangleProps";
+import { defaultModelValues, modelLabels } from "@/lib/models/registry";
 
 type EditorMode = {
   stack: ISpec.Stack;
-  key: ISpec.ShapesKey | "ruler" | "group";
+  key: ISpec.ShapesKey | ISpec.ModelKey | "ruler" | "group";
 };
+
+const MODEL_ICON = Package;
 
 const Tools = () => {
   const [editorMode, setEditorMode] = useState<EditorMode | null>(null);
@@ -43,27 +48,34 @@ const Tools = () => {
     { key: "arc", Icon: Parentheses },
   ];
 
+  // One shared icon for every model — they are told apart by name.
+  const modelsList: ISpec.ModelKey[] = ["glue", "door", "hole", "snapLock"];
+
   const selection = useAppSelector((s) => s.selection.selection);
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    switch (selection?.stack) {
-      case "shape":
-        setEditorMode({ stack: selection.stack, key: selection.type });
-        break;
-      case "model":
-        setEditorMode({ stack: selection.stack, key: selection.type });
-        break;
-      case "group":
-        setEditorMode({ stack: selection.stack, key: selection.type });
-        break;
-      case "ruler":
-        setEditorMode({ stack: selection.stack, key: selection.type });
-        break;
-      default:
-        setEditorMode(null);
-        break;
+    const current = selection;
+    if (!current) {
+      setEditorMode(null);
+      return;
     }
+
+    // `stack` is a union on shapes and rulers, so the panel is chosen from `type`.
+    if (current.type === "model") {
+      setEditorMode({ stack: "model", key: current.modelKey });
+      return;
+    }
+    if (current.type === "group") {
+      setEditorMode({ stack: "group", key: "group" });
+      return;
+    }
+    if (current.type === "ruler") {
+      setEditorMode({ stack: "ruler", key: "ruler" });
+      return;
+    }
+
+    setEditorMode({ stack: "shape", key: current.type });
   }, [selection]);
 
   const handleCloseEditor = () => {
@@ -92,6 +104,22 @@ const Tools = () => {
         >
           {({ form }) => <Component form={form} />}
         </ShapesPropsProvider>
+      );
+    }
+
+    if (editorMode.stack === "model") {
+      const modelKey = editorMode.key as ISpec.ModelKey;
+      const editing =
+        selection?.type === "model" ? (selection as ISpec.Model) : null;
+
+      return (
+        <ModelsPropsProvider
+          key={selection?.id ?? `new-${modelKey}`}
+          data={editing}
+          modelKey={modelKey}
+          initialValues={defaultModelValues(modelKey)}
+          close={handleCloseEditor}
+        />
       );
     }
 
@@ -133,6 +161,28 @@ const Tools = () => {
                   className="text-muted-foreground group-hover:text-foreground"
                 />
                 {key}
+              </Label>
+              <PlusCircle size={14} />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <Label>Models</Label>
+        <div>
+          {modelsList.map((key) => (
+            <div
+              key={key}
+              className="flex justify-between items-center hover:bg-gray-200/50 cursor-pointer px-2 py-2.5 rounded-md group"
+              onClick={() => setEditorMode({ stack: "model", key })}
+            >
+              <Label className="capitalize cursor-pointer">
+                <MODEL_ICON
+                  size={14}
+                  className="text-muted-foreground group-hover:text-foreground"
+                />
+                {modelLabels[key]}
               </Label>
               <PlusCircle size={14} />
             </div>

@@ -6,6 +6,7 @@ import {
   expandWithDescendants,
   FlatNode,
   flattenTree,
+  restoreModelNodes,
 } from "@/lib/utils/tree";
 import {
   closestCenter,
@@ -97,6 +98,11 @@ export function useLayerDrag({ nodes, items, setItems, selectedIds }: Args) {
     if (depth >= maxDepth) depth = maxDepth;
     else if (depth < minDepth) depth = minDepth;
 
+    // A model never accepts children, so the depth it would take is its own.
+    if (previous?.node.type === "model" && depth > previous.depth) {
+      depth = previous.depth;
+    }
+
     const parentId: string | null = (() => {
       if (depth === 0 || !previous) return null;
       if (depth === previous.depth) return previous.parentId;
@@ -163,7 +169,10 @@ export function useLayerDrag({ nodes, items, setItems, selectedIds }: Args) {
       setItems(flattenTree(nodes));
       return;
     }
-    dispatch(setNodes(buildTree(items)));
+    const next = buildTree(items);
+    // Model internals are not part of the flat list; put them back before saving.
+    restoreModelNodes(next, nodes);
+    dispatch(setNodes(next));
   };
 
   const handleDragCancel = () => {

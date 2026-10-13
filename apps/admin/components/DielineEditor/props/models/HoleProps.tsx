@@ -1,4 +1,3 @@
-import { ISpec } from "@repo/store/types";
 import {
   FormControl,
   FormDescription,
@@ -13,7 +12,7 @@ import { UseFormReturn } from "react-hook-form";
 import PropsFormContent from "../shapes/PropsFormContent";
 
 interface Props {
-  form: UseFormReturn<ISpec.HoleSpec, any, ISpec.HoleSpec>;
+  form: UseFormReturn<any, any, any>;
 }
 
 const HoleProps = ({ form }: Props) => {

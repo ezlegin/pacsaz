@@ -60,7 +60,8 @@ export default function ShapeLayers({ handleLayerAction, nodes }: Props) {
     let hideDepth: number | null = null;
     for (const item of items) {
       if (hideDepth !== null) {
-        if (item.depth > hideDepth) continue;
+        // A model row ends any collapse scope: its internals are not listed.
+        if (item.depth > hideDepth && item.node.type !== "model") continue;
         hideDepth = null;
       }
       out.push(item);

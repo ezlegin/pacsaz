@@ -134,15 +134,58 @@ export namespace ISpec {
     key: string;
     hidden: boolean;
     stack: "group";
+    // Groups have no origin of their own — children carry their own placement.
     nodes: Node[];
-    origin: Point;
     dup?: Dup;
     effects: ShapeEffect[];
   };
 
-  export type Node = Shape | Group;
+  export type Node = Shape | Group | Model;
 
   export type Nodes = Node[];
+
+  //! Models ---------------------------------------
+  //
+  // A model is an opaque, self-contained dieline part (glue flap, door, hole,
+  // snap lock). It renders through the same pipeline as a group, but none of its
+  // internals are user editable: `params` is the source of truth, the Drawer
+  // rebuilds the real geometry from it on each render, and `nodes` is a mirror
+  // used only so the model behaves as one collapse-proof unit in the layer tree.
+  //
+  // Models can still be grouped — with other models or with plain shapes — and
+  // the containing group may carry effects such as `join`.
+
+  export type ModelKey = "glue" | "door" | "hole" | "snapLock";
+
+  export type ModelParams = {
+    glue: { from: Point; to: Point };
+    door: {
+      dustSide?: "left" | "right" | "both";
+      indentAt?: { l: boolean; r: boolean };
+      mirror: { x: boolean; y: boolean };
+    };
+    hole: {
+      angleBetweenStartAndEnd: string;
+      heightOfLine: string;
+      rotation: string;
+      handleDir: "left" | "right";
+    };
+    snapLock: Record<string, never>;
+  };
+
+  export type Model = {
+    id: string;
+    type: "model";
+    key: string;
+    hidden: boolean;
+    stack: "model";
+    modelKey: ModelKey;
+    params: ModelParams[ModelKey];
+    origin: Point;
+    nodes: Node[];
+    dup?: Dup;
+    effects?: ShapeEffect[];
+  };
 
   //! Rulers --------------------------------------
 

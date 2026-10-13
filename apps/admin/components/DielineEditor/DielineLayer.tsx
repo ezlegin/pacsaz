@@ -47,6 +47,21 @@ export type HandleLayerActoin = (
   type: "dup" | "delete" | "visibility",
 ) => void;
 
+/** Deep copy of a node subtree with fresh ids, so a duplicate is independent. */
+function cloneNodeWithNewIds(node: ISpec.Node): ISpec.Node {
+  const cloned = {
+    ...node,
+    id: nanoid(),
+    key: node.key + "-dup",
+  } as ISpec.Node;
+
+  if (cloned.type === "group" || cloned.type === "model") {
+    cloned.nodes = cloned.nodes.map(cloneNodeWithNewIds);
+  }
+
+  return cloned;
+}
+
 const DielineLayer = ({
   dieline,
   categories,
@@ -75,9 +90,7 @@ const DielineLayer = ({
             dispatch(setNodeVisibility(node.id));
             break;
           case "dup":
-            dispatch(
-              addNode({ ...node, key: node.key + "-dup", id: nanoid() }),
-            );
+            dispatch(addNode(cloneNodeWithNewIds(node)));
             break;
         }
         break;

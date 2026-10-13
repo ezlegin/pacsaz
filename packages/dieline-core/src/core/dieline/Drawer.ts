@@ -9,7 +9,8 @@ import { applyJoin } from "../helpers/join";
 import { addFillet, addFilletAt } from "../helpers/addFillet";
 import { applyArray } from "../helpers/applyArray";
 
-type ShapeNode = Exclude<ISpec.Node, ISpec.Group>;
+/** Plain geometry nodes — everything a `Shape` can be built from directly. */
+type ShapeNode = Exclude<ISpec.Node, ISpec.Group | ISpec.Model>;
 
 export class Drawer extends Dieline {
   constructor(
@@ -156,8 +157,134 @@ export class Drawer extends Dieline {
       return;
     }
 
+    if (node.type === "model") {
+      this.$pushModelNode(node);
+      return;
+    }
+
     const shape = this.$buildShape(node);
     Pacsaz.shape.push(this[`${node.layer}Model`], node.id, shape);
+  }
+
+  /**
+   * A model is built from its params and pushed as one opaque unit. Its trim and
+   * fold halves are split out so they land in the right layer, but they keep the
+   * same node id, so the model stays a single node as far as selection, duplicate
+   * and effects are concerned.
+   */
+  private $pushModelNode(node: ISpec.Model) {
+    const built = this.$buildModel(node);
+
+    // The wrapper's own origin is inert (makerjs only moves the container), so the
+    // recorded origin has to be applied to the real geometry inside it.
+    const [ox, oy] = [
+      this.$parseMathStr(node.origin[0], this.scope),
+      this.$parseMathStr(node.origin[1], this.scope),
+    ];
+
+    const trims = built.models?.["trims"];
+    const folds = built.models?.["folds"];
+
+    if (!trims && !folds) {
+      Pacsaz.shape.push(this.trimModel, node.id, built);
+      return;
+    }
+
+    if (trims) {
+      if (ox || oy) M.model.move(trims, [ox, oy]);
+      Pacsaz.shape.push(this.trimModel, node.id, trims);
+    }
+
+    if (folds) {
+      if (ox || oy) M.model.move(folds, [ox, oy]);
+      Pacsaz.shape.push(this.foldModel, node.id, folds);
+    }
+  }
+
+  /** Instantiates the model class for a node from its stored params. */
+  private $buildModel(node: ISpec.Model): Shape {
+    const scope = this.scope;
+
+    let model: Shape;
+    switch (node.modelKey) {
+      case "glue": {
+        const p = node.params as ISpec.ModelParams["glue"];
+        model = new Pacsaz.models.Glue(
+          [
+            this.$parseMathStr(p.from[0], scope),
+            this.$parseMathStr(p.from[1], scope),
+          ],
+          [
+            this.$parseMathStr(p.to[0], scope),
+            this.$parseMathStr(p.to[1], scope),
+          ],
+        );
+        break;
+      }
+
+      case "door": {
+        const p = node.params as ISpec.ModelParams["door"];
+        model = new Pacsaz.models.Door(p.dustSide, p.indentAt);
+        break;
+      }
+
+      case "hole": {
+        const p = node.params as ISpec.ModelParams["hole"];
+        model = new Pacsaz.models.Hole(
+          p.angleBetweenStartAndEnd,
+          p.heightOfLine,
+          p.rotation,
+          p.handleDir,
+        );
+        break;
+      }
+
+      case "snapLock":
+        model = new Pacsaz.models.SnapLock();
+        break;
+    }
+
+    this.$applyDup(model, node.dup, scope);
+
+    return model;
+  }
+
+  /**
+   * Flattens a group child into the models that make it up. Models collapse into
+   * their trim + fold geometry, so a group can combine a model with plain shapes
+   * (and run join / boolean across the result).
+   */
+  private $flattenChild(child: ISpec.Node): M.IModel[] {
+    if (child.hidden) return [];
+    if (child.type === "group") return [this.$buildGroup(child)];
+    if (child.type === "model") return this.$buildModelParts(child);
+    return [this.$buildShape(child)];
+  }
+
+  /**
+   * Trim / fold halves of a model node, with its origin applied to the real
+   * geometry (the wrapper model's own origin is inert).
+   */
+  private $buildModelParts(node: ISpec.Model): M.IModel[] {
+    const built = this.$buildModel(node);
+
+    const [ox, oy] = [
+      this.$parseMathStr(node.origin[0], this.scope),
+      this.$parseMathStr(node.origin[1], this.scope),
+    ];
+
+    const parts: M.IModel[] = [];
+
+    for (const key of ["trims", "folds"] as const) {
+      const part = built.models?.[key];
+      if (!part) continue;
+      if (ox || oy) M.model.move(part, [ox, oy]);
+      parts.push(part);
+    }
+
+    if (parts.length === 0) parts.push(built);
+
+    return parts;
   }
 
   private $buildShape(node: ShapeNode): Shape {
@@ -183,11 +310,7 @@ export class Drawer extends Dieline {
     const children: M.IModel[] = [];
     for (const child of group.nodes) {
       if (child.hidden) continue;
-      children.push(
-        child.type === "group"
-          ? this.$buildGroup(child)
-          : this.$buildShape(child),
-      );
+      children.push(...this.$flattenChild(child));
     }
 
     const resolved = this.$resolveEffects(group.effects, scope) ?? [];

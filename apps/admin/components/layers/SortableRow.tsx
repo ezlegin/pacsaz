@@ -82,7 +82,9 @@ export function SortableRow({
   };
 
   const isGroup = item.node.type === "group";
-  const canGroup = selectedIds.length >= 2 && isSelected;
+  const isModel = item.node.type === "model";
+  // A model is a sealed unit: no effects, no ungroup, and not a group target.
+  const canGroup = selectedIds.length >= 2 && isSelected && !isModel;
   const nodeEffects = item.node.effects ?? [];
   const hasRadius = nodeEffects.some(
     (e) => e.type === "radius" || e.type === "radiusAt",
@@ -111,40 +113,45 @@ export function SortableRow({
       </ContextMenuTrigger>
 
       <ContextMenuContent>
-        <ContextMenuLabel>Effects</ContextMenuLabel>
-
-        <EffectMenuItem
-          label="Radius"
-          hasEffect={hasRadius}
-          onOpen={() => onAddRadius(item.id)}
-          onRemove={() => onRemoveRadius(item.id)}
-        />
-        <EffectMenuItem
-          label="Array"
-          hasEffect={hasArray}
-          onOpen={() => onAddArray(item.id)}
-          onRemove={() => onRemoveArray(item.id)}
-        />
-
-        {isGroup && (
+        {!isModel && (
           <>
+            <ContextMenuLabel>Effects</ContextMenuLabel>
+
+            <EffectMenuItem
+              label="Radius"
+              hasEffect={hasRadius}
+              onOpen={() => onAddRadius(item.id)}
+              onRemove={() => onRemoveRadius(item.id)}
+            />
+            <EffectMenuItem
+              label="Array"
+              hasEffect={hasArray}
+              onOpen={() => onAddArray(item.id)}
+              onRemove={() => onRemoveArray(item.id)}
+            />
+
+            {isGroup && (
+              <>
+                <ContextMenuSeparator />
+                <EffectMenuItem
+                  label="Boolean"
+                  hasEffect={hasBoolean}
+                  onOpen={() => onAddBoolean(item.id)}
+                  onRemove={() => onRemoveBoolean(item.id)}
+                />
+                <EffectMenuItem
+                  label="Join"
+                  hasEffect={hasJoin}
+                  onOpen={() => onAddJoin(item.id)}
+                  onRemove={() => onRemoveJoin(item.id)}
+                />
+              </>
+            )}
+
             <ContextMenuSeparator />
-            <EffectMenuItem
-              label="Boolean"
-              hasEffect={hasBoolean}
-              onOpen={() => onAddBoolean(item.id)}
-              onRemove={() => onRemoveBoolean(item.id)}
-            />
-            <EffectMenuItem
-              label="Join"
-              hasEffect={hasJoin}
-              onOpen={() => onAddJoin(item.id)}
-              onRemove={() => onRemoveJoin(item.id)}
-            />
           </>
         )}
 
-        <ContextMenuSeparator />
         <ContextMenuItem onSelect={() => onRenameStart(item.id)}>
           <Pencil className="mr-2 h-4 w-4" />
           Rename
@@ -164,6 +171,13 @@ export function SortableRow({
               Delete Group
             </ContextMenuItem>
           </>
+        ) : isModel ? (
+          <ContextMenuItem
+            onSelect={() => handleLayerAction("nodes", item.node, "delete")}
+          >
+            <Trash className="mr-2 h-4 w-4" />
+            Delete Model
+          </ContextMenuItem>
         ) : canGroup ? (
           <ContextMenuItem onSelect={() => onGroup(selectedIds)}>
             <FolderPlus className="mr-2 h-4 w-4" />

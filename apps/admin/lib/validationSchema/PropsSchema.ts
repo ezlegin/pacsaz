@@ -12,7 +12,6 @@ const shapesKey = [
   "polygon",
   "arc",
 ] as const;
-const modelsKey = ["glue", "door", "snapLock", "hole"] as const;
 const stack = ["model", "ruler", "shape", "group"] as const;
 const direction = ["down", "right", "up", "left"] as const;
 const pointDirection = [...direction, "draw"] as const;
@@ -139,11 +138,17 @@ export const rulerFormSchema = z.object({
   hidden: z.boolean(),
 });
 
+/**
+ * Model nodes. A model is stored as one opaque node — `modelKey` plus its
+ * `params` — so each model type keeps its own parameter shape here. The Drawer
+ * rebuilds the real geometry from these params, which is why they stay symbolic
+ * strings rather than resolved numbers.
+ */
 const modelGenerals = z.object({
-  stack: z.enum(stack),
-  key: z.string(),
-  type: z.enum(modelsKey),
+  stack: z.literal("model"),
+  type: z.literal("model"),
   id: z.string(),
+  key: z.string(),
   hidden: z.boolean(),
   origin: pointInput,
   dup: dup,
@@ -151,6 +156,7 @@ const modelGenerals = z.object({
 
 export const glueFormSchema = z
   .object({
+    modelKey: z.literal("glue"),
     from: pointInput,
     to: pointInput,
   })
@@ -158,6 +164,7 @@ export const glueFormSchema = z
 
 export const doorFormSchema = z
   .object({
+    modelKey: z.literal("door"),
     dustSide: z.enum(dustSide).optional(),
     mirror: z.object({
       x: z.boolean(),
@@ -172,7 +179,29 @@ export const doorFormSchema = z
   })
   .merge(modelGenerals);
 
-export const snapLockFormSchema = modelGenerals;
+export const holeFormSchema = z
+  .object({
+    modelKey: z.literal("hole"),
+    angleBetweenStartAndEnd: mathInput,
+    rotation: z.string(),
+    handleDir: z.enum(["left", "right"]),
+    heightOfLine: mathInput,
+  })
+  .merge(modelGenerals);
+
+export const snapLockFormSchema = z
+  .object({
+    modelKey: z.literal("snapLock"),
+  })
+  .merge(modelGenerals);
+
+/** Lookup used by the models props panel. */
+export const modelFormSchemas = {
+  glue: glueFormSchema,
+  door: doorFormSchema,
+  hole: holeFormSchema,
+  snapLock: snapLockFormSchema,
+} as const;
 
 /**
  * Groups are edited as a whole node (rename / dup); their children keep their own
@@ -188,12 +217,3 @@ export const groupFormSchema = z.object({
   dup: dup,
   effects: z.array(z.any()),
 });
-
-export const holeFormSchema = z
-  .object({
-    angleBetweenStartAndEnd: mathInput,
-    rotation: z.string(),
-    handleDir: z.enum(["left", "right"]),
-    heightOfLine: mathInput,
-  })
-  .merge(modelGenerals);

@@ -15,6 +15,7 @@ export function flattenTree(
   const out: FlatNode[] = [];
   for (const node of nodes) {
     out.push({ id: node.id, node, parentId, depth });
+    // Models are opaque: their generated children are never listed on their own.
     if (node.type === "group") {
       out.push(...flattenTree(node.nodes, node.id, depth + 1));
     }
@@ -35,7 +36,7 @@ export function buildTree(flat: FlatNode[]): ISpec.Nodes {
     const parent = stack[stack.length - 1]!.nodes;
 
     const cloned: ISpec.Node =
-      item.node.type === "group"
+      item.node.type === "group" || item.node.type === "model"
         ? { ...item.node, nodes: [] }
         : { ...item.node };
 

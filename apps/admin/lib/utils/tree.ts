@@ -15,6 +15,8 @@ export function flattenTree(
   const out: FlatNode[] = [];
   for (const node of nodes) {
     out.push({ id: node.id, node, parentId, depth });
+    // A model's children are internal geometry: they are part of the model row,
+    // never separate rows the user could reach.
     if (node.type === "group") {
       out.push(...flattenTree(node.nodes, node.id, depth + 1));
     }
@@ -35,9 +37,7 @@ export function buildTree(flat: FlatNode[]): ISpec.Nodes {
     const parent = stack[stack.length - 1]!.nodes;
 
     const cloned: ISpec.Node =
-      item.node.type === "group"
-        ? { ...item.node, nodes: [] }
-        : { ...item.node };
+      clonedContainerWithoutChildren(item.node) ?? { ...item.node };
 
     parent.push(cloned);
 
@@ -47,6 +47,44 @@ export function buildTree(flat: FlatNode[]): ISpec.Nodes {
   }
 
   return root;
+}
+
+/** Containers are rebuilt from the flat list, so their children start empty. */
+function clonedContainerWithoutChildren(node: ISpec.Node): ISpec.Node | null {
+  if (node.type === "group" || node.type === "model") {
+    return { ...node, nodes: [] };
+  }
+  return null;
+}
+
+/**
+ * `flattenTree` intentionally drops model internals, so after `buildTree` the
+ * generated children have to be re-attached from the authoritative tree before
+ * the result goes back to the store.
+ */
+export function restoreModelNodes(
+  nodes: ISpec.Nodes,
+  source: ISpec.Nodes,
+): void {
+  const byId = new Map<string, ISpec.Model>();
+  const collect = (list: ISpec.Nodes) => {
+    for (const node of list) {
+      if (node.type === "model") byId.set(node.id, node);
+      else if (node.type === "group") collect(node.nodes);
+    }
+  };
+  collect(source);
+
+  const apply = (list: ISpec.Nodes) => {
+    for (const node of list) {
+      if (node.type === "model") {
+        node.nodes = byId.get(node.id)?.nodes ?? node.nodes ?? [];
+      } else if (node.type === "group") {
+        apply(node.nodes);
+      }
+    }
+  };
+  apply(nodes);
 }
 
 export function arrayMove<T>(arr: T[], from: number, to: number): T[] {

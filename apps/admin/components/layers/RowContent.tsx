@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@repo/ui/lib/utils";
-import { ChevronRight, Folder } from "lucide-react";
+import { ChevronRight, Folder, Package } from "lucide-react";
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import type { FlatNode } from "@/lib/utils/tree";
 import { LayerIcon } from "./LayerIcon";
@@ -36,6 +36,9 @@ export function RowContent({
 }: Props) {
   const node = item.node;
   const isGroup = node.type === "group";
+  const isModel = node.type === "model";
+  // Only real groups expand and tint by layer; a model is one opaque unit.
+  const isContainerRow = isGroup;
   const [draft, setDraft] = useState(node.key);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -57,7 +60,7 @@ export function RowContent({
       }}
     >
       <div className="flex min-w-0 items-center gap-1">
-        {isGroup ? (
+        {isContainerRow ? (
           <button
             onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => {
@@ -81,7 +84,8 @@ export function RowContent({
           className={cn(
             "flex items-center text-xs font-medium",
             !isEditing && "truncate",
-            !isGroup &&
+            !isContainerRow &&
+              !isModel &&
               (node.layer === "trim"
                 ? "text-blue-500"
                 : node.layer === "fold"
@@ -89,7 +93,9 @@ export function RowContent({
                   : "text-fuchsia-500"),
           )}
         >
-          {isGroup ? (
+          {isModel ? (
+            <Package className="scale-[0.6] shrink-0" />
+          ) : isGroup ? (
             <Folder className="scale-[0.6] shrink-0" />
           ) : (
             <LayerIcon data={node.type} />

@@ -1,9 +1,8 @@
 import { UseFormReturn } from "react-hook-form";
 import PropsFormContent from "../shapes/PropsFormContent";
-import { ISpec } from "@repo/store/types";
 
 interface Props {
-  form: UseFormReturn<ISpec.DoorSpec, any, ISpec.DoorSpec>;
+  form: UseFormReturn<any, any, any>;
 }
 
 const SnapLockProps = ({}: Props) => {

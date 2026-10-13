@@ -1,10 +1,9 @@
 import { UseFormReturn } from "react-hook-form";
 import PointInput from "../shapes/PointInput";
 import PropsFormContent from "../shapes/PropsFormContent";
-import { ISpec } from "@repo/store/types";
 
 interface Props {
-  form: UseFormReturn<ISpec.GlueSpec, any, ISpec.GlueSpec>;
+  form: UseFormReturn<any, any, any>;
 }
 
 const GlueProps = ({ form }: Props) => {
