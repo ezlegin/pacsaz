@@ -87,6 +87,23 @@ const nodesSlice = createSlice({
       node.effects?.splice(action.payload.index, 1);
       if (node.effects?.length === 0) delete node.effects;
     },
+
+    /** Replaces a node's whole rule list (the rules dialog edits it as a set). */
+    setNodeRules: (
+      state,
+      action: PayloadAction<{ nodeId: string; rules: ISpec.Rules }>,
+    ) => {
+      const node = findNode(state, action.payload.nodeId);
+      if (!node) return;
+
+      // An empty list is stored as absent so untouched nodes stay clean.
+      if (action.payload.rules.length === 0) {
+        delete node.rules;
+        return;
+      }
+
+      node.rules = action.payload.rules;
+    },
   },
 });
 
@@ -102,6 +119,7 @@ export const {
   addEffect,
   removeEffect,
   updateEffect,
+  setNodeRules,
 } = nodesSlice.actions;
 
 export const nodesSelector = (state: RootState) => state.dieline.present.nodes;

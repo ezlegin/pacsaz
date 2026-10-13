@@ -27,7 +27,7 @@ const page = async () => {
         <HomeFeatures />
       </div>
 
-      <div className="p-4 md:p-20 mx-auto bg-muted/70">
+      <div className="border-y bg-muted/40 px-4 py-20 md:px-20 md:py-28">
         <HomeCategories />
       </div>
 

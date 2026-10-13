@@ -11,7 +11,7 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@repo/ui/components/context-menu";
-import { FolderMinus, FolderPlus, Pencil, Trash } from "lucide-react";
+import { FolderMinus, FolderPlus, Pencil, ShieldCheck, Trash } from "lucide-react";
 import type { CSSProperties, MouseEvent } from "react";
 import { HandleLayerActoin } from "../DielineEditor/DielineLayer";
 import { EffectMenuItem } from "./EffectMenuItem";
@@ -40,6 +40,8 @@ interface Props {
   onRemoveBoolean: (nodeId: string) => void;
   onAddJoin: (nodeId: string) => void;
   onRemoveJoin: (nodeId: string) => void;
+  onOpenRules: (nodeId: string) => void;
+  onClearRules: (nodeId: string) => void;
 }
 
 export function SortableRow({
@@ -65,6 +67,8 @@ export function SortableRow({
   onAddJoin,
   onRemoveBoolean,
   onRemoveJoin,
+  onOpenRules,
+  onClearRules,
 }: Props) {
   const {
     attributes,
@@ -94,6 +98,7 @@ export function SortableRow({
   const hasArray = nodeEffects.some((e) => e.type === "array");
   const hasBoolean = nodeEffects.some((e) => e.type === "boolean");
   const hasJoin = nodeEffects.some((e) => e.type === "join");
+  const hasRules = (item.node.rules ?? []).length > 0;
 
   return (
     <ContextMenu>
@@ -148,6 +153,26 @@ export function SortableRow({
                   onRemove={() => onRemoveJoin(item.id)}
                 />
               </>
+            )}
+
+            <ContextMenuSeparator />
+          </>
+        )}
+
+        {!isMultiSelection && (
+          <>
+            <ContextMenuLabel>Rules</ContextMenuLabel>
+
+            <ContextMenuItem onSelect={() => onOpenRules(item.id)}>
+              <ShieldCheck className="mr-2 h-4 w-4" />
+              {hasRules ? "Edit Rules" : "Add Rules"}
+            </ContextMenuItem>
+
+            {hasRules && (
+              <ContextMenuItem onSelect={() => onClearRules(item.id)}>
+                <Trash className="mr-2 h-4 w-4" />
+                Clear Rules
+              </ContextMenuItem>
             )}
 
             <ContextMenuSeparator />

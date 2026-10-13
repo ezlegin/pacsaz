@@ -141,6 +141,15 @@ export function RowContent({
             </span>
           )}
 
+          {node.rules && node.rules.length > 0 && (
+            <span
+              title={`${node.rules.length} visibility rule${node.rules.length > 1 ? "s" : ""}`}
+              className="shrink-0 rounded bg-sky-100 px-1 py-px text-[10px] font-semibold leading-none text-sky-700 group-hover:hidden"
+            >
+              IF
+            </span>
+          )}
+
           {handleLayerAction && (
             <LayerActions
               layerItemType="nodes"

@@ -42,6 +42,30 @@ export namespace ISpec {
     operations: DupOperation[];
   }[];
 
+  /**
+   * Visibility rules. Each rule is a condition evaluated against the dieline
+   * scope (`width`, `length`, `height`, `safeOffset` and every variable).
+   *
+   * Rules apply in order and the last matching one wins, so a `show` rule can
+   * carve an exception back out of an earlier `hide`:
+   *
+   *   if width > 100 -> hide
+   *   if width > 130 -> show
+   *
+   * The node's own `hidden` flag is the starting point, so a `show` rule also
+   * brings back a node that was hidden by hand.
+   */
+  export type RuleAction = "hide" | "show";
+
+  export type NodeRule = {
+    id: string;
+    /** Math expression evaluated as a boolean, e.g. `width > 100`. */
+    condition: string;
+    action: RuleAction;
+  };
+
+  export type Rules = NodeRule[];
+
   type Generals = {
     id: string;
     key: string;
@@ -51,6 +75,7 @@ export namespace ISpec {
     origin: Point;
     dup?: Dup;
     effects?: ShapeEffect[];
+    rules?: Rules;
   };
 
   export type Direction = "up" | "down" | "right" | "left";
@@ -138,6 +163,7 @@ export namespace ISpec {
     nodes: Node[];
     dup?: Dup;
     effects: ShapeEffect[];
+    rules?: Rules;
   };
 
   export type Node = Shape | Group | Model;
@@ -185,6 +211,7 @@ export namespace ISpec {
     nodes: Node[];
     dup?: Dup;
     effects?: ShapeEffect[];
+    rules?: Rules;
   };
 
   //! Rulers --------------------------------------

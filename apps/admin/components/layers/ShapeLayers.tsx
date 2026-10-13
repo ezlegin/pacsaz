@@ -28,6 +28,8 @@ import { RowContent } from "./RowContent";
 import { SortableRow } from "./SortableRow";
 import { BooleanDialog } from "./BooleanDialog";
 import { JoinDialog } from "./JoinDialog";
+import { NodeRulesDialog } from "./NodeRulesDialog";
+import { useNodeRulesDialog } from "@/lib/layers/useNodeRulesDialog";
 
 interface Props {
   nodes: ISpec.Nodes;
@@ -43,6 +45,7 @@ export default function ShapeLayers({ handleLayerAction, nodes }: Props) {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const effects = useEffectDialogs(nodes);
+  const rules = useNodeRulesDialog(nodes);
   const { activeId, dndProps } = useLayerDrag({
     nodes,
     items,
@@ -195,6 +198,8 @@ export default function ShapeLayers({ handleLayerAction, nodes }: Props) {
               onRemoveBoolean={effects.removeBoolean}
               onAddJoin={effects.openJoin}
               onRemoveJoin={effects.removeJoin}
+              onOpenRules={rules.openRules}
+              onClearRules={rules.clearRules}
             />
           ))}
         </div>
@@ -248,6 +253,14 @@ export default function ShapeLayers({ handleLayerAction, nodes }: Props) {
         initialJoinMode={effects.joinDialog?.initialMode ?? "nearest"}
         onOpenChange={(open) => !open && effects.closeJoin()}
         onSubmit={effects.submitJoin}
+      />
+
+      <NodeRulesDialog
+        open={rules.rulesDialog !== null}
+        nodeKey={rules.rulesDialog?.nodeKey ?? ""}
+        initialRules={rules.rulesDialog?.rules ?? []}
+        onOpenChange={(open) => !open && rules.closeRules()}
+        onSubmit={rules.submitRules}
       />
     </DndContext>
   );

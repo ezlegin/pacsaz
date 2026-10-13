@@ -23,6 +23,21 @@ function hasGeometry(model: M.IModel | undefined): boolean {
   return false;
 }
 
+/**
+ * `mathjs` spells its logical operators `and` / `or` / `not`, but JavaScript's
+ * `&&` / `||` / `!` are what people actually type — and mathjs raises a parse
+ * error on them. They are rewritten here so both spellings work.
+ *
+ * Multi-character operators are replaced first so `&&` never degrades into `and`.
+ */
+function normalizeCondition(condition: string): string {
+  return condition
+    .replace(/&&/g, " and ")
+    .replace(/\|\|/g, " or ")
+    .replace(/!=/g, " != ")
+    .replace(/!(?!=)/g, " not ");
+}
+
 export class Drawer extends Dieline {
   constructor(
     private nodes: ISpec.Nodes,
@@ -155,8 +170,12 @@ export class Drawer extends Dieline {
   //! ------------------------ Traversal ------------------------
 
   override drawShapes() {
+    // Resolve the scope once: `isHidden` needs it per node, and the getter
+    // re-evaluates every variable through mathjs on each access.
+    const scope = this.scope;
+
     for (const node of this.nodes) {
-      this.renderNode(node);
+      this.renderNode(node, scope);
     }
   }
 
@@ -170,36 +189,70 @@ export class Drawer extends Dieline {
       overall: new Pacsaz.ruler.OverallRuler(this.trimModel),
     });
 
-    for (const ruler of this.rulers) {
-      if (ruler.hidden) continue;
+    const scope = this.scope;
 
-      const from = this.$point(ruler.from);
-      const to = this.$point(ruler.to);
+    for (const ruler of this.rulers) {
+      if (this.isHidden(ruler, scope)) continue;
 
       this.$pushRuler({
         [ruler.key]: new Pacsaz.ruler.DielineRuler(
-          from,
-          to,
-          this.$parseMathStr(ruler.value, this.scope),
-          this.$parseMathStr(ruler.offset, this.scope),
+          this.$point(ruler.from, scope),
+          this.$point(ruler.to, scope),
+          this.$parseMathStr(ruler.value, scope),
+          this.$parseMathStr(ruler.offset, scope),
         ),
       });
     }
   }
 
-  /** Parses a stored point through the current variable scope. */
-  private $point(point: ISpec.Point): M.IPoint {
+  /** Parses a stored point through the given variable scope. */
+  private $point(
+    point: ISpec.Point,
+    scope: Record<string, number>,
+  ): M.IPoint {
     return [
-      this.$parseMathStr(point[0], this.scope),
-      this.$parseMathStr(point[1], this.scope),
+      this.$parseMathStr(point[0], scope),
+      this.$parseMathStr(point[1], scope),
     ];
   }
 
-  private renderNode(node: ISpec.Node) {
-    if (node.hidden) return;
+  /**
+   * Resolves a node's visibility from its own `hidden` flag plus its rules.
+   *
+   * Rules are applied **in order and the last match wins**, which is what lets a
+   * `show` rule undo an earlier `hide`:
+   *
+   *   if width > 100 -> hide
+   *   if width > 130 -> show
+   *
+   * A broken expression counts as "does not match" rather than failing the whole
+   * render — one bad rule should not take the dieline down.
+   */
+  private isHidden(
+    node: ISpec.Node | ISpec.Ruler,
+    scope: Record<string, number>,
+  ): boolean {
+    // The node's own flag is the starting point; rules then decide from there.
+    let hidden = node.hidden;
+
+    for (const rule of node.rules ?? []) {
+      try {
+        if (!evaluate(normalizeCondition(rule.condition), scope)) continue;
+      } catch {
+        continue;
+      }
+
+      hidden = rule.action === "hide";
+    }
+
+    return hidden;
+  }
+
+  private renderNode(node: ISpec.Node, scope: Record<string, number>) {
+    if (this.isHidden(node, scope)) return;
 
     if (node.type === "group") {
-      const model = this.$buildGroup(node);
+      const model = this.$buildGroup(node, scope);
       Pacsaz.shape.push(this.trimModel, node.id, model); //todo: push to right model based on layer.
       return;
     }
@@ -314,9 +367,12 @@ export class Drawer extends Dieline {
     return model;
   }
 
-  private $flattenChild(child: ISpec.Node): M.IModel[] {
-    if (child.hidden) return [];
-    if (child.type === "group") return [this.$buildGroup(child)];
+  private $flattenChild(
+    child: ISpec.Node,
+    scope: Record<string, number>,
+  ): M.IModel[] {
+    if (this.isHidden(child, scope)) return [];
+    if (child.type === "group") return [this.$buildGroup(child, scope)];
     if (child.type === "model") return this.$buildModelParts(child);
     return [this.$buildShape(child)];
   }
@@ -365,13 +421,14 @@ export class Drawer extends Dieline {
     }
   }
 
-  private $buildGroup(group: ISpec.Group): M.IModel {
-    const scope = this.scope;
-
+  private $buildGroup(
+    group: ISpec.Group,
+    scope: Record<string, number>,
+  ): M.IModel {
     const children: M.IModel[] = [];
     for (const child of group.nodes) {
-      if (child.hidden) continue;
-      children.push(...this.$flattenChild(child));
+      // `$flattenChild` applies visibility (manual + rules) for each child.
+      children.push(...this.$flattenChild(child, scope));
     }
 
     const resolved = this.$resolveEffects(group.effects, scope) ?? [];
