@@ -11,6 +11,14 @@ import { ISpec } from "@repo/store/types";
 import { useState } from "react";
 import { RadiusKind } from "./constants";
 
+interface JoinDialogState {
+  nodeId: string;
+  effectIndex: number | null;
+  initialMode: ISpec.JoinMode;
+  shapeA: string;
+  shapeB: string;
+}
+
 interface RadiusDialogState {
   nodeId: string;
   effectIndex: number | null;
@@ -55,6 +63,61 @@ export function useEffectDialogs(nodes: ISpec.Nodes) {
   const [booleanDialog, setBooleanDialog] = useState<BooleanDialogState | null>(
     null,
   );
+  const [joinDialog, setJoinDialog] = useState<JoinDialogState | null>(null);
+
+  // ---------- Join ----------
+
+  const openJoin = (nodeId: string) => {
+    const node = findNode(nodes, nodeId);
+    if (!node || node.type !== "group") return;
+
+    const visibleChildren = node.nodes.filter((c) => !c.hidden);
+    const shapeA = visibleChildren[0]?.key ?? "Shape 1";
+    const shapeB = visibleChildren[1]?.key ?? "Shape 2";
+
+    const effects = node.effects ?? [];
+    const idx = effects.findIndex((e) => e.type === "join");
+
+    if (idx >= 0) {
+      const e = effects[idx] as Extract<ISpec.ShapeEffect, { type: "join" }>;
+      setJoinDialog({
+        nodeId,
+        effectIndex: idx,
+        initialMode: e.mode,
+        shapeA,
+        shapeB,
+      });
+    } else {
+      setJoinDialog({
+        nodeId,
+        effectIndex: null,
+        initialMode: "nearest",
+        shapeA,
+        shapeB,
+      });
+    }
+  };
+
+  const submitJoin = (mode: ISpec.JoinMode) => {
+    if (!joinDialog) return;
+    const { nodeId, effectIndex } = joinDialog;
+    const effect: ISpec.ShapeEffect = { type: "join", mode };
+
+    dispatch(
+      effectIndex === null
+        ? addEffect({ nodeId, effect })
+        : updateEffect({ nodeId, index: effectIndex, changes: effect }),
+    );
+    setJoinDialog(null);
+  };
+
+  const removeJoin = (nodeId: string) => {
+    const node = findNode(nodes, nodeId);
+    if (!node || node.type !== "group") return;
+    const idx = (node.effects ?? []).findIndex((e) => e.type === "join");
+    if (idx < 0) return;
+    dispatch(removeEffect({ nodeId, index: idx }));
+  };
 
   // ---------- Boolean ----------
   const openBoolean = (nodeId: string) => {
@@ -89,22 +152,6 @@ export function useEffectDialogs(nodes: ISpec.Nodes) {
     const node = findNode(nodes, nodeId);
     if (!node || node.type !== "group") return;
     const idx = (node.effects ?? []).findIndex((e) => e.type === "boolean");
-    if (idx < 0) return;
-    dispatch(removeEffect({ nodeId, index: idx }));
-  };
-
-  // ---------- Join ----------
-  const addJoin = (nodeId: string) => {
-    const node = findNode(nodes, nodeId);
-    if (!node || node.type !== "group") return;
-    if ((node.effects ?? []).some((e) => e.type === "join")) return;
-    dispatch(addEffect({ nodeId, effect: { type: "join" } }));
-  };
-
-  const removeJoin = (nodeId: string) => {
-    const node = findNode(nodes, nodeId);
-    if (!node || node.type !== "group") return;
-    const idx = (node.effects ?? []).findIndex((e) => e.type === "join");
     if (idx < 0) return;
     dispatch(removeEffect({ nodeId, index: idx }));
   };
@@ -232,7 +279,10 @@ export function useEffectDialogs(nodes: ISpec.Nodes) {
     submitBoolean,
     removeBoolean,
 
-    addJoin,
+    joinDialog,
+    submitJoin,
+    openJoin,
+    closeJoin: () => setJoinDialog(null),
     removeJoin,
   };
 }

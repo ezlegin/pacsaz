@@ -57,12 +57,19 @@ export namespace ISpec {
 
   //! Shapes --------------------------------------
 
+  export type JoinMode =
+    | "nearest"
+    | "a-start-b-start"
+    | "a-start-b-end"
+    | "a-end-b-start"
+    | "a-end-b-end";
+
   export type ShapeEffect =
     | { type: "radiusAt"; targets: string[]; value: string }
     | { type: "radius"; value: string }
     | { type: "array"; moveX: string; moveY: string; repeat: string }
     | { type: "boolean"; mode: "union" | "subtract" | "intersect" }
-    | { type: "join" };
+    | { type: "join"; mode: JoinMode };
 
   export type LineSpec = Record<"length" | "angle", string> &
     Generals & {
@@ -157,12 +164,12 @@ export namespace ISpec {
 }
 
 //! IEffect ----------------------------------------------------------------
+
 export namespace IEffect {
   export type RadiusType = "full" | "indices";
   export type EffectOn = "shape" | "effect";
   export type EffectTypes = "boolean" | "radius" | "array";
   export type BooleanType = "union" | "subtract" | "intersect";
-  type ModelId = string;
 
   interface EffectBase {
     id: string;
@@ -174,8 +181,8 @@ export namespace IEffect {
   export interface BooleanEffectSpec extends EffectBase {
     type: "boolean";
     booleanType: BooleanType;
-    targetModelId: ModelId;
-    originModelId: ModelId;
+    targetModelId: string;
+    originModelId: string;
   }
 
   export type EffectSpec = BooleanEffectSpec;

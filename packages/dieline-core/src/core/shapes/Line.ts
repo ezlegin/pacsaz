@@ -8,15 +8,12 @@ export class Line extends Shape {
   constructor(length: number, angle?: number) {
     super();
 
-    this.$pushShape("line", this.line(length, angle));
-  }
-
-  line(length: number, angle?: number) {
     const arc = new M.paths.Arc(zero, length, 0, angle ?? 0);
     const arcPoints = M.point.fromArc(arc);
-    const line = new M.models.ConnectTheDots(false, [zero, arcPoints[1]!]);
+    // const line = new M.models.ConnectTheDots(false, [zero, arcPoints[1]!]);
+    const line = new M.paths.Line([zero, arcPoints[1]!]);
 
-    return line;
+    this.$pushShape("line", { paths: { line } });
   }
 }
 

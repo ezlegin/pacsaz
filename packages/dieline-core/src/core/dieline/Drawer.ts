@@ -150,12 +150,12 @@ export class Drawer extends Dieline {
 
     if (node.type === "group") {
       const model = this.$buildGroup(node);
-      Pacsaz.shape.push(this.trimModel, node.id, model);
+      Pacsaz.shape.push(this.trimModel, node.id, model); //todo: push to right model based on layer.
       return;
     }
 
     const shape = this.$buildShape(node);
-    Pacsaz.shape.push(this.trimModel, node.id, shape);
+    Pacsaz.shape.push(this[`${node.layer}Model`], node.id, shape);
   }
 
   private $buildShape(node: ShapeNode): Shape {
@@ -194,7 +194,7 @@ export class Drawer extends Dieline {
     for (const efx of group.effects ?? []) {
       switch (efx.type) {
         case "join":
-          combined = applyJoin(combined);
+          combined = applyJoin(children, efx.mode);
           break;
         case "boolean":
           combined = applyBoolean(children, efx.mode);
@@ -204,7 +204,6 @@ export class Drawer extends Dieline {
 
     return combined;
   }
-
   //! ------------------------ Utils ------------------------
 
   private $build<T extends ISpec.Node>(

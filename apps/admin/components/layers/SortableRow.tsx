@@ -1,6 +1,8 @@
 "use client";
 
 import type { FlatNode } from "@/lib/utils/tree";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -9,13 +11,11 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@repo/ui/components/context-menu";
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 import { FolderMinus, FolderPlus, Pencil, Trash } from "lucide-react";
 import type { CSSProperties, MouseEvent } from "react";
-import { EffectMenuItem, ToggleEffectMenuItem } from "./EffectMenuItem";
-import { RowContent } from "./RowContent";
 import { HandleLayerActoin } from "../DielineEditor/DielineLayer";
+import { EffectMenuItem } from "./EffectMenuItem";
+import { RowContent } from "./RowContent";
 
 interface Props {
   item: FlatNode;
@@ -123,10 +123,10 @@ export function SortableRow({
               onOpen={() => onAddBoolean(item.id)}
               onRemove={() => onRemoveBoolean(item.id)}
             />
-            <ToggleEffectMenuItem
+            <EffectMenuItem
               label="Join"
               hasEffect={hasJoin}
-              onAdd={() => onAddJoin(item.id)}
+              onOpen={() => onAddJoin(item.id)}
               onRemove={() => onRemoveJoin(item.id)}
             />
           </>

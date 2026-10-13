@@ -27,6 +27,7 @@ import { RadiusDialog } from "./RadiusDialog";
 import { RowContent } from "./RowContent";
 import { SortableRow } from "./SortableRow";
 import { BooleanDialog } from "./BooleanDialog";
+import { JoinDialog } from "./JoinDialog";
 
 interface Props {
   nodes: ISpec.Nodes;
@@ -188,7 +189,7 @@ export default function ShapeLayers({ handleLayerAction, nodes }: Props) {
               onRemoveArray={effects.removeArray}
               onAddBoolean={effects.openBoolean}
               onRemoveBoolean={effects.removeBoolean}
-              onAddJoin={effects.addJoin}
+              onAddJoin={effects.openJoin}
               onRemoveJoin={effects.removeJoin}
             />
           ))}
@@ -233,6 +234,16 @@ export default function ShapeLayers({ handleLayerAction, nodes }: Props) {
         initialMode={effects.booleanDialog?.initialMode ?? "union"}
         onOpenChange={(open) => !open && effects.closeBoolean()}
         onSubmit={effects.submitBoolean}
+      />
+
+      <JoinDialog
+        open={effects.joinDialog !== null}
+        mode={effects.joinDialog?.effectIndex === null ? "add" : "edit"}
+        shapeA={effects.joinDialog?.shapeA ?? "Shape 1"}
+        shapeB={effects.joinDialog?.shapeB ?? "Shape 2"}
+        initialJoinMode={effects.joinDialog?.initialMode ?? "nearest"}
+        onOpenChange={(open) => !open && effects.closeJoin()}
+        onSubmit={effects.submitJoin}
       />
     </DndContext>
   );
