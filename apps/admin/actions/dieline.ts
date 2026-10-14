@@ -236,7 +236,7 @@ export const saveDielineChanges = async (
   data: DielineUpdateFormType,
   id: number,
 ) => {
-  const { specification, variable, effect } = data;
+  const { specification, variable } = data;
   try {
     const existingDieline = await prisma.dieline.findFirst({ where: { id } });
     if (!existingDieline) throw new Error("Dieline Not Found.");
@@ -246,7 +246,6 @@ export const saveDielineChanges = async (
       data: {
         specification,
         variable,
-        effect,
       },
     });
 
@@ -347,7 +346,6 @@ export const duplicateDieline = async (dielineId: number) => {
         defaultMaterial: existingDieline.defaultMaterial,
         specification: existingDieline.specification,
         variable: existingDieline.variable,
-        effect: existingDieline.effect,
         active: existingDieline.active,
         categoryByModel: {
           connect: existingDieline.categoryByModel.map((item) => ({

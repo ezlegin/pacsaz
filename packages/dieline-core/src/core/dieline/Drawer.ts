@@ -12,6 +12,15 @@ import { applyArray } from "../helpers/applyArray";
 /** Plain geometry nodes — everything a `Shape` can be built from directly. */
 type ShapeNode = Exclude<ISpec.Node, ISpec.Group | ISpec.Model>;
 
+/**
+ * A built chunk of geometry together with the layer whose model it belongs in.
+ * Groups can mix layers, so their geometry has to stay tagged until it is pushed
+ * into `trimModel` / `foldModel` / `perfModel`.
+ */
+type LayerPart = { layer: ISpec.Layer; model: M.IModel };
+
+const LAYERS: readonly ISpec.Layer[] = ["trim", "fold", "perf"];
+
 function hasGeometry(model: M.IModel | undefined): boolean {
   if (!model) return false;
   if (model.paths && Object.keys(model.paths).length > 0) return true;
@@ -252,8 +261,7 @@ export class Drawer extends Dieline {
     if (this.isHidden(node, scope)) return;
 
     if (node.type === "group") {
-      const model = this.$buildGroup(node, scope);
-      Pacsaz.shape.push(this.trimModel, node.id, model); //todo: push to right model based on layer.
+      this.$pushParts(node.id, this.$buildGroup(node, scope));
       return;
     }
 
@@ -264,6 +272,23 @@ export class Drawer extends Dieline {
 
     const shape = this.$buildShape(node);
     Pacsaz.shape.push(this[`${node.layer}Model`], node.id, shape);
+  }
+
+  /** Routes the geometry of one node into the model for each layer it uses. */
+  private $pushParts(nodeId: string, parts: LayerPart[]) {
+    for (const layer of LAYERS) {
+      const models = parts
+        .filter((part) => part.layer === layer)
+        .map((part) => part.model);
+
+      if (models.length === 0) continue;
+
+      Pacsaz.shape.push(
+        this[`${layer}Model`],
+        nodeId,
+        models.length === 1 ? models[0]! : models,
+      );
+    }
   }
 
   private $pushModelNode(node: ISpec.Model) {
@@ -367,17 +392,21 @@ export class Drawer extends Dieline {
     return model;
   }
 
+  /** Flattens one child into layer-tagged parts, applying its visibility. */
   private $flattenChild(
     child: ISpec.Node,
     scope: Record<string, number>,
-  ): M.IModel[] {
+  ): LayerPart[] {
     if (this.isHidden(child, scope)) return [];
-    if (child.type === "group") return [this.$buildGroup(child, scope)];
+    if (child.type === "group") return this.$buildGroup(child, scope);
     if (child.type === "model") return this.$buildModelParts(child);
-    return [this.$buildShape(child)];
+    return [{ layer: child.layer, model: this.$buildShape(child) }];
   }
 
-  private $buildModelParts(node: ISpec.Model): M.IModel[] {
+  /**
+   * Trim / fold halves of a model node, each tagged with the layer it belongs to.
+   */
+  private $buildModelParts(node: ISpec.Model): LayerPart[] {
     const built = this.$buildModel(node);
 
     const shift = this.$modelOrigin(node);
@@ -385,20 +414,24 @@ export class Drawer extends Dieline {
 
     if (!layers) {
       if (shift) M.model.move(built, shift);
-      return [built];
+      return [{ layer: "trim", model: built }];
     }
 
-    const parts: M.IModel[] = [];
+    const parts: LayerPart[] = [];
 
-    for (const part of [layers.trims, layers.folds]) {
-      if (!part) continue;
-      if (shift) M.model.move(part, shift);
-      parts.push(part);
+    if (layers.trims) {
+      if (shift) M.model.move(layers.trims, shift);
+      parts.push({ layer: "trim", model: layers.trims });
+    }
+
+    if (layers.folds) {
+      if (shift) M.model.move(layers.folds, shift);
+      parts.push({ layer: "fold", model: layers.folds });
     }
 
     if (parts.length === 0) {
       if (shift) M.model.move(built, shift);
-      parts.push(built);
+      parts.push({ layer: "trim", model: built });
     }
 
     return parts;
@@ -421,14 +454,19 @@ export class Drawer extends Dieline {
     }
   }
 
+  /**
+   * Builds a group as layer-tagged parts. A group may mix layers (e.g. a trim
+   * line and a fold line), so the layer of every child is preserved instead of
+   * collapsing the whole group into one layer.
+   */
   private $buildGroup(
     group: ISpec.Group,
     scope: Record<string, number>,
-  ): M.IModel {
-    const children: M.IModel[] = [];
+  ): LayerPart[] {
+    let parts: LayerPart[] = [];
     for (const child of group.nodes) {
       // `$flattenChild` applies visibility (manual + rules) for each child.
-      children.push(...this.$flattenChild(child, scope));
+      parts.push(...this.$flattenChild(child, scope));
     }
 
     const resolved = this.$resolveEffects(group.effects, scope) ?? [];
@@ -440,45 +478,61 @@ export class Drawer extends Dieline {
       (e) => e.type === "radius" || e.type === "radiusAt" || e.type === "array",
     );
 
-    let combined: M.IModel = {
-      models: Object.fromEntries(children.map((c, i) => [`child-${i}`, c])),
+    // Cross-layer dup mirrors the whole group, so it is applied to the assembled
+    // geometry before the layers are separated.
+    let assembled: M.IModel = {
+      models: Object.fromEntries(parts.map((p, i) => [`child-${i}`, p.model])),
     };
 
-    for (const efx of combiners) {
-      switch (efx.type) {
-        case "join":
-          combined = applyJoin(children, efx.mode);
-          break;
-        case "boolean":
-          combined = applyBoolean(children, efx.mode);
-          break;
+    this.$applyDup(assembled, group.dup, scope);
+
+    const layers = new Set(parts.map((part) => part.layer));
+
+    // Join / boolean produce a single merged model, which only makes sense while
+    // one layer is involved. Across layers it would be undecidable where the
+    // merged geometry belongs, so the parts are kept intact instead of losing
+    // their layer assignment.
+    if (combiners.length > 0 && layers.size === 1) {
+      const models = parts.map((part) => part.model);
+
+      for (const efx of combiners) {
+        switch (efx.type) {
+          case "join":
+            assembled = applyJoin(models, efx.mode);
+            break;
+          case "boolean":
+            assembled = applyBoolean(models, efx.mode);
+            break;
+        }
+      }
+
+      parts = [{ layer: parts[0]!.layer, model: assembled }];
+    }
+
+    // Modifiers act per model, so they are safe to apply within each layer.
+    for (const part of parts) {
+      for (const efx of modifiers) {
+        switch (efx.type) {
+          case "radius":
+            part.model = addFillet(part.model, +efx.value);
+            break;
+
+          case "radiusAt":
+            part.model = addFilletAt(
+              part.model,
+              efx.targets.map((t) => Number(t)),
+              +efx.value,
+            );
+            break;
+
+          case "array":
+            part.model = applyArray(part.model, efx);
+            break;
+        }
       }
     }
 
-    for (const efx of modifiers) {
-      switch (efx.type) {
-        case "radius":
-          combined = addFillet(combined, +efx.value);
-          break;
-
-        case "radiusAt":
-          combined = addFilletAt(
-            combined,
-            efx.targets.map((t) => Number(t)),
-            +efx.value,
-          );
-          break;
-
-        case "array":
-          combined = applyArray(combined, efx);
-          break;
-      }
-    }
-
-    // Groups support the same dup operations as shapes.
-    this.$applyDup(combined, group.dup, scope);
-
-    return combined;
+    return parts;
   }
   //! ------------------------ Utils ------------------------
 

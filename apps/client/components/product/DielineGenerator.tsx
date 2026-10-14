@@ -3,15 +3,15 @@
 import { DielineType } from "@/data/types";
 import { CustomDielineSettings } from "@repo/db";
 import { useDielineGenerator } from "@repo/dieline-core/hooks/useDielineGenerator";
+import { useAppDispatch } from "@repo/store/hooks";
+import { setDeveloperTool } from "@repo/store/slices/developerToolsSlice";
+import { ISpec, IVar } from "@repo/store/types";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo } from "react";
 import { UserType } from "./DielineDownloadButton";
 import DielineLoadingOverlay from "./DielineLoadingOverlay";
 import DielineSettings from "./DielineSettings";
 import ProductInfo from "./ProductInfo";
-import { IVar, IEffect, ISpec } from "@repo/store/types";
-import { useAppDispatch } from "@repo/store/hooks";
-import { setDeveloperTool } from "@repo/store/slices/developerToolsSlice";
 const SVGPreview = dynamic(
   () => import("@repo/ui/components/custom/SVGPreview"),
   { ssr: false },
@@ -36,10 +36,6 @@ const DielineGenerator = ({
     () => JSON.parse(dieline.variable) as IVar.VariableMap,
     [dieline.variable],
   );
-  const effects = useMemo(
-    () => JSON.parse(dieline.effect) as IEffect.EffectsMap,
-    [dieline.effect],
-  );
 
   const { isRendering } = useDielineGenerator(
     {
@@ -48,7 +44,6 @@ const DielineGenerator = ({
       settings: dieline.settings,
       customSettings,
       variables,
-      effects,
     },
     user,
   );

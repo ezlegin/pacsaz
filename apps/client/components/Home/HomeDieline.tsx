@@ -6,7 +6,7 @@ import { tuckEnd } from "@/public";
 import { useDielineGenerator } from "@repo/dieline-core/hooks/useDielineGenerator";
 import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
 import { setDeveloperTool } from "@repo/store/slices/developerToolsSlice";
-import { IEffect, ISpec, IVar } from "@repo/store/types";
+import { ISpec, IVar } from "@repo/store/types";
 import { Card } from "@repo/ui/components/card";
 import { cn } from "@repo/ui/lib/utils";
 import dynamic from "next/dynamic";
@@ -48,17 +48,13 @@ const HomeDieline = ({ dieline }: { dieline: DielineType | null }) => {
     () => JSON.parse(dieline.variable) as IVar.VariableMap,
     [dieline.variable],
   );
-  const effects = useMemo(
-    () => JSON.parse(dieline.effect) as IEffect.EffectsMap,
-    [dieline.effect],
-  );
+
   const { isRendering } = useDielineGenerator(
     {
       ...dieline,
       specification: specs,
       settings: dieline.settings!,
       variables,
-      effects,
     },
     "client",
   );
