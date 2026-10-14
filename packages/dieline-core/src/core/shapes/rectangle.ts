@@ -1,13 +1,15 @@
 import { ISpec } from "@repo/store/types";
 import M from "makerjs";
-import { addFillet, addFilletAt } from "../helpers/addFillet";
 import { Shape } from "./Shape";
 
 interface Options {
   deleteSide?: ISpec.Direction;
-  effects?: ISpec.ShapeEffect[];
 }
 
+/**
+ * Geometry only. Effects (radius / radiusAt / array) are applied by the Drawer
+ * after the shape is built, so they are not handled here.
+ */
 export class Rectangle extends Shape {
   constructor(width: number, height: number, options?: Options) {
     super();
@@ -15,29 +17,7 @@ export class Rectangle extends Shape {
     const rect = new M.models.Rectangle(width, height);
     this.$applyDeleteSide(rect, options?.deleteSide);
 
-    let model: M.IModel = rect;
-
-    for (const effect of options?.effects ?? []) {
-      switch (effect.type) {
-        case "radiusAt":
-          model = addFilletAt(
-            model,
-            effect.targets.map((t) => +t),
-            +effect.value,
-          );
-          break;
-
-        case "radius":
-          model = addFillet(model, +effect.value);
-          break;
-
-        case "array":
-          model = this.$applyArray(model, effect);
-          break;
-      }
-    }
-
-    this.$pushShape("rect", model);
+    this.$pushShape("rect", rect);
   }
 
   private $applyDeleteSide(rect: M.models.Rectangle, side?: ISpec.Direction) {

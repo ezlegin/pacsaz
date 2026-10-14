@@ -1,7 +1,5 @@
-import { ISpec } from "@repo/store/types";
 import M, { IModel, IPoint } from "makerjs";
 import { zero } from "../../data/consts";
-import { addFillet, addFilletAt } from "../helpers/addFillet";
 import { Shape } from "./Shape";
 
 export class Line extends Shape {
@@ -19,16 +17,17 @@ export class Line extends Shape {
 
 interface LineChainOption {
   closed?: boolean;
-  filletRadius?: number;
-  indices?: number[];
-  effects?: ISpec.ShapeEffect[];
 }
 
+/**
+ * Geometry only. Effects (radius / radiusAt / array) are applied by the Drawer
+ * after the shape is built, so they are not handled here.
+ */
 export class Lines extends Shape {
   constructor(points: IPoint[], options?: LineChainOption) {
     super();
 
-    let lines: IModel = new M.models.ConnectTheDots(
+    const lines: IModel = new M.models.ConnectTheDots(
       options?.closed ?? false,
       points,
     );
@@ -36,28 +35,6 @@ export class Lines extends Shape {
     // this is used by mirror function to calculate the origin point.
     M.model.originate(lines, points[0]!);
 
-    let model: M.IModel = lines;
-
-    for (const effect of options?.effects ?? []) {
-      switch (effect.type) {
-        case "radiusAt":
-          model = addFilletAt(
-            model,
-            effect.targets.map((t) => +t),
-            +effect.value,
-          );
-          break;
-
-        case "radius":
-          model = addFillet(model, +effect.value);
-          break;
-
-        case "array":
-          model = this.$applyArray(model, effect);
-          break;
-      }
-    }
-
-    this.$pushShape("lines", model);
+    this.$pushShape("lines", lines);
   }
 }

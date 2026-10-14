@@ -65,9 +65,7 @@ export class Drawer extends Dieline {
   private lines(lines: ISpec.LinesSpec): Shape {
     return this.$build(
       lines,
-      ({ absolutePts, relativePts, isRelative, isClosed, effects }, scope) => {
-        const resolved = this.$resolveEffects(effects, scope);
-
+      ({ absolutePts, relativePts, isRelative, isClosed }, scope) => {
         if (isRelative) {
           if (!relativePts) throw new Error("Points Not Avaiable.");
 
@@ -102,7 +100,6 @@ export class Drawer extends Dieline {
 
           return new Pacsaz.shapes.Lines(pb.build(), {
             closed: isClosed,
-            effects: resolved,
           });
         }
 
@@ -113,24 +110,19 @@ export class Drawer extends Dieline {
         ]);
         return new Pacsaz.shapes.Lines(parsedPts, {
           closed: isClosed,
-          effects: resolved,
         });
       },
     );
   }
 
   private rectangle(rect: ISpec.RectangleSpec): Shape {
-    return this.$build(
-      rect,
-      ({ width, height, deleteSide, effects }, scope) => {
-        const resolved = this.$resolveEffects(effects, scope);
-        return new Pacsaz.shapes.Rectangle(
-          this.$parseMathStr(width, scope),
-          this.$parseMathStr(height, scope),
-          { deleteSide, effects: resolved },
-        );
-      },
-    );
+    return this.$build(rect, ({ width, height, deleteSide }, scope) => {
+      return new Pacsaz.shapes.Rectangle(
+        this.$parseMathStr(width, scope),
+        this.$parseMathStr(height, scope),
+        { deleteSide },
+      );
+    });
   }
 
   private circle(circle: ISpec.CircleSpec): Shape {
@@ -153,13 +145,11 @@ export class Drawer extends Dieline {
   }
 
   private polygon(polygon: ISpec.PolygonSpec): Shape {
-    return this.$build(polygon, ({ radius, sides, effects }, scope) => {
-      const resolved = this.$resolveEffects(effects, scope);
+    return this.$build(polygon, ({ radius, sides }, scope) => {
       return new Pacsaz.shapes.Polygon(
         this.$parseMathStr(radius, scope),
         +sides,
         undefined,
-        { effects: resolved },
       );
     });
   }
@@ -510,26 +500,9 @@ export class Drawer extends Dieline {
     }
 
     // Modifiers act per model, so they are safe to apply within each layer.
+    // Shapes go through this same helper via `$build`.
     for (const part of parts) {
-      for (const efx of modifiers) {
-        switch (efx.type) {
-          case "radius":
-            part.model = addFillet(part.model, +efx.value);
-            break;
-
-          case "radiusAt":
-            part.model = addFilletAt(
-              part.model,
-              efx.targets.map((t) => Number(t)),
-              +efx.value,
-            );
-            break;
-
-          case "array":
-            part.model = applyArray(part.model, efx);
-            break;
-        }
-      }
+      part.model = this.$applyEffects(part.model, modifiers);
     }
 
     return parts;
@@ -541,16 +514,67 @@ export class Drawer extends Dieline {
     callBack: (val: T, scope: Record<string, number>) => Shape,
   ): Shape {
     const scope = this.scope;
-    const model = callBack(item, scope);
+    const base = callBack(item, scope);
 
-    model.moveTo([
+    // Effects belong to the engine, not to the shape classes: the shape only
+    // produces geometry, and everything after that is applied here so all shapes
+    // share one implementation.
+    const shaped = this.$applyEffects(
+      base,
+      this.$resolveEffects(item.effects, scope),
+    );
+
+    return this.$finishShape(shaped, item, scope);
+  }
+
+  /** Applies the shape-level effects (radius, radiusAt, array) to a model. */
+  private $applyEffects(
+    model: M.IModel,
+    effects: ISpec.ShapeEffect[] | undefined,
+  ): M.IModel {
+    let result = model;
+
+    for (const effect of effects ?? []) {
+      switch (effect.type) {
+        case "radius":
+          result = addFillet(result, +effect.value);
+          break;
+
+        case "radiusAt":
+          result = addFilletAt(
+            result,
+            effect.targets.map((t) => Number(t)),
+            +effect.value,
+          );
+          break;
+
+        case "array":
+          result = applyArray(result, effect);
+          break;
+      }
+    }
+
+    return result;
+  }
+
+  /** Places a built shape at its origin and applies its dup operations. */
+  private $finishShape<T extends ShapeNode>(
+    model: M.IModel,
+    item: T,
+    scope: Record<string, number>,
+  ): Shape {
+    // Effects return plain models, so the geometry is re-wrapped to keep the
+    // `Shape` chain (`dup`, `mirror`, ...) that the dup operations rely on.
+    const shape = model instanceof Shape ? model : new Pacsaz.shape.ToShape(model);
+
+    shape.moveTo([
       this.$parseMathStr(item.origin[0], scope),
       this.$parseMathStr(item.origin[1], scope),
     ]);
 
-    this.$applyDup(model, item.dup, scope);
+    this.$applyDup(shape, item.dup, scope);
 
-    return model;
+    return shape;
   }
 
   private $applyDup(

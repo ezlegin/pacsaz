@@ -51,7 +51,6 @@ export const createDieline = async (data: DielineMetadataFormType) => {
           rulers: [],
         }),
         variable: JSON.stringify([]),
-        effect: JSON.stringify([]),
         categoryByModel: {
           connect: categoryByModel.map((i) => ({ slug: i })),
         },

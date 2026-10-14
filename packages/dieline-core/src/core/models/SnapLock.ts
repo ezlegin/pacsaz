@@ -1,6 +1,7 @@
 import M, { IModel, IPoint } from "makerjs";
 import { zero } from "../../data/consts";
 import Pacsaz from "../Pacsaz";
+import { addFilletAt } from "../helpers/addFillet";
 import { Model } from "./Model";
 
 export class SnapLock extends Model {
@@ -81,25 +82,20 @@ export class SnapLock extends Model {
 
     const pb = new Pacsaz.point.Builder(arc.points.start);
 
-    const line = new Pacsaz.shapes.Lines(
-      pb
-        .down(lockHeight)
-        .right(this.toothWidth - fitInOffset.x)
-        .up(this.toothHeight + fitInOffset.y)
-        .right(this.toungeWidth + fitInOffset.x * 2)
-        .down(this.toothHeight + fitInOffset.y)
-        .right(this.toothWidth - fitInOffset.x)
-        .up(lockHeight)
-        .build(),
-      {
-        effects: [
-          {
-            type: "radiusAt",
-            targets: ["2", "5"],
-            value: String(this.cornerRadius),
-          },
-        ],
-      },
+    const line = addFilletAt(
+      new Pacsaz.shapes.Lines(
+        pb
+          .down(lockHeight)
+          .right(this.toothWidth - fitInOffset.x)
+          .up(this.toothHeight + fitInOffset.y)
+          .right(this.toungeWidth + fitInOffset.x * 2)
+          .down(this.toothHeight + fitInOffset.y)
+          .right(this.toothWidth - fitInOffset.x)
+          .up(lockHeight)
+          .build(),
+      ),
+      [2, 5],
+      this.cornerRadius,
     );
 
     arc
@@ -124,25 +120,20 @@ export class SnapLock extends Model {
       considerStarterArc ? startArc.points.start : [this.width, 0],
     );
 
-    const line = new Pacsaz.shapes.Lines(
-      pb
-        .draw(
-          this.lockHorizon - (considerStarterArc ? startArc.size.width : 0),
-          -this.toothWidthRaw,
-        )
-        .draw(-lockerIndent, -this.toothHeight)
-        .right(lockerIndent + this.height - this.lockHorizon - this.arcRadius)
-        .up(this.toothWidthRaw + this.toothHeight - this.offsetFromBase)
-        .build(),
-      {
-        effects: [
-          {
-            type: "radiusAt",
-            targets: ["2"],
-            value: String(this.cornerRadius),
-          },
-        ],
-      },
+    const line = addFilletAt(
+      new Pacsaz.shapes.Lines(
+        pb
+          .draw(
+            this.lockHorizon - (considerStarterArc ? startArc.size.width : 0),
+            -this.toothWidthRaw,
+          )
+          .draw(-lockerIndent, -this.toothHeight)
+          .right(lockerIndent + this.height - this.lockHorizon - this.arcRadius)
+          .up(this.toothWidthRaw + this.toothHeight - this.offsetFromBase)
+          .build(),
+      ),
+      [2],
+      this.cornerRadius,
     );
 
     const endArc = new Pacsaz.shapes.Arc(this.arcRadius, 90, 180).move([
@@ -165,23 +156,18 @@ export class SnapLock extends Model {
 
     const pb = new Pacsaz.point.Builder(arc.points.start);
 
-    const line = new Pacsaz.shapes.Lines(
-      pb
-        .draw(this.toothWidth + difOfArcs, -this.lockHorizon)
-        .down(this.toothHeight)
-        .right(this.toungeWidth)
-        .up(this.toothHeight)
-        .draw(this.toothWidth + difOfArcs, this.lockHorizon)
-        .build(),
-      {
-        effects: [
-          {
-            type: "radiusAt",
-            targets: ["2", "3"],
-            value: String(this.cornerRadius),
-          },
-        ],
-      },
+    const line = addFilletAt(
+      new Pacsaz.shapes.Lines(
+        pb
+          .draw(this.toothWidth + difOfArcs, -this.lockHorizon)
+          .down(this.toothHeight)
+          .right(this.toungeWidth)
+          .up(this.toothHeight)
+          .draw(this.toothWidth + difOfArcs, this.lockHorizon)
+          .build(),
+      ),
+      [2, 3],
+      this.cornerRadius,
     );
 
     arc

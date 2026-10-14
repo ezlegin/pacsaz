@@ -93,17 +93,19 @@ export class Door extends Model {
 
   protected override trim() {
     const pb = new Pacsaz.point.Builder();
-    const doorLine = new Pacsaz.shapes.Lines(
-      pb
-        .up(this.topPanelHeight)
-        .right(this.thickness)
-        .up(this.tuckFlap.h)
-        .right(this.tuckFlap.w)
-        .down(this.tuckFlap.h)
-        .right(this.thickness)
-        .down(this.topPanelHeight)
-        .build(),
-      { effects: [{ type: "radius", value: "20" }] },
+    const doorLine = addFillet(
+      new Pacsaz.shapes.Lines(
+        pb
+          .up(this.topPanelHeight)
+          .right(this.thickness)
+          .up(this.tuckFlap.h)
+          .right(this.tuckFlap.w)
+          .down(this.tuckFlap.h)
+          .right(this.thickness)
+          .down(this.topPanelHeight)
+          .build(),
+      ),
+      20,
     );
 
     const seam = this.seam();
