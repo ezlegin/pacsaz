@@ -4,7 +4,6 @@ import { Categories, DielineType } from "@/app/(PANEL)/dielines/DielinesList";
 import DielineLayer from "@/components/DielineEditor/DielineLayer";
 import { useDielineGenerator } from "@repo/dieline-core/hooks/useDielineGenerator";
 import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
-import { effectsSelectors } from "@repo/store/slices/effectsSlice";
 import { addNodes, nodesSelector } from "@repo/store/slices/nodesSlice";
 import { addRulers, rulersSelectors } from "@repo/store/slices/rulersSlice";
 import {
@@ -45,11 +44,10 @@ const DielineEditor = ({
 
   const specification = useMemo(() => ({ nodes, rulers }), [nodes, rulers]);
   const variables = useAppSelector(variablesSelectors.selectAll);
-  const effects = useAppSelector(effectsSelectors.selectAll);
 
   const dielineForGenerator = useMemo(
-    () => ({ ...dieline, specification, variables, effects }),
-    [dieline, specification, variables, effects],
+    () => ({ ...dieline, specification, variables }),
+    [dieline, specification, variables],
   );
 
   const { isRendering } = useDielineGenerator(dielineForGenerator, null, false);

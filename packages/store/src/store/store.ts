@@ -18,9 +18,7 @@ import svgReducer from "./slices/svgSlice";
 import selectionReducer from "./slices/selectionSlice";
 import nodesReducer from "./slices/nodesSlice";
 import rulersReducer from "./slices/rulersSlice";
-import effectsReducer from "./slices/effectsSlice";
 import variablesReducer from "./slices/variablesSlice";
-import { cascadeListenerMiddleware } from "./listeners/cascadeListeners";
 
 const persistedDeveloperTools = persistReducer(
   {
@@ -34,7 +32,6 @@ const undoableReducer = undoable(
   combineReducers({
     nodes: nodesReducer,
     rulers: rulersReducer,
-    effects: effectsReducer,
     variables: variablesReducer,
   }),
   {
@@ -63,7 +60,7 @@ export const store = configureStore({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
-    }).prepend(cascadeListenerMiddleware.middleware),
+    }),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

@@ -22,7 +22,9 @@ const page = async ({ searchParams }: Props) => {
   const where = { userId: user?.id };
   const favs = await prisma.favedDieline.findMany({
     where,
-    include: { dieline: { include: { image: true } } },
+    include: {
+      dieline: { include: { dielineImage: true, modelImage: true } },
+    },
     skip,
     take,
   });

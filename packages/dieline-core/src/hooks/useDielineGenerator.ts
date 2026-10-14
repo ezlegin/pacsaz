@@ -1,20 +1,18 @@
 import { materials } from "@repo/dieline-core/data/materials";
+import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
+import { setDeveloperTool } from "@repo/store/slices/developerToolsSlice";
+import { setDefaultSettings } from "@repo/store/slices/dielineSettingsSlice";
+import { setSvg } from "@repo/store/slices/svgSlice";
+import { variablesSelectors } from "@repo/store/slices/variablesSlice";
+import { DimensionType, ISpec, IVar } from "@repo/store/types";
 import { useEffect, useTransition } from "react";
 import Pacsaz from "../core/Pacsaz";
 import { resolveDimensions } from "../utils/dimensionResolver";
 import { resolveOffsets } from "../utils/offsetResolver";
-import { IEffect, IVar, ISpec, DimensionType } from "@repo/store/types";
-import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
-import { setDefaultSettings } from "@repo/store/slices/dielineSettingsSlice";
-import { setDeveloperTool } from "@repo/store/slices/developerToolsSlice";
-import { setSvg } from "@repo/store/slices/svgSlice";
-import { variablesSelectors } from "@repo/store/slices/variablesSlice";
-import { effectsSelectors } from "@repo/store/slices/effectsSlice";
 import Drawer from "../core/dieline/Drawer";
 
 interface Dieline {
   materials: string;
-  effects: IEffect.EffectsMap;
   defaultMaterial: string;
   variables: IVar.VariableMap;
   specification: ISpec.Specs;
@@ -56,7 +54,6 @@ export function useDielineGenerator(
   const variables = useAppSelector((state) =>
     variablesSelectors.selectAll(state),
   );
-  const effects = useAppSelector((state) => effectsSelectors.selectAll(state));
 
   const drawer = new Pacsaz.models.Drawer(nodes, dieline.variables, rulers);
   const offsets = resolveOffsets();
@@ -119,14 +116,7 @@ export function useDielineGenerator(
       const svg = drawer.model();
       dispatch(setSvg(svg));
     });
-  }, [
-    settings,
-    Drawer,
-    dieline.specification,
-    developerTools,
-    variables,
-    effects,
-  ]);
+  }, [settings, Drawer, dieline.specification, developerTools, variables]);
 
   return {
     isRendering,

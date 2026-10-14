@@ -49,14 +49,14 @@ const getShapeSchema = (shapeKey: ISpec.ShapesKey) => {
   return schemas[shapeKey];
 };
 
-interface ShapesPropsProvider<T extends ISpec.Nodes> {
+interface ShapesPropsProvider<T extends ISpec.Shape> {
   data: T | null;
   children: (props: { form: any }) => ReactNode;
   close: () => void;
   shapeKey: ISpec.ShapesKey;
 }
 
-function ShapesPropsProvider<T extends ISpec.Nodes>({
+function ShapesPropsProvider<T extends ISpec.Shape>({
   children,
   data,
   close,

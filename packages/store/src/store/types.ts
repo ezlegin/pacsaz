@@ -256,7 +256,26 @@ export namespace IEffect {
     originModelId: string;
   }
 
-  export type EffectSpec = BooleanEffectSpec;
+  export interface RadiusEffectSpec extends EffectBase {
+    type: "radius";
+    targetModelId: string;
+    radius: number;
+    indices: { indice: string; radius: string }[];
+  }
+
+  export interface ArrayEffectSpec extends EffectBase {
+    type: "array";
+    targetModelId: string;
+    count: string;
+    rotate: boolean;
+    from: [string, string];
+    to: [string, string];
+  }
+
+  export type EffectSpec =
+    | BooleanEffectSpec
+    | RadiusEffectSpec
+    | ArrayEffectSpec;
   export type EffectsMap = EffectSpec[];
 }
 

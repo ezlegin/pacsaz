@@ -96,9 +96,9 @@ const Tools = () => {
       const editorKey = editorMode.key as ISpec.ShapesKey;
       const Component = shapePropsComponents[editorKey];
       return (
-        <ShapesPropsProvider<ISpec.ShapesSpec>
+        <ShapesPropsProvider<ISpec.Shape>
           key={selection?.id}
-          data={selection as ISpec.ShapesSpec}
+          data={selection as ISpec.Shape}
           close={handleCloseEditor}
           shapeKey={editorKey}
         >

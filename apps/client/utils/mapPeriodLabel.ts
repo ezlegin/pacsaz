@@ -1,4 +1,4 @@
-import { PlanPeriod } from "@repo/lib/data/plans";
+import { PlanPeriod } from "@repo/db";
 
 export function mapPeriodLabel(period: PlanPeriod) {
   switch (period) {

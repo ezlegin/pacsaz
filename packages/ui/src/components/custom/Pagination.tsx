@@ -3,6 +3,7 @@
 import { Button } from "@repo/ui/components/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
 interface Props {
   pageSize: number;
@@ -11,7 +12,19 @@ interface Props {
   lang?: "fa" | "en";
 }
 
-const Pagination = ({
+/**
+ * `useSearchParams` opts the closest Suspense boundary into client rendering, so
+ * that boundary has to live inside this component. Without it every page that
+ * renders <Pagination /> bails out of prerendering and fails the build with
+ * "useSearchParams() should be wrapped in a suspense boundary".
+ */
+const Pagination = (props: Props) => (
+  <Suspense fallback={null}>
+    <PaginationBar {...props} />
+  </Suspense>
+);
+
+const PaginationBar = ({
   pageSize,
   totalItems,
   paramName = "page",

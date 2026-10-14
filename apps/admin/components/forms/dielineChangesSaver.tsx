@@ -7,7 +7,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Dieline, DielineSettings } from "@repo/db";
 import { getNodes } from "@repo/store/getters";
 import { useAppSelector } from "@repo/store/hooks";
-import { effectsSelectors } from "@repo/store/slices/effectsSlice";
 import { rulersSelectors } from "@repo/store/slices/rulersSlice";
 import { variablesSelectors } from "@repo/store/slices/variablesSlice";
 import { useEffect } from "react";
@@ -22,14 +21,12 @@ const DielineChangesSaver = ({ dieline }: { dieline: DielineType }) => {
     rulers: useAppSelector(rulersSelectors.selectAll),
   };
   const variables = useAppSelector(variablesSelectors.selectAll);
-  const effects = useAppSelector(effectsSelectors.selectAll);
 
   const form = useForm<DielineUpdateFormType>({
     resolver: zodResolver(dielineUpdateFormSchema as any),
     defaultValues: {
       specification: dieline.specification,
       variable: dieline.variable,
-      effect: dieline.effect,
     },
     mode: "onChange",
   });
@@ -46,10 +43,6 @@ const DielineChangesSaver = ({ dieline }: { dieline: DielineType }) => {
   useEffect(() => {
     form.setValue("variable", JSON.stringify(variables));
   }, [variables]);
-
-  useEffect(() => {
-    form.setValue("effect", JSON.stringify(effects));
-  }, [effects]);
 
   useEffect(() => {
     form.setValue("specification", JSON.stringify(specs));

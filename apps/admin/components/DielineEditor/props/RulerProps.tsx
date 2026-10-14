@@ -29,7 +29,7 @@ const RulerProps = ({
   selection,
 }: {
   close: () => void;
-  selection: ISpec.ShapesSpec | ISpec.Ruler | null;
+  selection: ISpec.Shape | ISpec.Ruler | null;
 }) => {
   const rulers = useAppSelector(rulersSelectors.selectAll);
   const dispatch = useAppDispatch();

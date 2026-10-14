@@ -3,8 +3,8 @@ import { zero } from "../../data/consts";
 import { Shape } from "./Shape";
 
 export class Ellipse extends Shape {
-  constructor(id: string, radiusX: number, radiusY: number) {
-    super(id);
+  constructor(_id: string, radiusX: number, radiusY: number) {
+    super();
     const ellipse = new M.models.Ellipse(radiusX, radiusY);
     this.$pushShape("circle", ellipse);
   }
@@ -18,11 +18,11 @@ export class Ellipse extends Shape {
 
 export class SemiCircle extends Shape {
   constructor(
-    id: string,
+    _id: string,
     radius: number,
     side?: "left" | "right" | "up" | "down",
   ) {
-    super(id);
+    super();
 
     let startAngle = 180;
     let endAngle = 360;

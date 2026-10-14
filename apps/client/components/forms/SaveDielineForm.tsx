@@ -10,7 +10,7 @@ import Diamond from "@/public/icons/Diamond";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DielineSettings, Plan, SavedDieline } from "@repo/db";
 import { useLoading } from "@repo/lib/utils/useLoading";
-import { MaterialKey } from "@repo/store/data/types";
+import { MaterialKey } from "@repo/store/types";
 import { Badge } from "@repo/ui/components/badge";
 import { Button } from "@repo/ui/components/button";
 import {

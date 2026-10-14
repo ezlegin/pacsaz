@@ -9,7 +9,7 @@ import {
 } from "@repo/ui/components/form";
 import { Input } from "@repo/ui/components/input";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -19,7 +19,19 @@ const searchSchema = z.object({
 
 type SearchFormValues = z.infer<typeof searchSchema>;
 
-const Search = ({
+/**
+ * `useSearchParams` opts the closest Suspense boundary into client rendering, so
+ * that boundary has to live inside this component. Without it every page that
+ * renders <Search /> bails out of prerendering and fails the build with
+ * "useSearchParams() should be wrapped in a suspense boundary".
+ */
+const Search = (props: { placeholder?: string; className?: string }) => (
+  <Suspense fallback={null}>
+    <SearchField {...props} />
+  </Suspense>
+);
+
+const SearchField = ({
   placeholder = "Search...",
   className,
 }: {

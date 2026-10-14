@@ -1,7 +1,7 @@
-import { PlanFairDownload, PlanPeriod } from "@repo/lib/data/plans";
+import { FairDownload, PlanPeriod } from "@repo/db";
 
 export function mapFiarDownload(
-  fairDownload: PlanFairDownload,
+  fairDownload: FairDownload,
   period: PlanPeriod,
 ) {
   return period === "annual"

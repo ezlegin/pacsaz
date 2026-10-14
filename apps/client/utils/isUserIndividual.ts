@@ -1,4 +1,4 @@
-import { UserType } from "@/components/forms/OnboardingForm";
+import { UserType } from "@repo/lib/data/types";
 
 export function isUserIndividual(userType: UserType) {
   return (

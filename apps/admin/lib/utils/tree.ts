@@ -90,6 +90,7 @@ export function restoreModelNodes(
 export function arrayMove<T>(arr: T[], from: number, to: number): T[] {
   const copy = arr.slice();
   const [item] = copy.splice(from, 1);
+  if (item === undefined) return copy;
   copy.splice(to, 0, item);
   return copy;
 }
@@ -115,6 +116,7 @@ export function getProjection(
   const overIndex = items.findIndex((i) => i.id === overId);
   const activeIndex = items.findIndex((i) => i.id === activeId);
   const activeItem = items[activeIndex];
+  if (!activeItem) return { depth: 0, maxDepth: 0, minDepth: 0, parentId: null };
 
   const reordered = arrayMove(items, activeIndex, overIndex);
   const previous = reordered[overIndex - 1];

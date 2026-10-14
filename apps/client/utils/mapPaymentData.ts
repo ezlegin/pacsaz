@@ -1,7 +1,13 @@
-import { CheckoutInfo } from "@/hooks/usePaymentCheckout";
-import { PlanKey, PlanPeriod } from "@repo/lib/data/plans";
+import { PlanKey, PlanPeriod } from "@repo/db";
 import { formatPrice } from "@repo/lib/utils/formatPrice";
 import { useMemo } from "react";
+
+/** The checkout payload this helper formats. */
+interface CheckoutInfo {
+  amount: number;
+  discountAmount: number;
+  total: number;
+}
 
 export function mapPaymentData(
   period: PlanPeriod,

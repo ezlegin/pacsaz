@@ -39,7 +39,7 @@ function PaymentsList({ data }: { data: PaymentType[] }) {
           />
         </TableCell>
         <TableCell className="text-center">
-          {mapPlanTitle(payment.plan?.key)}
+          {payment.plan && mapPlanTitle(payment.plan.key)}
         </TableCell>
         <TableCell className="text-left">
           {mapPeriodLabel(payment.period)}

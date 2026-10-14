@@ -53,7 +53,7 @@ export function buildTree(flat: FlatNode[]): ISpec.Nodes {
 export function arrayMove<T>(arr: T[], from: number, to: number): T[] {
   const copy = arr.slice();
   const [item] = copy.splice(from, 1);
-  copy.splice(to, 0, item);
+  copy.splice(to, 0, item!);
   return copy;
 }
 
@@ -77,7 +77,7 @@ export function getProjection(
 ): Projection {
   const overIndex = items.findIndex((i) => i.id === overId);
   const activeIndex = items.findIndex((i) => i.id === activeId);
-  const activeItem = items[activeIndex];
+  const activeItem = items[activeIndex]!;
 
   const reordered = arrayMove(items, activeIndex, overIndex);
   const previous = reordered[overIndex - 1];

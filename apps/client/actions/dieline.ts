@@ -4,7 +4,7 @@ import { serverErrorMessage } from "@/data/consts";
 import { SaveDielineFormType } from "@/lib/validatoinSchema";
 import { getSessionUser } from "@repo/auth/session";
 import { DimensionType, prisma } from "@repo/db";
-import { MaterialKey } from "@repo/store/data/types";
+import { MaterialKey } from "@repo/store/types";
 
 export interface Settings {
   width: number;

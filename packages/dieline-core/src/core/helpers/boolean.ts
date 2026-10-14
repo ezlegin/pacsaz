@@ -17,7 +17,10 @@ export function applyBoolean(
   mode: BooleanMode,
 ): M.IModel {
   if (children.length === 0) return { models: {} };
-  if (children.length === 1) return M.model.clone(children[0]) as M.IModel;
+
+  const [first, ...rest] = children;
+  if (!first) return { models: {} };
+  if (rest.length === 0) return M.model.clone(first) as M.IModel;
 
   const combine =
     mode === "union"
@@ -26,10 +29,10 @@ export function applyBoolean(
         ? M.model.combineIntersection
         : M.model.combineSubtraction;
 
-  let acc: M.IModel = M.model.clone(children[0]) as M.IModel;
+  let acc: M.IModel = M.model.clone(first) as M.IModel;
 
-  for (let i = 1; i < children.length; i++) {
-    const b = M.model.clone(children[i]) as M.IModel;
+  for (const child of rest) {
+    const b = M.model.clone(child) as M.IModel;
     acc = combine(acc, b);
   }
 

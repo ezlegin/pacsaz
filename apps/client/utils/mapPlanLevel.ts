@@ -1,4 +1,4 @@
-import { PlanKey } from "@repo/lib/data/plans";
+import { PlanKey } from "@repo/db";
 
 export function mapPlanLevel(userPlan: PlanKey) {
   if (userPlan === "standard") return 1;

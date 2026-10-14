@@ -8,7 +8,7 @@ import {
   Select as UiSelect,
 } from "@repo/ui/components/select";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 
 interface SelectProps {
   name?: string;
@@ -17,12 +17,24 @@ interface SelectProps {
   placeholder?: string;
 }
 
-const Filter: React.FC<SelectProps> = ({
+/**
+ * `useSearchParams` opts the closest Suspense boundary into client rendering, so
+ * that boundary has to live inside this component. Without it every page that
+ * renders <Filter /> bails out of prerendering and fails the build with
+ * "useSearchParams() should be wrapped in a suspense boundary".
+ */
+const Filter: React.FC<SelectProps> = (props) => (
+  <Suspense fallback={null}>
+    <FilterSelect {...props} />
+  </Suspense>
+);
+
+const FilterSelect = ({
   name = "filter",
   options,
   defaultValue = "all",
   placeholder = "Select...",
-}) => {
+}: SelectProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
