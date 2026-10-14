@@ -223,6 +223,9 @@ importers:
       '@repo/db':
         specifier: workspace:*
         version: link:../db
+      '@repo/lib':
+        specifier: workspace:*
+        version: link:../lib
       bcrypt:
         specifier: ^6.0.0
         version: 6.0.0

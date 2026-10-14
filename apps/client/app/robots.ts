@@ -1,7 +1,6 @@
+import { siteUrl } from "@/lib/consts";
 import { privateRoutes } from "@/proxy";
 import type { MetadataRoute } from "next";
-
-const url = process.env.NEXT_PUBLIC_MAIN_URL || "https://pacsaz.ir";
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -12,6 +11,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: [...privateRoutes.map((route) => route + "/*")],
       },
     ],
-    sitemap: `${url}/sitemap.xml`,
+    sitemap: `${siteUrl}/sitemap.xml`,
   };
 }

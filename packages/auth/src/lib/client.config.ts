@@ -6,7 +6,14 @@ export default {
   pages: {
     signIn: "/login",
   },
-  trustHost: process.env.NODE_ENV === "development" ? true : false,
+  // Vercel terminates TLS and proxies the request, so the host Auth.js would
+  // infer is not the public one. Without this, production requests are rejected
+  // with `UntrustedHost`.
+  trustHost: true,
+  // Shares the deployment's AUTH_SECRET. The admin app derives its own key from
+  // the same value with a suffix, so the two apps' session tokens are not
+  // interchangeable even if they ever end up on one domain.
+  secret: process.env.AUTH_SECRET,
   callbacks: {
     async jwt({ token, user }) {
       if (user) {

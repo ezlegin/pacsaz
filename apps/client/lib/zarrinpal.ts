@@ -1,7 +1,7 @@
 "use server";
 
 import ZarinPal from "zarinpal-node-sdk";
-import { mainUrl } from "./consts";
+import { siteUrl } from "./consts";
 import { User } from "@repo/db";
 
 const merchantId = process.env.ZARINPAL_MERCHANT_ID;
@@ -22,7 +22,7 @@ interface InitiatePayment {
   };
 }
 
-const callback_url = mainUrl + "/payment/result";
+const callback_url = `${siteUrl}/payment/result`;
 
 export const initiateZarinpalPayment = async (params: {
   paymentId: number;

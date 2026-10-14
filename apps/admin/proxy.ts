@@ -1,11 +1,14 @@
-import { onDevelepe } from "@repo/lib/data/consts";
+import { adminSessionCookieName } from "@repo/lib/data/consts";
 import { NextRequest, NextResponse } from "next/server";
+
+export const loginPageRoute = "/login";
 
 export async function proxy(req: NextRequest) {
   const { nextUrl, cookies } = req;
-  const token = cookies.get(
-    onDevelepe ? "authjs.session-token" : "__Secure-authjs.session-token",
-  )?.value;
+
+  // Namespaced session cookie for this app; the name is shared with the Auth.js
+  // config through @repo/lib/data/consts.
+  const token = cookies.get(adminSessionCookieName)?.value;
   const isLoggedIn = !!token;
 
   const isPrivateRoute = ["/"].some((route) =>
@@ -32,5 +35,3 @@ export const config = {
     "/((?!_next/static|_next/image|favicon.ico|.*\\.svg|.*\\.png|.*\\.jpg|fonts|images|public).*)",
   ],
 };
-
-export const loginPageRoute = "/login";
