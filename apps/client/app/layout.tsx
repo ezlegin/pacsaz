@@ -13,6 +13,8 @@ export default async function RootLayout({
 
   return (
     <html lang="fa" dir="rtl" suppressHydrationWarning>
+      <meta name="enamad" content="78321751" />
+
       <body style={{ fontFamily }} className="antialiased">
         <ProgressBarProvider>
           <ReduxProvider>{children}</ReduxProvider>
