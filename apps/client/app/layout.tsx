@@ -13,8 +13,6 @@ export default async function RootLayout({
 
   return (
     <html lang="fa" dir="rtl" suppressHydrationWarning>
-      <meta name="enamad" content="78321751" />
-
       <body style={{ fontFamily }} className="antialiased">
         <ProgressBarProvider>
           <ReduxProvider>{children}</ReduxProvider>
@@ -32,8 +30,7 @@ export default async function RootLayout({
 
 export const metadata = {
   title: {
-    default: "78321751",
-    // default: "پک‌ساز",
+    default: "پک‌ساز",
     template: "%s - پک‌ساز",
   },
   description: "طراحی دایلاین، بدون آزمون و خطا!",

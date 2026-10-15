@@ -46,9 +46,20 @@ const Footer = () => {
               ))}
             </div>
 
-            <div className="hidden md:block">
-              <Enamad />
-            </div>
+            <a
+              className="w-22.5 h-30 rounded-sm overflow-hidden bg-card"
+              referrerPolicy="origin"
+              target="_blank"
+              href="https://trustseal.enamad.ir/?id=8198265&Code=MgGrRlsux4O6hcApzFke6ZHyDZIVsRrI"
+            >
+              <img
+                referrerPolicy="origin"
+                data-code="1Wgxc21JlxfhD1Coppnv"
+                src="https://trustseal.enamad.ir/logo.aspx?id=8198265&Code=MgGrRlsux4O6hcApzFke6ZHyDZIVsRrI"
+                alt="e-namad"
+                className="cursor-pointer"
+              />
+            </a>
           </div>
           <div className="md:hidden">
             <Enamad />
