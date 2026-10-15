@@ -38,9 +38,9 @@ const PLAN_TAGLINE: Record<string, string> = {
 };
 
 const PLAN_BENEFITS: Record<string, string[]> = {
-  standard: ["دسترسی به همه دسته‌ها", "خروجی استاندارد چاپ", "پشتیبانی ایمیلی"],
-  pro: ["همه امکانات استاندارد", "ابزارهای حرفه‌ای لایه‌بندی", "اولویت در پشتیبانی"],
-  organization: ["همه امکانات پلن حرفه‌ای", "مناسب چند کاربر", "پشتیبانی اختصاصی"],
+  standard: ["دسترسی به همه دسته‌ها", "خروجی استاندارد چاپ"],
+  pro: ["همه امکانات استاندارد", "ابزارهای حرفه‌ای لایه‌بندی"],
+  organization: ["همه امکانات پلن حرفه‌ای", "مناسب تیم‌ها و سازمان‌ها"],
 };
 
 const PROMISES = [
@@ -100,7 +100,7 @@ const Page = async () => {
     return (
       <div className="relative space-y-6">
         {/* ------------------------------- hero ------------------------------ */}
-        <section className="relative overflow-hidden rounded-3xl border bg-gradient-to-bl from-primary/[0.10] via-background to-background p-8 md:p-12">
+        <section className="relative overflow-hidden rounded-3xl border bg-linear-to-bl from-primary/10 via-background to-background p-8 md:p-12">
           <div
             aria-hidden
             className="pointer-events-none absolute -left-32 -top-32 size-96 rounded-full bg-primary/20 blur-3xl"
@@ -150,7 +150,7 @@ const Page = async () => {
               <div className="space-y-3">
                 <h1 className="text-2xl font-extrabold leading-tight tracking-tight md:text-4xl">
                   با یک اشتراک،{" "}
-                  <span className="bg-gradient-to-l from-violet-500 to-purple-600 bg-clip-text text-transparent">
+                  <span className="bg-linear-to-l from-violet-500 to-purple-600 bg-clip-text text-transparent">
                     بینهایت دایلاین
                   </span>{" "}
                   بساز
@@ -253,7 +253,7 @@ const Page = async () => {
                     className={cn(
                       "group relative flex flex-col overflow-hidden rounded-3xl p-[1.5px] transition-all duration-300",
                       isRecommended
-                        ? "bg-gradient-to-b from-violet-500 to-purple-600 shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/30"
+                        ? "bg-linear-to-b from-violet-500 to-purple-600 shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/30"
                         : "bg-border hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10",
                     )}
                   >
@@ -279,7 +279,7 @@ const Page = async () => {
                           className={cn(
                             "text-3xl font-extrabold tracking-tight",
                             isRecommended &&
-                              "bg-gradient-to-l from-violet-600 to-purple-600 bg-clip-text text-transparent",
+                              "bg-linear-to-l from-violet-600 to-purple-600 bg-clip-text text-transparent",
                           )}
                         >
                           {price
@@ -319,7 +319,7 @@ const Page = async () => {
                         className={cn(
                           "mt-5 inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-medium transition-all duration-300",
                           isRecommended
-                            ? "bg-gradient-to-l from-violet-500 to-purple-600 text-white group-hover:gap-3"
+                            ? "bg-linear-to-l from-violet-500 to-purple-600 text-white group-hover:gap-3"
                             : "border bg-background group-hover:border-primary/30 group-hover:text-primary",
                         )}
                       >
