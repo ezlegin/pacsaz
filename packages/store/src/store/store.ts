@@ -1,7 +1,6 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import undoable, { excludeAction } from "redux-undo";
 import {
-  persistReducer,
   FLUSH,
   REHYDRATE,
   PAUSE,
@@ -9,7 +8,6 @@ import {
   PURGE,
   REGISTER,
 } from "redux-persist";
-import storage from "redux-persist/lib/storage";
 import developerToolsReducer from "./slices/developerToolsSlice";
 import dielineFileReducer from "./slices/dielineFileSlice";
 import dielineSettingsReducer from "./slices/dielineSettingsSlice";
@@ -19,14 +17,6 @@ import selectionReducer from "./slices/selectionSlice";
 import nodesReducer from "./slices/nodesSlice";
 import rulersReducer from "./slices/rulersSlice";
 import variablesReducer from "./slices/variablesSlice";
-
-const persistedDeveloperTools = persistReducer(
-  {
-    key: "developer-tools",
-    storage,
-  },
-  developerToolsReducer,
-);
 
 const undoableReducer = undoable(
   combineReducers({
@@ -44,7 +34,7 @@ const undoableReducer = undoable(
 );
 
 const rootReducer = combineReducers({
-  developerTools: persistedDeveloperTools,
+  developerTools: developerToolsReducer,
   dielineFile: dielineFileReducer,
   dielineSettings: dielineSettingsReducer,
   overallSizes: overallSizesReducer,

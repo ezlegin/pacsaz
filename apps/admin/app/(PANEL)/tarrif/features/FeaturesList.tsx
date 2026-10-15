@@ -17,7 +17,7 @@ const FeaturesList = ({ data }: { data: TarrifFeature[] }) => {
         <TableCell className="text-center">{feature.type}</TableCell>
         <TableCell className="flex justify-end gap-3">
           <ActionButton icon={Pencil}>
-            <DialogTitle>Update User</DialogTitle>
+            <DialogTitle>Update Feature</DialogTitle>
             <FeatureForm feature={feature} />
           </ActionButton>
           <DeleteButton deleteFn={deleteFeature} id={feature.id} />

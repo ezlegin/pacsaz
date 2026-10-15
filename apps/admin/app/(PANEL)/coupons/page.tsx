@@ -33,7 +33,7 @@ const page = async ({ searchParams }: Props) => {
       <div className="flex justify-between">
         <Search placeholder="Search Coupons" />
 
-        <PopupNewDialog buttonTitle="New Plan">
+        <PopupNewDialog buttonTitle="New Coupon">
           <DialogTitle>New Coupon</DialogTitle>
           <CouponForm tarrif={tarrif} />
         </PopupNewDialog>
