@@ -46,6 +46,8 @@ const FavsPage = async ({ searchParams }: Props) => {
   ]);
 
   const dielines = favs.map((f) => f.dieline);
+  /** Everything on this page is favourited by definition. */
+  const favedIdList = dielines.map((d) => d.id);
 
   return (
     <PanelPage>
@@ -103,7 +105,11 @@ const FavsPage = async ({ searchParams }: Props) => {
         </PanelCard>
       ) : (
         <>
-          <DielinesGrid dielines={dielines} />
+          <DielinesGrid
+            dielines={dielines}
+            favedIds={favedIdList}
+            user={user}
+          />
           <Pagination
             pageSize={PAGE_SIZE}
             totalItems={totalFavs}

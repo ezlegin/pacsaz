@@ -2,116 +2,172 @@
 
 import { updateQueryParam } from "@/utils/updateQueryParam";
 import { DielineCategoryByModel, DielineCategoryByUsage } from "@repo/db";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@repo/ui/components/accordion";
-import { Input } from "@repo/ui/components/input";
-import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
-import { ChevronLeft, Search } from "lucide-react";
+import { cn } from "@repo/ui/lib/utils";
+import { Check, Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
-type DielineCount = {
-  _count: {
-    dieline: number;
-  };
-};
-interface Props {
+type DielineCount = { _count: { dieline: number } };
+
+export interface DielinesSidebarProps {
   categoriesByUsage: (DielineCategoryByUsage & DielineCount)[];
   categoriesByModel: (DielineCategoryByModel & DielineCount)[];
+  /** Slug of the category currently applied, if any. */
+  activeCategory?: string;
+  className?: string;
+  /** Called after a category is applied — lets a mobile sheet close itself. */
+  onSelect?: (slug: string | undefined) => void;
 }
 
-const DielinesSidebar = ({ categoriesByModel, categoriesByUsage }: Props) => {
-  const [query, setQuery] = useState<string | null>(null);
+const fa = (value: number) =>
+  value.toLocaleString("fa-IR", { useGrouping: false });
+
+const DielinesSidebar = ({
+  categoriesByModel,
+  categoriesByUsage,
+  activeCategory,
+  className,
+  onSelect: onSelectProp,
+}: DielinesSidebarProps) => {
+  const [query, setQuery] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const onSelect = (slug?: string | undefined) => {
+  const apply = (slug: string | undefined) => {
     updateQueryParam(searchParams, router, "category", slug);
+    onSelectProp?.(slug);
   };
 
-  const categories = [
+  const match = (title: string) =>
+    query.trim() === "" || title.includes(query.trim());
+
+  const groups = [
     {
-      groupLabel: "بر اساس استفاده",
       key: "usage",
-      categories: query
-        ? categoriesByUsage.filter((cat) => cat.title.includes(query))
-        : categoriesByUsage,
+      label: "بر اساس کاربرد",
+      items: categoriesByUsage.filter((c) => match(c.title)),
     },
     {
-      groupLabel: "بر اساس قالب",
       key: "model",
-      categories: query
-        ? categoriesByModel.filter((cat) => cat.title.includes(query))
-        : categoriesByModel,
+      label: "بر اساس مدل",
+      items: categoriesByModel.filter((c) => match(c.title)),
     },
   ];
 
+  const totalMatches = groups.reduce((sum, g) => sum + g.items.length, 0);
+
   return (
-    <div className="space-y-3">
+    <div className={cn("space-y-5", className)}>
+      {/* ------------------------------- search ------------------------------ */}
       <div className="relative">
-        <Input
-          className="pr-10"
-          placeholder="جستجوی دسته بندی ها..."
-          onChange={(e) => {
-            const value = e.target.value;
-            if (value === "") {
-              setQuery(null);
-              return;
-            }
-            setQuery(value);
-          }}
+        <Search className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="جستجوی دسته‌بندی..."
+          className="h-10 w-full rounded-xl border bg-background pr-9 pl-9 text-xs outline-none transition-colors placeholder:text-muted-foreground focus:border-primary/40 focus:ring-2 focus:ring-primary/20"
         />
-        <Search
-          size={18}
-          className="absolute top-1/2 -translate-y-1/2 right-3 text-muted-foreground"
-        />
+
+        {query !== "" && (
+          <button
+            type="button"
+            onClick={() => setQuery("")}
+            aria-label="پاک کردن جستجو"
+            className="absolute left-2.5 top-1/2 grid size-5 -translate-y-1/2 place-items-center rounded-full bg-muted text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
+          >
+            <X className="size-3" />
+          </button>
+        )}
       </div>
-      <Accordion defaultValue={"model"} type="single" collapsible>
-        {categories.map((c, idx) => (
-          <AccordionItem key={idx} value={c.key} className="border-none">
-            <AccordionTrigger className="p-3 rounded-md hover:bg-accent cursor-pointer">
-              {c.groupLabel}
-            </AccordionTrigger>
-            <AccordionContent className="p-2">
-              <ToggleGroup
-                onValueChange={(val) => {
-                  if (val === "") {
-                    onSelect(undefined);
-                    return;
-                  } else {
-                    onSelect(val);
-                  }
-                }}
-                dir="rtl"
-                type="single"
-                defaultValue="all"
-                className="flex-col items-start w-full"
-                spacing={2}
-              >
-                {c.categories.map((cc, idx) => (
-                  <ToggleGroupItem
-                    className="w-full justify-start cursor-pointer"
-                    key={idx}
-                    value={cc.slug}
-                  >
-                    <div className="flex gap-2 items-center">
-                      <ChevronLeft className="scale-[80%] text-muted-foreground" />
-                      <span>{cc.title}</span>
-                      <span className="text-muted-foreground">
-                        {cc._count.dieline}
-                      </span>
-                    </div>
-                  </ToggleGroupItem>
-                ))}
-              </ToggleGroup>
-            </AccordionContent>
-          </AccordionItem>
-        ))}
-      </Accordion>
+
+      {/* --------------------------- clear filter ---------------------------- */}
+      {activeCategory && (
+        <button
+          type="button"
+          onClick={() => apply(undefined)}
+          className="flex w-full items-center justify-between rounded-xl border border-primary/25 bg-primary/10 px-3 py-2 text-[11px] font-bold text-primary transition-colors hover:bg-primary/15"
+        >
+          <span className="flex items-center gap-1.5">
+            <Check className="size-3.5" />
+            فیلتر فعال است
+          </span>
+          <span className="flex items-center gap-1 text-[10px] opacity-80">
+            حذف
+            <X className="size-3" />
+          </span>
+        </button>
+      )}
+
+      {/* ------------------------------- groups ----------------------------- */}
+      {totalMatches === 0 ? (
+        <p className="rounded-xl border border-dashed px-4 py-6 text-center text-[11px] text-muted-foreground">
+          دسته‌بندی‌ای با این نام پیدا نشد.
+        </p>
+      ) : (
+        groups.map((group) =>
+          group.items.length === 0 ? null : (
+            <div key={group.key} className="space-y-2.5">
+              <div className="flex items-center gap-2">
+                <h3 className="text-[11px] font-bold text-muted-foreground">
+                  {group.label}
+                </h3>
+                <span className="h-px flex-1 bg-border" />
+                <span className="text-[10px] text-muted-foreground/70">
+                  {fa(group.items.length)}
+                </span>
+              </div>
+
+              <ul className="space-y-1">
+                {group.items.map((category) => {
+                  const active = category.slug === activeCategory;
+                  const empty = category._count.dieline === 0;
+
+                  return (
+                    <li key={category.id}>
+                      <button
+                        type="button"
+                        onClick={() => apply(active ? undefined : category.slug)}
+                        aria-pressed={active}
+                        className={cn(
+                          "group flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-right text-xs transition-all duration-200",
+                          active
+                            ? "bg-primary/10 font-bold text-primary"
+                            : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                          empty && !active && "opacity-50",
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            "grid size-4 shrink-0 place-items-center rounded-md border transition-colors",
+                            active
+                              ? "border-primary bg-primary text-primary-foreground"
+                              : "border-border group-hover:border-primary/40",
+                          )}
+                        >
+                          {active && <Check className="size-2.5" strokeWidth={4} />}
+                        </span>
+
+                        <span className="flex-1 truncate">{category.title}</span>
+
+                        <span
+                          className={cn(
+                            "shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-bold tabular-nums",
+                            active
+                              ? "bg-primary/15 text-primary"
+                              : "bg-muted text-muted-foreground",
+                          )}
+                        >
+                          {fa(category._count.dieline)}
+                        </span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ),
+        )
+      )}
     </div>
   );
 };
