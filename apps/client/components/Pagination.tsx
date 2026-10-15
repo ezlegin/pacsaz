@@ -3,6 +3,7 @@
 // deployable service. The admin and client apps each keep their own copy.
 "use client";
 
+import { cn } from "@repo/ui/lib/utils";
 import { Button } from "@repo/ui/components/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -27,6 +28,9 @@ const Pagination = (props: Props) => (
   </Suspense>
 );
 
+const fa = (value: number) =>
+  value.toLocaleString("fa-IR", { useGrouping: false });
+
 const PaginationBar = ({
   pageSize,
   totalItems,
@@ -49,37 +53,54 @@ const PaginationBar = ({
 
   if (pageCount < 2) return null;
 
+  const isFa = lang === "fa";
+  const from = (currentPage - 1) * pageSize + 1;
+  const to = Math.min(currentPage * pageSize, totalItems);
+
   return (
     <div
-      dir={lang === "en" ? "ltr" : "rtl"}
-      className="text-sm flex items-center"
+      dir={isFa ? "rtl" : "ltr"}
+      className="flex flex-col items-center justify-between gap-4 rounded-2xl border bg-background px-5 py-3.5 sm:flex-row"
     >
-      <PageButton
-        pageAction="dec"
-        pageHandler={pageHandler}
-        chevron="right"
-        currentPage={currentPage}
-      />
+      <p className="text-[11px] text-muted-foreground">
+        {isFa
+          ? `نمایش ${fa(from)} تا ${fa(to)} از ${fa(totalItems)} مورد`
+          : `Showing ${from}–${to} of ${totalItems}`}
+      </p>
 
-      <span className="text-gray-500 mx-2">
-        {lang === "fa" ? (
-          <span>
-            صفحه {currentPage} از {pageCount}
-          </span>
-        ) : (
-          <span dir="ltr">
-            Page {currentPage} of {pageCount}
-          </span>
-        )}
-      </span>
+      <div className="flex items-center gap-1.5">
+        <Button
+          size="icon"
+          variant="outline"
+          className="size-8 rounded-xl"
+          onClick={() => pageHandler("dec")}
+          disabled={currentPage <= 1}
+          aria-label={isFa ? "صفحه قبل" : "Previous page"}
+        >
+          <ChevronRight className="size-4" />
+        </Button>
 
-      <PageButton
-        pageAction="inc"
-        pageHandler={pageHandler}
-        chevron="left"
-        currentPage={currentPage}
-        pageCount={pageCount}
-      />
+        <span
+          className={cn(
+            "rounded-xl bg-primary/10 px-3 py-1.5 text-[11px] font-bold text-primary",
+          )}
+        >
+          {isFa
+            ? `${fa(currentPage)} / ${fa(pageCount)}`
+            : `${currentPage} / ${pageCount}`}
+        </span>
+
+        <Button
+          size="icon"
+          variant="outline"
+          className="size-8 rounded-xl"
+          onClick={() => pageHandler("inc")}
+          disabled={currentPage >= pageCount}
+          aria-label={isFa ? "صفحه بعد" : "Next page"}
+        >
+          <ChevronLeft className="size-4" />
+        </Button>
+      </div>
     </div>
   );
 };
@@ -87,30 +108,3 @@ const PaginationBar = ({
 export default Pagination;
 
 type PageAction = "inc" | "dec";
-
-function PageButton({
-  currentPage,
-  pageHandler,
-  chevron,
-  pageAction,
-  pageCount,
-}: {
-  currentPage: number;
-  chevron: "left" | "right";
-  pageAction: PageAction;
-  pageHandler: (pageAction: PageAction) => void;
-  pageCount?: number;
-}) {
-  return (
-    <Button
-      size={"icon"}
-      variant={"ghost"}
-      onClick={() => pageHandler(pageAction)}
-      disabled={
-        pageAction === "inc" ? currentPage === pageCount : currentPage <= 1
-      }
-    >
-      {chevron === "left" ? <ChevronLeft /> : <ChevronRight />}
-    </Button>
-  );
-}

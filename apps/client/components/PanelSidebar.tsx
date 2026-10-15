@@ -1,96 +1,70 @@
 import { getSessionUser } from "@repo/auth/session";
-import { Button } from "@repo/ui/components/button";
+import { cn } from "@repo/ui/lib/utils";
 import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
 } from "@repo/ui/components/sidebar";
-import { Bookmark, CreditCard, Flag, Heart, User, Users } from "lucide-react";
+import { Flag } from "lucide-react";
 import Link from "next/link";
 import PacsazLogo from "./PacsazLogo";
+import PanelNav from "./PanelNav";
 
 const PanelSidebar = async () => {
   const user = await getSessionUser();
-
-  const items = [
-    {
-      title: "سوابق اشتراک",
-      url: "/panel/subscriptions",
-      icon: Flag,
-    },
-    {
-      title: "علاقه‌مندی ها",
-      url: "/panel/favs",
-      icon: Heart,
-    },
-    {
-      title: "ذخیره شده",
-      url: "/panel/saved",
-      icon: Bookmark,
-    },
-    {
-      title: "مشتری‌ها",
-      url: "/panel/customers",
-      icon: Users,
-    },
-    {
-      title: "پرداخت ها",
-      url: "/panel/payments",
-      icon: CreditCard,
-    },
-    {
-      title: "مشخصات",
-      url: "/panel/profile",
-      icon: User,
-    },
-  ];
+  const hasPlan = Boolean(user?.plan);
 
   return (
     <Sidebar side="right">
-      <SidebarContent className="p-10 py-5">
-        <Link href={"/"} className="mb-4">
+      <SidebarContent className="gap-0 p-5">
+        <Link href={"/"} className="mb-5 block">
           <PacsazLogo type="full" scale={1} />
         </Link>
 
-        <div>
-          <p className="font-semibold text-lg">{user?.fullName}</p>
-          <span className=" text-xs text-muted-foreground font-medium">
-            {user?.phoneNumber}
-          </span>
+        {/* ---------------------------- user chip ---------------------------- */}
+        <div className="mb-5 space-y-3 rounded-2xl border bg-gradient-to-bl from-primary/[0.07] to-transparent p-4">
+          <div className="flex items-center gap-3">
+            <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 text-sm font-extrabold text-white shadow-md shadow-primary/20">
+              {user?.fullName?.trim().charAt(0) ?? "؟"}
+            </span>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-bold">{user?.fullName}</p>
+              <p
+                dir="ltr"
+                className="truncate text-right text-[11px] text-muted-foreground"
+              >
+                {user?.phoneNumber}
+              </p>
+            </div>
+          </div>
+
+          <Link
+            href="/panel"
+            className={cn(
+              "flex items-center justify-between rounded-xl px-3 py-2 text-[11px] font-bold transition-colors",
+              hasPlan
+                ? "bg-primary/10 text-primary hover:bg-primary/15"
+                : "border border-dashed text-muted-foreground hover:border-primary/30 hover:text-primary",
+            )}
+          >
+            <span className="flex items-center gap-1.5">
+              <Flag className="size-3.5" />
+              {hasPlan ? `پلن ${user?.plan?.title}` : "اشتراک فعالی نداری"}
+            </span>
+            <span className="text-[10px] opacity-70">
+              {hasPlan ? "مشاهده" : "فعال‌سازی"}
+            </span>
+          </Link>
         </div>
 
-        {user?.plan && (
-          <Link href={"/panel"}>
-            <Button
-              variant={"primaryForeground"}
-              className="w-full border border-primary/40 mt-3"
-            >
-              <Flag />
-              اشتراک من
-            </Button>
-          </Link>
-        )}
-
-        <SidebarGroup>
-          <SidebarGroupLabel>منو کاربری</SidebarGroupLabel>
+        <SidebarGroup className="p-0">
+          <SidebarGroupLabel className="px-1 text-[10px]">
+            منو کاربری
+          </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className="gap-3">
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <Link href={item.url}>
-                      <item.icon />
-                      {item.title}
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
+            <PanelNav />
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>

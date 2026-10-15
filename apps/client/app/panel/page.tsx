@@ -5,28 +5,33 @@ import { cn } from "@repo/ui/lib/utils";
 import {
   ArrowLeft,
   BadgeCheck,
+  Bookmark,
   Calendar,
   Check,
   Clock,
   CreditCard,
   Download,
   FileType2,
+  Flag,
   FolderDown,
   FolderTree,
+  Heart,
   Infinity as InfinityIcon,
   Layers,
+  LayoutDashboard,
   Ruler,
   ShieldCheck,
   Sparkles,
   TrendingUp,
+  Users,
   Zap,
 } from "lucide-react";
+import { differenceInDays, formatDate } from "date-fns";
 import Link from "next/link";
 import LastDownloads from "./components/LastDownloads";
 import RemainingDownloads from "./components/RemainingDownloads";
 import UserSubscriptionCard from "./components/UserSubscriptionCard";
-import { StatCard } from "@/components/StatCard";
-import { formatDate } from "date-fns";
+import { PanelPage, PageHeader, PanelCard, StatTile } from "./components/PanelUI";
 
 const fa = (value: number) =>
   value.toLocaleString("fa-IR", { useGrouping: false });
@@ -64,6 +69,15 @@ const PROMISES = [
     title: "دسترسی آنی",
     text: "بعد از پرداخت، بدون انتظار دانلود کن.",
   },
+];
+
+const QUICK_LINKS = [
+  { icon: Flag, label: "سوابق اشتراک", href: "/panel/subscriptions" },
+  { icon: Heart, label: "علاقه‌مندی‌ها", href: "/panel/favs" },
+  { icon: Bookmark, label: "ذخیره‌شده‌ها", href: "/panel/saved" },
+  { icon: Users, label: "مشتری‌ها", href: "/panel/customers" },
+  { icon: CreditCard, label: "پرداخت‌ها", href: "/panel/payments" },
+  { icon: Layers, label: "قالب‌ها", href: "/dielines" },
 ];
 
 const Page = async () => {
@@ -389,55 +403,250 @@ const Page = async () => {
   /*                           Active subscription                          */
   /* ---------------------------------------------------------------------- */
 
-  const fairDownload = user.plan.fairDownload;
-  const downloaded = user.plan.downloaded;
+  const plan = user.plan;
+  const fairDownload = plan.fairDownload;
+  const downloaded = plan.downloaded;
+  const remaining = Math.max(fairDownload - downloaded, 0);
+  const daysLeft = differenceInDays(plan.endsAt, new Date());
+  const usageRatio = fairDownload > 0 ? downloaded / fairDownload : 0;
 
-  const allDownloads = await prisma.downloadHistory.count({
-    where: { userId: user.id },
-  });
-  const downloadRecords = await prisma.downloadHistory.findMany({
-    where: { userId: user.id }, // todo
-    take: 10,
-    include: { dieline: true, settings: true },
-    orderBy: { downloadedAt: "desc" },
-  });
+  const [allDownloads, downloadRecords, nextPlan] = await Promise.all([
+    prisma.downloadHistory.count({ where: { userId: user.id } }),
+    prisma.downloadHistory.findMany({
+      where: { userId: user.id }, // todo
+      take: 10,
+      include: { dieline: true, settings: true },
+      orderBy: { downloadedAt: "desc" },
+    }),
+    prisma.tarrif.findFirst({
+      where: { level: plan.level + 1 },
+      include: { price: true, fairDownload: true },
+    }),
+  ]);
+
+  const quotaTone: "primary" | "warning" | "danger" =
+    usageRatio >= 0.9 ? "danger" : usageRatio >= 0.7 ? "warning" : "primary";
 
   return (
-    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-6">
-      <div className="xl:col-span-3">
-        <UserSubscriptionCard plan={user.plan} tarrif={tarrif} />
+    <PanelPage>
+      <PageHeader
+        icon={LayoutDashboard}
+        title={`سلام ${user.fullName.split(" ")[0]} 👋`}
+        description="خلاصه‌ی اشتراک، سهمیه دانلود و آخرین قالب‌هایی که ساختی."
+        actions={
+          <>
+            <Link href="/dielines">
+              <Button variant="outline" size="sm">
+                <Layers className="size-4" />
+                کتابخانه قالب‌ها
+              </Button>
+            </Link>
+            <Link href="/panel/subscriptions">
+              <Button variant="outline" size="sm">
+                <Flag className="size-4" />
+                سوابق اشتراک
+              </Button>
+            </Link>
+          </>
+        }
+      />
+
+      {/* ------------------- subscription + quota summary ------------------- */}
+      <div className="grid gap-5 xl:grid-cols-2">
+        <UserSubscriptionCard plan={plan} tarrif={tarrif} />
+
+        <PanelCard className="p-5" accent>
+          <RemainingDownloads
+            downloaded={downloaded}
+            fairDownload={fairDownload}
+          />
+        </PanelCard>
       </div>
 
-      <div className="xl:col-span-3">
-        <RemainingDownloads
-          downloaded={downloaded}
-          fairDownload={fairDownload}
+      {/* ------------------------------- stats ----------------------------- */}
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatTile
+          icon={Download}
+          label="دانلود این پلن"
+          value={`${fa(downloaded)} از ${fa(fairDownload)}`}
+          hint={`${fa(remaining)} دانلود باقی مانده`}
+        />
+        <StatTile
+          icon={FolderDown}
+          label="کل دانلودها"
+          value={`${fa(allDownloads)} قالب`}
+          hint="از ابتدای عضویت"
+        />
+        <StatTile
+          icon={Calendar}
+          label="پایان اشتراک"
+          value={formatDate(plan.endsAt, "yyyy/MM/dd")}
+          hint={
+            daysLeft > 0 ? `${fa(daysLeft)} روز باقی مانده` : "منقضی شده است"
+          }
+          tone={daysLeft <= 7 ? "warning" : "plain"}
+        />
+        <StatTile
+          icon={TrendingUp}
+          label="مصرف سهمیه"
+          value={`${fa(Math.round(usageRatio * 100))}٪`}
+          hint={
+            quotaTone === "danger"
+              ? "سهمیه تقریباً تمام شده"
+              : quotaTone === "warning"
+                ? "بیش از ۷۰٪ مصرف شده"
+                : "در محدوده مجاز"
+          }
+          tone="primary"
         />
       </div>
 
-      <StatCard
-        title="دانلود این پلن"
-        value={`${downloaded} دانلود`}
-        icon={Download}
-        className="md:col-span-1 xl:col-span-2"
-      />
+      {/* ---------------------------- quota detail -------------------------- */}
+      <PanelCard className="p-5">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div className="space-y-1">
+            <h2 className="text-sm font-bold">وضعیت سهمیه دانلود</h2>
+            <p className="text-[11px] text-muted-foreground">
+              سهمیه‌ی پلن {plan.title} برای دوره‌ی{" "}
+              {plan.period === "monthly"
+                ? "ماهیانه"
+                : plan.period === "threeMonth"
+                  ? "۳ ماهه"
+                  : "سالیانه"}
+            </p>
+          </div>
 
-      <StatCard
-        title="تعداد کل دانلودها"
-        value={`${allDownloads} دانلود`}
-        icon={FolderDown}
-        className="md:col-span-1 xl:col-span-2"
-      />
+          <div className="flex items-baseline gap-2">
+            <span className="text-2xl font-extrabold text-primary">
+              {fa(remaining)}
+            </span>
+            <span className="text-[11px] text-muted-foreground">
+              دانلود باقی مانده
+            </span>
+          </div>
+        </div>
 
-      <StatCard
-        title="پایان اشتراک"
-        value={formatDate(user.plan.endsAt, "PP")}
-        icon={Calendar}
-        className="md:col-span-2 xl:col-span-2"
-      />
+        <div className="mt-5">
+          <QuotaBar
+            downloaded={downloaded}
+            fairDownload={fairDownload}
+            tone={quotaTone}
+          />
+        </div>
 
-      <div className="md:col-span-2 xl:col-span-6">
-        <LastDownloads data={downloadRecords} />
+        <div className="mt-4 flex flex-wrap gap-6 border-t pt-4">
+          {[
+            {
+              label: "اولین دانلود",
+              value: plan.firstDownload
+                ? formatDate(plan.firstDownload, "yyyy/MM/dd")
+                : "—",
+            },
+            {
+              label: "آخرین دانلود",
+              value: plan.lastDownload
+                ? formatDate(plan.lastDownload, "yyyy/MM/dd")
+                : "—",
+            },
+            {
+              label: "نوع اشتراک",
+              value: plan.type === "new" ? "خرید جدید" : "تمدید",
+            },
+            { label: "سطح پلن", value: fa(plan.level) },
+          ].map((row) => (
+            <div key={row.label} className="space-y-0.5">
+              <p className="text-[10px] text-muted-foreground">{row.label}</p>
+              <p className="text-xs font-bold">{row.value}</p>
+            </div>
+          ))}
+        </div>
+      </PanelCard>
+
+      {/* ---------------------------- quick links --------------------------- */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        {QUICK_LINKS.map(({ icon: Icon, label, href }) => (
+          <Link
+            key={href}
+            href={href}
+            className="group flex flex-col items-center gap-2.5 rounded-2xl border bg-background p-4 transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10"
+          >
+            <span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary transition-colors duration-300 group-hover:bg-primary group-hover:text-primary-foreground">
+              <Icon className="size-4.5" strokeWidth={1.8} />
+            </span>
+            <span className="text-[11px] font-medium">{label}</span>
+          </Link>
+        ))}
+      </div>
+
+      {/* --------------------------- upgrade nudge -------------------------- */}
+      {nextPlan?.price && (
+        <PanelCard className="bg-gradient-to-bl from-primary/[0.07] via-background to-background p-5">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+                <Zap className="size-5" strokeWidth={1.9} />
+              </span>
+              <div className="space-y-0.5">
+                <p className="text-xs font-bold">
+                  با پلن {nextPlan.title} سهمیه‌ی بیشتری بگیر
+                </p>
+                <p className="text-[11px] leading-5 text-muted-foreground">
+                  {nextPlan.shortDescription} — سهمیه‌ی ماهانه{" "}
+                  {fa(nextPlan.fairDownload?.monthly ?? 0)} قالب.
+                </p>
+              </div>
+            </div>
+
+            <Link
+              href={`/payment?plan=${nextPlan.key}&period=monthly`}
+              className="group inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-gradient-to-l from-violet-500 to-purple-600 px-5 py-2.5 text-xs font-medium text-white shadow-sm transition-all duration-300 hover:gap-3 hover:shadow-lg hover:shadow-primary/30"
+            >
+              ارتقا به {nextPlan.title}
+              <ArrowLeft className="size-3.5" />
+            </Link>
+          </div>
+        </PanelCard>
+      )}
+
+      {/* ----------------------------- downloads ---------------------------- */}
+      <LastDownloads data={downloadRecords} />
+    </PanelPage>
+  );
+};
+
+/** Quota bar matching the shared Meter geometry so pages stay consistent. */
+const QuotaBar = ({
+  downloaded,
+  fairDownload,
+  tone,
+}: {
+  downloaded: number;
+  fairDownload: number;
+  tone: "primary" | "warning" | "danger";
+}) => {
+  const pct =
+    fairDownload > 0
+      ? Math.min(Math.round((downloaded / fairDownload) * 100), 100)
+      : 0;
+
+  const bar =
+    tone === "danger"
+      ? "bg-gradient-to-l from-rose-500 to-red-500"
+      : tone === "warning"
+        ? "bg-gradient-to-l from-amber-400 to-orange-500"
+        : "bg-gradient-to-l from-violet-500 to-purple-600";
+
+  return (
+    <div className="space-y-2">
+      <div className="h-2.5 w-full overflow-hidden rounded-full bg-muted">
+        <span
+          style={{ width: `${pct}%` }}
+          className={cn("block h-full rounded-full transition-all", bar)}
+        />
+      </div>
+      <div className="flex justify-between text-[10px] text-muted-foreground">
+        <span>{fa(downloaded)} دانلود شده</span>
+        <span>{fa(fairDownload)} سهمیه کل</span>
       </div>
     </div>
   );
