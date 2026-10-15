@@ -1,5 +1,5 @@
 import { zero } from "../../data/consts";
-import { Shape } from "./Shape";
+import { Shape } from "./shape";
 import M, { IPathArc } from "makerjs";
 
 export class Arc extends Shape {

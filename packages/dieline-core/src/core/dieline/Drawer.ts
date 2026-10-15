@@ -1,8 +1,8 @@
 import { ISpec, IVar } from "@repo/store/types";
 import { evaluate } from "mathjs";
 import M from "makerjs";
-import Pacsaz from "../Pacsaz";
-import { Shape } from "../shapes/Shape";
+import Pacsaz from "../pacsaz";
+import { Shape } from "../shapes/shape";
 import { Dieline } from "./Dieline";
 import { applyBoolean } from "../helpers/boolean";
 import { applyJoin } from "../helpers/join";
@@ -205,10 +205,7 @@ export class Drawer extends Dieline {
   }
 
   /** Parses a stored point through the given variable scope. */
-  private $point(
-    point: ISpec.Point,
-    scope: Record<string, number>,
-  ): M.IPoint {
+  private $point(point: ISpec.Point, scope: Record<string, number>): M.IPoint {
     return [
       this.$parseMathStr(point[0], scope),
       this.$parseMathStr(point[1], scope),
@@ -565,7 +562,8 @@ export class Drawer extends Dieline {
   ): Shape {
     // Effects return plain models, so the geometry is re-wrapped to keep the
     // `Shape` chain (`dup`, `mirror`, ...) that the dup operations rely on.
-    const shape = model instanceof Shape ? model : new Pacsaz.shape.ToShape(model);
+    const shape =
+      model instanceof Shape ? model : new Pacsaz.shape.ToShape(model);
 
     shape.moveTo([
       this.$parseMathStr(item.origin[0], scope),

@@ -1,6 +1,6 @@
 import { IModelMap } from "makerjs";
 import { zero } from "../../data/consts";
-import { Shape } from "../shapes/Shape";
+import { Shape } from "../shapes/shape";
 import { getDielineSettings } from "@repo/store/getters";
 
 export abstract class Model extends Shape {

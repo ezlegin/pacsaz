@@ -1,6 +1,6 @@
 import M, { IModel, IPoint } from "makerjs";
 import { zero } from "../../data/consts";
-import { Shape } from "./Shape";
+import { Shape } from "./shape";
 
 export class Line extends Shape {
   constructor(length: number, angle?: number) {

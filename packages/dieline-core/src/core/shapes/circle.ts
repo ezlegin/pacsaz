@@ -1,6 +1,6 @@
 import M, { IModel } from "makerjs";
 import { zero } from "../../data/consts";
-import { Shape } from "./Shape";
+import { Shape } from "./shape";
 
 export class Ellipse extends Shape {
   constructor(_id: string, radiusX: number, radiusY: number) {

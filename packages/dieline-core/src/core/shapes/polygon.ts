@@ -1,5 +1,5 @@
 import M from "makerjs";
-import { Shape } from "./Shape";
+import { Shape } from "./shape";
 
 /**
  * Geometry only. Effects (radius / radiusAt / array) are applied by the Drawer

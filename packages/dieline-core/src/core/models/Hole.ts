@@ -1,5 +1,5 @@
 import M, { IModelMap } from "makerjs";
-import Pacsaz from "../Pacsaz";
+import Pacsaz from "../pacsaz";
 import { Model } from "./Model";
 
 export class Hole extends Model {

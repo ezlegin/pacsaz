@@ -1,6 +1,6 @@
 import M, { IModel, IPoint } from "makerjs";
 import { zero } from "../../data/consts";
-import Pacsaz from "../Pacsaz";
+import Pacsaz from "../pacsaz";
 import { addFilletAt } from "../helpers/addFillet";
 import { Model } from "./Model";
 

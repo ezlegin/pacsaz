@@ -1,5 +1,5 @@
 import M, { IModel } from "makerjs";
-import Pacsaz from "../Pacsaz";
+import Pacsaz from "../pacsaz";
 
 export class Bleed implements IModel {
   constructor(trimModel: IModel, bleedAmount: number) {

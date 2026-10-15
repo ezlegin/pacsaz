@@ -1,6 +1,6 @@
 import M, { IModel } from "makerjs";
 import { toMm } from "../../utils/sizeConvertor";
-import Pacsaz from "../Pacsaz";
+import Pacsaz from "../pacsaz";
 
 export function addFillet(model: IModel, radius: number = 0): IModel {
   if (radius <= 0) return model;

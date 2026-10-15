@@ -1,6 +1,6 @@
 import { ISpec } from "@repo/store/types";
 import M from "makerjs";
-import { Shape } from "./Shape";
+import { Shape } from "./shape";
 
 interface Options {
   deleteSide?: ISpec.Direction;

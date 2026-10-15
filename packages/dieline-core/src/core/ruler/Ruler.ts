@@ -1,5 +1,5 @@
 import M, { IModel, IPoint } from "makerjs";
-import Pacsaz from "../Pacsaz";
+import Pacsaz from "../pacsaz";
 import { getOverallSizes } from "@repo/store/getters";
 
 export class Ruler implements IModel {

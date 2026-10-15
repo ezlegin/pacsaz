@@ -1,5 +1,5 @@
 import M, { IPoint } from "makerjs";
-import { Shape } from "./Shape";
+import { Shape } from "./shape";
 
 export class Text extends Shape {
   constructor(text: string, position: IPoint, textLayer?: string) {

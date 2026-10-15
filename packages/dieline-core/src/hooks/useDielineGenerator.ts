@@ -6,7 +6,7 @@ import { setSvg } from "@repo/store/slices/svgSlice";
 import { variablesSelectors } from "@repo/store/slices/variablesSlice";
 import { DimensionType, ISpec, IVar } from "@repo/store/types";
 import { useEffect, useTransition } from "react";
-import Pacsaz from "../core/Pacsaz";
+import Pacsaz from "../core/pacsaz";
 import { resolveDimensions } from "../utils/dimensionResolver";
 import { resolveOffsets } from "../utils/offsetResolver";
 import Drawer from "../core/dieline/Drawer";

@@ -1,5 +1,5 @@
 import M, { IModel } from "makerjs";
-import Pacsaz from "../Pacsaz";
+import Pacsaz from "../pacsaz";
 import { getDevCTX } from "@repo/store/getters";
 
 export class Container implements IModel {

@@ -1,5 +1,5 @@
 import M, { IModel } from "makerjs";
-import Pacsaz from "../Pacsaz";
+import Pacsaz from "../pacsaz";
 import { Model } from "./Model";
 import { addFilletAt } from "../helpers/addFillet";
 

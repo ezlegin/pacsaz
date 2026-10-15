@@ -3,7 +3,7 @@ import { getDielineSettings } from "@repo/store/getters";
 import { setOverallSizes } from "@repo/store/slices/overallSizesSlice";
 import { store } from "@repo/store/store";
 import M, { IModel, IModelMap } from "makerjs";
-import Pacsaz from "../Pacsaz";
+import Pacsaz from "../pacsaz";
 import { Bleed } from "./Bleed";
 import { Exporter } from "./Exporter";
 

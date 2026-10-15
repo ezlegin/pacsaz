@@ -1,5 +1,5 @@
 import M, { IModel } from "makerjs";
-import { Shape } from "./Shape";
+import { Shape } from "./shape";
 import { zero } from "../../data/consts";
 
 export class ToShape extends Shape {

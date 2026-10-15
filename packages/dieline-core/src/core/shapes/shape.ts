@@ -1,5 +1,5 @@
 import M, { IModel, IPoint } from "makerjs";
-import Pacsaz from "../Pacsaz";
+import Pacsaz from "../pacsaz";
 
 type MirrorRefPoint = "top" | "bottom" | "left" | "right";
 export type RotateRefPoint =
