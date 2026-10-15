@@ -1,5 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
-  "buildCommand": "pnpm --filter @repo/db run prisma:deploy && pnpm --filter @repo/db run prisma:generate && pnpm run build"
+  "buildCommand": "pnpm --filter @repo/db run prisma:deploy && pnpm --filter @repo/db run prisma:generate && pnpm --filter @repo/db prisma:generate-admin && pnpm run build"
 }

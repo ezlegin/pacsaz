@@ -13,6 +13,7 @@
     "prisma:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
     "prisma:push": "prisma db push",
+    "prisma:generate-admin": "tsx src/lib/generateAdmin.ts",
     "seed:tarrifs": "tsx src/seed/tarrifs.ts",
     "test": "tsx src/test-script.ts",
     "lint": "eslint . --max-warnings 0",
@@ -21,6 +22,7 @@
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
+    "@types/bcrypt": "^6.0.0",
     "@types/node": "^22.15.3",
     "mysql2": "^3.15.3",
     "pg": "^8.16.3",
@@ -30,6 +32,7 @@
   "dependencies": {
     "@prisma/adapter-pg": "7.8.0",
     "@prisma/client": "^7.3.0",
+    "bcrypt": "^6.0.0",
     "dotenv": "^17.2.3"
   }
 }

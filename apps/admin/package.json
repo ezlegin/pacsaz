@@ -5,6 +5,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev --webpack --port 3001",
+    "predev": "pnpm --filter @repo/db prisma:generate-admin",
+    "prebuild": "pnpm --filter @repo/db prisma:generate-admin",
     "build": "next build --webpack",
     "start": "next start --port 3001",
     "lint": "next lint",
