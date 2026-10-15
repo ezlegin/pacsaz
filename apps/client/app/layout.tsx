@@ -32,7 +32,8 @@ export default async function RootLayout({
 
 export const metadata = {
   title: {
-    default: "پک‌ساز",
+    default: "78321751",
+    // default: "پک‌ساز",
     template: "%s - پک‌ساز",
   },
   description: "طراحی دایلاین، بدون آزمون و خطا!",
