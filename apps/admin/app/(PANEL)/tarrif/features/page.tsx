@@ -6,14 +6,24 @@ import Pagination from "@/components/Pagination";
 import PopupNewDialog from "@/components/PopupNewDialog";
 import { DialogTitle } from "@repo/ui/components/dialog";
 import FeaturesList from "./FeaturesList";
+import { pagination } from "@repo/lib/utils/pagination";
 
-const page = async () => {
+interface Props {
+  searchParams: Promise<{ page: string }>;
+}
+
+const page = async ({ searchParams }: Props) => {
+  const { page } = await searchParams;
+  const { skip, take } = pagination(page, globalPageSize);
+
   const features = await prisma.tarrifFeature.findMany({
-    take: 10,
     orderBy: { id: "desc" },
+    skip,
+    take,
   });
 
-  // Todo: Pagination
+  const count = await prisma.tarrifFeature.count();
+
   return (
     <div className="space-y-3">
       <PageTitle title="Features" />
@@ -27,7 +37,7 @@ const page = async () => {
 
       <FeaturesList data={features} />
 
-      <Pagination pageSize={globalPageSize} totalItems={features.length} />
+      <Pagination pageSize={globalPageSize} totalItems={count} />
     </div>
   );
 };
