@@ -1,66 +1,75 @@
-import React from "react";
-import Card from "@repo/ui/components/custom/Card";
+import { termsAndConditions, termsGroups } from "@/data/terms";
+import { cn } from "@repo/ui/lib/utils";
 
+const fa = (value: number) =>
+  value.toLocaleString("fa-IR", { useGrouping: false });
+
+/**
+ * Terms renderer.
+ *
+ * `styled` groups clauses into titled sections; the display number is always the
+ * clause's original position in `termsAndConditions`, so a reference to "بند ۷"
+ * keeps meaning the same thing no matter how the page is laid out.
+ */
 const Terms = ({ style = "styled" }: { style?: "raw" | "styled" }) => {
-  return style === "raw" ? (
-    <div className="w-fit space-y-3 ">
-      {termsAndConditions.map((t, idx) => (
-        <p key={idx} className="text-sm">
-          {idx + 1}. {t}
-        </p>
-      ))}
-    </div>
-  ) : (
-    <div className="w-fit space-y-3 mx-auto">
-      {termsAndConditions.map((t, idx) => (
-        <Card key={idx}>
-          <p className="text-sm">
-            {idx + 1}. {t}
+  if (style === "raw") {
+    return (
+      <div className="w-fit space-y-3">
+        {termsAndConditions.map((term, index) => (
+          <p key={index} className="text-sm">
+            {index + 1}. {term}
           </p>
-        </Card>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-10">
+      {termsGroups.map((group) => (
+        <section
+          key={group.id}
+          id={group.id}
+          className="scroll-mt-28 space-y-4"
+        >
+          <div className="flex items-start gap-3">
+            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 text-[11px] font-extrabold text-white shadow-md shadow-primary/20">
+              {fa(group.items.length)}
+            </span>
+
+            <div className="space-y-1">
+              <h2 className="text-base font-extrabold tracking-tight">
+                {group.title}
+              </h2>
+              <p className="text-xs leading-5 text-muted-foreground">
+                {group.description}
+              </p>
+            </div>
+          </div>
+
+          <ol className="space-y-3">
+            {group.items.map((itemIndex) => (
+              <li
+                key={itemIndex}
+                className={cn(
+                  "group flex gap-4 rounded-2xl border bg-background p-5 transition-colors",
+                  "hover:border-primary/25 hover:bg-primary/[0.02]",
+                )}
+              >
+                <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-muted text-[11px] font-bold tabular-nums text-muted-foreground transition-colors group-hover:bg-primary/10 group-hover:text-primary">
+                  {fa(itemIndex + 1)}
+                </span>
+
+                <p className="text-sm leading-7 text-muted-foreground">
+                  {termsAndConditions[itemIndex]}
+                </p>
+              </li>
+            ))}
+          </ol>
+        </section>
       ))}
     </div>
   );
 };
 
 export default Terms;
-
-const termsAndConditions: string[] = [
-  "پک‌ساز یک پلتفرم تخصصی برای تولید، شخصی‌سازی و دانلود دایلاین‌های بسته‌بندی است و جایگزین بررسی‌های فنی نهایی توسط چاپخانه یا قالب‌ساز نمی‌باشد.",
-
-  "مسئولیت بررسی نهایی ابعاد، تلرانس‌ها، ضخامت متریال، بلید، خط تا و سازگاری فایل با فرآیند چاپ و قالب‌سازی بر عهده کاربر است.",
-
-  "تمام دایلاین‌های تولیدشده به‌صورت دیجیتال و بر اساس اطلاعات واردشده توسط کاربر ایجاد می‌شوند و پک‌ساز تضمینی بابت بدون‌خطا بودن در شرایط تولید فیزیکی ارائه نمی‌دهد.",
-
-  "کاربر متعهد می‌شود اطلاعات صحیح و واقعی (از جمله ابعاد، نوع بسته‌بندی و متریال) را وارد نماید. هرگونه خطا ناشی از ورود اطلاعات نادرست، بر عهده کاربر خواهد بود.",
-
-  "دانلود فایل‌ها صرفاً برای استفاده شخصی یا تجاری کاربر مجاز است و فروش، بازنشر یا ارائه دایلاین‌ها به‌صورت مستقل یا به‌عنوان محصول ثالث بدون مجوز کتبی از پک‌ساز ممنوع می‌باشد.",
-
-  "حق مالکیت معنوی ساختار پلتفرم، الگوریتم‌های تولید دایلاین، رابط کاربری و محتوای آموزشی متعلق به پک‌ساز است و هرگونه کپی‌برداری یا مهندسی معکوس پیگرد قانونی دارد.",
-
-  "حساب کاربری هر شخص صرفاً برای استفاده همان کاربر ایجاد شده و انتقال، اشتراک‌گذاری یا استفاده هم‌زمان توسط چند نفر (مگر در پلن‌های سازمانی) مجاز نیست.",
-
-  "در پلن‌های دارای محدودیت دانلود، تعداد دانلود منصفانه به‌صورت ماهانه یا سالانه محاسبه شده و با پایان مهلت اشتراک بازنشانی می‌شود.",
-
-  "در صورت سوءاستفاده از سیستم (دانلود غیرعادی، تلاش برای دور زدن محدودیت‌ها یا استفاده رباتیک)، پک‌ساز مجاز به تعلیق یا مسدودسازی حساب کاربری خواهد بود.",
-
-  "پرداخت‌های انجام‌شده بابت اشتراک یا دانلود، پس از فعال‌سازی یا استفاده از خدمات، غیرقابل استرداد می‌باشند مگر در مواردی که صراحتاً اعلام شده باشد.",
-
-  "پک‌ساز می‌تواند در هر زمان تعرفه‌ها، پلن‌ها یا امکانات را به‌روزرسانی نماید. تغییرات برای دوره‌های جدید اعمال شده و شامل اشتراک‌های فعال نخواهد بود.",
-
-  "مسئولیت نگهداری از اطلاعات ورود (نام کاربری و رمز عبور) بر عهده کاربر است و هرگونه فعالیت انجام‌شده با حساب کاربری، به نام وی ثبت می‌گردد.",
-
-  "پک‌ساز متعهد به حفظ حریم خصوصی کاربران بوده و اطلاعات شخصی را مطابق سیاست‌های حریم خصوصی نگهداری و پردازش می‌نماید.",
-
-  "استفاده از پک‌ساز برای اهداف غیرقانونی، نقض حقوق مالکیت فکری دیگران یا فعالیت‌های مغایر با قوانین جمهوری اسلامی ایران ممنوع است.",
-
-  "در صورت بروز اختلال فنی، به‌روزرسانی یا توقف موقت خدمات، پک‌ساز تلاش خود را برای اطلاع‌رسانی و رفع مشکل در سریع‌ترین زمان ممکن انجام خواهد داد.",
-
-  "کاربران سازمانی موظف‌اند استفاده کارکنان یا اعضای خود از پلتفرم را مدیریت کرده و مسئولیت استفاده نادرست احتمالی بر عهده سازمان خواهد بود.",
-
-  "پک‌ساز این حق را برای خود محفوظ می‌دارد که در صورت نقض قوانین، بدون نیاز به اطلاع قبلی دسترسی کاربر به خدمات را محدود یا قطع نماید.",
-
-  "ادامه استفاده از وب‌سایت پس از هرگونه تغییر در قوانین، به‌منزله پذیرش نسخه جدید قوانین و مقررات خواهد بود.",
-
-  "در صورت وجود هرگونه سؤال یا ابهام درباره قوانین و مقررات، کاربران می‌توانند از طریق راه‌های ارتباطی اعلام‌شده با تیم پشتیبانی پک‌ساز تماس بگیرند.",
-];
