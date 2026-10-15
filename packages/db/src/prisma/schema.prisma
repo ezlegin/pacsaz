@@ -77,6 +77,48 @@ model Otp {
   @@unique([code, phoneNumber])
 }
 
+//! CONTACT --------------------------------
+/**
+ * Messages from the public contact form. Deliberately not related to `User`:
+ * anyone can write in, signed in or not, so an account is not required and a
+ * submission must survive that account being deleted.
+ */
+model Contact {
+  id          Int           @id @default(autoincrement())
+  fullName    String
+  email       String
+  phoneNumber String?
+  subject     String
+  message     String
+  status      ContactStatus @default(new)
+
+  /**
+   * Reply body, stored even when delivery fails so nothing is lost.
+   */
+  replyMessage String?
+  repliedAt    DateTime?
+  /**
+   * Whether the reply actually left via the provider.
+   */
+  replySent    Boolean   @default(false)
+  /**
+   * Provider-side message id, for tracing a delivery.
+   */
+  replyId      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum ContactStatus {
+  new
+  read
+  replied
+}
+
 //! DIELINE --------------------------------
 model Dieline {
   id              Int      @id @default(autoincrement())

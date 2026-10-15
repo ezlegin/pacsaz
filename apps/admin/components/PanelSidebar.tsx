@@ -17,6 +17,7 @@ import {
   Layout,
   LayoutDashboard,
   List,
+  MessageSquare,
   Ratio,
   Ticket,
   UserCheck,
@@ -74,6 +75,16 @@ export function PanelSidebar() {
           title: "Coupons",
           url: "/coupons",
           icon: Ticket,
+        },
+      ],
+    },
+    {
+      groupLabel: "Support",
+      items: [
+        {
+          title: "Contacts",
+          url: "/contacts",
+          icon: MessageSquare,
         },
       ],
     },

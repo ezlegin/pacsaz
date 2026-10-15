@@ -13,6 +13,10 @@ const nextConfig = {
   // without relying on getting an environment variable right.
   env: {
     AUTH_APP: "admin",
+    // Exposed to the client ONLY as a boolean so the contacts UI can state
+    // whether reply delivery is live. The key itself stays server-side and the
+    // Resend SDK is never imported from a client component.
+    NEXT_PUBLIC_MAIL_CONFIGURED: process.env.RESEND_API_KEY ? "true" : "",
   },
   // This monorepo sits inside the user profile, where an unrelated
   // package-lock.json makes Next.js infer `C:\Users\<user>` as the workspace

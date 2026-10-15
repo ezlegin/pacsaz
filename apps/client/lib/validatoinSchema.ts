@@ -51,12 +51,22 @@ export type OnboardingStep2Type = z.infer<typeof onboardingStep2Schema>;
 export const contactFormSchema = z.object({
   fullName: z.string().min(3, "نام و نام خانوادگی حداقل باید ۳ کاراکتر باشد"),
   email: z.string().email("ایمیل وارد شده معتبر نیست"),
+  /**
+   * Optional: email is the reply channel, so a phone number is not required to
+   * answer. Empty string is normalised away rather than rejected.
+   */
   phone: z
     .string()
-    .min(10, "شماره تماس معتبر نیست")
-    .max(15, "شماره تماس معتبر نیست"),
+    .optional()
+    .refine(
+      (value) => !value || (value.length >= 10 && value.length <= 15),
+      "شماره تماس معتبر نیست",
+    ),
   subject: z.string().min(3, "عنوان باید حداقل ۳ کاراکتر باشد"),
-  message: z.string().min(10, "پیام باید حداقل ۱۰ کاراکتر باشد"),
+  message: z
+    .string()
+    .min(10, "پیام باید حداقل ۱۰ کاراکتر باشد")
+    .max(2000, "پیام حداکثر ۲۰۰۰ کاراکتر است"),
 });
 
 export type ContactFormType = z.infer<typeof contactFormSchema>;

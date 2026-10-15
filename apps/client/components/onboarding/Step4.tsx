@@ -1,6 +1,5 @@
-import { termsAndConditions, termsGroups } from "@/data/terms";
+import { termsAndConditions } from "@/data/terms";
 import { ScrollArea } from "@repo/ui/components/scroll-area";
-import { cn } from "@repo/ui/lib/utils";
 import { ArrowUpRight, ScrollText, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import Terms from "../Terms";
@@ -16,9 +15,9 @@ const Step4 = () => {
           قوانین و مقررات را بپذیر
         </h2>
         <p className="text-xs leading-6 text-muted-foreground">
-          ثبت‌نام شما به‌منزله‌ی تایید کامل{" "}
-          {fa(termsAndConditions.length)} بند قوانین پک‌ساز است. لطفاً پیش از
-          تایید، حداقل بخش‌های مربوط به مسئولیت کاربر را بخوانید.
+          ثبت‌نام شما به‌منزله‌ی تایید کامل {fa(termsAndConditions.length)} بند
+          قوانین پک‌ساز است. لطفاً پیش از تایید، حداقل بخش‌های مربوط به مسئولیت
+          کاربر را بخوانید.
         </p>
       </header>
 
@@ -46,23 +45,6 @@ const Step4 = () => {
             </li>
           ))}
         </ul>
-      </div>
-
-      {/* quick section overview */}
-      <div className="flex flex-wrap gap-1.5">
-        {termsGroups.map((group) => (
-          <span
-            key={group.id}
-            className={cn(
-              "inline-flex items-center gap-1.5 rounded-full border bg-background px-2.5 py-1 text-[10px] text-muted-foreground",
-            )}
-          >
-            {group.title}
-            <span className="rounded-md bg-muted px-1 font-bold tabular-nums">
-              {fa(group.items.length)}
-            </span>
-          </span>
-        ))}
       </div>
 
       {/* full text */}
@@ -94,7 +76,8 @@ const Step4 = () => {
       </div>
 
       <p className="text-center text-[10px] text-muted-foreground">
-        با زدن دکمه‌ی زیر، تایید می‌کنی که قوانین و مقررات را خوانده و پذیرفته‌ای.
+        با زدن دکمه‌ی زیر، تایید می‌کنی که قوانین و مقررات را خوانده و
+        پذیرفته‌ای.
       </p>
     </div>
   );
