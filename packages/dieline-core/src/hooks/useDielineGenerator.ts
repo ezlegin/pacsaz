@@ -9,7 +9,7 @@ import { useEffect, useTransition } from "react";
 import Pacsaz from "../core/pacsaz";
 import { resolveDimensions } from "../utils/dimensionResolver";
 import { resolveOffsets } from "../utils/offsetResolver";
-import Drawer from "../core/dieline/drawer";
+import Drawer from "../core/dieline/Drawer";
 
 interface Dieline {
   materials: string;

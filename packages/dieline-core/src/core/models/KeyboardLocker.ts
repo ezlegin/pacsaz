@@ -1,5 +1,5 @@
 import { IModelMap } from "makerjs";
-import { Model } from "./model";
+import { Model } from "./Model";
 
 export class KeyboardLocker extends Model {
   constructor() {

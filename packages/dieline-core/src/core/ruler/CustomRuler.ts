@@ -1,5 +1,5 @@
 import { IPoint } from "makerjs";
-import { Ruler } from "./ruler";
+import { Ruler } from "./Ruler";
 import Pacsaz from "../pacsaz";
 
 export class CustomRuler extends Ruler {

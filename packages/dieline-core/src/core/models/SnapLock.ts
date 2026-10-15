@@ -2,7 +2,7 @@ import M, { IModel, IPoint } from "makerjs";
 import { zero } from "../../data/consts";
 import Pacsaz from "../pacsaz";
 import { addFilletAt } from "../helpers/addFillet";
-import { Model } from "./model";
+import { Model } from "./Model";
 
 export class SnapLock extends Model {
   private arcRadius = this.thickness;

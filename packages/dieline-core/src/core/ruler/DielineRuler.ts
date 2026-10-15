@@ -1,6 +1,6 @@
 import M, { IPoint } from "makerjs";
 import Pacsaz from "../pacsaz";
-import { Ruler } from "./ruler";
+import { Ruler } from "./Ruler";
 import { getDielineSettings } from "@repo/store/getters";
 
 export class DielineRuler extends Ruler {

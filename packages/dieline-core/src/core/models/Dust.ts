@@ -1,6 +1,6 @@
 import M, { IModel } from "makerjs";
 import Pacsaz from "../pacsaz";
-import { Model } from "./model";
+import { Model } from "./Model";
 import { addFilletAt } from "../helpers/addFillet";
 
 export class Dust extends Model {
