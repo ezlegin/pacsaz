@@ -1,7 +1,7 @@
 import { getSessionUser } from "@repo/auth/session";
 import { prisma } from "@repo/db";
 import { pagination } from "@repo/lib/utils/pagination";
-import Pagination from "@repo/ui/components/custom/Pagination";
+import Pagination from "@/components/Pagination";
 import SubscriptionsList from "./SuscriptionsList";
 import { globalPageSize } from "@repo/lib/data/consts";
 

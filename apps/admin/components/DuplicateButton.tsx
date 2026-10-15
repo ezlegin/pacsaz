@@ -1,7 +1,7 @@
 "use client";
 
 import { duplicateDieline } from "@/actions/dieline";
-import { ActButton } from "@repo/ui/components/custom/ActionButton";
+import { ActButton } from "@/components/ActionButton";
 import { Copy } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";

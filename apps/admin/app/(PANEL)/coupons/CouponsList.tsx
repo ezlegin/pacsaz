@@ -2,7 +2,7 @@ import { deleteCoupon } from "@/actions/coupon";
 import DeleteButton from "@/components/DeleteButton";
 import { CouponForm } from "@/components/forms/CouponForm";
 import { Coupon, Tarrif } from "@repo/db";
-import ActionButton from "@repo/ui/components/custom/ActionButton";
+import ActionButton from "@/components/ActionButton";
 import Card from "@repo/ui/components/custom/Card";
 import Table from "@repo/ui/components/custom/Table";
 import { DialogTitle } from "@repo/ui/components/dialog";

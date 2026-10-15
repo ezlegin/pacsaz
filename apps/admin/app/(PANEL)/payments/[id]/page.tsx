@@ -1,7 +1,7 @@
 import { PaymentForm } from "@/components/forms/PaymentForm";
 import PageTitle from "@/components/PageTitle";
 import { prisma } from "@repo/db";
-import BackButton from "@repo/ui/components/custom/BackButton";
+import BackButton from "@/components/BackButton";
 import React from "react";
 
 interface Props {

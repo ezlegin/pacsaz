@@ -4,7 +4,7 @@ import { TarrifForm, TarrifType } from "@/components/forms/TarrifForm";
 import { TarrifFeature } from "@repo/db";
 import { formatPrice } from "@repo/lib/utils/formatPrice";
 import { Badge } from "@repo/ui/components/badge";
-import ActionButton from "@repo/ui/components/custom/ActionButton";
+import ActionButton from "@/components/ActionButton";
 import Card from "@repo/ui/components/custom/Card";
 import Table from "@repo/ui/components/custom/Table";
 import { DialogTitle } from "@repo/ui/components/dialog";

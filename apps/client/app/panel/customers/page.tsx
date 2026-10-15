@@ -1,9 +1,9 @@
 import { CustomerForm } from "@/components/forms/CustomerForm";
 import { prisma } from "@repo/db";
 import { globalPageSize } from "@repo/lib/data/consts";
-import Pagination from "@repo/ui/components/custom/Pagination";
-import PopupNewDialog from "@repo/ui/components/custom/PopupNewDialog";
-import Search from "@repo/ui/components/custom/Search";
+import Pagination from "@/components/Pagination";
+import PopupNewDialog from "@/components/PopupNewDialog";
+import Search from "@/components/Search";
 import { DialogTitle } from "@repo/ui/components/dialog";
 import CustomersList from "./CustomersList";
 import { pagination } from "@repo/lib/utils/pagination";

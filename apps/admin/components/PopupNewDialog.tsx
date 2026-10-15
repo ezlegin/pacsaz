@@ -1,3 +1,7 @@
+// Lives in the app rather than @repo/ui: its NewButton child imports next/link,
+// and Next.js imports inside the shared UI package make Vercel treat
+// packages/ui as a deployable service. The admin and client apps each keep
+// their own copy.
 import {
   Dialog,
   DialogContent,

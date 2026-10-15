@@ -1,3 +1,7 @@
+// Lives in the app rather than @repo/ui: it imports next/image, and Next.js
+// imports inside the shared UI package make Vercel treat packages/ui as a
+// deployable service.
+import { pacsazLogoFull, pacsazLogoIcon } from "@/public";
 import { cn } from "@repo/ui/lib/utils";
 import Image from "next/image";
 
@@ -17,7 +21,7 @@ const PacsazLogo = ({
   return type === "icon" ? (
     <Image
       alt="logo"
-      src={"/logos/pacsaz-logo-icon.svg"}
+      src={pacsazLogoIcon}
       width={36 * scale}
       height={36}
       className={styles}
@@ -25,7 +29,7 @@ const PacsazLogo = ({
   ) : (
     <Image
       alt="logo"
-      src={"/logos/pacsaz-logo-full.svg"}
+      src={pacsazLogoFull}
       width={85 * scale}
       height={36}
       className={styles}

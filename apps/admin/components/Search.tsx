@@ -1,3 +1,6 @@
+// Lives in the app rather than @repo/ui: it imports next/navigation, and Next.js
+// imports inside the shared UI package make Vercel treat packages/ui as a
+// deployable service. The admin and client apps each keep their own copy.
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";

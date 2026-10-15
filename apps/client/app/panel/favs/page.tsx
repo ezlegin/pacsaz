@@ -4,7 +4,7 @@ import { prisma } from "@repo/db";
 import { pagination } from "@repo/lib/utils/pagination";
 import { Button } from "@repo/ui/components/button";
 import Card from "@repo/ui/components/custom/Card";
-import Pagination from "@repo/ui/components/custom/Pagination";
+import Pagination from "@/components/Pagination";
 import { Frown } from "lucide-react";
 import Link from "next/link";
 

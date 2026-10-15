@@ -2,9 +2,7 @@ import { deleteSavedDieline } from "@/actions/dieline";
 import DeleteButton from "@/components/DeleteButton";
 import SaveDielineForm from "@/components/forms/SaveDielineForm";
 import { CustomDielineSettings, Dieline, Plan, SavedDieline } from "@repo/db";
-import ActionButton, {
-  ActButton,
-} from "@repo/ui/components/custom/ActionButton";
+import ActionButton, { ActButton } from "@/components/ActionButton";
 import Card from "@repo/ui/components/custom/Card";
 import Table from "@repo/ui/components/custom/Table";
 import { DialogTitle } from "@repo/ui/components/dialog";

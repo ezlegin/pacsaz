@@ -1,3 +1,6 @@
+// Lives in the app rather than @repo/ui: it imports next/link, and Next.js
+// imports inside the shared UI package make Vercel treat packages/ui as a
+// deployable service. PopupNewDialog depends on it, so both moved together.
 import { Button } from "@repo/ui/components/button";
 import { Plus } from "lucide-react";
 import Link from "next/link";

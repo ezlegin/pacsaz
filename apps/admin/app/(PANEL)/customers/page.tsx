@@ -1,8 +1,8 @@
 import PageTitle from "@/components/PageTitle";
 import { globalPageSize } from "@repo/lib/data/consts";
-import Pagination from "@repo/ui/components/custom/Pagination";
+import Pagination from "@/components/Pagination";
 import CustomersList from "./CustomersList";
-import Search from "@repo/ui/components/custom/Search";
+import Search from "@/components/Search";
 import { prisma } from "@repo/db";
 import { pagination } from "@repo/lib/utils/pagination";
 

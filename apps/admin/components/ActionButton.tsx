@@ -1,7 +1,14 @@
+// Lives in the app rather than @repo/ui: it imports next/link, and Next.js
+// imports inside the shared UI package make Vercel treat packages/ui as a
+// deployable service. The admin and client apps each keep their own copy.
 import { LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { HTMLAttributeAnchorTarget, ReactNode } from "react";
-import { Dialog, DialogContent, DialogTrigger } from "../dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+} from "@repo/ui/components/dialog";
 
 const ActionButton = (param: {
   icon: LucideIcon;

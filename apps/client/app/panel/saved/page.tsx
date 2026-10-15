@@ -2,8 +2,8 @@ import { getSessionUser } from "@repo/auth/session";
 import { prisma } from "@repo/db";
 import { pagination } from "@repo/lib/utils/pagination";
 import { Badge } from "@repo/ui/components/badge";
-import Pagination from "@repo/ui/components/custom/Pagination";
-import Search from "@repo/ui/components/custom/Search";
+import Pagination from "@/components/Pagination";
+import Search from "@/components/Search";
 import SavedDielinesList from "./SavedDielinesList";
 
 interface Props {

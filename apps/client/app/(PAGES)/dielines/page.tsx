@@ -3,7 +3,7 @@ import DielinesSidebar from "@/components/DielinesSidebar";
 import { Prisma, prisma } from "@repo/db";
 import { pagination } from "@repo/lib/utils/pagination";
 import { Button } from "@repo/ui/components/button";
-import Pagination from "@repo/ui/components/custom/Pagination";
+import Pagination from "@/components/Pagination";
 import {
   Sheet,
   SheetContent,

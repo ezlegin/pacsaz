@@ -1,5 +1,5 @@
 import { admin } from "@/data/admin";
-import PacsazLogo from "@repo/ui/components/custom/PacsazLogo";
+import PacsazLogo from "@/components/PacsazLogo";
 import {
   Sidebar,
   SidebarContent,

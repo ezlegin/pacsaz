@@ -15,7 +15,7 @@ import {
 } from "@repo/store/slices/nodesSlice";
 import { ISpec } from "@repo/store/types";
 import { Button } from "@repo/ui/components/button";
-import { ActButton } from "@repo/ui/components/custom/ActionButton";
+import { ActButton } from "@/components/ActionButton";
 import {
   Dialog,
   DialogContent,

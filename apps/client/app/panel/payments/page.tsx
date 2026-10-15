@@ -1,5 +1,5 @@
 import { globalPageSize } from "@repo/lib/data/consts";
-import Pagination from "@repo/ui/components/custom/Pagination";
+import Pagination from "@/components/Pagination";
 import PaymentsList from "./PaymentsList";
 import { PaymentWhereInput, prisma } from "@repo/db";
 import { getSessionUser } from "@repo/auth/session";

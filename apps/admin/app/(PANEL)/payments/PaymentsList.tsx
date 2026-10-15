@@ -3,7 +3,7 @@ import DeleteButton from "@/components/DeleteButton";
 import { PaymentForm } from "@/components/forms/PaymentForm";
 import { Coupon, Payment, Plan, Price, Tarrif, User } from "@repo/db";
 import { formatPrice } from "@repo/lib/utils/formatPrice";
-import ActionButton from "@repo/ui/components/custom/ActionButton";
+import ActionButton from "@/components/ActionButton";
 import Card from "@repo/ui/components/custom/Card";
 import PaymentStatus from "@repo/ui/components/custom/PaymentStatus";
 import Table from "@repo/ui/components/custom/Table";

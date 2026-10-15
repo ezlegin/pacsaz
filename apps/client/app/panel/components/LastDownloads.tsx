@@ -1,5 +1,5 @@
 import { CustomDielineSettings, Dieline, DownloadHistory } from "@repo/db";
-import { ActButton } from "@repo/ui/components/custom/ActionButton";
+import { ActButton } from "@/components/ActionButton";
 import Card from "@repo/ui/components/custom/Card";
 import Table from "@repo/ui/components/custom/Table";
 import { TableCell, TableRow } from "@repo/ui/components/table";

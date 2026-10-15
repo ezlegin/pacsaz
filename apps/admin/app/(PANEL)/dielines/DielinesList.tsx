@@ -14,7 +14,7 @@ import {
   ModelImage,
 } from "@repo/db";
 import { Badge } from "@repo/ui/components/badge";
-import ActionButton from "@repo/ui/components/custom/ActionButton";
+import ActionButton from "@/components/ActionButton";
 import Card from "@repo/ui/components/custom/Card";
 import Table from "@repo/ui/components/custom/Table";
 import { DialogTitle } from "@repo/ui/components/dialog";

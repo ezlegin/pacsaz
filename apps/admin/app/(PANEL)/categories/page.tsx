@@ -3,10 +3,10 @@ import PageTitle from "@/components/PageTitle";
 import { prisma } from "@repo/db";
 import { globalPageSize } from "@repo/lib/data/consts";
 import { pagination } from "@repo/lib/utils/pagination";
-import Filter from "@repo/ui/components/custom/Filter";
-import Pagination from "@repo/ui/components/custom/Pagination";
-import PopupNewDialog from "@repo/ui/components/custom/PopupNewDialog";
-import Search from "@repo/ui/components/custom/Search";
+import Filter from "@/components/Filter";
+import Pagination from "@/components/Pagination";
+import PopupNewDialog from "@/components/PopupNewDialog";
+import Search from "@/components/Search";
 import { DialogTitle } from "@repo/ui/components/dialog";
 import CategoriesList from "./CategoriesList";
 

@@ -2,8 +2,8 @@ import FeatureForm from "@/components/forms/FeatureForm";
 import PageTitle from "@/components/PageTitle";
 import { prisma } from "@repo/db";
 import { globalPageSize } from "@repo/lib/data/consts";
-import Pagination from "@repo/ui/components/custom/Pagination";
-import PopupNewDialog from "@repo/ui/components/custom/PopupNewDialog";
+import Pagination from "@/components/Pagination";
+import PopupNewDialog from "@/components/PopupNewDialog";
 import { DialogTitle } from "@repo/ui/components/dialog";
 import FeaturesList from "./FeaturesList";
 

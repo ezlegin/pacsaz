@@ -2,7 +2,7 @@ import { deleteUser } from "@/actions/user";
 import DeleteButton from "@/components/DeleteButton";
 import { UserForm } from "@/components/forms/UserForm";
 import { User } from "@repo/db";
-import ActionButton from "@repo/ui/components/custom/ActionButton";
+import ActionButton from "@/components/ActionButton";
 import Card from "@repo/ui/components/custom/Card";
 import Table from "@repo/ui/components/custom/Table";
 import { DialogTitle } from "@repo/ui/components/dialog";

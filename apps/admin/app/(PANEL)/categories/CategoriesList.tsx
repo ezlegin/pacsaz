@@ -2,7 +2,7 @@ import { deleteCategory } from "@/actions/categories";
 import DeleteButton from "@/components/DeleteButton";
 import { CategoriesForm } from "@/components/forms/CategoriesForm";
 import { mainURL } from "@/data/envs";
-import ActionButton from "@repo/ui/components/custom/ActionButton";
+import ActionButton from "@/components/ActionButton";
 import Card from "@repo/ui/components/custom/Card";
 import Table from "@repo/ui/components/custom/Table";
 import { DialogTitle } from "@repo/ui/components/dialog";
