@@ -1,6 +1,6 @@
 import { IModelMap, IPoint } from "makerjs";
 import Pacsaz from "../pacsaz";
-import { Model } from "./Model";
+import { Model } from "./model";
 
 export class Glue extends Model {
   constructor(

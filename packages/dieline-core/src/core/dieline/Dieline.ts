@@ -4,8 +4,8 @@ import { setOverallSizes } from "@repo/store/slices/overallSizesSlice";
 import { store } from "@repo/store/store";
 import M, { IModel, IModelMap } from "makerjs";
 import Pacsaz from "../pacsaz";
-import { Bleed } from "./Bleed";
-import { Exporter } from "./Exporter";
+import { Bleed } from "./bleed";
+import { Exporter } from "./exporter";
 
 export abstract class Dieline {
   protected main: IModel = {};

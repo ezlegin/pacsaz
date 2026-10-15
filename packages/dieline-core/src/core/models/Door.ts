@@ -1,7 +1,7 @@
 import M, { IModel, IModelMap, IPoint } from "makerjs";
 import { calcualteTuckFlapSize } from "../../utils/calculate/calculateTuckFlapSize";
 import Pacsaz from "../pacsaz";
-import { Model } from "./Model";
+import { Model } from "./model";
 import { addFillet } from "../helpers/addFillet";
 
 type DustSide = "left" | "right" | "both";
