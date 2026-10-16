@@ -43,6 +43,7 @@ const LINK_GROUPS = [
     title: "پک‌ساز",
     links: [
       { label: "درباره ما", href: "/about-us" },
+      { label: "سوالات متداول", href: "/faq" },
       { label: "تماس با ما", href: "/contact-us" },
       { label: "قوانین و مقررات", href: "/terms" },
     ],

@@ -1,78 +1,59 @@
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@repo/ui/components/accordion";
-import { Badge } from "@repo/ui/components/badge";
-import Card from "@repo/ui/components/custom/Card";
-import { CircleQuestionMark } from "lucide-react";
+import FaqAccordion from "@/components/FaqAccordion";
+import { FAQ_ITEMS, faqsByCategory } from "@/data/faq";
+import { ArrowLeft, CircleQuestionMark } from "lucide-react";
+import Link from "next/link";
 
+/** Home-page teaser for the product questions. */
 const FAQ = () => {
+  const items = faqsByCategory("product").slice(0, 5);
+
   return (
-    <div className="flex flex-wrap lg:flex-nowrap w-full gap-10">
-      <div className="space-y-3 w-full ">
-        <Badge variant={"primaryForeground"}>
-          Frequently Asked Questions
-          <CircleQuestionMark />
-        </Badge>
+    <div className="flex w-full flex-col gap-10 lg:flex-row lg:items-start">
+      {/* ------------------------------- heading ------------------------------ */}
+      <div className="w-full space-y-4 lg:sticky lg:top-24 lg:w-2/5">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-[11px] font-medium text-primary">
+          <CircleQuestionMark className="size-3.5" />
+          سوالات متداول
+        </span>
 
-        <h2 className="font-semibold text-2xl">سوالات متداول درباره پک‌ساز</h2>
+        <h2 className="text-2xl font-extrabold tracking-tight">
+          سوالات پرتکرار درباره‌ی پک‌ساز
+        </h2>
 
-        <p className="text-sm text-muted-foreground">
-          در این بخش به سوالات متداول درباره‌ی پک‌ساز پاسخ داده شده است. اگر
-          سوال شما در اینجا پاسخ داده نشده، لطفاً از طریق بخش پشتیبانی با ما در
-          ارتباط باشید.
+        <p className="text-sm leading-7 text-muted-foreground">
+          پاسخ کوتاه پرتکرارترین سوال‌ها را اینجا جمع کرده‌ایم. اگر پاسخ سوالت
+          اینجا نبود، از صفحه‌ی سوالات متداول یا بخش پشتیبانی کمک بگیر.
         </p>
 
-        {/* <Button variant={"default"}>صفحه سوالات متداول</Button> */}
+        <div className="flex flex-wrap items-center gap-3 pt-1">
+          <Link
+            href="/faq"
+            className="group inline-flex items-center gap-2 rounded-xl bg-gradient-to-l from-violet-500 to-purple-600 px-4 py-2.5 text-xs font-medium text-white shadow-sm transition-all duration-300 hover:gap-3 hover:shadow-lg hover:shadow-primary/30"
+          >
+            همه‌ی سوالات متداول
+            <ArrowLeft className="size-3.5" />
+          </Link>
+
+          <Link
+            href="/contact-us"
+            className="rounded-xl border bg-background px-4 py-2.5 text-xs font-medium transition-colors hover:border-primary/30 hover:text-primary"
+          >
+            پرسیدن سوال
+          </Link>
+        </div>
+
+        <p className="text-[11px] text-muted-foreground">
+          {FAQ_ITEMS.length.toLocaleString("fa-IR", { useGrouping: false })} سوال
+          پاسخ‌داده‌شده در سه دسته
+        </p>
       </div>
 
-      <div className="w-full">
-        <Accordion type="single" collapsible className="space-y-2">
-          {faqs.map((faq, idx) => (
-            <AccordionItem key={idx} value={`${idx}`} className="border-none">
-              <Card className="py-0">
-                <AccordionTrigger className="text-sm font-medium border-none cursor-pointer">
-                  {faq.q}
-                </AccordionTrigger>
-                <AccordionContent className="text-sm text-muted-foreground">
-                  {faq.a}
-                </AccordionContent>
-              </Card>
-            </AccordionItem>
-          ))}
-        </Accordion>
+      {/* -------------------------------- list -------------------------------- */}
+      <div className="w-full lg:w-3/5">
+        <FaqAccordion items={items} defaultOpenId={items[0]?.id} />
       </div>
     </div>
   );
 };
 
 export default FAQ;
-
-const faqs = [
-  {
-    q: "پک‌ساز دقیقاً چه کاری انجام می‌دهد؟",
-    a: "پک‌ساز یک ابزار تخصصی آنلاین برای تولید دایلاین‌های استاندارد بسته‌بندی است که به طراحان، چاپخانه‌ها و استودیوهای طراحی کمک می‌کند بدون خطا و بر اساس ابعاد واقعی، دایلاین آماده‌ی تولید بسازند.",
-  },
-  {
-    q: "برای استفاده از پک‌ساز باید نرم‌افزار خاصی نصب کنم؟",
-    a: "خیر. پک‌ساز کاملاً تحت وب است و بدون نصب هیچ نرم‌افزاری، از طریق مرورگر قابل استفاده است.",
-  },
-  {
-    q: "چه فرمت‌هایی برای خروجی دایلاین‌ها ارائه می‌شود؟",
-    a: "دایلاین‌ها در فرمت‌های استاندارد وکتور مانند PDF، DXF و AI ارائه می‌شوند تا به‌راحتی در نرم‌افزارهای وکتور همچون مثل Adobe Illustrator قابل ویرایش باشند.",
-  },
-  {
-    q: "آیا دایلاین‌های تولیدشده قابل استفاده در چاپخانه هستند؟",
-    a: "بله. تمام دایلاین‌های پک‌ساز بر اساس اصول فنی چاپ و بسته‌بندی طراحی شده‌اند و خروجی‌ها مستقیماً قابل استفاده در چاپخانه و خطوط تولید هستند.",
-  },
-  {
-    q: "آیا پک‌ساز برای چاپخانه‌ها و تیم‌های طراحی هم مناسب است؟",
-    a: "کاملاً. پک‌ساز به‌گونه‌ای طراحی شده که هم برای طراحان مستقل و هم برای چاپخانه‌ها و تیم‌های حرفه‌ای قابل استفاده باشد.",
-  },
-  {
-    q: "اگر در حین استفاده سوال یا مشکلی داشته باشم چه کار کنم؟",
-    a: "می‌توانید از طریق بخش پشتیبانی با تیم پک‌ساز در ارتباط باشید تا در سریع‌ترین زمان راهنمایی شوید.",
-  },
-];

@@ -1,70 +1,54 @@
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@repo/ui/components/accordion";
-import HomeTitle from "./HomeTitle";
-import Card from "@repo/ui/components/custom/Card";
+import FaqAccordion from "@/components/FaqAccordion";
+import { faqsByCategory } from "@/data/faq";
+import { ArrowLeft, CreditCard } from "lucide-react";
+import Link from "next/link";
 
-const HomeSUbFAQ = () => {
+/** Home-page teaser for billing and subscription questions. */
+const HomeSubFAQ = () => {
+  const items = faqsByCategory("subscription").slice(0, 5);
+
   return (
-    <div className="flex flex-wrap lg:flex-nowrap gap-10">
-      <div className="space-y-3 w-full">
-        <HomeTitle
-          title="سوالات متداول درباره اشتراک پک ساز"
-          description="در این بخش به سوالات متداول درباره‌ی اشتراک پک‌ساز پاسخ داده شده است.
-          اگر سوال شما در اینجا پاسخ داده نشده، لطفاً از طریق بخش پشتیبانی با ما
-          در ارتباط باشید."
-          className="text-right"
-        />
+    <div className="flex w-full flex-col gap-10 lg:flex-row lg:items-start">
+      {/* ------------------------------- heading ------------------------------ */}
+      <div className="w-full space-y-4 lg:sticky lg:top-24 lg:w-2/5">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-[11px] font-medium text-primary">
+          <CreditCard className="size-3.5" />
+          اشتراک و پرداخت
+        </span>
+
+        <h2 className="text-2xl font-extrabold tracking-tight">
+          سوالات متداول درباره‌ی اشتراک
+        </h2>
+
+        <p className="text-sm leading-7 text-muted-foreground">
+          هر چیزی که پیش از خرید اشتراک لازم است بدانی: تفاوت پلن‌ها، سهمیه‌ی
+          دانلود، روش پرداخت و شرایط تغییر یا تمدید پلن.
+        </p>
+
+        <div className="flex flex-wrap items-center gap-3 pt-1">
+          <Link
+            href="/subscription"
+            className="group inline-flex items-center gap-2 rounded-xl bg-gradient-to-l from-violet-500 to-purple-600 px-4 py-2.5 text-xs font-medium text-white shadow-sm transition-all duration-300 hover:gap-3 hover:shadow-lg hover:shadow-primary/30"
+          >
+            مشاهده‌ی پلن‌ها
+            <ArrowLeft className="size-3.5" />
+          </Link>
+
+          <Link
+            href="/faq"
+            className="rounded-xl border bg-background px-4 py-2.5 text-xs font-medium transition-colors hover:border-primary/30 hover:text-primary"
+          >
+            همه‌ی سوالات
+          </Link>
+        </div>
       </div>
 
-      <div className="w-full">
-        <Accordion type="single" collapsible className="space-y-2">
-          {faqs.map((faq, idx) => (
-            <AccordionItem key={idx} value={`${idx}`} className="border-none">
-              <Card className="py-0">
-                <AccordionTrigger className="text-sm font-medium border-none cursor-pointer">
-                  {faq.q}
-                </AccordionTrigger>
-                <AccordionContent className="text-sm text-muted-foreground">
-                  {faq.a}
-                </AccordionContent>
-              </Card>
-            </AccordionItem>
-          ))}
-        </Accordion>
+      {/* -------------------------------- list -------------------------------- */}
+      <div className="w-full lg:w-3/5">
+        <FaqAccordion items={items} />
       </div>
     </div>
   );
 };
 
-export default HomeSUbFAQ;
-
-const faqs = [
-  {
-    q: "دانلود منصفانه (Fair Download) یعنی چه؟",
-    a: "دانلود منصفانه یعنی هر پلن تعداد مشخصی دانلود در ماه یا سال دارد تا استفاده‌ی حرفه‌ای و عادلانه برای همه‌ی کاربران حفظ شود.",
-  },
-  {
-    q: "اگر دانلودهای پلنم تمام شود چه اتفاقی می‌افتد؟",
-    a: "در صورت اتمام دانلودهای پلن، می‌توانید پلن خود را تمدید یا ارتقا دهید یا تا شروع دوره‌ی بعدی منتظر بمانید.",
-  },
-  {
-    q: "پلن‌های اشتراک پک‌ساز چه تفاوتی با هم دارند؟",
-    a: "تفاوت پلن‌ها در تعداد دانلود، امکانات حرفه‌ای‌تر، سطح دسترسی و مناسب بودن برای طراحان فردی یا سازمان‌هاست.",
-  },
-  {
-    q: "آیا امکان ارتقا یا تغییر پلن در هر زمان وجود دارد؟",
-    a: "بله. شما می‌توانید در هر زمان پلن خود را ارتقا دهید و از امکانات پلن جدید استفاده کنید.",
-  },
-  {
-    q: "پرداخت‌ها از چه طریقی انجام می‌شود؟",
-    a: "پرداخت‌ها به‌صورت آنلاین و از طریق درگاه‌های امن بانکی انجام می‌شود و پس از پرداخت، اشتراک شما بلافاصله فعال خواهد شد.",
-  },
-  {
-    q: "آیا امکان پرداخت سالانه با تخفیف وجود دارد؟",
-    a: "بله. در پلن‌های سالانه، هزینه نهایی کمتر از پرداخت ماهانه است و شامل تخفیف ویژه می‌شود.",
-  },
-];
+export default HomeSubFAQ;
