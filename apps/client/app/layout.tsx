@@ -1,5 +1,7 @@
 import ProgressBarProvider from "@/components/ProgressBarProvider";
 import ReduxProvider from "@/components/ReduxProvider";
+import { BANNER_INLINE_SCRIPT } from "@/components/bannerStorage";
+import { SubscriptionBannerProvider } from "@/components/SubscriptionBanner";
 import { favIcon } from "@/public";
 import { Toaster } from "@repo/ui/components/sonner";
 import "@repo/ui/globals.css";
@@ -14,8 +16,18 @@ export default async function RootLayout({
   return (
     <html lang="fa" dir="rtl" suppressHydrationWarning>
       <body style={{ fontFamily }} className="antialiased">
+        {/*
+          Reads the banner's dismissed flag before paint. Without this the server
+          would render the banner and the client would remove it on hydration,
+          which flashes a card the visitor already closed.
+        */}
+        <script
+          dangerouslySetInnerHTML={{ __html: BANNER_INLINE_SCRIPT }}
+        />
         <ProgressBarProvider>
-          <ReduxProvider>{children}</ReduxProvider>
+          <SubscriptionBannerProvider>
+            <ReduxProvider>{children}</ReduxProvider>
+          </SubscriptionBannerProvider>
         </ProgressBarProvider>
         <Toaster
           richColors

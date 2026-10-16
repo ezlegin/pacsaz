@@ -5,7 +5,6 @@ import { cn } from "@repo/ui/lib/utils";
 import {
   ArrowLeft,
   BadgeCheck,
-  Bookmark,
   Calendar,
   Check,
   Clock,
@@ -15,7 +14,6 @@ import {
   Flag,
   FolderDown,
   FolderTree,
-  Heart,
   Infinity as InfinityIcon,
   Layers,
   LayoutDashboard,
@@ -23,7 +21,6 @@ import {
   ShieldCheck,
   Sparkles,
   TrendingUp,
-  Users,
   Zap,
 } from "lucide-react";
 import { differenceInDays, formatDate } from "date-fns";
@@ -31,7 +28,12 @@ import Link from "next/link";
 import LastDownloads from "./components/LastDownloads";
 import RemainingDownloads from "./components/RemainingDownloads";
 import UserSubscriptionCard from "./components/UserSubscriptionCard";
-import { PanelPage, PageHeader, PanelCard, StatTile } from "./components/PanelUI";
+import {
+  PanelPage,
+  PageHeader,
+  PanelCard,
+  StatTile,
+} from "./components/PanelUI";
 
 const fa = (value: number) =>
   value.toLocaleString("fa-IR", { useGrouping: false });
@@ -69,15 +71,6 @@ const PROMISES = [
     title: "دسترسی آنی",
     text: "بعد از پرداخت، بدون انتظار دانلود کن.",
   },
-];
-
-const QUICK_LINKS = [
-  { icon: Flag, label: "سوابق اشتراک", href: "/panel/subscriptions" },
-  { icon: Heart, label: "علاقه‌مندی‌ها", href: "/panel/favs" },
-  { icon: Bookmark, label: "ذخیره‌شده‌ها", href: "/panel/saved" },
-  { icon: Users, label: "مشتری‌ها", href: "/panel/customers" },
-  { icon: CreditCard, label: "پرداخت‌ها", href: "/panel/payments" },
-  { icon: Layers, label: "قالب‌ها", href: "/dielines" },
 ];
 
 const Page = async () => {
@@ -501,86 +494,9 @@ const Page = async () => {
         />
       </div>
 
-      {/* ---------------------------- quota detail -------------------------- */}
-      <PanelCard className="p-5">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div className="space-y-1">
-            <h2 className="text-sm font-bold">وضعیت سهمیه دانلود</h2>
-            <p className="text-[11px] text-muted-foreground">
-              سهمیه‌ی پلن {plan.title} برای دوره‌ی{" "}
-              {plan.period === "monthly"
-                ? "ماهیانه"
-                : plan.period === "threeMonth"
-                  ? "۳ ماهه"
-                  : "سالیانه"}
-            </p>
-          </div>
-
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-extrabold text-primary">
-              {fa(remaining)}
-            </span>
-            <span className="text-[11px] text-muted-foreground">
-              دانلود باقی مانده
-            </span>
-          </div>
-        </div>
-
-        <div className="mt-5">
-          <QuotaBar
-            downloaded={downloaded}
-            fairDownload={fairDownload}
-            tone={quotaTone}
-          />
-        </div>
-
-        <div className="mt-4 flex flex-wrap gap-6 border-t pt-4">
-          {[
-            {
-              label: "اولین دانلود",
-              value: plan.firstDownload
-                ? formatDate(plan.firstDownload, "yyyy/MM/dd")
-                : "—",
-            },
-            {
-              label: "آخرین دانلود",
-              value: plan.lastDownload
-                ? formatDate(plan.lastDownload, "yyyy/MM/dd")
-                : "—",
-            },
-            {
-              label: "نوع اشتراک",
-              value: plan.type === "new" ? "خرید جدید" : "تمدید",
-            },
-            { label: "سطح پلن", value: fa(plan.level) },
-          ].map((row) => (
-            <div key={row.label} className="space-y-0.5">
-              <p className="text-[10px] text-muted-foreground">{row.label}</p>
-              <p className="text-xs font-bold">{row.value}</p>
-            </div>
-          ))}
-        </div>
-      </PanelCard>
-
-      {/* ---------------------------- quick links --------------------------- */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        {QUICK_LINKS.map(({ icon: Icon, label, href }) => (
-          <Link
-            key={href}
-            href={href}
-            className="group flex flex-col items-center gap-2.5 rounded-2xl border bg-background p-4 transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10"
-          >
-            <span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary transition-colors duration-300 group-hover:bg-primary group-hover:text-primary-foreground">
-              <Icon className="size-4.5" strokeWidth={1.8} />
-            </span>
-            <span className="text-[11px] font-medium">{label}</span>
-          </Link>
-        ))}
-      </div>
-
       {/* --------------------------- upgrade nudge -------------------------- */}
       {nextPlan?.price && (
-        <PanelCard className="bg-gradient-to-bl from-primary/[0.07] via-background to-background p-5">
+        <PanelCard className="bg-linear-to-bl from-primary/[0.07] via-background to-background p-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">
               <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
@@ -611,44 +527,6 @@ const Page = async () => {
       {/* ----------------------------- downloads ---------------------------- */}
       <LastDownloads data={downloadRecords} />
     </PanelPage>
-  );
-};
-
-/** Quota bar matching the shared Meter geometry so pages stay consistent. */
-const QuotaBar = ({
-  downloaded,
-  fairDownload,
-  tone,
-}: {
-  downloaded: number;
-  fairDownload: number;
-  tone: "primary" | "warning" | "danger";
-}) => {
-  const pct =
-    fairDownload > 0
-      ? Math.min(Math.round((downloaded / fairDownload) * 100), 100)
-      : 0;
-
-  const bar =
-    tone === "danger"
-      ? "bg-gradient-to-l from-rose-500 to-red-500"
-      : tone === "warning"
-        ? "bg-gradient-to-l from-amber-400 to-orange-500"
-        : "bg-gradient-to-l from-violet-500 to-purple-600";
-
-  return (
-    <div className="space-y-2">
-      <div className="h-2.5 w-full overflow-hidden rounded-full bg-muted">
-        <span
-          style={{ width: `${pct}%` }}
-          className={cn("block h-full rounded-full transition-all", bar)}
-        />
-      </div>
-      <div className="flex justify-between text-[10px] text-muted-foreground">
-        <span>{fa(downloaded)} دانلود شده</span>
-        <span>{fa(fairDownload)} سهمیه کل</span>
-      </div>
-    </div>
   );
 };
 

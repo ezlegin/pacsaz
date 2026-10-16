@@ -72,27 +72,13 @@ const UserMenu = ({ user }: { user: NavbarUser }) => {
             : "hover:border-primary/25 hover:shadow-sm",
         )}
       >
-        <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 text-xs font-extrabold text-white shadow-sm shadow-primary/20">
+        <span className="grid size-5 shrink-0 place-items-center rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 text-[10px] font-extrabold text-white shadow-sm shadow-primary/20">
           {initial}
         </span>
 
         <span className="hidden min-w-0 lg:block">
           <span className="block max-w-28 truncate text-[11px] font-bold leading-tight">
             {user.fullName}
-          </span>
-          <span
-            className={cn(
-              "flex items-center gap-1 text-[10px] leading-tight",
-              expiringSoon ? "text-amber-600" : "text-muted-foreground",
-            )}
-          >
-            <span
-              className={cn(
-                "size-1 rounded-full",
-                expiringSoon ? "bg-amber-500" : "bg-green-500",
-              )}
-            />
-            {user.plan ? user.plan.title : "بدون اشتراک"}
           </span>
         </span>
 
