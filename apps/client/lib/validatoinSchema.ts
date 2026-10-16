@@ -31,8 +31,21 @@ const userType = [
   "other",
 ] as const;
 
+/**
+ * The user types the local mobile number as `9xxxxxxxxx` (no leading zero).
+ * Everything downstream — the Otp table, Kavenegar and the auth provider — keys
+ * on the `0…` form, so the schema validates the local form and normalises it to
+ * `09xxxxxxxxx` on the way out. `InputFormType` is therefore the *normalised*
+ * shape, which is what the server actions receive.
+ */
 export const inputFormSchema = z.object({
-  phoneNumber: z.string().regex(/^09\d{9}$/),
+  phoneNumber: z
+    .string()
+    .transform((value) => value.replace(/\D/g, "").replace(/^0+/, ""))
+    .refine((digits) => /^9\d{9}$/.test(digits), {
+      message: "شماره موبایل معتبر نیست.",
+    })
+    .transform((digits) => `0${digits}`),
 });
 export type InputFormType = z.infer<typeof inputFormSchema>;
 
