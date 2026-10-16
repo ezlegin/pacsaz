@@ -37,11 +37,21 @@ export const SubscriptionCard = ({
   const isRecommended = tarrif.isRecommended;
   const discount = tarrif.discountAmount ?? 0;
 
-  const finalPrice = PriceMapper(period, tarrif.price!, 0);
-  const basePrice = finalPrice / (1 - discount / 100);
+  /**
+   * `Price` and `FairDownload` are both optional relations on `Tarrif`, so a plan
+   * created in the admin panel before its pricing rows are filled in arrives here
+   * as `null`. Both used to be forced with `!`, which turned that ordinary state
+   * into a `Cannot read properties of null` crash of the whole page — including
+   * the home page, which embeds this list. Treating a missing price as zero keeps
+   * the card renderable and lets the caller decide whether to show it at all.
+   */
+  const finalPrice = tarrif.price ? PriceMapper(period, tarrif.price, 0) : 0;
+  const basePrice = discount >= 100 ? finalPrice : finalPrice / (1 - discount / 100);
   const saved = basePrice - finalPrice;
 
-  const downloadCount = FairDownloadMap(period, tarrif.fairDownload!);
+  const downloadCount = tarrif.fairDownload
+    ? FairDownloadMap(period, tarrif.fairDownload)
+    : 0;
 
   return (
     <div

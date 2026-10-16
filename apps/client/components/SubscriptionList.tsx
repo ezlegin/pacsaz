@@ -35,11 +35,19 @@ const PERIODS: { value: PlanPeriod; label: string; hint?: string }[] = [
 const SubscriptionList = ({
   tarrif,
   features,
+  /**
+   * The heading level for the section title. The pricing page owns the document
+   * `h1`; the home page renders this inside a section that already has one, so
+   * it renders an `h2` there.
+   */
+  headingLevel = "h2",
 }: {
   tarrif: TarrifType[];
   features: TarrifFeature[];
+  headingLevel?: "h1" | "h2";
 }) => {
   const [period, setPeriod] = useState<PlanPeriod>("monthly");
+  const Heading = headingLevel;
 
   return (
     <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col items-center gap-10 px-4">
@@ -55,12 +63,18 @@ const SubscriptionList = ({
           اشتراک پک‌ساز
         </Badge>
 
-        <h2 className="text-3xl font-extrabold tracking-tight md:text-4xl">
+        {/*
+          `h1`: this heading is the pricing page's own title. It is rendered by a
+          shared component (the home page reuses it as a section), where the
+          template already supplies the `h1`, so the level is set by the caller
+          through `headingLevel`.
+        */}
+        <Heading className="text-3xl font-extrabold tracking-tight md:text-4xl">
           یک اشتراک،{" "}
           <span className="bg-linear-to-l from-violet-500 to-purple-600 bg-clip-text text-transparent">
             بی‌نهایت دایلاین
           </span>
-        </h2>
+        </Heading>
 
         <p className="max-w-xl text-sm leading-6 text-muted-foreground md:text-base">
           با فعال‌سازی اشتراک، به تمام قالب‌ها، اندازه‌ها و ابزارهای حرفه‌ای
@@ -112,15 +126,23 @@ const SubscriptionList = ({
       </div>
 
       {/* ------------------------------- plans -------------------------------- */}
+      {/*
+        A plan with no `Price` row is not purchasable, so it is filtered out
+        rather than rendered with an empty price. The `Tarrif` list is fetched
+        without a filter to preserve the admin's ordering, so this is the one
+        place the shape of the data is checked before it reaches a card.
+      */}
       <div className="grid w-full grid-cols-1 items-stretch gap-6 md:grid-cols-2 xl:grid-cols-3">
-        {tarrif.map((t) => (
-          <SubscriptionCard
-            key={t.id}
-            tarrif={t}
-            period={period}
-            features={features}
-          />
-        ))}
+        {tarrif
+          .filter((plan) => plan.price !== null)
+          .map((plan) => (
+            <SubscriptionCard
+              key={plan.id}
+              tarrif={plan}
+              period={period}
+              features={features}
+            />
+          ))}
       </div>
 
       {/* ------------------------------ trust bar ----------------------------- */}

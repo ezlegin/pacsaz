@@ -1,6 +1,8 @@
 import OnboardingForm from "@/components/forms/OnboardingForm";
+import { buildMetadata, SITE_NAME } from "@/lib/seo";
 import { loginPageRoute } from "@/proxy";
 import { getSessionUser } from "@repo/auth/session";
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 const page = async () => {
@@ -54,6 +56,10 @@ const page = async () => {
 
 export default page;
 
-export const metadata = {
-  title: "تکمیل اطلاعات",
-};
+export const metadata: Metadata = buildMetadata({
+  title: "تکمیل اطلاعات کاربری",
+  description: `تکمیل اطلاعات حساب کاربری ${SITE_NAME} پس از ثبت‌نام.`,
+  path: "/onboarding",
+  // Session-gated and disallowed in robots.txt: it must never be indexed.
+  noIndex: true,
+});

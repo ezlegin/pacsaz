@@ -127,7 +127,7 @@ const SubscriptionBanner = ({
   return (
     <div
       aria-hidden={!visible}
-      className={`fixed bottom-6 right-6 z-40 hidden w-[21.5rem] transition-all duration-700 ease-out lg:block ${
+      className={`fixed bottom-6 right-6 z-40 hidden w-[16rem] transition-all duration-700 ease-out lg:block ${
         visible
           ? "visible translate-x-0 opacity-100"
           : "invisible pointer-events-none translate-x-10 opacity-0"
@@ -185,13 +185,6 @@ const SubscriptionBanner = ({
             >
               فعال‌سازی اشتراک
               <ArrowLeft className="size-3.5 transition-transform duration-300 group-hover:-translate-x-0.5" />
-            </a>
-
-            <a
-              href="/dielines"
-              className="shrink-0 rounded-xl border bg-background px-3 py-2 text-[11px] font-medium text-muted-foreground transition-colors hover:border-primary/30 hover:text-primary"
-            >
-              قالب‌ها
             </a>
           </div>
         </div>

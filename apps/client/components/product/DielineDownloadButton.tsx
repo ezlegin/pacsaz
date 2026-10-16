@@ -143,12 +143,8 @@ const DielineDownloadButton = ({ slug, isRendering, user }: Props) => {
             </>
           ) : (
             <>
-              {user?.plan ? (
-                <Download className="size-4" />
-              ) : (
-                <Diamond />
-              )}
-              {user?.plan ? "دانلود فایل" : "فعال‌سازی اشتراک برای دانلود"}
+              {user?.plan ? <Download className="size-4" /> : <Diamond />}
+              دانلود فایل
             </>
           )}
         </Button>
@@ -168,24 +164,13 @@ const DielineDownloadButton = ({ slug, isRendering, user }: Props) => {
               </Button>
             </TooltipTrigger>
             <TooltipContent side="top">
-              <p className="p-0.5 text-[11px]">ذخیره‌ی این قالب با تنظیمات فعلی</p>
+              <p className="p-0.5 text-[11px]">
+                ذخیره‌ی این قالب با تنظیمات فعلی
+              </p>
             </TooltipContent>
           </Tooltip>
         )}
       </div>
-
-      {!user?.plan && (
-        <p className="mt-2 text-center text-[10px] leading-5 text-muted-foreground">
-          برای دانلود فایل، ابتدا یک پلن فعال کن.{" "}
-          <button
-            type="button"
-            onClick={() => router.push("/subscription")}
-            className="font-bold text-primary hover:underline"
-          >
-            مشاهده پلن‌ها
-          </button>
-        </p>
-      )}
     </>
   );
 };

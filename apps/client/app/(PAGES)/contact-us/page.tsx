@@ -1,4 +1,14 @@
 import ContactUsForm from "@/components/forms/ContactUsForm";
+import JsonLd from "@/components/JsonLd";
+import {
+  absoluteUrl,
+  breadcrumbSchema,
+  buildMetadata,
+  CONTACT,
+  SITE_NAME,
+  SOCIAL_PROFILES,
+  webPageSchema,
+} from "@/lib/seo";
 import { getSessionUser } from "@repo/auth/session";
 import {
   Clock,
@@ -43,6 +53,54 @@ const page = async () => {
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-8">
+      <JsonLd
+        data={[
+          webPageSchema({
+            name: "تماس با پک‌ساز",
+            description: `راه‌های ارتباط با پشتیبانی ${SITE_NAME}: ایمیل، شماره تماس و ساعات پاسخ‌گویی.`,
+            path: "/contact-us",
+          }),
+          breadcrumbSchema(
+            [
+              { name: "صفحه اصلی", path: "/" },
+              { name: "تماس با ما", path: "/contact-us" },
+            ],
+            "/contact-us",
+          ),
+          /**
+           * `ContactPage` is what ties the published phone number and email to
+           * the brand entity, which is what a local/knowledge-panel result reads.
+           */
+          {
+            "@context": "https://schema.org",
+            "@type": "ContactPage",
+            "@id": `${absoluteUrl("/contact-us")}#contact`,
+            url: absoluteUrl("/contact-us"),
+            name: `تماس با ${SITE_NAME}`,
+            inLanguage: "fa",
+            isPartOf: { "@id": `${absoluteUrl("/")}#website` },
+            mainEntity: {
+              "@type": "Organization",
+              name: SITE_NAME,
+              url: absoluteUrl("/"),
+              email: CONTACT.email,
+              telephone: CONTACT.telephone,
+              sameAs: SOCIAL_PROFILES,
+              contactPoint: [
+                {
+                  "@type": "ContactPoint",
+                  contactType: "customer support",
+                  email: CONTACT.email,
+                  telephone: CONTACT.telephone,
+                  availableLanguage: ["fa"],
+                  areaServed: CONTACT.areaServed,
+                },
+              ],
+            },
+          },
+        ]}
+      />
+
       {/* ------------------------------- header ------------------------------ */}
       <header className="relative overflow-hidden rounded-3xl border bg-gradient-to-bl from-primary/[0.09] via-background to-background p-6 md:p-10">
         <div
@@ -169,8 +227,14 @@ const page = async () => {
 
 export default page;
 
-export const metadata = {
-  title: "تماس با ما",
-  description:
-    "صفحه تماس با ما در وبسایت پکساز. برای ارتباط با تیم پک ساز، می‌توانید از طریق ایمیل یا شماره تماس ارائه شده در این صفحه اقدام نمایید.",
-};
+export const metadata = buildMetadata({
+  title: "تماس با ما و پشتیبانی",
+  description: `راه‌های ارتباط با تیم ${SITE_NAME}: ایمیل پشتیبانی، شماره تماس و ساعات پاسخ‌گویی شنبه تا چهارشنبه. سوال فنی، مشکل حساب کاربری یا پیگیری سفارش را همین‌جا مطرح کن.`,
+  path: "/contact-us",
+  keywords: [
+    "تماس با پک‌ساز",
+    "پشتیبانی پک‌ساز",
+    "پشتیبانی دایلاین",
+    "ارتباط با پک ساز",
+  ],
+});

@@ -165,7 +165,18 @@ every layout behaves exactly as it did before.
 | `AUTH_APP` | `client` |
 | `ZARINPAL_MERCHANT_ID`, `ZARINPAL_ACCESS_TOKEN` | Payment gateway |
 | `KAVENEGAR_API` | SMS API key |
-| `NEXTJS_PUBLIC_MAIN_URL` | Public origin, used for absolute URLs (payment callback, sitemap) |
+| `RESEND_API_KEY`, `RESEND_FROM_EMAIL` | Transactional email |
+| `CRON_SECRET` | Shared secret the scheduled-job route verifies |
+| `NEXT_PUBLIC_MAIN_URL` | Public origin. Absolute URLs (payment callback, canonical links, `robots.txt`, `sitemap.xml`) are built from it |
+| `GOOGLE_SITE_VERIFICATION` | Optional. Emits the Search Console verification meta tag |
+
+> **`NEXT_PUBLIC_MAIN_URL`, not `NEXTJS_PUBLIC_MAIN_URL`.** Both apps read the
+> former (see `apps/client/lib/consts.ts` and `apps/admin/data/envs.ts`), so a
+> value set under the `NEXTJS_` spelling is ignored and the code falls back to the
+> hardcoded `https://pacsaz.ir`. That fallback is the production domain, which is
+> why the mistake is invisible until the site is served somewhere else — and then
+> every canonical link, `og:url` and sitemap entry points at the wrong host. Check
+> the spelling in Vercel as well as in the local `.env` files.
 
 `apps/admin/.env`:
 
@@ -175,7 +186,7 @@ every layout behaves exactly as it did before.
 | `AUTH_SECRET` | Auth.js signing key |
 | `AUTH_APP` | `admin` |
 | `CLOUDINARY_URL` | Image uploads |
-| `NEXTJS_PUBLIC_MAIN_URL` | Public site origin, for links out of the panel |
+| `NEXT_PUBLIC_MAIN_URL` | Public site origin, for links out of the panel |
 
 Then a seed-only group read by `packages/db` to create the first admin:
 `ADMIN_EMAIL`, `ADMIN_FULLNAME`, `ADMIN_PASSWORD`, `ADMIN_PHONENUMBER`.
@@ -251,3 +262,78 @@ allows symlinks you can switch the scripts back.
   `○` column of `pnpm build`.
 - **The dieline editor's state lives in `packages/store`** and is shared by the
   admin editor and the public product page.
+
+## SEO and AI crawlers
+
+Everything a crawler reads is generated from data, not written by hand, so the
+markup cannot drift from the catalogue.
+
+| Concern | Where it lives |
+| --- | --- |
+| Brand constants (name, origin, contact, social) | `apps/client/lib/seo/site.ts` |
+| schema.org graph builders | `apps/client/lib/seo/schema.ts` |
+| Next.js metadata helpers | `apps/client/lib/seo/metadata.ts` |
+| Crawler policy (which bots, which paths) | `apps/client/lib/seo/routes.ts` |
+| `<script type="application/ld+json">` renderer | `apps/client/components/JsonLd.tsx` |
+
+Routes the client publishes for crawlers: `/robots.txt`, `/sitemap.xml`,
+`/manifest.webmanifest`, `/llms.txt` and `/llms-full.txt`.
+
+Rules worth keeping:
+
+- **Every page's metadata goes through `buildMetadata`.** Next.js merges
+  `metadata` shallowly, so a page that sets only `openGraph` silently drops the
+  parent's canonical, robots directives and Twitter card. The helper repeats them.
+- **`metadataBase` is set once, in `app/layout.tsx`.** Without it the relative
+  `og:image` and canonical paths resolve to nothing.
+- **Graph nodes are joined by `@id`, not repeated.** `Organization` and `WebSite`
+  are declared once in the root layout; every other node references them. An `@id`
+  reference with no target makes the entity look inconsistent to Google.
+- **A page must never be both `Disallow`ed and linked.** `robots.ts` and
+  `sitemap.ts` both derive from `lib/seo/routes.ts` for that reason.
+- **Session-gated routes are `noindex` *and* disallowed.** `Disallow` stops the
+  crawl; only `noindex` keeps a URL out of the index.
+- **Categories are real routes.** `/dielines/category/<slug>` has its own title,
+  `h1`, breadcrumb and `ItemList`. The old `?category=` form permanently redirects
+  there, so it is not indexed as a near-duplicate of `/dielines`.
+- **`Dieline.specification` is JSON**, not prose — it is a geometry document the
+  editor parses. Never render it as text; `lib/seo/schema.ts` builds descriptions
+  from `title`, the size columns and `materials` instead.
+
+### Checking your work
+
+With the production server running:
+
+```bash
+python apps/client/scripts/audit.py http://localhost:3000      # titles, canonicals, robots, JSON-LD graph
+python apps/client/scripts/jsonld.py http://localhost:3000 /dieline/<slug>
+```
+
+`audit.py` validates the JSON-LD as a graph: dangling `@id` references,
+`Product` nodes missing required fields, breadcrumb positions that are not
+sequential, and `numberOfItems` disagreeing with the list it counts. It exits
+non-zero on failure, so it can gate a deploy.
+
+Two of its checks are data-conditional and report as warnings on an empty
+database: the sitemap carries no category or dieline URLs, and the catalogue
+section of `llms.txt` is absent. Seed the catalogue before treating those as
+failures.
+
+The icon set is generated, not hand-drawn — change the artwork and re-run:
+
+```bash
+python apps/client/scripts/icons.py   # favicon.ico, apple-touch-icon.png, icon-192/512.png
+```
+
+### AI discovery
+
+`robots.txt` names the answer-engine and training crawlers explicitly rather than
+leaving them to `*`, so the policy is auditable: `AI_CITATION_BOTS` (fetches a page
+to answer a question, links back) and `AI_TRAINING_BOTS` (builds model weights) are
+both allowed — blocking either removes the site from the answer without removing it
+from the model's knowledge of the web. Content scrapers with no discoverability
+upside (`AhrefsBot`, `SemrushBot`, `MJ12bot`) are blocked.
+
+`/llms.txt` is the index and `/llms-full.txt` is the content: the FAQ and terms
+verbatim, plus the full dieline catalogue with sizes. Both are generated from the
+same sources the pages render.

@@ -1,6 +1,8 @@
 import LoginCard from "@/components/forms/LoginCard";
-import Link from "next/link";
+import { buildMetadata, SITE_NAME } from "@/lib/seo";
 import { ArrowRight } from "lucide-react";
+import type { Metadata } from "next";
+import Link from "next/link";
 
 /**
  * Rendered per request. Login is otherwise prerenderable, which would bake the
@@ -71,8 +73,12 @@ const page = () => {
 
 export default page;
 
-export const metadata = {
-  title: "ورود/ثبت نام",
-  description:
-    "صفحه ورود و ثبت نام در وبسایت پکساز. با ورود به حساب کاربری خود می‌توانید به امکانات و خدمات ویژه دسترسی پیدا کنید.",
-};
+export const metadata: Metadata = buildMetadata({
+  title: "ورود یا ثبت‌نام",
+  description: `ورود و ثبت‌نام در ${SITE_NAME} با شماره موبایل. برای دانلود خروجی دایلاین‌ها و دسترسی به کتابخانه قالب‌ها وارد حساب کاربری شو.`,
+  path: "/login",
+  // A sign-in form has nothing to rank for, and its URL is disallowed in
+  // robots.txt. `noindex` is the directive that actually keeps it out of the
+  // index; `Disallow` alone only stops the crawl.
+  noIndex: true,
+});

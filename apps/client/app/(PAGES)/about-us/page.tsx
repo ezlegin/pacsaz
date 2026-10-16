@@ -1,4 +1,11 @@
+import JsonLd from "@/components/JsonLd";
 import PacsazLogo from "@/components/PacsazLogo";
+import {
+  breadcrumbSchema,
+  buildMetadata,
+  SITE_NAME,
+  webPageSchema,
+} from "@/lib/seo";
 import { prisma } from "@repo/db";
 import { cn } from "@repo/ui/lib/utils";
 import {
@@ -73,6 +80,23 @@ const AboutPage = async () => {
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-12">
+      <JsonLd
+        data={[
+          webPageSchema({
+            name: "درباره پک‌ساز",
+            description: `${SITE_NAME} ابزار آنلاین طراحی دایلاین بسته‌بندی؛ درباره تیم، فلسفه و معماری محصول.`,
+            path: "/about-us",
+          }),
+          breadcrumbSchema(
+            [
+              { name: "صفحه اصلی", path: "/" },
+              { name: "درباره ما", path: "/about-us" },
+            ],
+            "/about-us",
+          ),
+        ]}
+      />
+
       {/* -------------------------------- hero ------------------------------- */}
       <header className="relative overflow-hidden rounded-3xl border bg-gradient-to-bl from-primary/[0.09] via-background to-background p-8 text-center md:p-14">
         <div
@@ -336,8 +360,14 @@ const AboutPage = async () => {
 
 export default AboutPage;
 
-export const metadata = {
-  title: "درباره ما",
-  description:
-    "صفحه درباره ما در وبسایت پکساز. اطلاعات مربوط به مسیر شکل‌گیری، فلسفه و معماری محصول پک‌ساز در این صفحه ارائه شده است.",
-};
+export const metadata = buildMetadata({
+  title: "درباره پک‌ساز و تیم سازنده",
+  description: `${SITE_NAME} ابزار آنلاین طراحی دایلاین بسته‌بندی است؛ ساخته‌شده برای طراحان، چاپخانه‌ها و تیم‌های بسته‌بندی. داستان شکل‌گیری، فلسفه‌ی محاسبات دقیق و معماری محصول را بخوان.`,
+  path: "/about-us",
+  keywords: [
+    "درباره پک‌ساز",
+    "تیم پک‌ساز",
+    "نرم افزار بسته بندی ایرانی",
+    "ابزار طراحی دایلاین",
+  ],
+});

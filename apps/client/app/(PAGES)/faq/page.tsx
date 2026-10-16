@@ -1,29 +1,35 @@
 import FaqBrowser from "@/components/FaqBrowser";
+import JsonLd from "@/components/JsonLd";
 import { FAQ_CATEGORIES, FAQ_ITEMS } from "@/data/faq";
+import { breadcrumbSchema, buildMetadata, faqSchema, SITE_NAME } from "@/lib/seo";
 import { ArrowLeft, CircleQuestionMark, MessagesSquare } from "lucide-react";
 import Link from "next/link";
 
 const fa = (value: number) =>
   value.toLocaleString("fa-IR", { useGrouping: false });
 
+const PATH = "/faq";
+
 const page = () => {
-  /** Structured data so search engines can surface the answers directly. */
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: FAQ_ITEMS.map((item) => ({
-      "@type": "Question",
-      name: item.question,
-      acceptedAnswer: { "@type": "Answer", text: item.answer },
-    })),
-  };
+  /**
+   * Structured data. `FAQPage` marks up every question rendered below — the
+   * requirement is that each one is actually visible on the page, which is why
+   * the graph is built from the same array the list renders.
+   */
+  const structuredData = [
+    faqSchema(FAQ_ITEMS, PATH),
+    breadcrumbSchema(
+      [
+        { name: "صفحه اصلی", path: "/" },
+        { name: "سوالات متداول", path: PATH },
+      ],
+      PATH,
+    ),
+  ];
 
   return (
     <div className="mx-auto w-full max-w-4xl space-y-8">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <JsonLd data={structuredData} />
 
       {/* ------------------------------- header ------------------------------ */}
       <header className="relative overflow-hidden rounded-3xl border bg-gradient-to-bl from-primary/[0.09] via-background to-background p-6 md:p-10">
@@ -46,9 +52,9 @@ const page = () => {
               </span>
             </h1>
             <p className="max-w-2xl text-sm leading-7 text-muted-foreground">
-              پاسخ {fa(FAQ_ITEMS.length)} سوال پرتکرار درباره‌ی پک‌ساز، اشتراک‌ها
-              و حساب کاربری. اگر پاسخ سوالت را پیدا نکردی، از صفحه‌ی تماس با ما
-              بپرس.
+              پاسخ {fa(FAQ_ITEMS.length)} سوال پرتکرار درباره‌ی {SITE_NAME}،
+              دایلاین بسته‌بندی، اشتراک‌ها و حساب کاربری. اگر پاسخ سوالت را پیدا
+              نکردی، از صفحه‌ی تماس با ما بپرس.
             </p>
           </div>
 
@@ -119,8 +125,14 @@ const page = () => {
 
 export default page;
 
-export const metadata = {
-  title: "سوالات متداول",
-  description:
-    "پاسخ سوالات پرتکرار درباره‌ی پک‌ساز: خروجی دایلاین‌ها، متریال‌ها و بلید، تفاوت پلن‌های اشتراک، سهمیه دانلود، پرداخت و مدیریت حساب کاربری.",
-};
+export const metadata = buildMetadata({
+  title: "سوالات متداول دایلاین و اشتراک",
+  description: `پاسخ ${FAQ_ITEMS.length} سوال پرتکرار درباره‌ی ${SITE_NAME}: ساخت دایلاین، خروجی DXF و PDF، متریال و ضخامت مقوا، تفاوت پلن‌های اشتراک، سهمیه دانلود، پرداخت و مدیریت حساب کاربری.`,
+  path: PATH,
+  keywords: [
+    "سوالات متداول دایلاین",
+    "راهنمای دایلاین",
+    "خروجی DXF دایلاین",
+    "اشتراک پک‌ساز",
+  ],
+});

@@ -141,11 +141,12 @@ const DielineCard = ({
 
   return (
     <div className="group relative">
-      <Link
-        href={`/dieline/${dieline.slug}`}
-        target="_blank"
-        className="block space-y-3"
-      >
+      {/*
+        Same tab, deliberately: this is the site's primary internal link to a
+        product page, and `target="_blank"` makes it a dead end for the crawler
+        that follows it.
+      */}
+      <Link href={`/dieline/${dieline.slug}`} className="block space-y-3">
         {/* ----------------------------- preview ---------------------------- */}
         <div className="relative overflow-hidden rounded-2xl border bg-muted/30 transition-all duration-300 group-hover:border-primary/30 group-hover:shadow-xl group-hover:shadow-primary/10">
           {/* the non-active layer stays in flow so the box never collapses */}

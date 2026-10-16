@@ -1,5 +1,7 @@
 import PaymentResult from "@/components/PaymentResult";
+import { buildMetadata, SITE_NAME } from "@/lib/seo";
 import { ZarinPalStatus } from "@/lib/zarrinpal";
+import type { Metadata } from "next";
 import React from "react";
 
 interface Props {
@@ -14,8 +16,11 @@ const page = async ({ searchParams }: Props) => {
 
 export default page;
 
-export const metadata = {
+export const metadata: Metadata = buildMetadata({
   title: "نتیجه پرداخت",
-  description:
-    "صفحه نتیجه پرداخت در وبسایت پکساز. در این صفحه می‌توانید نتیجه فرآیند پرداخت اشتراک خود را مشاهده کنید و اطلاعات مربوط به وضعیت پرداخت را دریافت نمایید.",
-};
+  description: `نتیجه‌ی پرداخت اشتراک ${SITE_NAME}.`,
+  path: "/payment/result",
+  // Carries a gateway authority in the query string and is disallowed in
+  // robots.txt; `noindex` keeps a stale result page out of the index.
+  noIndex: true,
+});

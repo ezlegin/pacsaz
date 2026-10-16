@@ -1,10 +1,9 @@
 "use client";
 
-import { updateQueryParam } from "@/utils/updateQueryParam";
 import { DielineCategoryByModel, DielineCategoryByUsage } from "@repo/db";
 import { cn } from "@repo/ui/lib/utils";
 import { Check, Search, X } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { useState } from "react";
 
 type DielineCount = { _count: { dieline: number } };
@@ -15,28 +14,30 @@ export interface DielinesSidebarProps {
   /** Slug of the category currently applied, if any. */
   activeCategory?: string;
   className?: string;
-  /** Called after a category is applied — lets a mobile sheet close itself. */
+  /** Called after a category is followed — lets a mobile sheet close itself. */
   onSelect?: (slug: string | undefined) => void;
 }
 
 const fa = (value: number) =>
   value.toLocaleString("fa-IR", { useGrouping: false });
 
+/**
+ * The category rail.
+ *
+ * Categories are `<Link>`s to `/dielines/category/<slug>`, not buttons that write
+ * a query parameter. A crawler cannot follow a click handler, so the query-param
+ * version left every category page undiscoverable and unindexable; real hrefs
+ * make each one a first-class URL with its own title, description and structured
+ * data.
+ */
 const DielinesSidebar = ({
   categoriesByModel,
   categoriesByUsage,
   activeCategory,
   className,
-  onSelect: onSelectProp,
+  onSelect,
 }: DielinesSidebarProps) => {
   const [query, setQuery] = useState("");
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  const apply = (slug: string | undefined) => {
-    updateQueryParam(searchParams, router, "category", slug);
-    onSelectProp?.(slug);
-  };
 
   const match = (title: string) =>
     query.trim() === "" || title.includes(query.trim());
@@ -82,9 +83,9 @@ const DielinesSidebar = ({
 
       {/* --------------------------- clear filter ---------------------------- */}
       {activeCategory && (
-        <button
-          type="button"
-          onClick={() => apply(undefined)}
+        <Link
+          href="/dielines"
+          onClick={() => onSelect?.(undefined)}
           className="flex w-full items-center justify-between rounded-xl border border-primary/25 bg-primary/10 px-3 py-2 text-[11px] font-bold text-primary transition-colors hover:bg-primary/15"
         >
           <span className="flex items-center gap-1.5">
@@ -95,7 +96,7 @@ const DielinesSidebar = ({
             حذف
             <X className="size-3" />
           </span>
-        </button>
+        </Link>
       )}
 
       {/* ------------------------------- groups ----------------------------- */}
@@ -124,10 +125,10 @@ const DielinesSidebar = ({
 
                   return (
                     <li key={category.id}>
-                      <button
-                        type="button"
-                        onClick={() => apply(active ? undefined : category.slug)}
-                        aria-pressed={active}
+                      <Link
+                        href={`/dielines/category/${category.slug}`}
+                        onClick={() => onSelect?.(category.slug)}
+                        aria-current={active ? "page" : undefined}
                         className={cn(
                           "group flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-right text-xs transition-all duration-200",
                           active
@@ -144,7 +145,9 @@ const DielinesSidebar = ({
                               : "border-border group-hover:border-primary/40",
                           )}
                         >
-                          {active && <Check className="size-2.5" strokeWidth={4} />}
+                          {active && (
+                            <Check className="size-2.5" strokeWidth={4} />
+                          )}
                         </span>
 
                         <span className="flex-1 truncate">{category.title}</span>
@@ -159,7 +162,7 @@ const DielinesSidebar = ({
                         >
                           {fa(category._count.dieline)}
                         </span>
-                      </button>
+                      </Link>
                     </li>
                   );
                 })}

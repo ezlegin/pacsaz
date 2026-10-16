@@ -1,6 +1,8 @@
 import { createPaymentTrack } from "@/actions/payment";
 import PaymentCard from "@/components/PaymentCard";
+import { buildMetadata, SITE_NAME } from "@/lib/seo";
 import { PlanKey, PlanPeriod, prisma } from "@repo/db";
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getSessionUser } from "@repo/auth/session";
 import { loginPageRoute } from "@/proxy";
@@ -30,8 +32,11 @@ const page = async ({ searchParams }: Props) => {
 
 export default page;
 
-export const metadata = {
-  title: "پرداخت",
-  description:
-    "صفحه پرداخت در وبسایت پکساز. در این صفحه می‌توانید فرآیند پرداخت اشتراک خود را انجام دهید و به امکانات ویژه دسترسی پیدا کنید.",
-};
+export const metadata: Metadata = buildMetadata({
+  title: "پرداخت اشتراک",
+  description: `تکمیل پرداخت اشتراک ${SITE_NAME} از طریق درگاه بانکی امن.`,
+  path: "/payment",
+  // Per-visitor checkout: reachable without a session, but never indexable.
+  // Kept out of `sitemap.ts` by `NON_SITEMAP_PATHS`.
+  noIndex: true,
+});

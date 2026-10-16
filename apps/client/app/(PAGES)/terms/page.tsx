@@ -1,5 +1,7 @@
+import JsonLd from "@/components/JsonLd";
 import Terms from "@/components/Terms";
 import { termsAndConditions, termsGroups } from "@/data/terms";
+import { breadcrumbSchema, buildMetadata, SITE_NAME } from "@/lib/seo";
 import { BadgeCheck, FileText, Phone, Scale, ShieldAlert } from "lucide-react";
 import Link from "next/link";
 
@@ -14,6 +16,16 @@ const page = () => {
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-8">
+      <JsonLd
+        data={breadcrumbSchema(
+          [
+            { name: "صفحه اصلی", path: "/" },
+            { name: "قوانین و مقررات", path: "/terms" },
+          ],
+          "/terms",
+        )}
+      />
+
       {/* ------------------------------- header ------------------------------ */}
       <header className="relative overflow-hidden rounded-3xl border bg-gradient-to-bl from-primary/[0.08] via-background to-background p-6 md:p-10">
         <div
@@ -157,8 +169,9 @@ const page = () => {
 
 export default page;
 
-export const metadata = {
-  title: "قوانین و مقررات",
-  description:
-    "صفحه قوانین و مقررات در وبسایت پکساز. با استفاده از این وبسایت، شما موافقت خود را با شرایط و قوانین ارائه شده در این صفحه اعلام می‌کنید.",
-};
+export const metadata = buildMetadata({
+  title: "قوانین و مقررات استفاده",
+  description: `شرایط استفاده از ${SITE_NAME}: مالکیت خروجی‌های دایلاین، محدوده‌ی مسئولیت صحت ابعاد و متریال، شرایط اشتراک و لغو، و رویه‌ی بازپرداخت. پیش از خرید یا دانلود این صفحه را بخوانید.`,
+  path: "/terms",
+  keywords: ["قوانین پک‌ساز", "شرایط استفاده دایلاین", "بازپرداخت پک‌ساز"],
+});

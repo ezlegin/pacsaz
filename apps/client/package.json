@@ -8,7 +8,10 @@
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint --max-warnings 0",
-    "check-types": "next typegen && tsc --noEmit"
+    "check-types": "next typegen && tsc --noEmit",
+    "seo:audit": "python scripts/audit.py",
+    "seo:jsonld": "python scripts/jsonld.py",
+    "icons:build": "python scripts/icons.py"
   },
   "dependencies": {
     "@bprogress/next": "^3.2.12",

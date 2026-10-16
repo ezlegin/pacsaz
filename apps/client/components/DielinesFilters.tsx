@@ -1,6 +1,5 @@
 "use client";
 
-import { updateQueryParam } from "@/utils/updateQueryParam";
 import { DielineCategoryByModel, DielineCategoryByUsage } from "@repo/db";
 import { Button } from "@repo/ui/components/button";
 import {
@@ -11,7 +10,7 @@ import {
   SheetTrigger,
 } from "@repo/ui/components/sheet";
 import { SlidersHorizontal, X } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { useState } from "react";
 import DielinesSidebar from "./DielinesSidebar";
 
@@ -19,8 +18,11 @@ type DielineCount = { _count: { dieline: number } };
 
 /**
  * Mobile filter drawer. Lives in its own client component so the sidebar can
- * close the sheet after a category is picked — the Sheet primitive is
- * controlled here, not inside DielinesSidebar.
+ * close the sheet after a category is chosen — the Sheet primitive is controlled
+ * here, not inside DielinesSidebar.
+ *
+ * It takes no `searchParams`: the rail navigates to real category URLs, so the
+ * trigger only has to open and close.
  */
 const DielinesFilters = ({
   categoriesByUsage,
@@ -34,12 +36,6 @@ const DielinesFilters = ({
   resultCount: number;
 }) => {
   const [open, setOpen] = useState(false);
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  const clearFilter = () => {
-    updateQueryParam(searchParams, router, "category", undefined);
-  };
 
   const fa = (value: number) =>
     value.toLocaleString("fa-IR", { useGrouping: false });
@@ -66,9 +62,7 @@ const DielinesFilters = ({
         >
           <SheetHeader className="mb-5 space-y-1 text-right">
             <div className="flex items-center justify-between">
-              <SheetTitle className="text-sm font-bold">
-                دسته‌بندی‌ها
-              </SheetTitle>
+              <SheetTitle className="text-sm font-bold">دسته‌بندی‌ها</SheetTitle>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
@@ -92,16 +86,13 @@ const DielinesFilters = ({
           />
 
           {activeCategory && (
-            <Button
-              variant="outline"
-              className="mt-4 w-full"
-              onClick={() => {
-                clearFilter();
-                setOpen(false);
-              }}
+            <Link
+              href="/dielines"
+              onClick={() => setOpen(false)}
+              className="mt-4 flex w-full items-center justify-center rounded-xl border bg-background px-4 py-2.5 text-xs font-medium transition-colors hover:border-primary/30 hover:text-primary"
             >
               حذف فیلتر
-            </Button>
+            </Link>
           )}
         </SheetContent>
       </Sheet>

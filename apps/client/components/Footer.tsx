@@ -65,7 +65,7 @@ const Footer = () => {
 
       <div className="relative mx-auto w-full max-w-7xl pt-14">
         {/* ------------------------------ top grid ----------------------------- */}
-        <div className="grid gap-10 lg:grid-cols-[minmax(0,1.4fr)_repeat(3,minmax(0,1fr))]">
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,1.4fr)_repeat(4,minmax(0,1fr))]">
           {/* brand + contact */}
           <div className="space-y-6">
             <div className="space-y-4">
@@ -129,6 +129,23 @@ const Footer = () => {
               </ul>
             </nav>
           ))}
+
+          <a
+            referrerPolicy="origin"
+            target="_blank"
+            rel="noreferrer"
+            href={ENamadUrl}
+            className="transition-opacity hover:opacity-90"
+          >
+            {/* Remote seal: plain <img>, it is not a local asset. */}
+            <img
+              referrerPolicy="origin"
+              data-code="1Wgxc21JlxfhD1Coppnv"
+              src={ENamadLogo}
+              alt="نماد اعتماد الکترونیکی"
+              className="h-24 w-auto cursor-pointer rounded-sm"
+            />
+          </a>
         </div>
 
         {/* ------------------------------- CTA strip --------------------------- */}
@@ -162,29 +179,10 @@ const Footer = () => {
             © {new Date().getFullYear()} پک‌ساز — تمامی حقوق محفوظ است.
           </p>
 
-          <div className="flex flex-wrap items-center justify-center gap-4">
-            <span className="hidden items-center gap-1.5 text-[11px] text-muted-foreground sm:flex">
-              <ShieldCheck className="size-3.5 text-primary" />
-              پرداخت امن از طریق درگاه بانکی
-            </span>
-
-            <a
-              referrerPolicy="origin"
-              target="_blank"
-              rel="noreferrer"
-              href={ENamadUrl}
-              className="transition-opacity hover:opacity-90"
-            >
-              {/* Remote seal: plain <img>, it is not a local asset. */}
-              <img
-                referrerPolicy="origin"
-                data-code="1Wgxc21JlxfhD1Coppnv"
-                src={ENamadLogo}
-                alt="نماد اعتماد الکترونیکی"
-                className="h-24 w-auto cursor-pointer rounded-sm"
-              />
-            </a>
-          </div>
+          <span className="hidden items-center gap-1.5 text-[11px] text-muted-foreground sm:flex">
+            <ShieldCheck className="size-3.5 text-primary" />
+            پرداخت امن از طریق درگاه بانکی
+          </span>
         </div>
       </div>
     </footer>
