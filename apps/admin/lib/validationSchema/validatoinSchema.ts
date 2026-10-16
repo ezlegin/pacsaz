@@ -68,6 +68,29 @@ export const featureFormSchema = z.object({
 });
 export type FeatureFormType = z.infer<typeof featureFormSchema>;
 
+export const notificationFormSchema = z
+  .object({
+    text: z.string().trim().min(1),
+    ctaTitle: z.string().optional(),
+    ctaLink: z.string().optional(),
+    // An ISO instant, or "" when the deadline is cleared. The form converts the
+    // `datetime-local` value in the browser, so the server stores the moment the
+    // admin actually meant rather than one shifted by the server's timezone.
+    expiresAt: z.string().optional(),
+    active: z.boolean(),
+  })
+  // The bar only renders the button when both halves are present, so reject one
+  // on its own instead of silently dropping it.
+  .refine((values) => !values.ctaTitle || !!values.ctaLink, {
+    path: ["ctaLink"],
+    message: "A link is required when a call to action title is set.",
+  })
+  .refine((values) => !values.ctaLink || !!values.ctaTitle, {
+    path: ["ctaTitle"],
+    message: "A title is required when a call to action link is set.",
+  });
+export type NotificationFormType = z.infer<typeof notificationFormSchema>;
+
 export const adminFormSchema = z.object({
   fullName: z.string().min(1),
   email: z.string().email(),

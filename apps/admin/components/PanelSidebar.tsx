@@ -112,6 +112,18 @@ export function PanelSidebar() {
       ],
     },
     {
+      groupLabel: "Site",
+      items: [
+        {
+          // The site-wide announcement bar shown at the top of every page of the
+          // client site. Both apps read the same row.
+          title: "Notification",
+          url: "/notification",
+          icon: Megaphone,
+        },
+      ],
+    },
+    {
       groupLabel: "Usre Management",
       items: [
         {

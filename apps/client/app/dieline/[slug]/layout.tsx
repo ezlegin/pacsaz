@@ -19,7 +19,7 @@ export default async function Layout({
   if (!dieline) return notFound();
 
   return (
-    <div className="relative flex h-screen flex-col overflow-hidden bg-muted/40">
+    <div className="relative flex h-[calc(100vh-var(--app-top-offset))] flex-col overflow-hidden bg-muted/40">
       <DielineNavbar dieline={dieline} />
 
       {/* ----------------------------- desktop only ---------------------------- */}

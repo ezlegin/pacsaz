@@ -127,6 +127,32 @@ Authentication is configured per app through `AUTH_APP`:
 - `AUTH_APP` is baked in at build time by each app's `next.config`, so it does
   not need to be set as an environment variable.
 
+## Notification bar
+
+A thin announcement bar pinned to the top of **every page of the client site**,
+the user panel included.
+
+- Set it in the admin panel under **Notification** (`/notification`).
+- **Text** is required. The **CTA button** (title + link, rendered with
+  `next/link`) and the **countdown** are both optional — leave either out and the
+  bar renders without it.
+- While a deadline is set, visitors see a live `DD : HH : MM : SS` countdown, and
+  the bar removes itself once the deadline passes. Switching **Active** off hides
+  it everywhere.
+- It is a single `NotificationBar` row (`id: 1`) that both apps read, so saving in
+  the admin changes the public site immediately — no redeploy, because the client
+  reads it per request.
+
+The bar itself lives in `packages/ui` and stays Next-free; the app supplies the
+CTA so the link can use `next/link`. Only the client renders the bar — the admin
+side of this feature is the settings page.
+
+Height is `--notification-bar-height`. When a bar is present,
+`body:has([data-notification-bar])` sets `--app-top-offset` to that height, and
+the shared sidebar plus the full-height client containers subtract it, so nothing
+is hidden behind the bar. With no notification configured the offset is `0` and
+every layout behaves exactly as it did before.
+
 ## Environment
 
 `apps/client/.env`:
@@ -184,6 +210,12 @@ pnpm --filter @repo/db run prisma:deploy \
 Both projects deploy against the **same database**, so `prisma:deploy` runs twice
 per release — it is idempotent, but it does mean either project can apply a
 pending migration.
+
+> **Schema changes that have no migration file need `db push`.** `prisma:deploy`
+> only applies what is in `packages/db/src/prisma/migrations`. When a model is
+> added by pushing the schema instead of generating a migration, every database
+> that must have it — production included — needs
+> `pnpm --filter @repo/db exec prisma db push` against that database.
 
 Set every variable from the [Environment](#environment) section in the matching
 project (Production and Preview as needed), and use a **different `AUTH_SECRET`

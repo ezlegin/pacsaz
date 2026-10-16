@@ -8,8 +8,27 @@
 
 /* @custom-variant dark (&:is(.dark *)); */
 
+/*
+ * Announcement bar.
+ *
+ * The bar (see NotificationBar) marks itself with `data-notification-bar` and is
+ * rendered at the very top of the page by the client root layout. While it is
+ * present, `--app-top-offset` becomes its height, which the fixed sidebars and
+ * the full-height page containers subtract so they start *below* the bar instead
+ * of underneath it. When no notification is set the offset stays 0 and every
+ * layout behaves exactly as it did before.
+ *
+ * `--notification-bar-height` is the single source of truth for both the bar's
+ * height and that offset.
+ */
+body:has([data-notification-bar]) {
+  --app-top-offset: var(--notification-bar-height);
+}
+
 :root {
   --radius: 0.65rem;
+  --notification-bar-height: 2.75rem;
+  --app-top-offset: 0px;
   --background: oklch(1 0 0);
   --foreground: oklch(0.141 0.005 285.823);
   --card: oklch(1 0 0);
@@ -114,6 +133,18 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /*
+   * Entrances used by the landing hero. `both` keeps the element at its final
+   * state once the animation ends, and every one of them is switched off again
+   * under `prefers-reduced-motion` (see the keyframes at the foot of this file),
+   * which leaves the content simply visible.
+   */
+  --animate-rise: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-draw: draw 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.5s both;
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-live: live 2s ease-in-out infinite;
+  --animate-sheen: sheen 6s ease-in-out infinite;
 }
 
 html {
@@ -198,4 +229,76 @@ html > body[data-scroll-locked] {
 ::selection {
   background-color: var(--primary);
   color: white;
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Landing hero animations (see --animate-* in the theme block above)         */
+/* -------------------------------------------------------------------------- */
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Draws an SVG stroke on. `--draw-length` is set inline to the path length. */
+@keyframes draw {
+  from {
+    stroke-dashoffset: var(--draw-length, 320);
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes live {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.75);
+  }
+}
+
+/* A slow diagonal highlight that travels across the primary button. */
+@keyframes sheen {
+  0%,
+  55% {
+    transform: translateX(-130%) skewX(-18deg);
+  }
+  100% {
+    transform: translateX(230%) skewX(-18deg);
+  }
+}
+
+/*
+ * Anyone who asked their system for less motion gets the finished state instead
+ * of the animation: these rules only remove the movement, never the content.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise,
+  .animate-draw,
+  .animate-float,
+  .animate-live,
+  .animate-sheen {
+    animation: none;
+  }
 }

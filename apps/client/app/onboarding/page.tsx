@@ -9,7 +9,7 @@ const page = async () => {
   if (user.onboardingCompleted) redirect("/panel");
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-muted/30 px-4 py-12">
+    <div className="relative flex min-h-[calc(100vh-var(--app-top-offset))] items-center justify-center overflow-hidden bg-muted/30 px-4 py-12">
       {/* brand wash */}
       <div
         aria-hidden

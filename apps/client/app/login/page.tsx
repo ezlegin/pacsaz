@@ -2,9 +2,16 @@ import LoginCard from "@/components/forms/LoginCard";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
+/**
+ * Rendered per request. Login is otherwise prerenderable, which would bake the
+ * announcement bar from the root layout into the build — a notification created
+ * afterwards would not show up here until the next deploy.
+ */
+export const dynamic = "force-dynamic";
+
 const page = () => {
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-muted/30 px-4 py-10">
+    <div className="relative flex min-h-[calc(100vh-var(--app-top-offset))] items-center justify-center overflow-hidden bg-muted/30 px-4 py-10">
       {/* brand wash */}
       <div
         aria-hidden

@@ -139,7 +139,9 @@ function SidebarProvider({
             } as React.CSSProperties
           }
           className={cn(
-            "group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-h-svh w-full",
+            // `--app-top-offset` is 0 unless an announcement bar is on the page,
+            // in which case the wrapper stops short of it by exactly its height.
+            "group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-h-[calc(100svh-var(--app-top-offset))] w-full",
             className,
           )}
           {...props}
@@ -229,7 +231,9 @@ function Sidebar({
       <div
         data-slot="sidebar-container"
         className={cn(
-          "fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex",
+          // Starts below the announcement bar when one is present, and is that
+          // much shorter, so it never slides under the bar or off the viewport.
+          "fixed top-[var(--app-top-offset)] z-10 hidden h-[calc(100svh-var(--app-top-offset))] w-(--sidebar-width) transition-[left,right,width] duration-200 ease-linear md:flex",
           side === "left"
             ? "left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]"
             : "right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]",

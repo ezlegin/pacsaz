@@ -12,6 +12,15 @@ import CampaignsList from "./CampaignsList";
  * are minted by the monthly marketing cron job and are read-only here, so the
  * numbers always describe what users actually received.
  */
+/**
+ * Read live data on every request.
+ *
+ * Without this the page has nothing dynamic about it, so Next.js prerenders it at
+ * build time: not only would newly minted campaign coupons be missing, the
+ * active/expired split below would be frozen against the build's clock.
+ */
+export const dynamic = "force-dynamic";
+
 const Page = async () => {
   // A single instant for the whole render, so two rows cannot be classified
   // against different clock readings and disagree about the same date.

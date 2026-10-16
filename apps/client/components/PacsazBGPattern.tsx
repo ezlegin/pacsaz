@@ -20,7 +20,7 @@ const PacsazBGPattern = ({
         pointer-events-none
       `}
       />
-      <div className={cn("min-h-screen z-10", className)}>{children}</div>
+      <div className={cn("min-h-[calc(100vh-var(--app-top-offset))] z-10", className)}>{children}</div>
     </div>
   );
 };

@@ -22,7 +22,10 @@ const SVGPreview = dynamic(
 );
 
 const HomeDieline = ({ dieline }: { dieline: DielineType | null }) => {
-  const containerClass = "h-175 max-w-225 min-w-225";
+  // Fluid, so the preview is usable below `xl` too: the SVG inside sizes itself
+  // to this box. It used to be pinned to `min-w-225`, which is what forced the
+  // hero to hide it on anything narrower than a desktop.
+  const containerClass = "h-125 w-full sm:h-150 xl:h-175";
   if (!dieline)
     return (
       <div className={cn(containerClass, "flex justify-center items-center")}>

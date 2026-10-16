@@ -501,3 +501,25 @@ model Price {
   tarrif   Tarrif @relation(fields: [tarrifId], references: [id], onDelete: Cascade)
   tarrifId Int    @unique
 }
+
+//! NOTIFICATION BAR --------------------------------
+
+/// The announcement bar pinned to the top of every page in both apps.
+///
+/// Deliberately separate from `NotificationLog` (which records messages actually
+/// sent to a user): this is a single editable row of site-wide copy. Both
+/// deployments read the same database, so one edit in the admin panel shows up on
+/// the client site too. A row with `active = false`, or one whose `expiresAt` has
+/// passed, is not rendered at all.
+model NotificationBar {
+  id        Int      @id @default(autoincrement())
+  text      String
+  /// Optional call to action. Both fields must be set for the button to render.
+  ctaTitle  String?
+  ctaLink   String?
+  /// Optional deadline: while it is in the future the bar shows a live countdown.
+  expiresAt DateTime?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

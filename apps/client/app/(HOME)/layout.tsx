@@ -4,7 +4,7 @@ import SubscriptionBanner from "@/components/SubscriptionBannerServer";
 
 const layout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="min-h-screen grid grid-rows-[auto_1fr_auto]">
+    <div className="min-h-[calc(100vh-var(--app-top-offset))] grid grid-rows-[auto_1fr_auto]">
       <Navbar />
       <div className="flex-1 mb-32">{children}</div>
       <Footer />

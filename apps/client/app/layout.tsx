@@ -1,6 +1,7 @@
 import ProgressBarProvider from "@/components/ProgressBarProvider";
 import ReduxProvider from "@/components/ReduxProvider";
 import { BANNER_INLINE_SCRIPT } from "@/components/bannerStorage";
+import NotificationBanner from "@/components/NotificationBanner";
 import { SubscriptionBannerProvider } from "@/components/SubscriptionBanner";
 import { favIcon } from "@/public";
 import { Toaster } from "@repo/ui/components/sonner";
@@ -16,6 +17,11 @@ export default async function RootLayout({
   return (
     <html lang="fa" dir="rtl" suppressHydrationWarning>
       <body style={{ fontFamily }} className="antialiased">
+        {/*
+          The announcement bar sits above everything, on every page. It renders
+          nothing at all when no notification is configured.
+        */}
+        <NotificationBanner />
         {/*
           Reads the banner's dismissed flag before paint. Without this the server
           would render the banner and the client would remove it on hydration,
