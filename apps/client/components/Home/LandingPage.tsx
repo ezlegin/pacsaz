@@ -1,76 +1,24 @@
-import { DIMENSIONS_TYPE } from "@/data/consts";
 import { DielineType } from "@/data/types";
-import { tuckEnd } from "@/public";
 import { materials } from "@repo/dieline-core/data/materials";
 import { Badge } from "@repo/ui/components/badge";
 import { Button } from "@repo/ui/components/button";
-import { cn } from "@repo/ui/lib/utils";
 import { Check, ChevronDown, ChevronLeft, Zap } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
-import HeroShowcase from "./HeroShowcase";
+import SquarePattern from "../SquarePattern";
 import HomeDieline from "./HomeDieline";
 
-const CAPABILITIES = [
-  "خروجی DXF و SVG آماده‌ی تولید",
-  "ابعاد تولید، داخلی و خارجی",
-  "کاملاً در مرورگر، بدون نصب",
-];
-
-/**
- * The landing hero.
- *
- * Laid out as a drafting board: a faint blueprint grid behind everything, the
- * pitch on one side, and the product itself on the other — the dieline the
- * visitor can drag from flat to folded, showing the real measurements stored on
- * that record. Below it sits the live editor, so the page goes from the result to
- * the tool without a navigation.
- */
 const LandingPage = async ({ dieline }: { dieline: DielineType | null }) => {
-  const settings = dieline?.settings ?? null;
-
-  const material = settings
-    ? materials.find((item) => item.value === settings.material)
-    : undefined;
-
-  const dimensionType = DIMENSIONS_TYPE.find(
-    (type) => type.key === settings?.dimensionType,
-  )?.label;
-
-  const specs = settings
-    ? [
-        {
-          label: "ابعاد",
-          value: `${settings.length} × ${settings.width} × ${settings.height} mm`,
-        },
-        { label: "نوع ابعاد", value: dimensionType ?? "—" },
-        { label: "ماده", value: material?.label ?? settings.material },
-        { label: "بلید", value: `${settings.bleed} mm` },
-      ]
-    : [];
-
-  const flatImage = dieline?.dielineImage?.url;
-  const foldedImage = dieline?.modelImage?.url;
-  const hasShowcase = Boolean(flatImage && foldedImage && specs.length > 0);
+  const CAPABILITIES = [
+    "خروجی DXF و SVG آماده‌ی تولید",
+    "ابعاد تولید، داخلی و خارجی",
+    "کاملاً در مرورگر، بدون نصب",
+  ];
 
   return (
-    <div className="relative">
-      {/* ------------------------------------------------------------------ */}
-      {/*  Ambient drafting board                                            */}
-      {/* ------------------------------------------------------------------ */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
-      >
-        <div className="absolute inset-x-0 top-0 h-[34rem] bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] bg-size-[34px_34px] opacity-50 [mask-image:radial-gradient(70%_60%_at_50%_0%,black,transparent)]" />
-        <div className="absolute -top-40 right-1/4 size-[30rem] rounded-full bg-primary/12 blur-3xl" />
-        <div className="absolute top-32 -left-20 size-[22rem] rounded-full bg-chart-2/10 blur-3xl" />
-      </div>
+    <div>
+      <SquarePattern />
 
-      <div className="grid items-center gap-12 xl:grid-cols-[1.02fr_1fr] xl:gap-16">
-        {/* ---------------------------------------------------------------- */}
-        {/*  Pitch                                                           */}
-        {/* ---------------------------------------------------------------- */}
+      <div className="flex justify-between items-center ">
         <div className="flex flex-col items-center gap-7 text-center xl:items-start xl:text-right">
           <Link
             href="/dielines"
@@ -184,66 +132,10 @@ const LandingPage = async ({ dieline }: { dieline: DielineType | null }) => {
           </div>
         </div>
 
-        {/* ---------------------------------------------------------------- */}
-        {/*  Product theatre                                                 */}
-        {/* ---------------------------------------------------------------- */}
-        {hasShowcase ? (
-          <HeroShowcase
-            flatImage={flatImage!}
-            foldedImage={foldedImage!}
-            flatLabel="دایلاین تخت"
-            foldedLabel="جعبه‌ی ساخته‌شده"
-            specs={specs}
-          />
-        ) : (
-          // Without both renders there is nothing to reveal, so fall back to the
-          // live editor rather than showing half a comparison.
-          <div className={cn("relative")}>
-            {dieline ? (
-              <HomeDieline dieline={dieline} />
-            ) : (
-              <Image
-                src={tuckEnd}
-                alt="دایلاین"
-                width={800}
-                height={800}
-                className="mx-auto h-auto w-full max-w-xl"
-                priority
-              />
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* ------------------------------------------------------------------ */}
-      {/*  The tool itself                                                   */}
-      {/* ------------------------------------------------------------------ */}
-      <section className="mt-20 md:mt-28">
-        <div className="overflow-hidden rounded-3xl border bg-card shadow-xl shadow-primary/5">
-          <div className="flex flex-col gap-3 border-b bg-background/70 px-6 py-5 backdrop-blur md:flex-row md:items-center md:justify-between">
-            <div className="space-y-1">
-              <h2 className="text-lg font-bold sm:text-xl">
-                همین حالا روی قالب کار کنید
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                ابعاد را عوض کنید و نتیجه را زنده ببینید — همان قالب، در همین
-                صفحه.
-              </p>
-            </div>
-
-            <Link href="/dielines" className="w-fit">
-              <Button variant="secondary">
-                قالب‌های دیگر
-                <ChevronLeft className="size-4" />
-              </Button>
-            </Link>
-          </div>
-
-          <div className="bg-muted/20">
-            <HomeDieline dieline={dieline} />
-          </div>
+        <div className="hidden xl:block">
+          <HomeDieline dieline={dieline} />
         </div>
-      </section>
+      </div>
     </div>
   );
 };
