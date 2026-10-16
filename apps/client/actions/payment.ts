@@ -5,7 +5,9 @@ import {
   verifyZarrinPalPurchase,
   ZarinPalStatus,
 } from "@/lib/zarrinpal";
+import { notifyPaymentResult } from "@/lib/notifications/send";
 import { calculatePlanEndDate } from "@/utils/calculatePlanEndDate";
+import { mapPeriodLabel } from "@/utils/mapPeriodLabel";
 import { mapPlanLevel } from "@/utils/mapPlanLevel";
 import { mapPlanTitle } from "@/utils/mapPlanTitle";
 import { getSessionUser } from "@repo/auth/session";
@@ -43,6 +45,8 @@ export const createPayment = async (params: {
     const tarrif = await prisma.tarrif.findUnique({ where: { key: plan } });
     if (!tarrif) return { error: "Tarrif Not Found." };
 
+    // A campaign coupon has the same shape as any other percent coupon, so
+    // checkout needs no special case; look it up by code as usual.
     let couponId: number | undefined = undefined;
     if (discountCode) {
       const existingCoupon = await prisma.coupon.findUnique({
@@ -116,6 +120,20 @@ export const verifyPayment = async (
       }, 30000);
     });
 
+    // Read before verification so the failure path still knows what the user
+    // was trying to buy and for how much.
+    const pendingPayment = (await Promise.race([
+      timeoutPromise,
+      prisma.payment.findUnique({
+        where: { authority },
+        include: { tarrif: true },
+      }),
+    ])) as (Payment & { tarrif: Tarrif }) | null;
+
+    if (!pendingPayment) throw new Error("توکن پرداخت معتبر نمی باشد.");
+
+    const planTitle = mapPlanTitle(pendingPayment.tarrif.key);
+
     const res = await prisma.$transaction(async (ts) => {
       const payment = (await Promise.race([
         timeoutPromise,
@@ -146,12 +164,15 @@ export const verifyPayment = async (
         data: { status: "success" },
       });
 
-      const previusActivePlans = await ts.plan.findMany({
-        where: { status: "active" },
+      // Scoped to this user: activating one subscription must only retire that
+      // user's own previous plan. Without the `userId` filter a single purchase
+      // deactivated every active plan in the database.
+      const previousActivePlans = await ts.plan.findMany({
+        where: { userId: user.id, status: "active" },
       });
 
       await ts.plan.updateMany({
-        where: { OR: previusActivePlans.map((p) => ({ id: p.id })) },
+        where: { id: { in: previousActivePlans.map((p) => p.id) } },
         data: {
           status: "inActive",
         },
@@ -159,12 +180,12 @@ export const verifyPayment = async (
 
       const tarrif = payment.tarrif;
 
-      await ts.plan.create({
+      const newPlan = await ts.plan.create({
         data: {
           key: tarrif.key,
-          title: mapPlanTitle(tarrif.key),
+          title: planTitle,
           level: mapPlanLevel(tarrif.key),
-          type: previusActivePlans.length > 0 ? "renewal" : "new",
+          type: previousActivePlans.length > 0 ? "renewal" : "new",
           period: payment.period,
           fairDownload: tarrif.fairDownload[payment.period],
           endsAt: calculatePlanEndDate(payment.period),
@@ -174,13 +195,75 @@ export const verifyPayment = async (
         },
       });
 
-      return { success: verifyPayment.success };
+      return {
+        success: verifyPayment.success,
+        plan: {
+          paymentId: payment.id,
+          amount: payment.amount,
+          periodLabel: mapPeriodLabel(payment.period),
+          endsAt: newPlan.endsAt,
+          fairDownload: newPlan.fairDownload,
+        },
+      };
+    });
+
+    // Outside the transaction on purpose: a slow or failing mail provider must
+    // never roll back a payment that the gateway already confirmed. The
+    // notification is deduped per payment id, so a replayed callback from
+    // ZarinPal cannot mail the user twice.
+    await notifyPaymentResult({
+      userId: user.id,
+      email: user.email,
+      fullName: user.fullName,
+      paymentId: res.plan.paymentId,
+      succeeded: true,
+      planTitle,
+      amount: res.plan.amount,
+      periodLabel: res.plan.periodLabel,
+      endsAt: res.plan.endsAt,
+      fairDownload: res.plan.fairDownload,
     });
 
     return { result: "success", message: res.success! };
   } catch (error) {
     console.error(error);
+
+    // The receipt for a failed attempt is best-effort: swallowing a mail error
+    // here keeps the original payment failure as the message the user sees.
+    await notifyPaymentFailure(authority);
+
     return { result: "failed", message: (error as Error).message };
+  }
+};
+
+/**
+ * Mails the "payment did not complete" receipt.
+ *
+ * Separate from the success path because it runs after the transaction has
+ * already been rolled back, so the payment is re-read outside it. At most one
+ * message per payment: the notification log is keyed on the payment id, which
+ * means a user who retries and fails again is not spammed once per attempt.
+ */
+const notifyPaymentFailure = async (authority: string) => {
+  try {
+    const payment = await prisma.payment.findUnique({
+      where: { authority },
+      include: { tarrif: true, user: true },
+    });
+
+    if (!payment || payment.status === "success") return;
+
+    await notifyPaymentResult({
+      userId: payment.userId,
+      email: payment.user.email,
+      fullName: payment.user.fullName,
+      paymentId: payment.id,
+      succeeded: false,
+      planTitle: mapPlanTitle(payment.tarrif.key),
+      amount: payment.amount,
+    });
+  } catch (error) {
+    console.error("Failed to send the payment-failure email:", error);
   }
 };
 

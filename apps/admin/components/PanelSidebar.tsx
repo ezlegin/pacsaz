@@ -17,6 +17,7 @@ import {
   Layout,
   LayoutDashboard,
   List,
+  Megaphone,
   MessageSquare,
   Ratio,
   Ticket,
@@ -75,6 +76,13 @@ export function PanelSidebar() {
           title: "Coupons",
           url: "/coupons",
           icon: Ticket,
+        },
+        {
+          // Read-only report for the coupons minted by the monthly marketing
+          // job; deliberately separate from the /coupons workbench.
+          title: "Marketing Coupons",
+          url: "/marketing-coupons",
+          icon: Megaphone,
         },
       ],
     },

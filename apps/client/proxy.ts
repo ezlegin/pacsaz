@@ -8,6 +8,13 @@ export async function proxy(req: NextRequest) {
   )?.value;
   const isLoggedIn = !!token;
 
+  // Scheduled jobs authenticate with a shared secret rather than a session, and
+  // they are server-to-server calls that must receive a JSON status instead of a
+  // redirect to the login page. Their own handler is the gate.
+  const isExemptApiRoute = exemptApiRoutes.some((route) =>
+    nextUrl.pathname.startsWith(route),
+  );
+
   const isPrivateRoute = privateRoutes.some((route) =>
     nextUrl.pathname.startsWith(route),
   );
@@ -16,7 +23,7 @@ export async function proxy(req: NextRequest) {
     nextUrl.pathname.startsWith(route),
   );
 
-  if (!isLoggedIn && isPrivateRoute && !isAuthRoute) {
+  if (!isLoggedIn && isPrivateRoute && !isAuthRoute && !isExemptApiRoute) {
     const returnUrl = nextUrl.pathname + nextUrl.search;
     const loginUrl = new URL(loginPageRoute, nextUrl.origin);
     loginUrl.searchParams.set("callbackUrl", returnUrl);
@@ -45,3 +52,11 @@ export const privateRoutes = [
   "/checkout-result",
   "/payment",
 ];
+
+/**
+ * Routes under `/api` that are reachable without a session because they carry
+ * their own authentication. `/api/cron` verifies a shared secret
+ * (`CRON_SECRET`) and answers 401/503 as JSON; letting the proxy redirect it to
+ * the login page would hide that contract from the scheduler.
+ */
+export const exemptApiRoutes = ["/api/cron"];

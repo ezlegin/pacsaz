@@ -2,6 +2,7 @@
 
 import { serverErrorMessage } from "@/data/consts";
 import { OnboardingFormType, ProfileFormType } from "@/lib/validatoinSchema";
+import { notifyWelcome } from "@/lib/notifications/send";
 import { prisma } from "@repo/db";
 
 export const updateUserProfile = async (data: ProfileFormType, id: number) => {
@@ -32,7 +33,7 @@ export const updateUserDataFromOnboardingForm = async (
     if (!existingUser)
       throw new Error("کاربری با مشخصات شما وجود ندارد. لطفا مجددا وارد شوید.");
 
-    await prisma.user.update({
+    const updatedUser = await prisma.user.update({
       where: { phoneNumber },
       data: {
         userType,
@@ -43,6 +44,16 @@ export const updateUserDataFromOnboardingForm = async (
         email,
         onboardingCompleted: true,
       },
+    });
+
+    // The welcome email is sent here rather than at sign-up because the address
+    // is only captured by this form; there is nothing to send before it. The
+    // notification log makes a repeated onboarding submit a no-op, and a mail
+    // failure is logged without failing the user's onboarding.
+    await notifyWelcome({
+      userId: updatedUser.id,
+      email: updatedUser.email,
+      fullName: updatedUser.fullName,
     });
 
     return { success: "به جمع کاربران پک ساز خوش آمدید!" };
