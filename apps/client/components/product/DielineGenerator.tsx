@@ -3,7 +3,7 @@
 import { DielineType } from "@/data/types";
 import { CustomDielineSettings } from "@repo/db";
 import { useDielineGenerator } from "@repo/dieline-core/hooks/useDielineGenerator";
-import { useAppDispatch } from "@repo/store/hooks";
+import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
 import { setDeveloperTool } from "@repo/store/slices/developerToolsSlice";
 import { ISpec, IVar } from "@repo/store/types";
 import dynamic from "next/dynamic";
@@ -48,30 +48,67 @@ const DielineGenerator = ({
     user,
   );
 
+  const { length, width, height } = useAppSelector(
+    (s) => s.dielineSettings.dimension.raw,
+  );
+
   useEffect(() => {
     dispatch(setDeveloperTool({ key: "showContainer", value: true }));
     // this is because: if the user comes dierectly from home screen, doesn't get container.
-  }, []);
+  }, [dispatch]);
 
   return (
-    <div className="h-full">
+    <div className="relative grid h-full min-h-0 grid-cols-[320px_1fr_290px] gap-3 p-3">
       <DielineLoadingOverlay />
 
-      <div className="h-full grid grid-cols-[320px_1fr_300px] p-3">
-        <DielineSettings
-          slug={dieline.slug}
-          isRendering={isRendering}
-          user={user}
-        />
+      {/* ------------------------------- settings ------------------------------ */}
+      <DielineSettings
+        slug={dieline.slug}
+        isRendering={isRendering}
+        user={user}
+      />
 
-        <div className="relative">
-          <div className="absolute top-1/2 right-1/2 -translate-y-1/2 translate-x-1/2 h-full w-full pb-10">
-            <SVGPreview isRendering={isRendering} type="client" />
-          </div>
+      {/*
+        The canvas sits directly on the page background — no card wrapper, so the
+        dieline reads as the workspace itself. The absolute centring wrapper is
+        kept as-is: SVGPreview measures against this geometry.
+      */}
+      <div className="relative min-h-0">
+        <div className="absolute top-1/2 right-1/2 h-full w-full translate-y-[-50%] translate-x-1/2 pb-10">
+          <SVGPreview isRendering={isRendering} type="client" />
         </div>
 
-        <ProductInfo imageSrc={dieline.modelImage?.url} />
+        {/* floating state + live dimensions, over the canvas */}
+        <div className="pointer-events-none absolute right-1 top-1 z-10 flex items-center gap-2">
+          <span className="flex items-center gap-2 rounded-full border bg-background/85 px-3 py-1.5 text-[11px] font-bold shadow-sm backdrop-blur">
+            <span className="relative flex size-2">
+              <span
+                className={`absolute inline-flex h-full w-full rounded-full ${
+                  isRendering ? "animate-ping bg-amber-500 opacity-75" : "bg-green-500 opacity-0"
+                }`}
+              />
+              <span
+                className={`relative inline-flex size-2 rounded-full ${
+                  isRendering ? "bg-amber-500" : "bg-green-500"
+                }`}
+              />
+            </span>
+            {isRendering ? "در حال تولید" : "آماده"}
+          </span>
+
+          <span
+            dir="ltr"
+            className="rounded-full border bg-background/85 px-3 py-1.5 text-[11px] font-bold tabular-nums shadow-sm backdrop-blur"
+            title="ابعاد فعلی"
+          >
+            {length} × {width}
+            {height > 0 ? ` × ${height}` : ""} mm
+          </span>
+        </div>
       </div>
+
+      {/* -------------------------------- details ------------------------------ */}
+      <ProductInfo imageSrc={dieline.modelImage?.url} />
     </div>
   );
 };

@@ -6,6 +6,11 @@ import { useLoading } from "@repo/lib/utils/useLoading";
 import { Button } from "@repo/ui/components/button";
 import { Dialog, DialogContent, DialogTitle } from "@repo/ui/components/dialog";
 import { Spinner } from "@repo/ui/components/spinner";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@repo/ui/components/tooltip";
 import { cn } from "@repo/ui/lib/utils";
 import { BookmarkPlus, Download } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -124,34 +129,63 @@ const DielineDownloadButton = ({ slug, isRendering, user }: Props) => {
         <Button
           disabled={isRendering || isLoading}
           onClick={onDownload}
-          variant={user?.plan ? "green" : "default"}
+          variant={user?.plan ? "green" : "gradient"}
           size="lg"
           className={cn(
             user?.plan ? "col-span-5" : "col-span-6",
-            "gap-2 font-medium",
+            "group gap-2 font-bold shadow-sm",
           )}
         >
           {isLoading || isRendering ? (
-            <Spinner />
+            <>
+              <Spinner />
+              در حال آماده‌سازی...
+            </>
           ) : (
-            <div className="flex gap-1.5 items-center">
-              {user?.plan ? <Download /> : <Diamond />}
-              دانلود فایل
-            </div>
+            <>
+              {user?.plan ? (
+                <Download className="size-4" />
+              ) : (
+                <Diamond />
+              )}
+              {user?.plan ? "دانلود فایل" : "فعال‌سازی اشتراک برای دانلود"}
+            </>
           )}
         </Button>
+
         {user?.plan && (
-          <Button
-            disabled={isRendering || isLoading}
-            onClick={onOpenSavePopup}
-            variant={"secondary"}
-            size="lg"
-            className=""
-          >
-            <BookmarkPlus />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                disabled={isRendering || isLoading}
+                onClick={onOpenSavePopup}
+                variant={"secondary"}
+                size="lg"
+                className="col-span-1"
+                aria-label="ذخیره قالب"
+              >
+                <BookmarkPlus className="size-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="top">
+              <p className="p-0.5 text-[11px]">ذخیره‌ی این قالب با تنظیمات فعلی</p>
+            </TooltipContent>
+          </Tooltip>
         )}
       </div>
+
+      {!user?.plan && (
+        <p className="mt-2 text-center text-[10px] leading-5 text-muted-foreground">
+          برای دانلود فایل، ابتدا یک پلن فعال کن.{" "}
+          <button
+            type="button"
+            onClick={() => router.push("/subscription")}
+            className="font-bold text-primary hover:underline"
+          >
+            مشاهده پلن‌ها
+          </button>
+        </p>
+      )}
     </>
   );
 };

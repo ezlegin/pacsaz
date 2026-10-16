@@ -167,6 +167,34 @@ html > body[data-scroll-locked] {
   background-color: #94a3b8;
 }
 
+/**
+ * Soft, thin scrollbar for dense panels (editor settings, spec cards).
+ * Transparent track, near-invisible thumb that only firms up on hover, so the
+ * panel chrome is not disturbed by a permanent grey rail.
+ *
+ * Uses relative colour syntax rather than `color-mix`: the CSS minifier
+ * collapses `color-mix(..., transparent)` to the opaque colour, which made the
+ * thumb far too heavy.
+ */
+.scrollbar-soft {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(from var(--muted-foreground) r g b / 0.28) transparent;
+}
+.scrollbar-soft::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+.scrollbar-soft::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+.scrollbar-soft::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background-color: rgb(from var(--muted-foreground) r g b / 0.28);
+}
+.scrollbar-soft:hover::-webkit-scrollbar-thumb {
+  background-color: rgb(from var(--muted-foreground) r g b / 0.55);
+}
+
 ::selection {
   background-color: var(--primary);
   color: white;

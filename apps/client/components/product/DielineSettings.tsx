@@ -3,7 +3,6 @@ import { aiIcon, dxfIcon, pdfIcon } from "@/public";
 import { isPackagingSizeLogical } from "@repo/dieline-core/utils/isPackagingSizeLogical";
 import { bleeds as BLEEDS } from "@repo/dieline-core/data/materials";
 import { Badge } from "@repo/ui/components/badge";
-import { Card } from "@repo/ui/components/card";
 import {
   Select,
   SelectContent,
@@ -17,7 +16,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@repo/ui/components/tooltip";
-import { CircleQuestionMark } from "lucide-react";
+import { cn } from "@repo/ui/lib/utils";
+import { CircleQuestionMark, SlidersHorizontal } from "lucide-react";
 import Image from "next/image";
 import { Section } from "./DetailsSection";
 import DielineDownloadButton, { UserType } from "./DielineDownloadButton";
@@ -73,10 +73,24 @@ export default function DielineSettings({ slug, isRendering, user }: Props) {
   const isPremium = !!user && user.plan?.isPremium;
 
   return (
-    <Card className="h-full flex flex-col justify-between p-6 z-10">
-      <div className="space-y-5">
+    <aside className="flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border bg-background shadow-sm z-10">
+      {/* ------------------------------- header ------------------------------ */}
+      <div className="flex shrink-0 items-center gap-2.5 border-b bg-muted/30 px-5 py-4">
+        <span className="grid size-8 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+          <SlidersHorizontal className="size-4" strokeWidth={1.9} />
+        </span>
+        <div className="min-w-0">
+          <h2 className="truncate text-xs font-bold">تنظیمات قالب</h2>
+          <p className="truncate text-[10px] text-muted-foreground">
+            ابعاد، متریال و خروجی را اینجا تنظیم کن
+          </p>
+        </div>
+      </div>
+
+      {/* -------------------------------- body ------------------------------- */}
+      <div className="scrollbar-soft min-h-0 flex-1 space-y-5 overflow-y-auto p-5">
         <Section title="ابعاد" infoContent={<DimensionGuide />}>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             {DIMENSIONS.map(({ key, label }) => (
               <DimensionInput
                 key={key}
@@ -92,17 +106,20 @@ export default function DielineSettings({ slug, isRendering, user }: Props) {
           {!isPackagingLogical && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <Badge variant={"lightRed"} className="p-3 rounded-2xl">
-                  <div className="flex gap-2">
-                    <CircleQuestionMark size={16} />
-                    <div className="text-wrap">
+                <Badge
+                  variant={"lightRed"}
+                  className="mt-3 w-full rounded-2xl p-3"
+                >
+                  <div className="flex items-start gap-2 text-right">
+                    <CircleQuestionMark size={15} className="mt-0.5 shrink-0" />
+                    <div className="text-wrap text-[11px] leading-5">
                       احتمال وجود خطای برش با ابعاد ورودی شما وجود دارد.
                     </div>
                   </div>
                 </Badge>
               </TooltipTrigger>
-              <TooltipContent side="left">
-                <p className="max-w-sm leading-5">
+              <TooltipContent side="left" className="max-w-sm">
+                <p className="text-[11px] leading-6">
                   دایلاین باید با استانداردهای مشخصات ساخت بسته‌بندی مطابقت
                   داشته باشد. پس از اینکه ابعاد را تنظیم کردید، ما بررسی‌های
                   منطقیِ ساختاری انجام می‌دهیم تا اطمینان حاصل شود که فایل با
@@ -121,6 +138,47 @@ export default function DielineSettings({ slug, isRendering, user }: Props) {
 
         <Section title="متریال چاپ" infoContent={<MeterialGuide />}>
           <MaterialInput />
+        </Section>
+
+        <Section title="نوع ابعاد" infoContent={<DimensionTypeGuide />}>
+          <ToggleGroup
+            type="single"
+            variant="outline"
+            size="lg"
+            defaultValue="manufacture"
+            spacing={2}
+            dir="rtl"
+            value={dimensionType}
+            onValueChange={(val) => {
+              if (val)
+                dispatch(
+                  setSetting({
+                    key: "dimensionType",
+                    value: val as DimensionType,
+                  }),
+                );
+            }}
+            className="block w-full"
+          >
+            <div className="grid w-full grid-cols-3 gap-2">
+              {DIMENSIONS_TYPE.map(
+                ({ label, key }) =>
+                  dimensionTypes.includes(key) && (
+                    <ToggleGroupItem
+                      key={key}
+                      value={key}
+                      className={cn(
+                        "cursor-pointer rounded-xl text-xs font-normal transition-colors",
+                        "data-[state=on]:border-primary data-[state=on]:bg-primary/10 data-[state=on]:font-bold data-[state=on]:text-primary",
+                        "hover:border-primary/40 hover:bg-transparent",
+                      )}
+                    >
+                      {label}
+                    </ToggleGroupItem>
+                  ),
+              )}
+            </div>
+          </ToggleGroup>
         </Section>
 
         <Section
@@ -148,7 +206,7 @@ export default function DielineSettings({ slug, isRendering, user }: Props) {
                   value={item.size.toString()}
                 >
                   <div
-                    className={`${slateColors[idx]} * 100} w-5`}
+                    className={cn(slateColors[idx], "w-5 rounded-sm")}
                     style={{ height: `${idx + 3}px` }}
                   />
                   <span dir="ltr">{item.size} mm</span>
@@ -166,46 +224,7 @@ export default function DielineSettings({ slug, isRendering, user }: Props) {
           <ThicknessInput isRendering={isRendering} isPremium={isPremium} />
         </Section>
 
-        <Section title="نوع ابعاد" infoContent={<DimensionTypeGuide />}>
-          <ToggleGroup
-            type="single"
-            variant="outline"
-            size="lg"
-            defaultValue="manufacture"
-            spacing={2}
-            dir="rtl"
-            value={dimensionType}
-            onValueChange={(val) => {
-              if (val)
-                dispatch(
-                  setSetting({
-                    key: "dimensionType",
-                    value: val as DimensionType,
-                  }),
-                );
-            }}
-            className="w-full"
-          >
-            <div className="grid grid-cols-3 w-full gap-2">
-              {DIMENSIONS_TYPE.map(
-                ({ label, key }) =>
-                  dimensionTypes.includes(key) && (
-                    <ToggleGroupItem
-                      key={key}
-                      value={key}
-                      className="cursor-pointer data-[state=on]:border-primary data-[state=on]:bg-transparent hover:border-primary hover:bg-transparent"
-                    >
-                      <p className="font-normal text-xs">{label}</p>
-                    </ToggleGroupItem>
-                  ),
-              )}
-            </div>
-          </ToggleGroup>
-        </Section>
-      </div>
-
-      <div className="space-y-4">
-        <Section title="فرمت" infoContent={<FormatGuide />}>
+        <Section title="فرمت فایل" infoContent={<FormatGuide />}>
           <ToggleGroup
             type="single"
             size="lg"
@@ -217,31 +236,41 @@ export default function DielineSettings({ slug, isRendering, user }: Props) {
               if (val)
                 dispatch(setSetting({ key: "format", value: val as Format }));
             }}
-            className="w-full"
+            className="block w-full"
           >
-            <div className="grid grid-cols-3 w-full gap-2">
+            <div className="grid w-full grid-cols-3 gap-2">
               {FORMATS.map(({ value, icon }) => (
                 <ToggleGroupItem
                   key={value}
                   value={value}
-                  className="cursor-pointer data-[state=on]:border-primary data-[state=on]:bg-transparent hover:border-primary hover:bg-transparent"
+                  className={cn(
+                    "cursor-pointer rounded-xl transition-colors",
+                    "data-[state=on]:border-primary data-[state=on]:bg-primary/10",
+                    "hover:border-primary/40 hover:bg-transparent",
+                  )}
                 >
-                  <div className="flex items-center justify-center gap-2">
-                    <span className="pt-1 text-muted-foreground">{value}</span>
-                    <Image src={icon} alt={value} width={20} height={22} />
+                  <div className="flex items-center justify-center gap-1.5">
+                    <Image src={icon} alt={value} width={18} height={20} />
+                    <span className="text-[11px] uppercase text-muted-foreground">
+                      {value}
+                    </span>
                   </div>
                 </ToggleGroupItem>
               ))}
             </div>
           </ToggleGroup>
         </Section>
+      </div>
+
+      {/* ------------------------------- footer ------------------------------ */}
+      <div className="shrink-0 border-t bg-muted/20 p-4">
         <DielineDownloadButton
           isRendering={isRendering}
           slug={slug}
           user={user}
         />
       </div>
-    </Card>
+    </aside>
   );
 }
 
