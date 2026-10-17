@@ -108,7 +108,7 @@ const DielineGenerator = ({
       </div>
 
       {/* -------------------------------- details ------------------------------ */}
-      <ProductInfo imageSrc={dieline.modelImage?.url} />
+      <ProductInfo isRendering={isRendering} />
     </div>
   );
 };

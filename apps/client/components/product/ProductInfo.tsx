@@ -1,4 +1,3 @@
-import { placeholder } from "@/public";
 import { formatDimensions } from "@/utils/formatDimensions";
 import { DimensionType } from "@repo/db";
 import { applyDimensionOffset } from "@repo/dieline-core/utils/applyDimensionOffset";
@@ -6,20 +5,19 @@ import { resolveOffsets } from "@repo/dieline-core/utils/offsetResolver";
 import { useAppSelector } from "@repo/store/hooks";
 import { cn } from "@repo/ui/lib/utils";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@repo/ui/components/dialog";
-import { Expand, Info, Ruler } from "lucide-react";
-import Image from "next/image";
+import { Info, Ruler } from "lucide-react";
+import DielinePreview3D from "./DielinePreview3D";
 
 const fa = (value: number) =>
   value.toLocaleString("fa-IR", { maximumFractionDigits: 1 });
 
-const ProductInfo = ({ imageSrc }: { imageSrc?: string | null }) => {
+/**
+ * Spec panel for the dieline editor.
+ *
+ * The 3D preview replaced the static model render: it rebuilds from the live
+ * store, so it follows every specification change.
+ */
+const ProductInfo = ({ isRendering }: { isRendering: boolean }) => {
   const offset = resolveOffsets();
 
   const {
@@ -156,45 +154,7 @@ const ProductInfo = ({ imageSrc }: { imageSrc?: string | null }) => {
         </div>
 
         {/* ------------------------------ 3d preview -------------------------- */}
-        <Dialog>
-          <DialogTrigger asChild>
-            <button
-              type="button"
-              className="group relative block w-full overflow-hidden rounded-2xl border bg-muted/30"
-              aria-label="بزرگ‌نمایی نمای سه‌بعدی"
-            >
-              <Image
-                alt="نمای سه‌بعدی قالب"
-                src={imageSrc ?? placeholder}
-                width={300}
-                height={300}
-                className="aspect-square w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-              />
-
-              <span className="absolute inset-0 flex items-center justify-center bg-foreground/0 transition-colors duration-300 group-hover:bg-foreground/20">
-                <span className="grid size-9 translate-y-1 place-items-center rounded-full bg-background/90 text-primary opacity-0 shadow-sm transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-                  <Expand className="size-4" />
-                </span>
-              </span>
-            </button>
-          </DialogTrigger>
-
-          <DialogContent
-            showCloseButton={false}
-            className="border-none bg-transparent p-0 sm:max-w-2xl"
-          >
-            <DialogHeader>
-              <DialogTitle className="sr-only">نمای سه‌بعدی</DialogTitle>
-              <Image
-                alt="نمای سه‌بعدی قالب"
-                src={imageSrc ?? placeholder}
-                width={700}
-                height={700}
-                className="aspect-square w-full rounded-2xl bg-muted object-cover"
-              />
-            </DialogHeader>
-          </DialogContent>
-        </Dialog>
+        <DielinePreview3D isRendering={isRendering} compact />
 
         {/* ------------------------------ dimensions -------------------------- */}
         {visibleDimensions.length > 0 && (
