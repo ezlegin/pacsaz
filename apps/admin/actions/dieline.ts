@@ -235,7 +235,7 @@ export const saveDielineChanges = async (
   data: DielineUpdateFormType,
   id: number,
 ) => {
-  const { specification, variable } = data;
+  const { specification, variable, foldConfig } = data;
   try {
     const existingDieline = await prisma.dieline.findFirst({ where: { id } });
     if (!existingDieline) throw new Error("Dieline Not Found.");
@@ -247,6 +247,15 @@ export const saveDielineChanges = async (
         variable,
       },
     });
+
+    // Fold direction is a property of the template's stock settings, so it is
+    // stored on the settings row rather than in the specification JSON.
+    if (typeof foldConfig === "string") {
+      await prisma.dielineSettings.update({
+        where: { id: existingDieline.settingsId },
+        data: { foldConfig },
+      });
+    }
 
     return { success: "Dieline Saved Successfully." };
   } catch (error) {

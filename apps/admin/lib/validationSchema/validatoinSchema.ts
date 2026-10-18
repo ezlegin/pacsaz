@@ -177,5 +177,10 @@ export type CouponFormType = z.infer<typeof couponFormSchema>;
 export const dielineUpdateFormSchema = z.object({
   specification: z.string().min(1),
   variable: z.string(),
+  /**
+   * Authored per-panel fold overrides as JSON. Empty string means "use the
+   * viewer's inferred direction", so it must be allowed to be blank.
+   */
+  foldConfig: z.string(),
 });
 export type DielineUpdateFormType = z.infer<typeof dielineUpdateFormSchema>;

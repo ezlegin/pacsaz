@@ -6,6 +6,7 @@ import { useDielineGenerator } from "@repo/dieline-core/hooks/useDielineGenerato
 import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
 import { addNodes, nodesSelector } from "@repo/store/slices/nodesSlice";
 import { addRulers, rulersSelectors } from "@repo/store/slices/rulersSlice";
+import { loadFoldConfig } from "@repo/store/slices/foldConfigSlice";
 import {
   addVariables,
   variablesSelectors,
@@ -56,6 +57,11 @@ const DielineEditor = ({
     dispatch(addNodes(JSON.parse(dieline.specification).nodes));
     dispatch(addRulers(JSON.parse(dieline.specification).rulers));
     dispatch(addVariables(JSON.parse(dieline.variable) as IVar.VariableMap));
+
+    // Authored fold overrides live on the settings row, not in the spec.
+    dispatch(
+      loadFoldConfig({ json: dieline.settings?.foldConfig ?? "" }),
+    );
   }, []);
 
   return (
