@@ -11,6 +11,7 @@ import type { Pt, Segment, SegmentKind } from "./types";
  *       <path d="…" id="bleed"/>
  *       <path d="…" id="container"/>
  *       <path d="M 125 195 125 35" id="fold"/>
+ *       <path d="…" id="perf"/>
  *       <path d="…" id="trim"/>
  *     </g>
  *
@@ -19,14 +20,23 @@ import type { Pt, Segment, SegmentKind } from "./types";
  * Stroke colour and dashing are deliberately ignored: they are presentation, and
  * restyling the export must not change how it folds.
  *
- * Two things make this delicate:
+ * Three things make this delicate:
  *
  * 1. `bleed` is a **filled** rect enclosing the whole pattern. Treated as
  *    geometry it becomes one giant face with the real dieline hidden inside it.
  * 2. The watermark pass appends `<defs>` whose `<clipPath>` contains the bleed
  *    outline as a `<path>`. Definitions are never geometry.
+ * 3. `perf` (perforation) is extracted for display but must never affect the
+ *    panel subdivision — see the note on `FOLDABLE`.
  */
 
+/**
+ * Layers that are extracted.
+ *
+ * `perf` is included so its position can be shown, but the fold rig keeps it out
+ * of the planar subdivision: a perforation is a weakness line for folding or
+ * tearing off, not a crease, so it must not split panels or create hinges.
+ */
 const FOLDABLE: Record<string, SegmentKind> = {
   trim: "trim",
   fold: "fold",
@@ -162,9 +172,14 @@ export const extractSegmentsFromSvg = (svg: string): Segment[] => {
   return segments;
 };
 
-/** True when the export contains any crease or perforation geometry. */
+/**
+ * True when the export contains a crease.
+ *
+ * Perforations do not count: a dieline with only perforations has nothing to fold,
+ * which is a perfectly valid design.
+ */
 export const svgHasFoldLayer = (svg: string): boolean =>
-  extractSegmentsFromSvg(svg).some((s) => s.kind !== "trim");
+  extractSegmentsFromSvg(svg).some((segment) => segment.kind === "fold");
 
 /** Every `id` present in the export, for diagnostics. */
 export const svgLayerIds = (svg: string): string[] => {

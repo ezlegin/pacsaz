@@ -123,6 +123,36 @@ console.log("extracted:", segments.length, JSON.stringify(kinds));
   );
 }
 
+/* ------------------ perforations are found but never fold ----------------- */
+{
+  const withPerf = `<svg xmlns="http://www.w3.org/2000/svg">
+    <g id="svgGroup">
+      <path d="M 0 0 L 100 0 L 100 50 L 0 50 Z" id="trim"/>
+      <path d="M 60 0 L 60 50" id="perf"/>
+      <path d="M 30 0 L 30 50" id="fold"/>
+    </g>
+  </svg>`;
+
+  const segs = extractSegmentsFromSvg(withPerf);
+  const rig = buildFoldRig(segs);
+
+  check(
+    "perf layer is extracted for display",
+    segs.some((s) => s.kind === "perf"),
+    true,
+  );
+  // Only the crease splits the sheet; the perforation must not.
+  check("perf does not split the sheet", rig.stats.faceCount, 2);
+  check("perf creates no hinge", rig.stats.hingeCount, 1);
+  check("perf is carried on the rig", rig.perforations.length, 1);
+  assert(
+    "svgHasFoldLayer ignores a perf-only dieline",
+    !svgHasFoldLayer(
+      `<svg><g id="svgGroup"><path d="M0 0 L10 0 L10 10 Z" id="trim"/><path d="M5 0 L5 10" id="perf"/></g></svg>`,
+    ),
+  );
+}
+
 /* ---------------------- defs/watermark never geometry --------------------- */
 {
   const withDefs = `<svg xmlns="http://www.w3.org/2000/svg">

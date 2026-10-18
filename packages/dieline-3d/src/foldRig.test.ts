@@ -128,7 +128,7 @@ const rotateZ = (p: Pt, pivot: Pt, angle: number): Pt => {
 }
 
 /* -------------------------------------------------------------------------- */
-/* 3. Perforation-only dieline stays flat-ish but is not degenerate           */
+/* 3. Perforations never split a panel and never become a hinge               */
 /* -------------------------------------------------------------------------- */
 {
   const segments: Segment[] = [
@@ -140,9 +140,40 @@ const rotateZ = (p: Pt, pivot: Pt, angle: number): Pt => {
   ];
 
   const rig = buildFoldRig(segments);
-  check("perf faceCount", rig.stats.faceCount, 2);
-  check("perf hingeCount", rig.stats.hingeCount, 1);
-  check("perf kind recorded", rig.nodes.find((n) => n.parent !== null)?.kind, "perf");
+
+  // A perforation is a weakness line, not a crease: the sheet stays one panel.
+  check("perf does not split the panel", rig.stats.faceCount, 1);
+  check("perf creates no hinge", rig.stats.hingeCount, 0);
+  check("perf is recorded for display", rig.perforations.length, 1);
+  check(
+    "perf geometry is preserved",
+    [rig.perforations[0]!.a, rig.perforations[0]!.b],
+    [
+      [10, 0],
+      [10, 10],
+    ],
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* 3b. A crease plus a perforation: only the crease folds                    */
+/* -------------------------------------------------------------------------- */
+{
+  const segments: Segment[] = [
+    { a: [0, 0], b: [30, 0], kind: "trim" },
+    { a: [30, 0], b: [30, 10], kind: "trim" },
+    { a: [30, 10], b: [0, 10], kind: "trim" },
+    { a: [0, 10], b: [0, 0], kind: "trim" },
+    { a: [20, 0], b: [20, 10], kind: "fold" },
+    { a: [10, 0], b: [10, 10], kind: "perf" },
+  ];
+
+  const rig = buildFoldRig(segments);
+
+  check("fold splits, perf does not", rig.stats.faceCount, 2);
+  check("exactly one hinge", rig.stats.hingeCount, 1);
+  check("hinge kind is fold", rig.nodes.find((n) => n.parent !== null)?.kind, "fold");
+  check("perf still recorded", rig.perforations.length, 1);
 }
 
 /* -------------------------------------------------------------------------- */

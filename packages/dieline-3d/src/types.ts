@@ -59,12 +59,36 @@ export type RigNode = {
   /** Rotation sign for this node, already resolved by the direction heuristic. */
   sign: 1 | -1;
   angle: number;
+  /**
+   * True when the panel folds toward the viewer of the flat pattern (+Z), which
+   * is what a person calls folding "in". Inference always aims at +Z, so the
+   * default is `true`; an authored override can make a crease a mountain.
+   */
+  valley: boolean;
+  /**
+   * True when this face is a **window** — a trim loop enclosed by another panel.
+   *
+   * Such a face is not a panel: it is a cut-out. It is kept in `nodes` so that
+   * indices stay stable for fold overrides, but the geometry builder skips it and
+   * instead cuts it out of the panel named by `holesOf`.
+   */
+  isHole: boolean;
+  /** Outlines of the windows cut out of this panel. */
+  holes: Pt[][];
   kind: Exclude<SegmentKind, "trim">;
 };
 
 export type FoldRig = {
   nodes: RigNode[];
   rootId: number;
+  /**
+   * Perforation segments, kept purely for display.
+   *
+   * They do not split panels or create hinges — a perforation is a weakness line
+   * for folding or tearing off, not a crease — but knowing where they are lets the
+   * viewer press them into the surface as a groove.
+   */
+  perforations: Segment[];
   /** Bounding box of the flat pattern, in mm. */
   bounds: { min: Pt; max: Pt; width: number; height: number };
   /** Diagnostics so the UI can warn instead of silently showing nonsense. */

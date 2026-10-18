@@ -316,6 +316,11 @@ export type DielineSettings = {
   dimensionTypes: DimensionType[];
   format: Format;
   showOverallRulers: boolean;
+  /**
+   * Authored per-panel fold direction and angle, as JSON. Empty/undefined means
+   * the 3D viewer falls back to its geometric inference. See @repo/dieline-3d.
+   */
+  foldConfig?: string;
 };
 
 //! Overall sizes -------------------------------------------------------------

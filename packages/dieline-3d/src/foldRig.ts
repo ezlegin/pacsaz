@@ -1,4 +1,6 @@
 import { buildPlanarFaces } from "./planar";
+import { applyFoldOverrides, type FoldConfig } from "./foldConfig";
+import { isEnclosedBy } from "./polygon";
 import type { FoldRig, Hinge, Pt, RigNode, Segment } from "./types";
 
 /**
@@ -176,13 +178,66 @@ const resolveSign = (from: Pt, to: Pt, childCentroid: Pt): 1 | -1 => {
 };
 
 /**
+ * Marks faces that are windows enclosed by another panel and attaches their
+ * outlines to that panel. Returns how many were found.
+ *
+ * The enclosing panel is the smallest one that fully contains the face, so nested
+ * windows land on their immediate parent rather than the outermost panel.
+ */
+const detectWindows = (nodes: RigNode[]): number => {
+  let count = 0;
+
+  nodes.forEach((candidate, index) => {
+    // Only a closed loop of trim can be a window; it must also be smaller than
+    // any panel that contains it.
+    let containerIndex = -1;
+    let containerArea = Infinity;
+
+    nodes.forEach((other, otherIndex) => {
+      if (otherIndex === index) return;
+      if (other.face.area <= candidate.face.area) return;
+      if (other.face.area >= containerArea) return;
+
+      if (isEnclosedBy(candidate.face.outline, other.face.outline)) {
+        containerIndex = otherIndex;
+        containerArea = other.face.area;
+      }
+    });
+
+    if (containerIndex < 0) return;
+
+    const container = nodes[containerIndex]!;
+    container.holes.push(candidate.face.outline);
+    candidate.isHole = true;
+    count++;
+  });
+
+  return count;
+};
+
+/**
  * Turns a flat dieline into a foldable rig.
  *
  * Returns a rig even when folding is impossible, flagging the problem in
  * `stats` so the caller can show a message instead of an empty canvas.
+ *
+ * `config` carries authored fold overrides; without it every crease uses the
+ * inferred direction.
  */
-export const buildFoldRig = (segments: Segment[]): FoldRig => {
-  const plane = buildPlanarFaces(segments);
+export const buildFoldRig = (
+  segments: Segment[],
+  config?: FoldConfig | null,
+): FoldRig => {
+  /*
+   * Perforations are held back from the planar pass. They are weakness lines, not
+   * creases: feeding them into the subdivision would split a panel that is really
+   * one rigid piece and invent a hinge the material does not have. They are kept
+   * separately so the viewer can press them into the surface.
+   */
+  const perforations = segments.filter((segment) => segment.kind === "perf");
+  const structural = segments.filter((segment) => segment.kind !== "perf");
+
+  const plane = buildPlanarFaces(structural);
 
   const faces = plane.faces.filter((face) => face.area >= MIN_FACE_AREA);
   const kept = new Set(faces.map((face) => face.id));
@@ -215,6 +270,7 @@ export const buildFoldRig = (segments: Segment[]): FoldRig => {
     return {
       nodes: [],
       rootId: -1,
+      perforations,
       bounds,
       stats: {
         segmentCount: segments.length,
@@ -250,6 +306,9 @@ export const buildFoldRig = (segments: Segment[]): FoldRig => {
         axis: [1, 0],
         sign: 1,
         angle: 0,
+        valley: true,
+        isHole: false,
+        holes: [],
         kind: "fold",
       };
     }
@@ -272,22 +331,42 @@ export const buildFoldRig = (segments: Segment[]): FoldRig => {
       axis: sub(to, from),
       sign,
       angle: hinge.angle,
+      // The sign derivation aims every child at +Z, so inference folds "in".
+      valley: true,
+      isHole: false,
+      holes: [],
       kind: hinge.kind,
     };
   });
 
-  const orphanCount = nodes.filter((node) => node.depth < 0).length;
+  /* ------------------------------- windows -------------------------------- */
+  /**
+   * A trim loop drawn inside another panel is a window, not a panel: think of a
+   * finger hole or a display cut-out. It is detected as a face whose every vertex
+   * lies inside a larger face, and moved into that panel's `holes` so the geometry
+   * can be cut out of it.
+   *
+   * The face stays in `nodes` — removing it would shift indices and silently
+   * re-attach authored fold overrides to the wrong panels.
+   */
+  const holeCount = detectWindows(nodes);
+
+  // Windows are not panels, so they must not be reported as orphaned panels.
+  const orphanCount = nodes.filter(
+    (node) => node.depth < 0 && !node.isHole,
+  ).length;
 
   return {
-    nodes,
+    nodes: applyFoldOverrides(nodes, config),
     rootId: indexOf.get(rootId) ?? 0,
+    perforations,
     bounds,
     stats: {
       segmentCount: segments.length,
-      faceCount: faces.length,
+      faceCount: faces.length - holeCount,
       hingeCount: hinges.length,
       orphanCount,
-      degenerate: hinges.length === 0 || faces.length < 2,
+      degenerate: hinges.length === 0 || faces.length - holeCount < 1,
     },
   };
 };

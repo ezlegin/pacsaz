@@ -1,0 +1,27 @@
+{
+  "name": "@repo/dieline-3d",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "lint": "eslint . --max-warnings 0",
+    "check-types": "tsc --noEmit"
+  },
+  "exports": {
+    "./geometry": "./src/geometry.ts",
+    "./viewer": "./src/viewer.tsx"
+  },
+  "dependencies": {
+    "@react-three/drei": "^10.7.9",
+    "@react-three/fiber": "^9.8.2",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "three": "^0.186.1"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2",
+    "@types/three": "^0.186.0",
+    "typescript": "5.9.2"
+  }
+}
