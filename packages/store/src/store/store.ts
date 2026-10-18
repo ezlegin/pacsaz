@@ -11,6 +11,7 @@ import {
 import developerToolsReducer from "./slices/developerToolsSlice";
 import dielineFileReducer from "./slices/dielineFileSlice";
 import dielineSettingsReducer from "./slices/dielineSettingsSlice";
+import foldConfigReducer from "./slices/foldConfigSlice";
 import overallSizesReducer from "./slices/overallSizesSlice";
 import svgReducer from "./slices/svgSlice";
 import selectionReducer from "./slices/selectionSlice";
@@ -37,6 +38,7 @@ const rootReducer = combineReducers({
   developerTools: developerToolsReducer,
   dielineFile: dielineFileReducer,
   dielineSettings: dielineSettingsReducer,
+  foldConfig: foldConfigReducer,
   overallSizes: overallSizesReducer,
   svg: svgReducer,
   selection: selectionReducer,

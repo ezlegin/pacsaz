@@ -37,7 +37,21 @@ const SaveDielineForm = ({
 }: {
   slug: string;
   savedDieline?: SavedDieline;
-  settings: DielineSettings;
+  /**
+   * Only the persisted dimensions and stock are needed, so the contract is the
+   * fields actually used. This keeps both a template's `DielineSettings` and a
+   * user's `CustomDielineSettings` assignable — the latter has no fold config.
+   */
+  settings: Pick<
+    DielineSettings,
+    | "bleed"
+    | "dimensionType"
+    | "material"
+    | "thickness"
+    | "height"
+    | "length"
+    | "width"
+  >;
   plan: Plan;
 }) => {
   const router = useRouter();

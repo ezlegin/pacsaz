@@ -178,6 +178,9 @@ model DielineSettings {
   length        Float
   height        Float
   dimensionType DimensionType
+  /// Authored per-panel fold direction and angle, as JSON. Empty means the
+  /// viewer falls back to its geometric inference. See @repo/dieline-3d.
+  foldConfig    String        @default("")
 
   dieline Dieline?
 }
