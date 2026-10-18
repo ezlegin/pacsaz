@@ -100,23 +100,39 @@ const buildPanelGeometry = (
   const contour = toPoints(outline);
   if (contour.length < 3) return null;
 
-  const holePoints = holes
-    .map(toPoints)
-    .filter((ring) => ring.length >= 3);
+  const holeRings = holes
+    .map((ring) => ({ flat: ring, world: toPoints(ring) }))
+    .filter((ring) => ring.world.length >= 3);
 
   /* ------------------------------ triangulate ------------------------------ */
-  // earcut wants the contour counter-clockwise and holes clockwise.
-  const contourCcw =
-    signedArea(outline) < 0 ? [...contour].reverse() : contour;
-  const holesCw = holePoints.map((ring, index) => {
-    const source = holes[index]!;
-    return signedArea(source) > 0 ? [...ring].reverse() : ring;
-  });
+  /**
+   * Wind everything counter-clockwise in **world** space.
+   *
+   * SVG's y axis points down, so a face traced in SVG coordinates has the
+   * opposite orientation once y is flipped. Getting this backwards makes earcut
+   * emit clockwise triangles, which flips every surface normal.
+   *
+   * The flat and world arrays are reversed together so that entry `i` refers to
+   * the same edge in both — the crease test reads flat coordinates while the wall
+   * is built from world coordinates, and they must agree.
+   */
+  const worldIsCcw = signedArea(outline) < 0;
+
+  const orientWorld = <T,>(points: T[]): T[] =>
+    worldIsCcw ? points : [...points].reverse();
+
+  const contourWorld = orientWorld(contour);
+  const contourFlat = orientWorld(outline);
+
+  // Holes wind the opposite way to the contour.
+  const holeWorld = holeRings.map((ring) =>
+    signedArea(ring.flat) < 0 ? [...ring.world].reverse() : ring.world,
+  );
 
   let triangles: number[][];
 
   try {
-    triangles = THREE.ShapeUtils.triangulateShape(contourCcw, holesCw);
+    triangles = THREE.ShapeUtils.triangulateShape(contourWorld, holeWorld);
   } catch {
     // Degenerate or self-intersecting outline: skip this panel rather than
     // taking the whole viewer down.
@@ -126,7 +142,7 @@ const buildPanelGeometry = (
   if (triangles.length === 0) return null;
 
   /* ------------------------------- vertices ------------------------------- */
-  const allPoints = [...contourCcw, ...holesCw.flat()];
+  const allPoints = [...contourWorld, ...holeWorld.flat()];
 
   const positions: number[] = [];
   const normals: number[] = [];
@@ -180,15 +196,27 @@ const buildPanelGeometry = (
     });
   };
 
-  const pushWall = (a: THREE.Vector2, b: THREE.Vector2) => {
-    // Two triangles per edge, wound so the normal points outward.
+  /**
+   * One quad per edge, wound so its normal points away from the material.
+   *
+   * `flip` is used for hole rings: they run the other way round, so the material
+   * lies on the opposite side and the normal has to take the other branch, or the
+   * inside of a window would be lit as if it faced outward.
+   */
+  const pushWall = (
+    a: THREE.Vector2,
+    b: THREE.Vector2,
+    flip = false,
+  ) => {
     const dx = b.x - a.x;
     const dy = b.y - a.y;
     const length = Math.hypot(dx, dy);
     if (length < 1e-6) return;
 
-    const nx = dy / length;
-    const ny = -dx / length;
+    // For a counter-clockwise ring the outside is to the right of the edge.
+    const sign = flip ? -1 : 1;
+    const nx = (sign * dy) / length;
+    const ny = (sign * -dx) / length;
 
     const corners: [number, number, number][] = [
       [a.x, a.y, half],
@@ -205,19 +233,25 @@ const buildPanelGeometry = (
     }
   };
 
-  // Outer boundary edges, skipping creases.
-  for (let i = 0; i < contour.length; i++) {
-    const a = outline[i]!;
-    const b = outline[(i + 1) % outline.length]!;
+  /*
+   * Outer boundary edges, skipping creases.
+   *
+   * `contourFlat` and `contourWorld` are in the same order, so index `i` is the
+   * same edge in both: the crease test reads flat coordinates and the wall is
+   * built from world coordinates.
+   */
+  for (let i = 0; i < contourFlat.length; i++) {
+    const a = contourFlat[i]!;
+    const b = contourFlat[(i + 1) % contourFlat.length]!;
     if (isHingeEdge(a, b)) continue;
 
-    pushWall(contourCcw[i]!, contourCcw[(i + 1) % contourCcw.length]!);
+    pushWall(contourWorld[i]!, contourWorld[(i + 1) % contourWorld.length]!);
   }
 
   // Window edges always get a wall: a cut-out has an exposed inner edge.
-  holesCw.forEach((points) => {
+  holeWorld.forEach((points) => {
     for (let i = 0; i < points.length; i++) {
-      pushWall(points[i]!, points[(i + 1) % points.length]!);
+      pushWall(points[i]!, points[(i + 1) % points.length]!, true);
     }
   });
 
@@ -257,26 +291,52 @@ export const buildRigScene = ({
   const safeThickness = Math.max(thickness, 0.1);
 
   /* --------------------------- create pivot groups -------------------------- */
-  rig.nodes.forEach((node, index) => {
-    const pivot = new THREE.Group();
+  /**
+   * Each panel is wrapped in a pivot placed at its crease, and a child's pivot is
+   * parented to its parent's so folding carries descendants with it. Two details
+   * make this easy to get wrong, and both did:
+   *
+   * 1. A pivot's position must be relative to its **parent's** hinge, not
+   *    absolute. The parent's local frame is already translated to its own hinge,
+   *    so an absolute position applies that offset twice and detaches the panel.
+   * 2. Parents are not guaranteed to appear before their children in the node
+   *    list — for a chain the tree is often built root-last. Attaching in a single
+   *    pass silently dropped such children onto the root, so they ignored their
+   *    parent's rotation. Hence two passes.
+   */
+  const hinges: THREE.Vector2[] = new Array(rig.nodes.length);
 
-    if (node.parent === null) {
+  rig.nodes.forEach((node, index) => {
+    hinges[index] =
+      node.parent === null
+        ? new THREE.Vector2(0, 0)
+        : toWorld(node.pivot, center);
+
+    pivots[index] = new THREE.Group();
+  });
+
+  rig.nodes.forEach((node, index) => {
+    const pivot = pivots[index]!;
+    const parentIndex = node.parent;
+
+    if (parentIndex === null) {
       // Root panel keeps the world origin; it never rotates.
       pivot.position.set(0, 0, 0);
       root.add(pivot);
-    } else {
-      const parentIndex = node.parent;
-      const parentPivot = pivots[parentIndex];
-
-      const hingeWorld = toWorld(node.pivot, center);
-      // Pivot at the hinge, in the parent's local space.
-      pivot.position.set(hingeWorld.x, hingeWorld.y, 0);
-
-      if (parentPivot) parentPivot.add(pivot);
-      else root.add(pivot);
+      return;
     }
 
-    pivots[index] = pivot;
+    const parentPivot = pivots[parentIndex]!;
+    const hinge = hinges[index]!;
+    const parentHinge = hinges[parentIndex]!;
+
+    pivot.position.set(
+      hinge.x - parentHinge.x,
+      hinge.y - parentHinge.y,
+      0,
+    );
+
+    parentPivot.add(pivot);
   });
 
   /* ----------------------------- create panels ----------------------------- */
@@ -312,10 +372,7 @@ export const buildRigScene = ({
     // Shift the panel so its hinge sits at the pivot's origin. The outline is in
     // world coordinates, and the pivot is already at the hinge, so offset by the
     // negated hinge position.
-    const hingeWorld =
-      node.parent === null
-        ? new THREE.Vector2(0, 0)
-        : toWorld(node.pivot, center);
+    const hingeWorld = hinges[index]!;
     geometry.translate(-hingeWorld.x, -hingeWorld.y, 0);
 
     const materialInstance = new THREE.MeshStandardMaterial({
@@ -365,12 +422,12 @@ export const buildRigScene = ({
     const surfaceZ = safeThickness / 2 + 0.01;
     const OFFSET = 0.16;
 
-    const pivotLocal = (p: Pt, node: RigNode): THREE.Vector3 => {
+    const pivotLocal = (
+      p: Pt,
+      nodeIndex: number,
+    ): THREE.Vector3 => {
       const world = toWorld(p, center);
-      const hinge =
-        node.parent === null
-          ? new THREE.Vector2(0, 0)
-          : toWorld(node.pivot, center);
+      const hinge = hinges[nodeIndex]!;
 
       return new THREE.Vector3(world.x - hinge.x, world.y - hinge.y, surfaceZ);
     };
@@ -388,12 +445,11 @@ export const buildRigScene = ({
       // guessing, which would leave a groove floating on the wrong panel.
       if (index < 0) continue;
 
-      const node = rig.nodes[index]!;
       const pivot = pivots[index];
       if (!pivot) continue;
 
-      const a = pivotLocal(segment.a, node);
-      const b = pivotLocal(segment.b, node);
+      const a = pivotLocal(segment.a, index);
+      const b = pivotLocal(segment.b, index);
 
       const dx = b.x - a.x;
       const dy = b.y - a.y;

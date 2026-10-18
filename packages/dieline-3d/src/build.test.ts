@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { buildFoldRig } from "./foldRig";
 import { applyArtwork, applyFold, buildRigScene, materialStyleFor } from "./build";
-import type { Segment } from "./types";
+import type { Pt, Segment } from "./types";
 
 let failures = 0;
 const assert = (label: string, ok: boolean, detail = "") => {
@@ -412,6 +412,226 @@ const farthestFromHinge = (index: number) => {
     "clearing restores the stock colour",
     `#${material.color.getHexString()}`,
     materialStyleFor("glossyCardboard").color.toLowerCase(),
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* 11. Walls sit on the real boundary, never on a crease                     */
+/* -------------------------------------------------------------------------- */
+{
+  /**
+   * The rectangle-plus-two-triangles case.
+   *
+   * This is the shape that exposed a wall-indexing bug: the crease test ran over
+   * the outline in its original order while the wall was built from the reversed
+   * (counter-clockwise) array, so index `i` referred to two different edges. Walls
+   * ended up on creases and the true boundary had none — invisible on a rectangle,
+   * glaring on a triangle.
+   *
+   * Counting walls cannot catch that, because the same number are skipped either
+   * way. So this checks *which* edges they land on.
+   */
+  const segments: Segment[] = [
+    { a: [0, 0], b: [100, 0], kind: "trim" },
+    { a: [100, 0], b: [100, 60], kind: "trim" },
+    { a: [100, 60], b: [0, 60], kind: "trim" },
+    { a: [0, 60], b: [0, 0], kind: "trim" },
+    // B = (35, 60) on the bottom edge; A = (35, 0) on the top edge;
+    // C = (100, 0) the top-right corner.
+    { a: [35, 60], b: [35, 0], kind: "fold" },
+    { a: [35, 60], b: [100, 0], kind: "fold" },
+  ];
+
+  const rig = buildFoldRig(segments);
+  check("one rectangle and two triangles", rig.stats.faceCount, 3);
+  check("two hinges", rig.stats.hingeCount, 2);
+
+  const areas = rig.nodes
+    .map((node) => Math.round(node.face.area))
+    .sort((a, b) => a - b);
+  check("areas are 1950, 1950 and 2100", areas, [1950, 1950, 2100]);
+  check(
+    "two panels are triangles",
+    rig.nodes.filter((node) => node.face.outline.length === 3).length,
+    2,
+  );
+
+  const scene = buildRigScene({
+    rig,
+    material: "glossyCardboard",
+    thickness: 0.5,
+  });
+
+  /** Flat midpoints of the creases, so walls on them can be detected. */
+  const creaseMidpoints = segments
+    .filter((segment) => segment.kind === "fold")
+    .map(
+      (segment) =>
+        [
+          (segment.a[0] + segment.b[0]) / 2,
+          (segment.a[1] + segment.b[1]) / 2,
+        ] as [number, number],
+    );
+
+  let wallTriangles = 0;
+  let wallsOnCreases = 0;
+
+  // Panel vertices are pivot-local; convert back to flat pattern coordinates.
+  const centerX = (rig.bounds.min[0] + rig.bounds.max[0]) / 2;
+  const centerY = (rig.bounds.min[1] + rig.bounds.max[1]) / 2;
+
+  rig.nodes.forEach((node, index) => {
+    const pivot = scene.pivots[index]!;
+    const mesh = pivot.children.find(
+      (child) => (child as THREE.Mesh).isMesh,
+    ) as THREE.Mesh | undefined;
+    if (!mesh) return;
+
+    const hingeWorldX =
+      node.parent === null ? 0 : node.pivot[0] - centerX;
+    const hingeWorldY =
+      node.parent === null ? 0 : -(node.pivot[1] - centerY);
+
+    const position = mesh.geometry.getAttribute("position");
+    const normal = mesh.geometry.getAttribute("normal");
+
+    // Walls are emitted as 6 vertices per edge, all with a horizontal normal.
+    for (let i = 0; i < normal.count; i += 3) {
+      if (Math.abs(normal.getZ(i)) > 1e-6) continue;
+      wallTriangles++;
+
+      // Midpoint of the quad's bottom edge, back in flat coordinates.
+      const ax = position.getX(i) + hingeWorldX;
+      const ay = position.getY(i) + hingeWorldY;
+      const bx = position.getX(i + 1) + hingeWorldX;
+      const by = position.getY(i + 1) + hingeWorldY;
+
+      const flatX = (ax + bx) / 2 + centerX;
+      const flatY = centerY - (ay + by) / 2;
+
+      const onCrease = creaseMidpoints.some(
+        ([mx, my]) => Math.hypot(flatX - mx, flatY - my) < 0.6,
+      );
+      if (onCrease) wallsOnCreases++;
+    }
+  });
+
+  assert("the model has walls", wallTriangles > 0, `count=${wallTriangles}`);
+  check("no wall sits on a crease", wallsOnCreases, 0);
+
+  /*
+   * Boundary edges: rectangle 3 (its fourth side is a crease), top triangle 1
+   * (two of its sides are creases), bottom-right triangle 2. Two triangles each.
+   */
+  check("walls only on the six boundary edges", wallTriangles, 12);
+}
+
+/* -------------------------------------------------------------------------- */
+/* 12. A fold chain deeper than one level stays one connected sheet          */
+/* -------------------------------------------------------------------------- */
+{
+  /**
+   * Two creases meeting at B on the bottom edge produce a three-level tree:
+   * root (right quad) -> triangle -> left rectangle. Both of these were broken:
+   *
+   *  - parents do not appear before children in the node list, so a single-pass
+   *    attach dropped the grandchild onto the root and it ignored its parent;
+   *  - a child's pivot was placed at its hinge in absolute coordinates, applying
+   *    the parent's offset twice and detaching the panel — which reads as the card
+   *    being split into two pieces.
+   *
+   * Both only show up at depth two, which is why three-panel strips passed.
+   */
+  const segments: Segment[] = [
+    { a: [0, 0], b: [100, 0], kind: "trim" },
+    { a: [100, 0], b: [100, 60], kind: "trim" },
+    { a: [100, 60], b: [0, 60], kind: "trim" },
+    { a: [0, 60], b: [0, 0], kind: "trim" },
+    { a: [35, 60], b: [35, 0], kind: "fold" }, // B -> A
+    { a: [35, 60], b: [62, 0], kind: "fold" }, // B -> C
+  ];
+
+  const rig = buildFoldRig(segments);
+  check("three panels", rig.stats.faceCount, 3);
+
+  const deepest = rig.nodes.reduce((max, node) => Math.max(max, node.depth), 0);
+  check("tree is three levels deep", deepest, 2);
+
+  const scene = buildRigScene({
+    rig,
+    material: "glossyCardboard",
+    thickness: 0.5,
+  });
+
+  /* ---- the pivot hierarchy must mirror the fold tree ---- */
+  let wrongParents = 0;
+  rig.nodes.forEach((node, index) => {
+    if (node.parent === null) {
+      if (scene.pivots[index]!.parent !== scene.group) wrongParents++;
+      return;
+    }
+
+    if (scene.pivots[index]!.parent !== scene.pivots[node.parent]) {
+      wrongParents++;
+    }
+  });
+  check("every pivot hangs off its real parent", wrongParents, 0);
+
+  /* ---- after folding, every crease must stay welded ---- */
+  const centerX = (rig.bounds.min[0] + rig.bounds.max[0]) / 2;
+  const centerY = (rig.bounds.min[1] + rig.bounds.max[1]) / 2;
+
+  const hingeOf = (index: number) => {
+    const node = rig.nodes[index]!;
+    return node.parent === null
+      ? new THREE.Vector2(0, 0)
+      : new THREE.Vector2(node.pivot[0] - centerX, -(node.pivot[1] - centerY));
+  };
+
+  /** World position of a flat point as seen on a given panel. */
+  const worldOf = (flat: [number, number], index: number) => {
+    const hinge = hingeOf(index);
+    const local = new THREE.Vector3(
+      flat[0] - centerX - hinge.x,
+      -(flat[1] - centerY) - hinge.y,
+      0,
+    );
+
+    scene.group.updateMatrixWorld(true);
+    return local.applyMatrix4(scene.pivots[index]!.matrixWorld);
+  };
+
+  applyFold(scene, rig, 1);
+
+  let maxGap = 0;
+
+  rig.nodes.forEach((node, index) => {
+    if (node.parent === null) return;
+
+    const parent = node.parent;
+    // Both ends of the crease must coincide on the two panels sharing it.
+    for (const end of [
+      node.pivot,
+      [node.pivot[0] + node.axis[0], node.pivot[1] + node.axis[1]] as Pt,
+    ]) {
+      const onChild = worldOf(end, index);
+      const onParent = worldOf(end, parent);
+      maxGap = Math.max(maxGap, onChild.distanceTo(onParent));
+    }
+  });
+
+  assert(
+    "creases stay welded, so the sheet is one piece",
+    maxGap < 0.01,
+    `max gap=${maxGap.toFixed(4)}mm`,
+  );
+
+  /* ---- and the model must not be scattered ---- */
+  const spread = Math.max(scene.size.x, scene.size.y);
+  assert(
+    "folded model stays within a sane extent",
+    spread < 260,
+    `spread=${spread.toFixed(1)}mm (flat pattern is 100x60)`,
   );
 }
 
