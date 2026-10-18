@@ -30,7 +30,7 @@ import { useEffect, useRef, useState } from "react";
 import type { UserType } from "./DielineDownloadButton";
 import FoldedIcon from "../FoldedIcon";
 import UnfoldedIcon from "../UnfoldedIcon";
-import ArtworkPlacer from "./ArtworkPlacer";
+import { ArtworkPlacer } from "@repo/dieline-3d/ArtworkPlacer";
 
 /**
  * Previewing artwork on the 3D model is a paid capability.
@@ -282,6 +282,12 @@ const DielinePreview3D = ({
                     svg={svg ?? ""}
                     imageUrl={artwork.url}
                     value={artwork.transform}
+                    labels={{
+                      dragHint: "برای جابه‌جایی بکش",
+                      sizeLabel: "اندازه تصویر",
+                      reset: "بازنشانی جای تصویر",
+                      noGeometry: "هندسه‌ی دایلاین خوانده نشد.",
+                    }}
                     onChange={(transform) =>
                       setArtwork((current) =>
                         current ? { ...current, transform } : current,

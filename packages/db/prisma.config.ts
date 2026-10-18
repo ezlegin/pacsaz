@@ -8,5 +8,10 @@ export default defineConfig({
   },
   datasource: {
     url: process.env["DATABASE_URL"],
+    /**
+     * Scratch database Prisma uses to replay migrations while computing a diff.
+     * Optional: the app never needs it, only `migrate dev` and `migrate diff`.
+     */
+    shadowDatabaseUrl: process.env["SHADOW_DATABASE_URL"],
   },
 });

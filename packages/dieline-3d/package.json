@@ -8,11 +8,14 @@
   },
   "exports": {
     "./geometry": "./src/geometry.ts",
-    "./viewer": "./src/viewer.tsx"
+    "./viewer": "./src/viewer.tsx",
+    "./ArtworkPlacer": "./src/ArtworkPlacer.tsx"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.9",
     "@react-three/fiber": "^9.8.2",
+    "@repo/ui": "workspace:*",
+    "lucide-react": "^0.562.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "three": "^0.186.1"

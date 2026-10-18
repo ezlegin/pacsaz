@@ -3,11 +3,13 @@
 import {
   buildFoldRig,
   DEFAULT_FOLD_ANGLE,
+  defaultArtworkTransform,
   extractSegmentsFromSvg,
   foldConfigStatus,
   MAX_FOLD_ANGLE,
   MIN_FOLD_ANGLE,
   parseFoldConfig,
+  type ArtworkTransform,
   type FoldConfig,
   type FoldOverride,
 } from "@repo/dieline-3d/geometry";
@@ -27,8 +29,15 @@ import {
   DialogTrigger,
 } from "@repo/ui/components/dialog";
 import { Separator } from "@repo/ui/components/separator";
-import { Box, ExternalLink, RotateCcw } from "lucide-react";
-import { useMemo, useState } from "react";
+import {
+  Box,
+  ExternalLink,
+  ImagePlus,
+  RotateCcw,
+  Trash2,
+} from "lucide-react";
+import { ArtworkPlacer } from "@repo/dieline-3d/ArtworkPlacer";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 /** Upserts one override and serialises back into the store. */
 const withOverride = (
@@ -70,6 +79,38 @@ const FoldPanel = () => {
   const [selected, setSelected] = useState<number | null>(null);
   const [open, setOpen] = useState(false);
   const [progress, setProgress] = useState(1);
+
+  /**
+   * Preview-only artwork, exactly as in the client app: an object URL held in
+   * memory, never uploaded and never saved with the dieline. It exists so folds
+   * can be reviewed against real artwork, not a blank board.
+   */
+  const [artwork, setArtwork] = useState<{
+    url: string;
+    name: string;
+    transform: ArtworkTransform;
+  } | null>(null);
+
+  const fileInput = useRef<HTMLInputElement>(null);
+
+  // Free the blob URL when it is replaced, keyed on the URL so replacing the
+  // transform does not revoke a URL that is still in use.
+  useEffect(() => {
+    const url = artwork?.url;
+    if (!url) return;
+
+    return () => URL.revokeObjectURL(url);
+  }, [artwork?.url]);
+
+  const pickArtwork = (file: File | undefined) => {
+    if (!file || !file.type.startsWith("image/")) return;
+
+    setArtwork({
+      url: URL.createObjectURL(file),
+      name: file.name,
+      transform: defaultArtworkTransform(),
+    });
+  };
 
   const config = useMemo(() => parseFoldConfig(json), [json]);
 
@@ -158,13 +199,18 @@ const FoldPanel = () => {
             <DialogTitle>Fold directions</DialogTitle>
           </DialogHeader>
 
-          <div className="grid grid-cols-[1fr_220px] gap-4">
+          <div className="grid grid-cols-[minmax(0,1fr)_20rem] gap-4">
             <DielineViewer
               svg={svg ?? ""}
               material={material}
               thickness={thickness}
               progress={progress}
               foldConfig={json}
+              artwork={
+                artwork
+                  ? { url: artwork.url, transform: artwork.transform }
+                  : null
+              }
               selectedPanel={selected}
               onPanelClick={(index) => setSelected(index)}
               className="h-[720px] w-full rounded-xl"
@@ -263,6 +309,98 @@ const FoldPanel = () => {
                 <span className="w-9 text-right text-[11px] tabular-nums">
                   {Math.round(progress * 100)}%
                 </span>
+              </div>
+
+              {/* -------------------------- artwork --------------------------- */}
+              <div className="space-y-3 rounded-lg border p-3">
+                <div>
+                  <p className="text-[11px] font-medium">Artwork preview</p>
+                  <p className="text-[10px] leading-4 text-muted-foreground">
+                    Local only — never uploaded or saved.
+                  </p>
+                </div>
+
+                <input
+                  ref={fileInput}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    pickArtwork(e.target.files?.[0]);
+                    // Allow re-picking the same file.
+                    e.target.value = "";
+                  }}
+                />
+
+                {artwork ? (
+                  <>
+                    <div className="flex items-center gap-2">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={artwork.url}
+                        alt=""
+                        className="size-8 shrink-0 rounded border bg-white object-cover"
+                      />
+
+                      <p
+                        className="min-w-0 flex-1 truncate text-[10px] text-muted-foreground"
+                        title={artwork.name}
+                      >
+                        {artwork.name}
+                      </p>
+
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setArtwork(null)}
+                        aria-label="Remove artwork"
+                        title="Remove artwork"
+                      >
+                        <Trash2 size={13} />
+                      </Button>
+                    </div>
+
+                    <ArtworkPlacer
+                      svg={svg ?? ""}
+                      imageUrl={artwork.url}
+                      value={artwork.transform}
+                      labels={{
+                        dragHint: "Drag to position",
+                        sizeLabel: "Artwork size",
+                        reset: "Reset position",
+                        noGeometry: "Dieline geometry not found.",
+                      }}
+                      onChange={(transform) =>
+                        setArtwork((current) =>
+                          current ? { ...current, transform } : current,
+                        )
+                      }
+                    />
+
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => fileInput.current?.click()}
+                    >
+                      <ImagePlus size={13} className="mr-1.5" />
+                      Change image
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => fileInput.current?.click()}
+                  >
+                    <ImagePlus size={13} className="mr-1.5" />
+                    Choose image
+                  </Button>
+                )}
               </div>
             </div>
           </div>

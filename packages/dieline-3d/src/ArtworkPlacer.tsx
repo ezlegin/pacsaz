@@ -4,12 +4,11 @@ import {
   clampArtworkCentre,
   clampArtworkScale,
   defaultArtworkTransform,
-  extractTrimPaths,
   MAX_ARTWORK_SCALE,
   MIN_ARTWORK_SCALE,
-  svgBounds,
   type ArtworkTransform,
-} from "@repo/dieline-3d/geometry";
+} from "./artwork";
+import { extractTrimPaths, svgBounds } from "./extract";
 import { Button } from "@repo/ui/components/button";
 import { Move, RotateCcw, ZoomIn } from "lucide-react";
 import { useMemo, useRef } from "react";
@@ -25,16 +24,24 @@ import { useMemo, useRef } from "react";
  * The transform is expressed in normalized pattern space — the same space the UVs
  * use — which is what makes a drag here land exactly where it appears on the model.
  */
-const ArtworkPlacer = ({
+export const ArtworkPlacer = ({
   svg,
   imageUrl,
   value,
   onChange,
+  labels,
 }: {
   svg: string;
   imageUrl: string;
   value: ArtworkTransform;
   onChange: (transform: ArtworkTransform) => void;
+  /** Copy is injected because the client app is Persian and admin is English. */
+  labels: {
+    dragHint: string;
+    sizeLabel: string;
+    reset: string;
+    noGeometry: string;
+  };
 }) => {
   const surface = useRef<HTMLDivElement>(null);
   const drag = useRef<{ x: number; y: number } | null>(null);
@@ -45,7 +52,7 @@ const ArtworkPlacer = ({
   if (!bounds) {
     return (
       <p className="py-8 text-center text-[11px] text-muted-foreground">
-        هندسه‌ی دایلاین خوانده نشد.
+        {labels.noGeometry}
       </p>
     );
   }
@@ -153,7 +160,7 @@ const ArtworkPlacer = ({
         <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-center gap-1.5 bg-gradient-to-t from-black/45 to-transparent px-2 pb-1.5 pt-5">
           <Move className="size-3 text-white/90" />
           <span className="text-[9px] font-medium text-white/90">
-            برای جابه‌جایی بکش
+            {labels.dragHint}
           </span>
         </div>
       </div>
@@ -173,12 +180,12 @@ const ArtworkPlacer = ({
               scale: clampArtworkScale(Number(event.target.value) / 100),
             })
           }
-          aria-label="اندازه تصویر"
+          aria-label={labels.sizeLabel}
           className="h-1 min-w-0 flex-1 cursor-pointer appearance-none rounded-full bg-muted accent-[var(--primary)]"
         />
 
         <span className="w-9 shrink-0 text-center text-[10px] font-bold tabular-nums">
-          {Math.round(value.scale * 100).toLocaleString("fa-IR")}٪
+          {Math.round(value.scale * 100)}٪
         </span>
       </div>
 
@@ -190,7 +197,7 @@ const ArtworkPlacer = ({
         onClick={() => onChange(defaultArtworkTransform())}
       >
         <RotateCcw className="size-3.5" />
-        بازنشانی جای تصویر
+        {labels.reset}
       </Button>
     </div>
   );
