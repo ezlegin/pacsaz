@@ -72,8 +72,11 @@ const DielineGenerator = ({
         The canvas sits directly on the page background — no card wrapper, so the
         dieline reads as the workspace itself. The absolute centring wrapper is
         kept as-is: SVGPreview measures against this geometry.
+
+        `data-print-hide` keeps the drawing itself off paper: Ctrl+P prints the
+        page, never a printable copy of the dieline.
       */}
-      <div className="relative min-h-0">
+      <div data-print-hide className="relative min-h-0">
         <div className="absolute top-1/2 right-1/2 h-full w-full translate-y-[-50%] translate-x-1/2 pb-10">
           <SVGPreview isRendering={isRendering} type="client" />
         </div>

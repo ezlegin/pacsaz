@@ -302,3 +302,26 @@ html > body[data-scroll-locked] {
     animation: none;
   }
 }
+
+/* -------------------------------------------------------------------------- */
+/*  Printing: never print the dieline                                         */
+/* -------------------------------------------------------------------------- */
+
+/*
+ * A visitor who presses Ctrl+P must not get a printable copy of the dieline.
+ * The rest of the page is ordinary website content, so it prints exactly as it
+ * looks — this drops the canvas that holds the drawing and nothing else.
+ *
+ * `display: none` is safe here: the preview measures its drawing on mount, long
+ * before anyone prints, and its ResizeObserver simply stops reporting while the
+ * element is hidden.
+ *
+ * This is not copy protection. The drawing is built in the browser and can still
+ * be reached through the developer tools; anything that truly must not be
+ * reprinted has to arrive already rasterised, with the watermark burnt in.
+ */
+@media print {
+  [data-print-hide] {
+    display: none !important;
+  }
+}
