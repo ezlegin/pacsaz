@@ -1,5 +1,11 @@
 import { buildFoldRig } from "./foldRig";
-import { extractSegmentsFromSvg, svgHasFoldLayer, svgLayerIds } from "./extract";
+import {
+  extractSegmentsFromSvg,
+  extractTrimPaths,
+  svgBounds,
+  svgHasFoldLayer,
+  svgLayerIds,
+} from "./extract";
 
 let failures = 0;
 const check = (label: string, actual: unknown, expected: unknown) => {
@@ -153,6 +159,33 @@ console.log("extracted:", segments.length, JSON.stringify(kinds));
   );
 }
 
+/* ---------------- artwork mask helpers (placement editor) ----------------- */
+{
+  // Only trim outlines mask the sheet; bleed and folds must not.
+  const paths = extractTrimPaths(realSvg);
+  check("one trim path", paths.length, 1);
+  assert(
+    "trim path is the sheet outline",
+    paths[0]?.startsWith("M 35 195") === true,
+    paths[0]?.slice(0, 16),
+  );
+
+  const bounds = svgBounds(realSvg);
+  check(
+    "bounds match the trim, not the bleed",
+    bounds ? [bounds.width, bounds.height] : null,
+    [180, 160],
+  );
+  check(
+    "bounds origin is the trim corner",
+    bounds ? bounds.min : null,
+    [35, 35],
+  );
+
+  check("empty svg has no bounds", svgBounds(""), null);
+  check("trim-only svg has no trim paths after defs strip", extractTrimPaths(""), []);
+}
+
 /* ---------------------- defs/watermark never geometry --------------------- */
 {
   const withDefs = `<svg xmlns="http://www.w3.org/2000/svg">
@@ -170,6 +203,9 @@ console.log("extracted:", segments.length, JSON.stringify(kinds));
 
   check("defs path is not geometry", segs.length, 5);
   check("defs does not add faces", rig.stats.faceCount, 2);
+
+  // The mask helper must not pick the clipPath up as a trim outline.
+  check("defs clipPath is not a trim path", extractTrimPaths(withDefs).length, 1);
 }
 
 /* ------------------------------ empty states ------------------------------ */

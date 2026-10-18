@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { buildFoldRig } from "./foldRig";
-import { applyFold, buildRigScene, materialStyleFor } from "./build";
+import { applyArtwork, applyFold, buildRigScene, materialStyleFor } from "./build";
 import type { Segment } from "./types";
 
 let failures = 0;
@@ -356,6 +356,63 @@ const farthestFromHinge = (index: number) => {
 
   // Windows must still stay in `nodes` so fold override indices do not shift.
   check("hole stays in nodes for index stability", rig.nodes.length, 2);
+}
+
+/* -------------------------------------------------------------------------- */
+/* 10. Artwork is mapped across the whole flat pattern                       */
+/* -------------------------------------------------------------------------- */
+{
+  const segments: Segment[] = [
+    { a: [0, 0], b: [40, 0], kind: "trim" },
+    { a: [40, 0], b: [40, 20], kind: "trim" },
+    { a: [40, 20], b: [0, 20], kind: "trim" },
+    { a: [0, 20], b: [0, 0], kind: "trim" },
+  ];
+
+  const rig = buildFoldRig(segments);
+  const scene = buildRigScene({ rig, material: "glossyCardboard", thickness: 0.5 });
+
+  const mesh = scene.pivots[0]!.children.find(
+    (child) => (child as THREE.Mesh).isMesh,
+  ) as THREE.Mesh;
+
+  /* UVs must span 0–1 across the pattern, not millimetres. */
+  const uv = mesh.geometry.getAttribute("uv");
+  assert("panel geometry has UVs", Boolean(uv && uv.count > 0));
+
+  let min = Infinity;
+  let max = -Infinity;
+  for (let i = 0; i < uv.count; i++) {
+    min = Math.min(min, uv.getX(i), uv.getY(i));
+    max = Math.max(max, uv.getX(i), uv.getY(i));
+  }
+  assert(
+    "UVs are normalised to 0-1",
+    min >= -1e-6 && max <= 1 + 1e-6,
+    `min=${min.toFixed(3)} max=${max.toFixed(3)}`,
+  );
+  assert(
+    "UVs cover the pattern",
+    min < 0.01 && max > 0.99,
+    `min=${min.toFixed(3)} max=${max.toFixed(3)}`,
+  );
+
+  /* Applying artwork must swap the map and untint the board colour. */
+  const dummy = new THREE.Texture();
+  applyArtwork(scene, dummy);
+
+  const material = mesh.material as THREE.MeshStandardMaterial;
+  assert("artwork sets the texture map", material.map === dummy);
+  check("artwork makes the base colour white", `#${material.color.getHexString()}`, "#ffffff");
+
+  /* Clearing restores the stock colour and removes the map. */
+  applyArtwork(scene, null);
+  check("clearing removes the map", material.map, null);
+  check(
+    "clearing restores the stock colour",
+    `#${material.color.getHexString()}`,
+    materialStyleFor("glossyCardboard").color.toLowerCase(),
+  );
 }
 
 console.log(failures === 0 ? "\nALL 3D BUILD CHECKS PASSED" : `\n${failures} FAILED`);

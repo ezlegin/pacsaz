@@ -2,9 +2,10 @@
 
 import { OrbitControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import { useEffect, useMemo } from "react";
-import type * as THREE from "three";
-import { applyFold, buildRigScene, type RigScene } from "./build";
+import { useEffect, useMemo, useState } from "react";
+import * as THREE from "three";
+import { applyArtwork, applyFold, buildRigScene, type RigScene } from "./build";
+import { composeArtwork, type ArtworkTransform } from "./artwork";
 import { extractSegmentsFromSvg } from "./extract";
 import { buildFoldRig } from "./foldRig";
 import { parseFoldConfig } from "./foldConfig";
@@ -78,15 +79,22 @@ export type DielineViewerProps = {
    * crease uses the inferred direction.
    */
   foldConfig?: string | null;
+  /**
+   * Artwork to print across the flat pattern, with its placement. Purely visual:
+   * the viewer never uploads it, so it lives only as long as the caller's URL.
+   */
+  artwork?: { url: string; transform: ArtworkTransform } | null;
   className?: string;
   /**
-   * Overlay content, e.g. a fold slider. May be a function to receive facts about
-   * the model — a dieline with no creases renders flat, and a caller usually wants
-   * to hide fold controls in that case.
+   * Overlay content drawn on top of the canvas. Rarely needed: chrome that should
+   * sit *below* the model belongs outside the viewer, so it stays flush.
    */
-  children?:
-    | React.ReactNode
-    | ((info: { hasHinges: boolean; hingeCount: number }) => React.ReactNode);
+  children?: React.ReactNode;
+  /**
+   * Reports what the model turned out to be, so a caller can adapt its chrome —
+   * e.g. hide a fold slider for a dieline with no creases.
+   */
+  onModelInfo?: (info: { hasHinges: boolean; hingeCount: number }) => void;
   /** Called with the panel index when a panel is clicked. */
   onPanelClick?: (panelIndex: number) => void;
   /** Panel index to highlight, for editor selection. */
@@ -105,8 +113,10 @@ export const DielineViewer = ({
   progress,
   isRendering,
   foldConfig,
+  artwork,
   className,
   children,
+  onModelInfo,
   onPanelClick,
   selectedPanel,
   renderEmpty,
@@ -174,6 +184,122 @@ export const DielineViewer = ({
     });
   }, [scene, selectedPanel]);
 
+  /**
+   * Artwork is composed into a texture in two stages, on purpose.
+   *
+   * Decoding is keyed on the URL only: dragging fires a transform change on every
+   * pointer move, and re-decoding the image each time would be wasteful and would
+   * make the model stutter. Composition is keyed on the transform, so dragging
+   * only redraws the canvas.
+   *
+   * The result is drawn onto a canvas spanning the whole flat pattern rather than
+   * panning the texture with offset/repeat, because repeat would clamp and smear
+   * the image's edge pixels across the uncovered part of the sheet.
+   *
+   * Composition deps are the transform's primitives, not the object, so an inline
+   * object from the caller cannot trigger needless work.
+   */
+  const [artworkImage, setArtworkImage] = useState<HTMLImageElement | null>(
+    null,
+  );
+  const [artworkTexture, setArtworkTexture] = useState<THREE.Texture | null>(
+    null,
+  );
+
+  const artworkUrl = artwork?.url;
+  const artworkScale = artwork?.transform.scale;
+  const artworkCx = artwork?.transform.cx;
+  const artworkCy = artwork?.transform.cy;
+  const bounds = rig?.bounds;
+
+  /* --------------------------- decode once per URL ------------------------- */
+  useEffect(() => {
+    if (!artworkUrl) {
+      setArtworkImage(null);
+      return;
+    }
+
+    let cancelled = false;
+    const image = new Image();
+
+    image.onload = () => {
+      if (!cancelled) setArtworkImage(image);
+    };
+
+    image.onerror = () => {
+      if (cancelled) return;
+      console.error("[dieline-3d] artwork failed to decode");
+      setArtworkImage(null);
+    };
+
+    image.src = artworkUrl;
+
+    return () => {
+      cancelled = true;
+    };
+  }, [artworkUrl]);
+
+  /* ---------------------- recompose on every placement --------------------- */
+  useEffect(() => {
+    if (!artworkImage || !bounds) {
+      setArtworkTexture(null);
+      return;
+    }
+
+    try {
+      const canvas = composeArtwork({
+        image: artworkImage,
+        transform: {
+          scale: artworkScale ?? 1,
+          cx: artworkCx ?? 0.5,
+          cy: artworkCy ?? 0.5,
+        },
+        bounds,
+        // Live preview: dragging recomposes on every move, so a 2048px canvas
+        // would be wasted work for a model this size on screen.
+        maxWidth: 1024,
+      });
+
+      if (!canvas) {
+        setArtworkTexture(null);
+        return;
+      }
+
+      const texture = new THREE.CanvasTexture(canvas);
+      // Artwork is colour, not data, so it must decode as sRGB.
+      texture.colorSpace = THREE.SRGBColorSpace;
+      texture.anisotropy = 8;
+
+      setArtworkTexture(texture);
+    } catch (error) {
+      console.error("[dieline-3d] artwork compose failed", error);
+      setArtworkTexture(null);
+    }
+  }, [artworkImage, artworkScale, artworkCx, artworkCy, bounds]);
+
+  useEffect(() => {
+    if (!scene) return;
+
+    applyArtwork(scene, artworkTexture);
+    return () => applyArtwork(scene, null);
+  }, [scene, artworkTexture]);
+
+  // Release the GPU texture once it is no longer referenced.
+  useEffect(() => () => artworkTexture?.dispose(), [artworkTexture]);
+
+  /**
+   * Report the model's shape. A dieline with no creases still renders, but a fold
+   * control would do nothing, so callers need to know.
+   */
+  useEffect(() => {
+    if (!onModelInfo) return;
+
+    onModelInfo({
+      hasHinges: (rig?.stats.hingeCount ?? 0) > 0,
+      hingeCount: rig?.stats.hingeCount ?? 0,
+    });
+  }, [rig, onModelInfo]);
+
   /* ------------------------------ empty states ----------------------------- */
   if (!rig || !scene) {
     // `build` is a discriminated union, but narrowing `rig` does not narrow it.
@@ -200,12 +326,17 @@ export const DielineViewer = ({
   const cameraDistance = span * 1.15;
 
   return (
-    <div className={`relative overflow-hidden rounded-2xl ${className ?? ""}`}>
+    <div className={`relative overflow-hidden ${className ?? ""}`}>
       <Canvas
         dpr={[1, 2]}
         gl={{ antialias: true, alpha: false }}
         camera={{
-          position: [cameraDistance * 0.55, -cameraDistance * 0.9, cameraDistance],
+          /* Start above and to the right, looking down at the model. */
+          position: [
+            cameraDistance * 0.72,
+            cameraDistance * 0.5,
+            cameraDistance * 0.95,
+          ],
           fov: 42,
           near: 1,
           far: span * 20,
@@ -215,22 +346,33 @@ export const DielineViewer = ({
         <color attach="background" args={[WORLD_BACKGROUND]} />
 
         {/*
-          Three lights, no shadow maps — cheap and enough to read the form.
-          The hemisphere gives a soft sky/ground gradient instead of a flat
-          ambient wash, which is what makes folded panels legible.
-        */}
-        <hemisphereLight args={["#ffffff", "#c6cad0", 0.85]} />
+          Key on the front, an equally strong key on the back, plus a soft
+          sky/ground ambient and a low fill.
 
-        {/* Key light, upper front-left. */}
+          The back light is the point: a panel seen from behind is lit only by
+          lights behind it, so with a front key alone the reverse of the model
+          went dark. Two opposing keys give both faces the same brightness, and
+          because each faces only its own light the shading across a face stays
+          readable.
+        */}
+        <hemisphereLight args={["#ffffff", "#c6cad0", 0.8]} />
+
+        {/* Front key, upper left. */}
         <directionalLight
           position={[span * 0.8, -span, span * 1.4]}
-          intensity={1.6}
+          intensity={1.45}
         />
 
-        {/* Gentle fill from the opposite side so shaded panels still read. */}
+        {/* Back key, mirrored, so the reverse of the model is not in shadow. */}
         <directionalLight
-          position={[-span * 0.9, span * 0.6, span * 0.5]}
-          intensity={0.35}
+          position={[-span * 0.7, span * 0.85, -span * 1.35]}
+          intensity={1.45}
+        />
+
+        {/* Gentle fill from the upper right to stop edges going flat. */}
+        <directionalLight
+          position={[span * 0.9, span * 0.6, span * 0.45]}
+          intensity={0.4}
         />
 
         <RigObject
@@ -250,12 +392,7 @@ export const DielineViewer = ({
         />
       </Canvas>
 
-      {typeof children === "function"
-        ? children({
-            hasHinges: rig.stats.hingeCount > 0,
-            hingeCount: rig.stats.hingeCount,
-          })
-        : children}
+      {children}
     </div>
   );
 };

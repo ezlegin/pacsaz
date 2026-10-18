@@ -108,7 +108,7 @@ const DielineGenerator = ({
       </div>
 
       {/* -------------------------------- details ------------------------------ */}
-      <ProductInfo isRendering={isRendering} />
+      <ProductInfo isRendering={isRendering} user={user} />
     </div>
   );
 };

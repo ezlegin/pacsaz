@@ -194,3 +194,48 @@ export const svgLayerIds = (svg: string): string[] => {
 
   return ids;
 };
+
+/**
+ * Raw `d` attributes of the trim paths.
+ *
+ * The artwork placement editor uses these straight from the export — curves stay
+ * exact — to mask everything outside the sheet, so the image shows through only
+ * where board actually exists.
+ */
+export const extractTrimPaths = (svg: string): string[] => {
+  const clean = stripDefinitions(svg);
+  const paths: string[] = [];
+  const pattern = /<path\b([^>]*?)\/?>/gi;
+
+  let match: RegExpExecArray | null;
+  while ((match = pattern.exec(clean)) !== null) {
+    const attrs = match[1] ?? "";
+    if (attr(attrs, "id") !== "trim") continue;
+
+    const d = attr(attrs, "d");
+    if (d && d.trim()) paths.push(d);
+  }
+
+  return paths;
+};
+
+/**
+ * Bounding box of the foldable geometry, in SVG user units.
+ *
+ * Cheap on purpose: it segments the export but skips the planar pass, so the
+ * placement editor can size itself without building a whole fold rig.
+ */
+export const svgBounds = (
+  svg: string,
+): { min: Pt; max: Pt; width: number; height: number } | null => {
+  const segments = extractSegmentsFromSvg(svg);
+  if (segments.length === 0) return null;
+
+  const xs = segments.flatMap((segment) => [segment.a[0], segment.b[0]]);
+  const ys = segments.flatMap((segment) => [segment.a[1], segment.b[1]]);
+
+  const min: Pt = [Math.min(...xs), Math.min(...ys)];
+  const max: Pt = [Math.max(...xs), Math.max(...ys)];
+
+  return { min, max, width: max[0] - min[0], height: max[1] - min[1] };
+};

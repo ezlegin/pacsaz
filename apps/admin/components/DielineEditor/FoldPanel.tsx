@@ -167,7 +167,7 @@ const FoldPanel = () => {
               foldConfig={json}
               selectedPanel={selected}
               onPanelClick={(index) => setSelected(index)}
-              className="h-[720px] w-full"
+              className="h-[720px] w-full rounded-xl"
             />
 
             {/* ------------------------ selected panel ------------------------ */}

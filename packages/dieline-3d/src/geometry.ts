@@ -12,7 +12,23 @@
  * Entry point is `buildFoldRig`, then `buildRigScene` to get something drawable.
  */
 
-export { extractSegmentsFromSvg, svgHasFoldLayer, svgLayerIds } from "./extract";
+export {
+  extractSegmentsFromSvg,
+  extractTrimPaths,
+  svgBounds,
+  svgHasFoldLayer,
+  svgLayerIds,
+} from "./extract";
+export {
+  clampArtworkCentre,
+  clampArtworkScale,
+  composeArtwork,
+  defaultArtworkTransform,
+  MAX_ARTWORK_SCALE,
+  MIN_ARTWORK_SCALE,
+  type ArtworkBounds,
+  type ArtworkTransform,
+} from "./artwork";
 export { parsePathToPolylines, polylinesToSegments } from "./path";
 export { buildPlanarFaces, PLANAR_TOLERANCE } from "./planar";
 export {

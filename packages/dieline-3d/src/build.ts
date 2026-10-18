@@ -458,6 +458,31 @@ export const applyFold = (
   scene.group.updateMatrixWorld(true);
 };
 
+/**
+ * Maps an artwork texture onto every panel, or clears it when given `null`.
+ *
+ * Applied imperatively rather than baked into `buildRigScene`, so swapping the
+ * image never rebuilds geometry or resets the fold pose. While artwork is present
+ * the base colour goes white, otherwise the texture would be tinted by the board
+ * colour; clearing restores the stock colour.
+ */
+export const applyArtwork = (
+  scene: RigScene,
+  map: THREE.Texture | null,
+): void => {
+  scene.group.traverse((object) => {
+    const mesh = object as THREE.Mesh;
+    if (!mesh.isMesh) return;
+
+    const material = mesh.material as THREE.MeshStandardMaterial;
+    if (!material) return;
+
+    material.map = map;
+    material.color.set(map ? "#ffffff" : scene.style.color);
+    material.needsUpdate = true;
+  });
+};
+
 /** Edge overlay so cut and crease lines stay readable on the folded model. */
 export const buildEdgeLines = (
   rig: FoldRig,

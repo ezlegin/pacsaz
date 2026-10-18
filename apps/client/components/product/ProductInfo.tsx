@@ -7,6 +7,7 @@ import { cn } from "@repo/ui/lib/utils";
 
 import { Info, Ruler } from "lucide-react";
 import DielinePreview3D from "./DielinePreview3D";
+import { UserType } from "./DielineDownloadButton";
 
 const fa = (value: number) =>
   value.toLocaleString("fa-IR", { maximumFractionDigits: 1 });
@@ -15,9 +16,16 @@ const fa = (value: number) =>
  * Spec panel for the dieline editor.
  *
  * The 3D preview replaced the static model render: it rebuilds from the live
- * store, so it follows every specification change.
+ * store, so it follows every specification change. The user is passed through
+ * because previewing artwork on the model is a paid feature.
  */
-const ProductInfo = ({ isRendering }: { isRendering: boolean }) => {
+const ProductInfo = ({
+  isRendering,
+  user,
+}: {
+  isRendering: boolean;
+  user: UserType | null;
+}) => {
   const offset = resolveOffsets();
 
   const {
@@ -132,7 +140,7 @@ const ProductInfo = ({ isRendering }: { isRendering: boolean }) => {
 
       <div className="scrollbar-soft min-h-0 flex-1 space-y-5 overflow-y-auto p-5">
         {/* ------------------------------- legend ---------------------------- */}
-        <div className="flex flex-wrap gap-x-4 gap-y-2">
+        <div className="flex flex-wrap justify-between gap-x-4 gap-y-2">
           {packLengend.map(({ color, label, dashed }) => (
             <div key={label} className="flex items-center gap-1.5">
               <div
@@ -154,7 +162,7 @@ const ProductInfo = ({ isRendering }: { isRendering: boolean }) => {
         </div>
 
         {/* ------------------------------ 3d preview -------------------------- */}
-        <DielinePreview3D isRendering={isRendering} compact />
+        <DielinePreview3D isRendering={isRendering} user={user} />
 
         {/* ------------------------------ dimensions -------------------------- */}
         {visibleDimensions.length > 0 && (
