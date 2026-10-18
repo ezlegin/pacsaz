@@ -15,6 +15,8 @@ import {
   Ruler,
   Slash,
   Square,
+  Star,
+  Siren,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import RulerProps from "./props/RulerProps";
@@ -22,11 +24,13 @@ import GroupsPropsProvider from "./props/GroupsPropsProvider";
 import ModelsPropsProvider from "./props/ModelsPropsProvider";
 import ShapesPropsProvider from "./props/ShapesPropsProvider";
 import ArcProps from "./props/shapes/ArcProps";
+import BeltProps from "./props/shapes/BeltProps";
 import CircleProps from "./props/shapes/CircleProps";
 import LineProps from "./props/shapes/LineProps";
 import LinesProps from "./props/shapes/LinesProps";
 import PolygonProps from "./props/shapes/PolygonProps";
 import RectangleProps from "./props/shapes/RectangleProps";
+import StarProps from "./props/shapes/StarProps";
 import { defaultModelValues, modelLabels } from "@/lib/models/registry";
 
 type EditorMode = {
@@ -46,6 +50,8 @@ const Tools = () => {
     { key: "circle", Icon: Circle },
     { key: "polygon", Icon: Hexagon },
     { key: "arc", Icon: Parentheses },
+    { key: "star", Icon: Star },
+    { key: "belt", Icon: Siren },
   ];
 
   // One shared icon for every model — they are told apart by name.
@@ -89,6 +95,8 @@ const Tools = () => {
     circle: CircleProps,
     polygon: PolygonProps,
     arc: ArcProps,
+    star: StarProps,
+    belt: BeltProps,
   };
 
   if (editorMode) {

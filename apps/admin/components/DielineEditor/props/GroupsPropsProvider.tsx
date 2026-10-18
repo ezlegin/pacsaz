@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import PropsHeader from "./PropsHeader";
 import { DupOperationEditor } from "./shapes/DupOperationEditor";
+import PointInput from "./shapes/PointInput";
 
 interface Props {
   data: ISpec.Group;
@@ -38,7 +39,12 @@ function GroupsPropsProvider({ data, close }: Props) {
 
   const form = useForm<FormType>({
     resolver: zodResolver(groupFormSchema) as any,
-    defaultValues: data as unknown as FormType,
+    // Groups authored before `origin` existed have none; start them at zero so the
+    // form is always valid.
+    defaultValues: {
+      ...(data as unknown as FormType),
+      origin: data.origin ?? ["0", "0"],
+    },
     mode: "onChange",
   });
 
@@ -61,6 +67,15 @@ function GroupsPropsProvider({ data, close }: Props) {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <PropsHeader form={form} close={close} />
+
+        <Separator />
+
+        <PointInput
+          form={form}
+          label="Origin"
+          nameX="origin.0"
+          nameY="origin.1"
+        />
 
         <Separator />
 

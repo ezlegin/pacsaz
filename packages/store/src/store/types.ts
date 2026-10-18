@@ -90,8 +90,26 @@ export namespace ISpec {
     | "a-end-b-end";
 
   export type ShapeEffect =
-    | { type: "radiusAt"; targets: string[]; value: string }
+    /**
+     * Round every corner with a single radius.
+     */
     | { type: "radius"; value: string }
+    /**
+     * Round only the listed corner indices (`targets`) with one shared radius.
+     */
+    | { type: "radiusAt"; targets: string[]; value: string }
+    /**
+     * Round individual corners with their own radius, e.g. 0 -> 10, 1 -> 20.
+     */
+    | {
+        type: "customRadiusAt";
+        radii: { index: string; radius: string }[];
+      }
+    /**
+     * Round every corner by the largest amount that corner allows, so a small
+     * rectangle becomes a perfect capsule instead of collapsing.
+     */
+    | { type: "fullRadius" }
     | { type: "array"; moveX: string; moveY: string; repeat: string }
     | { type: "boolean"; mode: "union" | "subtract" | "intersect" }
     | { type: "join"; mode: JoinMode };
@@ -141,13 +159,41 @@ export namespace ISpec {
       type: "arc";
     };
 
+  /**
+   * Star. `innerRadius` is optional — when it is omitted (or resolves to zero)
+   * makerjs derives it from the point count, which is the usual look.
+   */
+  export type StarSpec = Record<"points" | "radius", string> &
+    Generals & {
+      type: "star";
+      innerRadius?: string;
+    };
+
+  /**
+   * Belt: two circular ends of different radii joined by tangent edges, used for
+   * strap and handle cut-outs.
+   *
+   * `angle` rotates it in degrees; the default is 90 so a belt is **vertical**,
+   * since makerjs builds it horizontally.
+   */
+  export type BeltSpec = Record<
+    "leftRadius" | "distance" | "rightRadius",
+    string
+  > &
+    Generals & {
+      type: "belt";
+      angle?: string;
+    };
+
   export type Shape =
     | LineSpec
     | LinesSpec
     | RectangleSpec
     | CircleSpec
     | PolygonSpec
-    | ArcSpec;
+    | ArcSpec
+    | StarSpec
+    | BeltSpec;
 
   export type ShapesKey = Shape["type"];
 
@@ -159,7 +205,12 @@ export namespace ISpec {
     key: string;
     hidden: boolean;
     stack: "group";
-    // Groups have no origin of their own — children carry their own placement.
+    /**
+     * Groups are translated as a whole by this offset, exactly like a shape's
+     * origin. Optional so groups authored before it existed still load; a missing
+     * origin means no shift.
+     */
+    origin?: Point;
     nodes: Node[];
     dup?: Dup;
     effects: ShapeEffect[];

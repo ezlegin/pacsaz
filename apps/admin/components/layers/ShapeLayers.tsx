@@ -135,6 +135,7 @@ export default function ShapeLayers({ handleLayerAction, nodes }: Props) {
       key: `Group (${ids.length})`,
       hidden: false,
       stack: "group",
+      origin: ["0", "0"],
       nodes: [],
       effects: [],
     };
@@ -223,6 +224,7 @@ export default function ShapeLayers({ handleLayerAction, nodes }: Props) {
         initialType={effects.radiusDialog?.initialType ?? "radius"}
         initialTargets={effects.radiusDialog?.initialTargets ?? []}
         initialValue={effects.radiusDialog?.initialValue ?? "5"}
+        initialRadii={effects.radiusDialog?.initialRadii ?? []}
         onOpenChange={(open) => !open && effects.closeRadius()}
         onSubmit={effects.submitRadius}
       />

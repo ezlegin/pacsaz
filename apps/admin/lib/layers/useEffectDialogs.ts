@@ -9,7 +9,8 @@ import {
 } from "@repo/store/slices/nodesSlice";
 import { ISpec } from "@repo/store/types";
 import { useState } from "react";
-import { RadiusKind } from "./constants";
+import { CornerRadius, RadiusKind } from "./constants";
+import { RadiusSubmit } from "@/components/layers/RadiusDialog";
 
 interface JoinDialogState {
   nodeId: string;
@@ -25,6 +26,7 @@ interface RadiusDialogState {
   initialType: RadiusKind;
   initialTargets: string[];
   initialValue: string;
+  initialRadii: CornerRadius[];
 }
 
 interface ArrayDialogState {
@@ -51,7 +53,12 @@ function findNode(nodes: ISpec.Nodes, id: string): ISpec.Node | undefined {
   }
 }
 
-const RADIUS_TYPES = new Set(["radius", "radiusAt"]);
+const RADIUS_TYPES = new Set([
+  "radius",
+  "radiusAt",
+  "customRadiusAt",
+  "fullRadius",
+]);
 
 export function useEffectDialogs(nodes: ISpec.Nodes) {
   const dispatch = useAppDispatch();
@@ -167,14 +174,15 @@ export function useEffectDialogs(nodes: ISpec.Nodes) {
     if (idx >= 0) {
       const e = effects[idx] as Extract<
         ISpec.ShapeEffect,
-        { type: "radius" | "radiusAt" }
+        { type: RadiusKind }
       >;
       setRadiusDialog({
         nodeId,
         effectIndex: idx,
         initialType: e.type,
         initialTargets: e.type === "radiusAt" ? e.targets : [],
-        initialValue: e.value,
+        initialValue: "value" in e ? e.value : "5",
+        initialRadii: e.type === "customRadiusAt" ? e.radii : [],
       });
     } else {
       setRadiusDialog({
@@ -183,17 +191,24 @@ export function useEffectDialogs(nodes: ISpec.Nodes) {
         initialType: "radius",
         initialTargets: [],
         initialValue: "5",
+        initialRadii: [],
       });
     }
   };
 
-  const submitRadius = (type: RadiusKind, targets: string[], value: string) => {
+  const submitRadius = (payload: RadiusSubmit) => {
     if (!radiusDialog) return;
     const { nodeId, effectIndex } = radiusDialog;
+    const { type, targets, value, radii } = payload;
+
     const effect: ISpec.ShapeEffect =
-      type === "radiusAt"
-        ? { type: "radiusAt", targets, value }
-        : { type: "radius", value };
+      type === "fullRadius"
+        ? { type: "fullRadius" }
+        : type === "customRadiusAt"
+          ? { type: "customRadiusAt", radii }
+          : type === "radiusAt"
+            ? { type: "radiusAt", targets, value }
+            : { type: "radius", value };
 
     dispatch(
       effectIndex === null

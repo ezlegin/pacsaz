@@ -6,10 +6,15 @@ import { Shape } from "../shapes/shape";
 import { Dieline } from "./Dieline";
 import { applyBoolean } from "../helpers/boolean";
 import { applyJoin } from "../helpers/join";
-import { addFillet, addFilletAt } from "../helpers/addFillet";
+import {
+  addCustomFilletAt,
+  addFillet,
+  addFilletAt,
+  addFullFillet,
+} from "../helpers/addFillet";
 import { applyArray } from "../helpers/applyArray";
 
-/** Plain geometry nodes — everything a `Shape` can be built from directly. */
+/** Plain geometry nodes â€” everything a `Shape` can be built from directly. */
 type ShapeNode = Exclude<ISpec.Node, ISpec.Group | ISpec.Model>;
 
 /**
@@ -19,7 +24,22 @@ type ShapeNode = Exclude<ISpec.Node, ISpec.Group | ISpec.Model>;
  */
 type LayerPart = { layer: ISpec.Layer; model: M.IModel };
 
+/**
+ * Reference geometry for dup operations. For a shape it is the shape itself; for
+ * a group it is the combined extents of every part, so the whole group is
+ * mirrored / centred as one object.
+ */
+type DupFrame = { extents: M.IMeasureWithCenter | null; origin: M.IPoint };
+
 const LAYERS: readonly ISpec.Layer[] = ["trim", "fold", "perf"];
+
+/** The effects that reshape a single model rather than combining several. */
+const RADIUS_OR_ARRAY = (effect: ISpec.ShapeEffect): boolean =>
+  effect.type === "radius" ||
+  effect.type === "radiusAt" ||
+  effect.type === "customRadiusAt" ||
+  effect.type === "fullRadius" ||
+  effect.type === "array";
 
 function hasGeometry(model: M.IModel | undefined): boolean {
   if (!model) return false;
@@ -34,7 +54,7 @@ function hasGeometry(model: M.IModel | undefined): boolean {
 
 /**
  * `mathjs` spells its logical operators `and` / `or` / `not`, but JavaScript's
- * `&&` / `||` / `!` are what people actually type — and mathjs raises a parse
+ * `&&` / `||` / `!` are what people actually type â€” and mathjs raises a parse
  * error on them. They are rewritten here so both spellings work.
  *
  * Multi-character operators are replaced first so `&&` never degrades into `and`.
@@ -166,6 +186,43 @@ export class Drawer extends Dieline {
     });
   }
 
+  private star(star: ISpec.StarSpec): Shape {
+    return this.$build(star, ({ points, radius, innerRadius }, scope) => {
+      // `innerRadius` is optional: an empty value lets makerjs pick the
+      // conventional inner radius for the point count.
+      const inner =
+        innerRadius && innerRadius.trim().length > 0
+          ? this.$parseMathStr(innerRadius, scope)
+          : undefined;
+
+      return new Pacsaz.shapes.Star(
+        +points,
+        this.$parseMathStr(radius, scope),
+        inner,
+      );
+    });
+  }
+
+  private belt(belt: ISpec.BeltSpec): Shape {
+    return this.$build(
+      belt,
+      ({ leftRadius, distance, rightRadius, angle }, scope) => {
+        // makerjs draws a belt horizontally; 90Â° makes the default vertical.
+        const rotation =
+          angle && angle.trim().length > 0
+            ? this.$parseMathStr(angle, scope)
+            : 90;
+
+        return new Pacsaz.shapes.Belt(
+          this.$parseMathStr(leftRadius, scope),
+          this.$parseMathStr(distance, scope),
+          this.$parseMathStr(rightRadius, scope),
+          rotation,
+        );
+      },
+    );
+  }
+
   //! ------------------------ Traversal ------------------------
 
   override drawShapes() {
@@ -222,7 +279,7 @@ export class Drawer extends Dieline {
    *   if width > 130 -> show
    *
    * A broken expression counts as "does not match" rather than failing the whole
-   * render — one bad rule should not take the dieline down.
+   * render â€” one bad rule should not take the dieline down.
    */
   private isHidden(
     node: ISpec.Node | ISpec.Ruler,
@@ -436,6 +493,10 @@ export class Drawer extends Dieline {
         return this.lines(node);
       case "polygon":
         return this.polygon(node);
+      case "star":
+        return this.star(node);
+      case "belt":
+        return this.belt(node);
       case "rectangle":
         return this.rectangle(node);
     }
@@ -461,17 +522,7 @@ export class Drawer extends Dieline {
     const combiners = resolved.filter(
       (e) => e.type === "join" || e.type === "boolean",
     );
-    const modifiers = resolved.filter(
-      (e) => e.type === "radius" || e.type === "radiusAt" || e.type === "array",
-    );
-
-    // Cross-layer dup mirrors the whole group, so it is applied to the assembled
-    // geometry before the layers are separated.
-    let assembled: M.IModel = {
-      models: Object.fromEntries(parts.map((p, i) => [`child-${i}`, p.model])),
-    };
-
-    this.$applyDup(assembled, group.dup, scope);
+    const modifiers = resolved.filter(RADIUS_OR_ARRAY);
 
     const layers = new Set(parts.map((part) => part.layer));
 
@@ -481,6 +532,8 @@ export class Drawer extends Dieline {
     // their layer assignment.
     if (combiners.length > 0 && layers.size === 1) {
       const models = parts.map((part) => part.model);
+
+      let assembled: M.IModel = { models: {} };
 
       for (const efx of combiners) {
         switch (efx.type) {
@@ -502,7 +555,180 @@ export class Drawer extends Dieline {
       part.model = this.$applyEffects(part.model, modifiers);
     }
 
+    // A group's own origin translates the whole assembled result, matching how a
+    // shape's origin places it. It is applied *before* the duplicate so the shift
+    // cannot overwrite an origin that a dup operation set (move / moveTo / zero /
+    // center all work through the model origin).
+    const shift = this.$groupOrigin(group) ?? [0, 0];
+    if (shift[0] || shift[1]) {
+      for (const part of parts) M.model.moveRelative(part.model, shift);
+    }
+
+    // Duplicate the group as a whole. Each entry clones every part so a group
+    // that spans layers stays coherent, then the operations transform the clone.
+    for (const part of this.$duplicateParts(parts, group.dup, scope, shift)) {
+      parts.push(part);
+    }
+
     return parts;
+  }
+
+  /**
+   * Builds the duplicated copies of a group's parts.
+   *
+   * A group is duplicated **as a unit**: the frame (centre / low corner / origin)
+   * is measured across all of its parts, so mirroring or centring a two-rectangle
+   * group flips the pair together instead of flipping each rectangle about its own
+   * centre. Each entry clones the result of the previous entry, matching how a
+   * shape's `dup()` chains.
+   */
+  private $duplicateParts(
+    parts: LayerPart[],
+    dup: ISpec.Dup | undefined,
+    scope: Record<string, number>,
+    groupOrigin: M.IPoint,
+  ): LayerPart[] {
+    if (!dup || dup.length === 0 || parts.length === 0) return [];
+
+    // `selfWidth` / `selfHeight` in dup expressions refer to the original size.
+    const size = this.$partsExtents(parts);
+    const dupScope: Record<string, number> = {
+      ...scope,
+      ...(size ? { selfWidth: size.width, selfHeight: size.height } : {}),
+    };
+
+    const copies: LayerPart[] = [];
+    let previous = parts;
+
+    for (const entry of dup) {
+      const cloned = previous.map((part) => ({
+        layer: part.layer,
+        model: M.model.clone(part.model) as M.IModel,
+      }));
+
+      for (const op of entry.operations) {
+        // Re-measure before each operation so a `move` followed by `center`
+        // centres the moved group rather than the original one.
+        const frame: DupFrame = {
+          extents: this.$partsExtents(cloned),
+          origin: groupOrigin,
+        };
+
+        for (const part of cloned) {
+          part.model = this.$applyDupOperation(part.model, op, dupScope, frame);
+        }
+      }
+
+      copies.push(...cloned);
+      previous = cloned;
+    }
+
+    return copies;
+  }
+
+  /** Combined extents of a set of layer parts. */
+  private $partsExtents(parts: LayerPart[]): M.IMeasureWithCenter | null {
+    if (parts.length === 0) return null;
+
+    return M.measure.modelExtents({
+      models: Object.fromEntries(parts.map((p, i) => [`child-${i}`, p.model])),
+    });
+  }
+
+  /**
+   * Applies one dup operation to a model, returning the result.
+   *
+   * Operations are expressed as transforms of the actual geometry rather than by
+   * setting the model's `origin`: a group part is a container whose children carry
+   * the real coordinates, so `M.model.zero` / `center` on the container would be a
+   * no-op, and `M.model.mirror` returns a brand-new model instead of mutating.
+   *
+   * `frame` carries the reference point of the whole group, so every part of a
+   * multi-part group is transformed about the same centre.
+   */
+  private $applyDupOperation(
+    model: M.IModel,
+    op: ISpec.Dup[number]["operations"][number],
+    scope: Record<string, number>,
+    frame: DupFrame,
+  ): M.IModel {
+    switch (op.type) {
+      case "zero": {
+        const low = frame.extents?.low;
+        if (low) M.model.moveRelative(model, [-low[0]!, -low[1]!]);
+        return model;
+      }
+
+      case "center": {
+        const center = frame.extents?.center;
+        if (center) M.model.moveRelative(model, [-center[0]!, -center[1]!]);
+        return model;
+      }
+
+      case "mirror": {
+        if (!op.x && !op.y) return model;
+
+        // Mirror about the group/shape centre, exactly like `Shape.mirror`: mirror,
+        // normalize the result's extents onto the origin, then move it back onto
+        // the original centre. `M.model.mirror` returns a new model and ignores the
+        // model's own origin, so the centring step is what places it correctly.
+        const center = frame.extents?.center ?? [0, 0];
+        const mirrored = M.model.mirror(model, op.x, op.y);
+
+        M.model.center(mirrored);
+        M.model.moveRelative(mirrored, center);
+
+        return mirrored;
+      }
+
+      case "move":
+        M.model.moveRelative(model, [
+          this.$parseMathStr(op.value[0], scope),
+          this.$parseMathStr(op.value[1], scope),
+        ]);
+        return model;
+
+      case "moveTo": {
+        const target: M.IPoint = [
+          this.$parseMathStr(op.value[0], scope),
+          this.$parseMathStr(op.value[1], scope),
+        ];
+        const origin = frame.origin;
+        M.model.moveRelative(model, [
+          target[0]! - origin[0]!,
+          target[1]! - origin[1]!,
+        ]);
+        return model;
+      }
+
+      case "rotate": {
+        // Rotate about the group's centre, like a shape's default `rotate()`.
+        const center = frame.extents?.center ?? [0, 0];
+        M.model.rotate(model, +op.value, center);
+        return model;
+      }
+
+      case "scale": {
+        // Scale about the group's centre so the copies stay in the same place.
+        const center = frame.extents?.center ?? [0, 0];
+        M.model.moveRelative(model, [-center[0]!, -center[1]!]);
+        M.model.scale(model, +op.value);
+        M.model.moveRelative(model, center);
+        return model;
+      }
+    }
+  }
+
+  /** Resolved group origin, or null when it is a no-op. */
+  private $groupOrigin(group: ISpec.Group): M.IPoint | null {
+    const origin = group.origin;
+    if (!origin) return null;
+
+    const scope = this.scope;
+    const x = this.$parseMathStr(origin[0], scope);
+    const y = this.$parseMathStr(origin[1], scope);
+
+    return x || y ? [x, y] : null;
   }
   //! ------------------------ Utils ------------------------
 
@@ -524,7 +750,7 @@ export class Drawer extends Dieline {
     return this.$finishShape(shaped, item, scope);
   }
 
-  /** Applies the shape-level effects (radius, radiusAt, array) to a model. */
+  /** Applies the shape-level effects to a model. */
   private $applyEffects(
     model: M.IModel,
     effects: ISpec.ShapeEffect[] | undefined,
@@ -543,6 +769,20 @@ export class Drawer extends Dieline {
             effect.targets.map((t) => Number(t)),
             +effect.value,
           );
+          break;
+
+        case "customRadiusAt":
+          result = addCustomFilletAt(
+            result,
+            effect.radii.map((entry) => ({
+              index: Number(entry.index),
+              radius: +entry.radius,
+            })),
+          );
+          break;
+
+        case "fullRadius":
+          result = addFullFillet(result);
           break;
 
         case "array":
@@ -599,7 +839,7 @@ export class Drawer extends Dieline {
     this.$applyDupOnModel(model, dup, dupScope);
   }
 
-  /** Dup for shapes — the `Shape` class owns clone/zero/mirror/... state. */
+  /** Dup for shapes â€” the `Shape` class owns clone/zero/mirror/... state. */
   private $applyDupOnShape(
     model: Shape,
     dup: ISpec.Dup,
@@ -653,50 +893,26 @@ export class Drawer extends Dieline {
     dup: ISpec.Dup,
     dupScope: Record<string, number>,
   ): void {
-    for (const d of dup) {
-      // `addModel` dedupes colliding ids itself (dup-0, dup-0_1, ...), so a fixed
-      // prefix is enough and every clone stays reachable as a child of the group.
-      const clone = M.model.clone(model);
+    const origin = model.origin ?? [0, 0];
+    let previous: M.IModel = model;
 
-      M.model.addModel(model, clone, "dup");
+    for (const d of dup) {
+      // Transform the clone before attaching it, because an operation such as
+      // `mirror` hands back a new model rather than mutating in place. Each entry
+      // chains from the previous duplicate, like a shape's `dup()`.
+      let clone: M.IModel = M.model.clone(previous);
 
       for (const op of d.operations) {
-        switch (op.type) {
-          case "zero":
-            M.model.zero(clone);
-            break;
-
-          case "center":
-            M.model.center(clone);
-            break;
-
-          case "mirror":
-            if (op.x || op.y) M.model.mirror(clone, op.x, op.y);
-            break;
-
-          case "move":
-            M.model.moveRelative(clone, [
-              this.$parseMathStr(op.value[0], dupScope),
-              this.$parseMathStr(op.value[1], dupScope),
-            ]);
-            break;
-
-          case "moveTo":
-            M.model.move(clone, [
-              this.$parseMathStr(op.value[0], dupScope),
-              this.$parseMathStr(op.value[1], dupScope),
-            ]);
-            break;
-
-          case "rotate":
-            M.model.rotate(clone, +op.value);
-            break;
-
-          case "scale":
-            M.model.scale(clone, +op.value);
-            break;
-        }
+        const frame: DupFrame = {
+          extents: M.measure.modelExtents(clone),
+          origin: origin as M.IPoint,
+        };
+        clone = this.$applyDupOperation(clone, op, dupScope, frame);
       }
+
+      // `addModel` dedupes colliding ids itself (dup, dup_1, ...).
+      M.model.addModel(model, clone, "dup");
+      previous = clone;
     }
   }
 
@@ -713,6 +929,17 @@ export class Drawer extends Dieline {
           return {
             ...fx,
             value: this.$parseMathStr(fx.value, scope).toString(),
+          };
+
+        case "customRadiusAt":
+          return {
+            ...fx,
+            radii: fx.radii.map((entry) => ({
+              index: entry.index,
+              radius: entry.radius.trim().length
+                ? this.$parseMathStr(entry.radius, scope).toString()
+                : entry.radius,
+            })),
           };
 
         case "array":
@@ -773,3 +1000,4 @@ export class Drawer extends Dieline {
 }
 
 export default Drawer;
+

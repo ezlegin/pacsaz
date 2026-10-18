@@ -1,10 +1,12 @@
 import {
   arcFormSchema,
+  beltFormSchema,
   circleFormSchema,
   lineFormSchema,
   linesFormSchema,
   polygonFormSchema,
   rectangleFormSchema,
+  starFormSchema,
 } from "@/lib/validationSchema/PropsSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
@@ -44,6 +46,8 @@ const getShapeSchema = (shapeKey: ISpec.ShapesKey) => {
     circle: circleFormSchema,
     polygon: polygonFormSchema,
     arc: arcFormSchema,
+    star: starFormSchema,
+    belt: beltFormSchema,
   };
 
   return schemas[shapeKey];
@@ -84,6 +88,12 @@ function ShapesPropsProvider<T extends ISpec.Shape>({
       radius: "0",
       radiusX: "0",
       radiusY: "0",
+      // Star / belt defaults, so their inputs start from a usable shape.
+      points: "5",
+      innerRadius: "",
+      leftRadius: "10",
+      rightRadius: "10",
+      distance: "30",
       isRelative: true,
       pts: undefined,
       absolutePts: [["", ""]],
@@ -102,6 +112,8 @@ function ShapesPropsProvider<T extends ISpec.Shape>({
       origin: ["0", "0"],
       hidden: false,
       effects: [],
+      // Overrides the shared `angle: "0"`: a belt is vertical by default.
+      ...(shapeKey === "belt" ? { angle: "90" } : {}),
     },
     mode: "onChange",
   });

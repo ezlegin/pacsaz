@@ -11,6 +11,8 @@ const shapesKey = [
   "rectangle",
   "polygon",
   "arc",
+  "star",
+  "belt",
 ] as const;
 const stack = ["model", "ruler", "shape", "group"] as const;
 const direction = ["down", "right", "up", "left"] as const;
@@ -57,13 +59,9 @@ const generalSchema = z.object({
   stack: z.enum(stack),
   id: z.string(),
   dup: dup,
-  effects: z.array(
-    z.object({
-      type: z.enum(["readius"]),
-      value: mathInput,
-      targets: z.array(z.string()),
-    }),
-  ),
+  // Effects are edited through the layer dialogs, not this form, so they are
+  // carried through untouched rather than validated here.
+  effects: z.array(z.any()).optional(),
 });
 
 export const lineFormSchema = z
@@ -123,6 +121,25 @@ export const arcFormSchema = z
     radius: mathInput,
     startAngle: mathInput,
     endAngle: mathInput,
+  })
+  .merge(generalSchema);
+
+/** `innerRadius` is optional: an empty value lets makerjs choose it. */
+export const starFormSchema = z
+  .object({
+    points: mathInput,
+    radius: mathInput,
+    innerRadius: z.string().optional(),
+  })
+  .merge(generalSchema);
+
+export const beltFormSchema = z
+  .object({
+    leftRadius: mathInput,
+    distance: mathInput,
+    rightRadius: mathInput,
+    // Rotation in degrees; 90 (the default) makes the belt vertical.
+    angle: z.string(),
   })
   .merge(generalSchema);
 
@@ -204,8 +221,9 @@ export const modelFormSchemas = {
 } as const;
 
 /**
- * Groups are edited as a whole node (rename / dup); their children keep their own
- * shapes. `nodes` is intentionally loose because it holds an arbitrary node tree.
+ * Groups are edited as a whole node (rename / origin / dup); their children keep
+ * their own shapes. `nodes` is intentionally loose because it holds an arbitrary
+ * node tree.
  */
 export const groupFormSchema = z.object({
   id: z.string(),
@@ -213,6 +231,7 @@ export const groupFormSchema = z.object({
   stack: z.literal("group"),
   key: z.string(),
   hidden: z.boolean(),
+  origin: pointInput,
   nodes: z.array(z.any()),
   dup: dup,
   effects: z.array(z.any()),

@@ -5,7 +5,9 @@ import {
   Hexagon,
   Minus,
   Parentheses,
+  Siren,
   Square,
+  Star,
 } from "lucide-react";
 
 export function LayerIcon({ data }: { data: ISpec.ShapesKey }) {
@@ -23,5 +25,9 @@ export function LayerIcon({ data }: { data: ISpec.ShapesKey }) {
       return <Hexagon className={cls} />;
     case "arc":
       return <Parentheses className={cls} />;
+    case "star":
+      return <Star className={cls} />;
+    case "belt":
+      return <Siren className={cls} />;
   }
 }

@@ -14,10 +14,12 @@ import { CustomRuler } from "./ruler/CustomRuler";
 import { DielineRuler } from "./ruler/DielineRuler";
 import { OverallRuler } from "./ruler/OverallRuler";
 import { Arc } from "./shapes/Arc";
+import { Belt } from "./shapes/Belt";
 import { Ellipse, SemiCircle } from "./shapes/Circle";
 import { Line, Lines } from "./shapes/Line";
 import { Polygon } from "./shapes/Polygon";
 import { Rectangle } from "./shapes/Rectangle";
+import { Star } from "./shapes/Star";
 import { Text } from "./shapes/Text";
 import { ToShape } from "./shapes/ToShape";
 
@@ -34,6 +36,8 @@ export default class Pacsaz {
     Ellipse,
     SemiCircle,
     Polygon,
+    Star,
+    Belt,
     Text,
     Arc,
   };
