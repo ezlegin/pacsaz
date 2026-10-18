@@ -3,13 +3,7 @@
 import { placeholder } from "@/public";
 import { User } from "@repo/db";
 import { cn } from "@repo/ui/lib/utils";
-import {
-  ArrowUpRight,
-  Box,
-  LayoutGrid,
-  Ratio,
-  SearchX,
-} from "lucide-react";
+import { ArrowUpRight, Box, LayoutGrid, Ratio, SearchX } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -103,7 +97,7 @@ const DielinesGrid = ({
       </div>
 
       {/* -------------------------------- grid -------------------------------- */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-3 xl:grid-cols-5">
         {dielines.map((dieline) => (
           <DielineCard
             key={dieline.id}

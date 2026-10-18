@@ -63,13 +63,11 @@ const DielinesCatalogue = async ({
   const breadcrumbs = [
     { name: "صفحه اصلی", path: "/" },
     { name: "قالب‌ها", path: "/dielines" },
-    ...(activeCategory
-      ? [{ name: activeCategory.title, path }]
-      : []),
+    ...(activeCategory ? [{ name: activeCategory.title, path }] : []),
   ];
 
   return (
-    <div className="mx-auto w-full max-w-7xl space-y-8">
+    <div className="mx-auto w-full space-y-8">
       <JsonLd
         data={[
           collectionPageSchema({
@@ -129,7 +127,9 @@ const DielinesCatalogue = async ({
           <div className="space-y-4">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-[11px] font-medium text-primary">
               <Sparkles className="size-3.5" />
-              {activeCategory ? "دسته‌بندی قالب‌ها" : "کتابخانه قالب‌های پک‌ساز"}
+              {activeCategory
+                ? "دسته‌بندی قالب‌ها"
+                : "کتابخانه قالب‌های پک‌ساز"}
             </span>
 
             <div className="space-y-2">
@@ -201,7 +201,8 @@ const DielinesCatalogue = async ({
               <div>
                 <h2 className="text-xs font-bold">فیلتر دسته‌بندی</h2>
                 <p className="text-[10px] text-muted-foreground">
-                  {fa(modelCategories.length + usageCategories.length)} دسته فعال
+                  {fa(modelCategories.length + usageCategories.length)} دسته
+                  فعال
                 </p>
               </div>
             </div>

@@ -8,6 +8,8 @@ export const aiIcon = "/icons/ai-icon.svg";
 export const pdfIcon = "/icons/pdf-icon.svg";
 export const dxfIcon = "/icons/dxf-icon.svg";
 export const favIcon = "/icons/favicon.svg";
+export const folded = "/icons/folded.svg";
+export const unfolded = "/icons/unfolded.svg";
 
 // PATTERNS
 export const watermarkPattern = "/watermark.png";

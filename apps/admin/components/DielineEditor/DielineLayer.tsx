@@ -33,6 +33,7 @@ import { Redo, Settings, Undo } from "lucide-react";
 import DielineChangesSaver from "../forms/dielineChangesSaver";
 import DielineSettingsForm from "../forms/DielineSettingsForm";
 import RulerLayers from "./layers/RulerLayers";
+import FoldPanel from "./FoldPanel";
 import { nanoid } from "nanoid";
 import ShapeLayers from "../layers/ShapeLayers";
 
@@ -160,6 +161,7 @@ const DielineLayer = ({
           <TabsList className="w-full px-0">
             <TabsTrigger value="layers">Layers</TabsTrigger>
             <TabsTrigger value="rulers">Rulers</TabsTrigger>
+            <TabsTrigger value="folds">Folds</TabsTrigger>
           </TabsList>
           <Separator />
         </div>
@@ -169,6 +171,14 @@ const DielineLayer = ({
         </TabsContent>
         <TabsContent value="rulers">
           <RulerLayers handleLayerAction={handleLayerAction} rulers={rulers} />
+        </TabsContent>
+        <TabsContent value="folds">
+          {/*
+            Folds are *derived* panels, not authored geometry like Layers and
+            Rulers, so this panel works from the generated SVG rather than the
+            node list.
+          */}
+          <FoldPanel />
         </TabsContent>
       </Tabs>
     </div>

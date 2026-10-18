@@ -35,6 +35,8 @@ type DielineSettings = {
   thickness: number;
   material: string;
   dimensionType: string;
+  /** Authored fold overrides as JSON; optional so older callers still type-check. */
+  foldConfig?: string | null;
 };
 
 export function useDielineGenerator(
@@ -100,6 +102,10 @@ export function useDielineGenerator(
         dimensionType: dielineSettings.dimensionType as DimensionType,
         format: "pdf",
         showOverallRulers: false,
+        // Fold direction belongs to the template, not to a user's dimension
+        // overrides, so it always comes from the template's settings — otherwise
+        // saved dielines would silently lose their authored folds.
+        foldConfig: dieline.settings.foldConfig ?? "",
       }),
     );
 
