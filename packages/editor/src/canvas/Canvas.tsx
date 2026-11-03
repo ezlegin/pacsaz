@@ -4,6 +4,7 @@ import {
   duplicateNodes,
   findNode,
   formatNumber,
+  insertNodes,
   newId,
   refExpr,
   removeNodes,
@@ -37,6 +38,7 @@ import {
 } from "../model/frames";
 import { handlesFor, type Handle } from "../model/handles";
 import { moveNodes } from "../model/move";
+import { constrain45, drawnPath, placedShape, type DrawPoint } from "../model/draw";
 import { groupNodes, ungroupNode } from "../model/ops";
 import { niceStep, snapMoving, snappedDelta, snapTargets, wouldCycle, type SnapResult, type SnapTarget } from "../model/snap";
 import { useEditor, useStore } from "../state/react";
@@ -73,7 +75,8 @@ type Gesture =
       handle: Handle;
       targets: SnapTarget[];
     }
-  | { type: "marquee"; start: Pt; additive: boolean };
+  | { type: "marquee"; start: Pt; additive: boolean }
+  | { type: "place"; start: DrawPoint; startScreen: Pt };
 
 const boxPoints = (b: { minX: number; minY: number; maxX: number; maxY: number }): Pt[] => {
   const cx = (b.minX + b.maxX) / 2;
@@ -117,6 +120,16 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
   const [marquee, setMarquee] = useState<[Pt, Pt] | null>(null);
   const [measure, setMeasure] = useState<MeasureState>({});
   const [dragging, setDragging] = useState<Gesture["type"] | null>(null);
+  /** Points placed so far with the pen. */
+  const [pen, setPen] = useState<DrawPoint[]>([]);
+  /** The shape being dragged out with a place tool. */
+  const [placing, setPlacing] = useState<{ start: DrawPoint; end: DrawPoint } | null>(null);
+
+  // Switching tools abandons a half-drawn path or measurement.
+  useEffect(() => {
+    setPen([]);
+    setMeasure({});
+  }, [tool]);
 
   //! Size and initial fit -------------------------------------------------------
 
@@ -146,6 +159,14 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
     fitted.current = true;
     fit();
   }, [size, fit]);
+
+  // Panels and commands ask for a fit through the store.
+  const fitRequest = useEditor((s) => s.fitRequest);
+  useEffect(() => {
+    if (fitRequest.seq > 0) fit(fitRequest.ids);
+    // Only a new request should fit, not a resize.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fitRequest]);
 
   //! Wheel: zoom with the wheel or a pinch, pan with a trackpad -------------------
 
@@ -198,7 +219,8 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
   const handles = useMemo(() => (single ? handlesFor(single, result) : []), [single, result]);
   const handleChain = useMemo(() => (single ? fullChain(result, single.id) : []), [single, result]);
 
-  const measureTargets = useMemo(() => (tool === "measure" ? snapTargets(result, []) : []), [tool, result]);
+  const drawing = tool === "measure" || tool === "pen" || tool === "place";
+  const measureTargets = useMemo(() => (drawing ? snapTargets(result, []) : []), [drawing, result]);
 
   //! Helpers --------------------------------------------------------------------
 
@@ -223,6 +245,24 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
     return { p, target };
   };
 
+  /** The next pen point: snapped, or held to 45° steps with Shift. */
+  const penPoint = (world: Pt, e: { shiftKey: boolean; ctrlKey: boolean }): DrawPoint => {
+    const last = pen[pen.length - 1];
+    if (e.shiftKey && last) return { p: constrain45(last.p, world) };
+    return measurePoint(world, store.get().snapping && !e.ctrlKey);
+  };
+
+  const finishPen = (closed: boolean, points: DrawPoint[] = pen) => {
+    // A double-click lands two clicks on the same spot; keep one.
+    const unique = points.filter((p, i) => i === 0 || Math.hypot(p.p[0] - points[i - 1]!.p[0], p.p[1] - points[i - 1]!.p[1]) > 1e-6);
+    setPen([]);
+    if (unique.length < 2) return;
+    const state = store.get();
+    const node = drawnPath(state.doc, state.result, state.scope, unique, closed && unique.length >= 3, state.drawLineType);
+    store.apply((d) => insertNodes(d, [node], state.scope), [node.id]);
+    store.setTool("select");
+  };
+
   //! Pointer --------------------------------------------------------------------
 
   const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
@@ -245,7 +285,27 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
       return;
     }
 
+    if (state.tool === "pen") {
+      const point = penPoint(world, e);
+      const first = pen[0];
+      // Clicking the first point again closes the shape.
+      if (first && pen.length >= 3 && Math.hypot(...(toScreen(first.p, state.view).map((v, i) => v - s[i]!) as [number, number])) < SNAP_PX + 2) {
+        finishPen(true);
+      } else {
+        setPen([...pen, point]);
+      }
+      return;
+    }
+
     e.currentTarget.setPointerCapture(e.pointerId);
+
+    if (state.tool === "place") {
+      const start = measurePoint(world, state.snapping && !e.ctrlKey);
+      gesture.current = { type: "place", start, startScreen: s };
+      setPlacing({ start, end: start });
+      setDragging("place");
+      return;
+    }
 
     const handleKey = handleAt(e.target);
     const handle = handleKey ? handles.find((h) => h.key === handleKey) : undefined;
@@ -293,9 +353,13 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
     const g = gesture.current;
 
     if (!g) {
-      if (state.tool === "measure") {
+      if (state.tool === "measure" || state.tool === "place") {
         const point = measurePoint(world, state.snapping && !e.ctrlKey);
         setMeasure((m) => ({ ...m, live: point }));
+        return;
+      }
+      if (state.tool === "pen") {
+        setMeasure({ live: penPoint(world, e) });
         return;
       }
       const leaf = leafAt(e.target);
@@ -377,6 +441,10 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
       case "marquee":
         setMarquee([g.start, s]);
         return;
+
+      case "place":
+        setPlacing({ start: g.start, end: measurePoint(world, snapOn) });
+        return;
     }
   };
 
@@ -389,6 +457,17 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
 
     const state = store.get();
     switch (g.type) {
+      case "place": {
+        const end = screenOf(e);
+        const dragged = Math.hypot(end[0] - g.startScreen[0], end[1] - g.startScreen[1]) >= DRAG_THRESHOLD;
+        const finalEnd = dragged ? measurePoint(toWorld(end, state.view), state.snapping && !e.ctrlKey) : null;
+        setPlacing(null);
+        const node = placedShape(state.doc, state.result, state.scope, state.placeKind, g.start, finalEnd, state.drawLineType);
+        store.apply((d) => insertNodes(d, [node], state.scope), [node.id]);
+        store.setTool("select");
+        return;
+      }
+
       case "press":
         // A plain click on one of several selected nodes narrows to it.
         if (g.wasSelected && !e.shiftKey && state.selection.length > 1) store.select([g.id]);
@@ -422,6 +501,10 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
 
   const onDoubleClick = (e: MouseEvent) => {
     const state = store.get();
+    if (state.tool === "pen") {
+      finishPen(false);
+      return;
+    }
     const leaf = leafAt(e.target);
     if (!leaf) return;
     const id = pickable(state.result, leaf, state.scope);
@@ -490,6 +573,16 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
     }
     if (mod) return;
 
+    // The pen owns Enter, Escape and Backspace while a path is under way.
+    if (state.tool === "pen" && pen.length) {
+      if (e.key === "Enter") return finishPen(false);
+      if (e.key === "Escape") return setPen([]);
+      if (e.key === "Backspace" || e.key === "Delete") {
+        e.preventDefault();
+        return setPen(pen.slice(0, -1));
+      }
+    }
+
     if (e.key === "Escape") {
       if (gesture.current && store.inTransaction) {
         store.cancel();
@@ -530,6 +623,10 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
     if (key === "v") store.setTool("select");
     else if (key === "m") store.setTool("measure");
     else if (key === "h") store.setTool("hand");
+    else if (key === "p") store.setTool("pen");
+    else if (key === "r") store.setTool("place", "rect");
+    else if (key === "l") store.setTool("place", "line");
+    else if (key === "e") store.setTool("place", "ellipse");
     else if (key === "f" || (e.shiftKey && e.key === "!")) fit();
     else if (e.shiftKey && e.key === "@") fit(state.selection);
     else if (key === "s") store.setSnapping(!state.snapping);
@@ -580,7 +677,7 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
   const cursorClass =
     dragging === "pan" ? "cursor-grabbing"
     : tool === "hand" || spaceDown.current ? "cursor-grab"
-    : tool === "measure" ? "cursor-crosshair"
+    : drawing ? "cursor-crosshair"
     : dragging === "move" ? "cursor-move"
     : "cursor-default";
 
@@ -684,6 +781,42 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
         )}
 
         {tool === "measure" && <MeasureOverlay measure={measure} view={view} />}
+        {tool === "place" && !placing && <MeasureOverlay measure={{ live: measure.live }} view={view} />}
+
+        {/* Shape being dragged out */}
+        {placing && (() => {
+          const a = scr(placing.start.p);
+          const b = scr(placing.end.p);
+          const kind = store.get().placeKind;
+          const r = Math.hypot(b[0] - a[0], b[1] - a[1]);
+          return (
+            <g pointerEvents="none" fill="rgb(59 130 246 / 0.06)" stroke="rgb(37 99 235)" strokeDasharray="4 3">
+              {kind === "rect" && <rect x={Math.min(a[0], b[0])} y={Math.min(a[1], b[1])} width={Math.abs(b[0] - a[0])} height={Math.abs(b[1] - a[1])} />}
+              {kind === "line" && <line x1={a[0]} y1={a[1]} x2={b[0]} y2={b[1]} />}
+              {kind === "ellipse" && <ellipse cx={a[0]} cy={a[1]} rx={Math.abs(b[0] - a[0])} ry={Math.abs(b[1] - a[1])} />}
+              {kind === "belt" && <line x1={a[0]} y1={a[1]} x2={b[0]} y2={a[1]} />}
+              {(kind === "arc" || kind === "polygon" || kind === "star") && <circle cx={a[0]} cy={a[1]} r={r} />}
+              <MeasureOverlay measure={{ a: placing.start, b: placing.end }} view={view} />
+            </g>
+          );
+        })()}
+
+        {/* Path under construction */}
+        {tool === "pen" && (pen.length > 0 || measure.live) && (() => {
+          const pts = [...pen, ...(measure.live ? [measure.live] : [])].map((p) => scr(p.p));
+          const first = pen[0] ? scr(pen[0].p) : null;
+          return (
+            <g pointerEvents="none">
+              <polyline points={pts.map((p) => p.join(",")).join(" ")} fill="none" stroke="rgb(37 99 235)" strokeWidth={1.5} />
+              {pen.map((p, i) => {
+                const s = scr(p.p);
+                return <rect key={i} x={s[0] - 3.5} y={s[1] - 3.5} width={7} height={7} fill={i === 0 ? "rgb(37 99 235)" : "white"} stroke="rgb(37 99 235)" />;
+              })}
+              {first && pen.length >= 3 && <circle cx={first[0]} cy={first[1]} r={SNAP_PX + 2} fill="none" stroke="rgb(37 99 235 / 0.4)" />}
+              <MeasureOverlay measure={{ live: measure.live }} view={view} />
+            </g>
+          );
+        })()}
 
         {showRulers && <ScreenRulers view={view} width={size.width} height={size.height} cursor={cursor} />}
       </svg>

@@ -47,18 +47,22 @@ const rule = z.object({
   action: z.enum(["hide", "show"]),
 });
 
+const disabled = { disabled: z.boolean().optional() };
+
 const modifier = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("round"),
     radius: expr,
     corners: z.array(z.number().int().min(0)).optional(),
+    ...disabled,
   }),
-  z.object({ type: z.literal("roundFull") }),
-  z.object({ type: z.literal("array"), count: expr, dx: expr, dy: expr }),
+  z.object({ type: z.literal("roundFull"), ...disabled }),
+  z.object({ type: z.literal("array"), count: expr, dx: expr, dy: expr, ...disabled }),
   z.object({
     type: z.literal("mirrorCopy"),
     axis: z.enum(["x", "y"]),
     at: expr,
+    ...disabled,
   }),
   z.object({
     type: z.literal("copy"),
@@ -67,8 +71,9 @@ const modifier = z.discriminatedUnion("type", [
     rotate: expr.optional(),
     mirrorX: z.boolean().optional(),
     mirrorY: z.boolean().optional(),
+    ...disabled,
   }),
-  z.object({ type: z.literal("offset"), distance: expr }),
+  z.object({ type: z.literal("offset"), distance: expr, ...disabled }),
 ]);
 
 const base = {

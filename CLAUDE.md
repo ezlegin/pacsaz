@@ -13,7 +13,7 @@ packages below.
 | `apps/client` | Public site (Persian, RTL): catalogue, dieline customisation, payments, user panel. Port 3000. |
 | `apps/admin` | Staff panel (English UI): dieline authoring **editor**, catalogue, tariffs, customers. Port 3001. |
 | `packages/dieline-engine` | **Editor v2 geometry engine** (pure TypeScript). See below. |
-| `packages/editor` | **Editor v2 UI**: `EditorStore` (document, history, selection, view) and the interactive `Canvas`. |
+| `packages/editor` | **Editor v2 UI**: `Studio` (the whole editor), `EditorStore`, the interactive `Canvas`, panels. |
 | `packages/dieline-core` | Legacy engine (makerjs + Redux-coupled). Being replaced by `dieline-engine`; do not extend it. |
 | `packages/dieline-3d` | Fold rig and three.js 3D preview built from the 2D dieline. |
 | `packages/store` | Redux Toolkit store for the legacy editor (`redux-undo`). |
@@ -84,6 +84,17 @@ Phases (each ends with a commit message for the user to commit):
 - Spec changes go through `spec/types.ts` **and** `spec/schema.ts` together, with
   tests.
 
+### Where things stand
+
+- Phases 1–3 are done. The admin route `/editor/[slug]` is the v2 `Studio`
+  (`apps/admin/app/editor/[slug]/StudioEditor.tsx`); the old admin editor was removed.
+- v2 documents are stored in `Dieline.specification` as JSON with `"version": 2`,
+  validated by `parseDocument` in the `saveDielineDocument` server action.
+  Specifications in the old format open as an empty document.
+- The **client app still renders with the legacy `dieline-core`**, so a dieline
+  saved from the new Studio does not render on the public site until the client
+  is moved to the engine (planned with Customize mode, Phase 6).
+
 ## `@repo/editor` rules
 
 - All document changes go through `EditorStore.apply` (one undo step) or a
@@ -97,6 +108,13 @@ Phases (each ends with a commit message for the user to commit):
   `wouldCycle` says it is safe; other snaps align but keep the formula.
 - Canvas coordinates: `toScreen`/`toWorld` in `canvas/viewport.ts`; the dieline is
   drawn through `worldMatrix(view)` with `vector-effect="non-scaling-stroke"`.
+- Inspector fields bind with `useNodeField(id, path)` / `useDocField(path, match)`
+  (`ui/bindings.ts`). `path` is the same dotted path the engine puts in a
+  diagnostic's `field`, which is how a field shows its own error.
+- `ExpressionInput` opens an undo gesture on focus and closes it on blur, so one
+  field edit is one undo step; Escape cancels back to the value on focus.
+- Commands for the palette live in `commands.ts`; add new actions there so they
+  are searchable.
 
 ## Conventions
 

@@ -16,6 +16,7 @@ export function applyModifiers(
   let out = paths;
 
   modifiers?.forEach((mod, i) => {
+    if (mod.disabled) return;
     const field = `modifiers.${i}`;
 
     switch (mod.type) {

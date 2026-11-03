@@ -1,7 +1,14 @@
 export * from "./spec/types";
 export { parseDocument, documentSchema, LIMITS, type ParseResult } from "./spec/schema";
 
-export { compile, dependencies, ExprError, type Compiled, type Ref } from "./expr/expr";
+export {
+  compile,
+  dependencies,
+  ExprError,
+  EXPRESSION_FUNCTIONS,
+  type Compiled,
+  type Ref,
+} from "./expr/expr";
 
 export {
   render,
@@ -11,6 +18,7 @@ export {
   type RulerInfo,
 } from "./eval/render";
 export type { Diagnostic } from "./eval/diagnostics";
+export { evaluateExpression } from "./eval/evaluate";
 export { BUILTINS, type Scope } from "./eval/scope";
 export { resolveDimensions, type DimensionType, type Dimensions } from "./eval/dimensions";
 
@@ -25,7 +33,9 @@ export {
   removeNodes,
   insertNodes,
   duplicateNodes,
+  moveNode,
   renameNode,
+  renameSymbol,
   mapExprs,
   newId,
   uniqueName,

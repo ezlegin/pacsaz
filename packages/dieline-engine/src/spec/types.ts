@@ -80,7 +80,12 @@ export type Rule = { id: string; when: Expr; action: "hide" | "show" };
  * Non-destructive operations applied to a node's local geometry, in order, before
  * the node's transform. They replace the old "effects" and "dup" systems.
  */
-export type Modifier =
+export type Modifier = ModifierBody & {
+  /** Switched off in the editor without being deleted. */
+  disabled?: boolean;
+};
+
+type ModifierBody =
   | {
       type: "round";
       radius: Expr;

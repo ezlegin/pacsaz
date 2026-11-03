@@ -61,6 +61,17 @@ const ALLOWED_FUNCTIONS = new Set([
   "clamp", "lerp",
 ]);
 
+/** Functions with a one-line signature, for autocomplete and help. */
+export const EXPRESSION_FUNCTIONS: Record<string, string> = {
+  min: "min(a, b, …)", max: "max(a, b, …)", clamp: "clamp(value, low, high)",
+  lerp: "lerp(a, b, t)", abs: "abs(x)", round: "round(x)", floor: "floor(x)",
+  ceil: "ceil(x)", sqrt: "sqrt(x)", pow: "pow(x, y)", hypot: "hypot(a, b)",
+  mod: "mod(a, b)", sign: "sign(x)",
+  sind: "sind(degrees)", cosd: "cosd(degrees)", tand: "tand(degrees)",
+  asind: "asind(x) → degrees", acosd: "acosd(x) → degrees", atand: "atand(x) → degrees",
+  atan2d: "atan2d(y, x) → degrees",
+};
+
 /** Constants the language provides; never reported as free identifiers. */
 const CONSTANTS = new Set(["pi", "e", "tau", "phi"]);
 

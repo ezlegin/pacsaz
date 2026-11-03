@@ -1,6 +1,8 @@
 import { emptyDocument, findNode, render, updateNode, type DielineDocument, type Node, type RenderInputs } from "@repo/dieline-engine";
 import { tuckEndBox } from "@repo/dieline-engine/fixtures";
 import { describe, expect, it } from "vitest";
+import { applyCompletion, completionsAt } from "../model/completions";
+import { constrain45, drawnPath, placedShape } from "../model/draw";
 import { handlesFor } from "../model/handles";
 import { moveNodes } from "../model/move";
 import { groupNodes, ungroupNode } from "../model/ops";
@@ -125,6 +127,13 @@ describe("references and cycles", () => {
     expect(wouldCycle(tuckEndBox, result, "front", "front")).toBe(true);
   });
 
+  it("lets a single drawn point land on a nearby corner over closer stray alignments", () => {
+    // Near side1's top-left (60, 120); the outline has a vertex at x = 61 too.
+    const snap = snapMoving([[60.6, 120.4]], snapTargets(result, []), 5);
+    expect(snap.x!.target).toBe(snap.y!.target);
+    expect([snap.x!.value, snap.y!.value]).toEqual([60, 120]);
+  });
+
   it("prefers one target for coinciding corners", () => {
     const snap = snapMoving([[60.2, 0.1]], snapTargets(result, []), 2);
     expect(snap.x!.target).toBe(snap.y!.target);
@@ -197,6 +206,61 @@ describe("handles", () => {
     const handle = handlesFor(line, render(doc, INPUTS)).find((h) => h.key === "line:to")!;
     const next = handle.apply(line, [0, 0], { plain: false, refs: { x: "@a.topRight.x" } });
     expect(next.kind === "line" && next.to).toEqual({ x: "@a.topRight.x", y: "5" });
+  });
+});
+
+describe("autocomplete", () => {
+  const result = render(tuckEndBox, INPUTS);
+  const ctx = { doc: tuckEndBox, result };
+  const labels = (text: string, force = false) => completionsAt(text, text.length, ctx, force).map((c) => c.label);
+
+  it("offers names in scope and functions", () => {
+    expect(labels("wid")).toContain("width");
+    expect(labels("glu")).toEqual(["glue", "glueTaper"]);
+    expect(labels("cl")).toContain("clamp");
+    expect(labels("12.")).toEqual([]);
+  });
+
+  it("walks references: nodes, then anchors and sizes, then axes", () => {
+    // Prefix matches first, then names that merely contain the text.
+    expect(labels("@si").slice(0, 2)).toEqual(["side1", "side2"]);
+    expect(labels("@si")).toContain("foldBackSide");
+    expect(labels("@side1.top")).toEqual(expect.arrayContaining(["top", "topLeft", "topRight"]));
+    expect(labels("@side1.wi")).toEqual(["width"]);
+    expect(labels("@side1.topLeft.")).toEqual(["x", "y"]);
+  });
+
+  it("replaces just the word being typed", () => {
+    const text = "@front.right.x + gl";
+    const [first] = completionsAt(text, text.length, ctx);
+    expect(applyCompletion(text, first!)).toEqual({ text: "@front.right.x + glue", caret: 21 });
+  });
+});
+
+describe("drawing", () => {
+  const result = render(tuckEndBox, INPUTS);
+  const corner = snapTargets(result, []).find((t) => t.nodeName === "side1" && t.anchor === "topLeft")!;
+
+  it("links a shape drawn from a corner to that corner", () => {
+    const node = placedShape(tuckEndBox, result, null, "rect", { p: [60, 120], target: corner }, { p: [90, 140] }, "cut");
+    expect(node).toMatchObject({ kind: "rect", width: "30", height: "20", transform: { x: "@side1.topLeft.x", y: "@side1.topLeft.y" } });
+  });
+
+  it("takes the origin from the lower-left point when dragged backwards", () => {
+    const node = placedShape(tuckEndBox, result, null, "rect", { p: [60, 120], target: corner }, { p: [30, 100] }, "crease");
+    expect(node).toMatchObject({ width: "30", height: "20", lineType: "crease", transform: { x: "30", y: "100" } });
+  });
+
+  it("writes local numbers inside a moved group", () => {
+    const doc = docOf([{ id: "g", name: "g", kind: "group", transform: { x: "100" }, children: [rect("a", "1", "1")] }]);
+    const r = render(doc, INPUTS);
+    const path = drawnPath(doc, r, "g", [{ p: [110, 0] }, { p: [120, 5] }], false, "cut");
+    expect(path.start).toEqual({ x: "10", y: "0" });
+    expect(path.segments).toEqual([{ type: "to", x: "20", y: "5" }]);
+  });
+
+  it("holds pen segments to 45° steps", () => {
+    expect(constrain45([0, 0], [10, 1])).toEqual([expect.closeTo(Math.hypot(10, 1), 6), 0]);
   });
 });
 

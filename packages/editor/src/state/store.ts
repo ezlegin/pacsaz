@@ -1,6 +1,8 @@
-import { render, type DielineDocument, type RenderInputs, type RenderResult } from "@repo/dieline-engine";
+import { render, type DielineDocument, type LineType, type RenderInputs, type RenderResult } from "@repo/dieline-engine";
+import type { PlaceableKind } from "../model/create";
 
-export type Tool = "select" | "measure" | "hand";
+/** `place` draws `placeKind`; `pen` draws a path point by point. */
+export type Tool = "select" | "measure" | "hand" | "pen" | "place";
 
 /** Screen pixel = world mm × zoom, with the Y axis flipped; `x`/`y` place world 0,0. */
 export type View = { x: number; y: number; zoom: number };
@@ -16,10 +18,18 @@ export type EditorState = {
   /** The group the designer has entered; clicks select its direct children. */
   scope: string | null;
   tool: Tool;
+  placeKind: PlaceableKind;
+  /** Line type given to newly drawn shapes. */
+  drawLineType: LineType;
   view: View;
   snapping: boolean;
+  display: { guides: boolean; rulers: boolean };
   canUndo: boolean;
   canRedo: boolean;
+  /** The document differs from the last saved one. */
+  dirty: boolean;
+  /** Bumped to ask the canvas to fit; it owns the viewport size. */
+  fitRequest: { seq: number; ids?: string[] };
 };
 
 const HISTORY_LIMIT = 200;
@@ -39,8 +49,10 @@ export class EditorStore {
   private past: DielineDocument[] = [];
   private future: DielineDocument[] = [];
   private transactionStart: DielineDocument | null = null;
+  private saved: DielineDocument;
 
   constructor(doc: DielineDocument, inputs: RenderInputs) {
+    this.saved = doc;
     this.state = {
       doc,
       inputs,
@@ -49,11 +61,21 @@ export class EditorStore {
       hover: null,
       scope: null,
       tool: "select",
+      placeKind: "rect",
+      drawLineType: "cut",
       view: { x: 0, y: 0, zoom: 1 },
       snapping: true,
+      display: { guides: true, rulers: true },
       canUndo: false,
       canRedo: false,
+      dirty: false,
+      fitRequest: { seq: 0 },
     };
+  }
+
+  /** Fits the view to everything, or to `ids`. */
+  requestFit(ids?: string[]) {
+    this.set({ fitRequest: { seq: this.state.fitRequest.seq + 1, ...(ids?.length ? { ids } : {}) } });
   }
 
   get = (): EditorState => this.state;
@@ -78,6 +100,7 @@ export class EditorStore {
 
     next.canUndo = this.past.length > 0;
     next.canRedo = this.future.length > 0;
+    next.dirty = next.doc !== this.saved;
     this.state = next;
     for (const listener of this.listeners) listener();
   }
@@ -89,7 +112,14 @@ export class EditorStore {
     this.past = [];
     this.future = [];
     this.transactionStart = null;
+    this.saved = doc;
     this.set({ doc, selection: [], hover: null, scope: null });
+  }
+
+  /** Records `doc` as what is stored, so `dirty` reflects later edits only. */
+  markSaved(doc: DielineDocument = this.state.doc) {
+    this.saved = doc;
+    this.set({});
   }
 
   /** Changes the document as one undoable step. */
@@ -194,8 +224,18 @@ export class EditorStore {
     if (scope !== this.state.scope) this.set({ scope });
   }
 
-  setTool(tool: Tool) {
-    if (tool !== this.state.tool) this.set({ tool });
+  setTool(tool: Tool, placeKind?: PlaceableKind) {
+    if (tool !== this.state.tool || (placeKind && placeKind !== this.state.placeKind)) {
+      this.set({ tool, ...(placeKind ? { placeKind } : {}) });
+    }
+  }
+
+  setDrawLineType(drawLineType: LineType) {
+    this.set({ drawLineType });
+  }
+
+  setDisplay(patch: Partial<EditorState["display"]>) {
+    this.set({ display: { ...this.state.display, ...patch } });
   }
 
   setView(view: View) {

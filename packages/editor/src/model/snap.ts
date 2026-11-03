@@ -58,8 +58,13 @@ export function snapMoving(moving: Pt[], targets: SnapTarget[], tolerance: numbe
   // Prefer a full point snap when one target is close on both axes. Ties go to
   // the point snap: dielines are full of coinciding corners, and two axis snaps
   // to different nodes at the same spot cannot become one reference.
+  //
+  // A single point (a pen click, a handle, a measurement) always prefers a
+  // corner within reach: that is what the designer is aiming at, while two
+  // unrelated alignments that happen to be a hair closer are noise. Moving a
+  // whole selection keeps the plain distance rule, so edge alignment still works.
   let bestPoint = Infinity;
-  const axisBest = bestX && bestY ? Math.hypot(bestX.d, bestY.d) : Infinity;
+  const axisBest = moving.length === 1 ? Infinity : bestX && bestY ? Math.hypot(bestX.d, bestY.d) : Infinity;
   for (const m of moving) {
     for (const t of targets) {
       const d = Math.hypot(t.point[0] - m[0], t.point[1] - m[1]);

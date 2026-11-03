@@ -1,10 +1,8 @@
 "use server";
 
-import {
-  DielineMetadataFormType,
-  DielineUpdateFormType,
-} from "@/lib/validationSchema/validatoinSchema";
+import { DielineMetadataFormType } from "@/lib/validationSchema/validatoinSchema";
 import { prisma } from "@repo/db";
+import { parseDocument } from "@repo/dieline-engine";
 import { materials as allMats } from "@repo/dieline-core/data/materials";
 import { UploadApiResponse } from "cloudinary";
 import { deleteImage, uploadCloudFile } from "./cloudinary";
@@ -231,36 +229,38 @@ export const updateDieline = async (
   }
 };
 
-export const saveDielineChanges = async (
-  data: DielineUpdateFormType,
+/**
+ * Saves an editor v2 document. The document lives in `specification` as
+ * versioned JSON (variables are part of it, so `variable` is cleared). It is
+ * validated here, on the server, whatever the client sent.
+ */
+export const saveDielineDocument = async (
   id: number,
-) => {
-  const { specification, variable, foldConfig } = data;
+  json: string,
+): Promise<{ ok: true } | { ok: false; error: string }> => {
   try {
+    let input: unknown;
+    try {
+      input = JSON.parse(json);
+    } catch {
+      return { ok: false, error: "The document is not valid JSON." };
+    }
+
+    const parsed = parseDocument(input);
+    if (!parsed.ok) return { ok: false, error: parsed.errors.slice(0, 3).join("; ") };
+
     const existingDieline = await prisma.dieline.findFirst({ where: { id } });
-    if (!existingDieline) throw new Error("Dieline Not Found.");
+    if (!existingDieline) return { ok: false, error: "Dieline not found." };
 
     await prisma.dieline.update({
       where: { id },
-      data: {
-        specification,
-        variable,
-      },
+      data: { specification: JSON.stringify(parsed.document), variable: "[]" },
     });
 
-    // Fold direction is a property of the template's stock settings, so it is
-    // stored on the settings row rather than in the specification JSON.
-    if (typeof foldConfig === "string") {
-      await prisma.dielineSettings.update({
-        where: { id: existingDieline.settingsId },
-        data: { foldConfig },
-      });
-    }
-
-    return { success: "Dieline Saved Successfully." };
+    return { ok: true };
   } catch (error) {
     console.error(error);
-    return { error: (error as Error).message };
+    return { ok: false, error: (error as Error).message };
   }
 };
 

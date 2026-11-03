@@ -80,6 +80,33 @@ export function insertNodes(
   return updateNode(doc, parentId, (n) => (n.kind === "group" ? { ...n, children: insert(n.children) } : n));
 }
 
+/**
+ * Moves a node into `parentId` (null for the root) at `index`, where `index`
+ * counts positions in the destination list *before* the node is removed. A group
+ * cannot be moved into itself or its own descendants.
+ */
+export function moveNode(
+  doc: DielineDocument,
+  id: string,
+  parentId: string | null,
+  index: number,
+): DielineDocument {
+  const located = findNode(doc, id);
+  if (!located) return doc;
+  if (parentId === id) return doc;
+  if (parentId && located.node.kind === "group" && findInside(located.node, parentId)) return doc;
+
+  const sameParent = (located.parent?.id ?? null) === parentId;
+  const target = sameParent && located.index < index ? index - 1 : index;
+  if (sameParent && target === located.index) return doc;
+
+  return insertNodes(removeNodes(doc, [id]), [located.node], parentId, target);
+}
+
+function findInside(group: GroupNode, id: string): boolean {
+  return group.children.some((c) => c.id === id || (c.kind === "group" && findInside(c, id)));
+}
+
 //! Names and ids ----------------------------------------------------------------
 
 export function newId(): string {
@@ -138,6 +165,22 @@ export function renameNode(doc: DielineDocument, id: string, name: string): Diel
     ...renamed,
     nodes: renamed.nodes.map((n) => mapExprs(n, rewrite)),
     rulers: renamed.rulers.map((r) => mapExprs(r, rewrite)),
+  };
+}
+
+/**
+ * Rewrites uses of a param or variable after it was renamed. Only whole
+ * identifiers change: `@from.x` (a node reference) and `node.from` (a path part)
+ * are left alone. Components have their own scope and are not touched.
+ */
+export function renameSymbol(doc: DielineDocument, from: string, to: string): DielineDocument {
+  const pattern = new RegExp(`(?<![@.\\w])${from}(?![\\w])`, "g");
+  const rewrite = (expr: string) => expr.replace(pattern, to);
+  return {
+    ...doc,
+    nodes: doc.nodes.map((n) => mapExprs(n, rewrite)),
+    rulers: doc.rulers.map((r) => mapExprs(r, rewrite)),
+    variables: doc.variables.map((v) => mapExprs(v, rewrite)),
   };
 }
 

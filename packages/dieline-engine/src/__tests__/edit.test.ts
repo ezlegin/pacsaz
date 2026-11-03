@@ -1,6 +1,17 @@
 import { describe, expect, it } from "vitest";
 import { offsetExpr, refExpr, renameRefs } from "../edit/exprEdit";
-import { duplicateNodes, findNode, insertNodes, removeNodes, renameNode, uniqueName, updateNode } from "../edit/tree";
+import {
+  duplicateNodes,
+  findNode,
+  insertNodes,
+  moveNode,
+  removeNodes,
+  renameNode,
+  renameSymbol,
+  uniqueName,
+  updateNode,
+} from "../edit/tree";
+import { evaluateExpression } from "../eval/evaluate";
 import { render } from "../eval/render";
 import { tuckEndBox } from "../fixtures/tuckEnd";
 import type { Node } from "../spec/types";
@@ -79,6 +90,40 @@ describe("tree operations", () => {
     expect(copy.children.map((c) => c.name)).toEqual(["left2", "right2"]);
     expect(copy.children[1]!.transform?.x).toBe("@left2.right.x");
     expect(errors(render(next, INPUTS))).toEqual([]);
+  });
+
+  it("moves nodes between groups and refuses moving a group into itself", () => {
+    const moved = moveNode(base, "a", "g", 0);
+    expect(findNode(moved, "a")?.parent?.id).toBe("g");
+    expect(moveNode(base, "g", "g", 0)).toBe(base);
+
+    const reordered = moveNode(base, "g", null, 0);
+    expect(reordered.nodes.map((n) => n.id)).toEqual(["g", "a"]);
+  });
+
+  it("evaluates a single expression against a render", () => {
+    const result = render(tuckEndBox, INPUTS);
+    expect(evaluateExpression(result, "@side1.right.x + glue").value).toBe(160 + 18);
+    expect(evaluateExpression(result, "@nope.x").error).toContain("nope");
+    expect(evaluateExpression(result, "width +").error).toBeDefined();
+  });
+
+  it("renames variables everywhere they are used, and nothing else", () => {
+    const renamed = renameSymbol(tuckEndBox, "glue", "glueWidth");
+    const json = JSON.stringify(renamed);
+    expect(json).toContain("@side2.topRight.x + glueWidth");
+    // No expression still says `glue` (the quoted name of the variable itself is data).
+    expect(json).not.toMatch(/[^@.\w"]glue[^\w"]/);
+    // The variable's own name is data, not an expression.
+    expect(renamed.variables.find((v) => v.name === "glue")).toBeDefined();
+    expect(renameSymbol(doc({ nodes: [rect("from", "@from.width + from", "1")] }), "from", "f").nodes[0]).toMatchObject({
+      width: "@from.width + f",
+    });
+  });
+
+  it("skips disabled modifiers", () => {
+    const d = doc({ nodes: [rect("a", "10", "10", { modifiers: [{ type: "array", count: "3", dx: "20", dy: "0", disabled: true }] } as Partial<Node>)] });
+    expect(render(d, INPUTS).bounds!.maxX).toBe(10);
   });
 
   it("generates unique names", () => {
