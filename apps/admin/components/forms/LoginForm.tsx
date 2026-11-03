@@ -14,6 +14,7 @@ import {
   FormControl,
   FormField,
   FormItem,
+  FormMessage,
 } from "@repo/ui/components/form";
 import { Input } from "@repo/ui/components/input";
 import { Spinner } from "@repo/ui/components/spinner";
@@ -63,6 +64,7 @@ export function LoginForm() {
                   />
                 </div>
               </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -86,12 +88,14 @@ export function LoginForm() {
                   />
                 </div>
               </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />
         <Button
           size={"lg"}
-          disabled={!form.formState.isValid || isLoading}
+          type="submit"
+          disabled={isLoading}
           className="w-full"
         >
           <Spinner isLoading={isLoading} />
