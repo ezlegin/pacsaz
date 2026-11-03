@@ -60,7 +60,41 @@ export function NodeInspector({ id }: { id: string }) {
       <Placement node={node} />
       <Modifiers node={node} />
       <Rules node={node} />
+      <CustomerAccess node={node} />
     </div>
+  );
+}
+
+/** Customize mode: what a paying customer may do to this part. */
+function CustomerAccess({ node }: { node: Node }) {
+  const set = useNodeSetter(node.id);
+  const c = node.customize ?? {};
+  const write = (next: typeof c) => set("customize", next.optional || (next.move ?? 0) > 0 ? next : undefined);
+  const active = !!c.optional || (c.move ?? 0) > 0;
+
+  return (
+    <Section title="Customer access" defaultOpen={active}>
+      <p className="text-[11px] text-muted-foreground">Customers never edit the drawing itself, only what you allow here.</p>
+      <Row label="Optional">
+        <Pill on={!!c.optional} onChange={(on) => write({ ...c, optional: on || undefined })} title="Customers can switch this part off, or on when it is hidden">
+          {c.optional ? "Can switch on/off" : "Always as drawn"}
+        </Pill>
+      </Row>
+      <Row label="Move">
+        <input
+          type="number"
+          min={0}
+          step={1}
+          value={c.move ?? 0}
+          onChange={(e) => {
+            const v = Number(e.target.value);
+            if (Number.isFinite(v) && v >= 0) write({ ...c, move: v || undefined });
+          }}
+          className="h-7 w-20 rounded-md border bg-background px-2 font-mono text-[11.5px] outline-none focus:border-blue-500"
+        />
+        <span className="text-[11px] text-muted-foreground">mm each way</span>
+      </Row>
+    </Section>
   );
 }
 

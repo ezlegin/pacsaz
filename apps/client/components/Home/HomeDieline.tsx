@@ -3,17 +3,16 @@
 import { DIMENSIONS } from "@/data/consts";
 import { DielineType } from "@/data/types";
 import { tuckEnd } from "@/public";
-import { useDielineGenerator } from "@repo/dieline-core/hooks/useDielineGenerator";
 import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
 import { setDeveloperTool } from "@repo/store/slices/developerToolsSlice";
-import { ISpec, IVar } from "@repo/store/types";
 import { Card } from "@repo/ui/components/card";
 import { cn } from "@repo/ui/lib/utils";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import DielineLoadingOverlay from "../product/DielineLoadingOverlay";
 import { DimensionInput } from "../product/DimensionsInput";
+import { useEngineDieline } from "../product/useEngineDieline";
 const SVGPreview = dynamic(
   () => import("@repo/ui/components/custom/SVGPreview"),
   {
@@ -21,8 +20,9 @@ const SVGPreview = dynamic(
   },
 );
 
+const containerClass = "h-175 max-w-225 min-w-225";
+
 const HomeDieline = ({ dieline }: { dieline: DielineType | null }) => {
-  const containerClass = "h-175 max-w-225 min-w-225";
   if (!dieline)
     return (
       <div className={cn(containerClass, "flex justify-center items-center")}>
@@ -35,36 +35,23 @@ const HomeDieline = ({ dieline }: { dieline: DielineType | null }) => {
         />
       </div>
     );
+  return <LiveDieline dieline={dieline} />;
+};
 
+/** Hooks need a component of their own: the fallback above returns before them. */
+const LiveDieline = ({ dieline }: { dieline: DielineType }) => {
   const { minDimension, maxDimension } = useAppSelector(
     (s) => s.dielineSettings,
   );
 
-  const specs = useMemo(
-    () => JSON.parse(dieline.specification) as ISpec.Specs,
-    [dieline.specification],
-  );
-  const variables = useMemo(
-    () => JSON.parse(dieline.variable) as IVar.VariableMap,
-    [dieline.variable],
-  );
-
-  const { isRendering } = useDielineGenerator(
-    {
-      ...dieline,
-      specification: specs,
-      settings: dieline.settings!,
-      variables,
-    },
-    "client",
-  );
+  const { isRendering } = useEngineDieline(dieline, { watermark: false });
   const dispatch = useAppDispatch();
 
   useEffect(() => {
     dispatch(setDeveloperTool({ key: "showContainer", value: false }));
     dispatch(setDeveloperTool({ key: "showWatermark", value: false }));
     dispatch(setDeveloperTool({ key: "doCenterSVG", value: true }));
-  }, []);
+  }, [dispatch]);
 
   return (
     <div className="relative p-0">

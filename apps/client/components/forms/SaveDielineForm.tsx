@@ -34,8 +34,14 @@ const SaveDielineForm = ({
   savedDieline,
   slug,
   plan,
+  customization,
+  onSaved,
 }: {
   slug: string;
+  /** Customize mode: the overlay to store with the copy, as JSON. */
+  customization?: string;
+  /** Called with the saved copy's id instead of refreshing the page. */
+  onSaved?: (id: number) => void;
   savedDieline?: SavedDieline;
   /**
    * Only the persisted dimensions and stock are needed, so the contract is the
@@ -78,12 +84,16 @@ const SaveDielineForm = ({
 
   const onSubmit = async (data: SaveDielineFormType) => {
     startLoading();
-    isUpdateType;
     const res = isUpdateType
-      ? await updateSavedDieline(data, savedDieline.id)
-      : await createSaveDieline(data, slug);
+      ? await updateSavedDieline(data, savedDieline.id, customization)
+      : await createSaveDieline(data, slug, customization);
 
-    handleRes(res, { onSuccess: () => router.refresh() });
+    handleRes(res, {
+      onSuccess: () => {
+        if (onSaved && "id" in res && res.id) onSaved(res.id);
+        else router.refresh();
+      },
+    });
     form.reset();
 
     stopLoading();

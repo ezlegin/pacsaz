@@ -112,7 +112,8 @@ const DielinePreview3D = ({
     fileInput.current?.click();
   };
 
-  const svg = useAppSelector((s) => s.svg.svg);
+  // The engine writes a separate layered SVG for folding; the legacy one did both.
+  const svg = useAppSelector((s) => s.svg.fold ?? s.svg.svg);
   const material = useAppSelector((s) => s.dielineSettings.material.value);
   const thickness = useAppSelector((s) => s.dielineSettings.thickness);
   const foldConfig = useAppSelector((s) => s.dielineSettings.foldConfig);

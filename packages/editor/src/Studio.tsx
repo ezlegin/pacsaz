@@ -1,10 +1,12 @@
 "use client";
 
-import { removeNodes, type DielineDocument, type Dimensions } from "@repo/dieline-engine";
+import { removeNodes, type Customization, type DielineDocument, type Dimensions } from "@repo/dieline-engine";
 import { TooltipProvider } from "@repo/ui/components/tooltip";
 import { cn } from "@repo/ui/lib/utils";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { Canvas } from "./canvas/Canvas";
+import { FoldPreview } from "./canvas/Preview3D";
+import { Customizer } from "./customize/Customizer";
 import { buildCommands, downloadFile } from "./commands";
 import { CommandPalette } from "./panels/CommandPalette";
 import { DocumentPanel } from "./panels/DocumentPanel";
@@ -73,6 +75,9 @@ function StudioLayout({ title, leading, trailing, onSave, onError, sizeRange }: 
   const [palette, setPalette] = useState(false);
   const [saving, setSaving] = useState(false);
   const display = useEditor((s) => s.display);
+  // Customer preview: the template as a paying customer sees it. Trial changes are never saved.
+  const [customerView, setCustomerView] = useState(false);
+  const [trial, setTrial] = useState<Customization>({});
 
   const save = useCallback(async () => {
     if (!onSave || saving) return;
@@ -108,7 +113,7 @@ function StudioLayout({ title, leading, trailing, onSave, onError, sizeRange }: 
       }
 
       const target = e.target as HTMLElement | null;
-      if (isEditable(target) || target?.closest("[data-editor-canvas]") || palette) return;
+      if (isEditable(target) || target?.closest("[data-editor-canvas]") || palette || customerView) return;
 
       if (mod && key === "z") {
         e.preventDefault();
@@ -131,7 +136,7 @@ function StudioLayout({ title, leading, trailing, onSave, onError, sizeRange }: 
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [store, save, palette]);
+  }, [store, save, palette, customerView]);
 
   // Don't let unsaved work be lost to a closed tab.
   const dirty = useEditor((s) => s.dirty);
@@ -144,7 +149,19 @@ function StudioLayout({ title, leading, trailing, onSave, onError, sizeRange }: 
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background text-foreground">
-      <TopBar title={title} leading={leading} trailing={trailing} onSave={onSave ? save : undefined} saving={saving} onPalette={() => setPalette(true)} />
+      <TopBar
+        title={title}
+        leading={leading}
+        trailing={trailing}
+        onSave={onSave ? save : undefined}
+        saving={saving}
+        onPalette={() => setPalette(true)}
+        customerView={customerView}
+        onCustomerView={setCustomerView}
+      />
+      {customerView ? (
+        <CustomerPreview value={trial} onChange={setTrial} onClose={() => setCustomerView(false)} />
+      ) : (
       <div className="flex min-h-0 flex-1">
         <ToolRail />
         <aside className="flex w-60 shrink-0 flex-col border-r bg-muted/20">
@@ -180,10 +197,40 @@ function StudioLayout({ title, leading, trailing, onSave, onError, sizeRange }: 
         </main>
         <Inspector />
       </div>
+      )}
       <CommandPalette
         open={palette}
         onOpenChange={setPalette}
         commands={() => buildCommands(store, { save: onSave ? () => void save() : undefined, download: downloadFile })}
+      />
+    </div>
+  );
+}
+
+/** The Customizer on the template being edited, so the designer sees exactly what customers get. */
+function CustomerPreview({ value, onChange, onClose }: { value: Customization; onChange: (c: Customization) => void; onClose: () => void }) {
+  const doc = useEditor((s) => s.doc);
+  const inputs = useEditor((s) => s.inputs);
+  const [fold, setFold] = useState(false);
+  return (
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className="flex h-9 shrink-0 items-center gap-3 border-b bg-violet-600 px-3 text-xs text-white">
+        <span className="font-semibold">Customer view</span>
+        <span className="text-white/80">What a paying customer can change. Changes here are only a trial and are not saved.</span>
+        <button type="button" className="ml-auto rounded px-2 py-1 hover:bg-white/15" onClick={() => setFold(!fold)}>
+          {fold ? "Hide 3D" : "Show 3D"}
+        </button>
+        <button type="button" className="rounded px-2 py-1 hover:bg-white/15" onClick={onClose}>
+          Back to editing
+        </button>
+      </div>
+      <Customizer
+        className="flex-1"
+        template={doc}
+        inputs={inputs}
+        value={value}
+        onChange={onChange}
+        overlay={(result) => fold && <FoldPreview result={result} thickness={inputs.thickness} onClose={() => setFold(false)} />}
       />
     </div>
   );

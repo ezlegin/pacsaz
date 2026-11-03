@@ -147,7 +147,7 @@ const SavedDielinesList = ({
                         <div className="flex justify-end gap-2">
                           <Link
                             target="_blank"
-                            href={`/dieline/${dieline?.slug}?settingsId=${settings?.id}`}
+                            href={settings?.customization ? `/dieline/${dieline?.slug}/customize?saved=${id}` : `/dieline/${dieline?.slug}?settingsId=${settings?.id}`}
                           >
                             <span className="flex size-7 items-center justify-center rounded-full bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground">
                               <RotateCw size={14} />
@@ -251,7 +251,7 @@ const SavedDielinesList = ({
 
                   <Link
                     target="_blank"
-                    href={`/dieline/${dieline?.slug}?settingsId=${settings?.id}`}
+                    href={settings?.customization ? `/dieline/${dieline?.slug}/customize?saved=${id}` : `/dieline/${dieline?.slug}?settingsId=${settings?.id}`}
                     className="flex items-center justify-center gap-2 rounded-xl border bg-background py-2.5 text-[11px] font-medium transition-colors hover:border-primary/30 hover:text-primary"
                   >
                     <RotateCw className="size-3.5" />

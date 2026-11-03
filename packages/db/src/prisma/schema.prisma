@@ -194,6 +194,9 @@ model CustomDielineSettings {
   length        Float
   height        Float
   dimensionType DimensionType
+  /// Customize mode: the customer's overlay on the template as JSON (see
+  /// `Customization` in @repo/dieline-engine). Empty for a plain resize.
+  customization String        @default("")
 
   savedDieline      SavedDieline?    @relation(fields: [savedDielineId], references: [id], onDelete: Cascade)
   savedDielineId    Int?             @unique

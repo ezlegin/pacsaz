@@ -19,6 +19,9 @@ import {
 import { cn } from "@repo/ui/lib/utils";
 import { CircleQuestionMark, SlidersHorizontal } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
+import Diamond from "@/public/icons/Diamond";
+import { canCustomize } from "@/lib/dieline/access";
 import { Section } from "./DetailsSection";
 import DielineDownloadButton, { UserType } from "./DielineDownloadButton";
 import { DimensionInput } from "./DimensionsInput";
@@ -38,10 +41,12 @@ import { Format } from "@repo/store/types";
 interface Props {
   slug: string;
   isRendering: boolean;
+  /** The template has Customize-mode options: show the way into the paid editor. */
+  customizable?: boolean;
   user: UserType | null;
 }
 
-export default function DielineSettings({ slug, isRendering, user }: Props) {
+export default function DielineSettings({ slug, isRendering, user, customizable }: Props) {
   const {
     bleed,
     dimensionType,
@@ -264,6 +269,15 @@ export default function DielineSettings({ slug, isRendering, user }: Props) {
 
       {/* ------------------------------- footer ------------------------------ */}
       <div className="shrink-0 border-t bg-muted/20 p-4">
+        {customizable && (
+          <Link
+            href={`/dieline/${slug}/customize`}
+            className="mb-2 flex items-center justify-center gap-2 rounded-xl border border-primary/30 bg-primary/[0.05] py-2.5 text-xs font-bold text-primary transition-colors hover:bg-primary/10"
+          >
+            {!canCustomize(user?.plan) && <Diamond />}
+            ویرایش پیشرفته: بال‌ها، پنجره و سوراخ
+          </Link>
+        )}
         <DielineDownloadButton
           isRendering={isRendering}
           slug={slug}

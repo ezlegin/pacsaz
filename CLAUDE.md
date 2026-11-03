@@ -86,14 +86,16 @@ Phases (each ends with a commit message for the user to commit):
 
 ### Where things stand
 
-- Phases 1–5 are done. The admin route `/editor/[slug]` is the v2 `Studio`
+- Phases 1–6 are done. The admin route `/editor/[slug]` is the v2 `Studio`
   (`apps/admin/app/editor/[slug]/StudioEditor.tsx`); the old admin editor was removed.
 - v2 documents are stored in `Dieline.specification` as JSON with `"version": 2`,
   validated by `parseDocument` in the `saveDielineDocument` server action.
   Specifications in the old format open as an empty document.
-- The **client app still renders with the legacy `dieline-core`**, so a dieline
-  saved from the new Studio does not render on the public site until the client
-  is moved to the engine (planned with Customize mode, Phase 6).
+- The client app renders with the engine (`useEngineDieline` in
+  `apps/client/components/product/`); templates still in the old format show an
+  "being updated" notice. `dieline-core` is only used there for material data and
+  the old dimension helpers of the settings panel; the Redux store still holds
+  the size settings.
 
 ### Box bodies and the component library
 
@@ -132,6 +134,39 @@ Phases (each ends with a commit message for the user to commit):
   sizes, cached per render. The admin passes each dieline's min/max dimensions.
 - Polygons can be sized by side (`sizeBy: "side"`); the Triangle tool draws
   three-sided polygons that way.
+- Bleed (`geometry/bleed.ts`) is the outermost closed cut loop offset outward
+  with round corners; it does not use makerjs (too slow, and wrong on narrow
+  notches). `export.test.ts` checks it on every preset at several distances.
+
+### Customize mode (paid customer editor)
+
+- A customer's copy is **the template plus a `Customization` overlay**
+  (`dieline-engine/src/customize/customize.ts`), never a document of its own:
+  exposed param values, optional parts switched on/off, movable parts' offsets,
+  another part (or args) on an edge, and windows/holes placed relative to a
+  panel's centre. A template fix reaches every copy.
+- What a template allows lives in the spec: `Param.exposed` (+ `min`/`max`),
+  `node.customize = { optional, move }`, `edgeFeature.customize = { choices, args }`
+  and `doc.customize.cutouts`. `customizeOptions(doc)` lists it all.
+- `validateCustomization` rejects anything not allowed (tampering shows, it is not
+  ignored); `applyCustomization` builds the document to render;
+  `verifyCustomization` also renders it and checks windows sit inside their panel
+  clear of folds and that `checkDieline` finds nothing new. The Customizer shows
+  exactly what the server checks.
+- UI: `Customizer` in `@repo/editor` (`src/customize/`), strings overridable
+  (English default; the client passes Persian from
+  `apps/client/lib/dieline/customizeStrings.ts`). Overlay edits are pure
+  functions in `editor/src/model/customize.ts`. The Studio's "Customer view"
+  runs the Customizer on the open template with unsaved trial changes.
+- Client: `/dieline/[slug]/customize` (`?saved=<id>` to reopen a copy). Access is
+  `canCustomize(plan)` (`apps/client/lib/dieline/access.ts`: pro, organization),
+  checked on the page and again in every server action.
+- **Downloads are rendered on the server** (`downloadDieline` in
+  `apps/client/actions/dieline.ts` → `verifyRequest` → `buildDielineFile`): the
+  size is clamped to the template's range, the material must be offered, the
+  customization verified; the browser never sends geometry.
+- Saved copies and download history store the overlay as JSON in
+  `CustomDielineSettings.customization` (empty for a plain resize).
 
 ## `@repo/editor` rules
 

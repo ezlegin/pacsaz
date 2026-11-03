@@ -9,3 +9,8 @@ export { groupNodes, ungroupNode, ungroupBlocker } from "./model/ops";
 export { snapTargets, snapMoving, wouldCycle, type SnapTarget, type SnapResult } from "./model/snap";
 export { completionsAt, applyCompletion, type Completion } from "./model/completions";
 export { createShape, SHAPE_LABELS, type PlaceableKind } from "./model/create";
+export { Customizer, type CustomizerProps } from "./customize/Customizer";
+export { CustomizeCanvas, type CanvasTarget } from "./customize/CustomizeCanvas";
+export { EN_STRINGS, type CustomizeStrings } from "./customize/strings";
+export { FoldPreview, type FoldPreviewStrings } from "./canvas/Preview3D";
+export * as customizeEdits from "./model/customize";

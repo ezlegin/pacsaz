@@ -17,7 +17,53 @@ export function DocumentPanel() {
       <PreviewSize />
       <Params />
       <Variables />
+      <CustomerCutouts />
     </div>
+  );
+}
+
+//! Customize mode ----------------------------------------------------------------------
+
+/** Whether customers may add windows and holes to the box's panels. */
+function CustomerCutouts() {
+  const store = useStore();
+  const rules = useEditor((s) => s.doc.customize?.cutouts);
+  const write = (next: typeof rules) =>
+    store.apply((d) => {
+      const customize = { ...d.customize, cutouts: next };
+      if (!next) delete customize.cutouts;
+      return { ...d, customize: Object.keys(customize).length ? customize : undefined };
+    });
+  const shapes = rules?.shapes ?? [];
+  const toggle = (s: "rect" | "ellipse") => {
+    const next = shapes.includes(s) ? shapes.filter((x) => x !== s) : [...shapes, s];
+    write(next.length ? { ...rules!, shapes: next } : undefined);
+  };
+
+  return (
+    <Section title="Customer windows and holes" defaultOpen={!!rules}>
+      <p className="text-[11px] text-muted-foreground">Customers place them inside box panels, clear of folds and edges.</p>
+      <Row label="Allow">
+        <Pill on={!!rules} onChange={(on) => write(on ? { shapes: ["rect", "ellipse"], max: 2 } : undefined)}>
+          {rules ? "Allowed" : "Not allowed"}
+        </Pill>
+      </Row>
+      {rules && (
+        <>
+          <Row label="Shapes">
+            <Pill on={shapes.includes("rect")} onChange={() => toggle("rect")}>Rectangle</Pill>
+            <Pill on={shapes.includes("ellipse")} onChange={() => toggle("ellipse")}>Circle / oval</Pill>
+          </Row>
+          <Row label="At most">
+            <NumberField value={rules.max} min={1} onChange={(v) => write({ ...rules, max: Math.max(1, Math.min(50, Math.round(v))) })} />
+          </Row>
+          <Row label="Clearance">
+            <NumberField value={rules.margin ?? 0} min={0} step={0.5} onChange={(v) => write({ ...rules, margin: v > 0 ? v : undefined })} />
+          </Row>
+          <p className="pl-14 text-[11px] text-muted-foreground">0 means max(3 mm, 2 × thickness).</p>
+        </>
+      )}
+    </Section>
   );
 }
 

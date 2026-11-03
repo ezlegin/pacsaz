@@ -5,7 +5,11 @@ import { parseDocument } from "../spec/schema";
 import { render } from "../eval/render";
 import { resolveDimensions } from "../eval/dimensions";
 import { tuckEndBox } from "../fixtures/tuckEnd";
-import { errors, INPUTS, isClosedOutline } from "./helpers";
+import { pathsBounds } from "../geometry/math";
+import type { Path } from "../geometry/types";
+import { rteBox } from "../fixtures/rte";
+import { PRESETS, presetBody, type PresetId } from "../library/presets";
+import { doc, errors, INPUTS, isClosedOutline, rect, renderNodes } from "./helpers";
 
 describe("tuck end fixture", () => {
   const result = render(tuckEndBox, INPUTS);
@@ -80,5 +84,42 @@ describe("documents", () => {
     expect(resolveDimensions(size, "manufacture", { thickness: 1 })).toEqual(size);
     expect(resolveDimensions(size, "inner", { thickness: 1 })).toEqual({ width: 102, length: 52, height: 82 });
     expect(resolveDimensions(size, "outer", { thickness: 1, outerOffset: 1.5 }).width).toBe(97);
+  });
+});
+
+describe("bleed", () => {
+  const dist = (p: [number, number], a: [number, number], b: [number, number]) => {
+    const dx = b[0] - a[0];
+    const dy = b[1] - a[1];
+    const t = Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / (dx * dx + dy * dy || 1)));
+    return Math.hypot(p[0] - a[0] - t * dx, p[1] - a[1] - t * dy);
+  };
+
+  it("grows a rectangle by the bleed with round corners", () => {
+    const r = renderNodes([rect("a", "10", "10")], { bleed: 3 });
+    const b = pathsBounds(r.bleed)!;
+    expect([b.minX, b.minY, b.maxX, b.maxY].map((v) => Math.round(v * 100) / 100)).toEqual([-3, -3, 13, 13]);
+  });
+
+  // 1.5 and 3 make the FEFCO slots (3 mm) exactly twice and once the bleed: offsets that touch instead of crossing.
+  const cases = ["rte", ...PRESETS.map((p) => p.id)].flatMap((id) => [1.5, 3, 5].map((bleed) => [id, bleed] as const));
+  it.each(cases)("follows the %s outline at a %s mm bleed, fast", (id, bleed) => {
+    const d = id === "rte" ? rteBox : doc({ nodes: [presetBody(id as PresetId, "body")] });
+    const t0 = performance.now();
+    const r = render(d, { ...INPUTS, bleed });
+    expect(performance.now() - t0).toBeLessThan(500);
+    expect(r.bleed.length).toBeGreaterThan(0);
+
+    const cut = r.paths.filter((p) => p.lineType === "cut" && p.kind === "line") as Extract<Path, { kind: "line" }>[];
+    const b = pathsBounds(r.bleed)!;
+    const c = r.bounds!;
+    expect(b.minX).toBeCloseTo(c.minX - bleed, 1);
+    expect(b.maxY).toBeCloseTo(c.maxY + bleed, 1);
+    // Every bleed point is at least the bleed away from every cut line: no inner strays.
+    for (const seg of r.bleed) {
+      if (seg.kind !== "line") continue;
+      const nearest = Math.min(...cut.map((l) => dist(seg.a, l.a, l.b)));
+      expect(nearest).toBeGreaterThan(bleed - 0.05);
+    }
   });
 });

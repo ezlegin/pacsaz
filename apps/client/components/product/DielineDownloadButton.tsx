@@ -1,7 +1,7 @@
-import { createDownloadHistory } from "@/actions/dieline";
+import { downloadDieline } from "@/actions/dieline";
+import { saveBase64File } from "@/lib/dieline/download";
 import Diamond from "@/public/icons/Diamond";
-import { Plan, User } from "@repo/db";
-import { dielineDownloder } from "@repo/lib/utils/dielineDownloader";
+import { Plan, SavedDieline, User } from "@repo/db";
 import { useLoading } from "@repo/lib/utils/useLoading";
 import { Button } from "@repo/ui/components/button";
 import { Dialog, DialogContent, DialogTitle } from "@repo/ui/components/dialog";
@@ -28,9 +28,16 @@ interface Props {
   slug: string;
   isRendering: boolean;
   user: UserType | null;
+  /** Customize mode: the customer's overlay as JSON, saved and downloaded with the size. */
+  customization?: string;
+  /** Customize mode: the copy being edited, so saving updates it. */
+  savedDieline?: SavedDieline;
+  onSaved?: (id: number) => void;
+  /** Problems the customer has to fix before the file can be produced. */
+  blocked?: string | null;
 }
 
-const DielineDownloadButton = ({ slug, isRendering, user }: Props) => {
+const DielineDownloadButton = ({ slug, isRendering, user, customization, savedDieline, onSaved, blocked }: Props) => {
   const router = useRouter();
   const settings = useAppSelector((s) => s.dielineSettings);
   const svg = useAppSelector((s) => s.svg.svg);
@@ -59,6 +66,11 @@ const DielineDownloadButton = ({ slug, isRendering, user }: Props) => {
       return;
     }
 
+    if (blocked) {
+      toast.error(blocked);
+      return;
+    }
+
     if (!svg || isRendering) {
       toast.error("فایل آماده دانلود نیست.");
       return;
@@ -66,9 +78,11 @@ const DielineDownloadButton = ({ slug, isRendering, user }: Props) => {
 
     startLoading();
 
-    const createRecord = await createDownloadHistory(slug, setts, user.plan.id);
-    if (createRecord.error) {
-      toast.error(createRecord.error, {
+    // The server renders the file itself from the template, the size and the
+    // customization; nothing drawn in the browser is sent.
+    const res = await downloadDieline(slug, setts, settings.format, customization);
+    if ("error" in res) {
+      toast.error(res.error, {
         action: {
           label: "تمدید اشتراک",
           onClick: () => {
@@ -80,16 +94,9 @@ const DielineDownloadButton = ({ slug, isRendering, user }: Props) => {
       return;
     }
 
-    const res = await dielineDownloder(slug);
-
-    if (res?.success && createRecord.success) {
-      toast.success("فایل با موفقیت تولید شد.");
-      stopLoading();
-      return;
-    } else {
-      toast.error("خطایی رخ داد. لطفا لحظاتی بعد مجددا تلاش کنید.");
-      stopLoading();
-    }
+    saveBase64File(res.file, res.mime, res.fileName);
+    toast.success("فایل با موفقیت تولید شد.");
+    stopLoading();
   };
 
   const onOpenSavePopup = () => {
@@ -119,6 +126,12 @@ const DielineDownloadButton = ({ slug, isRendering, user }: Props) => {
                 settings={setts}
                 slug={slug}
                 plan={user?.plan!}
+                customization={customization}
+                savedDieline={savedDieline}
+                onSaved={(id) => {
+                  setOpenPopup(null);
+                  onSaved?.(id);
+                }}
               />
             </>
           )}

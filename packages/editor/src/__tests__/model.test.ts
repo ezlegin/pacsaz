@@ -3,6 +3,7 @@ import { rteBox, tuckEndBox } from "@repo/dieline-engine/fixtures";
 import { edgeSlots } from "../model/body";
 import { describe, expect, it } from "vitest";
 import { applyCompletion, completionsAt } from "../model/completions";
+import { addCutout, changeCount, removeCutout, setEdgeArg, setEdgePart, setParam, setPartOffset, setPartShown, updateCutout } from "../model/customize";
 import { constrain45, drawnPath, placedShape } from "../model/draw";
 import { handlesFor } from "../model/handles";
 import { moveNodes } from "../model/move";
@@ -313,5 +314,37 @@ describe("triangle tool", () => {
     const handle = handlesFor(findNode(doc, node.id)!.node, r)[0]!;
     const next = handle.apply(findNode(doc, node.id)!.node, [0, 10], { plain: true });
     expect(Number((next as { radius: string }).radius)).toBeCloseTo(100 + 10 * Math.sqrt(3), 2);
+  });
+});
+
+describe("customer overlay edits", () => {
+  it("keeps only real changes", () => {
+    let c = setParam({}, "lid", 12);
+    expect(c).toEqual({ params: { lid: 12 } });
+    c = setParam(c, "lid", undefined);
+    expect(c).toEqual({});
+
+    // Switching a hidden-by-default part on is a change; back off removes it.
+    c = setPartShown({}, "hole", true, true);
+    expect(c).toEqual({ nodes: { hole: { hidden: false } } });
+    expect(setPartShown(c, "hole", false, true)).toEqual({});
+
+    c = setPartOffset({}, "hole", 50, -2.345, 10);
+    expect(c).toEqual({ nodes: { hole: { dx: 10, dy: -2.35 } } });
+    expect(setPartOffset(c, "hole", 0, 0, 10)).toEqual({});
+
+    // Args belong to the part they were set for.
+    c = setEdgeArg({}, "e", "depth", 20);
+    expect(c).toEqual({ edges: { e: { args: { depth: 20 } } } });
+    c = setEdgePart(c, "e", "lib:plainFlap", "lib:tuckLid");
+    expect(c).toEqual({ edges: { e: { component: "lib:plainFlap" } } });
+    c = setEdgePart(c, "e", "lib:tuckLid", "lib:tuckLid");
+    expect(c).toEqual({});
+
+    const added = addCutout({}, "rect", "body.front");
+    c = updateCutout(added.customization, added.id, { cx: 1.234, radius: 0 });
+    expect(c.cutouts).toEqual([{ id: added.id, shape: "rect", panel: "body.front", cx: 1.23, cy: 0, width: 30, height: 30 }]);
+    expect(changeCount(c)).toBe(1);
+    expect(removeCutout(c, added.id)).toEqual({});
   });
 });

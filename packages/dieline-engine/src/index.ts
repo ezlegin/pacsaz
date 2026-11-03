@@ -52,3 +52,23 @@ export { addNicks, type NickOptions } from "./export/nicks";
 export { toFoldSVG } from "./export/fold";
 export { checkDieline, type Issue, type IssueCode, type CheckOptions } from "./checks/checks";
 export { LINE_STYLES, DXF_LAYERS, type LineStyle } from "./export/styles";
+export {
+  applyCustomization,
+  componentById,
+  customizationSchema,
+  customizeOptions,
+  edgeArgParams,
+  edgeKey,
+  emptyCustomization,
+  parseCustomization,
+  validateCustomization,
+  verifyCustomization,
+  type Customization,
+  type CustomizableEdge,
+  type CustomizableNode,
+  type CustomizeOptions,
+  type CustomizeProblem,
+  type CustomizeProblemCode,
+  type Cutout,
+  type VerifyResult,
+} from "./customize/customize";

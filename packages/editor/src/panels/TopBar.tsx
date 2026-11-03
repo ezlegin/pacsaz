@@ -5,7 +5,7 @@ import { Button } from "@repo/ui/components/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@repo/ui/components/popover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@repo/ui/components/tooltip";
 import { cn } from "@repo/ui/lib/utils";
-import { Box, CircleAlert, Command, Download, Grid2x2, Layers2, Loader2, Magnet, Redo2, Ruler, Scissors, Undo2, type LucideIcon } from "lucide-react";
+import { Box, CircleAlert, Command, Download, Grid2x2, Layers2, Loader2, Magnet, Redo2, Ruler, Scissors, Undo2, UserRound, type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { downloadFile } from "../commands";
 import { useEditor, useStore } from "../state/react";
@@ -45,6 +45,8 @@ export function TopBar({
   onSave,
   saving,
   onPalette,
+  customerView,
+  onCustomerView,
 }: {
   title: ReactNode;
   leading?: ReactNode;
@@ -52,6 +54,8 @@ export function TopBar({
   onSave?: () => void;
   saving?: boolean;
   onPalette: () => void;
+  customerView?: boolean;
+  onCustomerView?: (on: boolean) => void;
 }) {
   const store = useStore();
   const canUndo = useEditor((s) => s.canUndo);
@@ -117,6 +121,11 @@ export function TopBar({
       <BarButton Icon={Box} label={`3D preview ${display.preview3d ? "open" : "closed"}`} active={display.preview3d} onClick={() => store.setDisplay({ preview3d: !display.preview3d })} />
 
       <div className="ml-auto flex items-center gap-1.5">
+        {onCustomerView && (
+          <Button variant={customerView ? "default" : "outline"} size="sm" onClick={() => onCustomerView(!customerView)} title="See and try what customers can change">
+            <UserRound /> Customer view
+          </Button>
+        )}
         <button
           type="button"
           onClick={onPalette}

@@ -1,5 +1,5 @@
 import { compile, evalCondition, evalNumber, ExprError, type Ref } from "../expr/expr";
-import { offsetOf } from "../geometry/makerjs";
+import { bleedOutline } from "../geometry/bleed";
 import {
   distance,
   IDENTITY,
@@ -690,7 +690,7 @@ export function render(doc: DielineDocument, inputs: RenderInputs): RenderResult
   let bleed: Prim[] = [];
   if (inputs.bleed && inputs.bleed > 0) {
     try {
-      bleed = offsetOf(
+      bleed = bleedOutline(
         production.filter((p) => p.lineType === "cut"),
         inputs.bleed,
       );

@@ -21,6 +21,7 @@ export const LIMITS = {
   arrayCount: 500,
   components: 200,
   panels: 40,
+  cutouts: 50,
 } as const;
 
 const NAME_PATTERN = /^[A-Za-z_][A-Za-z0-9_]*$/;
@@ -82,7 +83,10 @@ const base = {
   name,
   label: z.string().max(200).optional(),
   hidden: z.boolean().optional(),
-  locked: z.boolean().optional(),
+  customize: z
+    .object({ optional: z.boolean().optional(), move: z.number().finite().min(0).max(1000).optional() })
+    .strict()
+    .optional(),
   transform: transform.optional(),
   modifiers: z.array(modifier).max(32).optional(),
   rules: z.array(rule).max(32).optional(),
@@ -123,6 +127,13 @@ const edgeFeature = z.object({
   args: z.record(name, expr).optional(),
   flip: z.boolean().optional(),
   hinge: z.union([lineType, z.literal("none")]).optional(),
+  customize: z
+    .object({
+      choices: z.array(z.string().min(1).max(100)).max(32).optional(),
+      args: z.array(name).max(32).optional(),
+    })
+    .strict()
+    .optional(),
 });
 
 // `z.lazy` is needed because groups contain nodes.
@@ -262,6 +273,20 @@ export const documentSchema = z.object({
   nodes: z.array(node),
   rulers: z.array(ruler),
   components: z.array(component).max(LIMITS.components),
+  customize: z
+    .object({
+      cutouts: z
+        .object({
+          shapes: z.array(z.enum(["rect", "ellipse"])).min(1),
+          max: z.number().int().min(0).max(LIMITS.cutouts),
+          margin: z.number().finite().min(0).optional(),
+          minSize: z.number().finite().min(0).optional(),
+        })
+        .strict()
+        .optional(),
+    })
+    .strict()
+    .optional(),
 });
 
 export type ParseResult =

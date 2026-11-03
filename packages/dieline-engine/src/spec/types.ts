@@ -112,6 +112,49 @@ type ModifierBody =
 
 export type ModifierType = Modifier["type"];
 
+//! Customize mode ------------------------------------------------------------------
+
+/**
+ * What a customer may do to a node in Customize mode. Everything else about the
+ * node is fixed: customers never edit a template's geometry directly.
+ */
+export type NodeCustomize = {
+  /**
+   * The customer may switch the part off, or on when the template hides it
+   * (`hidden: true`). Good for hang holes, thumb notches and windows.
+   */
+  optional?: boolean;
+  /** The customer may move the part, at most this many mm along each axis. */
+  move?: number;
+};
+
+/**
+ * What a customer may change on one edge of a box body: swap the part for one of
+ * `choices` (component ids, `"none"` for a plain edge) and set the named `args`
+ * within the component's own param ranges. Corner rounding and flap depths are
+ * args such as `round` and `depth`.
+ */
+export type EdgeCustomize = {
+  choices?: string[];
+  args?: string[];
+};
+
+/** Windows and holes customers may add to the panels of a box body. */
+export type CutoutRules = {
+  shapes: ("rect" | "ellipse")[];
+  /** Most cut-outs one dieline may have. */
+  max: number;
+  /** Clearance from the panel's folds and edges. Defaults to max(3, 2 × thickness). */
+  margin?: number;
+  /** Smallest width and height, in mm. Defaults to 5. */
+  minSize?: number;
+};
+
+/** The template's Customize-mode settings that are not attached to one node. */
+export type DocumentCustomize = {
+  cutouts?: CutoutRules;
+};
+
 //! Nodes ------------------------------------------------------------------------
 
 type NodeBase = {
@@ -121,8 +164,8 @@ type NodeBase = {
   /** Display name for the outline. Falls back to `name`. */
   label?: string;
   hidden?: boolean;
-  /** Customize mode: a locked node cannot be edited by the customer. */
-  locked?: boolean;
+  /** Customize mode: what the customer may do to this node. Nothing when omitted. */
+  customize?: NodeCustomize;
   transform?: Transform;
   modifiers?: Modifier[];
   rules?: Rule[];
@@ -273,6 +316,8 @@ export type EdgeFeature = {
   flip?: boolean;
   /** The line along the hinge. Defaults to the component's own choice. */
   hinge?: LineType | "none";
+  /** Customize mode: what the customer may change on this edge. */
+  customize?: EdgeCustomize;
 };
 
 export type Panel = {
@@ -378,6 +423,7 @@ export type DielineDocument = {
   nodes: Node[];
   rulers: Ruler[];
   components: ComponentDef[];
+  customize?: DocumentCustomize;
 };
 
 export function emptyDocument(): DielineDocument {

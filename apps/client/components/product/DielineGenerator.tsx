@@ -2,16 +2,16 @@
 
 import { DielineType } from "@/data/types";
 import { CustomDielineSettings } from "@repo/db";
-import { useDielineGenerator } from "@repo/dieline-core/hooks/useDielineGenerator";
 import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
 import { setDeveloperTool } from "@repo/store/slices/developerToolsSlice";
-import { ISpec, IVar } from "@repo/store/types";
 import dynamic from "next/dynamic";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { UserType } from "./DielineDownloadButton";
 import DielineLoadingOverlay from "./DielineLoadingOverlay";
 import DielineSettings from "./DielineSettings";
 import ProductInfo from "./ProductInfo";
+import { useEngineDieline } from "./useEngineDieline";
+import { customizeOptions } from "@repo/dieline-engine";
 const SVGPreview = dynamic(
   () => import("@repo/ui/components/custom/SVGPreview"),
   { ssr: false },
@@ -28,24 +28,9 @@ const DielineGenerator = ({
 }) => {
   const dispatch = useAppDispatch();
 
-  const specs = useMemo(
-    () => JSON.parse(dieline.specification) as ISpec.Specs,
-    [dieline.specification],
-  );
-  const variables = useMemo(
-    () => JSON.parse(dieline.variable) as IVar.VariableMap,
-    [dieline.variable],
-  );
-
-  const { isRendering } = useDielineGenerator(
-    {
-      ...dieline,
-      specification: specs,
-      settings: dieline.settings,
-      customSettings,
-      variables,
-    },
-    user,
+  const { isRendering, template } = useEngineDieline(
+    { ...dieline, customSettings },
+    { watermark: !user },
   );
 
   const { length, width, height } = useAppSelector(
@@ -66,6 +51,7 @@ const DielineGenerator = ({
         slug={dieline.slug}
         isRendering={isRendering}
         user={user}
+        customizable={!!template && customizeOptions(template).any}
       />
 
       {/*

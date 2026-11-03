@@ -175,7 +175,50 @@ function FeatureEditor({ node, path, label, feature }: { node: PanelsNode; path:
           </Row>
         </div>
       )}
+      {feature && def && <EdgeAccess node={node} path={path} feature={feature} components={components} />}
       {feature && !def && <Pill on={false} onChange={() => set(path, undefined)}>Remove</Pill>}
     </div>
+  );
+}
+
+/** Customize mode: the parts a customer may swap in on this edge, and the settings they may change. */
+function EdgeAccess({ node, path, feature, components }: { node: PanelsNode; path: string; feature: EdgeFeature; components: ComponentDef[] }) {
+  const set = useNodeSetter(node.id);
+  const c = feature.customize ?? {};
+  const choices = c.choices ?? [];
+  const args = c.args ?? [];
+  const params = [...new Set([feature.component, ...choices])]
+    .flatMap((id) => components.find((x) => x.id === id)?.params ?? [])
+    .filter((p, i, all) => all.findIndex((q) => q.name === p.name) === i);
+
+  const write = (next: { choices?: string[]; args?: string[] }) => {
+    const clean = { ...(next.choices?.length ? { choices: next.choices } : {}), ...(next.args?.length ? { args: next.args } : {}) };
+    set(`${path}.customize`, Object.keys(clean).length ? clean : undefined);
+  };
+  const toggle = (list: string[], v: string) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
+  const count = choices.length + args.length;
+
+  return (
+    <details className="ml-14 rounded-md bg-muted/40 px-2 py-1 text-[11px]" open={count > 0}>
+      <summary className="cursor-pointer text-muted-foreground">Customer can change{count ? ` (${count})` : ""}</summary>
+      <div className="mt-1 space-y-1.5 pb-1">
+        <div className="flex flex-wrap gap-1">
+          {[{ id: "none", name: "Plain edge" }, ...components.filter((x) => x.id !== feature.component)].map((x) => (
+            <Pill key={x.id} on={choices.includes(x.id)} onChange={() => write({ ...c, choices: toggle(choices, x.id) })} title="Customers may pick this part instead">
+              {x.name}
+            </Pill>
+          ))}
+        </div>
+        {params.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {params.map((p) => (
+              <Pill key={p.name} on={args.includes(p.name)} onChange={() => write({ ...c, args: toggle(args, p.name) })} title="Customers may set this, within the part's own range">
+                {p.label?.replace(/ \(0 = auto\)$/, "") ?? p.name}
+              </Pill>
+            ))}
+          </div>
+        )}
+      </div>
+    </details>
   );
 }

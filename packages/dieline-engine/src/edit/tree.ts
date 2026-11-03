@@ -137,6 +137,8 @@ const NOT_EXPR = new Set([
 /** Maps every expression string inside a value (node, ruler, ...). */
 export function mapExprs<T>(value: T, fn: (expr: string) => string): T {
   const visit = (v: unknown, key: string | null): unknown => {
+    // Customize settings hold component ids and param names, never expressions.
+    if (key === "customize") return v;
     if (typeof v === "string") return key !== null && NOT_EXPR.has(key) ? v : fn(v);
     if (Array.isArray(v)) return v.map((item) => visit(item, key === "children" ? null : key));
     if (v && typeof v === "object") {
