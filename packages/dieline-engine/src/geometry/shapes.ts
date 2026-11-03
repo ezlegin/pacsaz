@@ -113,10 +113,22 @@ function rect(node: RectNode, ev: Evaluate): Built {
     prims = filletPolyline(corners, true, (i) => radii[i]!);
   }
 
+  // The rect's own corners, so a node with copy modifiers still reports the
+  // rect it is built from (box anchors would cover the copies too).
   return {
     parts: tag(prims, node.lineType),
-    anchors: {},
-    scalars: {},
+    anchors: {
+      bottomLeft: [0, 0],
+      bottom: [w / 2, 0],
+      bottomRight: [w, 0],
+      right: [w, h / 2],
+      topRight: [w, h],
+      top: [w / 2, h],
+      topLeft: [0, h],
+      left: [0, h / 2],
+      center: [w / 2, h / 2],
+    },
+    scalars: { width: w, height: h },
   };
 }
 
@@ -124,11 +136,13 @@ function ellipse(node: EllipseNode, ev: Evaluate): Built {
   const rx = positive(ev.num(node.rx, "rx"), "rx", "Radius X");
   const ry = positive(ev.num(node.ry, "ry"), "ry", "Radius Y");
 
+  const ends = { east: [rx, 0] as Pt, north: [0, ry] as Pt };
+
   if (Math.abs(rx - ry) < 1e-9) {
     return {
       parts: tag([{ kind: "circle", c: [0, 0], r: rx }], node.lineType),
-      anchors: {},
-      scalars: { radius: rx },
+      anchors: ends,
+      scalars: { radius: rx, rx, ry },
     };
   }
 
@@ -143,8 +157,8 @@ function ellipse(node: EllipseNode, ev: Evaluate): Built {
 
   return {
     parts: tag(filletPolyline(pts, true, () => 0), node.lineType),
-    anchors: {},
-    scalars: {},
+    anchors: ends,
+    scalars: { rx, ry },
   };
 }
 
@@ -206,7 +220,7 @@ function star(node: StarNode, ev: Evaluate): Built {
 
   return {
     parts: tag(filletPolyline(pts, true, () => 0), node.lineType),
-    anchors: {},
+    anchors: { tip: pts[0]! },
     scalars: { radius: r, innerRadius: inner },
   };
 }

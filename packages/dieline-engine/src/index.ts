@@ -17,6 +17,22 @@ export { resolveDimensions, type DimensionType, type Dimensions } from "./eval/d
 export type { Bounds, Path, Prim, Pt } from "./geometry/types";
 export { pathsBounds, primLength, endpoints } from "./geometry/math";
 
+export { formatNumber, offsetExpr, refExpr, renameRefs, referencedNodes } from "./edit/exprEdit";
+export {
+  findNode,
+  allNodes,
+  updateNode,
+  removeNodes,
+  insertNodes,
+  duplicateNodes,
+  renameNode,
+  mapExprs,
+  newId,
+  uniqueName,
+  type Located,
+} from "./edit/tree";
+export { placePoint, IDENTITY, type Placement } from "./geometry/math";
+
 export { toSVG, exportBounds, type SvgOptions } from "./export/svg";
 export { toDXF } from "./export/dxf";
 export { LINE_STYLES, DXF_LAYERS, type LineStyle } from "./export/styles";

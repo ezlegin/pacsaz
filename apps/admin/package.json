@@ -22,6 +22,8 @@
     "@repo/db": "workspace:*",
     "@repo/dieline-3d": "workspace:*",
     "@repo/dieline-core": "workspace:*",
+    "@repo/dieline-engine": "workspace:*",
+    "@repo/editor": "workspace:*",
     "@repo/lib": "workspace:*",
     "@repo/store": "workspace:*",
     "@repo/ui": "workspace:*",

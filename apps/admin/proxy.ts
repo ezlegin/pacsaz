@@ -11,6 +11,12 @@ export async function proxy(req: NextRequest) {
   const token = cookies.get(adminSessionCookieName)?.value;
   const isLoggedIn = !!token;
 
+  // Development-only playgrounds (the editor v2 canvas) need no account. The
+  // pages themselves return 404 outside development as well.
+  if (process.env.NODE_ENV === "development" && nextUrl.pathname.startsWith("/dev/")) {
+    return NextResponse.next();
+  }
+
   const isPrivateRoute = ["/"].some((route) =>
     nextUrl.pathname.startsWith(route),
   );

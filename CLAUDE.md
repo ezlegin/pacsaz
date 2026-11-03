@@ -13,6 +13,7 @@ packages below.
 | `apps/client` | Public site (Persian, RTL): catalogue, dieline customisation, payments, user panel. Port 3000. |
 | `apps/admin` | Staff panel (English UI): dieline authoring **editor**, catalogue, tariffs, customers. Port 3001. |
 | `packages/dieline-engine` | **Editor v2 geometry engine** (pure TypeScript). See below. |
+| `packages/editor` | **Editor v2 UI**: `EditorStore` (document, history, selection, view) and the interactive `Canvas`. |
 | `packages/dieline-core` | Legacy engine (makerjs + Redux-coupled). Being replaced by `dieline-engine`; do not extend it. |
 | `packages/dieline-3d` | Fold rig and three.js 3D preview built from the 2D dieline. |
 | `packages/store` | Redux Toolkit store for the legacy editor (`redux-undo`). |
@@ -28,7 +29,11 @@ pnpm dev                                        # both apps
 pnpm check-types                                # whole repo
 pnpm --filter @repo/dieline-engine test         # engine tests (vitest)
 pnpm --filter @repo/dieline-engine check-types
+pnpm --filter @repo/editor test                 # editor model tests (vitest)
 ```
+
+Canvas playground (development only, no login, no database):
+`http://localhost:3001/dev/editor`. The store is on `window.__editor` there.
 
 ## Editor v2 redesign (in progress, branch `editor-v2`)
 
@@ -78,6 +83,20 @@ Phases (each ends with a commit message for the user to commit):
   `label` is for display. Renaming a node must rewrite references (editor job).
 - Spec changes go through `spec/types.ts` **and** `spec/schema.ts` together, with
   tests.
+
+## `@repo/editor` rules
+
+- All document changes go through `EditorStore.apply` (one undo step) or a
+  gesture transaction (`begin` → `preview`… → `end`/`cancel`).
+- Interaction logic that decides *what to write* lives in `src/model/` as pure
+  functions with tests; components in `src/canvas/` only translate pointer and
+  keyboard input into calls to it.
+- Direct manipulation edits expressions with `offsetExpr` (adjust the trailing
+  constant). A snap writes a reference only when the node's own origin (or an
+  absolute point) lands exactly on the target in an untranslated frame, and
+  `wouldCycle` says it is safe; other snaps align but keep the formula.
+- Canvas coordinates: `toScreen`/`toWorld` in `canvas/viewport.ts`; the dieline is
+  drawn through `worldMatrix(view)` with `vector-effect="non-scaling-stroke"`.
 
 ## Conventions
 

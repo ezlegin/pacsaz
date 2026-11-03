@@ -51,6 +51,11 @@ export type NodeInfo = {
   anchors: Record<string, Pt>;
   /** Named measurements, usable as `@name.width`. */
   scalars: Record<string, number>;
+  /**
+   * The node's own evaluated transform, relative to its parent. The editor uses
+   * it (with the parents') to map pointer movement into the node's frame.
+   */
+  placement: Placement;
 };
 
 export type RulerInfo = {
@@ -185,6 +190,13 @@ class Context {
         const visible = parentVisible && !this.isHidden(node);
         const world = this.world(node);
 
+        let placement = IDENTITY;
+        try {
+          placement = this.placement(node);
+        } catch {
+          // Already reported when the node was built.
+        }
+
         out[node.id] = {
           id: node.id,
           name: node.name,
@@ -195,6 +207,7 @@ class Context {
           bounds: world ? pathsBounds(world.paths) : null,
           anchors: world?.anchors ?? {},
           scalars: world?.scalars ?? {},
+          placement,
         };
 
         if (node.kind === "group") visit(node.children, node, visible);

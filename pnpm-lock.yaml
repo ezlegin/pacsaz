@@ -44,6 +44,12 @@ importers:
       '@repo/dieline-core':
         specifier: workspace:*
         version: link:../../packages/dieline-core
+      '@repo/dieline-engine':
+        specifier: workspace:*
+        version: link:../../packages/dieline-engine
+      '@repo/editor':
+        specifier: workspace:*
+        version: link:../../packages/editor
       '@repo/lib':
         specifier: workspace:*
         version: link:../../packages/lib
@@ -426,6 +432,43 @@ importers:
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
+      typescript:
+        specifier: 5.9.2
+        version: 5.9.2
+      vitest:
+        specifier: 3.2.4
+        version: 3.2.4(@types/node@22.19.19)(jiti@2.7.0)(jsdom@27.4.0)(lightningcss@1.32.0)(tsx@4.22.3)
+
+  packages/editor:
+    dependencies:
+      '@repo/dieline-engine':
+        specifier: workspace:*
+        version: link:../dieline-engine
+      '@repo/ui':
+        specifier: workspace:*
+        version: link:../ui
+      lucide-react:
+        specifier: ^0.562.0
+        version: 0.562.0(react@19.2.0)
+    devDependencies:
+      '@repo/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      '@types/react':
+        specifier: 19.2.2
+        version: 19.2.2
+      '@types/react-dom':
+        specifier: 19.2.2
+        version: 19.2.2(@types/react@19.2.2)
+      react:
+        specifier: ^19.2.0
+        version: 19.2.0
+      react-dom:
+        specifier: ^19.2.0
+        version: 19.2.0(react@19.2.0)
       typescript:
         specifier: 5.9.2
         version: 5.9.2

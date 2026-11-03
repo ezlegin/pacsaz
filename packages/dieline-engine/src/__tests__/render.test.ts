@@ -208,8 +208,9 @@ describe("rules, modifiers, groups", () => {
     expect(r.nodes.arr!.bounds!.maxX).toBe(25);
     expect(r.nodes.mir!.bounds!.maxX).toBe(40);
     expect(r.nodes.cp!.bounds!.maxY).toBe(15);
-    // The node's own size covers its copies.
-    expect(r.nodes.arr!.scalars.width).toBe(25);
+    // A rect's width is the rect itself; its bounds cover the copies.
+    expect(r.nodes.arr!.scalars.width).toBe(5);
+    expect(r.nodes.arr!.anchors.topRight).toEqual([5, 5]);
   });
 
   it("rounds selected corners or all of them", () => {
