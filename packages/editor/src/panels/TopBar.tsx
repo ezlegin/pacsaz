@@ -117,7 +117,7 @@ export function TopBar({
       />
       <BarButton
         Icon={SquareDashed}
-        label={inputs.bleed ? `Bleed (${inputs.bleed} mm) ${display.bleed ? "shown" : "hidden"}` : "Bleed: set a bleed in Template › Preview size"}
+        label={inputs.bleed ? `Bleed (${inputs.bleed} mm) ${display.bleed ? "shown" : "hidden"}` : "Bleed: set a bleed in the Settings tab"}
         active={display.bleed && !!inputs.bleed}
         onClick={() => store.setDisplay({ bleed: !display.bleed })}
       />

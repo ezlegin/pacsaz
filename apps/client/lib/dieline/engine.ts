@@ -71,8 +71,8 @@ export function previewSvg(result: RenderResult, options: { watermark: boolean; 
   const box = /viewBox="([^"]+)"/.exec(svg)?.[1]?.split(" ").map(Number);
   if (!box || box.length !== 4) return svg;
   const [x, y, w, h] = box as [number, number, number, number];
-  // A tile about a quarter of the drawing, so the mark shows at any size.
-  const tile = Math.max(40, Math.min(w, h) / 2);
+  // Large tiles, so the mark reads at any size; the 3D model uses the same (watermarkTile).
+  const tile = Math.max(70, Math.min(w, h) / 1.3);
   // Only the printed sheet is marked: inside the bleed, or the cut outline without one.
   const sheet = closedPathD(result.bleed.length ? result.bleed : result.paths.filter((p) => p.lineType === "cut"));
   const clip = sheet ? `<clipPath id="watermark-sheet"><path d="${sheet}" clip-rule="evenodd"/></clipPath>` : "";

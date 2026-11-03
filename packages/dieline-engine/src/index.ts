@@ -47,6 +47,7 @@ export { LIBRARY, EDGE_COMPONENTS } from "./library/components";
 export { PRESETS, presetBody, type PresetId } from "./library/presets";
 
 export { toSVG, exportBounds, rulerPrims, closedPathD, type SvgOptions } from "./export/svg";
+export { closedLoops } from "./geometry/bleed";
 export { toDXF } from "./export/dxf";
 export { addNicks, type NickOptions } from "./export/nicks";
 export { toFoldSVG } from "./export/fold";

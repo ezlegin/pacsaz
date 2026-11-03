@@ -140,21 +140,28 @@ Phases (each ends with a commit message for the user to commit):
 
 ### 3D folding
 
-- The fold animation is staged (`dieline-3d/src/schedule.ts`): the body panels
-  one by one, then the bottom flaps, then the top flaps (flaps on flaps a step
-  later). Viewers start closed (progress 1), so opening shows the top first,
-  then the bottom, then the sides. Body panels hinge on vertical folds, flaps on
-  horizontal ones.
+- The fold animation is staged (`dieline-3d/src/schedule.ts`): the glue flap,
+  then the body panels one by one (the far end closes onto the glue last), then
+  the bottom flaps, then the top flaps. On each side: dust flaps, then flaps on
+  flaps (the tuck bends while its lid is open), then the lid. Dust flaps under a
+  lid, and the glue flap, fold 6° past square so the lid or the closing panel
+  lands over them. Viewers start closed
+  (progress 1), so opening reverses it. Body panels hinge on vertical folds,
+  flaps on horizontal ones.
 - Visitors without a plan see the watermark on the 3D model too (`watermark`
   prop of `DielineViewer`); the flat preview's watermark is clipped to the bleed
-  (`closedPathD`).
+  (`closedPathD`). The Studio canvas fills the bleed white (`BleedSheet`); exports
+  never do.
 - Fold direction and angle per panel are authored in the Studio's 3D dock (click
   a panel) and saved in the template as `doc.folds`, keyed by rig face index with
   `vertexCount`/`faceCount` for drift detection. The client passes them to the
   viewer as its `foldConfig`. `@repo/dieline-3d/rig` exposes the rig without
   three.js for this.
-- The Studio's Settings tab hosts the app's template settings form
-  (`settings` prop on `Studio`; the admin passes `DielineSettingsForm`).
+- The Studio's Settings tab is how the template is previewed (`settings` prop on
+  `Studio`, plain size fields without it). The admin passes `PreviewSettings`
+  (size as a customer types it, material, dimension type, bleed, thickness);
+  the dieline record form (`DielineSettingsForm`: sizes sold, materials,
+  images) opens from a header icon button.
 
 ### Customize mode (paid customer editor)
 

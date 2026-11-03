@@ -494,7 +494,7 @@ const scheduleOf = (rig: FoldRig): FoldWindow[] => {
 
 /**
  * Applies the fold amount to every pivot. Panels fold in stages (see
- * `foldSchedule`): top flaps, bottom flaps, then the body panels one by one.
+ * `foldSchedule`): body panels one by one, then bottom and top flaps.
  *
  * `progress` runs 0 (flat sheet) to 1 (fully closed). Each node rotates about its
  * own hinge axis — which lies *in* the flat plane — so the panel tilts out of
@@ -519,8 +519,9 @@ export const applyFold = (
     if (axis.lengthSq() < 1e-12) return;
     axis.normalize();
 
-    const amount = stageProgress(schedule[index] ?? { start: 0, end: 1 }, clamped);
-    pivot.quaternion.setFromAxisAngle(axis, node.sign * node.angle * amount);
+    const window = schedule[index] ?? { start: 0, end: 1 };
+    const amount = stageProgress(window, clamped);
+    pivot.quaternion.setFromAxisAngle(axis, node.sign * (window.angle ?? node.angle) * amount);
   });
 
   scene.group.updateMatrixWorld(true);

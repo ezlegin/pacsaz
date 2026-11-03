@@ -94,18 +94,20 @@ export const glueFlap: ComponentDef = {
   variables: [
     { name: "d", expr: "depth > 0 ? depth : clamp(edge * 0.15, 12, 25)" },
     { name: "tp", expr: "taper > 0 ? taper : min(d * 0.6, edge / 6)" },
+    { name: "gm", expr: "min(2, d / 4)" },
+    // Horizontal shift that keeps the margin square to the slanted sides.
+    { name: "gs", expr: "gm * sqrt(1 + (tp / d) ^ 2)" },
   ],
   nodes: [
     path("outline", "cut", ["0", "0"], [to("tp", "d"), to("edge - tp", "d"), to("edge", "0")]),
-    {
-      id: "glueArea",
-      name: "glueArea",
-      kind: "rect",
-      lineType: "glue",
-      width: "max(edge - 2 * tp - 4, 1)",
-      height: "max(d - 4, 1)",
-      transform: { x: "tp + 2", y: "2" },
-    },
+    // The glue area follows the flap's taper, a margin `gm` inside every edge.
+    path(
+      "glueArea",
+      "glue",
+      ["tp * gm / d + gs", "gm"],
+      [to("tp * (d - gm) / d + gs", "d - gm"), to("edge - tp * (d - gm) / d - gs", "d - gm"), to("edge - tp * gm / d - gs", "gm")],
+      true,
+    ),
   ],
 };
 

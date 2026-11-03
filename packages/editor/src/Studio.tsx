@@ -10,7 +10,7 @@ import { Customizer } from "./customize/Customizer";
 import { buildCommands, downloadFile } from "./commands";
 import { groupNodes, ungroupNodes } from "./model/ops";
 import { CommandPalette } from "./panels/CommandPalette";
-import { DocumentPanel } from "./panels/DocumentPanel";
+import { DocumentPanel, PreviewSize } from "./panels/DocumentPanel";
 import { IssuesPanel, useIssueCount } from "./panels/IssuesPanel";
 import { NodeInspector } from "./panels/NodeInspector";
 import { Outline } from "./panels/Outline";
@@ -31,7 +31,10 @@ export type StudioProps = {
   onSave?: (doc: DielineDocument) => Promise<SaveResult>;
   /** Called when a save fails, to show the error the app's way. */
   onError?: (message: string) => void;
-  /** The app's template settings (sizes, materials, bleed, images): the inspector's Settings tab. */
+  /**
+   * The inspector's Settings tab: what the template is previewed at (size,
+   * material, bleed, ...). Without it the tab holds plain size fields.
+   */
   settings?: ReactNode;
   /** The smallest and largest sizes the template is sold in: drawn as ghosts and checked. */
   sizeRange?: { min: Dimensions; max: Dimensions } | null;
@@ -261,8 +264,8 @@ function Inspector({ settings }: { settings?: ReactNode }) {
     if (single) setTab("design");
   }, [single]);
 
-  const showing = tab === "settings" && settings ? "settings" : single && tab === "design" ? "design" : "document";
-  const tabs = settings ? (["design", "document", "settings"] as const) : (["design", "document"] as const);
+  const showing = tab === "settings" ? "settings" : single && tab === "design" ? "design" : "document";
+  const tabs = ["design", "document", "settings"] as const;
 
   return (
     <aside className="flex w-[340px] shrink-0 flex-col border-l bg-background">
@@ -284,7 +287,7 @@ function Inspector({ settings }: { settings?: ReactNode }) {
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto">
         {showing === "settings" ? (
-          settings
+          (settings ?? <PreviewSize />)
         ) : showing === "design" && single ? (
           <NodeInspector key={single} id={single} />
         ) : (

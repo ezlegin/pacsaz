@@ -50,18 +50,5 @@ export default function Playground() {
     (window as unknown as { __editor: EditorStore }).__editor = store;
   }, [store]);
 
-  return (
-    <Studio
-      store={store}
-      title="Playground · reverse tuck end"
-      sizeRange={SIZE_RANGE}
-      // The playground has no dieline record; the real editor shows its settings form here.
-      settings={
-        <p className="p-3 text-xs text-muted-foreground">
-          In the real editor (/editor/[slug]) this tab holds the dieline&apos;s settings: title, slug, categories, images, bleed,
-          default/min/max sizes, dimension types and materials. The playground has no database record, so there is nothing to edit here.
-        </p>
-      }
-    />
-  );
+  return <Studio store={store} title="Playground · reverse tuck end" sizeRange={SIZE_RANGE} />;
 }

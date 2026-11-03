@@ -44,7 +44,7 @@ import { niceStep, snapMoving, snappedDelta, snapTargets, wouldCycle, type SnapR
 import { useEditor, useStore } from "../state/react";
 import type { View } from "../state/store";
 import { useAnalysis } from "../state/analysis";
-import { BleedLayer, DielineLayer, DimensionLabels, DimensionLines, GhostLayer, Grid, HighlightLayer, HitLayer, RULER_SIZE, ScreenRulers } from "./layers";
+import { BleedLayer, BleedSheet, DielineLayer, DimensionLabels, DimensionLines, GhostLayer, Grid, HighlightLayer, HitLayer, RULER_SIZE, ScreenRulers } from "./layers";
 import { Preview3D } from "./Preview3D";
 import { MeasureOverlay, type MeasureState, type MeasurePoint } from "./MeasureOverlay";
 import { EdgeChips } from "./EdgeChips";
@@ -706,6 +706,7 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
         <Grid view={view} width={size.width} height={size.height} />
 
         <g transform={worldMatrix(view)}>
+          {display.bleed && <BleedSheet result={result} />}
           <HighlightLayer result={result} leafIds={selectedLeaves} hoverLeafIds={hoverLeaves} />
           {display.ghosts && ghosts.min && <GhostLayer result={ghosts.min} color="rgb(139 92 246)" />}
           {display.ghosts && ghosts.max && <GhostLayer result={ghosts.max} color="rgb(249 115 22)" />}

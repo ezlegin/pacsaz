@@ -43,7 +43,7 @@ export const clampArtworkCentre = (value: number): number =>
 
 /** Watermark tile size in pattern units: the same tile the 2D preview uses. */
 export const watermarkTile = (bounds: ArtworkBounds): number =>
-  Math.max(40, Math.min(bounds.width, bounds.height) / 2);
+  Math.max(70, Math.min(bounds.width, bounds.height) / 1.3);
 
 type Drawable = CanvasImageSource & { width: number; height: number };
 

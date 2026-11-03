@@ -43,4 +43,41 @@ assert("top flap closes last", Math.abs(top.start - bottom.end) < 1e-9 && top.en
 assert("root never moves", schedule[at(20, 15)]!.start === 0 && schedule[at(20, 15)]!.end === 1);
 assert("progress maps into a stage", stageProgress(bottom, 0.625) === 0.5 && stageProgress(bottom, 0.3) === 0 && stageProgress(bottom, 0.9) === 1);
 
+/*
+  A tuck end: lid with a tuck on the root's top, a dust flap on the left side's
+  top, and a narrow glue flap on the right.
+
+            [tuck]               y -3..0,  x 10..30
+            [ lid ]              y 0..5,   x 10..30
+  [dust]                         y 2..5,   x 0..9.5 (slit beside the lid)
+  [side][  root panel  ][side][g] y 5..25, x 0..10 | 10..30 | 30..40 | 40..43
+*/
+const tuckSegs: Segment[] = [
+  ...loop([
+    [10, -3], [30, -3], [30, 5], [43, 5], [43, 25], [0, 25], [0, 2], [9.5, 2], [9.5, 5], [10, 5],
+  ]),
+  { a: [10, 0], b: [30, 0], kind: "fold" },
+  { a: [10, 5], b: [30, 5], kind: "fold" },
+  { a: [0, 5], b: [9.5, 5], kind: "fold" },
+  { a: [10, 5], b: [10, 25], kind: "fold" },
+  { a: [30, 5], b: [30, 25], kind: "fold" },
+  { a: [40, 5], b: [40, 25], kind: "fold" },
+];
+const rig2 = buildFoldRig(tuckSegs);
+const s2 = foldSchedule(rig2);
+const at2 = (x: number, y: number) =>
+  rig2.nodes.findIndex((n) => Math.abs(n.face.centroid[0] - x) < 1 && Math.abs(n.face.centroid[1] - y) < 1);
+const tuck = s2[at2(20, -1.5)]!;
+const lid = s2[at2(20, 2.5)]!;
+const dust = s2[at2(4.75, 3.5)]!;
+const glue = s2[at2(41.5, 15)]!;
+const right2 = s2[at2(35, 15)]!;
+const left2 = s2[at2(5.9, 13)]!;
+assert("glue flap folds first", glue.start === 0, JSON.stringify(s2));
+assert("far end closes onto the glue last among the sides", left2.start >= right2.end - 1e-9);
+assert("dust, then tuck, then lid", dust.end <= tuck.start + 1e-9 && tuck.end <= lid.start + 1e-9 && lid.end === 1);
+assert("dust flap tucks past square under the lid", (dust.angle ?? 0) > Math.PI / 2);
+assert("glue flap tucks past square", (glue.angle ?? 0) > Math.PI / 2);
+assert("lid keeps its own angle", lid.angle === undefined);
+
 console.log(failures === 0 ? "\nALL FOLD SCHEDULE CHECKS PASSED" : `\n${failures} FAILED`);

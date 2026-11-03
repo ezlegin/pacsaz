@@ -12,6 +12,10 @@ import DielineSettings from "./DielineSettings";
 import ProductInfo from "./ProductInfo";
 import { useEngineDieline } from "./useEngineDieline";
 import { customizeOptions } from "@repo/dieline-engine";
+import { canCustomize } from "@/lib/dieline/access";
+import Diamond from "@/public/icons/Diamond";
+import { PencilRuler } from "lucide-react";
+import Link from "next/link";
 const SVGPreview = dynamic(
   () => import("@repo/ui/components/custom/SVGPreview"),
   { ssr: false },
@@ -33,6 +37,8 @@ const DielineGenerator = ({
     { watermark: !user },
   );
 
+  const customizable = !!template && customizeOptions(template).any;
+
   const { length, width, height } = useAppSelector(
     (s) => s.dielineSettings.dimension.raw,
   );
@@ -51,7 +57,7 @@ const DielineGenerator = ({
         slug={dieline.slug}
         isRendering={isRendering}
         user={user}
-        customizable={!!template && customizeOptions(template).any}
+        customizable={customizable}
       />
 
       {/*
@@ -93,6 +99,32 @@ const DielineGenerator = ({
             {length} × {width}
             {height > 0 ? ` × ${height}` : ""} mm
           </span>
+        </div>
+        {/*
+          The way into the editor, always in view: visitors without the plan see
+          it too (with the plan badge) and land on the page that explains it.
+        */}
+        <div className="absolute left-1 top-1 z-10">
+          {customizable ? (
+            <Link
+              href={`/dieline/${dieline.slug}/customize`}
+              className="flex items-center gap-1.5 rounded-full border border-primary/30 bg-background/85 px-3 py-1.5 text-[11px] font-bold text-primary shadow-sm backdrop-blur transition-colors hover:bg-primary/10"
+            >
+              <PencilRuler className="size-3.5" />
+              باز کردن در ویرایشگر
+              {!canCustomize(user?.plan) && <Diamond />}
+            </Link>
+          ) : (
+            template && (
+              <span
+                title="طراح این قالب گزینه‌ای برای ویرایش باز نکرده است؛ فقط ابعاد و متریال قابل تغییرند."
+                className="flex cursor-not-allowed items-center gap-1.5 rounded-full border bg-background/85 px-3 py-1.5 text-[11px] font-bold text-muted-foreground shadow-sm backdrop-blur"
+              >
+                <PencilRuler className="size-3.5" />
+                ویرایشگر برای این قالب فعال نیست
+              </span>
+            )
+          )}
         </div>
       </div>
 

@@ -14,7 +14,6 @@ const NAME = /^[A-Za-z_][A-Za-z0-9_]*$/;
 export function DocumentPanel() {
   return (
     <div className="text-xs">
-      <PreviewSize />
       <Params />
       <Variables />
       <CustomerCutouts />
@@ -93,7 +92,8 @@ function NumberField({ value, onChange, step = 1, min }: { value: number; onChan
   );
 }
 
-function PreviewSize() {
+/** The size the template is drawn at: the Settings tab when the app brings none of its own. */
+export function PreviewSize() {
   const store = useStore();
   const inputs = useEditor((s) => s.inputs);
   return (

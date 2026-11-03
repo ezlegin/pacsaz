@@ -41,12 +41,9 @@ import ImageField from "../ImageField";
 const DielineSettingsForm = ({
   categories,
   dieline,
-  compact,
 }: {
   categories: Categories;
   dieline?: DielineType;
-  /** One column, for the editor's Settings tab. */
-  compact?: boolean;
 }) => {
   const settings = dieline?.settings;
   const router = useRouter();
@@ -108,7 +105,7 @@ const DielineSettingsForm = ({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className={compact ? "grid grid-cols-1 gap-5" : "grid grid-cols-2 gap-5"}
+        className="grid grid-cols-2 gap-5"
       >
         <div className="space-y-5">
           <FormField

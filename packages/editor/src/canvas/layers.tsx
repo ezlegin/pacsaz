@@ -1,10 +1,10 @@
 "use client";
 
-import { formatNumber, LINE_STYLES, rulerPrims, type RenderResult } from "@repo/dieline-engine";
+import { closedLoops, formatNumber, LINE_STYLES, rulerPrims, type RenderResult } from "@repo/dieline-engine";
 import { memo, useMemo, type JSX } from "react";
 import type { View } from "../state/store";
 import { groupPaths, pathsByNode } from "./paths";
-import { primD } from "./paths";
+import { primD, pt } from "./paths";
 import { gridSteps, toScreen } from "./viewport";
 
 /** On screen, dashes are drawn in pixels so they read the same at every zoom. */
@@ -59,6 +59,19 @@ const DIMENSION_COLOR = "#0ea5e9";
 const BLEED_COLOR = "#22c55e";
 
 /** The bleed outline, in world coordinates. */
+/**
+ * The printed sheet: white inside the bleed, so the grid stops where the paper
+ * would. Canvas only; exports never draw it.
+ */
+export const BleedSheet = memo(function BleedSheet({ result }: { result: RenderResult }) {
+  const d = useMemo(
+    () => closedLoops(result.bleed).filter((l) => l.length >= 3).map((l) => `M${l.map((p) => pt(p[0], p[1])).join("L")}Z`).join(""),
+    [result],
+  );
+  if (!d) return null;
+  return <path d={d} fill="#ffffff" stroke="none" pointerEvents="none" />;
+});
+
 export const BleedLayer = memo(function BleedLayer({ result }: { result: RenderResult }) {
   const d = useMemo(() => result.bleed.map(primD).join(""), [result]);
   if (!d) return null;

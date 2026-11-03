@@ -3,10 +3,12 @@
 import { saveDielineDocument } from "@/actions/dieline";
 import type { Categories, DielineType } from "@/app/(PANEL)/dielines/DielinesList";
 import DielineSettingsForm from "@/components/forms/DielineSettingsForm";
+import PreviewSettings from "./PreviewSettings";
 import type { DielineDocument } from "@repo/dieline-engine";
 import { EditorStore, Studio } from "@repo/editor";
 import { Button } from "@repo/ui/components/button";
-import { ArrowLeft } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@repo/ui/components/dialog";
+import { ArrowLeft, Settings2 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -42,7 +44,7 @@ export default function StudioEditor({
     [dieline],
   );
 
-  // Saving the Settings tab refreshes the page data; the preview follows the new defaults.
+  // Saving the dieline settings refreshes the page data; the preview follows the new defaults.
   useEffect(() => {
     store.setInputs({
       width: dieline.settings.width,
@@ -73,11 +75,24 @@ export default function StudioEditor({
           </Link>
         </Button>
       }
-      settings={
-        <div className="p-3 text-xs">
-          <DielineSettingsForm categories={categories} dieline={dieline} compact />
-        </div>
+      trailing={
+        // The dieline record (title, sizes it is sold in, materials, images): a dialog, not a tab.
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="ghost" size="icon" title="Dieline settings">
+              <Settings2 />
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
+            <DialogHeader>
+              <DialogTitle>Dieline settings</DialogTitle>
+              <DialogDescription>Title, categories, images and the sizes, materials and dimension types this dieline is sold in.</DialogDescription>
+            </DialogHeader>
+            <DielineSettingsForm categories={categories} dieline={dieline} />
+          </DialogContent>
+        </Dialog>
       }
+      settings={<PreviewSettings dieline={dieline} />}
       onSave={async (doc) => {
         const res = await saveDielineDocument(dieline.id, JSON.stringify(doc));
         if (res.ok) toast.success("Dieline saved");

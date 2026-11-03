@@ -2,7 +2,7 @@ import type { LineType, Path, Prim, RenderResult } from "@repo/dieline-engine";
 
 const RAD = Math.PI / 180;
 const f = (n: number) => Math.round(n * 1e4) / 1e4;
-const pt = (x: number, y: number) => `${f(x)} ${f(y)}`;
+export const pt = (x: number, y: number) => `${f(x)} ${f(y)}`;
 
 /**
  * SVG path data in world coordinates (Y up). The canvas draws it through a
