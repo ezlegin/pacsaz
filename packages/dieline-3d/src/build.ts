@@ -1,6 +1,6 @@
 import { foldSchedule, stageProgress, type FoldWindow } from "./schedule";
 import * as THREE from "three";
-import { corrugatedTextures, type BoardTextures } from "./board";
+import { boardTextures, type BoardTextures } from "./board";
 import type { FoldRig, Pt, RigNode } from "./types";
 
 /**
@@ -64,7 +64,7 @@ export type RigScene = {
   pivots: THREE.Group[];
   size: THREE.Vector3;
   style: MaterialStyle;
-  /** Kraft liner and flute ridges for corrugated board; null for paper-faced board. */
+  /** Surface textures: paper grain, or kraft liner and flute ridges. Null outside a browser. */
   board: BoardTextures | null;
 };
 
@@ -282,7 +282,7 @@ export const buildRigScene = ({
   thickness: number;
 }): RigScene => {
   const style = materialStyleFor(material);
-  const board = corrugatedTextures(material, rig.bounds, style.color);
+  const board = boardTextures(material, rig.bounds, style.color);
 
   const center: Pt = [
     (rig.bounds.min[0] + rig.bounds.max[0]) / 2,
@@ -384,7 +384,7 @@ export const buildRigScene = ({
       color: board ? "#ffffff" : style.color,
       map: board?.map ?? null,
       bumpMap: board?.bumpMap ?? null,
-      bumpScale: 0.5,
+      bumpScale: board && style === KRAFT_BOARD ? 0.5 : 0.15,
       roughness: style.roughness,
       metalness: 0.02,
       side: THREE.DoubleSide,

@@ -1,7 +1,8 @@
 import * as THREE from "three";
 
 /**
- * Surface of corrugated board: a kraft liner with paper fibres, and the flutes
+ * Surface of the board. Paperboard is a white coated sheet with a fine grain.
+ * Corrugated board: a kraft liner with paper fibres, and the flutes
  * underneath showing through as soft ridges.
  *
  * The ridges are what tells one board from another: an F or E flute is a fine
@@ -33,54 +34,14 @@ const SIZE = 512;
  * Textures tiled across the flat pattern. UVs span the pattern's bounds (0–1),
  * so the repeat is the pattern size over the tile size, in mm.
  */
-export function corrugatedTextures(material: string, bounds: { width: number; height: number }, color: string): BoardTextures | null {
+export function boardTextures(material: string, bounds: { width: number; height: number }, color: string): BoardTextures | null {
+  if (typeof document === "undefined") return null;
   const pitch = flutePitch(material);
-  if (pitch === null || typeof document === "undefined") return null;
+  return pitch === null ? paperTextures(bounds, color) : corrugatedTextures(pitch, bounds, color);
+}
 
-  // A whole number of flutes per tile so the ridges meet across tile edges.
-  const flutes = Math.max(4, Math.round(60 / pitch));
-  const tile = flutes * pitch;
-
-  // Deterministic noise, so the board does not change on every rebuild.
-  let seed = 7;
-  const rand = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
-
-  const colorCanvas = document.createElement("canvas");
-  colorCanvas.width = colorCanvas.height = SIZE;
-  const c = colorCanvas.getContext("2d")!;
-  c.fillStyle = color;
-  c.fillRect(0, 0, SIZE, SIZE);
-  // Fibres: short light and dark strokes, mostly along the machine direction.
-  for (let i = 0; i < 2600; i++) {
-    const x = rand() * SIZE;
-    const y = rand() * SIZE;
-    const len = 3 + rand() * 10;
-    const a = (rand() - 0.5) * 0.8;
-    c.strokeStyle = rand() < 0.5 ? `rgba(90,60,25,${0.05 + rand() * 0.08})` : `rgba(255,240,215,${0.05 + rand() * 0.08})`;
-    c.lineWidth = 0.6 + rand();
-    c.beginPath();
-    c.moveTo(x, y);
-    c.lineTo(x + Math.cos(a) * len, y + Math.sin(a) * len);
-    c.stroke();
-  }
-  // The flutes darken the liner very slightly between crests.
-  for (let x = 0; x < SIZE; x++) {
-    const s = Math.sin((x / SIZE) * flutes * Math.PI * 2);
-    c.fillStyle = `rgba(70,45,15,${0.012 * (1 - s)})`;
-    c.fillRect(x, 0, 1, SIZE);
-  }
-
-  const bumpCanvas = document.createElement("canvas");
-  bumpCanvas.width = bumpCanvas.height = SIZE;
-  const b = bumpCanvas.getContext("2d")!;
-  for (let x = 0; x < SIZE; x++) {
-    const s = Math.sin((x / SIZE) * flutes * Math.PI * 2);
-    // Crests are rounder than the valleys, as a liner glued over flutes.
-    const v = Math.round(128 + 110 * Math.sign(s) * Math.sqrt(Math.abs(s)));
-    b.fillStyle = `rgb(${v},${v},${v})`;
-    b.fillRect(x, 0, 1, SIZE);
-  }
-
+/** Tiles and shared helpers for both kinds of board. */
+function textures(colorCanvas: HTMLCanvasElement, bumpCanvas: HTMLCanvasElement, tile: number, bounds: { width: number; height: number }): BoardTextures {
   const repeat = (t: THREE.Texture) => {
     t.wrapS = t.wrapT = THREE.RepeatWrapping;
     t.repeat.set(bounds.width / tile, bounds.height / tile);
@@ -107,4 +68,99 @@ export function corrugatedTextures(material: string, bounds: { width: number; he
       bumpMap.dispose();
     },
   };
+}
+
+const canvas = () => {
+  const c = document.createElement("canvas");
+  c.width = c.height = SIZE;
+  return c;
+};
+
+/**
+ * Paperboard: a white coated sheet. Faint fibres and a fine grain in the bump,
+ * enough that it reads as paper rather than plastic under the studio light.
+ */
+function paperTextures(bounds: { width: number; height: number }, color: string): BoardTextures {
+  let seed = 11;
+  const rand = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
+  // A 40 mm tile: fibres a few millimetres long.
+  const tile = 40;
+
+  const colorCanvas = canvas();
+  const c = colorCanvas.getContext("2d")!;
+  c.fillStyle = color;
+  c.fillRect(0, 0, SIZE, SIZE);
+  for (let i = 0; i < 1800; i++) {
+    const x = rand() * SIZE;
+    const y = rand() * SIZE;
+    const len = 4 + rand() * 14;
+    const a = rand() * Math.PI;
+    c.strokeStyle = rand() < 0.6 ? `rgba(120,115,105,${0.02 + rand() * 0.04})` : `rgba(255,255,255,${0.2 + rand() * 0.3})`;
+    c.lineWidth = 0.5 + rand() * 0.8;
+    c.beginPath();
+    c.moveTo(x, y);
+    c.quadraticCurveTo(x + Math.cos(a + 0.4) * len * 0.5, y + Math.sin(a + 0.4) * len * 0.5, x + Math.cos(a) * len, y + Math.sin(a) * len);
+    c.stroke();
+  }
+
+  const bumpCanvas = canvas();
+  const b = bumpCanvas.getContext("2d")!;
+  const img = b.createImageData(SIZE, SIZE);
+  for (let i = 0; i < SIZE * SIZE; i++) {
+    const v = 128 + (rand() - 0.5) * 40;
+    img.data[i * 4] = img.data[i * 4 + 1] = img.data[i * 4 + 2] = v;
+    img.data[i * 4 + 3] = 255;
+  }
+  b.putImageData(img, 0, 0);
+  // Soften the grain so it reads as tooth, not noise.
+  b.filter = "blur(1px)";
+  b.drawImage(bumpCanvas, 0, 0);
+
+  return textures(colorCanvas, bumpCanvas, tile, bounds);
+}
+
+function corrugatedTextures(pitch: number, bounds: { width: number; height: number }, color: string): BoardTextures {
+  // A whole number of flutes per tile so the ridges meet across tile edges.
+  const flutes = Math.max(4, Math.round(60 / pitch));
+  const tile = flutes * pitch;
+
+  // Deterministic noise, so the board does not change on every rebuild.
+  let seed = 7;
+  const rand = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
+
+  const colorCanvas = canvas();
+  const c = colorCanvas.getContext("2d")!;
+  c.fillStyle = color;
+  c.fillRect(0, 0, SIZE, SIZE);
+  // Fibres: short light and dark strokes, mostly along the machine direction.
+  for (let i = 0; i < 2600; i++) {
+    const x = rand() * SIZE;
+    const y = rand() * SIZE;
+    const len = 3 + rand() * 10;
+    const a = (rand() - 0.5) * 0.8;
+    c.strokeStyle = rand() < 0.5 ? `rgba(90,60,25,${0.05 + rand() * 0.08})` : `rgba(255,240,215,${0.05 + rand() * 0.08})`;
+    c.lineWidth = 0.6 + rand();
+    c.beginPath();
+    c.moveTo(x, y);
+    c.lineTo(x + Math.cos(a) * len, y + Math.sin(a) * len);
+    c.stroke();
+  }
+  // The flutes darken the liner very slightly between crests.
+  for (let x = 0; x < SIZE; x++) {
+    const s = Math.sin((x / SIZE) * flutes * Math.PI * 2);
+    c.fillStyle = `rgba(70,45,15,${0.012 * (1 - s)})`;
+    c.fillRect(x, 0, 1, SIZE);
+  }
+
+  const bumpCanvas = canvas();
+  const b = bumpCanvas.getContext("2d")!;
+  for (let x = 0; x < SIZE; x++) {
+    const s = Math.sin((x / SIZE) * flutes * Math.PI * 2);
+    // Crests are rounder than the valleys, as a liner glued over flutes.
+    const v = Math.round(128 + 110 * Math.sign(s) * Math.sqrt(Math.abs(s)));
+    b.fillStyle = `rgb(${v},${v},${v})`;
+    b.fillRect(x, 0, 1, SIZE);
+  }
+
+  return textures(colorCanvas, bumpCanvas, tile, bounds);
 }

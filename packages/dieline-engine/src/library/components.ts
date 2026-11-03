@@ -44,19 +44,32 @@ export const tuckLid: ComponentDef = {
   id: "lib:tuckLid",
   name: "Tuck lid",
   category: "Closures",
-  description: "A closure panel with a rounded tuck flap, as on tuck-end cartons.",
+  description: "A closure panel with a rounded tuck flap and friction locks, as on tuck-end cartons.",
   edge: { hinge: "crease" },
-  params: [auto("depth", "Lid depth"), auto("tuck", "Tuck depth"), auto("taper", "Tuck taper")],
+  params: [auto("depth", "Lid depth"), auto("tuck", "Tuck depth"), auto("lock", "Friction lock length")],
   variables: [
     { name: "d", expr: `depth > 0 ? depth : ${ACROSS}` },
     // The tuck table the old Door model used, by lid width.
     { name: "t", expr: "tuck > 0 ? tuck : (edge >= 180 ? 25 : edge >= 130 ? 20 : edge >= 100 ? 15 : edge >= 60 ? 13 : 11)" },
-    { name: "i", expr: "taper > 0 ? taper : max(t * 0.15, 2)" },
-    { name: "r", expr: "t * 0.6" },
+    // The tuck is a little narrower than the lid, so it slides between the side walls.
+    { name: "k", expr: "max(1, 2 * thickness)" },
+    // Friction locks: slits along the tuck fold at both ends. The tuck's
+    // shoulders catch on the dust flaps, which holds the lid shut.
+    { name: "n", expr: "lock > 0 ? k + lock : k + clamp(edge * 0.06, 3, 8)" },
+    { name: "r", expr: "min(t * 0.6, (edge - 2 * k) / 2)" },
+    // The tuck folds a little below the lid's edge, so it turns over the board's
+    // own thickness instead of crushing it. Each slit runs along the edge, then
+    // rounds down into a short hook past the fold, where the fold begins; the
+    // hook is what the tuck's shoulder catches on.
+    { name: "f", expr: "max(0.5, 2 * thickness)" },
+    { name: "h", expr: "f + max(0.5, thickness)" },
+    { name: "rh", expr: "f * 0.8" },
   ],
   nodes: [
-    path("outline", "cut", ["0", "0"], [to("0", "d"), to("i", "d + t", "r"), to("edge - i", "d + t", "r"), to("edge", "d"), to("edge", "0")]),
-    line("tuckFold", "crease", ["0", "d"], ["edge", "d"]),
+    path("outline", "cut", ["0", "0"], [to("0", "d"), to("k", "d"), to("k", "d + t", "r"), to("edge - k", "d + t", "r"), to("edge - k", "d"), to("edge", "d"), to("edge", "0")]),
+    path("lockStart", "cut", ["k", "d"], [to("n", "d", "rh"), to("n", "d - h")]),
+    path("lockEnd", "cut", ["edge - k", "d"], [to("edge - n", "d", "rh"), to("edge - n", "d - h")]),
+    line("tuckFold", "crease", ["n", "d - f"], ["edge - n", "d - f"]),
   ],
   anchors: [
     { name: "fold", at: { x: "0", y: "d" } },
@@ -68,20 +81,49 @@ export const dustFlap: ComponentDef = {
   id: "lib:dustFlap",
   name: "Dust flap",
   category: "Closures",
-  description: "Side flap under a lid. Flip it so the sloped end sits next to the lid.",
-  edge: { hinge: "crease" },
-  params: [auto("depth", "Depth"), auto("shoulder", "Slope length"), auto("round", "Corner radius")],
+  description: "Side flap under a lid: nearly square with a relief notch on the lid side (the end of the edge); at the start it stands a board's thickness past the fold, then a chamfer and a long slope. Flip it so the notch sits next to the lid.",
+  // The flap draws its own crease, stopping short of the relief notch.
+  edge: { hinge: "none" },
+  params: [auto("depth", "Depth"), auto("slope", "Slope width"), auto("round", "Corner radius")],
   variables: [
-    // Half the dimension across the opening, less the board, so the two flaps meet.
-    { name: "d", expr: `depth > 0 ? depth : ${ACROSS} / 2 - thickness` },
-    { name: "s", expr: "shoulder > 0 ? shoulder : min(6, edge / 4)" },
-    { name: "r", expr: "round > 0 ? round : min(4, d / 4)" },
-    { name: "ins", expr: "2 * thickness" },
-    // The lid next door is cut along the shared fold line, so the sloped end
-    // must leave that line straight away; running down it would be a double knife.
-    { name: "gap", expr: "max(1.5, 2 * thickness)" },
+    // Half as deep as the lid with its tuck: the lid spans this edge, and its
+    // tuck follows the lid's own width (across this edge), by the same table.
+    { name: "lt", expr: `${ACROSS} >= 180 ? 25 : ${ACROSS} >= 130 ? 20 : ${ACROSS} >= 100 ? 15 : ${ACROSS} >= 60 ? 13 : 11` },
+    { name: "d", expr: `depth > 0 ? depth : min((edge + lt) / 2, ${ACROSS} / 2 - thickness)` },
+    // Relief beside a lid: a small round notch where lid and flap fold side by
+    // side, so the board does not bind or crush there. Sized by the board.
+    { name: "rr", expr: "max(0.75, 1.5 * thickness)" },
+    { name: "nr", expr: "endNext ? rr : 0" },
+    // Lid side: set in from the fold so the lid's tuck clears it, a little more at the top.
+    { name: "it", expr: "min(5, edge / 10)" },
+    { name: "ib", expr: "max(it * 0.75, 2 * thickness, 2 * rr + 0.5)" },
+    // A short run into the corner leaves the lid's cut line at once (no double knife).
+    { name: "rb", expr: "min(5, d / 6)" },
+    // Far side: straight up a little, a chamfer, then a long slope to the top.
+    { name: "v", expr: "min(6, d * 0.15)" },
+    { name: "ch", expr: "min(4, d * 0.1)" },
+    { name: "sl", expr: "slope > 0 ? slope : min(edge / 6, d * 0.2)" },
+    // Beside a plain panel edge the far side steps back a board's thickness
+    // from the fold, into this flap's own panel, and rises straight: folded,
+    // it then clears the wall it wraps around. Anywhere else it leans off the
+    // fold, clear of whatever is there.
+    { name: "s0", expr: "startFree ? max(0.5, 2 * thickness) : 0" },
+    { name: "g", expr: "startFree ? 0 : max(1, 2 * thickness)" },
+    { name: "rt", expr: "round > 0 ? round : min(8, d / 4, (edge - it - s0 - g - ch - sl) / 3)" },
   ],
-  nodes: [path("outline", "cut", ["0", "0"], [to("ins", "d", "r"), to("edge - s", "d", "r"), to("edge - gap", "d / 2"), to("edge", "0")])],
+  nodes: [
+    path("outline", "cut", ["s0", "0"], [
+      to("s0 + g", "v"),
+      to("s0 + g + ch", "v + ch"),
+      to("s0 + g + ch + sl", "d", "rt"),
+      to("edge - it", "d"),
+      to("edge - ib", "rb"),
+    ]),
+    { ...path("relief", "cut", ["edge - ib", "rb"], [to("edge - 2 * rr", "0"), { type: "arc", x: "edge", y: "0", radius: "rr" }]), rules: [{ id: "noLid", when: "!endNext", action: "hide" }] },
+    { ...line("corner", "cut", ["edge - ib", "rb"], ["edge", "0"]), rules: [{ id: "lid", when: "endNext", action: "hide" }] },
+    { ...line("setBack", "cut", ["0", "0"], ["s0", "0"]), rules: [{ id: "noSetBack", when: "!startFree", action: "hide" }] },
+    line("hinge", "crease", ["s0", "0"], ["edge - 2 * nr", "0"]),
+  ],
 };
 
 export const glueFlap: ComponentDef = {
@@ -89,24 +131,29 @@ export const glueFlap: ComponentDef = {
   name: "Glue flap",
   category: "Flaps",
   description: "Tapered flap glued inside the opposite panel to close the tube.",
-  edge: { hinge: "crease" },
+  edge: { hinge: "none" },
   params: [auto("depth", "Depth"), auto("taper", "Taper")],
   variables: [
     // A carton glue flap is 10–18 mm, by the narrower face (not the panel height).
     { name: "d", expr: "depth > 0 ? depth : clamp(min(width, length) * 0.25, 10, 18)" },
-    { name: "tp", expr: "taper > 0 ? taper : min(d * 0.6, edge / 6)" },
+    // A shallow taper at each end, about 15° off square, so it clears the flaps.
+    { name: "tp", expr: "taper > 0 ? taper : min(d * 0.27, edge / 6)" },
+    // The flap starts a little in from each end of the panel, so it clears the
+    // folds of the flaps above and below once the box is glued.
+    { name: "o", expr: "max(0.5, 2 * thickness)" },
     { name: "gm", expr: "min(2, d / 4)" },
     // Horizontal shift that keeps the margin square to the slanted sides.
     { name: "gs", expr: "gm * sqrt(1 + (tp / d) ^ 2)" },
   ],
   nodes: [
-    path("outline", "cut", ["0", "0"], [to("tp", "d"), to("edge - tp", "d"), to("edge", "0")]),
+    path("outline", "cut", ["0", "0"], [to("o", "0"), to("o + tp", "d"), to("edge - o - tp", "d"), to("edge - o", "0"), to("edge", "0")]),
+    line("hinge", "crease", ["o", "0"], ["edge - o", "0"]),
     // The glue area follows the flap's taper, a margin `gm` inside every edge.
     path(
       "glueArea",
       "glue",
-      ["tp * gm / d + gs", "gm"],
-      [to("tp * (d - gm) / d + gs", "d - gm"), to("edge - tp * (d - gm) / d - gs", "d - gm"), to("edge - tp * gm / d - gs", "gm")],
+      ["o + tp * gm / d + gs", "gm"],
+      [to("o + tp * (d - gm) / d + gs", "d - gm"), to("edge - o - tp * (d - gm) / d - gs", "d - gm"), to("edge - o - tp * gm / d - gs", "gm")],
       true,
     ),
   ],

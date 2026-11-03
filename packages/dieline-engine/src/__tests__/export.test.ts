@@ -162,6 +162,13 @@ describe("sheet and overall rulers", () => {
     expect(toSVG(r, { includeRulers: true, overallRulers: false, reserveRulers: true })).not.toContain("100 mm");
   });
 
+  it("hatches glue areas instead of outlining them", () => {
+    const r = render(doc({ nodes: [presetBody("reverseTuckEnd", "body")] }), INPUTS);
+    const svg = toSVG(r);
+    expect(svg).toContain('id="glue-hatch"');
+    expect(svg).toMatch(/data-line-type="glue"[^>]*fill="url\(#glue-hatch\)" stroke="none"/);
+  });
+
   it("gives every separate part its own bleed", () => {
     const r = renderNodes([rect("a", "100", "50"), rect("b", "30", "40", { transform: { x: "150" } })], { bleed: 3 });
     expect(sheetLoops(r)).toHaveLength(2);

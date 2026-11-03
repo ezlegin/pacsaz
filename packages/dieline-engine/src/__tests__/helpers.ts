@@ -25,19 +25,21 @@ export function isClosedOutline(paths: Path[]): boolean {
   // `+ 0` folds -0 into 0 so tiny negative rounding noise lands on the same key.
   const round = (n: number) => Math.round(n * 1000) / 1000 + 0;
   const key = (p: [number, number]) => `${round(p[0])},${round(p[1])}`;
-  const degree = new Map<string, number>();
-  const bump = (p: [number, number]) => degree.set(key(p), (degree.get(key(p)) ?? 0) + 1);
+  const rad = Math.PI / 180;
+  const ends = (p: Path): [string, string] | null =>
+    p.kind === "line"
+      ? [key(p.a), key(p.b)]
+      : p.kind === "arc"
+        ? [key([p.c[0] + p.r * Math.cos(p.start * rad), p.c[1] + p.r * Math.sin(p.start * rad)]), key([p.c[0] + p.r * Math.cos(p.end * rad), p.c[1] + p.r * Math.sin(p.end * rad)])]
+        : null;
 
-  for (const p of paths) {
-    if (p.kind === "line") {
-      bump(p.a);
-      bump(p.b);
-    } else if (p.kind === "arc") {
-      const rad = Math.PI / 180;
-      bump([p.c[0] + p.r * Math.cos(p.start * rad), p.c[1] + p.r * Math.sin(p.start * rad)]);
-      bump([p.c[0] + p.r * Math.cos(p.end * rad), p.c[1] + p.r * Math.sin(p.end * rad)]);
-    }
+  // Slits (a friction lock) end in the board on purpose: drop them first.
+  let left = paths.filter((p) => ends(p));
+  for (;;) {
+    const degree = new Map<string, number>();
+    for (const p of left) for (const k of ends(p)!) degree.set(k, (degree.get(k) ?? 0) + 1);
+    const next = left.filter((p) => ends(p)!.every((k) => degree.get(k)! > 1));
+    if (next.length === left.length) return [...degree.values()].every((d) => d === 2);
+    left = next;
   }
-
-  return [...degree.values()].every((d) => d === 2);
 }

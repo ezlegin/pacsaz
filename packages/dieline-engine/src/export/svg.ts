@@ -141,9 +141,16 @@ export function toSVG(result: RenderResult, options: SvgOptions = {}): string {
     else groups.set(key, [p]);
   }
 
+  let hatched = false;
   for (const paths of groups.values()) {
     const first = paths[0]!;
     const id = options.nodeIds ? ` data-node-id="${escapeAttr(first.nodeId)}"` : "";
+    if (first.lineType === "glue") {
+      // A glue area is a hatched region, as on a printed drawing, not an outline.
+      hatched = true;
+      body.push(`<path${id} data-line-type="glue" d="${paths.map(primToD).join("")}" fill="url(#glue-hatch)" stroke="none"/>`);
+      continue;
+    }
     body.push(
       `<path${id} data-line-type="${first.lineType}" d="${paths.map(primToD).join("")}" fill="none" ${strokeAttrs(style(first.lineType), base, nonScaling)}/>`,
     );
@@ -155,8 +162,17 @@ export function toSVG(result: RenderResult, options: SvgOptions = {}): string {
 
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" width="${fmt(width)}mm" height="${fmt(height)}mm" stroke-linecap="round" stroke-linejoin="round">` +
+    (hatched ? glueHatch(style("glue").color) : "") +
     body.join("") +
     `</svg>`
+  );
+}
+
+/** 45° hatching, 2 mm apart, for glue areas. Sizes are in millimetres, like the drawing. */
+function glueHatch(color: string): string {
+  return (
+    `<defs><pattern id="glue-hatch" patternUnits="userSpaceOnUse" width="2" height="2" patternTransform="rotate(45)">` +
+    `<line x1="0" y1="0" x2="0" y2="2" stroke="${color}" stroke-width="0.35"/></pattern></defs>`
   );
 }
 

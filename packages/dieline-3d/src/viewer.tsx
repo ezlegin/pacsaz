@@ -16,7 +16,7 @@ import type { FoldRig } from "./types";
  * by CSS behind a transparent canvas. Dark enough that a white board still reads
  * against it, neutral enough not to tint the kraft stock.
  */
-const BACKDROP = "radial-gradient(ellipse at 50% 85%, #e6e6e6 0%, #cfcfcf 55%, #b4b4b4 100%)";
+const BACKDROP = "radial-gradient(ellipse at 50% 85%, #fbfbfb 0%, #ededed 55%, #dcdcdc 100%)";
 
 /** Highlight colour for the panel selected in an editor. */
 const SELECTION_COLOR = "#7c3aed";

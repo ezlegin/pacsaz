@@ -504,6 +504,11 @@ class Context {
       length: number,
       field: string,
       anchorPrefix: string,
+      // Whether the panel edge next to each end of this one (along the fold) is a
+      // plain cut a flap may stand on. In the feature's own frame, after a flip.
+      free: { start: boolean; end: boolean } = { start: false, end: false },
+      // Whether the neighbouring panel carries a feature on the same edge (a lid beside a dust flap).
+      next: { start: boolean; end: boolean } = { start: false, end: false },
     ) => {
       if (!feature) {
         line(a, b, "cut");
@@ -514,7 +519,13 @@ class Context {
       const hinge = feature.hinge ?? def?.edge?.hinge ?? "crease";
 
       try {
-        const built = this.buildComponent(node.id, feature.component, feature.args ?? {}, `${field}.`, { edge: length });
+        const built = this.buildComponent(node.id, feature.component, feature.args ?? {}, `${field}.`, {
+          edge: length,
+          startFree: (feature.flip ? free.end : free.start) ? 1 : 0,
+          endFree: (feature.flip ? free.start : free.end) ? 1 : 0,
+          startNext: (feature.flip ? next.end : next.start) ? 1 : 0,
+          endNext: (feature.flip ? next.start : next.end) ? 1 : 0,
+        });
         // Flipping mirrors the feature end to end about the middle of its edge.
         const flip: Placement = feature.flip ? { ...IDENTITY, mirrorX: true, x: length } : IDENTITY;
         paths.push(...placePaths(placePaths(built.paths, flip), frame));
@@ -536,8 +547,18 @@ class Context {
       scalars[`${panel.name}.width`] = w;
 
       // Each edge frame puts the hinge on +x and the feature towards +y, outward.
-      edge(panel.top, [x0, height], [x1, height], { ...IDENTITY, x: x0, y: height }, w, `panels.${i}.top`, `${panel.name}.top`);
-      edge(panel.bottom, [x1, 0], [x0, 0], { ...IDENTITY, x: x1, rotate: 180 }, w, `panels.${i}.bottom`, `${panel.name}.bottom`);
+      // A neighbour's edge with no feature is a plain cut.
+      const plain = (j: number, side: "top" | "bottom") => j >= 0 && j < node.panels.length && !node.panels[j]![side];
+      const featured = (j: number, side: "top" | "bottom") => j >= 0 && j < node.panels.length && !!node.panels[j]![side];
+      // Top edges run left to right, bottom edges right to left.
+      edge(panel.top, [x0, height], [x1, height], { ...IDENTITY, x: x0, y: height }, w, `panels.${i}.top`, `${panel.name}.top`, {
+        start: plain(i - 1, "top"),
+        end: plain(i + 1, "top"),
+      }, { start: featured(i - 1, "top"), end: featured(i + 1, "top") });
+      edge(panel.bottom, [x1, 0], [x0, 0], { ...IDENTITY, x: x1, rotate: 180 }, w, `panels.${i}.bottom`, `${panel.name}.bottom`, {
+        start: plain(i + 1, "bottom"),
+        end: plain(i - 1, "bottom"),
+      }, { start: featured(i + 1, "bottom"), end: featured(i - 1, "bottom") });
     });
 
     const first = node.panels[0]?.name ?? "first";

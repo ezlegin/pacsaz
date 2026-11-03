@@ -34,9 +34,59 @@ const signedArea = (poly: Pt[]) => {
   return a / 2;
 };
 
+/**
+ * Splits pieces where another piece's end lands part way along them (a flap
+ * standing on a panel's edge), so the walk can turn there.
+ */
+function splitAtTees(pieces: Pt[][]): Pt[][] {
+  const ends = pieces.flatMap((p) => [p[0]!, p[p.length - 1]!]);
+  const out: Pt[][] = [];
+  for (const piece of pieces) {
+    let current: Pt[] = [piece[0]!];
+    for (let i = 1; i < piece.length; i++) {
+      const a = piece[i - 1]!;
+      const b = piece[i]!;
+      const dx = b[0] - a[0];
+      const dy = b[1] - a[1];
+      const len2 = dx * dx + dy * dy;
+      const hits = len2 < 1e-12 ? [] : ends
+        .map((e) => ({ e, t: ((e[0] - a[0]) * dx + (e[1] - a[1]) * dy) / len2 }))
+        .filter(({ e, t }) => t > 1e-4 && t < 1 - 1e-4 && Math.abs((e[0] - a[0]) * dy - (e[1] - a[1]) * dx) / Math.sqrt(len2) < 1 / KEY)
+        .sort((x, y) => x.t - y.t);
+      for (const { e } of hits) {
+        current.push(e);
+        out.push(current);
+        current = [e];
+      }
+      current.push(b);
+    }
+    out.push(current);
+  }
+  return out;
+}
+
+/**
+ * Drops slits: pieces with an end nothing else meets (a friction lock, a tear
+ * slit), repeatedly, so a slit leaving an outline cannot lead the loop walk
+ * into a dead end.
+ */
+function withoutSlits(pieces: Pt[][]): Pt[][] {
+  let left = pieces;
+  for (;;) {
+    const count = new Map<string, number>();
+    for (const p of left) {
+      if (key(p[0]!) === key(p[p.length - 1]!)) continue;
+      for (const end of [p[0]!, p[p.length - 1]!]) count.set(key(end), (count.get(key(end)) ?? 0) + 1);
+    }
+    const next = left.filter((p) => key(p[0]!) === key(p[p.length - 1]!) || (count.get(key(p[0]!))! > 1 && count.get(key(p[p.length - 1]!))! > 1));
+    if (next.length === left.length) return left;
+    left = next;
+  }
+}
+
 /** Closed loops formed by the pieces; open ends are ignored. */
 export function closedLoops(prims: readonly Prim[]): Pt[][] {
-  const pieces = prims.map(flatten).filter((p) => p.length >= 2);
+  const pieces = withoutSlits(splitAtTees(prims.map(flatten).filter((p) => p.length >= 2)));
   const at = new Map<string, number[]>();
   pieces.forEach((p, i) => {
     for (const end of [p[0]!, p[p.length - 1]!]) {

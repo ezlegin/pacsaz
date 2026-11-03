@@ -118,7 +118,16 @@ Phases (each ends with a commit message for the user to commit):
 - Presets (`library/presets.ts`): reverse tuck end, straight tuck end, sleeve,
   FEFCO 0201. Bodies run front, side, back, side, glue; front and back are
   `max(length, width)` and the sides `min(...)`, so lids always sit on the wide
-  panels and dust flaps on the narrow ones. New presets must render without diagnostics and keep the cut
+  panels and dust flaps on the narrow ones. Tuck lids carry friction-lock slits (rounding into a short hook past the tuck fold, which sits 2 × thickness below the lid edge) along
+  the tuck fold (a slit that runs on as a fold is not an open cut; `closedLoops`
+  drops slits); dust flaps are nearly square on the lid side with a chamfer and
+  slope on the other. Glue areas export and draw hatched, with no outline.
+  Edge features get `startFree`/`endFree` (1 when the neighbouring panel's
+  same edge is a plain cut) and `startNext`/`endNext` (1 when it carries a
+  feature). A dust flap's far side steps back 2 × thickness from the fold
+  beside a plain edge, straight up; its relief notch is cut only beside a lid.
+  Relief notches, the glue flap's set-in and these overhangs all scale with
+  `thickness`. The 3D board is textured: paper grain, or kraft with flutes. New presets must render without diagnostics and keep the cut
   outline closed at several sizes (see `panels.test.ts`).
 
 ### Packaging checks, nicks, 3D

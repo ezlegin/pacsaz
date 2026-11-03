@@ -22,8 +22,15 @@ export const DielineLayer = memo(function DielineLayer({
 
   return (
     <g fill="none" strokeLinecap="round" strokeLinejoin="round">
+      {/* Glue areas are hatched, in millimetres of the drawing, with no outline. */}
+      <defs>
+        <pattern id="glue-hatch" patternUnits="userSpaceOnUse" width={2} height={2} patternTransform="rotate(45)">
+          <line x1={0} y1={0} x2={0} y2={2} stroke={LINE_STYLES.glue.color} strokeWidth={0.35} />
+        </pattern>
+      </defs>
       {groups.map((g) => {
         if (g.lineType === "guide" && !showGuides) return null;
+        if (g.lineType === "glue") return <path key={g.key} d={g.d} fill="url(#glue-hatch)" stroke="none" />;
         const style = LINE_STYLES[g.lineType];
         return (
           <path

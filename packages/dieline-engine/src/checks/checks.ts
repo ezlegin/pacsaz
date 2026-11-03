@@ -107,7 +107,26 @@ export function checkDieline(result: RenderResult, options: CheckOptions = {}): 
     }
   }
 
-  const loose = [...ends.values()].filter((e) => e.count % 2 === 1);
+  // Three cuts meeting is a T (a slit leaving an outline), not an open end; and
+  // a slit that runs on as a fold, like the friction lock at a tuck, ends where
+  // the fold begins.
+  const foldEnds = tooling.filter((p) => FOLDS.has(p.lineType)).flatMap((f) => endpoints(f) ?? []);
+  // An end landing part way along another cut is a T too (a flap standing on a
+  // panel's edge).
+  const cutSegs = segs.filter((s) => s.path.lineType === "cut");
+  const onCut = (p: Pt) => cutSegs.some((s) => {
+    const { d, t } = toSegment(p, s.a, s.b);
+    return d <= tol * 5 && t > 1e-6 && t < 1 - 1e-6;
+  });
+  const atFold = (p: Pt) => foldEnds.some((f) => distance(f, p) <= tol * 5);
+  // A friction lock's hook: a short cut (at most 3 mm) ending in the board,
+  // with a fold beginning on it.
+  const isHook = (p: Pt) =>
+    cutSegs.some((s) => {
+      const ends = distance(s.a, p) <= tol * 5 || distance(s.b, p) <= tol * 5;
+      return ends && distance(s.a, s.b) <= 3 && foldEnds.some((f) => toSegment(f, s.a, s.b).d <= tol * 5);
+    });
+  const loose = [...ends.values()].filter((e) => e.count === 1 && !atFold(e.p) && !onCut(e.p) && !isHook(e.p));
   const paired = new Set<number>();
   loose.forEach((e, i) => {
     if (paired.has(i)) return;

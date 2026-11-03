@@ -77,11 +77,49 @@ describe("box bodies", () => {
       render(doc({ nodes: [body({ panels: [{ id: "p", name: "p", width: "60", top: { component: "lib:dustFlap", flip } }] })] }), INPUTS);
     const peak = (r: ReturnType<typeof render>) =>
       r.paths.filter((p) => p.kind === "line" && p.lineType === "cut" && p.a[1] > 120 && p.b[1] > 120 && Math.abs(p.a[1] - p.b[1]) < 1e-6);
-    // The flat top sits towards the start unflipped and towards the end flipped.
+    // The square (lid) side sits at the end unflipped and at the start flipped.
     const [plain] = peak(dust(false));
     const [flipped] = peak(dust(true));
-    expect(Math.min(plain!.kind === "line" ? plain!.a[0] : 0, plain!.kind === "line" ? plain!.b[0] : 0)).toBeLessThan(5);
-    expect(Math.max(flipped!.kind === "line" ? flipped!.a[0] : 0, flipped!.kind === "line" ? flipped!.b[0] : 0)).toBeGreaterThan(55);
+    expect(Math.max(plain!.kind === "line" ? plain!.a[0] : 0, plain!.kind === "line" ? plain!.b[0] : 0)).toBeGreaterThan(50);
+    expect(Math.min(flipped!.kind === "line" ? flipped!.a[0] : 0, flipped!.kind === "line" ? flipped!.b[0] : 0)).toBeLessThan(10);
+  });
+
+  it("makes a dust flap half as deep as the lid with its tuck", () => {
+    // A 60 mm side under a 120 mm lid: lid 60 deep plus a 15 mm tuck, so 37.5.
+    const r = render(doc({ nodes: [body({ panels: [{ id: "p", name: "p", width: "60", top: { component: "lib:dustFlap" } }] })] }), { ...INPUTS, width: 60, length: 120, height: 100 });
+    const top = Math.max(...r.paths.filter((p) => p.lineType === "cut" && p.kind === "line").flatMap((p) => (p.kind === "line" ? [p.a[1], p.b[1]] : [])));
+    expect(top - 100).toBeCloseTo(37.5);
+    // Alone on a body there is no lid beside it, so no relief notch.
+    expect(r.paths.some((p) => p.kind === "arc" && p.lineType === "cut" && p.r < 2)).toBe(false);
+  });
+
+  it("rounds each friction-lock slit into a hook past the tuck fold, which sits below the edge", () => {
+    // A 90 mm lid on a 160 mm tall body, 0.5 mm board: lid 50 deep, so the tuck fold is at 210.
+    const r = render(doc({ nodes: [body({ panels: [{ id: "p", name: "p", width: "90", top: { component: "lib:tuckLid" } }] })] }), { ...INPUTS, width: 50, length: 90, height: 160, thickness: 0.5 });
+    // The fold sits a board's thickness twice over (1 mm) below the edge; each hook rounds off the
+    // slit and ends 0.5 mm past the fold.
+    const hooks = r.paths.filter((p) => p.kind === "line" && p.lineType === "cut" && p.a[0] === p.b[0] && Math.min(p.a[1], p.b[1]) === 208.5);
+    expect(hooks).toHaveLength(2);
+    expect(r.paths.filter((p) => p.kind === "arc" && p.lineType === "cut" && Math.abs(p.r - 0.8) < 1e-6)).toHaveLength(2);
+    expect(r.paths.some((p) => p.kind === "line" && p.lineType === "crease" && p.a[1] === 209 && p.b[1] === 209)).toBe(true);
+  });
+
+  it("notches a dust flap only beside a lid", () => {
+    const r = render(doc({ nodes: [presetBody("reverseTuckEnd", "body")] }), { ...INPUTS, width: 50, length: 90, height: 160, thickness: 0.5 });
+    // Three of the four dust flaps sit beside a lid; the second side's top flap
+    // has the plain back panel on one side and the end of the body on the other.
+    // The notch is 1.5 × the 0.5 mm board: 0.75 mm.
+    expect(r.paths.filter((p) => p.kind === "arc" && p.lineType === "cut" && Math.abs(p.r - 0.75) < 1e-6)).toHaveLength(3);
+  });
+
+  it("steps a dust flap's far side back a board's thickness from the fold, straight up", () => {
+    // Reverse tuck end, 90 × 50 × 160, 0.5 mm board: the back panel runs 140–230 at the top,
+    // and the side flaps either side of it step 1 mm back into their own panels.
+    const r = render(doc({ nodes: [presetBody("reverseTuckEnd", "body")] }), { ...INPUTS, width: 50, length: 90, height: 160, thickness: 0.5 });
+    const upright = (x: number) =>
+      r.paths.some((p) => p.kind === "line" && p.lineType === "cut" && Math.abs(p.a[0] - x) < 1e-6 && Math.abs(p.b[0] - x) < 1e-6 && Math.min(p.a[1], p.b[1]) === 160);
+    expect(upright(139)).toBe(true);
+    expect(upright(231)).toBe(true);
   });
 
   it("reports feature problems on the feature's fields and keeps the edge", () => {
