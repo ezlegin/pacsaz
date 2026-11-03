@@ -1,6 +1,6 @@
 import { duplicateNodes, findNode, removeNodes, toDXF, toSVG } from "@repo/dieline-engine";
 import { SHAPE_LABELS, type PlaceableKind } from "./model/create";
-import { groupNodes, ungroupNode } from "./model/ops";
+import { groupNodes, ungroupNodes } from "./model/ops";
 import type { EditorStore } from "./state/store";
 
 export type Command = {
@@ -66,9 +66,9 @@ export function buildCommands(store: EditorStore, host: CommandHost): Command[] 
       label: "Ungroup",
       group: "Edit",
       keys: "Ctrl+Shift+G",
-      enabled: sel.length === 1 && findNode(s.doc, sel[0]!)?.node.kind === "group",
+      enabled: sel.some((id) => findNode(s.doc, id)?.node.kind === "group"),
       run: () => {
-        const r = ungroupNode(store.get().doc, sel[0]!);
+        const r = ungroupNodes(store.get().doc, sel);
         if (r) store.apply(() => r.doc, r.ids);
       },
     },
@@ -83,7 +83,9 @@ export function buildCommands(store: EditorStore, host: CommandHost): Command[] 
     { id: "fit-sel", label: "Zoom to selection", group: "View", keys: "Shift+2", enabled: sel.length > 0, run: () => store.requestFit(sel) },
     { id: "snap", label: s.snapping ? "Turn snapping off" : "Turn snapping on", group: "View", keys: "S", run: () => store.setSnapping(!s.snapping) },
     { id: "guides", label: s.display.guides ? "Hide guides" : "Show guides", group: "View", run: () => store.setDisplay({ guides: !s.display.guides }) },
-    { id: "rulers", label: s.display.rulers ? "Hide rulers" : "Show rulers", group: "View", run: () => store.setDisplay({ rulers: !s.display.rulers }) },
+    { id: "rulers", label: s.display.rulers ? "Hide screen rulers" : "Show screen rulers", group: "View", run: () => store.setDisplay({ rulers: !s.display.rulers }) },
+    { id: "dimensions", label: s.display.dimensions ? "Hide dimension rulers" : "Show dimension rulers", group: "View", run: () => store.setDisplay({ dimensions: !s.display.dimensions }) },
+    { id: "bleed", label: s.display.bleed ? "Hide bleed" : "Show bleed", group: "View", run: () => store.setDisplay({ bleed: !s.display.bleed }) },
     { id: "ghosts", label: s.display.ghosts ? "Hide smallest/largest sizes" : "Show smallest/largest sizes", group: "View", enabled: !!s.sizeRange, run: () => store.setDisplay({ ghosts: !s.display.ghosts }) },
     { id: "nicks", label: s.display.nicks ? "Turn nicks off" : "Turn nicks on", group: "View", run: () => store.setDisplay({ nicks: !s.display.nicks }) },
     { id: "issues", label: s.display.issues ? "Hide problem markers" : "Show problem markers", group: "View", run: () => store.setDisplay({ issues: !s.display.issues }) },

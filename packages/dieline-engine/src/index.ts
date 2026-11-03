@@ -46,7 +46,7 @@ export { placePoint, IDENTITY, type Placement } from "./geometry/math";
 export { LIBRARY, EDGE_COMPONENTS } from "./library/components";
 export { PRESETS, presetBody, type PresetId } from "./library/presets";
 
-export { toSVG, exportBounds, type SvgOptions } from "./export/svg";
+export { toSVG, exportBounds, rulerPrims, closedPathD, type SvgOptions } from "./export/svg";
 export { toDXF } from "./export/dxf";
 export { addNicks, type NickOptions } from "./export/nicks";
 export { toFoldSVG } from "./export/fold";

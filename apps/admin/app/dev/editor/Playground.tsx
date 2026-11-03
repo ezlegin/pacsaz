@@ -42,7 +42,7 @@ function withCustomerOptions(doc: DielineDocument): DielineDocument {
 /** The full Studio on the reverse tuck end box body, with nothing saved. */
 export default function Playground() {
   const [store] = useState(
-    () => new EditorStore(withCustomerOptions(rteBox), { width: 100, length: 60, height: 120, thickness: 0.5 }),
+    () => new EditorStore(withCustomerOptions(rteBox), { width: 100, length: 60, height: 120, thickness: 0.5, bleed: 3 }),
   );
 
   // Handy from the browser console while developing the editor.
@@ -50,5 +50,18 @@ export default function Playground() {
     (window as unknown as { __editor: EditorStore }).__editor = store;
   }, [store]);
 
-  return <Studio store={store} title="Playground · reverse tuck end" sizeRange={SIZE_RANGE} />;
+  return (
+    <Studio
+      store={store}
+      title="Playground · reverse tuck end"
+      sizeRange={SIZE_RANGE}
+      // The playground has no dieline record; the real editor shows its settings form here.
+      settings={
+        <p className="p-3 text-xs text-muted-foreground">
+          In the real editor (/editor/[slug]) this tab holds the dieline&apos;s settings: title, slug, categories, images, bleed,
+          default/min/max sizes, dimension types and materials. The playground has no database record, so there is nothing to edit here.
+        </p>
+      }
+    />
+  );
 }

@@ -138,6 +138,24 @@ Phases (each ends with a commit message for the user to commit):
   with round corners; it does not use makerjs (too slow, and wrong on narrow
   notches). `export.test.ts` checks it on every preset at several distances.
 
+### 3D folding
+
+- The fold animation is staged (`dieline-3d/src/schedule.ts`): the body panels
+  one by one, then the bottom flaps, then the top flaps (flaps on flaps a step
+  later). Viewers start closed (progress 1), so opening shows the top first,
+  then the bottom, then the sides. Body panels hinge on vertical folds, flaps on
+  horizontal ones.
+- Visitors without a plan see the watermark on the 3D model too (`watermark`
+  prop of `DielineViewer`); the flat preview's watermark is clipped to the bleed
+  (`closedPathD`).
+- Fold direction and angle per panel are authored in the Studio's 3D dock (click
+  a panel) and saved in the template as `doc.folds`, keyed by rig face index with
+  `vertexCount`/`faceCount` for drift detection. The client passes them to the
+  viewer as its `foldConfig`. `@repo/dieline-3d/rig` exposes the rig without
+  three.js for this.
+- The Studio's Settings tab hosts the app's template settings form
+  (`settings` prop on `Studio`; the admin passes `DielineSettingsForm`).
+
 ### Customize mode (paid customer editor)
 
 - A customer's copy is **the template plus a `Customization` overlay**

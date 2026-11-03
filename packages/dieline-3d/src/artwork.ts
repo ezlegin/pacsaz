@@ -41,21 +41,34 @@ export const clampArtworkScale = (scale: number): number =>
 export const clampArtworkCentre = (value: number): number =>
   Math.min(1.6, Math.max(-0.6, value));
 
+/** Watermark tile size in pattern units: the same tile the 2D preview uses. */
+export const watermarkTile = (bounds: ArtworkBounds): number =>
+  Math.max(40, Math.min(bounds.width, bounds.height) / 2);
+
+type Drawable = CanvasImageSource & { width: number; height: number };
+
 /**
- * Draws the image onto a canvas covering the whole flat pattern.
+ * Draws the image onto a canvas covering the whole flat pattern, and tiles a
+ * watermark over it when one is given (the model of a visitor without a paid
+ * plan is marked like the flat preview).
  *
  * Painting the background first means any part of the pattern not covered by the
  * image reads as unprinted board instead of a stretched edge pixel.
  */
 export const composeArtwork = ({
   image,
+  watermark,
   transform,
   bounds,
+  background = "#ffffff",
   maxWidth = 2048,
 }: {
-  image: CanvasImageSource & { width: number; height: number };
+  image?: Drawable | null;
+  watermark?: Drawable | null;
   transform: ArtworkTransform;
   bounds: ArtworkBounds;
+  /** Colour of the unprinted board; the board's own colour when there is only a watermark. */
+  background?: string;
   maxWidth?: number;
 }): HTMLCanvasElement | null => {
   const ratio = bounds.height / bounds.width;
@@ -72,25 +85,42 @@ export const composeArtwork = ({
   if (!context) return null;
 
   // Uncovered pattern reads as plain board.
-  context.fillStyle = "#ffffff";
+  context.fillStyle = background;
   context.fillRect(0, 0, width, height);
-
-  const scale = clampArtworkScale(transform.scale);
-  const drawnWidth = scale * width;
-  const drawnHeight =
-    drawnWidth * (image.height / Math.max(1, image.width));
-
-  const centreX = clampArtworkCentre(transform.cx) * width;
-  const centreY = clampArtworkCentre(transform.cy) * height;
-
   context.imageSmoothingQuality = "high";
-  context.drawImage(
-    image,
-    centreX - drawnWidth / 2,
-    centreY - drawnHeight / 2,
-    drawnWidth,
-    drawnHeight,
-  );
+
+  if (image) {
+    const scale = clampArtworkScale(transform.scale);
+    const drawnWidth = scale * width;
+    const drawnHeight =
+      drawnWidth * (image.height / Math.max(1, image.width));
+
+    const centreX = clampArtworkCentre(transform.cx) * width;
+    const centreY = clampArtworkCentre(transform.cy) * height;
+
+    context.drawImage(
+      image,
+      centreX - drawnWidth / 2,
+      centreY - drawnHeight / 2,
+      drawnWidth,
+      drawnHeight,
+    );
+  }
+
+  if (watermark) {
+    // Square tiles with the mark fitted inside, as the 2D preview's pattern does.
+    const tile = (watermarkTile(bounds) * width) / bounds.width;
+    const fit = Math.min(tile / Math.max(1, watermark.width), tile / Math.max(1, watermark.height));
+    const w = watermark.width * fit;
+    const h = watermark.height * fit;
+    context.globalAlpha = 0.5;
+    for (let y = 0; y < height; y += tile) {
+      for (let x = 0; x < width; x += tile) {
+        context.drawImage(watermark, x + (tile - w) / 2, y + (tile - h) / 2, w, h);
+      }
+    }
+    context.globalAlpha = 1;
+  }
 
   return canvas;
 };

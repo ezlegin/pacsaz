@@ -106,6 +106,18 @@ export function drawnPath(
 }
 
 /** Holding Shift with the pen keeps the new segment at a multiple of 45°. */
+/**
+ * Shift while placing a shape: a line snaps to 0°, 45°, 90°…; anything else
+ * keeps a 1:1 aspect (a square, a circle), sized by the longer side of the drag.
+ */
+export function constrainPlace(kind: PlaceableKind, from: Pt, to: Pt): Pt {
+  if (kind === "line") return constrain45(from, to);
+  const dx = to[0] - from[0];
+  const dy = to[1] - from[1];
+  const size = Math.max(Math.abs(dx), Math.abs(dy));
+  return [from[0] + (dx < 0 ? -size : size), from[1] + (dy < 0 ? -size : size)];
+}
+
 export function constrain45(from: Pt, to: Pt): Pt {
   const dx = to[0] - from[0];
   const dy = to[1] - from[1];

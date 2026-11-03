@@ -1,4 +1,5 @@
 import type { RenderResult, RulerInfo } from "../eval/render";
+import { closedLoops } from "../geometry/bleed";
 import { add, angleOf, polar, scale, sub, unit, unionBounds, pathsBounds, sweep } from "../geometry/math";
 import type { Bounds, Path, Prim, Pt } from "../geometry/types";
 import type { LineType } from "../spec/types";
@@ -57,6 +58,19 @@ function primToD(prim: Prim): string {
       return `M${flip(from)}A${r} ${r} 0 ${s > 180 ? 1 : 0} 0 ${flip(to)}`;
     }
   }
+}
+
+/**
+ * The closed loops formed by `prims` as filled SVG path data, in the same
+ * flipped coordinates as `toSVG`. Separate line pieces have no area of their
+ * own, so this is what a clip path or a fill needs (a watermark kept inside the
+ * bleed, for one).
+ */
+export function closedPathD(prims: readonly Prim[]): string {
+  return closedLoops(prims)
+    .filter((loop) => loop.length >= 3)
+    .map((loop) => `M${loop.map(flip).join("L")}Z`)
+    .join("");
 }
 
 function strokeAttrs(style: LineStyle, base: number, nonScaling: boolean): string {
@@ -131,8 +145,8 @@ export function toSVG(result: RenderResult, options: SvgOptions = {}): string {
 
 //! Rulers -------------------------------------------------------------------------
 
-/** Extension lines, dimension line and ticks of a ruler. */
-function rulerPrims(r: RulerInfo): Prim[] {
+/** Extension lines, dimension line and ticks of a ruler, for any renderer. */
+export function rulerPrims(r: RulerInfo): Prim[] {
   const dir = unit(sub(r.to, r.from));
   const normal: Pt = [-dir[1], dir[0]];
   const shift = scale(normal, r.offset);

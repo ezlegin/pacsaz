@@ -150,6 +150,17 @@ export type CutoutRules = {
   minSize?: number;
 };
 
+/**
+ * How the 3D preview folds the dieline: per panel, which way and how far. A panel
+ * is the n-th face the fold rig finds (`@repo/dieline-3d`), which is stable for a
+ * given template at any size; `vertexCount` and `faceCount` let the viewer skip an
+ * override that no longer fits after the template's shape changed.
+ */
+export type FoldSettings = {
+  faceCount: number;
+  overrides: { faceIndex: number; direction: "in" | "out"; angle: number; vertexCount?: number }[];
+};
+
 /** The template's Customize-mode settings that are not attached to one node. */
 export type DocumentCustomize = {
   cutouts?: CutoutRules;
@@ -424,6 +435,7 @@ export type DielineDocument = {
   rulers: Ruler[];
   components: ComponentDef[];
   customize?: DocumentCustomize;
+  folds?: FoldSettings;
 };
 
 export function emptyDocument(): DielineDocument {

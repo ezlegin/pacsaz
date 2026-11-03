@@ -1,10 +1,11 @@
 "use client";
 
-import { LINE_STYLES, type RenderResult } from "@repo/dieline-engine";
+import { formatNumber, LINE_STYLES, rulerPrims, type RenderResult } from "@repo/dieline-engine";
 import { memo, useMemo, type JSX } from "react";
 import type { View } from "../state/store";
 import { groupPaths, pathsByNode } from "./paths";
-import { gridSteps } from "./viewport";
+import { primD } from "./paths";
+import { gridSteps, toScreen } from "./viewport";
 
 /** On screen, dashes are drawn in pixels so they read the same at every zoom. */
 const DASH_PX = 3;
@@ -53,6 +54,49 @@ export const GhostLayer = memo(function GhostLayer({ result, color }: { result: 
   );
   return <path d={d} fill="none" stroke={color} strokeOpacity={0.55} strokeWidth={1} strokeDasharray="5 3" vectorEffect="non-scaling-stroke" pointerEvents="none" />;
 });
+
+const DIMENSION_COLOR = "#0ea5e9";
+const BLEED_COLOR = "#22c55e";
+
+/** The bleed outline, in world coordinates. */
+export const BleedLayer = memo(function BleedLayer({ result }: { result: RenderResult }) {
+  const d = useMemo(() => result.bleed.map(primD).join(""), [result]);
+  if (!d) return null;
+  return <path d={d} fill="none" stroke={BLEED_COLOR} strokeWidth={1} vectorEffect="non-scaling-stroke" pointerEvents="none" />;
+});
+
+/** The template's dimension rulers: lines in world space (inside the world group). */
+export const DimensionLines = memo(function DimensionLines({ result }: { result: RenderResult }) {
+  const d = useMemo(() => result.rulers.flatMap(rulerPrims).map(primD).join(""), [result]);
+  if (!d) return null;
+  return <path d={d} fill="none" stroke={DIMENSION_COLOR} strokeWidth={1} vectorEffect="non-scaling-stroke" pointerEvents="none" />;
+});
+
+/** Their values, in screen space so the text stays upright and readable at any zoom. */
+export function DimensionLabels({ result, view }: { result: RenderResult; view: View }) {
+  return (
+    <g pointerEvents="none" fontSize={11} fontFamily="ui-sans-serif, system-ui" textAnchor="middle" fill={DIMENSION_COLOR}>
+      {result.rulers.map((r) => {
+        const dx = r.to[0] - r.from[0];
+        const dy = r.to[1] - r.from[1];
+        const len = Math.hypot(dx, dy) || 1;
+        const normal: [number, number] = [-dy / len, dx / len];
+        const mid: [number, number] = [(r.from[0] + r.to[0]) / 2 + normal[0] * r.offset, (r.from[1] + r.to[1]) / 2 + normal[1] * r.offset];
+        const s = toScreen(mid, view);
+        // Screen angle of the line (Y flips), turned so the text never reads upside down.
+        let angle = (-Math.atan2(dy, dx) * 180) / Math.PI;
+        if (angle > 90 || angle <= -90) angle += 180;
+        const ox = Math.sin((angle * Math.PI) / 180) * 5;
+        const oy = -Math.cos((angle * Math.PI) / 180) * 5;
+        return (
+          <text key={r.id} x={s[0] + ox} y={s[1] + oy} transform={`rotate(${angle} ${s[0] + ox} ${s[1] + oy})`} className="font-medium">
+            {formatNumber(Math.round(r.value * 10) / 10)}
+          </text>
+        );
+      })}
+    </g>
+  );
+}
 
 /**
  * Invisible wide strokes that receive pointer events, tagged with the leaf node

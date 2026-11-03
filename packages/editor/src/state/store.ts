@@ -23,7 +23,18 @@ export type EditorState = {
   drawLineType: LineType;
   view: View;
   snapping: boolean;
-  display: { guides: boolean; rulers: boolean; ghosts: boolean; nicks: boolean; issues: boolean; preview3d: boolean };
+  display: {
+    guides: boolean;
+    /** Screen rulers along the canvas edges. */
+    rulers: boolean;
+    /** The template's own dimension rulers (what exports show). */
+    dimensions: boolean;
+    bleed: boolean;
+    ghosts: boolean;
+    nicks: boolean;
+    issues: boolean;
+    preview3d: boolean;
+  };
   /** The smallest and largest sizes the template is sold in, for ghosts and checks. */
   sizeRange: { min: Dimensions; max: Dimensions } | null;
   /** Bridges left in the cut lines, shown when `display.nicks` and used on export. */
@@ -69,7 +80,7 @@ export class EditorStore {
       drawLineType: "cut",
       view: { x: 0, y: 0, zoom: 1 },
       snapping: true,
-      display: { guides: true, rulers: true, ghosts: false, nicks: false, issues: true, preview3d: false },
+      display: { guides: true, rulers: true, dimensions: true, bleed: true, ghosts: false, nicks: false, issues: true, preview3d: false },
       sizeRange: null,
       nicks: { width: 0.5, spacing: 60 },
       canUndo: false,

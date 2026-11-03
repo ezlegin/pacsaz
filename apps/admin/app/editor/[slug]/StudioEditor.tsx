@@ -6,8 +6,7 @@ import DielineSettingsForm from "@/components/forms/DielineSettingsForm";
 import type { DielineDocument } from "@repo/dieline-engine";
 import { EditorStore, Studio } from "@repo/editor";
 import { Button } from "@repo/ui/components/button";
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@repo/ui/components/dialog";
-import { ArrowLeft, Settings } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -43,6 +42,17 @@ export default function StudioEditor({
     [dieline],
   );
 
+  // Saving the Settings tab refreshes the page data; the preview follows the new defaults.
+  useEffect(() => {
+    store.setInputs({
+      width: dieline.settings.width,
+      length: dieline.settings.length,
+      height: dieline.settings.height,
+      thickness: dieline.settings.thickness,
+      bleed: dieline.settings.bleed,
+    });
+  }, [store, dieline.settings]);
+
   useEffect(() => {
     if (legacy) {
       toast.info("This dieline was made with the old editor. It opens empty here; saving replaces the old drawing.", {
@@ -63,18 +73,10 @@ export default function StudioEditor({
           </Link>
         </Button>
       }
-      trailing={
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="outline" size="sm">
-              <Settings /> Details
-            </Button>
-          </DialogTrigger>
-          <DialogContent showCloseButton={false} overlayClassname="backdrop-blur-xs bg-transparent" className="min-w-3xl">
-            <DialogTitle className="sr-only">Dieline details</DialogTitle>
-            <DielineSettingsForm categories={categories} dieline={dieline} />
-          </DialogContent>
-        </Dialog>
+      settings={
+        <div className="p-3 text-xs">
+          <DielineSettingsForm categories={categories} dieline={dieline} compact />
+        </div>
       }
       onSave={async (doc) => {
         const res = await saveDielineDocument(dieline.id, JSON.stringify(doc));

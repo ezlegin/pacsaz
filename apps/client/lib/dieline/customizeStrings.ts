@@ -99,4 +99,6 @@ export const FA_FOLD: Partial<FoldPreviewStrings> = {
   pending: "در حال ساخت مدل…",
   empty: "خطی برای تا کردن وجود ندارد.",
   failed: "این قالب قابل تا کردن نیست.",
+  expand: "نمای بزرگ",
+  shrink: "نمای کوچک",
 };

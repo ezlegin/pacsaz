@@ -96,6 +96,17 @@ export const updateTarrif = async (data: TarrifFormType, id: number) => {
     if (isRecommended && recommendedFeature)
       return { error: "There is already a tarrif with Recommended Label." };
 
+    const downloads = {
+      monthly: +fairDownload.monthly,
+      threeMonth: +fairDownload.threeMonth,
+      annual: +fairDownload.annual,
+    };
+    const prices = {
+      monthly: +price.monthly,
+      threeMonth: +price.threeMonth,
+      annual: +price.annual,
+    };
+
     await prisma.tarrif.update({
       where: { id },
       data: {
@@ -106,18 +117,19 @@ export const updateTarrif = async (data: TarrifFormType, id: number) => {
         shortDescription,
         title,
         discountAmount: +discountAmount,
+        // Upserts: a tariff made before these rows existed (or by a partial
+        // seed) has no price or download limit yet, and a nested `update` on a
+        // missing relation fails with P2025.
         fairDownload: {
-          update: {
-            monthly: +fairDownload.monthly,
-            threeMonth: +fairDownload.threeMonth,
-            annual: +fairDownload.annual,
+          upsert: {
+            create: downloads,
+            update: downloads,
           },
         },
         price: {
-          update: {
-            monthly: +price.monthly,
-            threeMonth: +price.threeMonth,
-            annual: +price.annual,
+          upsert: {
+            create: prices,
+            update: prices,
           },
         },
         features: {

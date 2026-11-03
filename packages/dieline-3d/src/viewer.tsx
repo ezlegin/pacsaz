@@ -4,7 +4,7 @@ import { OrbitControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { useEffect, useMemo, useState } from "react";
 import * as THREE from "three";
-import { applyArtwork, applyFold, buildRigScene, type RigScene } from "./build";
+import { applyArtwork, applyFold, buildRigScene, materialStyleFor, type RigScene } from "./build";
 import { composeArtwork, type ArtworkTransform } from "./artwork";
 import { extractSegmentsFromSvg } from "./extract";
 import { buildFoldRig } from "./foldRig";
@@ -84,6 +84,11 @@ export type DielineViewerProps = {
    * the viewer never uploads it, so it lives only as long as the caller's URL.
    */
   artwork?: { url: string; transform: ArtworkTransform } | null;
+  /**
+   * Image tiled over the whole model, as the flat preview is for visitors
+   * without a paid plan.
+   */
+  watermark?: string | null;
   className?: string;
   /**
    * Overlay content drawn on top of the canvas. Rarely needed: chrome that should
@@ -114,6 +119,7 @@ export const DielineViewer = ({
   isRendering,
   foldConfig,
   artwork,
+  watermark,
   className,
   children,
   onModelInfo,
@@ -199,9 +205,6 @@ export const DielineViewer = ({
    * Composition deps are the transform's primitives, not the object, so an inline
    * object from the caller cannot trigger needless work.
    */
-  const [artworkImage, setArtworkImage] = useState<HTMLImageElement | null>(
-    null,
-  );
   const [artworkTexture, setArtworkTexture] = useState<THREE.Texture | null>(
     null,
   );
@@ -213,35 +216,13 @@ export const DielineViewer = ({
   const bounds = rig?.bounds;
 
   /* --------------------------- decode once per URL ------------------------- */
-  useEffect(() => {
-    if (!artworkUrl) {
-      setArtworkImage(null);
-      return;
-    }
-
-    let cancelled = false;
-    const image = new Image();
-
-    image.onload = () => {
-      if (!cancelled) setArtworkImage(image);
-    };
-
-    image.onerror = () => {
-      if (cancelled) return;
-      console.error("[dieline-3d] artwork failed to decode");
-      setArtworkImage(null);
-    };
-
-    image.src = artworkUrl;
-
-    return () => {
-      cancelled = true;
-    };
-  }, [artworkUrl]);
+  const artworkImage = useDecodedImage(artworkUrl, "artwork");
+  const watermarkImage = useDecodedImage(watermark ?? undefined, "watermark");
+  const boardColor = materialStyleFor(material).color;
 
   /* ---------------------- recompose on every placement --------------------- */
   useEffect(() => {
-    if (!artworkImage || !bounds) {
+    if ((!artworkImage && !watermarkImage) || !bounds) {
       setArtworkTexture(null);
       return;
     }
@@ -249,12 +230,15 @@ export const DielineViewer = ({
     try {
       const canvas = composeArtwork({
         image: artworkImage,
+        watermark: watermarkImage,
         transform: {
           scale: artworkScale ?? 1,
           cx: artworkCx ?? 0.5,
           cy: artworkCy ?? 0.5,
         },
         bounds,
+        // A watermark alone keeps the board's colour; artwork is printed on white.
+        background: artworkImage ? "#ffffff" : boardColor,
         // Live preview: dragging recomposes on every move, so a 2048px canvas
         // would be wasted work for a model this size on screen.
         maxWidth: 1024,
@@ -275,7 +259,7 @@ export const DielineViewer = ({
       console.error("[dieline-3d] artwork compose failed", error);
       setArtworkTexture(null);
     }
-  }, [artworkImage, artworkScale, artworkCx, artworkCy, bounds]);
+  }, [artworkImage, watermarkImage, boardColor, artworkScale, artworkCx, artworkCy, bounds]);
 
   useEffect(() => {
     if (!scene) return;
@@ -398,3 +382,36 @@ export const DielineViewer = ({
 };
 
 export default DielineViewer;
+
+/** Decodes an image once per URL; null until it loads or when it fails. */
+function useDecodedImage(url: string | undefined, what: string): HTMLImageElement | null {
+  const [image, setImage] = useState<HTMLImageElement | null>(null);
+
+  useEffect(() => {
+    if (!url) {
+      setImage(null);
+      return;
+    }
+
+    let cancelled = false;
+    const next = new Image();
+
+    next.onload = () => {
+      if (!cancelled) setImage(next);
+    };
+
+    next.onerror = () => {
+      if (cancelled) return;
+      console.error(`[dieline-3d] ${what} failed to decode`);
+      setImage(null);
+    };
+
+    next.src = url;
+
+    return () => {
+      cancelled = true;
+    };
+  }, [url, what]);
+
+  return image;
+}

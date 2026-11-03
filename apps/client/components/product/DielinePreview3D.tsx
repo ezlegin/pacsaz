@@ -31,6 +31,7 @@ import type { UserType } from "./DielineDownloadButton";
 import FoldedIcon from "../FoldedIcon";
 import UnfoldedIcon from "../UnfoldedIcon";
 import { ArtworkPlacer } from "@repo/dieline-3d/ArtworkPlacer";
+import { watermarkPattern } from "@/public";
 
 /**
  * Previewing artwork on the 3D model is a paid capability.
@@ -101,6 +102,8 @@ const DielinePreview3D = ({
   const fileInput = useRef<HTMLInputElement>(null);
 
   const artworkUnlocked = canUseArtwork(user);
+  // The model is marked like the flat preview until the visitor has a paid plan.
+  const watermark = user?.plan ? null : watermarkPattern;
 
   /** Single entry point for choosing a file, so the plan gate cannot be bypassed. */
   const requestArtwork = () => {
@@ -193,6 +196,7 @@ const DielinePreview3D = ({
           isRendering={isRendering}
           foldConfig={foldConfig}
           artwork={viewerArtwork}
+          watermark={watermark}
           renderEmpty={emptyMessage}
           onModelInfo={(info) => setHasHinges(info.hasHinges)}
           className="h-52 w-full"
@@ -360,6 +364,7 @@ const DielinePreview3D = ({
                 isRendering={isRendering}
                 foldConfig={foldConfig}
                 artwork={viewerArtwork}
+                watermark={watermark}
                 renderEmpty={emptyMessage}
                 onModelInfo={(info) => setHasHinges(info.hasHinges)}
                 className="h-[58vh] w-full"

@@ -4,7 +4,7 @@ import { edgeSlots } from "../model/body";
 import { describe, expect, it } from "vitest";
 import { applyCompletion, completionsAt } from "../model/completions";
 import { addCutout, changeCount, removeCutout, setEdgeArg, setEdgePart, setParam, setPartOffset, setPartShown, updateCutout } from "../model/customize";
-import { constrain45, drawnPath, placedShape } from "../model/draw";
+import { constrain45, constrainPlace, drawnPath, placedShape } from "../model/draw";
 import { handlesFor } from "../model/handles";
 import { moveNodes } from "../model/move";
 import { groupNodes, ungroupNode } from "../model/ops";
@@ -346,5 +346,14 @@ describe("customer overlay edits", () => {
     expect(c.cutouts).toEqual([{ id: added.id, shape: "rect", panel: "body.front", cx: 1.23, cy: 0, width: 30, height: 30 }]);
     expect(changeCount(c)).toBe(1);
     expect(removeCutout(c, added.id)).toEqual({});
+  });
+});
+
+describe("Shift while placing", () => {
+  it("keeps shapes 1:1 and lines on 45° steps", () => {
+    expect(constrainPlace("rect", [0, 0], [30, -10])).toEqual([30, -30]);
+    expect(constrainPlace("ellipse", [5, 5], [-5, 25])).toEqual([-15, 25]);
+    const [x, y] = constrainPlace("line", [0, 0], [10, 1]);
+    expect([x, y]).toEqual([Math.hypot(10, 1), 0].map((v) => Math.round(v * 1e6) / 1e6));
   });
 });

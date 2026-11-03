@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { toDXF } from "../export/dxf";
-import { toSVG } from "../export/svg";
+import { closedPathD, toSVG } from "../export/svg";
 import { parseDocument } from "../spec/schema";
 import { render } from "../eval/render";
 import { resolveDimensions } from "../eval/dimensions";
@@ -99,6 +99,13 @@ describe("bleed", () => {
     const r = renderNodes([rect("a", "10", "10")], { bleed: 3 });
     const b = pathsBounds(r.bleed)!;
     expect([b.minX, b.minY, b.maxX, b.maxY].map((v) => Math.round(v * 100) / 100)).toEqual([-3, -3, 13, 13]);
+  });
+
+  it("closes into one fillable outline for clipping", () => {
+    const r = renderNodes([rect("a", "10", "10")], { bleed: 3 });
+    const d = closedPathD(r.bleed);
+    expect(d.match(/M/g)).toHaveLength(1);
+    expect(d.endsWith("Z")).toBe(true);
   });
 
   // 1.5 and 3 make the FEFCO slots (3 mm) exactly twice and once the bleed: offsets that touch instead of crossing.

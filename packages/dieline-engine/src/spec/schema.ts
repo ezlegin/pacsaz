@@ -266,6 +266,24 @@ const ruler = z.object({
   rules: z.array(rule).max(32).optional(),
 });
 
+const folds = z
+  .object({
+    faceCount: z.number().int().min(0),
+    overrides: z
+      .array(
+        z
+          .object({
+            faceIndex: z.number().int().min(0),
+            direction: z.enum(["in", "out"]),
+            angle: z.number().finite().min(0).max(180),
+            vertexCount: z.number().int().min(0).optional(),
+          })
+          .strict(),
+      )
+      .max(500),
+  })
+  .strict();
+
 export const documentSchema = z.object({
   version: z.literal(SPEC_VERSION),
   params: z.array(param),
@@ -273,6 +291,7 @@ export const documentSchema = z.object({
   nodes: z.array(node),
   rulers: z.array(ruler),
   components: z.array(component).max(LIMITS.components),
+  folds: folds.optional(),
   customize: z
     .object({
       cutouts: z

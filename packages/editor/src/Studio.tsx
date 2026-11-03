@@ -8,6 +8,7 @@ import { Canvas } from "./canvas/Canvas";
 import { FoldPreview } from "./canvas/Preview3D";
 import { Customizer } from "./customize/Customizer";
 import { buildCommands, downloadFile } from "./commands";
+import { groupNodes, ungroupNodes } from "./model/ops";
 import { CommandPalette } from "./panels/CommandPalette";
 import { DocumentPanel } from "./panels/DocumentPanel";
 import { IssuesPanel, useIssueCount } from "./panels/IssuesPanel";
@@ -30,6 +31,8 @@ export type StudioProps = {
   onSave?: (doc: DielineDocument) => Promise<SaveResult>;
   /** Called when a save fails, to show the error the app's way. */
   onError?: (message: string) => void;
+  /** The app's template settings (sizes, materials, bleed, images): the inspector's Settings tab. */
+  settings?: ReactNode;
   /** The smallest and largest sizes the template is sold in: drawn as ghosts and checked. */
   sizeRange?: { min: Dimensions; max: Dimensions } | null;
 };
@@ -64,7 +67,7 @@ function isEditable(target: EventTarget | null): boolean {
   return !!el && (el.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(el.tagName));
 }
 
-function StudioLayout({ title, leading, trailing, onSave, onError, sizeRange }: StudioProps) {
+function StudioLayout({ title, leading, trailing, onSave, onError, sizeRange, settings }: StudioProps) {
   const store = useStore();
   const [sidebar, setSidebar] = useState<"layers" | "checks">("layers");
   const issueCount = useIssueCount();
@@ -113,7 +116,18 @@ function StudioLayout({ title, leading, trailing, onSave, onError, sizeRange }: 
       }
 
       const target = e.target as HTMLElement | null;
-      if (isEditable(target) || target?.closest("[data-editor-canvas]") || palette || customerView) return;
+      if (isEditable(target) || palette || customerView) return;
+
+      // Grouping is handled here only, wherever focus is, so the browser never
+      // gets Ctrl+G (find next) and the canvas never groups a second time.
+      if (mod && key === "g") {
+        e.preventDefault();
+        const { doc, result, selection } = store.get();
+        const r = e.shiftKey ? ungroupNodes(doc, selection) : groupNodes(doc, result, selection);
+        if (r) store.apply(() => r.doc, "id" in r ? [r.id] : r.ids);
+        return;
+      }
+      if (target?.closest("[data-editor-canvas]")) return;
 
       if (mod && key === "z") {
         e.preventDefault();
@@ -195,7 +209,7 @@ function StudioLayout({ title, leading, trailing, onSave, onError, sizeRange }: 
         <main className="relative min-w-0 flex-1" data-editor-canvas>
           <Canvas className="h-full w-full" showGuides={display.guides} showRulers={display.rulers} />
         </main>
-        <Inspector />
+        <Inspector settings={settings} />
       </div>
       )}
       <CommandPalette
@@ -230,16 +244,16 @@ function CustomerPreview({ value, onChange, onClose }: { value: Customization; o
         inputs={inputs}
         value={value}
         onChange={onChange}
-        overlay={(result) => fold && <FoldPreview result={result} thickness={inputs.thickness} onClose={() => setFold(false)} />}
+        overlay={(result) => fold && <FoldPreview result={result} thickness={inputs.thickness} folds={doc.folds} onClose={() => setFold(false)} />}
       />
     </div>
   );
 }
 
 /** Right panel: the selected node's properties, or the document's. */
-function Inspector() {
+function Inspector({ settings }: { settings?: ReactNode }) {
   const selection = useEditor((s) => s.selection);
-  const [tab, setTab] = useState<"design" | "document">("design");
+  const [tab, setTab] = useState<"design" | "document" | "settings">("design");
   const single = selection.length === 1 ? selection[0]! : null;
 
   // Selecting something brings its properties forward.
@@ -247,12 +261,13 @@ function Inspector() {
     if (single) setTab("design");
   }, [single]);
 
-  const showing = single && tab === "design" ? "design" : "document";
+  const showing = tab === "settings" && settings ? "settings" : single && tab === "design" ? "design" : "document";
+  const tabs = settings ? (["design", "document", "settings"] as const) : (["design", "document"] as const);
 
   return (
     <aside className="flex w-[340px] shrink-0 flex-col border-l bg-background">
       <div className="flex h-8 shrink-0 border-b text-[11px] font-semibold uppercase tracking-wide">
-        {(["design", "document"] as const).map((t) => (
+        {tabs.map((t) => (
           <button
             key={t}
             type="button"
@@ -263,12 +278,14 @@ function Inspector() {
               showing === t && "border-blue-600 text-foreground",
             )}
           >
-            {t === "design" ? "Shape" : "Template"}
+            {t === "design" ? "Shape" : t === "document" ? "Template" : "Settings"}
           </button>
         ))}
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto">
-        {showing === "design" && single ? (
+        {showing === "settings" ? (
+          settings
+        ) : showing === "design" && single ? (
           <NodeInspector key={single} id={single} />
         ) : (
           <>

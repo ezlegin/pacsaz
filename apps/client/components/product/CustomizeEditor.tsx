@@ -108,6 +108,7 @@ export default function CustomizeEditor({
           <FoldPreview
             result={result}
             thickness={inputs.thickness}
+            folds={template.folds}
             strings={FA_FOLD}
             onClose={() => setFold(false)}
             className="left-3 right-auto"

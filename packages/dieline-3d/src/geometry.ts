@@ -23,6 +23,7 @@ export {
   clampArtworkCentre,
   clampArtworkScale,
   composeArtwork,
+  watermarkTile,
   defaultArtworkTransform,
   MAX_ARTWORK_SCALE,
   MIN_ARTWORK_SCALE,
@@ -35,6 +36,7 @@ export {
   buildFoldRig,
   FOLD_CLOSURE_ANGLE,
 } from "./foldRig";
+export { foldSchedule, stageProgress, type FoldWindow } from "./schedule";
 export {
   applyFold,
   buildEdgeLines,

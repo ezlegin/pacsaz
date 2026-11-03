@@ -78,7 +78,8 @@ export function useEngineDieline(dieline: EngineDieline, options: { watermark: b
         dimensionType: type,
         format: "pdf",
         showOverallRulers: false,
-        foldConfig: dieline.settings.foldConfig ?? "",
+        // Fold directions are authored in the Studio and saved with the template.
+        foldConfig: template?.folds ? JSON.stringify({ version: 1, ...template.folds }) : "",
       }),
     );
     // Defaults are set once per page; later changes come from the settings panel.

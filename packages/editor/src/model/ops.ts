@@ -80,3 +80,17 @@ export function ungroupNode(doc: DielineDocument, id: string): { doc: DielineDoc
     ids: children.map((c) => c.id),
   };
 }
+
+/** Ungroups every group among `ids`; null when none of them can be dissolved. */
+export function ungroupNodes(doc: DielineDocument, ids: readonly string[]): { doc: DielineDocument; ids: string[] } | null {
+  let next = doc;
+  const out: string[] = [];
+  for (const id of ids) {
+    const r = ungroupNode(next, id);
+    if (r) {
+      next = r.doc;
+      out.push(...r.ids);
+    }
+  }
+  return out.length ? { doc: next, ids: out } : null;
+}

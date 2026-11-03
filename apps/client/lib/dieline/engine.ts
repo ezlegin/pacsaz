@@ -1,5 +1,6 @@
 import { materials } from "@repo/dieline-core/data/materials";
 import {
+  closedPathD,
   parseCustomization,
   parseDocument,
   toFoldSVG,
@@ -72,11 +73,14 @@ export function previewSvg(result: RenderResult, options: { watermark: boolean; 
   const [x, y, w, h] = box as [number, number, number, number];
   // A tile about a quarter of the drawing, so the mark shows at any size.
   const tile = Math.max(40, Math.min(w, h) / 2);
+  // Only the printed sheet is marked: inside the bleed, or the cut outline without one.
+  const sheet = closedPathD(result.bleed.length ? result.bleed : result.paths.filter((p) => p.lineType === "cut"));
+  const clip = sheet ? `<clipPath id="watermark-sheet"><path d="${sheet}" clip-rule="evenodd"/></clipPath>` : "";
   return svg.replace(
     "</svg>",
     `<defs><pattern id="watermark" patternUnits="userSpaceOnUse" x="${x}" y="${y}" width="${tile}" height="${tile}">` +
-      `<image href="/watermark.png" width="${tile}" height="${tile}" opacity="0.5" preserveAspectRatio="xMidYMid meet"/></pattern></defs>` +
-      `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="url(#watermark)" pointer-events="none"/></svg>`,
+      `<image href="/watermark.png" width="${tile}" height="${tile}" opacity="0.5" preserveAspectRatio="xMidYMid meet"/></pattern>${clip}</defs>` +
+      `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="url(#watermark)"${clip ? ` clip-path="url(#watermark-sheet)"` : ""} pointer-events="none"/></svg>`,
   );
 }
 

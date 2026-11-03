@@ -1,7 +1,7 @@
 "use server";
 
 import { DielineMetadataFormType } from "@/lib/validationSchema/validatoinSchema";
-import { prisma } from "@repo/db";
+import { prisma, type DimensionType } from "@repo/db";
 import { parseDocument } from "@repo/dieline-engine";
 import { materials as allMats } from "@repo/dieline-core/data/materials";
 import { UploadApiResponse } from "cloudinary";
@@ -162,8 +162,9 @@ export const updateDieline = async (
         },
         settings: {
           update: {
-            material: materials.split(",")[0]!, // todo
-            dimensionType: "manufacture", // todo
+            material: defaultMaterial,
+            // The first allowed type is what the product page opens with.
+            dimensionType: (dimensionTypes.split(",")[0] || "manufacture") as DimensionType,
             thickness:
               allMats.find((m) => m.value === defaultMaterial)?.thickness ??
               0.5,

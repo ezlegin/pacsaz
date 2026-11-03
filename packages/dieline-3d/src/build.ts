@@ -1,3 +1,4 @@
+import { foldSchedule, stageProgress, type FoldWindow } from "./schedule";
 import * as THREE from "three";
 import type { FoldRig, Pt, RigNode } from "./types";
 
@@ -483,8 +484,17 @@ export const buildRigScene = ({
   return { group: root, pivots, size, style };
 };
 
+// The schedule only depends on the rig, and the slider calls `applyFold` per frame.
+const schedules = new WeakMap<FoldRig, FoldWindow[]>();
+const scheduleOf = (rig: FoldRig): FoldWindow[] => {
+  let s = schedules.get(rig);
+  if (!s) schedules.set(rig, (s = foldSchedule(rig)));
+  return s;
+};
+
 /**
- * Applies the fold amount to every pivot.
+ * Applies the fold amount to every pivot. Panels fold in stages (see
+ * `foldSchedule`): top flaps, bottom flaps, then the body panels one by one.
  *
  * `progress` runs 0 (flat sheet) to 1 (fully closed). Each node rotates about its
  * own hinge axis — which lies *in* the flat plane — so the panel tilts out of
@@ -496,6 +506,7 @@ export const applyFold = (
   progress: number,
 ) => {
   const clamped = Math.max(0, Math.min(1, progress));
+  const schedule = scheduleOf(rig);
 
   rig.nodes.forEach((node, index) => {
     const pivot = scene.pivots[index];
@@ -508,7 +519,8 @@ export const applyFold = (
     if (axis.lengthSq() < 1e-12) return;
     axis.normalize();
 
-    pivot.quaternion.setFromAxisAngle(axis, node.sign * node.angle * clamped);
+    const amount = stageProgress(schedule[index] ?? { start: 0, end: 1 }, clamped);
+    pivot.quaternion.setFromAxisAngle(axis, node.sign * node.angle * amount);
   });
 
   scene.group.updateMatrixWorld(true);

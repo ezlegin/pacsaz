@@ -5,7 +5,7 @@ import { Button } from "@repo/ui/components/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@repo/ui/components/popover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@repo/ui/components/tooltip";
 import { cn } from "@repo/ui/lib/utils";
-import { Box, CircleAlert, Command, Download, Grid2x2, Layers2, Loader2, Magnet, Redo2, Ruler, Scissors, Undo2, UserRound, type LucideIcon } from "lucide-react";
+import { Box, CircleAlert, Command, Download, Grid2x2, Layers2, Loader2, Magnet, MoveHorizontal, Redo2, Ruler, Scissors, SquareDashed, Undo2, UserRound, type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { downloadFile } from "../commands";
 import { useEditor, useStore } from "../state/react";
@@ -108,7 +108,19 @@ export function TopBar({
       <div className="mx-1 h-5 w-px bg-border" />
       <BarButton Icon={Magnet} label={`Snapping ${snapping ? "on" : "off"} (S)`} active={snapping} onClick={() => store.setSnapping(!snapping)} />
       <BarButton Icon={Grid2x2} label={`Guides ${display.guides ? "shown" : "hidden"}`} active={display.guides} onClick={() => store.setDisplay({ guides: !display.guides })} />
-      <BarButton Icon={Ruler} label={`Rulers ${display.rulers ? "shown" : "hidden"}`} active={display.rulers} onClick={() => store.setDisplay({ rulers: !display.rulers })} />
+      <BarButton Icon={Ruler} label={`Screen rulers ${display.rulers ? "shown" : "hidden"}`} active={display.rulers} onClick={() => store.setDisplay({ rulers: !display.rulers })} />
+      <BarButton
+        Icon={MoveHorizontal}
+        label={`Dimension rulers ${display.dimensions ? "shown" : "hidden"} (add one with the measure tool)`}
+        active={display.dimensions}
+        onClick={() => store.setDisplay({ dimensions: !display.dimensions })}
+      />
+      <BarButton
+        Icon={SquareDashed}
+        label={inputs.bleed ? `Bleed (${inputs.bleed} mm) ${display.bleed ? "shown" : "hidden"}` : "Bleed: set a bleed in Template › Preview size"}
+        active={display.bleed && !!inputs.bleed}
+        onClick={() => store.setDisplay({ bleed: !display.bleed })}
+      />
       <BarButton Icon={CircleAlert} label={`Problem markers ${display.issues ? "shown" : "hidden"}`} active={display.issues} onClick={() => store.setDisplay({ issues: !display.issues })} />
       <BarButton
         Icon={Layers2}

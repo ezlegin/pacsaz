@@ -39,13 +39,12 @@ import {
 } from "../model/frames";
 import { handlesFor, type Handle } from "../model/handles";
 import { moveNodes } from "../model/move";
-import { constrain45, drawnPath, placedShape, type DrawPoint } from "../model/draw";
-import { groupNodes, ungroupNode } from "../model/ops";
+import { constrain45, constrainPlace, drawnPath, placedShape, type DrawPoint } from "../model/draw";
 import { niceStep, snapMoving, snappedDelta, snapTargets, wouldCycle, type SnapResult, type SnapTarget } from "../model/snap";
 import { useEditor, useStore } from "../state/react";
 import type { View } from "../state/store";
 import { useAnalysis } from "../state/analysis";
-import { DielineLayer, GhostLayer, Grid, HighlightLayer, HitLayer, RULER_SIZE, ScreenRulers } from "./layers";
+import { BleedLayer, DielineLayer, DimensionLabels, DimensionLines, GhostLayer, Grid, HighlightLayer, HitLayer, RULER_SIZE, ScreenRulers } from "./layers";
 import { Preview3D } from "./Preview3D";
 import { MeasureOverlay, type MeasureState, type MeasurePoint } from "./MeasureOverlay";
 import { EdgeChips } from "./EdgeChips";
@@ -459,9 +458,11 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
         setMarquee([g.start, s]);
         return;
 
-      case "place":
-        setPlacing({ start: g.start, end: measurePoint(world, snapOn) });
+      case "place": {
+        const end = measurePoint(world, snapOn);
+        setPlacing({ start: g.start, end: e.shiftKey ? { p: constrainPlace(store.get().placeKind, g.start.p, end.p) } : end });
         return;
+      }
     }
   };
 
@@ -477,7 +478,8 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
       case "place": {
         const end = screenOf(e);
         const dragged = Math.hypot(end[0] - g.startScreen[0], end[1] - g.startScreen[1]) >= DRAG_THRESHOLD;
-        const finalEnd = dragged ? measurePoint(toWorld(end, state.view), state.snapping && !e.ctrlKey) : null;
+        let finalEnd = dragged ? measurePoint(toWorld(end, state.view), state.snapping && !e.ctrlKey) : null;
+        if (finalEnd && e.shiftKey) finalEnd = { p: constrainPlace(state.placeKind, g.start.p, finalEnd.p) };
         setPlacing(null);
         const node = placedShape(state.doc, state.result, state.scope, state.placeKind, g.start, finalEnd, state.drawLineType);
         store.apply((d) => insertNodes(d, [node], state.scope), [node.id]);
@@ -566,26 +568,6 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
       if (!state.selection.length) return;
       const { doc: next, ids } = duplicateNodes(state.doc, state.selection);
       store.apply(() => next, ids);
-      return;
-    }
-    if (mod && key === "g") {
-      e.preventDefault();
-      if (e.shiftKey) {
-        const groups = state.selection.filter((id) => state.result.nodes[id]?.kind === "group");
-        let next = state.doc;
-        const ids: string[] = [];
-        for (const id of groups) {
-          const r = ungroupNode(next, id);
-          if (r) {
-            next = r.doc;
-            ids.push(...r.ids);
-          }
-        }
-        if (ids.length) store.apply(() => next, ids);
-      } else {
-        const r = groupNodes(state.doc, state.result, state.selection);
-        if (r) store.apply(() => r.doc, [r.id]);
-      }
       return;
     }
     if (mod) return;
@@ -727,9 +709,12 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
           <HighlightLayer result={result} leafIds={selectedLeaves} hoverLeafIds={hoverLeaves} />
           {display.ghosts && ghosts.min && <GhostLayer result={ghosts.min} color="rgb(139 92 246)" />}
           {display.ghosts && ghosts.max && <GhostLayer result={ghosts.max} color="rgb(249 115 22)" />}
+          {display.bleed && <BleedLayer result={result} />}
           <DielineLayer result={shown} showGuides={showGuides} />
+          {display.dimensions && <DimensionLines result={result} />}
           {tool === "select" && <HitLayer result={result} />}
         </g>
+        {display.dimensions && <DimensionLabels result={result} view={view} />}
 
         {/* Selection box and size */}
         {selBounds && dragging !== "marquee" && (() => {
