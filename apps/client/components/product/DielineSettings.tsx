@@ -1,8 +1,6 @@
 import { DIMENSIONS, DIMENSIONS_TYPE } from "@/data/consts";
 import { aiIcon, dxfIcon, pdfIcon } from "@/public";
-import { isPackagingSizeLogical } from "@repo/dieline-core/utils/isPackagingSizeLogical";
 import { bleeds as BLEEDS } from "@repo/dieline-core/data/materials";
-import { Badge } from "@repo/ui/components/badge";
 import {
   Select,
   SelectContent,
@@ -11,17 +9,10 @@ import {
   SelectValue,
 } from "@repo/ui/components/select";
 import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@repo/ui/components/tooltip";
 import { cn } from "@repo/ui/lib/utils";
-import { CircleQuestionMark, SlidersHorizontal } from "lucide-react";
+import { TriangleAlert } from "lucide-react";
+import type { IssueCode } from "@repo/dieline-engine";
 import Image from "next/image";
-import Link from "next/link";
-import Diamond from "@/public/icons/Diamond";
-import { canCustomize } from "@/lib/dieline/access";
 import { Section } from "./DetailsSection";
 import DielineDownloadButton, { UserType } from "./DielineDownloadButton";
 import { DimensionInput } from "./DimensionsInput";
@@ -41,17 +32,27 @@ import { Format } from "@repo/store/types";
 interface Props {
   slug: string;
   isRendering: boolean;
-  /** The template has Customize-mode options: show the way into the paid editor. */
-  customizable?: boolean;
+  /** What the design checks find in the dieline at the chosen size. */
+  problems: (IssueCode | "build")[];
   user: UserType | null;
 }
 
-export default function DielineSettings({ slug, isRendering, user, customizable }: Props) {
+/** The Studio's design checks, said for a customer. */
+const PROBLEM_TEXT: Record<IssueCode | "build", string> = {
+  build: "بخشی از قالب در این ابعاد ساخته نمی‌شود.",
+  gap: "خط برش در جایی باز مانده و قطعه کامل جدا نمی‌شود.",
+  openCut: "انتهای یک خط برش آزاد مانده است.",
+  doubleKnife: "دو خط برش روی هم افتاده‌اند.",
+  crossing: "خطوط برش از روی هم رد می‌شوند.",
+  danglingFold: "یک خط تا وسط مقوا تمام می‌شود.",
+  tinySegment: "تکه‌ای از خطوط برای برش بیش از حد کوتاه است.",
+};
+
+export default function DielineSettings({ slug, isRendering, user, problems }: Props) {
   const {
     bleed,
     dimensionType,
     format,
-    dimension,
     minDimension,
     dimensionTypes,
     maxDimension,
@@ -70,28 +71,10 @@ export default function DielineSettings({ slug, isRendering, user, customizable 
     "bg-slate-600",
   ];
 
-  const isPackagingLogical = isPackagingSizeLogical(
-    dimension.raw.height,
-    dimension.raw.width,
-  );
-
   const isPremium = !!user && user.plan?.isPremium;
 
   return (
     <aside className="flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border bg-background shadow-sm z-10">
-      {/* ------------------------------- header ------------------------------ */}
-      <div className="flex shrink-0 items-center gap-2.5 border-b bg-muted/30 px-5 py-4">
-        <span className="grid size-8 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
-          <SlidersHorizontal className="size-4" strokeWidth={1.9} />
-        </span>
-        <div className="min-w-0">
-          <h2 className="truncate text-xs font-bold">تنظیمات قالب</h2>
-          <p className="truncate text-[10px] text-muted-foreground">
-            ابعاد، متریال و خروجی را اینجا تنظیم کن
-          </p>
-        </div>
-      </div>
-
       {/* -------------------------------- body ------------------------------- */}
       <div className="scrollbar-soft min-h-0 flex-1 space-y-5 overflow-y-auto p-5">
         <Section title="ابعاد" infoContent={<DimensionGuide />}>
@@ -108,36 +91,19 @@ export default function DielineSettings({ slug, isRendering, user, customizable 
             ))}
           </div>
 
-          {!isPackagingLogical && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Badge
-                  variant={"lightRed"}
-                  className="mt-3 w-full rounded-2xl p-3"
-                >
-                  <div className="flex items-start gap-2 text-right">
-                    <CircleQuestionMark size={15} className="mt-0.5 shrink-0" />
-                    <div className="text-wrap text-[11px] leading-5">
-                      احتمال وجود خطای برش با ابعاد ورودی شما وجود دارد.
-                    </div>
-                  </div>
-                </Badge>
-              </TooltipTrigger>
-              <TooltipContent side="left" className="max-w-sm">
-                <p className="text-[11px] leading-6">
-                  دایلاین باید با استانداردهای مشخصات ساخت بسته‌بندی مطابقت
-                  داشته باشد. پس از اینکه ابعاد را تنظیم کردید، ما بررسی‌های
-                  منطقیِ ساختاری انجام می‌دهیم تا اطمینان حاصل شود که فایل با
-                  مشخصات تولید مطابقت دارد.
-                  <br />
-                  اگر پیام «احتمال وجود خطای برش با ابعاد ورودی شما وجود دارد.»
-                  نمایش داده شود، یعنی بسته‌بندی شما در بررسی منطقی مردود شده
-                  است. با این حال، همچنان می‌توانید دایلاین را دانلود کنید، اما
-                  باید پیش از تولید، جزئیات را به‌طور کامل با کارخانه بررسی و
-                  تأیید کنید.
-                </p>
-              </TooltipContent>
-            </Tooltip>
+          {problems.length > 0 && (
+            <div role="alert" className="mt-3 rounded-xl border border-red-200 bg-red-50 p-3 text-[11px] leading-5 text-red-700">
+              <p className="flex items-center gap-1.5 font-bold">
+                <TriangleAlert className="size-3.5 shrink-0" />
+                این دایلاین در این ابعاد ایراد دارد
+              </p>
+              <ul className="mt-1 list-disc space-y-0.5 pr-5">
+                {problems.map((code) => (
+                  <li key={code}>{PROBLEM_TEXT[code]}</li>
+                ))}
+              </ul>
+              <p className="mt-1.5 text-red-600/80">ابعاد را تغییر دهید یا پیش از تولید با چاپخانه هماهنگ کنید.</p>
+            </div>
           )}
         </Section>
 
@@ -269,15 +235,6 @@ export default function DielineSettings({ slug, isRendering, user, customizable 
 
       {/* ------------------------------- footer ------------------------------ */}
       <div className="shrink-0 border-t bg-muted/20 p-4">
-        {customizable && (
-          <Link
-            href={`/dieline/${slug}/customize`}
-            className="mb-2 flex items-center justify-center gap-2 rounded-xl border border-primary/30 bg-primary/[0.05] py-2.5 text-xs font-bold text-primary transition-colors hover:bg-primary/10"
-          >
-            {!canCustomize(user?.plan) && <Diamond />}
-            ویرایش پیشرفته: بال‌ها، پنجره و سوراخ
-          </Link>
-        )}
         <DielineDownloadButton
           isRendering={isRendering}
           slug={slug}

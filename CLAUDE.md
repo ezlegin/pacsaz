@@ -152,8 +152,12 @@ Phases (each ends with a commit message for the user to commit):
   flaps on horizontal ones.
 - Visitors without a plan see the watermark on the 3D model too (`watermark`
   prop of `DielineViewer`); the flat preview's watermark is clipped to the bleed
-  (`closedPathD`). The Studio canvas fills the bleed white (`BleedSheet`); exports
-  never do.
+  (`sheetLoops`). The printed sheet (`geometry/sheet.ts`) is the bleed outline
+  with every window left open; the Studio canvas and the client preview fill it
+  white (`sheetFill`), exports never do. `overallRulers(result)` measures each
+  separate cut part; rulers draw with arrowheads and an "N mm" label on the line.
+- The product page shows `checkDieline` problems at the chosen size (Persian
+  text in `DielineSettings`), not a rule of thumb.
 - Fold direction and angle per panel are authored in the Studio's 3D dock (click
   a panel) and saved in the template as `doc.folds`, keyed by rig face index with
   `vertexCount`/`faceCount` for drift detection. The client passes them to the

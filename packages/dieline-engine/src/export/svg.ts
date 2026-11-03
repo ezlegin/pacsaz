@@ -1,5 +1,6 @@
 import type { RenderResult, RulerInfo } from "../eval/render";
 import { closedLoops } from "../geometry/bleed";
+import { overallRulers, sheetLoops } from "../geometry/sheet";
 import { add, angleOf, polar, scale, sub, unit, unionBounds, pathsBounds, sweep } from "../geometry/math";
 import type { Bounds, Path, Prim, Pt } from "../geometry/types";
 import type { LineType } from "../spec/types";
@@ -23,6 +24,10 @@ export type SvgOptions = {
   nicks?: NickOptions;
   rulerColor?: string;
   rulerFontSize?: number;
+  /** Add each part's overall width and height (computed, not from the document). */
+  overallRulers?: boolean;
+  /** Fill the printed sheet (inside the bleed, windows left open) with this colour. On-screen previews only. */
+  sheetFill?: string;
 };
 
 const fmt = (n: number) => {
@@ -67,7 +72,12 @@ function primToD(prim: Prim): string {
  * bleed, for one).
  */
 export function closedPathD(prims: readonly Prim[]): string {
-  return closedLoops(prims)
+  return loopsD(closedLoops(prims));
+}
+
+/** Closed loops as SVG path data, in `toSVG`'s flipped coordinates. */
+export function loopsD(loops: readonly Pt[][]): string {
+  return loops
     .filter((loop) => loop.length >= 3)
     .map((loop) => `M${loop.map(flip).join("L")}Z`)
     .join("");
@@ -87,7 +97,7 @@ export function exportBounds(result: RenderResult, options: SvgOptions = {}): Bo
   let b = options.includeGuides ? pathsBounds(result.paths) : result.bounds;
   if (options.includeBleed) b = unionBounds(b, pathsBounds(result.bleed));
   if (options.includeRulers) {
-    for (const r of result.rulers) b = unionBounds(b, pathsBounds(rulerPrims(r)));
+    for (const r of shownRulers(result, options)) b = unionBounds(b, pathsBounds(rulerPrims(r)));
   }
   return b;
 }
@@ -104,6 +114,11 @@ export function toSVG(result: RenderResult, options: SvgOptions = {}): string {
   const viewBox = `${fmt(b.minX - pad)} ${fmt(-b.maxY - pad)} ${fmt(width)} ${fmt(height)}`;
 
   const body: string[] = [];
+
+  if (options.sheetFill) {
+    const d = loopsD(sheetLoops(result));
+    if (d) body.push(`<path d="${d}" fill="${options.sheetFill}" fill-rule="evenodd" stroke="none"/>`);
+  }
 
   if (options.includeBleed && result.bleed.length) {
     body.push(
@@ -133,7 +148,7 @@ export function toSVG(result: RenderResult, options: SvgOptions = {}): string {
   if (options.includeRulers) {
     const color = options.rulerColor ?? "#0ea5e9";
     const fontSize = options.rulerFontSize ?? 3.5;
-    for (const ruler of result.rulers) body.push(rulerSVG(ruler, color, fontSize, base, nonScaling));
+    for (const ruler of shownRulers(result, options)) body.push(rulerSVG(ruler, color, fontSize, base, nonScaling));
   }
 
   return (
@@ -145,39 +160,61 @@ export function toSVG(result: RenderResult, options: SvgOptions = {}): string {
 
 //! Rulers -------------------------------------------------------------------------
 
-/** Extension lines, dimension line and ticks of a ruler, for any renderer. */
-export function rulerPrims(r: RulerInfo): Prim[] {
+function shownRulers(result: RenderResult, options: SvgOptions): RulerInfo[] {
+  return options.overallRulers ? [...result.rulers, ...overallRulers(result)] : result.rulers;
+}
+
+/** The dimension line's two ends, `a` at `from`, after the offset. */
+export function rulerEnds(r: RulerInfo): { a: Pt; b: Pt; dir: Pt; normal: Pt } {
   const dir = unit(sub(r.to, r.from));
   const normal: Pt = [-dir[1], dir[0]];
   const shift = scale(normal, r.offset);
-  const a = add(r.from, shift);
-  const b = add(r.to, shift);
-  const tick = scale(add(dir, normal), 1.2);
+  return { a: add(r.from, shift), b: add(r.to, shift), dir, normal };
+}
 
+/** Extension lines and the dimension line of a ruler, for any renderer. Arrows are drawn by `rulerArrows`. */
+export function rulerPrims(r: RulerInfo): Prim[] {
+  const { a, b, normal } = rulerEnds(r);
+  // Extension lines run a little past the dimension line, as on a drawing.
+  const over = scale(normal, Math.sign(r.offset || 1) * 1.5);
   return [
-    { kind: "line", a: r.from, b: a },
-    { kind: "line", a: r.to, b },
+    { kind: "line", a: r.from, b: add(a, over) },
+    { kind: "line", a: r.to, b: add(b, over) },
     { kind: "line", a, b },
-    { kind: "line", a: sub(a, tick), b: add(a, tick) },
-    { kind: "line", a: sub(b, tick), b: add(b, tick) },
   ];
+}
+
+/** Filled arrowheads at both ends of the dimension line, pointing outwards, `size` long. */
+export function rulerArrows(r: RulerInfo, size: number): [Pt, Pt, Pt][] {
+  const { a, b, dir, normal } = rulerEnds(r);
+  const head = (tip: Pt, back: Pt): [Pt, Pt, Pt] => {
+    const base = add(tip, scale(back, size));
+    return [tip, add(base, scale(normal, size * 0.35)), sub(base, scale(normal, size * 0.35))];
+  };
+  return [head(a, dir), head(b, scale(dir, -1))];
+}
+
+/** "60 mm", as the label reads. */
+export function rulerLabel(r: RulerInfo): string {
+  return `${fmt(Math.round(r.value * 10) / 10)} mm`;
 }
 
 function rulerSVG(r: RulerInfo, color: string, fontSize: number, base: number, nonScaling: boolean): string {
   const prims = rulerPrims(r);
-  const dir = unit(sub(r.to, r.from));
-  const normal: Pt = [-dir[1], dir[0]];
-  const midPoint = add(scale(add(r.from, r.to), 0.5), scale(normal, r.offset + fontSize * 0.4));
+  const { a, b, dir } = rulerEnds(r);
+  const arrows = rulerArrows(r, fontSize * 0.9).map((t) => `M${t.map(flip).join("L")}Z`).join("");
 
-  // Keep the label readable: never upside down.
+  // Keep the label readable: never upside down. It sits on the line, which a
+  // white halo breaks around it.
   let angle = -angleOf(dir);
   if (angle > 90 || angle <= -90) angle += 180;
 
-  const [x, y] = flip(midPoint).split(" ");
+  const [x, y] = flip(scale(add(a, b), 0.5)).split(" ");
   return (
     `<g data-ruler-id="${escapeAttr(r.id)}">` +
     `<path d="${prims.map(primToD).join("")}" fill="none" stroke="${color}" stroke-width="${fmt(base * 0.6)}"${nonScaling ? ` vector-effect="non-scaling-stroke"` : ""}/>` +
-    `<text x="${x}" y="${y}" fill="${color}" font-size="${fmt(fontSize)}" font-family="sans-serif" text-anchor="middle" transform="rotate(${fmt(angle)} ${x} ${y})">${fmt(Math.round(r.value * 10) / 10)}</text>` +
+    `<path d="${arrows}" fill="${color}" stroke="none"/>` +
+    `<text x="${x}" y="${y}" fill="${color}" font-size="${fmt(fontSize)}" font-family="sans-serif" text-anchor="middle" dominant-baseline="central" stroke="#ffffff" stroke-width="${fmt(fontSize * 0.5)}" paint-order="stroke" transform="rotate(${fmt(angle)} ${x} ${y})">${rulerLabel(r)}</text>` +
     `</g>`
   );
 }

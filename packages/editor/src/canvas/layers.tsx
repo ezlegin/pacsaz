@@ -1,6 +1,6 @@
 "use client";
 
-import { closedLoops, formatNumber, LINE_STYLES, rulerPrims, type RenderResult } from "@repo/dieline-engine";
+import { LINE_STYLES, overallRulers, rulerEnds, rulerLabel, rulerPrims, sheetLoops, type RenderResult, type RulerInfo } from "@repo/dieline-engine";
 import { memo, useMemo, type JSX } from "react";
 import type { View } from "../state/store";
 import { groupPaths, pathsByNode } from "./paths";
@@ -58,53 +58,76 @@ export const GhostLayer = memo(function GhostLayer({ result, color }: { result: 
 const DIMENSION_COLOR = "#0ea5e9";
 const BLEED_COLOR = "#22c55e";
 
-/** The bleed outline, in world coordinates. */
 /**
  * The printed sheet: white inside the bleed, so the grid stops where the paper
- * would. Canvas only; exports never draw it.
+ * would, with windows left open (nothing is printed where the board is cut
+ * away). Canvas only; exports never draw it.
  */
 export const BleedSheet = memo(function BleedSheet({ result }: { result: RenderResult }) {
   const d = useMemo(
-    () => closedLoops(result.bleed).filter((l) => l.length >= 3).map((l) => `M${l.map((p) => pt(p[0], p[1])).join("L")}Z`).join(""),
+    () => sheetLoops(result).filter((l) => l.length >= 3).map((l) => `M${l.map((p) => pt(p[0], p[1])).join("L")}Z`).join(""),
     [result],
   );
   if (!d) return null;
-  return <path d={d} fill="#ffffff" stroke="none" pointerEvents="none" />;
+  return <path d={d} fill="#ffffff" fillRule="evenodd" stroke="none" pointerEvents="none" />;
 });
 
+/** The bleed outline, in world coordinates. */
 export const BleedLayer = memo(function BleedLayer({ result }: { result: RenderResult }) {
   const d = useMemo(() => result.bleed.map(primD).join(""), [result]);
   if (!d) return null;
   return <path d={d} fill="none" stroke={BLEED_COLOR} strokeWidth={1} vectorEffect="non-scaling-stroke" pointerEvents="none" />;
 });
 
-/** The template's dimension rulers: lines in world space (inside the world group). */
-export const DimensionLines = memo(function DimensionLines({ result }: { result: RenderResult }) {
-  const d = useMemo(() => result.rulers.flatMap(rulerPrims).map(primD).join(""), [result]);
+/** The template's rulers plus each part's overall width and height. */
+export function useShownRulers(result: RenderResult): RulerInfo[] {
+  return useMemo(() => [...result.rulers, ...overallRulers(result)], [result]);
+}
+
+/** Extension and dimension lines: world space (inside the world group). */
+export const DimensionLines = memo(function DimensionLines({ rulers }: { rulers: RulerInfo[] }) {
+  const d = useMemo(() => rulers.flatMap(rulerPrims).map(primD).join(""), [rulers]);
   if (!d) return null;
   return <path d={d} fill="none" stroke={DIMENSION_COLOR} strokeWidth={1} vectorEffect="non-scaling-stroke" pointerEvents="none" />;
 });
 
-/** Their values, in screen space so the text stays upright and readable at any zoom. */
-export function DimensionLabels({ result, view }: { result: RenderResult; view: View }) {
+/**
+ * Arrowheads and values, in screen space so they keep their size and the text
+ * stays upright at any zoom. The value sits on the line, which a halo breaks.
+ */
+export function DimensionLabels({ rulers, view }: { rulers: RulerInfo[]; view: View }) {
+  const ARROW = 8;
   return (
-    <g pointerEvents="none" fontSize={11} fontFamily="ui-sans-serif, system-ui" textAnchor="middle" fill={DIMENSION_COLOR}>
-      {result.rulers.map((r) => {
-        const dx = r.to[0] - r.from[0];
-        const dy = r.to[1] - r.from[1];
-        const len = Math.hypot(dx, dy) || 1;
-        const normal: [number, number] = [-dy / len, dx / len];
-        const mid: [number, number] = [(r.from[0] + r.to[0]) / 2 + normal[0] * r.offset, (r.from[1] + r.to[1]) / 2 + normal[1] * r.offset];
-        const s = toScreen(mid, view);
-        // Screen angle of the line (Y flips), turned so the text never reads upside down.
-        let angle = (-Math.atan2(dy, dx) * 180) / Math.PI;
+    <g pointerEvents="none" fontSize={12} fontFamily="ui-sans-serif, system-ui" textAnchor="middle" dominantBaseline="central" fill={DIMENSION_COLOR}>
+      {rulers.map((r) => {
+        const { a, b } = rulerEnds(r);
+        const sa = toScreen(a, view);
+        const sb = toScreen(b, view);
+        const len = Math.hypot(sb[0] - sa[0], sb[1] - sa[1]);
+        if (len < 1) return null;
+        const ux = (sb[0] - sa[0]) / len;
+        const uy = (sb[1] - sa[1]) / len;
+        const nx = -uy * ARROW * 0.35;
+        const ny = ux * ARROW * 0.35;
+        const head = (tip: readonly number[], back: number) => {
+          const [tx = 0, ty = 0] = tip;
+          const bx = tx + ux * ARROW * back;
+          const by = ty + uy * ARROW * back;
+          return `M${tx} ${ty}L${bx + nx} ${by + ny}L${bx - nx} ${by - ny}Z`;
+        };
+        const mx = (sa[0] + sb[0]) / 2;
+        const my = (sa[1] + sb[1]) / 2;
+        let angle = (Math.atan2(uy, ux) * 180) / Math.PI;
         if (angle > 90 || angle <= -90) angle += 180;
-        const ox = Math.sin((angle * Math.PI) / 180) * 5;
-        const oy = -Math.cos((angle * Math.PI) / 180) * 5;
         return (
-          <text key={r.id} x={s[0] + ox} y={s[1] + oy} transform={`rotate(${angle} ${s[0] + ox} ${s[1] + oy})`} className="font-medium">
-            {formatNumber(Math.round(r.value * 10) / 10)}
-          </text>
+          <g key={r.id}>
+            {len > ARROW * 2.5 && <path d={head(sa, 1) + head(sb, -1)} stroke="none" />}
+            {len > 40 && (
+              <text x={mx} y={my} transform={`rotate(${angle} ${mx} ${my})`} stroke="#ffffff" strokeWidth={5} paintOrder="stroke" className="font-medium">
+                {rulerLabel(r)}
+              </text>
+            )}
+          </g>
         );
       })}
     </g>

@@ -32,7 +32,7 @@ const DielineGenerator = ({
 }) => {
   const dispatch = useAppDispatch();
 
-  const { isRendering, template } = useEngineDieline(
+  const { isRendering, template, problems } = useEngineDieline(
     { ...dieline, customSettings },
     { watermark: !user },
   );
@@ -57,7 +57,7 @@ const DielineGenerator = ({
         slug={dieline.slug}
         isRendering={isRendering}
         user={user}
-        customizable={customizable}
+        problems={problems}
       />
 
       {/*
@@ -111,19 +111,18 @@ const DielineGenerator = ({
               className="flex items-center gap-1.5 rounded-full border border-primary/30 bg-background/85 px-3 py-1.5 text-[11px] font-bold text-primary shadow-sm backdrop-blur transition-colors hover:bg-primary/10"
             >
               <PencilRuler className="size-3.5" />
-              باز کردن در ویرایشگر
+              شخصی‌سازی قالب
               {!canCustomize(user?.plan) && <Diamond />}
             </Link>
           ) : (
-            template && (
-              <span
-                title="طراح این قالب گزینه‌ای برای ویرایش باز نکرده است؛ فقط ابعاد و متریال قابل تغییرند."
-                className="flex cursor-not-allowed items-center gap-1.5 rounded-full border bg-background/85 px-3 py-1.5 text-[11px] font-bold text-muted-foreground shadow-sm backdrop-blur"
-              >
-                <PencilRuler className="size-3.5" />
-                ویرایشگر برای این قالب فعال نیست
-              </span>
-            )
+            // Nothing in this template can be customized: the same button, switched off.
+            <span
+              aria-disabled
+              className="flex cursor-not-allowed items-center gap-1.5 rounded-full border bg-background/85 px-3 py-1.5 text-[11px] font-bold text-muted-foreground/60 shadow-sm backdrop-blur"
+            >
+              <PencilRuler className="size-3.5" />
+              شخصی‌سازی قالب
+            </span>
           )}
         </div>
       </div>

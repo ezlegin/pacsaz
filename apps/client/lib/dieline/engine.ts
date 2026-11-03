@@ -1,8 +1,9 @@
 import { materials } from "@repo/dieline-core/data/materials";
 import {
-  closedPathD,
+  loopsD,
   parseCustomization,
   parseDocument,
+  sheetLoops,
   toFoldSVG,
   toSVG,
   type Customization,
@@ -64,8 +65,23 @@ export function clampSize(raw: Size, min: Size, max: Size): Size {
  * The drawing shown on the product page. Strokes keep their width on screen at
  * any zoom; visitors who are not signed in see it under a watermark.
  */
+function rulerFont(result: RenderResult): number {
+  const b = result.bounds;
+  return b ? Math.max(4, Math.max(b.maxX - b.minX, b.maxY - b.minY) / 40) : 4;
+}
+
 export function previewSvg(result: RenderResult, options: { watermark: boolean; rulers: boolean }): string {
-  const svg = toSVG(result, { includeRulers: options.rulers, includeBleed: true, nonScalingStroke: true, strokeWidth: 1.2 });
+  // White paper inside the bleed (windows left open) and, with rulers, each part's overall size.
+  const svg = toSVG(result, {
+    includeRulers: options.rulers,
+    overallRulers: true,
+    includeBleed: true,
+    nonScalingStroke: true,
+    strokeWidth: 1.2,
+    sheetFill: "#ffffff",
+    // The preview is scaled to fit, so labels grow with the drawing to stay readable.
+    rulerFontSize: rulerFont(result),
+  });
   if (!options.watermark) return svg;
 
   const box = /viewBox="([^"]+)"/.exec(svg)?.[1]?.split(" ").map(Number);
@@ -73,8 +89,8 @@ export function previewSvg(result: RenderResult, options: { watermark: boolean; 
   const [x, y, w, h] = box as [number, number, number, number];
   // Large tiles, so the mark reads at any size; the 3D model uses the same (watermarkTile).
   const tile = Math.max(110, Math.min(w, h));
-  // Only the printed sheet is marked: inside the bleed, or the cut outline without one.
-  const sheet = closedPathD(result.bleed.length ? result.bleed : result.paths.filter((p) => p.lineType === "cut"));
+  // Only the printed sheet is marked: inside the bleed (or the outline without one), never over a window.
+  const sheet = loopsD(sheetLoops(result));
   const clip = sheet ? `<clipPath id="watermark-sheet"><path d="${sheet}" clip-rule="evenodd"/></clipPath>` : "";
   return svg.replace(
     "</svg>",

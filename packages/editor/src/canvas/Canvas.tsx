@@ -44,7 +44,7 @@ import { niceStep, snapMoving, snappedDelta, snapTargets, wouldCycle, type SnapR
 import { useEditor, useStore } from "../state/react";
 import type { View } from "../state/store";
 import { useAnalysis } from "../state/analysis";
-import { BleedLayer, BleedSheet, DielineLayer, DimensionLabels, DimensionLines, GhostLayer, Grid, HighlightLayer, HitLayer, RULER_SIZE, ScreenRulers } from "./layers";
+import { BleedLayer, BleedSheet, DielineLayer, DimensionLabels, DimensionLines, useShownRulers, GhostLayer, Grid, HighlightLayer, HitLayer, RULER_SIZE, ScreenRulers } from "./layers";
 import { Preview3D } from "./Preview3D";
 import { MeasureOverlay, type MeasureState, type MeasurePoint } from "./MeasureOverlay";
 import { EdgeChips } from "./EdgeChips";
@@ -106,6 +106,7 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
   const store = useStore();
   const doc = useEditor((s) => s.doc);
   const result = useEditor((s) => s.result);
+  const shownRulers = useShownRulers(result);
   const view = useEditor((s) => s.view);
   const selection = useEditor((s) => s.selection);
   const hover = useEditor((s) => s.hover);
@@ -253,6 +254,10 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
 
   const tolerance = () => SNAP_PX / store.get().view.zoom;
 
+  // Shift keeps the second point of a measurement on 0°, 45°, 90°, ... from the first.
+  const measureEnd = (world: Pt, shift: boolean, useSnap: boolean): MeasurePoint =>
+    shift && measure.a && !measure.b ? { p: constrain45(measure.a.p, world) } : measurePoint(world, useSnap);
+
   const measurePoint = (world: Pt, useSnap: boolean): MeasurePoint => {
     if (!useSnap) return { p: world };
     const snap = snapMoving([world], measureTargets, tolerance());
@@ -296,7 +301,7 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
     if (e.button !== 0) return;
 
     if (state.tool === "measure") {
-      const point = measurePoint(world, state.snapping && !e.ctrlKey);
+      const point = measureEnd(world, e.shiftKey, state.snapping && !e.ctrlKey);
       setMeasure((m) => (!m.a || m.b ? { a: point } : { a: m.a, b: point }));
       return;
     }
@@ -370,7 +375,7 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
 
     if (!g) {
       if (state.tool === "measure" || state.tool === "place") {
-        const point = measurePoint(world, state.snapping && !e.ctrlKey);
+        const point = state.tool === "measure" ? measureEnd(world, e.shiftKey, state.snapping && !e.ctrlKey) : measurePoint(world, state.snapping && !e.ctrlKey);
         setMeasure((m) => ({ ...m, live: point }));
         return;
       }
@@ -712,10 +717,10 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
           {display.ghosts && ghosts.max && <GhostLayer result={ghosts.max} color="rgb(249 115 22)" />}
           {display.bleed && <BleedLayer result={result} />}
           <DielineLayer result={shown} showGuides={showGuides} />
-          {display.dimensions && <DimensionLines result={result} />}
+          {display.dimensions && <DimensionLines rulers={shownRulers} />}
           {tool === "select" && <HitLayer result={result} />}
         </g>
-        {display.dimensions && <DimensionLabels result={result} view={view} />}
+        {display.dimensions && <DimensionLabels rulers={shownRulers} view={view} />}
 
         {/* Selection box and size */}
         {selBounds && dragging !== "marquee" && (() => {

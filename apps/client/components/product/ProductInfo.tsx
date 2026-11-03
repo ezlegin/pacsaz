@@ -5,7 +5,7 @@ import { resolveOffsets } from "@repo/dieline-core/utils/offsetResolver";
 import { useAppSelector } from "@repo/store/hooks";
 import { cn } from "@repo/ui/lib/utils";
 
-import { Info, Ruler } from "lucide-react";
+import { Info } from "lucide-react";
 import DielinePreview3D from "./DielinePreview3D";
 import { UserType } from "./DielineDownloadButton";
 
@@ -125,19 +125,6 @@ const ProductInfo = ({
 
   return (
     <aside className="flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border bg-background shadow-sm z-10">
-      {/* ------------------------------- header ------------------------------ */}
-      <div className="flex shrink-0 items-center gap-2.5 border-b bg-muted/30 px-5 py-4">
-        <span className="grid size-8 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
-          <Ruler className="size-4" strokeWidth={1.9} />
-        </span>
-        <div className="min-w-0">
-          <h2 className="truncate text-xs font-bold">مشخصات قالب</h2>
-          <p className="truncate text-[10px] text-muted-foreground">
-            ابعاد نهایی و راهنمای خطوط
-          </p>
-        </div>
-      </div>
-
       <div className="scrollbar-soft min-h-0 flex-1 space-y-5 overflow-y-auto p-5">
         {/* ------------------------------- legend ---------------------------- */}
         <div className="flex flex-wrap justify-between gap-x-4 gap-y-2">

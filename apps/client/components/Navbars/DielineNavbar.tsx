@@ -1,6 +1,6 @@
 import { getSessionUser } from "@repo/auth/session";
 import { Dieline, prisma } from "@repo/db";
-import { ChevronLeft, Search } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import PacsazLogo from "../PacsazLogo";
 import FavoriteDieline from "../product/FavoriteDielineButton";
@@ -55,14 +55,6 @@ const DielineNavbar = async ({ dieline }: Props) => {
 
         {/* ------------------------------ utilities ---------------------------- */}
         <div className="flex shrink-0 items-center gap-2">
-          <Link
-            href="/dielines"
-            className="hidden items-center gap-1.5 rounded-xl border bg-background px-3 py-1.5 text-[11px] font-medium text-muted-foreground transition-colors hover:border-primary/30 hover:text-primary md:inline-flex"
-          >
-            <Search className="size-3.5" />
-            قالب دیگری انتخاب کنم
-          </Link>
-
           <NavbarButtons />
         </div>
       </div>

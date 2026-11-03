@@ -2,11 +2,11 @@
 
 import { loadCustomization, loadTemplate, manufactureSize, previewSvg, toFoldSVG, type DimensionType } from "@/lib/dieline/engine";
 import { materials } from "@repo/dieline-core/data/materials";
-import { applyCustomization, render } from "@repo/dieline-engine";
+import { applyCustomization, checkDieline, render, type IssueCode } from "@repo/dieline-engine";
 import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
 import { setDefaultSettings } from "@repo/store/slices/dielineSettingsSlice";
 import { setFoldSvg, setSvg } from "@repo/store/slices/svgSlice";
-import { useEffect, useMemo, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 
 type Settings = {
   bleed: number;
@@ -51,6 +51,8 @@ const OUTDATED_SVG =
 export function useEngineDieline(dieline: EngineDieline, options: { watermark: boolean }) {
   const dispatch = useAppDispatch();
   const [isRendering, startTransition] = useTransition();
+  // What the Studio's checks find at this size; "build" when part of the template fails to draw.
+  const [problems, setProblems] = useState<(IssueCode | "build")[]>([]);
   const settings = useAppSelector((s) => s.dielineSettings);
   const template = useMemo(() => loadTemplate(dieline.specification), [dieline.specification]);
   const customization = useMemo(() => loadCustomization(dieline.customSettings?.customization), [dieline.customSettings?.customization]);
@@ -77,7 +79,8 @@ export function useEngineDieline(dieline: EngineDieline, options: { watermark: b
         thickness: s.thickness,
         dimensionType: type,
         format: "pdf",
-        showOverallRulers: false,
+        // Each part's overall size is shown unless the visitor turns it off.
+        showOverallRulers: true,
         // Fold directions are authored in the Studio and saved with the template.
         foldConfig: template?.folds ? JSON.stringify({ version: 1, ...template.folds }) : "",
       }),
@@ -101,8 +104,11 @@ export function useEngineDieline(dieline: EngineDieline, options: { watermark: b
       const result = render(document, { ...size, thickness, bleed, params });
       dispatch(setSvg(previewSvg(result, { watermark: options.watermark, rulers: showOverallRulers })));
       dispatch(setFoldSvg(toFoldSVG(result)));
+      const found = new Set<IssueCode | "build">(checkDieline(result).map((i) => i.code));
+      if (result.diagnostics.some((d) => d.severity === "error")) found.add("build");
+      setProblems([...found]);
     });
   }, [dispatch, template, customization, dimension.raw, dimensionType, material.value, thickness, bleed, showOverallRulers, options.watermark]);
 
-  return { isRendering, template };
+  return { isRendering, template, problems };
 }

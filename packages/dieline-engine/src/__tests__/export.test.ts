@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { toDXF } from "../export/dxf";
 import { closedPathD, toSVG } from "../export/svg";
+import { cutParts, overallRulers, sheetLoops } from "../geometry/sheet";
 import { parseDocument } from "../spec/schema";
 import { render } from "../eval/render";
 import { resolveDimensions } from "../eval/dimensions";
@@ -128,5 +129,23 @@ describe("bleed", () => {
       const nearest = Math.min(...cut.map((l) => dist(seg.a, l.a, l.b)));
       expect(nearest).toBeGreaterThan(bleed - 0.05);
     }
+  });
+});
+
+describe("sheet and overall rulers", () => {
+  it("leaves windows open in the printed sheet", () => {
+    const r = renderNodes([rect("a", "100", "50"), rect("w", "20", "10", { transform: { x: "40", y: "20" } })], { bleed: 3 });
+    const { outlines, holes } = cutParts(r);
+    expect(outlines).toHaveLength(1);
+    expect(holes).toHaveLength(1);
+    expect(sheetLoops(r)).toHaveLength(2);
+    expect(toSVG(r, { sheetFill: "#fff" })).toContain('fill-rule="evenodd"');
+  });
+
+  it("measures each separate part", () => {
+    const r = renderNodes([rect("a", "100", "50"), rect("b", "30", "40", { transform: { x: "150" } })]);
+    const rulers = overallRulers(r);
+    expect(rulers.map((x) => Math.round(x.value))).toEqual([100, 50, 30, 40]);
+    expect(toSVG(r, { includeRulers: true, overallRulers: true })).toContain("100 mm");
   });
 });
