@@ -4,6 +4,7 @@ import { LINE_STYLES, LINE_TYPES, type LineType, type NodeKind } from "@repo/die
 import { cn } from "@repo/ui/lib/utils";
 import {
   Box,
+  Package,
   ChevronDown,
   ChevronRight,
   Circle,
@@ -30,6 +31,7 @@ export const NODE_ICONS: Record<NodeKind, LucideIcon> = {
   belt: PillIcon,
   group: Folder,
   instance: Box,
+  panels: Package,
 };
 
 /** A collapsible inspector section. */

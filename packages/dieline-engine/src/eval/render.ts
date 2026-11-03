@@ -13,15 +13,20 @@ import type { Bounds, Path, Prim, Pt } from "../geometry/types";
 import type {
   ComponentDef,
   DielineDocument,
+  EdgeFeature,
   Expr,
   GroupNode,
   InstanceNode,
+  LineType,
   Node,
   NodeKind,
+  PanelsNode,
   Rule,
 } from "../spec/types";
 import { Diagnostics, type Diagnostic } from "./diagnostics";
 import { applyModifiers, combineChildren } from "./modifiers";
+import { lookupRef } from "./refs";
+import { LIBRARY } from "../library/components";
 import { buildScope, messageOf, type Builtins, type Scope } from "./scope";
 
 export type RenderInputs = {
@@ -99,6 +104,13 @@ const BOX_ANCHORS = (b: Bounds): Record<string, Pt> => {
   };
 };
 
+/** A panel's corners, edge middles and centre, prefixed with its name. */
+function panelAnchors(name: string, x0: number, x1: number, h: number): Record<string, Pt> {
+  return Object.fromEntries(
+    Object.entries(BOX_ANCHORS({ minX: x0, minY: 0, maxX: x1, maxY: h })).map(([k, p]) => [`${name}.${k}`, p]),
+  );
+}
+
 /** An error that knows which input field caused it. */
 class FieldError extends Error {
   constructor(
@@ -116,7 +128,7 @@ type Env = {
 };
 
 /** Set when a context renders the inside of a component instance. */
-type Owner = { instanceId: string; componentName: string };
+type Owner = { instanceId: string; componentName: string; field: string };
 
 /** A node's geometry in its parent's frame, with its own transform applied. */
 type Built = {
@@ -247,25 +259,7 @@ class Context {
     const world = this.world(entry.node);
     if (!world) throw new ExprError(`"${ref.node}" has an error`);
 
-    const [first, second, ...extra] = ref.path;
-    if (!first || extra.length > 0) {
-      throw new ExprError(`Write @${ref.node}.width or @${ref.node}.anchor.x`);
-    }
-
-    if (second === undefined) {
-      const scalar = world.scalars[first];
-      if (scalar !== undefined) return scalar;
-      if (world.anchors[first]) {
-        throw new ExprError(`@${ref.node}.${first} is a point; add .x or .y`);
-      }
-      throw new ExprError(`"${ref.node}" has no "${first}"`);
-    }
-
-    const anchor = world.anchors[first];
-    if (!anchor) throw new ExprError(`"${ref.node}" has no point "${first}"`);
-    if (second === "x") return anchor[0];
-    if (second === "y") return anchor[1];
-    throw new ExprError(`Use .x or .y after @${ref.node}.${first}`);
+    return lookupRef(world, ref.node, ref.path);
   }
 
   /** An evaluator whose failures carry the field that failed. */
@@ -347,11 +341,12 @@ class Context {
         paths = this.buildGroup(node);
         break;
 
-      case "instance": {
-        const instance = this.buildInstance(node);
-        paths = instance.paths;
-        anchors = instance.anchors;
-        scalars = instance.scalars;
+      case "instance":
+      case "panels": {
+        const built = node.kind === "instance" ? this.buildInstance(node) : this.buildPanels(node);
+        paths = built.paths;
+        anchors = built.anchors;
+        scalars = built.scalars;
         break;
       }
 
@@ -399,46 +394,63 @@ class Context {
   }
 
   private buildInstance(node: InstanceNode): Built {
-    const def = this.env.components.get(node.component);
-    if (!def) throw new FieldError(`Component "${node.component}" does not exist`, "component");
+    return this.buildComponent(node.id, node.component, node.args, "", {});
+  }
+
+  /**
+   * Builds a component for a node: a placed instance, or an edge feature of a box
+   * body. `fieldPrefix` locates the arguments in the node for diagnostics
+   * (`args.depth`, `panels.2.top.args.depth`), and `extra` adds built-ins such as
+   * `edge`. Paths come back tagged with the owning node's id.
+   */
+  private buildComponent(
+    nodeId: string,
+    componentId: string,
+    args: Record<string, Expr>,
+    fieldPrefix: string,
+    extra: Record<string, number>,
+  ): Built {
+    const def = this.env.components.get(componentId);
+    if (!def) throw new FieldError(`Component "${componentId}" does not exist`, `${fieldPrefix}component`);
     if (this.depth >= MAX_COMPONENT_DEPTH) {
-      throw new FieldError("Components are nested too deeply (or place themselves)", "component");
+      throw new FieldError("Components are nested too deeply (or place themselves)", `${fieldPrefix}component`);
     }
 
     const known = new Set(def.params.map((p) => p.name));
     const overrides: Record<string, number> = {};
     const ev = this.evaluator();
 
-    for (const [name, expr] of Object.entries(node.args)) {
+    for (const [name, expr] of Object.entries(args)) {
       if (!known.has(name)) {
-        this.report("warning", node.id, `args.${name}`, `${def.name} has no parameter "${name}"`);
+        this.report("warning", nodeId, `${fieldPrefix}args.${name}`, `${def.name} has no parameter "${name}"`);
         continue;
       }
-      if (expr.trim() !== "") overrides[name] = ev.num(expr, `args.${name}`);
+      if (expr.trim() !== "") overrides[name] = ev.num(expr, `${fieldPrefix}args.${name}`);
     }
 
-    // Problems inside the component are reported on the instance, since that is
+    // Problems inside the component are reported on the node, since that is
     // what the designer can see and click.
     const inner = new Diagnostics();
-    const scope = buildScope(this.env.builtins, def.params, def.variables, overrides, inner, def.name);
+    const scope = buildScope(this.env.builtins, def.params, def.variables, overrides, inner, def.name, extra);
     for (const d of inner.list) {
-      const field = d.target.type === "param" ? `args.${d.target.name}` : "component";
-      this.report(d.severity, node.id, field, `${def.name}: ${d.message}`);
+      const field = d.target.type === "param" ? `${fieldPrefix}args.${d.target.name}` : `${fieldPrefix}component`;
+      this.report(d.severity, nodeId, field, `${def.name}: ${d.message}`);
     }
 
     const context = new Context(def.nodes, scope, this.env, this.depth + 1, {
-      instanceId: node.id,
+      instanceId: nodeId,
       componentName: def.name,
+      field: `${fieldPrefix}component`,
     });
 
-    const paths = context.paths().map((p) => ({ ...p, nodeId: node.id }));
+    const paths = context.paths().map((p) => ({ ...p, nodeId }));
 
     const anchors: Record<string, Pt> = {};
     for (const anchor of def.anchors ?? []) {
       try {
         anchors[anchor.name] = [context.num(anchor.at.x), context.num(anchor.at.y)];
       } catch (error) {
-        this.report("error", node.id, "component", `${def.name} › anchor ${anchor.name}: ${messageOf(error)}`);
+        this.report("error", nodeId, `${fieldPrefix}component`, `${def.name} › anchor ${anchor.name}: ${messageOf(error)}`);
       }
     }
 
@@ -447,6 +459,91 @@ class Context {
       const value = scope[param.name];
       if (value !== undefined) scalars[param.name] = value;
     }
+
+    return { paths, anchors, scalars };
+  }
+
+  //! Box bodies ---------------------------------------------------------------
+
+  /**
+   * Panels side by side with folds between them. Each edge is either cut or, when
+   * it carries a feature, its hinge plus the feature's own geometry. Every panel
+   * offers its corners as anchors (`front.topLeft`) and its width as a scalar.
+   */
+  private buildPanels(node: PanelsNode): Built {
+    const ev = this.evaluator();
+    const height = ev.num(node.height, "height");
+    if (!(height > 0)) throw new GeometryError("Height must be greater than 0", "height");
+
+    const seen = new Set<string>();
+    let x = 0;
+    const spans = node.panels.map((panel, i) => {
+      if (seen.has(panel.name)) throw new GeometryError(`Two panels are named "${panel.name}"`, `panels.${i}.name`);
+      seen.add(panel.name);
+      const w = ev.num(panel.width, `panels.${i}.width`);
+      if (!(w > 0)) throw new GeometryError("Width must be greater than 0", `panels.${i}.width`);
+      const span = { x0: x, x1: x + w, w };
+      x += w;
+      return span;
+    });
+    const total = x;
+
+    const paths: Path[] = [];
+    const anchors: Record<string, Pt> = {};
+    const scalars: Record<string, number> = { bodyWidth: total, bodyHeight: height };
+    const line = (a: Pt, b: Pt, lineType: LineType) => paths.push({ kind: "line", a, b, lineType, nodeId: node.id });
+
+    // Folds between neighbouring panels.
+    for (const span of spans.slice(1)) line([span.x0, 0], [span.x0, height], node.fold ?? "crease");
+
+    const edge = (
+      feature: EdgeFeature | undefined,
+      a: Pt,
+      b: Pt,
+      frame: Placement,
+      length: number,
+      field: string,
+      anchorPrefix: string,
+    ) => {
+      if (!feature) {
+        line(a, b, "cut");
+        return;
+      }
+
+      const def = this.env.components.get(feature.component);
+      const hinge = feature.hinge ?? def?.edge?.hinge ?? "crease";
+
+      try {
+        const built = this.buildComponent(node.id, feature.component, feature.args ?? {}, `${field}.`, { edge: length });
+        // Flipping mirrors the feature end to end about the middle of its edge.
+        const flip: Placement = feature.flip ? { ...IDENTITY, mirrorX: true, x: length } : IDENTITY;
+        paths.push(...placePaths(placePaths(built.paths, flip), frame));
+        for (const [name, p] of Object.entries(built.anchors)) {
+          anchors[`${anchorPrefix}.${name}`] = placePoint(placePoint(p, flip), frame);
+        }
+        if (hinge !== "none") line(a, b, hinge);
+      } catch (error) {
+        // A broken feature leaves a plain cut edge, so the rest still reads.
+        const f = error instanceof FieldError || error instanceof GeometryError ? error.field : undefined;
+        this.error(node.id, f ?? `${field}.component`, messageOf(error));
+        line(a, b, "cut");
+      }
+    };
+
+    node.panels.forEach((panel, i) => {
+      const { x0, x1, w } = spans[i]!;
+      Object.assign(anchors, panelAnchors(panel.name, x0, x1, height));
+      scalars[`${panel.name}.width`] = w;
+
+      // Each edge frame puts the hinge on +x and the feature towards +y, outward.
+      edge(panel.top, [x0, height], [x1, height], { ...IDENTITY, x: x0, y: height }, w, `panels.${i}.top`, `${panel.name}.top`);
+      edge(panel.bottom, [x1, 0], [x0, 0], { ...IDENTITY, x: x1, rotate: 180 }, w, `panels.${i}.bottom`, `${panel.name}.bottom`);
+    });
+
+    const first = node.panels[0]?.name ?? "first";
+    const last = node.panels[node.panels.length - 1]?.name ?? "last";
+    edge(node.left, [0, 0], [0, height], { ...IDENTITY, rotate: 90 }, height, "left", `${first}.left`);
+    edge(node.right, [total, height], [total, 0], { ...IDENTITY, x: total, y: height, rotate: -90 }, height, "right", `${last}.right`);
 
     return { paths, anchors, scalars };
   }
@@ -547,7 +644,7 @@ class Context {
     if (this.owner) {
       // Inside a component: pin it on the instance the designer placed.
       const name = this.byId.get(nodeId)?.node.name ?? nodeId;
-      const target = { type: "node" as const, id: this.owner.instanceId, field: "component" };
+      const target = { type: "node" as const, id: this.owner.instanceId, field: this.owner.field };
       const text = `${this.owner.componentName} › ${name}: ${message}`;
       if (severity === "error") this.env.diagnostics.error(target, text);
       else this.env.diagnostics.warn(target, text);
@@ -578,7 +675,8 @@ export function render(doc: DielineDocument, inputs: RenderInputs): RenderResult
 
   const env: Env = {
     builtins,
-    components: new Map(doc.components.map((c) => [c.id, c])),
+    // The built-in library first, so a document's own component can shadow one.
+    components: new Map([...LIBRARY, ...doc.components].map((c) => [c.id, c])),
     diagnostics,
   };
 

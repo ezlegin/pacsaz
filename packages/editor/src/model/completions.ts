@@ -55,36 +55,38 @@ export function completionsAt(
     const node = nodes.find((n) => n.name === parts[0]);
     if (!node) return [];
 
-    if (parts.length === 2) {
-      const anchors = Object.entries(node.anchors).map(([name, p]) => ({
-        label: name,
-        insert: `@${node.name}.${name}.`,
-        kind: "anchor" as const,
-        detail: `${formatNumber(p[0], 1)}, ${formatNumber(p[1], 1)}`,
-      }));
-      const scalars = Object.entries(node.scalars).map(([name, v]) => ({
-        label: name,
-        insert: `@${node.name}.${name}`,
-        kind: "scalar" as const,
-        detail: formatNumber(v, 2),
-      }));
-      return rank([...scalars, ...anchors], parts[1]!, true).map((c) => ({ ...c, from, to: caret }));
-    }
+    // Point names may contain dots (a box body's `front.topLeft`), so the typed
+    // rest is matched against whole names; once it names a point, offer x / y.
+    const rest = parts.slice(1);
+    const head = rest.slice(0, -1).join(".");
+    const point = head ? node.anchors[head] : undefined;
 
-    if (parts.length === 3 && node.anchors[parts[1]!]) {
-      const p = node.anchors[parts[1]!]!;
+    if (point) {
       return rank(
         (["x", "y"] as const).map((axis, i) => ({
           label: axis,
-          insert: `@${node.name}.${parts[1]}.${axis}`,
+          insert: `@${node.name}.${head}.${axis}`,
           kind: "axis" as const,
-          detail: formatNumber(p[i]!, 2),
+          detail: formatNumber(point[i]!, 2),
         })),
-        parts[2]!,
+        rest[rest.length - 1]!,
       ).map((c) => ({ ...c, from, to: caret }));
     }
 
-    return [];
+    const typed = rest.join(".");
+    const anchors = Object.entries(node.anchors).map(([name, p]) => ({
+      label: name,
+      insert: `@${node.name}.${name}.`,
+      kind: "anchor" as const,
+      detail: `${formatNumber(p[0], 1)}, ${formatNumber(p[1], 1)}`,
+    }));
+    const scalars = Object.entries(node.scalars).map(([name, v]) => ({
+      label: name,
+      insert: `@${node.name}.${name}`,
+      kind: "scalar" as const,
+      detail: formatNumber(v, 2),
+    }));
+    return rank([...scalars, ...anchors], typed, true).map((c) => ({ ...c, from, to: caret }));
   }
 
   // A plain word: names in scope, then functions.

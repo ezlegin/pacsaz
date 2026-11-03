@@ -43,6 +43,9 @@ export {
 } from "./edit/tree";
 export { placePoint, IDENTITY, type Placement } from "./geometry/math";
 
+export { LIBRARY, EDGE_COMPONENTS } from "./library/components";
+export { PRESETS, presetBody, type PresetId } from "./library/presets";
+
 export { toSVG, exportBounds, type SvgOptions } from "./export/svg";
 export { toDXF } from "./export/dxf";
 export { LINE_STYLES, DXF_LAYERS, type LineStyle } from "./export/styles";

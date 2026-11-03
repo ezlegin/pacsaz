@@ -23,9 +23,11 @@ export function buildScope(
   diagnostics: Diagnostics,
   /** Prefix for diagnostics raised inside a component. */
   owner?: string,
+  /** Extra built-in values, such as `edge` inside an edge feature. */
+  extra: Record<string, number> = {},
 ): Scope {
-  const scope: Scope = { ...builtins };
-  const taken = new Set<string>(BUILTINS);
+  const scope: Scope = { ...builtins, ...extra };
+  const taken = new Set<string>([...BUILTINS, ...Object.keys(extra)]);
   const where = owner ? ` (in ${owner})` : "";
 
   for (const param of params) {

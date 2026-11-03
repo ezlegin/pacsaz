@@ -115,7 +115,7 @@ function StudioLayout({ title, leading, trailing, onSave, onError }: StudioProps
       } else if (!mod && !e.altKey && TOOL_KEYS[key]) {
         const [tool, kind] = TOOL_KEYS[key]!;
         store.setTool(tool, kind);
-      } else if (!mod && key === "f") {
+      } else if (!mod && (key === "f" || (e.shiftKey && e.code === "Slash"))) {
         store.requestFit();
       }
     };

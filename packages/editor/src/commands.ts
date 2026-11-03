@@ -79,7 +79,7 @@ export function buildCommands(store: EditorStore, host: CommandHost): Command[] 
     { id: "tool-measure", label: "Measure tool", group: "Tools", keys: "M", run: () => store.setTool("measure") },
     ...kinds.map((k) => ({ id: `tool-${k}`, label: `Draw ${SHAPE_LABELS[k].toLowerCase()}`, group: "Tools", run: () => store.setTool("place", k) })),
 
-    { id: "fit", label: "Fit everything", group: "View", keys: "F", run: () => store.requestFit() },
+    { id: "fit", label: "Fit dieline to screen", group: "View", keys: "Shift+/", run: () => store.requestFit() },
     { id: "fit-sel", label: "Zoom to selection", group: "View", keys: "Shift+2", enabled: sel.length > 0, run: () => store.requestFit(sel) },
     { id: "snap", label: s.snapping ? "Turn snapping off" : "Turn snapping on", group: "View", keys: "S", run: () => store.setSnapping(!s.snapping) },
     { id: "guides", label: s.display.guides ? "Hide guides" : "Show guides", group: "View", run: () => store.setDisplay({ guides: !s.display.guides }) },

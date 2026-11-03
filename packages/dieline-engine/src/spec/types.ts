@@ -251,7 +251,54 @@ export type InstanceNode = NodeBase & {
   args: Record<string, Expr>;
 };
 
-export type Node = ShapeNode | GroupNode | InstanceNode;
+//! Box bodies ----------------------------------------------------------------------
+
+/**
+ * Something attached along a panel edge: a tuck lid, a dust flap, a glue flap, a
+ * notch. It is a component drawn in the *edge frame*: the hinge runs from (0, 0)
+ * to (edge, 0) along +x and the feature extends towards +y. The body places it
+ * on whichever edge it belongs to. Inside the component, `edge` is the length of
+ * the edge it sits on.
+ */
+export type EdgeFeature = {
+  component: string;
+  args?: Record<string, Expr>;
+  /** Mirror the feature end to end along its edge. */
+  flip?: boolean;
+  /** The line along the hinge. Defaults to the component's own choice. */
+  hinge?: LineType | "none";
+};
+
+export type Panel = {
+  id: string;
+  /** Used in references: `@body.front.topLeft.x`. */
+  name: string;
+  width: Expr;
+  top?: EdgeFeature;
+  bottom?: EdgeFeature;
+};
+
+/**
+ * The body of a folding box: panels side by side, all `height` tall, with a fold
+ * between neighbours. Free edges are cut; an edge with a feature becomes its
+ * hinge. This is how most cartons are built, and it replaces drawing the outline
+ * and every crease by hand.
+ */
+export type PanelsNode = NodeBase & {
+  kind: "panels";
+  height: Expr;
+  panels: Panel[];
+  /** Feature on the outer edge of the first panel (often the glue flap). */
+  left?: EdgeFeature;
+  /** Feature on the outer edge of the last panel. */
+  right?: EdgeFeature;
+  /** Line between neighbouring panels. Defaults to a crease. */
+  fold?: LineType;
+};
+
+export type EdgeSide = "top" | "bottom" | "left" | "right";
+
+export type Node = ShapeNode | GroupNode | InstanceNode | PanelsNode;
 export type NodeKind = Node["kind"];
 
 //! Params, variables, components -------------------------------------------------
@@ -297,6 +344,14 @@ export type ComponentDef = {
   nodes: Node[];
   /** Extra named points exposed on every instance, e.g. a hinge end. */
   anchors?: { name: string; at: PointExpr }[];
+  /**
+   * Present when the component is meant for panel edges. `hinge` is the line the
+   * body draws along the edge: a crease for flaps, "none" for features such as a
+   * notch that draw the edge themselves.
+   */
+  edge?: { hinge: LineType | "none" };
+  /** Grouping in pickers, e.g. "Closures", "Flaps", "Cut-outs". */
+  category?: string;
 };
 
 export type Ruler = {

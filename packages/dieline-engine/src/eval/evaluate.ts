@@ -1,4 +1,5 @@
 import { compile, evalNumber, ExprError } from "../expr/expr";
+import { lookupRef } from "./refs";
 import type { RenderResult } from "./render";
 import { messageOf } from "./scope";
 
@@ -20,20 +21,7 @@ export function evaluateExpression(
       const info = byName.get(ref.node);
       if (!info) throw new ExprError(`No shape is named "${ref.node}"`);
       if (info.failed) throw new ExprError(`"${ref.node}" has an error`);
-
-      const [first, second] = ref.path;
-      if (!first) throw new ExprError(`Write @${ref.node}.width or @${ref.node}.anchor.x`);
-
-      if (second === undefined) {
-        const scalar = info.scalars[first];
-        if (scalar === undefined) throw new ExprError(`"${ref.node}" has no "${first}"`);
-        refs[ref.symbol] = scalar;
-      } else {
-        const anchor = info.anchors[first];
-        if (!anchor) throw new ExprError(`"${ref.node}" has no point "${first}"`);
-        if (second !== "x" && second !== "y") throw new ExprError("Use .x or .y");
-        refs[ref.symbol] = second === "x" ? anchor[0] : anchor[1];
-      }
+      refs[ref.symbol] = lookupRef(info, ref.node, ref.path);
     }
 
     return { value: evalNumber(compiled, { ...result.scope, ...refs }) };

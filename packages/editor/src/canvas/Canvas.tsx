@@ -45,6 +45,7 @@ import { useEditor, useStore } from "../state/react";
 import type { View } from "../state/store";
 import { DielineLayer, Grid, HighlightLayer, HitLayer, RULER_SIZE, ScreenRulers } from "./layers";
 import { MeasureOverlay, type MeasureState, type MeasurePoint } from "./MeasureOverlay";
+import { EdgeChips } from "./EdgeChips";
 import { StatusBar } from "./StatusBar";
 import { fitView, toScreen, toWorld, worldMatrix, zoomAt } from "./viewport";
 
@@ -627,7 +628,9 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
     else if (key === "r") store.setTool("place", "rect");
     else if (key === "l") store.setTool("place", "line");
     else if (key === "e") store.setTool("place", "ellipse");
-    else if (key === "f" || (e.shiftKey && e.key === "!")) fit();
+    // Shift+/ fits the dieline to the screen, like Ctrl+0 in Illustrator. The
+    // physical key is checked so it works on any keyboard layout (Persian gives ؟).
+    else if (key === "f" || (e.shiftKey && (e.code === "Slash" || e.key === "!"))) fit();
     else if (e.shiftKey && e.key === "@") fit(state.selection);
     else if (key === "s") store.setSnapping(!state.snapping);
     else if (key === "=" || key === "+") store.setView(zoomAt(state.view, [size.width / 2, size.height / 2], 1.25));
@@ -820,6 +823,8 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
 
         {showRulers && <ScreenRulers view={view} width={size.width} height={size.height} cursor={cursor} />}
       </svg>
+
+      {single?.kind === "panels" && tool === "select" && !dragging && <EdgeChips node={single} />}
 
       {scopeName && (
         <div className="absolute top-7 left-1/2 -translate-x-1/2 rounded-full bg-blue-600 px-3 py-1 text-xs text-white shadow">

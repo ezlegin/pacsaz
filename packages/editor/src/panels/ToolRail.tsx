@@ -1,10 +1,11 @@
 "use client";
 
-import { LINE_STYLES, LINE_TYPES } from "@repo/dieline-engine";
+import { allNodes, insertNodes, LINE_STYLES, LINE_TYPES, presetBody, PRESETS, uniqueName, type PresetId } from "@repo/dieline-engine";
 import { cn } from "@repo/ui/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@repo/ui/components/popover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@repo/ui/components/tooltip";
-import { Circle, Hand, Hexagon, MousePointer2, Pill, PenTool, Ruler, Slash, Square, Star, Undo, type LucideIcon } from "lucide-react";
+import { Circle, Hand, Hexagon, MousePointer2, Package, Pill, PenTool, Ruler, Slash, Square, Star, Undo, type LucideIcon } from "lucide-react";
+import { useState } from "react";
 import type { PlaceableKind } from "../model/create";
 import { useEditor, useStore } from "../state/react";
 import type { Tool } from "../state/store";
@@ -68,6 +69,9 @@ export function ToolRail() {
       ))}
 
       <div className="my-1.5 h-px w-6 bg-border" />
+      <BodyPresets />
+
+      <div className="my-1.5 h-px w-6 bg-border" />
       <Popover>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -104,5 +108,59 @@ export function ToolRail() {
         </PopoverContent>
       </Popover>
     </nav>
+  );
+}
+
+/**
+ * Box bodies: one click places a whole carton as a single editable node, to the
+ * right of whatever is already drawn.
+ */
+function BodyPresets() {
+  const store = useStore();
+  const [open, setOpen] = useState(false);
+
+  const place = (id: PresetId) => {
+    const { doc, result } = store.get();
+    const name = uniqueName(allNodes(doc).map((n) => n.name), "body");
+    const body = presetBody(id, name);
+    const x = result.bounds ? result.bounds.maxX + 60 : 0;
+    const node = x ? { ...body, transform: { x: String(Math.round(x)) } } : body;
+    store.setScope(null);
+    store.apply((d) => insertNodes(d, [node]), [node.id]);
+    store.setTool("select");
+    store.requestFit();
+    setOpen(false);
+  };
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <PopoverTrigger asChild>
+            <button
+              type="button"
+              className="flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            >
+              <Package className="size-4" />
+            </button>
+          </PopoverTrigger>
+        </TooltipTrigger>
+        <TooltipContent side="right">Box body — panels with lids and flaps</TooltipContent>
+      </Tooltip>
+      <PopoverContent side="right" align="start" className="w-72 p-1">
+        <div className="px-2 pb-1 pt-1.5 text-[11px] font-medium uppercase text-muted-foreground">Add a box body</div>
+        {PRESETS.map((p) => (
+          <button
+            key={p.id}
+            type="button"
+            onClick={() => place(p.id)}
+            className="flex w-full flex-col rounded px-2 py-1.5 text-left hover:bg-accent"
+          >
+            <span className="text-sm">{p.name}</span>
+            <span className="text-[11px] text-muted-foreground">{p.description}</span>
+          </button>
+        ))}
+      </PopoverContent>
+    </Popover>
   );
 }

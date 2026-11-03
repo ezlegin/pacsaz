@@ -1,5 +1,6 @@
-import { emptyDocument, findNode, render, updateNode, type DielineDocument, type Node, type RenderInputs } from "@repo/dieline-engine";
-import { tuckEndBox } from "@repo/dieline-engine/fixtures";
+import { emptyDocument, findNode, render, updateNode, type DielineDocument, type Node, type PanelsNode, type RenderInputs } from "@repo/dieline-engine";
+import { rteBox, tuckEndBox } from "@repo/dieline-engine/fixtures";
+import { edgeSlots } from "../model/body";
 import { describe, expect, it } from "vitest";
 import { applyCompletion, completionsAt } from "../model/completions";
 import { constrain45, drawnPath, placedShape } from "../model/draw";
@@ -228,6 +229,22 @@ describe("autocomplete", () => {
     expect(labels("@side1.top")).toEqual(expect.arrayContaining(["top", "topLeft", "topRight"]));
     expect(labels("@side1.wi")).toEqual(["width"]);
     expect(labels("@side1.topLeft.")).toEqual(["x", "y"]);
+  });
+
+  it("completes a box body's dotted panel points", () => {
+    const body = render(rteBox, INPUTS);
+    const c = (text: string) => completionsAt(text, text.length, { doc: rteBox, result: body }).map((x) => x.label);
+    expect(c("@body.front.top")).toEqual(expect.arrayContaining(["front.top", "front.topLeft", "front.topRight"]));
+    expect(c("@body.front.topLeft.")).toEqual(["x", "y"]);
+    expect(c("@body.side1.wi")).toEqual(["side1.width"]);
+  });
+
+  it("lists every edge of a body, pointing outwards", () => {
+    const body = render(rteBox, INPUTS);
+    const slots = edgeSlots(rteBox.nodes[0] as PanelsNode, body);
+    expect(slots).toHaveLength(10);
+    expect(slots.find((s) => s.path === "panels.0.bottom")).toMatchObject({ at: [30, 0], out: [0, -1] });
+    expect(slots.find((s) => s.path === "right")!.feature?.component).toBe("lib:glueFlap");
   });
 
   it("replaces just the word being typed", () => {

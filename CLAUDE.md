@@ -86,7 +86,7 @@ Phases (each ends with a commit message for the user to commit):
 
 ### Where things stand
 
-- Phases 1–3 are done. The admin route `/editor/[slug]` is the v2 `Studio`
+- Phases 1–4 are done. The admin route `/editor/[slug]` is the v2 `Studio`
   (`apps/admin/app/editor/[slug]/StudioEditor.tsx`); the old admin editor was removed.
 - v2 documents are stored in `Dieline.specification` as JSON with `"version": 2`,
   validated by `parseDocument` in the `saveDielineDocument` server action.
@@ -94,6 +94,28 @@ Phases (each ends with a commit message for the user to commit):
 - The **client app still renders with the legacy `dieline-core`**, so a dieline
   saved from the new Studio does not render on the public site until the client
   is moved to the engine (planned with Customize mode, Phase 6).
+
+### Box bodies and the component library
+
+- A `panels` node is a carton body: panels side by side (`name`, `width`), all
+  `height` tall, folds between them, and an optional **edge feature** on each
+  panel's top/bottom and on the outer left/right edges. Free edges are cut; an
+  edge with a feature draws its hinge (the component's `edge.hinge`, overridable).
+- Edge features are components drawn in the **edge frame**: hinge from (0, 0) to
+  (edge, 0), feature towards +y; `edge` is in scope inside them. The body maps
+  that frame onto the real edge (top: as is; bottom: rotated 180°; left: 90°;
+  right: −90°), and `flip` mirrors it end to end.
+- Panels expose dotted anchors and scalars: `@body.front.topLeft.x`,
+  `@body.front.width`, plus `bodyWidth`/`bodyHeight`. `lookupRef` reads a path as
+  "everything before a trailing x/y is the point name".
+- Built-in components live in `dieline-engine/src/library/components.ts`, written
+  in the spec format (`lib:tuckLid`, `lib:dustFlap`, `lib:glueFlap`,
+  `lib:slottedFlap`, `lib:plainFlap`, `lib:thumbNotch`). Size params default to 0
+  meaning "auto" and are resolved in the component's variables. A document
+  component with the same id shadows a built-in one.
+- Presets (`library/presets.ts`): reverse tuck end, straight tuck end, sleeve,
+  FEFCO 0201. New presets must render without diagnostics and keep the cut
+  outline closed at several sizes (see `panels.test.ts`).
 
 ## `@repo/editor` rules
 

@@ -20,6 +20,7 @@ export const LIMITS = {
   segments: 500,
   arrayCount: 500,
   components: 200,
+  panels: 40,
 } as const;
 
 const NAME_PATTERN = /^[A-Za-z_][A-Za-z0-9_]*$/;
@@ -117,6 +118,13 @@ const segment = z.discriminatedUnion("type", [
 
 const side = z.enum(["top", "right", "bottom", "left"]);
 
+const edgeFeature = z.object({
+  component: z.string().min(1),
+  args: z.record(name, expr).optional(),
+  flip: z.boolean().optional(),
+  hinge: z.union([lineType, z.literal("none")]).optional(),
+});
+
 // `z.lazy` is needed because groups contain nodes.
 const node: z.ZodType<Node> = z.lazy(() =>
   z.discriminatedUnion("kind", [
@@ -183,6 +191,26 @@ const node: z.ZodType<Node> = z.lazy(() =>
       component: z.string().min(1),
       args: z.record(name, expr),
     }),
+    z.object({
+      ...base,
+      kind: z.literal("panels"),
+      height: expr,
+      panels: z
+        .array(
+          z.object({
+            id: z.string().min(1),
+            name,
+            width: expr,
+            top: edgeFeature.optional(),
+            bottom: edgeFeature.optional(),
+          }),
+        )
+        .min(1)
+        .max(LIMITS.panels),
+      left: edgeFeature.optional(),
+      right: edgeFeature.optional(),
+      fold: lineType.optional(),
+    }),
   ]) as unknown as z.ZodType<Node>,
 );
 
@@ -212,6 +240,8 @@ const component = z.object({
   variables: z.array(variable),
   nodes: z.array(node),
   anchors: z.array(z.object({ name, at: point })).optional(),
+  edge: z.object({ hinge: z.union([lineType, z.literal("none")]) }).optional(),
+  category: z.string().max(100).optional(),
 });
 
 const ruler = z.object({

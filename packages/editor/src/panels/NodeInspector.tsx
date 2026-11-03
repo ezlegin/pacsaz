@@ -15,6 +15,7 @@ import {
 import { ArrowDown, ArrowUp, Eye, EyeOff, Plus, Trash2 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { SHAPE_LABELS } from "../model/create";
+import { BodyInspector } from "./BodyInspector";
 import { useEditor, useStore } from "../state/react";
 import { findNodeCached, useNodeField, useNodeSetter } from "../ui/bindings";
 import { IconButton, LineTypeSelect, NODE_ICONS, Pill, Row, Section, SelectField, TextInput } from "../ui/controls";
@@ -53,7 +54,7 @@ export function NodeInspector({ id }: { id: string }) {
       {info?.failed && !nodeError && (
         <p className="mx-3 mt-2 rounded-md bg-red-50 px-2 py-1.5 text-red-700">This shape has an error in one of its fields.</p>
       )}
-      <Geometry node={node} />
+      {node.kind === "panels" ? <BodyInspector node={node} /> : <Geometry node={node} />}
       <Placement node={node} />
       <Modifiers node={node} />
       <Rules node={node} />
@@ -88,7 +89,7 @@ function Header({ node }: { node: Node }) {
       </div>
       {problem && <p className="mt-1 text-[11px] text-red-600">{problem}</p>}
       <p className="mt-1 text-[11px] text-muted-foreground">
-        {node.kind === "group" ? "Group" : node.kind === "instance" ? "Component" : SHAPE_LABELS[node.kind]}
+        {node.kind === "group" ? "Group" : node.kind === "instance" ? "Component" : node.kind === "panels" ? "Box body" : SHAPE_LABELS[node.kind]}
       </p>
     </div>
   );
