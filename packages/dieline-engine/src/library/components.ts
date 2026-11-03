@@ -92,7 +92,8 @@ export const glueFlap: ComponentDef = {
   edge: { hinge: "crease" },
   params: [auto("depth", "Depth"), auto("taper", "Taper")],
   variables: [
-    { name: "d", expr: "depth > 0 ? depth : clamp(edge * 0.15, 12, 25)" },
+    // A carton glue flap is 10–18 mm, by the narrower face (not the panel height).
+    { name: "d", expr: "depth > 0 ? depth : clamp(min(width, length) * 0.25, 10, 18)" },
     { name: "tp", expr: "taper > 0 ? taper : min(d * 0.6, edge / 6)" },
     { name: "gm", expr: "min(2, d / 4)" },
     // Horizontal shift that keeps the margin square to the slanted sides.

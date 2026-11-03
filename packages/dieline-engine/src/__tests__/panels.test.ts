@@ -114,12 +114,13 @@ describe("presets", () => {
 
   it("matches the hand-drawn tuck end's outer size", () => {
     const r = render(rteBox, INPUTS);
-    // front + side + back + side + glue flap (18); lids as deep as `width`, with
-    // a tuck sized from the lid's own 60 mm width (13).
-    expect(r.bounds!.maxX).toBeCloseTo(60 + 100 + 60 + 100 + 18);
-    expect(r.bounds!.maxY).toBeCloseTo(120 + 100 + 13);
-    expect(r.bounds!.minY).toBeCloseTo(-113);
-    expect(r.rulers[0]!.value).toBe(60);
+    // front + side + back + side + glue flap (a quarter of the 60 mm side, 15). Front and back take the larger
+    // of length and width (100), so the lids sit on them, as deep as the sides
+    // (60), with a tuck sized from the lid's own 100 mm width (15).
+    expect(r.bounds!.maxX).toBeCloseTo(100 + 60 + 100 + 60 + 15);
+    expect(r.bounds!.maxY).toBeCloseTo(120 + 60 + 15);
+    expect(r.bounds!.minY).toBeCloseTo(-75);
+    expect(r.rulers[0]!.value).toBe(100);
   });
 
   it("is a valid document", () => {

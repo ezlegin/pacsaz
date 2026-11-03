@@ -244,7 +244,7 @@ describe("autocomplete", () => {
     const body = render(rteBox, INPUTS);
     const slots = edgeSlots(rteBox.nodes[0] as PanelsNode, body);
     expect(slots).toHaveLength(10);
-    expect(slots.find((s) => s.path === "panels.0.bottom")).toMatchObject({ at: [30, 0], out: [0, -1] });
+    expect(slots.find((s) => s.path === "panels.0.bottom")).toMatchObject({ at: [50, 0], out: [0, -1] });
     expect(slots.find((s) => s.path === "right")!.feature?.component).toBe("lib:glueFlap");
   });
 

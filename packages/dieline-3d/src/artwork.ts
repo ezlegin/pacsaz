@@ -43,7 +43,7 @@ export const clampArtworkCentre = (value: number): number =>
 
 /** Watermark tile size in pattern units: the same tile the 2D preview uses. */
 export const watermarkTile = (bounds: ArtworkBounds): number =>
-  Math.max(70, Math.min(bounds.width, bounds.height) / 1.3);
+  Math.max(110, Math.min(bounds.width, bounds.height));
 
 type Drawable = CanvasImageSource & { width: number; height: number };
 
@@ -113,7 +113,8 @@ export const composeArtwork = ({
     const fit = Math.min(tile / Math.max(1, watermark.width), tile / Math.max(1, watermark.height));
     const w = watermark.width * fit;
     const h = watermark.height * fit;
-    context.globalAlpha = 0.5;
+    // Stronger than on the flat drawing: shading on the model washes it out.
+    context.globalAlpha = 0.75;
     for (let y = 0; y < height; y += tile) {
       for (let x = 0; x < width; x += tile) {
         context.drawImage(watermark, x + (tile - w) / 2, y + (tile - h) / 2, w, h);

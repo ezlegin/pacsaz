@@ -116,7 +116,9 @@ Phases (each ends with a commit message for the user to commit):
   meaning "auto" and are resolved in the component's variables. A document
   component with the same id shadows a built-in one.
 - Presets (`library/presets.ts`): reverse tuck end, straight tuck end, sleeve,
-  FEFCO 0201. New presets must render without diagnostics and keep the cut
+  FEFCO 0201. Bodies run front, side, back, side, glue; front and back are
+  `max(length, width)` and the sides `min(...)`, so lids always sit on the wide
+  panels and dust flaps on the narrow ones. New presets must render without diagnostics and keep the cut
   outline closed at several sizes (see `panels.test.ts`).
 
 ### Packaging checks, nicks, 3D

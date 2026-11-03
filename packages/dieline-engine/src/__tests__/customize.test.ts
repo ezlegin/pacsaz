@@ -18,8 +18,8 @@ import { doc, errors, INPUTS } from "./helpers";
 /** A reverse tuck end box with something of every kind exposed. */
 function template(): { d: DielineDocument; body: PanelsNode } {
   const body = presetBody("reverseTuckEnd", "body");
-  const back = body.panels[2]!;
-  back.top = { ...back.top!, customize: { choices: ["lib:plainFlap"], args: ["depth"] } };
+  const front = body.panels[0]!;
+  front.top = { ...front.top!, customize: { choices: ["lib:plainFlap"], args: ["depth"] } };
   const side1 = body.panels[1]!;
   side1.top = { ...side1.top!, customize: { args: ["round"] } };
 
@@ -47,7 +47,7 @@ function template(): { d: DielineDocument; body: PanelsNode } {
   return { d, body };
 }
 
-const lidKey = (body: PanelsNode) => edgeKey(body.id, "top", body.panels[2]!.id);
+const lidKey = (body: PanelsNode) => edgeKey(body.id, "top", body.panels[0]!.id);
 
 describe("customize options", () => {
   it("lists only what the designer exposed", () => {
@@ -56,8 +56,8 @@ describe("customize options", () => {
     expect(o.any).toBe(true);
     expect(o.params.map((p) => p.name)).toEqual(["hangHole"]);
     expect(o.nodes).toEqual([expect.objectContaining({ id: "hole", optional: true, move: 10, hiddenByDefault: true })]);
-    expect(o.edges.map((e) => e.key)).toEqual([edgeKey(body.id, "top", body.panels[1]!.id), lidKey(body)]);
-    expect(o.edges[1]!.choices).toEqual(["lib:tuckLid", "lib:plainFlap"]);
+    expect(o.edges.map((e) => e.key)).toEqual([lidKey(body), edgeKey(body.id, "top", body.panels[1]!.id)]);
+    expect(o.edges[0]!.choices).toEqual(["lib:tuckLid", "lib:plainFlap"]);
     expect(o.panels).toContain("body.front");
     expect(o.cutouts?.max).toBe(2);
   });
@@ -70,7 +70,7 @@ describe("customize options", () => {
     const { d } = template();
     expect(parseDocument(JSON.parse(JSON.stringify(d))).ok).toBe(true);
     const renamed = renameSymbol(d, "depth", "deep");
-    expect(customizeOptions(renamed).edges[1]!.args).toEqual(["depth"]);
+    expect(customizeOptions(renamed).edges[0]!.args).toEqual(["depth"]);
     expect(mapExprs(d, (e) => `(${e})`).customize).toEqual(d.customize);
   });
 });
@@ -159,8 +159,8 @@ describe("applyCustomization", () => {
     expect((hole.bounds!.minY + hole.bounds!.maxY) / 2).toBeCloseTo(front[1] - 3);
     expect(hole.bounds!.maxX - hole.bounds!.minX).toBeCloseTo(10);
 
-    // The plain flap is 20 deep above the back panel; the tuck lid was deeper.
-    const top = after.nodes[body.id]!.anchors["back.topLeft"]![1];
+    // The plain flap is 20 deep above the front panel; the tuck lid was deeper.
+    const top = after.nodes[body.id]!.anchors["front.topLeft"]![1];
     expect(after.bounds!.maxY).toBeLessThan(before.bounds!.maxY);
     expect(after.bounds!.maxY).toBeGreaterThanOrEqual(top + 20 - 1e-6);
   });
@@ -202,7 +202,7 @@ describe("verifyCustomization", () => {
       d,
       {
         cutouts: [
-          { id: "w1", shape: "rect", panel: "body.front", cx: 25, cy: 0, width: 20, height: 20 },
+          { id: "w1", shape: "rect", panel: "body.front", cx: 45, cy: 0, width: 20, height: 20 },
           { id: "w2", shape: "rect", panel: "body.back", cx: 0, cy: 0, width: 20, height: 20 },
           { id: "w3", shape: "rect", panel: "body.back", cx: 0, cy: 22, width: 20, height: 20 },
         ],
@@ -217,11 +217,11 @@ describe("verifyCustomization", () => {
 
   it("catches a moved part that now crosses a cut line", () => {
     const { d } = template();
-    // The front panel is 60 wide: moving the hole 10 mm still keeps it inside,
+    // The front panel is 100 wide: moving the hole 10 mm still keeps it inside,
     // so widen the move to push it over the fold.
     const hole = d.nodes[1]!;
-    hole.customize = { optional: true, move: 40 };
-    const v = verifyCustomization(d, { nodes: { hole: { hidden: false, dx: 29 } } }, INPUTS);
+    hole.customize = { optional: true, move: 60 };
+    const v = verifyCustomization(d, { nodes: { hole: { hidden: false, dx: 49 } } }, INPUTS);
     expect(v.ok).toBe(false);
     expect(v.problems.some((p) => p.code === "geometry" && p.path === "nodes.hole")).toBe(true);
   });
