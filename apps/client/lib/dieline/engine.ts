@@ -8,6 +8,7 @@ import {
   toSVG,
   type Customization,
   type DielineDocument,
+  type Pt,
   type RenderResult,
 } from "@repo/dieline-engine";
 
@@ -70,11 +71,41 @@ function rulerFont(result: RenderResult): number {
   return b ? Math.max(4, Math.max(b.maxX - b.minX, b.maxY - b.minY) / 40) : 4;
 }
 
-export function previewSvg(result: RenderResult, options: { watermark: boolean; rulers: boolean }): string {
-  // White paper inside the bleed (windows left open) and, with rulers, each part's overall size.
+/**
+ * The template's rulers as the customer's size reads: an inner size is measured
+ * between the inner faces, so each end moves `inset` mm inside the crease (an
+ * outer size, a negative inset, moves them out). The line is also pushed a
+ * little towards the inside or the outside, so it is plain what is measured.
+ */
+function rulersFor(result: RenderResult, inset: number): RenderResult {
+  if (!inset) return result;
+  const b = result.bounds;
+  const push = Math.sign(inset) * (b ? Math.max(b.maxX - b.minX, b.maxY - b.minY) * 0.02 : 2);
+  const rulers = result.rulers.map((r) => {
+    const len = Math.hypot(r.to[0] - r.from[0], r.to[1] - r.from[1]);
+    if (len <= inset * 2) return r;
+    const ux = (r.to[0] - r.from[0]) / len;
+    const uy = (r.to[1] - r.from[1]) / len;
+    return {
+      ...r,
+      from: [r.from[0] + ux * inset, r.from[1] + uy * inset] as Pt,
+      to: [r.to[0] - ux * inset, r.to[1] - uy * inset] as Pt,
+      offset: r.offset - push * Math.sign(r.offset || 1),
+      value: r.value - inset * 2,
+    };
+  });
+  return { ...result, rulers };
+}
+
+export function previewSvg(result: RenderResult, options: { watermark: boolean; overallRulers: boolean; rulerInset?: number }): string {
+  result = rulersFor(result, options.rulerInset ?? 0);
+  // White paper inside the bleed (windows left open), the template's rulers
+  // always, and each part's overall size when the visitor has it on. Room for
+  // every ruler is kept either way, so the toggle never moves the drawing.
   const svg = toSVG(result, {
-    includeRulers: options.rulers,
-    overallRulers: true,
+    includeRulers: true,
+    overallRulers: options.overallRulers,
+    reserveRulers: true,
     includeBleed: true,
     nonScalingStroke: true,
     strokeWidth: 1.2,

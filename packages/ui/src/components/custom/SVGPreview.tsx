@@ -6,7 +6,7 @@ import { Separator } from "@repo/ui/components/separator";
 import { Spinner } from "@repo/ui/components/spinner";
 import { cn } from "@repo/ui/lib/utils";
 import { Ruler, ZoomIn, ZoomOut } from "lucide-react";
-import { useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import {
   ReactZoomPanPinchRef,
   TransformComponent,
@@ -144,7 +144,12 @@ export default function SvgPreview({
                 overflow: "visible",
               }}
             >
-              <div className="relative" ref={contentRef}>
+              {/*
+                Ruler arrows and labels read --ruler-scale, so they keep their size on
+                screen while zooming in. Zoomed out past the fitted view they shrink with
+                the drawing instead, or the labels would grow over everything.
+              */}
+              <div className="relative" ref={contentRef} style={{ "--ruler-scale": Math.min(1, 1 / scaleFraction) } as CSSProperties}>
                 {isRendering && (
                   <Spinner className="scale-200 text-primary absolute top-1/2 -translate-y-1/2 left-1/2 translate-x-1/2" />
                 )}
@@ -166,7 +171,7 @@ export default function SvgPreview({
                     )}
                     variant="ghost"
                     size={"icon"}
-                    title="خطکش ها"
+                    title="ابعاد کلی"
                     onClick={() => handleRulers()}
                   >
                     <Ruler />

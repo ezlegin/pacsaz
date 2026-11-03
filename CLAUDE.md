@@ -156,6 +156,17 @@ Phases (each ends with a commit message for the user to commit):
   with every window left open; the Studio canvas and the client preview fill it
   white (`sheetFill`), exports never do. `overallRulers(result)` measures each
   separate cut part; rulers draw with arrowheads and an "N mm" label on the line.
+  Bleed grows each part outward and each window inward (a window narrower than
+  twice the bleed drops out). The template's rulers always show; only the
+  overall ones toggle (editor top bar, client preview button), and previews pass
+  `reserveRulers` so toggling never moves the drawing. On-screen SVG arrows and
+  labels scale by the CSS variable `--ruler-scale` to keep their size when zoomed.
+  The measure tool also snaps to fold-line ends and along fold lines.
+- The client draws the template's rulers at the size the customer typed: for an
+  inner or outer size each end moves inside or outside the crease (`rulerInset`
+  in `previewSvg`). Tucks fold 6° past square too. The 3D viewer fits the model
+  with drei `Bounds`, lights it with a local `Environment` of light formers, and
+  gives flute materials a kraft liner with flute ridges by pitch (`board.ts`).
 - The product page shows `checkDieline` problems at the chosen size (Persian
   text in `DielineSettings`), not a rule of thumb.
 - Fold direction and angle per panel are authored in the Studio's 3D dock (click

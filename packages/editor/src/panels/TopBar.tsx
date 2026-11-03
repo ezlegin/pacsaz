@@ -111,9 +111,9 @@ export function TopBar({
       <BarButton Icon={Ruler} label={`Screen rulers ${display.rulers ? "shown" : "hidden"}`} active={display.rulers} onClick={() => store.setDisplay({ rulers: !display.rulers })} />
       <BarButton
         Icon={MoveHorizontal}
-        label={`Dimension rulers ${display.dimensions ? "shown" : "hidden"} (add one with the measure tool)`}
-        active={display.dimensions}
-        onClick={() => store.setDisplay({ dimensions: !display.dimensions })}
+        label={`Overall size of each part ${display.overall ? "shown" : "hidden"}`}
+        active={display.overall}
+        onClick={() => store.setDisplay({ overall: !display.overall })}
       />
       <BarButton
         Icon={SquareDashed}

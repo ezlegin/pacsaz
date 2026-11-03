@@ -1,5 +1,6 @@
 import { foldSchedule, stageProgress, type FoldWindow } from "./schedule";
 import * as THREE from "three";
+import { corrugatedTextures, type BoardTextures } from "./board";
 import type { FoldRig, Pt, RigNode } from "./types";
 
 /**
@@ -63,6 +64,8 @@ export type RigScene = {
   pivots: THREE.Group[];
   size: THREE.Vector3;
   style: MaterialStyle;
+  /** Kraft liner and flute ridges for corrugated board; null for paper-faced board. */
+  board: BoardTextures | null;
 };
 
 /** Flat (SVG, y-down) point -> world (y-up) point, centred on the pattern. */
@@ -279,6 +282,7 @@ export const buildRigScene = ({
   thickness: number;
 }): RigScene => {
   const style = materialStyleFor(material);
+  const board = corrugatedTextures(material, rig.bounds, style.color);
 
   const center: Pt = [
     (rig.bounds.min[0] + rig.bounds.max[0]) / 2,
@@ -377,7 +381,10 @@ export const buildRigScene = ({
     geometry.translate(-hingeWorld.x, -hingeWorld.y, 0);
 
     const materialInstance = new THREE.MeshStandardMaterial({
-      color: style.color,
+      color: board ? "#ffffff" : style.color,
+      map: board?.map ?? null,
+      bumpMap: board?.bumpMap ?? null,
+      bumpScale: 0.5,
       roughness: style.roughness,
       metalness: 0.02,
       side: THREE.DoubleSide,
@@ -481,7 +488,7 @@ export const buildRigScene = ({
   const size = new THREE.Vector3();
   box.getSize(size);
 
-  return { group: root, pivots, size, style };
+  return { group: root, pivots, size, style, board };
 };
 
 // The schedule only depends on the rig, and the slider calls `applyFold` per frame.
@@ -546,8 +553,9 @@ export const applyArtwork = (
     const material = mesh.material as THREE.MeshStandardMaterial;
     if (!material) return;
 
-    material.map = map;
-    material.color.set(map ? "#ffffff" : scene.style.color);
+    // Artwork is printed over the board; the flutes still show through it.
+    material.map = map ?? scene.board?.map ?? null;
+    material.color.set(material.map ? "#ffffff" : scene.style.color);
     material.needsUpdate = true;
   });
 };

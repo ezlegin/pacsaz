@@ -102,7 +102,12 @@ export function useEngineDieline(dieline: EngineDieline, options: { watermark: b
       const size = manufactureSize(dimension.raw, dimensionType, material.value, thickness);
       const { document, params } = applyCustomization(template, customization);
       const result = render(document, { ...size, thickness, bleed, params });
-      dispatch(setSvg(previewSvg(result, { watermark: options.watermark, rulers: showOverallRulers })));
+      dispatch(setSvg(previewSvg(result, {
+          watermark: options.watermark,
+          overallRulers: showOverallRulers,
+          // Rulers measure the size the customer typed: inner or outer faces, not the creases.
+          rulerInset: (size.width - dimension.raw.width) / 2,
+        })));
       dispatch(setFoldSvg(toFoldSVG(result)));
       const found = new Set<IssueCode | "build">(checkDieline(result).map((i) => i.code));
       if (result.diagnostics.some((d) => d.severity === "error")) found.add("build");

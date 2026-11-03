@@ -84,7 +84,7 @@ export function buildCommands(store: EditorStore, host: CommandHost): Command[] 
     { id: "snap", label: s.snapping ? "Turn snapping off" : "Turn snapping on", group: "View", keys: "S", run: () => store.setSnapping(!s.snapping) },
     { id: "guides", label: s.display.guides ? "Hide guides" : "Show guides", group: "View", run: () => store.setDisplay({ guides: !s.display.guides }) },
     { id: "rulers", label: s.display.rulers ? "Hide screen rulers" : "Show screen rulers", group: "View", run: () => store.setDisplay({ rulers: !s.display.rulers }) },
-    { id: "dimensions", label: s.display.dimensions ? "Hide dimension rulers" : "Show dimension rulers", group: "View", run: () => store.setDisplay({ dimensions: !s.display.dimensions }) },
+    { id: "overall", label: s.display.overall ? "Hide overall size" : "Show overall size", group: "View", run: () => store.setDisplay({ overall: !s.display.overall }) },
     { id: "bleed", label: s.display.bleed ? "Hide bleed" : "Show bleed", group: "View", run: () => store.setDisplay({ bleed: !s.display.bleed }) },
     { id: "ghosts", label: s.display.ghosts ? "Hide smallest/largest sizes" : "Show smallest/largest sizes", group: "View", enabled: !!s.sizeRange, run: () => store.setDisplay({ ghosts: !s.display.ghosts }) },
     { id: "nicks", label: s.display.nicks ? "Turn nicks off" : "Turn nicks on", group: "View", run: () => store.setDisplay({ nicks: !s.display.nicks }) },

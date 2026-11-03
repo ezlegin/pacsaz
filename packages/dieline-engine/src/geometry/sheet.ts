@@ -1,5 +1,5 @@
 import type { RenderResult, RulerInfo } from "../eval/render";
-import { closedLoops } from "./bleed";
+import { closedLoops, isHole } from "./bleed";
 import { pathsBounds } from "./math";
 import type { Pt } from "./types";
 
@@ -11,36 +11,25 @@ import type { Pt } from "./types";
  * the outlines of the parts.
  */
 
-function inside(p: Pt, poly: Pt[]): boolean {
-  let hit = false;
-  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
-    const a = poly[i]!;
-    const b = poly[j]!;
-    if (a[1] > p[1] !== b[1] > p[1] && p[0] < ((b[0] - a[0]) * (p[1] - a[1])) / (b[1] - a[1]) + a[0]) hit = !hit;
-  }
-  return hit;
-}
-
 export function cutParts(result: RenderResult): { outlines: Pt[][]; holes: Pt[][] } {
   const loops = closedLoops(result.paths.filter((p) => p.lineType === "cut"));
   const outlines: Pt[][] = [];
   const holes: Pt[][] = [];
-  loops.forEach((loop, i) => {
-    const within = loops.some((other, j) => j !== i && other.length > 2 && inside(loop[0]!, other) && !inside(other[0]!, loop));
-    (within ? holes : outlines).push(loop);
-  });
+  for (const loop of loops) (isHole(loop, loops) ? holes : outlines).push(loop);
   return { outlines, holes };
 }
 
 /**
- * Loops that fill the printed sheet with the even-odd rule: the bleed outline
+ * Loops that fill the printed sheet with the even-odd rule: the bleed loops
  * (or the parts' outlines without a bleed) with every window left open, since
  * nothing is printed where the board is cut away.
  */
 export function sheetLoops(result: RenderResult): Pt[][] {
-  const { outlines, holes } = cutParts(result);
+  // The bleed already holds every window, grown into its opening.
   const bleed = closedLoops(result.bleed);
-  return [...(bleed.length ? bleed : outlines), ...holes];
+  if (bleed.length) return bleed;
+  const { outlines, holes } = cutParts(result);
+  return [...outlines, ...holes];
 }
 
 /**

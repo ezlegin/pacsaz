@@ -142,6 +142,31 @@ describe("sheet and overall rulers", () => {
     expect(toSVG(r, { sheetFill: "#fff" })).toContain('fill-rule="evenodd"');
   });
 
+  it("grows the bleed into each window", () => {
+    const r = renderNodes([rect("a", "100", "50"), rect("w", "20", "10", { transform: { x: "40", y: "20" } })], { bleed: 3 });
+    const [, hole] = sheetLoops(r);
+    const xs = hole!.map((p) => Math.round(p[0] * 100) / 100);
+    const ys = hole!.map((p) => Math.round(p[1] * 100) / 100);
+    expect([Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)]).toEqual([43, 23, 57, 27]);
+  });
+
+  it("drops a window narrower than twice the bleed", () => {
+    const r = renderNodes([rect("a", "100", "50"), rect("w", "4", "4", { transform: { x: "40", y: "20" } })], { bleed: 3 });
+    expect(sheetLoops(r)).toHaveLength(1);
+  });
+
+  it("keeps the drawing still when rulers are toggled with reserveRulers", () => {
+    const r = renderNodes([rect("a", "100", "50")]);
+    const box = (overall: boolean) => /viewBox="([^"]+)"/.exec(toSVG(r, { includeRulers: true, overallRulers: overall, reserveRulers: true }))?.[1];
+    expect(box(false)).toBe(box(true));
+    expect(toSVG(r, { includeRulers: true, overallRulers: false, reserveRulers: true })).not.toContain("100 mm");
+  });
+
+  it("gives every separate part its own bleed", () => {
+    const r = renderNodes([rect("a", "100", "50"), rect("b", "30", "40", { transform: { x: "150" } })], { bleed: 3 });
+    expect(sheetLoops(r)).toHaveLength(2);
+  });
+
   it("measures each separate part", () => {
     const r = renderNodes([rect("a", "100", "50"), rect("b", "30", "40", { transform: { x: "150" } })]);
     const rulers = overallRulers(r);

@@ -80,8 +80,8 @@ export const BleedLayer = memo(function BleedLayer({ result }: { result: RenderR
 });
 
 /** The template's rulers plus each part's overall width and height. */
-export function useShownRulers(result: RenderResult): RulerInfo[] {
-  return useMemo(() => [...result.rulers, ...overallRulers(result)], [result]);
+export function useShownRulers(result: RenderResult, overall: boolean): RulerInfo[] {
+  return useMemo(() => (overall ? [...result.rulers, ...overallRulers(result)] : result.rulers), [result, overall]);
 }
 
 /** Extension and dimension lines: world space (inside the world group). */

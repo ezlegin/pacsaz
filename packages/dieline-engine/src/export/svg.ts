@@ -24,8 +24,13 @@ export type SvgOptions = {
   nicks?: NickOptions;
   rulerColor?: string;
   rulerFontSize?: number;
-  /** Add each part's overall width and height (computed, not from the document). */
+  /** Add each part's overall width and height (computed, not from the document). Independent of `includeRulers`. */
   overallRulers?: boolean;
+  /**
+   * Size the drawing as if every ruler (the template's and the overall ones) were
+   * shown, so turning rulers on and off in a viewer does not move the drawing.
+   */
+  reserveRulers?: boolean;
   /** Fill the printed sheet (inside the bleed, windows left open) with this colour. On-screen previews only. */
   sheetFill?: string;
 };
@@ -96,9 +101,8 @@ function strokeAttrs(style: LineStyle, base: number, nonScaling: boolean): strin
 export function exportBounds(result: RenderResult, options: SvgOptions = {}): Bounds | null {
   let b = options.includeGuides ? pathsBounds(result.paths) : result.bounds;
   if (options.includeBleed) b = unionBounds(b, pathsBounds(result.bleed));
-  if (options.includeRulers) {
-    for (const r of shownRulers(result, options)) b = unionBounds(b, pathsBounds(rulerPrims(r)));
-  }
+  const sized = options.reserveRulers ? shownRulers(result, { includeRulers: true, overallRulers: true }) : shownRulers(result, options);
+  for (const r of sized) b = unionBounds(b, pathsBounds(rulerPrims(r)));
   return b;
 }
 
@@ -145,11 +149,9 @@ export function toSVG(result: RenderResult, options: SvgOptions = {}): string {
     );
   }
 
-  if (options.includeRulers) {
-    const color = options.rulerColor ?? "#0ea5e9";
-    const fontSize = options.rulerFontSize ?? 3.5;
-    for (const ruler of shownRulers(result, options)) body.push(rulerSVG(ruler, color, fontSize, base, nonScaling));
-  }
+  const color = options.rulerColor ?? "#0ea5e9";
+  const fontSize = options.rulerFontSize ?? 3.5;
+  for (const ruler of shownRulers(result, options)) body.push(rulerSVG(ruler, color, fontSize, base, nonScaling));
 
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" width="${fmt(width)}mm" height="${fmt(height)}mm" stroke-linecap="round" stroke-linejoin="round">` +
@@ -161,7 +163,7 @@ export function toSVG(result: RenderResult, options: SvgOptions = {}): string {
 //! Rulers -------------------------------------------------------------------------
 
 function shownRulers(result: RenderResult, options: SvgOptions): RulerInfo[] {
-  return options.overallRulers ? [...result.rulers, ...overallRulers(result)] : result.rulers;
+  return [...(options.includeRulers ? result.rulers : []), ...(options.overallRulers ? overallRulers(result) : [])];
 }
 
 /** The dimension line's two ends, `a` at `from`, after the offset. */
@@ -202,19 +204,42 @@ export function rulerLabel(r: RulerInfo): string {
 function rulerSVG(r: RulerInfo, color: string, fontSize: number, base: number, nonScaling: boolean): string {
   const prims = rulerPrims(r);
   const { a, b, dir } = rulerEnds(r);
-  const arrows = rulerArrows(r, fontSize * 0.9).map((t) => `M${t.map(flip).join("L")}Z`).join("");
+  const size = fontSize * 0.9;
 
   // Keep the label readable: never upside down. It sits on the line, which a
   // white halo breaks around it.
   let angle = -angleOf(dir);
   if (angle > 90 || angle <= -90) angle += 180;
+  const mid = flip(scale(add(a, b), 0.5)).split(" ");
+  const text = (attrs: string) =>
+    `<text ${attrs} fill="${color}" font-size="${fmt(fontSize)}" font-family="sans-serif" text-anchor="middle" dominant-baseline="central" stroke="#ffffff" stroke-width="${fmt(fontSize * 0.5)}" paint-order="stroke">${rulerLabel(r)}</text>`;
 
-  const [x, y] = flip(scale(add(a, b), 0.5)).split(" ");
+  let marks: string;
+  if (nonScaling) {
+    // On screen, arrows and label are drawn around their own anchor and scaled by
+    // the CSS variable --ruler-scale, so a zoomable viewer keeps them the same size
+    // on screen at any zoom, as the editor does.
+    const at = (p: Pt, deg: number) => {
+      const [x, y] = flip(p).split(" ");
+      return `style="transform: translate(${x}px, ${y}px) rotate(${fmt(deg)}deg) scale(var(--ruler-scale, 1))"`;
+    };
+    const head = `M0 0L${fmt(size)} ${fmt(size * 0.35)}L${fmt(size)} ${fmt(-size * 0.35)}Z`;
+    // The back of the head points along the line, into the ruler.
+    const back = -angleOf(dir);
+    marks =
+      `<path d="${head}" fill="${color}" stroke="none" ${at(a, back)}/>` +
+      `<path d="${head}" fill="${color}" stroke="none" ${at(b, back + 180)}/>` +
+      text(`x="0" y="0" ${at(scale(add(a, b), 0.5), angle)}`);
+  } else {
+    const arrows = rulerArrows(r, size).map((t) => `M${t.map(flip).join("L")}Z`).join("");
+    const [x, y] = mid;
+    marks = `<path d="${arrows}" fill="${color}" stroke="none"/>` + text(`x="${x}" y="${y}" transform="rotate(${fmt(angle)} ${x} ${y})"`);
+  }
+
   return (
     `<g data-ruler-id="${escapeAttr(r.id)}">` +
     `<path d="${prims.map(primToD).join("")}" fill="none" stroke="${color}" stroke-width="${fmt(base * 0.6)}"${nonScaling ? ` vector-effect="non-scaling-stroke"` : ""}/>` +
-    `<path d="${arrows}" fill="${color}" stroke="none"/>` +
-    `<text x="${x}" y="${y}" fill="${color}" font-size="${fmt(fontSize)}" font-family="sans-serif" text-anchor="middle" dominant-baseline="central" stroke="#ffffff" stroke-width="${fmt(fontSize * 0.5)}" paint-order="stroke" transform="rotate(${fmt(angle)} ${x} ${y})">${rulerLabel(r)}</text>` +
+    marks +
     `</g>`
   );
 }

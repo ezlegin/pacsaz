@@ -27,8 +27,8 @@ export type EditorState = {
     guides: boolean;
     /** Screen rulers along the canvas edges. */
     rulers: boolean;
-    /** The template's own dimension rulers (what exports show). */
-    dimensions: boolean;
+    /** Each part's overall width and height. The template's own rulers always show. */
+    overall: boolean;
     bleed: boolean;
     ghosts: boolean;
     nicks: boolean;
@@ -80,7 +80,7 @@ export class EditorStore {
       drawLineType: "cut",
       view: { x: 0, y: 0, zoom: 1 },
       snapping: true,
-      display: { guides: true, rulers: true, dimensions: true, bleed: true, ghosts: false, nicks: false, issues: true, preview3d: false },
+      display: { guides: true, rulers: true, overall: true, bleed: true, ghosts: false, nicks: false, issues: true, preview3d: false },
       sizeRange: null,
       nicks: { width: 0.5, spacing: 60 },
       canUndo: false,

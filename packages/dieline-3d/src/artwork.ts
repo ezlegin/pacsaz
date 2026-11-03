@@ -67,8 +67,8 @@ export const composeArtwork = ({
   watermark?: Drawable | null;
   transform: ArtworkTransform;
   bounds: ArtworkBounds;
-  /** Colour of the unprinted board; the board's own colour when there is only a watermark. */
-  background?: string;
+  /** Colour of the unprinted board, or a painter for a textured board (corrugated). */
+  background?: string | ((context: CanvasRenderingContext2D, width: number, height: number) => void);
   maxWidth?: number;
 }): HTMLCanvasElement | null => {
   const ratio = bounds.height / bounds.width;
@@ -85,8 +85,11 @@ export const composeArtwork = ({
   if (!context) return null;
 
   // Uncovered pattern reads as plain board.
-  context.fillStyle = background;
-  context.fillRect(0, 0, width, height);
+  if (typeof background === "function") background(context, width, height);
+  else {
+    context.fillStyle = background;
+    context.fillRect(0, 0, width, height);
+  }
   context.imageSmoothingQuality = "high";
 
   if (image) {

@@ -172,19 +172,46 @@ function distanceTo(poly: Pt[], p: Pt): number {
   return best;
 }
 
+/** Even-odd point in polygon. */
+export function insidePolygon(p: Pt, poly: Pt[]): boolean {
+  let hit = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const a = poly[i]!;
+    const b = poly[j]!;
+    if (a[1] > p[1] !== b[1] > p[1] && p[0] < ((b[0] - a[0]) * (p[1] - a[1])) / (b[1] - a[1]) + a[0]) hit = !hit;
+  }
+  return hit;
+}
+
+/** A closed loop lying inside another one is a hole (a window); the rest are part outlines. */
+export function isHole(loop: Pt[], loops: Pt[][]): boolean {
+  return loops.some((other) => other !== loop && other.length > 2 && insidePolygon(loop[0]!, other) && !insidePolygon(other[0]!, loop));
+}
+
+/**
+ * Grows `loop` by `distance` away from the board: outward for a part's outline,
+ * into the opening for a window, so the print runs past every knife. Returns
+ * nothing when a window is too small to keep an opening.
+ */
+function offsetLoop(loop: Pt[], distance: number, hole: boolean): Pt[] | null {
+  let poly = cleaned(loop);
+  if (poly.length < 3) return null;
+  // `rawOffset` grows a counter-clockwise loop outward; a window runs clockwise
+  // so the same code grows it into its own opening.
+  if (signedArea(poly) < 0 !== hole) poly = [...poly].reverse();
+  const out = untangle(rawOffset(poly, distance)).filter((p) => distanceTo(poly, p) > distance - 1e-3);
+  if (out.length < 3) return null;
+  // A window narrower than twice the bleed closes up: what remains turns the wrong way or is a sliver.
+  if (hole && (signedArea(out) >= 0 || !out.every((p) => insidePolygon(p, poly)))) return null;
+  return out;
+}
+
 export function bleedOutline(cut: readonly Prim[], distance: number): Prim[] {
   if (!(distance > 0)) return [];
   const loops = closedLoops(cut);
-  if (!loops.length) return [];
-
-  let outer = cleaned(loops.reduce((best, l) => (Math.abs(signedArea(l)) > Math.abs(signedArea(best)) ? l : best)));
-  if (outer.length < 3) return [];
-  if (signedArea(outer) < 0) outer = [...outer].reverse();
-
-  // Overlaps that only touch (a slot exactly as wide as the bleed, or twice as
-  // wide) never cross, so untangling leaves them; a point closer to the cut
-  // than the bleed can only belong to such a fold, and its neighbours join up.
-  const poly = untangle(rawOffset(outer, distance)).filter((p) => distanceTo(outer, p) > distance - 1e-3);
-  if (poly.length < 3) return [];
-  return poly.map((p, i) => ({ kind: "line", a: p, b: poly[(i + 1) % poly.length]! }));
+  return loops.flatMap((loop) => {
+    const poly = offsetLoop(loop, distance, isHole(loop, loops));
+    if (!poly) return [];
+    return poly.map((p, i): Prim => ({ kind: "line", a: p, b: poly[(i + 1) % poly.length]! }));
+  });
 }

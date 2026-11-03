@@ -16,7 +16,7 @@ import type { FoldRig } from "./types";
  * Viewers start closed, so dragging the slider back reverses this: the lid
  * opens, the tuck straightens, the dust flaps open, the bottom, then the sides.
  *
- * Dust flaps under a lid, and the glue flap, fold a little past square, so the
+ * Dust flaps under a lid, tucks, and the glue flap fold a little past square, so the
  * lid or the closing panel lands over them instead of into them.
  *
  * Everything is derived from the rig: a *body* panel hinges on a vertical fold
@@ -140,8 +140,11 @@ export function foldSchedule(rig: FoldRig): FoldWindow[] {
     if (!g) return ALWAYS;
     const window = windowOf(flapStage(i));
     // Only an untouched square fold is deepened; an authored angle is kept.
-    const dust = flapStage(i).endsWith(":dust") && lidOn.has(g.side) && Math.abs(node.angle - SQUARE) < 1e-6;
-    return dust ? { ...window, angle: node.angle + TUCK_IN } : window;
+    // Dust flaps under a lid, and a tuck on its lid, go a little past square so
+    // the lid lands over the dust flaps and the tuck slides inside the box.
+    const square = Math.abs(node.angle - SQUARE) < 1e-6;
+    const dust = flapStage(i).endsWith(":dust") && lidOn.has(g.side);
+    return square && (dust || g.level > 1) ? { ...window, angle: node.angle + TUCK_IN } : window;
   });
 }
 

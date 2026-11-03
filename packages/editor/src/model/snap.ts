@@ -1,4 +1,4 @@
-import { allNodes, mapExprs, referencedNodes, type DielineDocument, type Pt, type RenderResult } from "@repo/dieline-engine";
+import { allNodes, mapExprs, referencedNodes, type DielineDocument, type LineType, type Pt, type RenderResult } from "@repo/dieline-engine";
 import { lineage } from "./frames";
 
 /** A point other geometry can snap to: a named anchor of a visible node. */
@@ -34,6 +34,43 @@ export function snapTargets(result: RenderResult, exclude: readonly string[]): S
   }
 
   return out;
+}
+
+const FOLDS: ReadonlySet<LineType> = new Set(["crease", "reverseCrease", "perf", "cutCrease"]);
+
+/**
+ * Ends of the fold lines. A body's folds run between panel corners that are
+ * anchors already, but the hinges of its flaps and folds drawn as plain lines
+ * have none. These targets have an empty `anchor`: a point to land on, never a
+ * reference to write.
+ */
+export function foldTargets(result: RenderResult): SnapTarget[] {
+  const out: SnapTarget[] = [];
+  for (const path of result.paths) {
+    if (path.kind !== "line" || !FOLDS.has(path.lineType)) continue;
+    for (const point of [path.a, path.b]) out.push({ nodeId: path.nodeId, nodeName: "", anchor: "", point });
+  }
+  return out;
+}
+
+/** The closest point on any fold line within `tolerance`, for measuring to a fold anywhere along it. */
+export function nearestOnFold(result: RenderResult, p: Pt, tolerance: number): Pt | null {
+  let best: Pt | null = null;
+  let bestD = tolerance;
+  for (const path of result.paths) {
+    if (path.kind !== "line" || !FOLDS.has(path.lineType)) continue;
+    const [ax, ay] = path.a;
+    const dx = path.b[0] - ax;
+    const dy = path.b[1] - ay;
+    const t = Math.max(0, Math.min(1, ((p[0] - ax) * dx + (p[1] - ay) * dy) / (dx * dx + dy * dy || 1)));
+    const q: Pt = [ax + t * dx, ay + t * dy];
+    const d = Math.hypot(q[0] - p[0], q[1] - p[1]);
+    if (d <= bestD) {
+      bestD = d;
+      best = q;
+    }
+  }
+  return best;
 }
 
 /**

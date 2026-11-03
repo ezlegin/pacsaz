@@ -40,7 +40,7 @@ import {
 import { handlesFor, type Handle } from "../model/handles";
 import { moveNodes } from "../model/move";
 import { constrain45, constrainPlace, drawnPath, placedShape, type DrawPoint } from "../model/draw";
-import { niceStep, snapMoving, snappedDelta, snapTargets, wouldCycle, type SnapResult, type SnapTarget } from "../model/snap";
+import { foldTargets, nearestOnFold, niceStep, snapMoving, snappedDelta, snapTargets, wouldCycle, type SnapResult, type SnapTarget } from "../model/snap";
 import { useEditor, useStore } from "../state/react";
 import type { View } from "../state/store";
 import { useAnalysis } from "../state/analysis";
@@ -106,13 +106,13 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
   const store = useStore();
   const doc = useEditor((s) => s.doc);
   const result = useEditor((s) => s.result);
-  const shownRulers = useShownRulers(result);
   const view = useEditor((s) => s.view);
   const selection = useEditor((s) => s.selection);
   const hover = useEditor((s) => s.hover);
   const scope = useEditor((s) => s.scope);
   const tool = useEditor((s) => s.tool);
   const display = useEditor((s) => s.display);
+  const shownRulers = useShownRulers(result, display.overall);
   const nicks = useEditor((s) => s.nicks);
   const { ghosts, issues } = useAnalysis();
 
@@ -256,7 +256,18 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
 
   // Shift keeps the second point of a measurement on 0°, 45°, 90°, ... from the first.
   const measureEnd = (world: Pt, shift: boolean, useSnap: boolean): MeasurePoint =>
-    shift && measure.a && !measure.b ? { p: constrain45(measure.a.p, world) } : measurePoint(world, useSnap);
+    shift && measure.a && !measure.b ? { p: constrain45(measure.a.p, world) } : rulerPoint(world, useSnap);
+
+  // The measure tool also lands on fold lines: their ends first, then anywhere along one.
+  const rulerTargets = useMemo(() => (tool === "measure" ? [...measureTargets, ...foldTargets(result)] : measureTargets), [tool, measureTargets, result]);
+  const rulerPoint = (world: Pt, useSnap: boolean): MeasurePoint => {
+    if (!useSnap) return { p: world };
+    const snap = snapMoving([world], rulerTargets, tolerance());
+    if (snap.x && snap.y && snap.x.target === snap.y.target) return { p: [snap.x.value, snap.y.value], target: snap.x.target };
+    const onFold = nearestOnFold(result, world, tolerance());
+    if (onFold) return { p: onFold };
+    return { p: [snap.x?.value ?? world[0], snap.y?.value ?? world[1]] };
+  };
 
   const measurePoint = (world: Pt, useSnap: boolean): MeasurePoint => {
     if (!useSnap) return { p: world };
@@ -651,7 +662,7 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
     const { a, b } = measure;
     if (!a || !b) return;
     const coord = (m: MeasurePoint, axis: "x" | "y", i: 0 | 1) =>
-      m.target ? refExpr(m.target.nodeName, m.target.anchor, axis) : formatNumber(m.p[i]);
+      m.target?.anchor ? refExpr(m.target.nodeName, m.target.anchor, axis) : formatNumber(m.p[i]);
     store.apply((d) => ({
       ...d,
       rulers: [
@@ -661,7 +672,7 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
           name: uniqueName(d.rulers.map((r) => r.name), "ruler"),
           from: { x: coord(a, "x", 0), y: coord(a, "y", 1) },
           to: { x: coord(b, "x", 0), y: coord(b, "y", 1) },
-          offset: "8",
+          offset: "0",
         },
       ],
     }));
@@ -686,6 +697,8 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
     : tool === "hand" || spaceDown.current ? "cursor-grab"
     : drawing ? "cursor-crosshair"
     : dragging === "move" ? "cursor-move"
+    // Over a shape's line: it can be dragged.
+    : tool === "select" && hover ? "cursor-move"
     : "cursor-default";
 
   const scopeName = scope ? result.nodes[scope]?.name : null;
@@ -717,10 +730,10 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
           {display.ghosts && ghosts.max && <GhostLayer result={ghosts.max} color="rgb(249 115 22)" />}
           {display.bleed && <BleedLayer result={result} />}
           <DielineLayer result={shown} showGuides={showGuides} />
-          {display.dimensions && <DimensionLines rulers={shownRulers} />}
+          <DimensionLines rulers={shownRulers} />
           {tool === "select" && <HitLayer result={result} />}
         </g>
-        {display.dimensions && <DimensionLabels rulers={shownRulers} view={view} />}
+        <DimensionLabels rulers={shownRulers} view={view} />
 
         {/* Selection box and size */}
         {selBounds && dragging !== "marquee" && (() => {

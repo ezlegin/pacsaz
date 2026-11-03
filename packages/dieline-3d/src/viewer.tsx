@@ -1,6 +1,6 @@
 "use client";
 
-import { OrbitControls } from "@react-three/drei";
+import { Bounds, Environment, Lightformer, OrbitControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { useEffect, useMemo, useState } from "react";
 import * as THREE from "three";
@@ -12,10 +12,11 @@ import { parseFoldConfig } from "./foldConfig";
 import type { FoldRig } from "./types";
 
 /**
- * Light neutral grey studio backdrop. Dark enough that a white board still reads
+ * Studio backdrop: a grey sweep, darker at the top, as in a product shot. Drawn
+ * by CSS behind a transparent canvas. Dark enough that a white board still reads
  * against it, neutral enough not to tint the kraft stock.
  */
-const WORLD_BACKGROUND = "#e9ebee";
+const BACKDROP = "radial-gradient(ellipse at 50% 85%, #e6e6e6 0%, #cfcfcf 55%, #b4b4b4 100%)";
 
 /** Highlight colour for the panel selected in an editor. */
 const SELECTION_COLOR = "#7c3aed";
@@ -219,6 +220,7 @@ export const DielineViewer = ({
   const artworkImage = useDecodedImage(artworkUrl, "artwork");
   const watermarkImage = useDecodedImage(watermark ?? undefined, "watermark");
   const boardColor = materialStyleFor(material).color;
+  const board = scene?.board ?? null;
 
   /* ---------------------- recompose on every placement --------------------- */
   useEffect(() => {
@@ -237,8 +239,8 @@ export const DielineViewer = ({
           cy: artworkCy ?? 0.5,
         },
         bounds,
-        // A watermark alone keeps the board's colour; artwork is printed on white.
-        background: artworkImage ? "#ffffff" : boardColor,
+        // A watermark alone keeps the board's look; artwork is printed on white.
+        background: artworkImage ? "#ffffff" : (board?.paint ?? boardColor),
         // Live preview: dragging recomposes on every move, so a 2048px canvas
         // would be wasted work for a model this size on screen.
         maxWidth: 1024,
@@ -259,7 +261,7 @@ export const DielineViewer = ({
       console.error("[dieline-3d] artwork compose failed", error);
       setArtworkTexture(null);
     }
-  }, [artworkImage, watermarkImage, boardColor, artworkScale, artworkCx, artworkCy, bounds]);
+  }, [artworkImage, watermarkImage, boardColor, board, artworkScale, artworkCx, artworkCy, bounds]);
 
   useEffect(() => {
     if (!scene) return;
@@ -267,6 +269,8 @@ export const DielineViewer = ({
     applyArtwork(scene, artworkTexture);
     return () => applyArtwork(scene, null);
   }, [scene, artworkTexture]);
+
+  useEffect(() => () => scene?.board?.dispose(), [scene]);
 
   // Release the GPU texture once it is no longer referenced.
   useEffect(() => () => artworkTexture?.dispose(), [artworkTexture]);
@@ -310,10 +314,10 @@ export const DielineViewer = ({
   const cameraDistance = span * 1.15;
 
   return (
-    <div className={`relative overflow-hidden ${className ?? ""}`}>
+    <div className={`relative overflow-hidden ${className ?? ""}`} style={{ background: BACKDROP }}>
       <Canvas
         dpr={[1, 2]}
-        gl={{ antialias: true, alpha: false }}
+        gl={{ antialias: true, alpha: true }}
         camera={{
           /* Start above and to the right, looking down at the model. */
           position: [
@@ -326,52 +330,38 @@ export const DielineViewer = ({
           far: span * 20,
         }}
       >
-        {/* Neutral studio backdrop rather than the page showing through. */}
-        <color attach="background" args={[WORLD_BACKGROUND]} />
-
         {/*
-          Key on the front, an equally strong key on the back, plus a soft
-          sky/ground ambient and a low fill.
-
-          The back light is the point: a panel seen from behind is lit only by
-          lights behind it, so with a front key alone the reverse of the model
-          went dark. Two opposing keys give both faces the same brightness, and
-          because each faces only its own light the shading across a face stays
-          readable.
+          Soft studio light: a large softbox overhead and strips on either side,
+          reflected by the board (an environment built here, nothing downloaded),
+          plus a soft key from the front left so the faces of the box shade
+          differently, and a gentle back light so the reverse is never black.
         */}
-        <hemisphereLight args={["#ffffff", "#c6cad0", 0.8]} />
+        <Environment resolution={256}>
+          <Lightformer form="rect" intensity={2.2} position={[0, 5, 0]} rotation-x={Math.PI / 2} scale={[10, 10, 1]} />
+          <Lightformer form="rect" intensity={1.2} position={[-5, 1, 2]} rotation-y={Math.PI / 2} scale={[8, 3, 1]} />
+          <Lightformer form="rect" intensity={0.9} position={[5, 1, 2]} rotation-y={-Math.PI / 2} scale={[8, 3, 1]} />
+          <Lightformer form="rect" intensity={0.6} position={[0, 1, 6]} scale={[8, 4, 1]} />
+        </Environment>
+        <hemisphereLight args={["#ffffff", "#b9b9b9", 0.35]} />
+        <directionalLight position={[-span * 0.8, span * 1.2, span]} intensity={0.9} />
+        <directionalLight position={[span * 0.6, span * 0.4, -span]} intensity={0.35} />
 
-        {/* Front key, upper left. */}
-        <directionalLight
-          position={[span * 0.8, -span, span * 1.4]}
-          intensity={1.45}
-        />
-
-        {/* Back key, mirrored, so the reverse of the model is not in shadow. */}
-        <directionalLight
-          position={[-span * 0.7, span * 0.85, -span * 1.35]}
-          intensity={1.45}
-        />
-
-        {/* Gentle fill from the upper right to stop edges going flat. */}
-        <directionalLight
-          position={[span * 0.9, span * 0.6, span * 0.45]}
-          intensity={0.4}
-        />
-
-        <RigObject
-          scene={scene}
-          rig={rig}
-          progress={progress}
-          onPanelClick={onPanelClick}
-        />
+        {/* Fit the model to the viewer on first view and whenever it is rebuilt or resized. */}
+        <Bounds fit clip observe margin={1.35} maxDuration={0}>
+          <RigObject
+            scene={scene}
+            rig={rig}
+            progress={progress}
+            onPanelClick={onPanelClick}
+          />
+        </Bounds>
 
         <OrbitControls
           makeDefault
           enablePan
           enableDamping
           dampingFactor={0.12}
-          minDistance={span * 0.35}
+          minDistance={span * 0.2}
           maxDistance={span * 4}
         />
       </Canvas>
