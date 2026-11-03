@@ -441,6 +441,9 @@ importers:
 
   packages/editor:
     dependencies:
+      '@repo/dieline-3d':
+        specifier: workspace:*
+        version: link:../dieline-3d
       '@repo/dieline-engine':
         specifier: workspace:*
         version: link:../dieline-engine

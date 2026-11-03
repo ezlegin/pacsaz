@@ -12,6 +12,7 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
+    "@repo/dieline-3d": "workspace:*",
     "@repo/dieline-engine": "workspace:*",
     "@repo/ui": "workspace:*",
     "lucide-react": "^0.562.0"

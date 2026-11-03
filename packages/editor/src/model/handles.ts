@@ -79,14 +79,19 @@ export function handlesFor(node: Node, result: RenderResult): Handle[] {
       const at = local(node.kind === "arc" ? "mid" : node.kind === "star" ? "tip" : "p0");
       if (!at) return [];
       const radius = info.scalars.radius ?? 0;
+      // A polygon sized by its side changes side length, not corner radius, as
+      // the corner moves out: by 2·sin(π/n) per millimetre of radius.
+      const bySide = node.kind === "polygon" && node.sizeBy === "side";
+      const perRadius = bySide ? 2 * Math.sin(Math.PI / (info.scalars.sides ?? 3)) : 1;
+      const current = bySide ? (info.scalars.side ?? 0) : radius;
       return [
         {
           key: "radius",
           local: at,
           cursor: "move",
           apply: (n, d, o) => {
-            const grow = dot(d, unit(at));
-            return { ...n, radius: adjust((n as { radius: Expr }).radius, radius, grow, o.plain) } as Node;
+            const grow = dot(d, unit(at)) * perRadius;
+            return { ...n, radius: adjust((n as { radius: Expr }).radius, current, grow, o.plain) } as Node;
           },
         },
       ];

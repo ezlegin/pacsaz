@@ -24,7 +24,7 @@ export type CommandHost = {
 export function buildCommands(store: EditorStore, host: CommandHost): Command[] {
   const s = store.get();
   const sel = s.selection;
-  const kinds: PlaceableKind[] = ["rect", "line", "ellipse", "arc", "polygon", "star", "belt"];
+  const kinds: PlaceableKind[] = ["rect", "line", "triangle", "ellipse", "arc", "polygon", "star", "belt"];
 
   const commands: Command[] = [
     ...(host.save ? [{ id: "save", label: "Save", group: "File", keys: "Ctrl+S", run: host.save, enabled: s.dirty }] : []),
@@ -32,9 +32,9 @@ export function buildCommands(store: EditorStore, host: CommandHost): Command[] 
       id: "export-svg",
       label: "Export SVG",
       group: "File",
-      run: () => host.download("dieline.svg", toSVG(s.result, { includeRulers: true }), "image/svg+xml"),
+      run: () => host.download("dieline.svg", toSVG(s.result, { includeRulers: true, ...(s.display.nicks ? { nicks: s.nicks } : {}) }), "image/svg+xml"),
     },
-    { id: "export-dxf", label: "Export DXF (die maker layers)", group: "File", run: () => host.download("dieline.dxf", toDXF(s.result), "application/dxf") },
+    { id: "export-dxf", label: "Export DXF (die maker layers)", group: "File", run: () => host.download("dieline.dxf", toDXF(s.result, s.display.nicks ? { nicks: s.nicks } : {}), "application/dxf") },
 
     { id: "undo", label: "Undo", group: "Edit", keys: "Ctrl+Z", run: () => store.undo(), enabled: s.canUndo },
     { id: "redo", label: "Redo", group: "Edit", keys: "Ctrl+Shift+Z", run: () => store.redo(), enabled: s.canRedo },
@@ -84,6 +84,10 @@ export function buildCommands(store: EditorStore, host: CommandHost): Command[] 
     { id: "snap", label: s.snapping ? "Turn snapping off" : "Turn snapping on", group: "View", keys: "S", run: () => store.setSnapping(!s.snapping) },
     { id: "guides", label: s.display.guides ? "Hide guides" : "Show guides", group: "View", run: () => store.setDisplay({ guides: !s.display.guides }) },
     { id: "rulers", label: s.display.rulers ? "Hide rulers" : "Show rulers", group: "View", run: () => store.setDisplay({ rulers: !s.display.rulers }) },
+    { id: "ghosts", label: s.display.ghosts ? "Hide smallest/largest sizes" : "Show smallest/largest sizes", group: "View", enabled: !!s.sizeRange, run: () => store.setDisplay({ ghosts: !s.display.ghosts }) },
+    { id: "nicks", label: s.display.nicks ? "Turn nicks off" : "Turn nicks on", group: "View", run: () => store.setDisplay({ nicks: !s.display.nicks }) },
+    { id: "issues", label: s.display.issues ? "Hide problem markers" : "Show problem markers", group: "View", run: () => store.setDisplay({ issues: !s.display.issues }) },
+    { id: "preview3d", label: s.display.preview3d ? "Close 3D preview" : "Open 3D preview", group: "View", run: () => store.setDisplay({ preview3d: !s.display.preview3d }) },
   ];
 
   // Jump to any node by name.

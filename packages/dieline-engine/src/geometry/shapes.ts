@@ -189,13 +189,17 @@ function polygon(node: PolygonNode, ev: Evaluate): Built {
   if (sides < 3 || sides > 360) {
     throw new GeometryError("Sides must be between 3 and 360", "sides");
   }
-  const r = positive(ev.num(node.radius, "radius"), "radius", "Radius");
+  const bySide = node.sizeBy === "side";
+  const size = positive(ev.num(node.radius, "radius"), "radius", bySide ? "Side" : "Radius");
+  // A regular polygon's side is 2·R·sin(π/n), so the corner radius follows from it.
+  const chord = 2 * Math.sin(Math.PI / sides);
+  const r = bySide ? size / chord : size;
   const pts = regularPoints(sides, r, ev.opt(node.angle, "angle", 90));
 
   return {
     parts: tag(filletPolyline(pts, true, () => 0), node.lineType),
     anchors: Object.fromEntries(pts.map((p, i) => [`p${i}`, p])),
-    scalars: { radius: r },
+    scalars: { radius: r, side: r * chord, sides },
   };
 }
 

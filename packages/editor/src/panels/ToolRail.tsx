@@ -4,7 +4,7 @@ import { allNodes, insertNodes, LINE_STYLES, LINE_TYPES, presetBody, PRESETS, un
 import { cn } from "@repo/ui/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@repo/ui/components/popover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@repo/ui/components/tooltip";
-import { Circle, Hand, Hexagon, MousePointer2, Package, Pill, PenTool, Ruler, Slash, Square, Star, Undo, type LucideIcon } from "lucide-react";
+import { Circle, Hand, Hexagon, MousePointer2, Package, Pill, PenTool, Ruler, Slash, Square, Star, Triangle, Undo, type LucideIcon } from "lucide-react";
 import { useState } from "react";
 import type { PlaceableKind } from "../model/create";
 import { useEditor, useStore } from "../state/react";
@@ -24,6 +24,7 @@ const GROUPS: Item[][] = [
     { id: "line", label: "Line", keys: "L", Icon: Slash, tool: "place", kind: "line" },
     { id: "ellipse", label: "Ellipse — drag from the centre", keys: "E", Icon: Circle, tool: "place", kind: "ellipse" },
     { id: "arc", label: "Arc", Icon: Undo, tool: "place", kind: "arc" },
+    { id: "triangle", label: "Triangle — sized by its side, drag from the centre", keys: "T", Icon: Triangle, tool: "place", kind: "triangle" },
     { id: "polygon", label: "Polygon", Icon: Hexagon, tool: "place", kind: "polygon" },
     { id: "star", label: "Star", Icon: Star, tool: "place", kind: "star" },
     { id: "belt", label: "Belt (handle slot)", Icon: Pill, tool: "place", kind: "belt" },

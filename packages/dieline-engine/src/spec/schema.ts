@@ -157,6 +157,7 @@ const node: z.ZodType<Node> = z.lazy(() =>
       kind: z.literal("polygon"),
       sides: expr,
       radius: expr,
+      sizeBy: z.enum(["radius", "side"]).optional(),
       angle: expr.optional(),
     }),
     z.object({

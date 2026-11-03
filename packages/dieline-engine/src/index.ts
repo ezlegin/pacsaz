@@ -48,4 +48,7 @@ export { PRESETS, presetBody, type PresetId } from "./library/presets";
 
 export { toSVG, exportBounds, type SvgOptions } from "./export/svg";
 export { toDXF } from "./export/dxf";
+export { addNicks, type NickOptions } from "./export/nicks";
+export { toFoldSVG } from "./export/fold";
+export { checkDieline, type Issue, type IssueCode, type CheckOptions } from "./checks/checks";
 export { LINE_STYLES, DXF_LAYERS, type LineStyle } from "./export/styles";

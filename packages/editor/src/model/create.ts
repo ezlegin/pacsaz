@@ -1,8 +1,10 @@
 import { allNodes, newId, offsetExpr, uniqueName, type DielineDocument, type Expr, type LineType, type ShapeKind, type ShapeNode } from "@repo/dieline-engine";
 
-export type PlaceableKind = Exclude<ShapeKind, "path">;
+/** Shapes the place tool draws. A triangle is a three-sided polygon sized by its side. */
+export type PlaceableKind = Exclude<ShapeKind, "path"> | "triangle";
 
-export const SHAPE_LABELS: Record<ShapeKind, string> = {
+export const SHAPE_LABELS: Record<ShapeKind | "triangle", string> = {
+  triangle: "Triangle",
   rect: "Rectangle",
   line: "Line",
   path: "Path",
@@ -51,6 +53,10 @@ export function createShape(
       return { ...base, kind, radius: n(size ? Math.max(w, h) / 2 : 20), start: "0", end: "180" };
     case "polygon":
       return { ...base, kind, sides: "6", radius: n(size ? Math.max(w, h) / 2 : 20) };
+    case "triangle":
+      // Dragged from the centre: the drag reaches a corner, and the side of an
+      // equilateral triangle is √3 times that radius.
+      return { ...base, kind: "polygon", sides: "3", sizeBy: "side", radius: n(size ? (Math.max(w, h) / 2) * Math.sqrt(3) : 40) };
     case "star":
       return { ...base, kind, points: "5", radius: n(size ? Math.max(w, h) / 2 : 20) };
     case "belt":

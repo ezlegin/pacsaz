@@ -337,3 +337,18 @@ describe("rulers and bleed", () => {
     expect(r.bleed.length).toBeGreaterThan(0);
   });
 });
+
+describe("polygons sized by side", () => {
+  it("gives a triangle of side 100 three 100 mm sides, like a 100 mm line", () => {
+    const r = renderNodes([
+      { id: "t", name: "t", kind: "polygon", lineType: "cut", sides: "3", radius: "100", sizeBy: "side" },
+      { id: "l", name: "l", kind: "line", lineType: "cut", from: { x: "0", y: "0" }, to: { x: "100", y: "0" } },
+    ]);
+    const sides = r.paths.filter((p) => p.nodeId === "t").map((p) => (p.kind === "line" ? Math.hypot(p.b[0] - p.a[0], p.b[1] - p.a[1]) : 0));
+    expect(sides).toHaveLength(3);
+    for (const s of sides) expect(s).toBeCloseTo(100, 9);
+    expect(r.nodes.t!.scalars.side).toBeCloseTo(r.nodes.l!.scalars.length!, 9);
+    // A triangle's base is flat at the bottom.
+    expect(r.nodes.t!.bounds!.maxX - r.nodes.t!.bounds!.minX).toBeCloseTo(100, 9);
+  });
+});

@@ -40,6 +40,21 @@ export const DielineLayer = memo(function DielineLayer({
 });
 
 /**
+ * The template at another size, drawn faintly behind the real one. Only tooling
+ * lines are shown; guides and glue areas would just add noise.
+ */
+export const GhostLayer = memo(function GhostLayer({ result, color }: { result: RenderResult; color: string }) {
+  const d = useMemo(
+    () =>
+      groupPaths(result.paths.filter((p) => p.lineType !== "guide" && p.lineType !== "glue"))
+        .map((g) => g.d)
+        .join(""),
+    [result],
+  );
+  return <path d={d} fill="none" stroke={color} strokeOpacity={0.55} strokeWidth={1} strokeDasharray="5 3" vectorEffect="non-scaling-stroke" pointerEvents="none" />;
+});
+
+/**
  * Invisible wide strokes that receive pointer events, tagged with the leaf node
  * id. Separate from the visible layer so hit areas stay generous at any zoom.
  */

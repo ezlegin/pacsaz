@@ -1,6 +1,6 @@
 "use client";
 
-import { removeNodes, type DielineDocument } from "@repo/dieline-engine";
+import { removeNodes, type DielineDocument, type Dimensions } from "@repo/dieline-engine";
 import { TooltipProvider } from "@repo/ui/components/tooltip";
 import { cn } from "@repo/ui/lib/utils";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
@@ -8,6 +8,7 @@ import { Canvas } from "./canvas/Canvas";
 import { buildCommands, downloadFile } from "./commands";
 import { CommandPalette } from "./panels/CommandPalette";
 import { DocumentPanel } from "./panels/DocumentPanel";
+import { IssuesPanel, useIssueCount } from "./panels/IssuesPanel";
 import { NodeInspector } from "./panels/NodeInspector";
 import { Outline } from "./panels/Outline";
 import { ToolRail } from "./panels/ToolRail";
@@ -27,6 +28,8 @@ export type StudioProps = {
   onSave?: (doc: DielineDocument) => Promise<SaveResult>;
   /** Called when a save fails, to show the error the app's way. */
   onError?: (message: string) => void;
+  /** The smallest and largest sizes the template is sold in: drawn as ghosts and checked. */
+  sizeRange?: { min: Dimensions; max: Dimensions } | null;
 };
 
 /**
@@ -43,7 +46,8 @@ export function Studio(props: StudioProps) {
   );
 }
 
-const TOOL_KEYS: Record<string, [Tool, ("rect" | "line" | "ellipse")?]> = {
+const TOOL_KEYS: Record<string, [Tool, ("rect" | "line" | "ellipse" | "triangle")?]> = {
+  t: ["place", "triangle"],
   v: ["select"],
   h: ["hand"],
   m: ["measure"],
@@ -58,8 +62,14 @@ function isEditable(target: EventTarget | null): boolean {
   return !!el && (el.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(el.tagName));
 }
 
-function StudioLayout({ title, leading, trailing, onSave, onError }: StudioProps) {
+function StudioLayout({ title, leading, trailing, onSave, onError, sizeRange }: StudioProps) {
   const store = useStore();
+  const [sidebar, setSidebar] = useState<"layers" | "checks">("layers");
+  const issueCount = useIssueCount();
+
+  useEffect(() => {
+    store.setSizeRange(sizeRange ?? null);
+  }, [store, sizeRange]);
   const [palette, setPalette] = useState(false);
   const [saving, setSaving] = useState(false);
   const display = useEditor((s) => s.display);
@@ -138,10 +148,32 @@ function StudioLayout({ title, leading, trailing, onSave, onError }: StudioProps
       <div className="flex min-h-0 flex-1">
         <ToolRail />
         <aside className="flex w-60 shrink-0 flex-col border-r bg-muted/20">
-          <div className="flex h-8 shrink-0 items-center border-b px-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-            Layers
+          <div className="flex h-8 shrink-0 border-b text-[11px] font-semibold uppercase tracking-wide">
+            {(["layers", "checks"] as const).map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => setSidebar(t)}
+                className={cn(
+                  "flex flex-1 items-center justify-center gap-1.5 border-b-2 border-transparent text-muted-foreground hover:text-foreground",
+                  sidebar === t && "border-blue-600 text-foreground",
+                )}
+              >
+                {t === "layers" ? "Layers" : "Checks"}
+                {t === "checks" && (issueCount.errors > 0 || issueCount.warnings > 0) && (
+                  <span
+                    className={cn(
+                      "rounded-full px-1.5 text-[10px] font-semibold normal-case text-white",
+                      issueCount.errors > 0 ? "bg-red-500" : "bg-amber-500",
+                    )}
+                  >
+                    {issueCount.errors || issueCount.warnings}
+                  </span>
+                )}
+              </button>
+            ))}
           </div>
-          <Outline />
+          {sidebar === "layers" ? <Outline /> : <IssuesPanel />}
         </aside>
         <main className="relative min-w-0 flex-1" data-editor-canvas>
           <Canvas className="h-full w-full" showGuides={display.guides} showRulers={display.rulers} />

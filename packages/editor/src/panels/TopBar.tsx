@@ -5,7 +5,7 @@ import { Button } from "@repo/ui/components/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@repo/ui/components/popover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@repo/ui/components/tooltip";
 import { cn } from "@repo/ui/lib/utils";
-import { Command, Download, Grid2x2, Loader2, Magnet, Redo2, Ruler, Undo2, type LucideIcon } from "lucide-react";
+import { Box, CircleAlert, Command, Download, Grid2x2, Layers2, Loader2, Magnet, Redo2, Ruler, Scissors, Undo2, type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { downloadFile } from "../commands";
 import { useEditor, useStore } from "../state/react";
@@ -60,6 +60,9 @@ export function TopBar({
   const snapping = useEditor((s) => s.snapping);
   const display = useEditor((s) => s.display);
   const inputs = useEditor((s) => s.inputs);
+  const range = useEditor((s) => s.sizeRange);
+  const nicks = useEditor((s) => s.nicks);
+  const exportOptions = () => (display.nicks ? { nicks } : {});
 
   return (
     <header className="flex h-12 shrink-0 items-center gap-2 border-b bg-background px-2">
@@ -102,6 +105,16 @@ export function TopBar({
       <BarButton Icon={Magnet} label={`Snapping ${snapping ? "on" : "off"} (S)`} active={snapping} onClick={() => store.setSnapping(!snapping)} />
       <BarButton Icon={Grid2x2} label={`Guides ${display.guides ? "shown" : "hidden"}`} active={display.guides} onClick={() => store.setDisplay({ guides: !display.guides })} />
       <BarButton Icon={Ruler} label={`Rulers ${display.rulers ? "shown" : "hidden"}`} active={display.rulers} onClick={() => store.setDisplay({ rulers: !display.rulers })} />
+      <BarButton Icon={CircleAlert} label={`Problem markers ${display.issues ? "shown" : "hidden"}`} active={display.issues} onClick={() => store.setDisplay({ issues: !display.issues })} />
+      <BarButton
+        Icon={Layers2}
+        label={range ? `Smallest and largest sizes ${display.ghosts ? "shown" : "hidden"} (violet / orange)` : "Smallest and largest sizes: the template has no size range"}
+        active={display.ghosts}
+        disabled={!range}
+        onClick={() => store.setDisplay({ ghosts: !display.ghosts })}
+      />
+      <BarButton Icon={Scissors} label={`Nicks ${display.nicks ? "on" : "off"}: bridges in the cut lines`} active={display.nicks} onClick={() => store.setDisplay({ nicks: !display.nicks })} />
+      <BarButton Icon={Box} label={`3D preview ${display.preview3d ? "open" : "closed"}`} active={display.preview3d} onClick={() => store.setDisplay({ preview3d: !display.preview3d })} />
 
       <div className="ml-auto flex items-center gap-1.5">
         <button
@@ -122,17 +135,43 @@ export function TopBar({
             <button
               type="button"
               className="flex w-full flex-col rounded px-2 py-1.5 text-left hover:bg-accent"
-              onClick={() => downloadFile("dieline.svg", toSVG(store.get().result, { includeRulers: true }), "image/svg+xml")}
+              onClick={() => downloadFile("dieline.svg", toSVG(store.get().result, { includeRulers: true, ...exportOptions() }), "image/svg+xml")}
             >
               SVG <span className="text-[11px] text-muted-foreground">With rulers, for preview and print</span>
             </button>
             <button
               type="button"
               className="flex w-full flex-col rounded px-2 py-1.5 text-left hover:bg-accent"
-              onClick={() => downloadFile("dieline.dxf", toDXF(store.get().result), "application/dxf")}
+              onClick={() => downloadFile("dieline.dxf", toDXF(store.get().result, exportOptions()), "application/dxf")}
             >
               DXF <span className="text-[11px] text-muted-foreground">CUT / CREASE / … layers for die makers</span>
             </button>
+            <div className="mt-1 border-t px-2 pb-1 pt-2 text-xs">
+              <label className="flex items-center gap-2">
+                <input type="checkbox" checked={display.nicks} onChange={(e) => store.setDisplay({ nicks: e.target.checked })} />
+                Nicks in cut lines
+              </label>
+              {display.nicks && (
+                <div className="mt-1.5 grid grid-cols-2 gap-1.5">
+                  {(["width", "spacing"] as const).map((k) => (
+                    <label key={k} className="space-y-0.5">
+                      <span className="text-[10px] text-muted-foreground">{k === "width" ? "Width (mm)" : "Every (mm)"}</span>
+                      <input
+                        type="number"
+                        step={k === "width" ? 0.1 : 5}
+                        min={0}
+                        value={nicks[k]}
+                        onChange={(e) => {
+                          const v = Number(e.target.value);
+                          if (Number.isFinite(v) && v > 0) store.setNicks({ [k]: v });
+                        }}
+                        className="h-7 w-full rounded border bg-background px-1.5 font-mono text-[11px]"
+                      />
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
           </PopoverContent>
         </Popover>
 

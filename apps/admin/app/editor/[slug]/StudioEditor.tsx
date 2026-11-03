@@ -9,7 +9,7 @@ import { Button } from "@repo/ui/components/button";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@repo/ui/components/dialog";
 import { ArrowLeft, Settings } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 export default function StudioEditor({
@@ -34,6 +34,15 @@ export default function StudioEditor({
       }),
   );
 
+  // The sizes the template is sold in: shown as ghosts and checked by the Studio.
+  const sizeRange = useMemo(
+    () => ({
+      min: { width: dieline.minWidth, length: dieline.minLength, height: dieline.minHeight },
+      max: { width: dieline.maxWidth, length: dieline.maxLength, height: dieline.maxHeight },
+    }),
+    [dieline],
+  );
+
   useEffect(() => {
     if (legacy) {
       toast.info("This dieline was made with the old editor. It opens empty here; saving replaces the old drawing.", {
@@ -46,6 +55,7 @@ export default function StudioEditor({
     <Studio
       store={store}
       title={dieline.title}
+      sizeRange={sizeRange}
       leading={
         <Button variant="ghost" size="icon" asChild title="Back to dielines">
           <Link href="/dielines">

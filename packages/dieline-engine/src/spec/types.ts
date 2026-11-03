@@ -193,7 +193,13 @@ export type ArcNode = ShapeBase & {
 export type PolygonNode = ShapeBase & {
   kind: "polygon";
   sides: Expr;
+  /**
+   * The polygon's size: the distance from the centre to a corner, or, with
+   * `sizeBy: "side"`, the length of each side. A triangle of side 100 has three
+   * 100 mm sides; one of radius 100 has sides of about 173 mm.
+   */
   radius: Expr;
+  sizeBy?: "radius" | "side";
   /** Angle of the first corner; 90 puts a corner at the top. */
   angle?: Expr;
 };

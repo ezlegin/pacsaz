@@ -2,6 +2,7 @@ import type { RenderResult, RulerInfo } from "../eval/render";
 import { add, angleOf, polar, scale, sub, unit, unionBounds, pathsBounds, sweep } from "../geometry/math";
 import type { Bounds, Path, Prim, Pt } from "../geometry/types";
 import type { LineType } from "../spec/types";
+import { addNicks, type NickOptions } from "./nicks";
 import { LINE_STYLES, type LineStyle } from "./styles";
 
 export type SvgOptions = {
@@ -17,6 +18,8 @@ export type SvgOptions = {
   /** Keep strokes the same on screen at any zoom. For on-screen previews only. */
   nonScalingStroke?: boolean;
   styles?: Partial<Record<LineType, Partial<LineStyle>>>;
+  /** Leave bridges in the cut lines, as the die will have them. */
+  nicks?: NickOptions;
   rulerColor?: string;
   rulerFontSize?: number;
 };
@@ -96,7 +99,8 @@ export function toSVG(result: RenderResult, options: SvgOptions = {}): string {
 
   // One <path> per node and line type keeps the file small and each piece clickable.
   const groups = new Map<string, Path[]>();
-  for (const p of result.paths) {
+  const paths = options.nicks ? addNicks(result.paths, options.nicks) : result.paths;
+  for (const p of paths) {
     if (p.lineType === "guide" && !options.includeGuides) continue;
     const key = `${p.nodeId}\u0000${p.lineType}`;
     const list = groups.get(key);

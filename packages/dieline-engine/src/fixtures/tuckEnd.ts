@@ -49,7 +49,8 @@ const outline: PathNode = {
     // Top dust flap on the first side panel.
     to("@side1.topLeft.x + dustInset", "height + dust", "dustRound"),
     to("@side1.topRight.x - dustShoulder", "height + dust", "dustRound"),
-    to("@side1.topRight.x", "height + dust / 2"),
+    // Pulled off the fold line so it does not run along the lid's cut edge.
+    to("@side1.topRight.x - dustInset", "height + dust / 2"),
     to("@side1.topRight.x", "height"),
 
     // Top closure on the back panel, with its tuck flap.
@@ -60,7 +61,7 @@ const outline: PathNode = {
     to("@back.topRight.x", "height"),
 
     // Top dust flap on the second side panel (mirror of the first).
-    to("@side2.topLeft.x", "height + dust / 2"),
+    to("@side2.topLeft.x + dustInset", "height + dust / 2"),
     to("@side2.topLeft.x + dustShoulder", "height + dust", "dustRound"),
     to("@side2.topRight.x - dustInset", "height + dust", "dustRound"),
     to("@side2.topRight.x", "height"),
@@ -73,14 +74,14 @@ const outline: PathNode = {
     // Bottom dust flap on the second side panel.
     to("@side2.bottomRight.x - dustInset", "-dust", "dustRound"),
     to("@side2.bottomLeft.x + dustShoulder", "-dust", "dustRound"),
-    to("@side2.bottomLeft.x", "-dust / 2"),
+    to("@side2.bottomLeft.x + dustInset", "-dust / 2"),
     to("@side2.bottomLeft.x", "0"),
 
     // The back panel has no bottom flap.
     to("@back.bottomLeft.x", "0"),
 
     // Bottom dust flap on the first side panel.
-    to("@side1.bottomRight.x", "-dust / 2"),
+    to("@side1.bottomRight.x - dustInset", "-dust / 2"),
     to("@side1.bottomRight.x - dustShoulder", "-dust", "dustRound"),
     to("@side1.bottomLeft.x + dustInset", "-dust", "dustRound"),
     to("@side1.bottomLeft.x", "0"),

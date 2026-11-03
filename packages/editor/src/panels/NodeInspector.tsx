@@ -2,8 +2,10 @@
 
 import {
   allNodes,
+  formatNumber,
   newId,
   renameNode,
+  updateNode,
   type LineType,
   type Modifier,
   type ModifierType,
@@ -98,6 +100,7 @@ function Header({ node }: { node: Node }) {
 //! Geometry ------------------------------------------------------------------------
 
 function Geometry({ node }: { node: Node }) {
+  const store = useStore();
   const set = useNodeSetter(node.id);
   const id = node.id;
   let body: ReactNode = null;
@@ -187,8 +190,29 @@ function Geometry({ node }: { node: Node }) {
           <Row label="Sides">
             <F id={id} path="sides" />
           </Row>
-          <Row label="Radius">
+          <Row label={node.sizeBy === "side" ? "Side" : "Radius"}>
             <F id={id} path="radius" />
+            <SelectField
+              className="max-w-24"
+              title="Size the polygon by its corner radius or by the length of a side"
+              value={node.sizeBy ?? "radius"}
+              options={[
+                { value: "radius", label: "Radius" },
+                { value: "side", label: "Side" },
+              ]}
+              onChange={(v) => {
+                // Keep the shape the same size: convert the current value, in one step.
+                const scalars = store.get().result.nodes[id]?.scalars;
+                const keep = v === "side" ? scalars?.side : scalars?.radius;
+                store.apply((d) =>
+                  updateNode(d, id, (n) =>
+                    n.kind === "polygon"
+                      ? { ...n, sizeBy: v === "side" ? "side" : undefined, ...(keep !== undefined ? { radius: formatNumber(keep) } : {}) }
+                      : n,
+                  ),
+                );
+              }}
+            />
           </Row>
           <Row label="Angle">
             <F id={id} path="angle" optional placeholder="90" />

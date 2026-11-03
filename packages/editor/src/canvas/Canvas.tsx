@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  addNicks,
   duplicateNodes,
   findNode,
   formatNumber,
@@ -43,7 +44,9 @@ import { groupNodes, ungroupNode } from "../model/ops";
 import { niceStep, snapMoving, snappedDelta, snapTargets, wouldCycle, type SnapResult, type SnapTarget } from "../model/snap";
 import { useEditor, useStore } from "../state/react";
 import type { View } from "../state/store";
-import { DielineLayer, Grid, HighlightLayer, HitLayer, RULER_SIZE, ScreenRulers } from "./layers";
+import { useAnalysis } from "../state/analysis";
+import { DielineLayer, GhostLayer, Grid, HighlightLayer, HitLayer, RULER_SIZE, ScreenRulers } from "./layers";
+import { Preview3D } from "./Preview3D";
 import { MeasureOverlay, type MeasureState, type MeasurePoint } from "./MeasureOverlay";
 import { EdgeChips } from "./EdgeChips";
 import { StatusBar } from "./StatusBar";
@@ -109,6 +112,15 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
   const hover = useEditor((s) => s.hover);
   const scope = useEditor((s) => s.scope);
   const tool = useEditor((s) => s.tool);
+  const display = useEditor((s) => s.display);
+  const nicks = useEditor((s) => s.nicks);
+  const { ghosts, issues } = useAnalysis();
+
+  // With nicks on, the canvas shows the knife as the die will have it.
+  const shown = useMemo(
+    () => (display.nicks ? { ...result, paths: addNicks(result.paths, nicks) } : result),
+    [display.nicks, result, nicks],
+  );
 
   const rootRef = useRef<HTMLDivElement>(null);
   const gesture = useRef<Gesture | null>(null);
@@ -164,7 +176,9 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
   // Panels and commands ask for a fit through the store.
   const fitRequest = useEditor((s) => s.fitRequest);
   useEffect(() => {
-    if (fitRequest.seq > 0) fit(fitRequest.ids);
+    if (fitRequest.seq === 0) return;
+    if (fitRequest.bounds && size.width) store.setView(fitView(fitRequest.bounds, size.width, size.height, 48 + RULER_SIZE));
+    else fit(fitRequest.ids);
     // Only a new request should fit, not a resize.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fitRequest]);
@@ -175,6 +189,8 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
     const el = rootRef.current;
     if (!el) return;
     const onWheel = (e: WheelEvent) => {
+      // Docked panels (the 3D view) use the wheel themselves.
+      if ((e.target as Element | null)?.closest?.("[data-own-wheel]")) return;
       e.preventDefault();
       const rect = el.getBoundingClientRect();
       const at: Pt = [e.clientX - rect.left, e.clientY - rect.top];
@@ -628,6 +644,7 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
     else if (key === "r") store.setTool("place", "rect");
     else if (key === "l") store.setTool("place", "line");
     else if (key === "e") store.setTool("place", "ellipse");
+    else if (key === "t") store.setTool("place", "triangle");
     // Shift+/ fits the dieline to the screen, like Ctrl+0 in Illustrator. The
     // physical key is checked so it works on any keyboard layout (Persian gives ؟).
     else if (key === "f" || (e.shiftKey && (e.code === "Slash" || e.key === "!"))) fit();
@@ -708,7 +725,9 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
 
         <g transform={worldMatrix(view)}>
           <HighlightLayer result={result} leafIds={selectedLeaves} hoverLeafIds={hoverLeaves} />
-          <DielineLayer result={result} showGuides={showGuides} />
+          {display.ghosts && ghosts.min && <GhostLayer result={ghosts.min} color="rgb(139 92 246)" />}
+          {display.ghosts && ghosts.max && <GhostLayer result={ghosts.max} color="rgb(249 115 22)" />}
+          <DielineLayer result={shown} showGuides={showGuides} />
           {tool === "select" && <HitLayer result={result} />}
         </g>
 
@@ -784,6 +803,32 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
         )}
 
         {tool === "measure" && <MeasureOverlay measure={measure} view={view} />}
+
+        {/* Design-check markers at the preview size */}
+        {display.issues && !dragging &&
+          issues
+            .filter((i) => i.size === "current")
+            .map((issue, k) => {
+              const s = scr(issue.at);
+              const error = issue.severity === "error";
+              return (
+                <g
+                  key={k}
+                  className="cursor-pointer"
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={() => {
+                    const ids = issue.nodeIds.filter((id) => result.nodes[id]);
+                    if (!ids.length) return;
+                    store.setScope(result.nodes[ids[0]!]?.parentId ?? null);
+                    store.select(ids);
+                  }}
+                >
+                  <title>{issue.message}</title>
+                  <circle cx={s[0]} cy={s[1]} r={9} fill={error ? "rgb(239 68 68 / 0.18)" : "rgb(245 158 11 / 0.18)"} />
+                  <circle cx={s[0]} cy={s[1]} r={5} fill={error ? "rgb(239 68 68)" : "rgb(245 158 11)"} stroke="white" strokeWidth={1.5} />
+                </g>
+              );
+            })}
         {tool === "place" && !placing && <MeasureOverlay measure={{ live: measure.live }} view={view} />}
 
         {/* Shape being dragged out */}
@@ -798,7 +843,7 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
               {kind === "line" && <line x1={a[0]} y1={a[1]} x2={b[0]} y2={b[1]} />}
               {kind === "ellipse" && <ellipse cx={a[0]} cy={a[1]} rx={Math.abs(b[0] - a[0])} ry={Math.abs(b[1] - a[1])} />}
               {kind === "belt" && <line x1={a[0]} y1={a[1]} x2={b[0]} y2={a[1]} />}
-              {(kind === "arc" || kind === "polygon" || kind === "star") && <circle cx={a[0]} cy={a[1]} r={r} />}
+              {(kind === "arc" || kind === "polygon" || kind === "star" || kind === "triangle") && <circle cx={a[0]} cy={a[1]} r={r} />}
               <MeasureOverlay measure={{ a: placing.start, b: placing.end }} view={view} />
             </g>
           );
@@ -842,6 +887,8 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
           Add as ruler
         </button>
       )}
+
+      {display.preview3d && <Preview3D />}
 
       <StatusBar cursor={cursor ? toWorld(cursor, view) : null} />
     </div>

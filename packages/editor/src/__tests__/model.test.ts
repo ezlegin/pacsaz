@@ -299,3 +299,19 @@ describe("grouping", () => {
     expect(groupNodes(doc, render(doc, INPUTS), ["a", "b"])).toBeNull();
   });
 });
+
+describe("triangle tool", () => {
+  it("draws a triangle sized by its side, and its handle edits the side", () => {
+    const node = placedShape(docOf([]), render(docOf([]), INPUTS), null, "triangle", { p: [0, 0] }, null, "cut");
+    expect(node).toMatchObject({ kind: "polygon", sides: "3", sizeBy: "side", radius: "40" });
+
+    const doc = docOf([{ ...node, radius: "100" } as Node]);
+    const r = render(doc, INPUTS);
+    expect(r.nodes[node.id]!.scalars.side).toBeCloseTo(100, 9);
+
+    // Pulling the top corner 10 mm further out grows each side by 10·√3.
+    const handle = handlesFor(findNode(doc, node.id)!.node, r)[0]!;
+    const next = handle.apply(findNode(doc, node.id)!.node, [0, 10], { plain: true });
+    expect(Number((next as { radius: string }).radius)).toBeCloseTo(100 + 10 * Math.sqrt(3), 2);
+  });
+});

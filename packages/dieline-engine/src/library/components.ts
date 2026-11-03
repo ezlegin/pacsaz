@@ -77,8 +77,11 @@ export const dustFlap: ComponentDef = {
     { name: "s", expr: "shoulder > 0 ? shoulder : min(6, edge / 4)" },
     { name: "r", expr: "round > 0 ? round : min(4, d / 4)" },
     { name: "ins", expr: "2 * thickness" },
+    // The lid next door is cut along the shared fold line, so the sloped end
+    // must leave that line straight away; running down it would be a double knife.
+    { name: "gap", expr: "max(1.5, 2 * thickness)" },
   ],
-  nodes: [path("outline", "cut", ["0", "0"], [to("ins", "d", "r"), to("edge - s", "d", "r"), to("edge", "d / 2"), to("edge", "0")])],
+  nodes: [path("outline", "cut", ["0", "0"], [to("ins", "d", "r"), to("edge - s", "d", "r"), to("edge - gap", "d / 2"), to("edge", "0")])],
 };
 
 export const glueFlap: ComponentDef = {

@@ -1,4 +1,4 @@
-import { render, type DielineDocument, type LineType, type RenderInputs, type RenderResult } from "@repo/dieline-engine";
+import { render, type Bounds, type DielineDocument, type Dimensions, type LineType, type NickOptions, type RenderInputs, type RenderResult } from "@repo/dieline-engine";
 import type { PlaceableKind } from "../model/create";
 
 /** `place` draws `placeKind`; `pen` draws a path point by point. */
@@ -23,13 +23,17 @@ export type EditorState = {
   drawLineType: LineType;
   view: View;
   snapping: boolean;
-  display: { guides: boolean; rulers: boolean };
+  display: { guides: boolean; rulers: boolean; ghosts: boolean; nicks: boolean; issues: boolean; preview3d: boolean };
+  /** The smallest and largest sizes the template is sold in, for ghosts and checks. */
+  sizeRange: { min: Dimensions; max: Dimensions } | null;
+  /** Bridges left in the cut lines, shown when `display.nicks` and used on export. */
+  nicks: NickOptions;
   canUndo: boolean;
   canRedo: boolean;
   /** The document differs from the last saved one. */
   dirty: boolean;
   /** Bumped to ask the canvas to fit; it owns the viewport size. */
-  fitRequest: { seq: number; ids?: string[] };
+  fitRequest: { seq: number; ids?: string[]; bounds?: Bounds };
 };
 
 const HISTORY_LIMIT = 200;
@@ -65,7 +69,9 @@ export class EditorStore {
       drawLineType: "cut",
       view: { x: 0, y: 0, zoom: 1 },
       snapping: true,
-      display: { guides: true, rulers: true },
+      display: { guides: true, rulers: true, ghosts: false, nicks: false, issues: true, preview3d: false },
+      sizeRange: null,
+      nicks: { width: 0.5, spacing: 60 },
       canUndo: false,
       canRedo: false,
       dirty: false,
@@ -76,6 +82,19 @@ export class EditorStore {
   /** Fits the view to everything, or to `ids`. */
   requestFit(ids?: string[]) {
     this.set({ fitRequest: { seq: this.state.fitRequest.seq + 1, ...(ids?.length ? { ids } : {}) } });
+  }
+
+  /** Fits the view to an area, e.g. around a design-check issue. */
+  requestFitBounds(bounds: Bounds) {
+    this.set({ fitRequest: { seq: this.state.fitRequest.seq + 1, bounds } });
+  }
+
+  setSizeRange(sizeRange: EditorState["sizeRange"]) {
+    this.set({ sizeRange });
+  }
+
+  setNicks(patch: Partial<NickOptions>) {
+    this.set({ nicks: { ...this.state.nicks, ...patch } });
   }
 
   get = (): EditorState => this.state;

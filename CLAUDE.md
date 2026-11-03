@@ -86,7 +86,7 @@ Phases (each ends with a commit message for the user to commit):
 
 ### Where things stand
 
-- Phases 1–4 are done. The admin route `/editor/[slug]` is the v2 `Studio`
+- Phases 1–5 are done. The admin route `/editor/[slug]` is the v2 `Studio`
   (`apps/admin/app/editor/[slug]/StudioEditor.tsx`); the old admin editor was removed.
 - v2 documents are stored in `Dieline.specification` as JSON with `"version": 2`,
   validated by `parseDocument` in the `saveDielineDocument` server action.
@@ -116,6 +116,22 @@ Phases (each ends with a commit message for the user to commit):
 - Presets (`library/presets.ts`): reverse tuck end, straight tuck end, sleeve,
   FEFCO 0201. New presets must render without diagnostics and keep the cut
   outline closed at several sizes (see `panels.test.ts`).
+
+### Packaging checks, nicks, 3D
+
+- `checkDieline(result)` (`dieline-engine/src/checks/checks.ts`) finds gaps and
+  open cut ends, double knives, crossing lines, folds that end in the board and
+  tiny segments, on the rendered geometry. **Every preset must pass it with no
+  issues** (`checks.test.ts`); it already caught dust flaps running down the
+  lid's cut line.
+- `addNicks(paths, { width, spacing })` splits cut lines for bridges; `toSVG` /
+  `toDXF` take `nicks` too. `toFoldSVG(result)` writes the `trim`/`fold`/`perf`
+  SVG that `@repo/dieline-3d` folds.
+- In the Studio, `useAnalysis()` (`editor/src/state/analysis.ts`) renders the
+  template at `sizeRange.min/max` (ghosts) and runs the checks at all three
+  sizes, cached per render. The admin passes each dieline's min/max dimensions.
+- Polygons can be sized by side (`sizeBy: "side"`); the Triangle tool draws
+  three-sided polygons that way.
 
 ## `@repo/editor` rules
 
