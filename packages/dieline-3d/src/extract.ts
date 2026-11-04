@@ -196,6 +196,27 @@ export const svgLayerIds = (svg: string): string[] => {
 };
 
 /**
+ * Window outlines from the `window` paths: polygons of straight segments, in
+ * flat SVG coordinates. A window that crosses a fold is cut out of both panels;
+ * the rig uses these to drop the pieces of board inside it.
+ */
+export const extractWindows = (svg: string): Pt[][] => {
+  const clean = stripDefinitions(svg);
+  const out: Pt[][] = [];
+  const pattern = /<path\b([^>]*?)\/?>/gi;
+  let match: RegExpExecArray | null;
+  while ((match = pattern.exec(clean)) !== null) {
+    const attrs = match[1] ?? "";
+    if (attr(attrs, "id") !== "window") continue;
+    const numbers = (attr(attrs, "d") ?? "").match(/-?\d*\.?\d+(?:e-?\d+)?/gi)?.map(Number) ?? [];
+    const points: Pt[] = [];
+    for (let i = 0; i + 1 < numbers.length; i += 2) points.push([numbers[i]!, numbers[i + 1]!]);
+    if (points.length >= 3) out.push(points);
+  }
+  return out;
+};
+
+/**
  * Raw `d` attributes of the trim paths.
  *
  * The artwork placement editor uses these straight from the export — curves stay

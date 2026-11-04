@@ -47,7 +47,7 @@ export function verifyRequest(row: TemplateRow, requested: RequestedSettings, cu
     { width: row.minWidth, length: row.minLength, height: row.minHeight },
     { width: row.maxWidth, length: row.maxLength, height: row.maxHeight },
   );
-  const size = manufactureSize(raw, requested.dimensionType, requested.material, requested.thickness);
+  const size = manufactureSize(raw, requested.dimensionType, requested.thickness);
   const inputs = { ...size, thickness: requested.thickness, bleed: requested.bleed };
 
   const verified = verifyCustomization(template, customization, inputs);

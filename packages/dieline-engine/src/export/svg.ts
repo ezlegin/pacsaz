@@ -5,7 +5,7 @@ import { add, angleOf, polar, scale, sub, unit, unionBounds, pathsBounds, sweep 
 import type { Bounds, Path, Prim, Pt } from "../geometry/types";
 import type { LineType } from "../spec/types";
 import { addNicks, type NickOptions } from "./nicks";
-import { LINE_STYLES, type LineStyle } from "./styles";
+import { GLUE_HATCH, LINE_STYLES, type LineStyle } from "./styles";
 
 export type SvgOptions = {
   /** Base stroke width in millimetres. */
@@ -148,7 +148,8 @@ export function toSVG(result: RenderResult, options: SvgOptions = {}): string {
     if (first.lineType === "glue") {
       // A glue area is a hatched region, as on a printed drawing, not an outline.
       hatched = true;
-      body.push(`<path${id} data-line-type="glue" d="${paths.map(primToD).join("")}" fill="url(#glue-hatch)" stroke="none"/>`);
+      // Filled, so the segments are joined into closed loops first.
+      body.push(`<path${id} data-line-type="glue" d="${closedPathD(paths)}" fill="url(#glue-hatch)" stroke="none"/>`);
       continue;
     }
     body.push(
@@ -162,17 +163,18 @@ export function toSVG(result: RenderResult, options: SvgOptions = {}): string {
 
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" width="${fmt(width)}mm" height="${fmt(height)}mm" stroke-linecap="round" stroke-linejoin="round">` +
-    (hatched ? glueHatch(style("glue").color) : "") +
+    (hatched ? glueHatch() : "") +
     body.join("") +
     `</svg>`
   );
 }
 
-/** 45° hatching, 2 mm apart, for glue areas. Sizes are in millimetres, like the drawing. */
-function glueHatch(color: string): string {
+/** The glue hatching (GLUE_HATCH). SVG's y points down, so +45° leans the lines up to the right. */
+function glueHatch(): string {
+  const { color, spacing, width } = GLUE_HATCH;
   return (
-    `<defs><pattern id="glue-hatch" patternUnits="userSpaceOnUse" width="2" height="2" patternTransform="rotate(45)">` +
-    `<line x1="0" y1="0" x2="0" y2="2" stroke="${color}" stroke-width="0.35"/></pattern></defs>`
+    `<defs><pattern id="glue-hatch" patternUnits="userSpaceOnUse" width="${spacing}" height="${spacing}" patternTransform="rotate(45)">` +
+    `<line x1="0" y1="0" x2="0" y2="${spacing}" stroke="${color}" stroke-width="${width}"/></pattern></defs>`
   );
 }
 
@@ -195,9 +197,11 @@ export function rulerPrims(r: RulerInfo): Prim[] {
   const { a, b, normal } = rulerEnds(r);
   // Extension lines run a little past the dimension line, as on a drawing.
   const over = scale(normal, Math.sign(r.offset || 1) * 1.5);
+  // A ruler sitting on its own points has nothing to extend from: its end ticks centre on the arrows.
+  const start = (end: Pt, point: Pt) => (r.offset ? point : sub(end, over));
   return [
-    { kind: "line", a: r.from, b: add(a, over) },
-    { kind: "line", a: r.to, b: add(b, over) },
+    { kind: "line", a: start(a, r.from), b: add(a, over) },
+    { kind: "line", a: start(b, r.to), b: add(b, over) },
     { kind: "line", a, b },
   ];
 }
@@ -220,7 +224,7 @@ export function rulerLabel(r: RulerInfo): string {
 function rulerSVG(r: RulerInfo, color: string, fontSize: number, base: number, nonScaling: boolean): string {
   const prims = rulerPrims(r);
   const { a, b, dir } = rulerEnds(r);
-  const size = fontSize * 0.9;
+  const size = fontSize * 0.55;
 
   // Keep the label readable: never upside down. It sits on the line, which a
   // white halo breaks around it.

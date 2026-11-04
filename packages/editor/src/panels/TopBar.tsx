@@ -5,7 +5,7 @@ import { Button } from "@repo/ui/components/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@repo/ui/components/popover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@repo/ui/components/tooltip";
 import { cn } from "@repo/ui/lib/utils";
-import { Box, CircleAlert, Command, Download, Grid2x2, Layers2, Loader2, Magnet, MoveHorizontal, Redo2, Ruler, Scissors, SquareDashed, Undo2, UserRound, type LucideIcon } from "lucide-react";
+import { Box, CircleAlert, Command, Download, Grid2x2, Layers2, Loader2, Magnet, Redo2, Ruler, Scissors, SquareDashed, Undo2, UserRound, type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { downloadFile } from "../commands";
 import { useEditor, useStore } from "../state/react";
@@ -108,10 +108,9 @@ export function TopBar({
       <div className="mx-1 h-5 w-px bg-border" />
       <BarButton Icon={Magnet} label={`Snapping ${snapping ? "on" : "off"} (S)`} active={snapping} onClick={() => store.setSnapping(!snapping)} />
       <BarButton Icon={Grid2x2} label={`Guides ${display.guides ? "shown" : "hidden"}`} active={display.guides} onClick={() => store.setDisplay({ guides: !display.guides })} />
-      <BarButton Icon={Ruler} label={`Screen rulers ${display.rulers ? "shown" : "hidden"}`} active={display.rulers} onClick={() => store.setDisplay({ rulers: !display.rulers })} />
       <BarButton
-        Icon={MoveHorizontal}
-        label={`Overall size of each part ${display.overall ? "shown" : "hidden"}`}
+        Icon={Ruler}
+        label={`Overall rulers ${display.overall ? "shown" : "hidden"}`}
         active={display.overall}
         onClick={() => store.setDisplay({ overall: !display.overall })}
       />

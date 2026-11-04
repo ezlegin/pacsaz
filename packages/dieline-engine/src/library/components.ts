@@ -45,14 +45,20 @@ export const tuckLid: ComponentDef = {
   name: "Tuck lid",
   category: "Closures",
   description: "A closure panel with a rounded tuck flap and friction locks, as on tuck-end cartons.",
-  edge: { hinge: "crease" },
-  params: [auto("depth", "Lid depth"), auto("tuck", "Tuck depth"), auto("lock", "Friction lock length")],
+  // The lid draws its own hinge, raised off the body's edge.
+  edge: { hinge: "none" },
+  params: [auto("depth", "Lid depth, fold to fold"), auto("tuck", "Tuck depth"), auto("lock", "Friction lock length")],
   variables: [
+    // Fold to fold, the lid is exactly as deep as the box across the opening,
+    // so closed, the tuck fold sits right on the far wall's top edge.
     { name: "d", expr: `depth > 0 ? depth : ${ACROSS}` },
+    // The lid's hinge is raised off the body's edge by the board, so the lid
+    // closes on top of the walls instead of pinching their edges.
+    { name: "s", expr: "max(0.2, thickness)" },
     // The tuck table the old Door model used, by lid width.
     { name: "t", expr: "tuck > 0 ? tuck : (edge >= 180 ? 25 : edge >= 130 ? 20 : edge >= 100 ? 15 : edge >= 60 ? 13 : 11)" },
     // The tuck is a little narrower than the lid, so it slides between the side walls.
-    { name: "k", expr: "max(1, 2 * thickness)" },
+    { name: "k", expr: "max(0.2, thickness)" },
     // Friction locks: slits along the tuck fold at both ends. The tuck's
     // shoulders catch on the dust flaps, which holds the lid shut.
     { name: "n", expr: "lock > 0 ? k + lock : k + clamp(edge * 0.06, 3, 8)" },
@@ -61,19 +67,24 @@ export const tuckLid: ComponentDef = {
     // own thickness instead of crushing it. Each slit runs along the edge, then
     // rounds down into a short hook past the fold, where the fold begins; the
     // hook is what the tuck's shoulder catches on.
-    { name: "f", expr: "max(0.5, 2 * thickness)" },
-    { name: "h", expr: "f + max(0.5, thickness)" },
+    { name: "f", expr: "max(0.2, thickness)" },
+    { name: "h", expr: "f + max(0.2, thickness)" },
     { name: "rh", expr: "f * 0.8" },
+    // Tuck fold, and the lid's edge where the locks run.
+    { name: "L", expr: "s + d" },
+    { name: "E", expr: "L + f" },
   ],
   nodes: [
-    path("outline", "cut", ["0", "0"], [to("0", "d"), to("k", "d"), to("k", "d + t", "r"), to("edge - k", "d + t", "r"), to("edge - k", "d"), to("edge", "d"), to("edge", "0")]),
-    path("lockStart", "cut", ["k", "d"], [to("n", "d", "rh"), to("n", "d - h")]),
-    path("lockEnd", "cut", ["edge - k", "d"], [to("edge - n", "d", "rh"), to("edge - n", "d - h")]),
-    line("tuckFold", "crease", ["n", "d - f"], ["edge - n", "d - f"]),
+    path("outline", "cut", ["0", "0"], [to("0", "E"), to("k", "E"), to("k", "E + t", "r"), to("edge - k", "E + t", "r"), to("edge - k", "E"), to("edge", "E"), to("edge", "0")]),
+    line("hinge", "crease", ["0", "s"], ["edge", "s"]),
+    path("lockStart", "cut", ["k", "E"], [to("n", "E", "rh"), to("n", "E - h")]),
+    path("lockEnd", "cut", ["edge - k", "E"], [to("edge - n", "E", "rh"), to("edge - n", "E - h")]),
+    line("tuckFold", "crease", ["n", "L"], ["edge - n", "L"]),
   ],
   anchors: [
-    { name: "fold", at: { x: "0", y: "d" } },
-    { name: "tip", at: { x: "edge / 2", y: "d + t" } },
+    { name: "hinge", at: { x: "0", y: "s" } },
+    { name: "fold", at: { x: "0", y: "L" } },
+    { name: "tip", at: { x: "edge / 2", y: "E + t" } },
   ],
 };
 
@@ -81,7 +92,7 @@ export const dustFlap: ComponentDef = {
   id: "lib:dustFlap",
   name: "Dust flap",
   category: "Closures",
-  description: "Side flap under a lid: nearly square with a relief notch on the lid side (the end of the edge); at the start it stands a board's thickness past the fold, then a chamfer and a long slope. Flip it so the notch sits next to the lid.",
+  description: "Side flap under a lid: nearly square with a relief notch on the lid side (the end of the edge); at the start it steps back a board's thickness from the fold, then a chamfer and a long slope. Flip it so the notch sits next to the lid.",
   // The flap draws its own crease, stopping short of the relief notch.
   edge: { hinge: "none" },
   params: [auto("depth", "Depth"), auto("slope", "Slope width"), auto("round", "Corner radius")],
@@ -92,11 +103,12 @@ export const dustFlap: ComponentDef = {
     { name: "d", expr: `depth > 0 ? depth : min((edge + lt) / 2, ${ACROSS} / 2 - thickness)` },
     // Relief beside a lid: a small round notch where lid and flap fold side by
     // side, so the board does not bind or crush there. Sized by the board.
-    { name: "rr", expr: "max(0.75, 1.5 * thickness)" },
+    // The notch is as wide as the board is thick: its radius is half the thickness.
+    { name: "rr", expr: "max(0.1, thickness / 2)" },
     { name: "nr", expr: "endNext ? rr : 0" },
     // Lid side: set in from the fold so the lid's tuck clears it, a little more at the top.
     { name: "it", expr: "min(5, edge / 10)" },
-    { name: "ib", expr: "max(it * 0.75, 2 * thickness, 2 * rr + 0.5)" },
+    { name: "ib", expr: "max(it * 0.75, 2 * rr + 0.5)" },
     // A short run into the corner leaves the lid's cut line at once (no double knife).
     { name: "rb", expr: "min(5, d / 6)" },
     // Far side: straight up a little, a chamfer, then a long slope to the top.
@@ -106,8 +118,8 @@ export const dustFlap: ComponentDef = {
     // Beside a plain panel edge the far side steps back a board's thickness
     // from the fold, into this flap's own panel, and rises straight: folded,
     // it then clears the wall it wraps around. Anywhere else it leans off the
-    // fold, clear of whatever is there.
-    { name: "s0", expr: "startFree ? max(0.5, 2 * thickness) : 0" },
+    // fold, clear of whatever is there. The end of the body counts as plain.
+    { name: "s0", expr: "startFree ? max(0.2, thickness) : 0" },
     { name: "g", expr: "startFree ? 0 : max(1, 2 * thickness)" },
     { name: "rt", expr: "round > 0 ? round : min(8, d / 4, (edge - it - s0 - g - ch - sl) / 3)" },
   ],
@@ -131,29 +143,27 @@ export const glueFlap: ComponentDef = {
   name: "Glue flap",
   category: "Flaps",
   description: "Tapered flap glued inside the opposite panel to close the tube.",
-  edge: { hinge: "none" },
+  edge: { hinge: "crease" },
   params: [auto("depth", "Depth"), auto("taper", "Taper")],
   variables: [
     // A carton glue flap is 10–18 mm, by the narrower face (not the panel height).
     { name: "d", expr: "depth > 0 ? depth : clamp(min(width, length) * 0.25, 10, 18)" },
     // A shallow taper at each end, about 15° off square, so it clears the flaps.
     { name: "tp", expr: "taper > 0 ? taper : min(d * 0.27, edge / 6)" },
-    // The flap starts a little in from each end of the panel, so it clears the
-    // folds of the flaps above and below once the box is glued.
-    { name: "o", expr: "max(0.5, 2 * thickness)" },
     { name: "gm", expr: "min(2, d / 4)" },
     // Horizontal shift that keeps the margin square to the slanted sides.
     { name: "gs", expr: "gm * sqrt(1 + (tp / d) ^ 2)" },
   ],
   nodes: [
-    path("outline", "cut", ["0", "0"], [to("o", "0"), to("o + tp", "d"), to("edge - o - tp", "d"), to("edge - o", "0"), to("edge", "0")]),
-    line("hinge", "crease", ["o", "0"], ["edge - o", "0"]),
+    // The flap runs the full height of the panel: its ends start exactly on the
+    // body's top and bottom edges.
+    path("outline", "cut", ["0", "0"], [to("tp", "d"), to("edge - tp", "d"), to("edge", "0")]),
     // The glue area follows the flap's taper, a margin `gm` inside every edge.
     path(
       "glueArea",
       "glue",
-      ["o + tp * gm / d + gs", "gm"],
-      [to("o + tp * (d - gm) / d + gs", "d - gm"), to("edge - o - tp * (d - gm) / d - gs", "d - gm"), to("edge - o - tp * gm / d - gs", "gm")],
+      ["tp * gm / d + gs", "gm"],
+      [to("tp * (d - gm) / d + gs", "d - gm"), to("edge - tp * (d - gm) / d - gs", "d - gm"), to("edge - tp * gm / d - gs", "gm")],
       true,
     ),
   ],

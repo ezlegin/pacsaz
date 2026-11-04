@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import * as THREE from "three";
 import { applyArtwork, applyFold, buildRigScene, materialStyleFor, type RigScene } from "./build";
 import { composeArtwork, type ArtworkTransform } from "./artwork";
-import { extractSegmentsFromSvg } from "./extract";
+import { extractSegmentsFromSvg, extractWindows } from "./extract";
 import { buildFoldRig } from "./foldRig";
 import { parseFoldConfig } from "./foldConfig";
 import type { FoldRig } from "./types";
@@ -143,7 +143,7 @@ export const DielineViewer = ({
       }
 
       const config = parseFoldConfig(foldConfig);
-      const next = buildFoldRig(segments, config);
+      const next = buildFoldRig(segments, config, extractWindows(svg));
       if (next.nodes.length === 0) {
         return { rig: null, reason: "no-geometry" as const };
       }

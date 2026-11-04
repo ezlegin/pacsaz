@@ -1,5 +1,5 @@
 import { compile, evalCondition, evalNumber, ExprError, type Ref } from "../expr/expr";
-import { bleedOutline } from "../geometry/bleed";
+import { bleedOutline, trimFoldsAtHoles } from "../geometry/bleed";
 import {
   distance,
   IDENTITY,
@@ -77,6 +77,13 @@ export type RenderResult = {
   paths: Path[];
   /** Bleed outline around the cut lines, when bleed was requested. */
   bleed: Prim[];
+  /** Length of fold line (mm) removed because a window crosses it. */
+  foldsCut: number;
+  /**
+   * The removed pieces. The 3D model still folds along the whole line (the
+   * panels either side are hinged there), so the fold export puts them back.
+   */
+  foldsInHoles: Path[];
   nodes: Record<string, NodeInfo>;
   rulers: RulerInfo[];
   scope: Scope;
@@ -547,8 +554,8 @@ class Context {
       scalars[`${panel.name}.width`] = w;
 
       // Each edge frame puts the hinge on +x and the feature towards +y, outward.
-      // A neighbour's edge with no feature is a plain cut.
-      const plain = (j: number, side: "top" | "bottom") => j >= 0 && j < node.panels.length && !node.panels[j]![side];
+      // A neighbour's edge with no feature is a plain cut, and so is the end of the body.
+      const plain = (j: number, side: "top" | "bottom") => !node.panels[j]?.[side];
       const featured = (j: number, side: "top" | "bottom") => j >= 0 && j < node.panels.length && !!node.panels[j]![side];
       // Top edges run left to right, bottom edges right to left.
       edge(panel.top, [x0, height], [x1, height], { ...IDENTITY, x: x0, y: height }, w, `panels.${i}.top`, `${panel.name}.top`, {
@@ -702,7 +709,8 @@ export function render(doc: DielineDocument, inputs: RenderInputs): RenderResult
   };
 
   const context = new Context(doc.nodes, scope, env, 0, null);
-  const paths = context.paths();
+  // A window cut across a fold interrupts it.
+  const { paths, trimmed: foldsCut, removed: foldsInHoles } = trimFoldsAtHoles(context.paths());
   const nodes = context.infos();
   const rulers = context.rulers(doc.rulers);
 
@@ -723,6 +731,8 @@ export function render(doc: DielineDocument, inputs: RenderInputs): RenderResult
   return {
     paths,
     bleed,
+    foldsCut,
+    foldsInHoles,
     nodes,
     rulers,
     scope,

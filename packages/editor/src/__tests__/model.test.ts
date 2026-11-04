@@ -8,7 +8,7 @@ import { constrain45, constrainPlace, drawnPath, placedShape } from "../model/dr
 import { handlesFor } from "../model/handles";
 import { moveNodes } from "../model/move";
 import { groupNodes, ungroupNode } from "../model/ops";
-import { niceStep, snapMoving, snappedDelta, snapTargets, wouldCycle } from "../model/snap";
+import { niceStep, rulerCoord, snapMoving, snappedDelta, snapTargets, wouldCycle } from "../model/snap";
 import { pickable, worldToLocalVector } from "../model/frames";
 import { EditorStore } from "../state/store";
 
@@ -355,5 +355,20 @@ describe("Shift while placing", () => {
     expect(constrainPlace("ellipse", [5, 5], [-5, 25])).toEqual([-15, 25]);
     const [x, y] = constrainPlace("line", [0, 0], [10, 1]);
     expect([x, y]).toEqual([Math.hypot(10, 1), 0].map((v) => Math.round(v * 1e6) / 1e6));
+  });
+});
+
+describe("rulers measured on folds", () => {
+  it("follows the template's size through an anchor on the same line", () => {
+    const doc = docOf([rect("panel", "width", "height")]);
+    const result = render(doc, INPUTS);
+    const right = result.nodes.panel!.bounds!.maxX;
+    const expr = rulerCoord(result, { p: [right, 37] }, "x");
+    expect(expr).toContain("@panel");
+    expect(rulerCoord(result, { p: [right + 3, 37] }, "x")).toBe(String(right + 3));
+
+    const ruler = { id: "r", name: "r", from: { x: "0", y: "0" }, to: { x: expr, y: "0" }, offset: "0" };
+    const grown = render({ ...doc, rulers: [ruler] }, { ...INPUTS, width: 140 });
+    expect(grown.rulers[0]!.value).toBe(grown.nodes.panel!.bounds!.maxX);
   });
 });

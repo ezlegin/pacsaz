@@ -4,10 +4,12 @@ import { closedPathD, toSVG } from "../export/svg";
 import { cutParts, overallRulers, sheetLoops } from "../geometry/sheet";
 import { parseDocument } from "../spec/schema";
 import { render } from "../eval/render";
-import { resolveDimensions } from "../eval/dimensions";
+import { resolveDimensions, typedRulers } from "../eval/dimensions";
 import { tuckEndBox } from "../fixtures/tuckEnd";
 import { pathsBounds } from "../geometry/math";
 import type { Path } from "../geometry/types";
+import type { Node } from "../spec/types";
+import { checkDieline } from "../checks/checks";
 import { rteBox } from "../fixtures/rte";
 import { PRESETS, presetBody, type PresetId } from "../library/presets";
 import { doc, errors, INPUTS, isClosedOutline, rect, renderNodes } from "./helpers";
@@ -82,9 +84,23 @@ describe("documents", () => {
 
   it("resolves inner and outer sizes", () => {
     const size = { width: 100, length: 50, height: 80 };
-    expect(resolveDimensions(size, "manufacture", { thickness: 1 })).toEqual(size);
-    expect(resolveDimensions(size, "inner", { thickness: 1 })).toEqual({ width: 102, length: 52, height: 82 });
-    expect(resolveDimensions(size, "outer", { thickness: 1, outerOffset: 1.5 }).width).toBe(97);
+    expect(resolveDimensions(size, "manufacture", 1)).toEqual(size);
+    expect(resolveDimensions(size, "inner", 1)).toEqual({ width: 103, length: 53, height: 82 });
+    expect(resolveDimensions({ width: 90, length: 50, height: 160 }, "inner", 0.5)).toEqual({ width: 92, length: 52, height: 161 });
+    expect(resolveDimensions(size, "outer", 1.5).width).toBe(97);
+  });
+
+  it("moves only the rulers that measure the size when it is typed as inner or outer", () => {
+    const ruler = (id: string, length: number) => ({ id, name: id, from: [0, 0] as [number, number], to: [length, 0] as [number, number], offset: 5, value: length });
+    const result = { rulers: [ruler("w", 100), ruler("flap", 12)], bounds: { minX: 0, minY: 0, maxX: 200, maxY: 100 } } as unknown as Parameters<typeof typedRulers>[0];
+    const size = { width: 100, length: 50, height: 80 };
+
+    const all = (d: number) => ({ width: d, length: d, height: d });
+    expect(typedRulers(result, size, all(0))).toBe(result.rulers);
+    const [inner, flap] = typedRulers(result, size, all(4));
+    expect(inner).toMatchObject({ from: [1.5, 0], to: [98.5, 0], value: 96 });
+    expect(flap).toEqual(result.rulers[1]);
+    expect(typedRulers(result, size, all(-2))[0]).toMatchObject({ from: [-1.5, 0], to: [101.5, 0], value: 102 });
   });
 });
 
@@ -166,7 +182,18 @@ describe("sheet and overall rulers", () => {
     const r = render(doc({ nodes: [presetBody("reverseTuckEnd", "body")] }), INPUTS);
     const svg = toSVG(r);
     expect(svg).toContain('id="glue-hatch"');
+    // One closed shape per glue area, so the hatch has something to fill.
+    expect(svg).toMatch(/data-line-type="glue" d="M[^"]*Z"/);
     expect(svg).toMatch(/data-line-type="glue"[^>]*fill="url\(#glue-hatch\)" stroke="none"/);
+  });
+
+  it("interrupts a fold where a window crosses it", () => {
+    // A 100 × 50 sheet with a fold at x = 50 and a 20 × 10 window across it.
+    const fold = { id: "f", name: "f", kind: "line", lineType: "crease", from: { x: "50", y: "0" }, to: { x: "50", y: "50" } } as Node;
+    const r = renderNodes([rect("a", "100", "50"), fold, rect("w", "20", "10", { transform: { x: "40", y: "20" } })]);
+    const creases = r.paths.filter((p) => p.lineType === "crease" && p.kind === "line");
+    expect(creases.map((p) => (p.kind === "line" ? [p.a[1], p.b[1]].sort((x, y) => x - y) : []))).toEqual([[0, 20], [30, 50]]);
+    expect(checkDieline(r)).toEqual([]);
   });
 
   it("gives every separate part its own bleed", () => {

@@ -1,7 +1,8 @@
 "use client";
 
-import { LINE_STYLES, overallRulers, rulerEnds, rulerLabel, rulerPrims, sheetLoops, type RenderResult, type RulerInfo } from "@repo/dieline-engine";
+import { closedLoops, GLUE_HATCH, LINE_STYLES, overallRulers, rulerEnds, rulerLabel, rulerPrims, sheetLoops, typedRulers, type Dimensions, type RenderResult, type RulerInfo } from "@repo/dieline-engine";
 import { memo, useMemo, type JSX } from "react";
+import { useEditor } from "../state/react";
 import type { View } from "../state/store";
 import { groupPaths, pathsByNode } from "./paths";
 import { primD, pt } from "./paths";
@@ -19,18 +20,29 @@ export const DielineLayer = memo(function DielineLayer({
   showGuides: boolean;
 }) {
   const groups = useMemo(() => groupPaths(result.paths), [result]);
+  // A fill needs closed shapes; the glue outline comes as separate segments, so
+  // it is joined into loops first.
+  const glueD = useMemo(
+    () =>
+      closedLoops(result.paths.filter((p) => p.lineType === "glue"))
+        .filter((l) => l.length >= 3)
+        .map((l) => `M${l.map((p) => pt(p[0], p[1])).join("L")}Z`)
+        .join(""),
+    [result],
+  );
 
   return (
     <g fill="none" strokeLinecap="round" strokeLinejoin="round">
       {/* Glue areas are hatched, in millimetres of the drawing, with no outline. */}
       <defs>
-        <pattern id="glue-hatch" patternUnits="userSpaceOnUse" width={2} height={2} patternTransform="rotate(45)">
-          <line x1={0} y1={0} x2={0} y2={2} stroke={LINE_STYLES.glue.color} strokeWidth={0.35} />
+        {/* The world group flips y, so −45° here leans the lines up to the right, as in exports. */}
+        <pattern id="glue-hatch" patternUnits="userSpaceOnUse" width={GLUE_HATCH.spacing} height={GLUE_HATCH.spacing} patternTransform="rotate(-45)">
+          <line x1={0} y1={0} x2={0} y2={GLUE_HATCH.spacing} stroke={GLUE_HATCH.color} strokeWidth={GLUE_HATCH.width} />
         </pattern>
       </defs>
       {groups.map((g) => {
         if (g.lineType === "guide" && !showGuides) return null;
-        if (g.lineType === "glue") return <path key={g.key} d={g.d} fill="url(#glue-hatch)" stroke="none" />;
+        if (g.lineType === "glue") return null;
         const style = LINE_STYLES[g.lineType];
         return (
           <path
@@ -43,6 +55,7 @@ export const DielineLayer = memo(function DielineLayer({
           />
         );
       })}
+      {glueD && <path d={glueD} fill="url(#glue-hatch)" stroke="none" pointerEvents="none" />}
     </g>
   );
 });
@@ -86,9 +99,13 @@ export const BleedLayer = memo(function BleedLayer({ result }: { result: RenderR
   return <path d={d} fill="none" stroke={BLEED_COLOR} strokeWidth={1} vectorEffect="non-scaling-stroke" pointerEvents="none" />;
 });
 
-/** The template's rulers plus each part's overall width and height. */
-export function useShownRulers(result: RenderResult, overall: boolean): RulerInfo[] {
-  return useMemo(() => (overall ? [...result.rulers, ...overallRulers(result)] : result.rulers), [result, overall]);
+/** The template's rulers, as a customer's size reads, plus each part's overall width and height. */
+export function useShownRulers(result: RenderResult, overall: boolean, sizeDelta: Dimensions): RulerInfo[] {
+  const inputs = useEditor((s) => s.inputs);
+  return useMemo(() => {
+    const rulers = typedRulers(result, inputs, sizeDelta);
+    return overall ? [...rulers, ...overallRulers(result)] : rulers;
+  }, [result, overall, sizeDelta, inputs]);
 }
 
 /** Extension and dimension lines: world space (inside the world group). */

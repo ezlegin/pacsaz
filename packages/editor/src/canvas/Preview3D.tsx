@@ -2,7 +2,7 @@
 
 import { toFoldSVG, type FoldSettings, type RenderResult } from "@repo/dieline-engine";
 import { ArtworkPlacer } from "@repo/dieline-3d/ArtworkPlacer";
-import { buildFoldRig, DEFAULT_FOLD_ANGLE, extractSegmentsFromSvg } from "@repo/dieline-3d/rig";
+import { buildFoldRig, DEFAULT_FOLD_ANGLE, extractSegmentsFromSvg, extractWindows } from "@repo/dieline-3d/rig";
 import { cn } from "@repo/ui/lib/utils";
 import { Box, ImagePlus, Maximize2, Minimize2, Trash2, X } from "lucide-react";
 import { lazy, Suspense, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
@@ -126,7 +126,7 @@ export function FoldPreview({
   // The same rig the viewer builds, for naming panels and recording overrides.
   const rig = useMemo(() => {
     try {
-      return buildFoldRig(extractSegmentsFromSvg(svg));
+      return buildFoldRig(extractSegmentsFromSvg(svg), null, extractWindows(svg));
     } catch {
       return null;
     }

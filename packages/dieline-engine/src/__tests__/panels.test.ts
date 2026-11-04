@@ -94,32 +94,34 @@ describe("box bodies", () => {
   });
 
   it("rounds each friction-lock slit into a hook past the tuck fold, which sits below the edge", () => {
-    // A 90 mm lid on a 160 mm tall body, 0.5 mm board: lid 50 deep, so the tuck fold is at 210.
+    // A 90 mm lid on a 160 mm tall body, 0.5 mm board: the hinge is raised one board to 160.5, the lid
+    // is 50 deep fold to fold (the box across the opening), so the tuck fold is at 210.5 and the edge at 211.
     const r = render(doc({ nodes: [body({ panels: [{ id: "p", name: "p", width: "90", top: { component: "lib:tuckLid" } }] })] }), { ...INPUTS, width: 50, length: 90, height: 160, thickness: 0.5 });
-    // The fold sits a board's thickness twice over (1 mm) below the edge; each hook rounds off the
-    // slit and ends 0.5 mm past the fold.
-    const hooks = r.paths.filter((p) => p.kind === "line" && p.lineType === "cut" && p.a[0] === p.b[0] && Math.min(p.a[1], p.b[1]) === 208.5);
+    // The fold sits one board (0.5 mm) below the edge; each hook rounds off the slit and ends
+    // another board past the fold.
+    const hooks = r.paths.filter((p) => p.kind === "line" && p.lineType === "cut" && p.a[0] === p.b[0] && Math.min(p.a[1], p.b[1]) === 210);
     expect(hooks).toHaveLength(2);
-    expect(r.paths.filter((p) => p.kind === "arc" && p.lineType === "cut" && Math.abs(p.r - 0.8) < 1e-6)).toHaveLength(2);
-    expect(r.paths.some((p) => p.kind === "line" && p.lineType === "crease" && p.a[1] === 209 && p.b[1] === 209)).toBe(true);
+    expect(r.paths.filter((p) => p.kind === "arc" && p.lineType === "cut" && Math.abs(p.r - 0.4) < 1e-6)).toHaveLength(2);
+    const creases = r.paths.filter((p) => p.kind === "line" && p.lineType === "crease" && p.a[1] === p.b[1]).map((p) => (p.kind === "line" ? p.a[1] : 0));
+    expect(creases.sort()).toEqual([160.5, 210.5]);
   });
 
   it("notches a dust flap only beside a lid", () => {
     const r = render(doc({ nodes: [presetBody("reverseTuckEnd", "body")] }), { ...INPUTS, width: 50, length: 90, height: 160, thickness: 0.5 });
     // Three of the four dust flaps sit beside a lid; the second side's top flap
     // has the plain back panel on one side and the end of the body on the other.
-    // The notch is 1.5 × the 0.5 mm board: 0.75 mm.
-    expect(r.paths.filter((p) => p.kind === "arc" && p.lineType === "cut" && Math.abs(p.r - 0.75) < 1e-6)).toHaveLength(3);
+    // The notch is as wide as the 0.5 mm board: radius 0.25 mm.
+    expect(r.paths.filter((p) => p.kind === "arc" && p.lineType === "cut" && Math.abs(p.r - 0.25) < 1e-6)).toHaveLength(3);
   });
 
   it("steps a dust flap's far side back a board's thickness from the fold, straight up", () => {
     // Reverse tuck end, 90 × 50 × 160, 0.5 mm board: the back panel runs 140–230 at the top,
-    // and the side flaps either side of it step 1 mm back into their own panels.
+    // and the side flaps either side of it step one board (0.5 mm) back into their own panels.
     const r = render(doc({ nodes: [presetBody("reverseTuckEnd", "body")] }), { ...INPUTS, width: 50, length: 90, height: 160, thickness: 0.5 });
     const upright = (x: number) =>
       r.paths.some((p) => p.kind === "line" && p.lineType === "cut" && Math.abs(p.a[0] - x) < 1e-6 && Math.abs(p.b[0] - x) < 1e-6 && Math.min(p.a[1], p.b[1]) === 160);
-    expect(upright(139)).toBe(true);
-    expect(upright(231)).toBe(true);
+    expect(upright(139.5)).toBe(true);
+    expect(upright(230.5)).toBe(true);
   });
 
   it("reports feature problems on the feature's fields and keeps the edge", () => {
@@ -156,8 +158,9 @@ describe("presets", () => {
     // of length and width (100), so the lids sit on them, as deep as the sides
     // (60), with a tuck sized from the lid's own 100 mm width (15).
     expect(r.bounds!.maxX).toBeCloseTo(100 + 60 + 100 + 60 + 15);
-    expect(r.bounds!.maxY).toBeCloseTo(120 + 60 + 15);
-    expect(r.bounds!.minY).toBeCloseTo(-75);
+    // Plus the raised hinge and the tuck fold's step below the lid's edge, one board (0.5 mm) each.
+    expect(r.bounds!.maxY).toBeCloseTo(120 + 60 + 15 + 1);
+    expect(r.bounds!.minY).toBeCloseTo(-75 - 1);
     expect(r.rulers[0]!.value).toBe(100);
   });
 

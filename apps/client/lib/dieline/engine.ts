@@ -1,14 +1,14 @@
-import { materials } from "@repo/dieline-core/data/materials";
 import {
   loopsD,
   parseCustomization,
   parseDocument,
+  resolveDimensions,
   sheetLoops,
   toFoldSVG,
   toSVG,
+  typedRulers,
   type Customization,
   type DielineDocument,
-  type Pt,
   type RenderResult,
 } from "@repo/dieline-engine";
 
@@ -41,19 +41,14 @@ export function loadCustomization(json: string | null | undefined): Customizatio
 export type DimensionType = "manufacture" | "inner" | "outer";
 export type Size = { width: number; length: number; height: number };
 
-/**
- * The size a customer typed, turned into the crease-to-crease size the template
- * is drawn at. Same rule as the site has always used: an inner size grows by the
- * material's inner offset on both sides; an outer size shrinks by the thickness
- * (the material's own outer offset when the thickness was not changed).
- */
-export function manufactureSize(raw: Size, type: DimensionType, materialKey: string, thickness: number): Size {
-  if (type === "manufacture") return { ...raw };
-  const material = materials.find((m) => m.value === materialKey) ?? materials[0]!;
-  const inner = material.offset.inner * 2;
-  const outer = (thickness !== material.thickness ? thickness : material.offset.outer) * 2;
-  const d = type === "inner" ? inner : -outer;
-  return { width: raw.width + d, length: raw.length + d, height: raw.height + d };
+/** The size a customer typed, as the crease-to-crease size the template is drawn at. */
+export const manufactureSize = resolveDimensions;
+
+/** The reverse of `manufactureSize`: a box's crease size in the numbers of a dimension type. */
+export function typedSize(crease: Size, type: DimensionType, thickness: number): Size {
+  const grown = manufactureSize(crease, type, thickness);
+  const n = (key: keyof Size) => Math.round((2 * crease[key] - grown[key]) * 100) / 100;
+  return { width: n("width"), length: n("length"), height: n("height") };
 }
 
 /** Keeps a requested size inside what the template is sold in. */
@@ -71,34 +66,13 @@ function rulerFont(result: RenderResult): number {
   return b ? Math.max(4, Math.max(b.maxX - b.minX, b.maxY - b.minY) / 40) : 4;
 }
 
-/**
- * The template's rulers as the customer's size reads: an inner size is measured
- * between the inner faces, so each end moves `inset` mm inside the crease (an
- * outer size, a negative inset, moves them out). The line is also pushed a
- * little towards the inside or the outside, so it is plain what is measured.
- */
-function rulersFor(result: RenderResult, inset: number): RenderResult {
-  if (!inset) return result;
-  const b = result.bounds;
-  const push = Math.sign(inset) * (b ? Math.max(b.maxX - b.minX, b.maxY - b.minY) * 0.02 : 2);
-  const rulers = result.rulers.map((r) => {
-    const len = Math.hypot(r.to[0] - r.from[0], r.to[1] - r.from[1]);
-    if (len <= inset * 2) return r;
-    const ux = (r.to[0] - r.from[0]) / len;
-    const uy = (r.to[1] - r.from[1]) / len;
-    return {
-      ...r,
-      from: [r.from[0] + ux * inset, r.from[1] + uy * inset] as Pt,
-      to: [r.to[0] - ux * inset, r.to[1] - uy * inset] as Pt,
-      offset: r.offset - push * Math.sign(r.offset || 1),
-      value: r.value - inset * 2,
-    };
-  });
-  return { ...result, rulers };
-}
-
-export function previewSvg(result: RenderResult, options: { watermark: boolean; overallRulers: boolean; rulerInset?: number }): string {
-  result = rulersFor(result, options.rulerInset ?? 0);
+export function previewSvg(result: RenderResult, options: { watermark: boolean; overallRulers: boolean; size?: Size; typed?: Size }): string {
+  // The drawing is at the crease size; rulers show the number the customer typed.
+  const { size, typed } = options;
+  if (size && typed) {
+    const delta = { width: size.width - typed.width, length: size.length - typed.length, height: size.height - typed.height };
+    result = { ...result, rulers: typedRulers(result, size, delta) };
+  }
   // White paper inside the bleed (windows left open), the template's rulers
   // always, and each part's overall size when the visitor has it on. Room for
   // every ruler is kept either way, so the toggle never moves the drawing.

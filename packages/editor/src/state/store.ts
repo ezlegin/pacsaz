@@ -25,10 +25,10 @@ export type EditorState = {
   snapping: boolean;
   display: {
     guides: boolean;
-    /** Screen rulers along the canvas edges. */
-    rulers: boolean;
     /** Each part's overall width and height. The template's own rulers always show. */
     overall: boolean;
+    /** Crease size minus the size as a customer types it: how the template's rulers read (`typedRulers`). */
+    sizeDelta: Dimensions;
     bleed: boolean;
     ghosts: boolean;
     nicks: boolean;
@@ -80,7 +80,7 @@ export class EditorStore {
       drawLineType: "cut",
       view: { x: 0, y: 0, zoom: 1 },
       snapping: true,
-      display: { guides: true, rulers: true, overall: true, bleed: true, ghosts: false, nicks: false, issues: true, preview3d: false },
+      display: { guides: true, overall: true, sizeDelta: { width: 0, length: 0, height: 0 }, bleed: true, ghosts: false, nicks: false, issues: true, preview3d: false },
       sizeRange: null,
       nicks: { width: 0.5, spacing: 60 },
       canUndo: false,

@@ -1,4 +1,4 @@
-import { allNodes, mapExprs, referencedNodes, type DielineDocument, type LineType, type Pt, type RenderResult } from "@repo/dieline-engine";
+import { allNodes, formatNumber, mapExprs, refExpr, referencedNodes, type DielineDocument, type LineType, type Pt, type RenderResult } from "@repo/dieline-engine";
 import { lineage } from "./frames";
 
 /** A point other geometry can snap to: a named anchor of a visible node. */
@@ -51,6 +51,18 @@ export function foldTargets(result: RenderResult): SnapTarget[] {
     for (const point of [path.a, path.b]) out.push({ nodeId: path.nodeId, nodeName: "", anchor: "", point });
   }
   return out;
+}
+
+/**
+ * One coordinate of a measured point, as a ruler stores it. A point on a fold
+ * has no anchor of its own, so each axis looks for an anchor on the same line: a
+ * plain number would stay put when the template is drawn at another size, and
+ * the ruler would stop measuring the panel.
+ */
+export function rulerCoord(result: RenderResult, point: { p: Pt; target?: SnapTarget }, axis: "x" | "y"): string {
+  const i = axis === "x" ? 0 : 1;
+  const hit = point.target?.anchor ? point.target : snapTargets(result, []).find((t) => Math.abs(t.point[i] - point.p[i]) < 0.01);
+  return hit ? refExpr(hit.nodeName, hit.anchor, axis) : formatNumber(point.p[i]);
 }
 
 /** The closest point on any fold line within `tolerance`, for measuring to a fold anywhere along it. */

@@ -43,9 +43,9 @@ export default function CustomizeEditor({
   // Until the store has the template's defaults, the size is zero.
   const ready = settings.dimension.raw.width > 0 || settings.dimension.raw.length > 0;
   const inputs = useMemo(() => {
-    const size = manufactureSize(settings.dimension.raw, settings.dimensionType, settings.material.value, settings.thickness);
+    const size = manufactureSize(settings.dimension.raw, settings.dimensionType, settings.thickness);
     return { ...size, thickness: settings.thickness, bleed: settings.bleed };
-  }, [settings.dimension.raw, settings.dimensionType, settings.material.value, settings.thickness, settings.bleed]);
+  }, [settings.dimension.raw, settings.dimensionType, settings.thickness, settings.bleed]);
 
   const blocked = verified && !verified.ok ? "پیش از دانلود، موارد «بررسی تولید» را برطرف کنید." : null;
 

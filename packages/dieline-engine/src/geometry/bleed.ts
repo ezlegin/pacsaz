@@ -1,5 +1,5 @@
 import { polar, sweep } from "./math";
-import type { Prim, Pt } from "./types";
+import type { Path, Prim, Pt } from "./types";
 
 /**
  * Bleed: the outer cut contour grown by `distance`, with round outside corners.
@@ -264,4 +264,61 @@ export function bleedOutline(cut: readonly Prim[], distance: number): Prim[] {
     if (!poly) return [];
     return poly.map((p, i): Prim => ({ kind: "line", a: p, b: poly[(i + 1) % poly.length]! }));
   });
+}
+
+const FOLD_TYPES = new Set(["crease", "reverseCrease", "perf", "cutCrease", "halfCut"]);
+
+/**
+ * Folds stop at windows: where a fold line runs through a hole (a window cut
+ * across a crease), the part inside the opening is removed, so the fold ends
+ * on the window's edge either side. Works on any shape, wherever it is moved.
+ */
+export function trimFoldsAtHoles(paths: Path[]): { paths: Path[]; trimmed: number; removed: Path[] } {
+  const loops = closedLoops(paths.filter((p) => p.lineType === "cut"));
+  const holes = loops.filter((l) => isHole(l, loops));
+  if (!holes.length) return { paths, trimmed: 0, removed: [] };
+  let trimmed = 0;
+  const removed: Path[] = [];
+  const inAnyHole = (p: Pt) => holes.some((h) => insidePolygon(p, h));
+
+  const out = paths.flatMap((path): Path[] => {
+    if (!FOLD_TYPES.has(path.lineType)) return [path];
+    if (path.kind !== "line") {
+      const pts = flatten(path);
+      if (!inAnyHole(pts[Math.floor(pts.length / 2)]!)) return [path];
+      for (let i = 1; i < pts.length; i++) trimmed += Math.hypot(pts[i]![0] - pts[i - 1]![0], pts[i]![1] - pts[i - 1]![1]);
+      removed.push(path);
+      return [];
+    }
+    const { a, b } = path;
+    const ts = [0, 1];
+    for (const h of holes) {
+      for (let i = 0; i < h.length; i++) {
+        const hit = intersect(a, b, h[i]!, h[(i + 1) % h.length]!);
+        if (hit && hit.t > 1e-9 && hit.t < 1 - 1e-9 && hit.u >= -1e-9 && hit.u <= 1 + 1e-9) ts.push(hit.t);
+      }
+    }
+    const len = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    if (ts.length === 2) {
+      if (!inAnyHole([(a[0] + b[0]) / 2, (a[1] + b[1]) / 2])) return [path];
+      trimmed += len;
+      removed.push(path);
+      return [];
+    }
+    ts.sort((x, y) => x - y);
+    const at = (t: number): Pt => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+    const kept: Path[] = [];
+    for (let i = 0; i + 1 < ts.length; i++) {
+      const t0 = ts[i]!;
+      const t1 = ts[i + 1]!;
+      if (t1 - t0 < 1e-9) continue;
+      const piece = { ...path, a: at(t0), b: at(t1) };
+      if (inAnyHole(at((t0 + t1) / 2))) {
+        trimmed += (t1 - t0) * len;
+        removed.push(piece);
+      } else kept.push(piece);
+    }
+    return kept;
+  });
+  return { paths: out, trimmed, removed };
 }

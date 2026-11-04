@@ -1,7 +1,5 @@
 import { formatDimensions } from "@/utils/formatDimensions";
-import { DimensionType } from "@repo/db";
-import { applyDimensionOffset } from "@repo/dieline-core/utils/applyDimensionOffset";
-import { resolveOffsets } from "@repo/dieline-core/utils/offsetResolver";
+import { manufactureSize, typedSize } from "@/lib/dieline/engine";
 import { useAppSelector } from "@repo/store/hooks";
 import { cn } from "@repo/ui/lib/utils";
 
@@ -26,62 +24,14 @@ const ProductInfo = ({
   isRendering: boolean;
   user: UserType | null;
 }) => {
-  const offset = resolveOffsets();
-
   const {
     dimensionType,
     dimensionTypes,
-    dimension: {
-      raw: { height, length, width },
-    },
+    thickness,
+    dimension: { raw },
   } = useAppSelector((s) => s.dielineSettings);
 
-  const calcManufacture = (value: number, axis: "width" | "length") =>
-    applyDimensionOffset(
-      value,
-      dimensionType,
-      dimensionType === "inner"
-        ? (offset?.[axis].inner ?? 0)
-        : (offset?.[axis].outer ?? 0),
-    );
-
-  const calcInner = (
-    rawValue: number,
-    manufactureValue: number,
-    axis: "width" | "length",
-  ) => {
-    const base = dimensionType === "outer" ? manufactureValue : rawValue;
-
-    const fromType: DimensionType =
-      dimensionType === "inner" ? "manufacture" : "outer";
-
-    return applyDimensionOffset(base, fromType, offset?.[axis].inner ?? 0);
-  };
-
-  const calcOuter = (
-    rawValue: number,
-    manufactureValue: number,
-    axis: "width" | "length",
-  ) => {
-    const base = dimensionType === "inner" ? manufactureValue : rawValue;
-
-    const fromType: DimensionType =
-      dimensionType === "outer" ? "manufacture" : "inner";
-
-    return applyDimensionOffset(base, fromType, offset?.[axis].outer ?? 0);
-  };
-
-  // manufacture dims
-  const manufactureDimWidth = calcManufacture(width, "width");
-  const manufactureDimLength = calcManufacture(length, "length");
-
-  // inner dims
-  const innerDimWidth = calcInner(width, manufactureDimWidth, "width");
-  const innerDimLength = calcInner(length, manufactureDimLength, "length");
-
-  // outer dims
-  const outerDimWidth = calcOuter(width, manufactureDimWidth, "width");
-  const outerDimLength = calcOuter(length, manufactureDimLength, "length");
+  const crease = manufactureSize(raw, dimensionType, thickness);
 
   const packLengend = [
     { color: "bg-blue-500", label: "خط برش", dashed: false },
@@ -90,31 +40,15 @@ const ProductInfo = ({
   ];
 
   const dimensions = [
-    {
-      label: "ابعاد تولید",
-      value: formatDimensions({
-        width: manufactureDimWidth,
-        length: manufactureDimLength,
-        height,
-      }),
-      key: "manufacture",
-    },
+    { label: "ابعاد تولید", value: formatDimensions(crease), key: "manufacture" },
     {
       label: "ابعاد داخلی",
-      value: formatDimensions({
-        width: innerDimWidth,
-        length: innerDimLength,
-        height,
-      }),
+      value: formatDimensions(typedSize(crease, "inner", thickness)),
       key: "inner",
     },
     {
       label: "ابعاد خارجی",
-      value: formatDimensions({
-        width: outerDimWidth,
-        length: outerDimLength,
-        height,
-      }),
+      value: formatDimensions(typedSize(crease, "outer", thickness)),
       key: "outer",
     },
   ];

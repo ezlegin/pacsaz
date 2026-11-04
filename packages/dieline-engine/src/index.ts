@@ -20,7 +20,7 @@ export {
 export type { Diagnostic } from "./eval/diagnostics";
 export { evaluateExpression } from "./eval/evaluate";
 export { BUILTINS, type Scope } from "./eval/scope";
-export { resolveDimensions, type DimensionType, type Dimensions } from "./eval/dimensions";
+export { resolveDimensions, typedRulers, type DimensionType, type Dimensions } from "./eval/dimensions";
 
 export type { Bounds, Path, Prim, Pt } from "./geometry/types";
 export { pathsBounds, primLength, endpoints } from "./geometry/math";
@@ -53,7 +53,7 @@ export { toDXF } from "./export/dxf";
 export { addNicks, type NickOptions } from "./export/nicks";
 export { toFoldSVG } from "./export/fold";
 export { checkDieline, type Issue, type IssueCode, type CheckOptions } from "./checks/checks";
-export { LINE_STYLES, DXF_LAYERS, type LineStyle } from "./export/styles";
+export { GLUE_HATCH, LINE_STYLES, DXF_LAYERS, type LineStyle } from "./export/styles";
 export {
   applyCustomization,
   componentById,

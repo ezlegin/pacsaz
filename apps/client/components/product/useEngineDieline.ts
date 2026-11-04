@@ -67,7 +67,7 @@ export function useEngineDieline(dieline: EngineDieline, options: { watermark: b
     dispatch(
       setDefaultSettings({
         bleed: s.bleed,
-        dimension: { raw, resolved: manufactureSize(raw, type, material.value, s.thickness) },
+        dimension: { raw, resolved: manufactureSize(raw, type, s.thickness) },
         dimensionTypes: dieline.dimensionTypes.split(",") as DimensionType[],
         minDimension: { width: dieline.minWidth, height: dieline.minHeight, length: dieline.minLength },
         maxDimension: { width: dieline.maxWidth, height: dieline.maxHeight, length: dieline.maxLength },
@@ -99,14 +99,15 @@ export function useEngineDieline(dieline: EngineDieline, options: { watermark: b
       return;
     }
     startTransition(() => {
-      const size = manufactureSize(dimension.raw, dimensionType, material.value, thickness);
+      const size = manufactureSize(dimension.raw, dimensionType, thickness);
       const { document, params } = applyCustomization(template, customization);
       const result = render(document, { ...size, thickness, bleed, params });
       dispatch(setSvg(previewSvg(result, {
           watermark: options.watermark,
           overallRulers: showOverallRulers,
-          // Rulers measure the size the customer typed: inner or outer faces, not the creases.
-          rulerInset: (size.width - dimension.raw.width) / 2,
+          // Rulers read the size the customer typed: inner or outer, not the creases.
+          size,
+          typed: dimension.raw,
         })));
       dispatch(setFoldSvg(toFoldSVG(result)));
       const found = new Set<IssueCode | "build">(checkDieline(result).map((i) => i.code));

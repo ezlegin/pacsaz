@@ -1,6 +1,6 @@
 import { buildPlanarFaces } from "./planar";
 import { applyFoldOverrides, type FoldConfig } from "./foldConfig";
-import { isEnclosedBy } from "./polygon";
+import { isEnclosedBy, pointInPolygon } from "./polygon";
 import type { FoldRig, Hinge, Pt, RigNode, Segment } from "./types";
 
 /**
@@ -188,6 +188,7 @@ const detectWindows = (nodes: RigNode[]): number => {
   let count = 0;
 
   nodes.forEach((candidate, index) => {
+    if (candidate.isHole) return;
     // Only a closed loop of trim can be a window; it must also be smaller than
     // any panel that contains it.
     let containerIndex = -1;
@@ -227,6 +228,8 @@ const detectWindows = (nodes: RigNode[]): number => {
 export const buildFoldRig = (
   segments: Segment[],
   config?: FoldConfig | null,
+  /** Window outlines (`extractWindows`): faces inside one are openings, not board. */
+  windows: Pt[][] = [],
 ): FoldRig => {
   /*
    * Perforations are held back from the planar pass. They are weakness lines, not
@@ -349,7 +352,16 @@ export const buildFoldRig = (
    * The face stays in `nodes` — removing it would shift indices and silently
    * re-attach authored fold overrides to the wrong panels.
    */
-  const holeCount = detectWindows(nodes);
+  // Pieces a fold makes inside a window that crosses it are openings too, cut
+  // out of the panels either side by their own outlines already.
+  let openings = 0;
+  for (const node of nodes) {
+    if (windows.some((w) => pointInPolygon(node.face.centroid, w))) {
+      node.isHole = true;
+      openings++;
+    }
+  }
+  const holeCount = detectWindows(nodes) + openings;
 
   // Windows are not panels, so they must not be reported as orphaned panels.
   const orphanCount = nodes.filter(

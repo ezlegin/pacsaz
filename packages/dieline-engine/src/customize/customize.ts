@@ -517,6 +517,16 @@ export function verifyCustomization(
     }
   }
 
+  // A window in the template may interrupt a fold (the renderer trims it), but
+  // a customer's moved or added part must not.
+  if (result.foldsCut > template.foldsCut + 1e-3) {
+    const moved = Object.entries(c.nodes ?? {}).filter(([, n]) => n.dx || n.dy || n.hidden === false).map(([id]) => `nodes.${id}`);
+    const paths = [...moved, ...(c.cutouts ?? []).map((cut) => `cutouts.${cut.id}`)];
+    for (const path of paths.length ? paths : ["document"]) {
+      if (!problems.some((p) => p.path === path)) problems.push({ code: "geometry", path, message: "This part cuts through a fold line" });
+    }
+  }
+
   const known = new Set(checkDieline(template).map(issueKey));
   for (const issue of checkDieline(result)) {
     if (issue.severity !== "error" || known.has(issueKey(issue))) continue;

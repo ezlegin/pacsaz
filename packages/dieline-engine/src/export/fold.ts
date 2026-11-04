@@ -1,12 +1,18 @@
 import type { RenderResult } from "../eval/render";
 import { polar, sweep } from "../geometry/math";
+import { cutParts } from "../geometry/sheet";
 import type { Path, Pt } from "../geometry/types";
 import type { LineType } from "../spec/types";
 
 /**
  * The layered SVG the 3D fold rig (`@repo/dieline-3d`) reads: one path each with
- * the ids `trim`, `fold` and `perf`. Arcs are written as short chords because the
- * rig works on straight segments anyway.
+ * the ids `trim`, `fold` and `perf`, plus `window` with each window's outline.
+ * Arcs are written as short chords because the rig works on straight segments
+ * anyway.
+ *
+ * A fold the drawing interrupts at a window is written whole: the panels either
+ * side are still hinged along that line. The rig drops the pieces of board the
+ * whole fold makes inside a window, using the `window` outlines.
  */
 const LAYER: Partial<Record<LineType, "trim" | "fold" | "perf">> = {
   cut: "trim",
@@ -30,7 +36,7 @@ function polyline(p: Path): Pt[] {
 
 export function toFoldSVG(result: RenderResult): string {
   const layers: Record<"trim" | "fold" | "perf", string[]> = { trim: [], fold: [], perf: [] };
-  for (const p of result.paths) {
+  for (const p of [...result.paths, ...result.foldsInHoles]) {
     const layer = LAYER[p.lineType];
     if (!layer) continue;
     const pts = polyline(p);
@@ -43,6 +49,9 @@ export function toFoldSVG(result: RenderResult): string {
     .filter((k) => layers[k].length)
     .map((k) => `<path id="${k}" d="${layers[k].join(" ")}"/>`)
     .join("");
+  const windows = result.foldsInHoles.length
+    ? cutParts(result).holes.map((h) => `<path id="window" d="M ${h.map(pt).join(" L ")} Z"/>`).join("")
+    : "";
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}"><g id="svgGroup" fill="none" stroke="#000">${paths}</g></svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}"><g id="svgGroup" fill="none" stroke="#000">${paths}${windows}</g></svg>`;
 }

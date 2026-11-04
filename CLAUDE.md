@@ -118,16 +118,17 @@ Phases (each ends with a commit message for the user to commit):
 - Presets (`library/presets.ts`): reverse tuck end, straight tuck end, sleeve,
   FEFCO 0201. Bodies run front, side, back, side, glue; front and back are
   `max(length, width)` and the sides `min(...)`, so lids always sit on the wide
-  panels and dust flaps on the narrow ones. Tuck lids carry friction-lock slits (rounding into a short hook past the tuck fold, which sits 2 × thickness below the lid edge) along
+  panels and dust flaps on the narrow ones. Tuck lids hinge one board thickness above the body edge and are exactly the box across the opening fold to fold (so closed, the tuck fold lands on the far wall); they carry friction-lock slits (rounding into a short hook past the tuck fold, which sits one thickness below the lid edge) along
   the tuck fold (a slit that runs on as a fold is not an open cut; `closedLoops`
   drops slits); dust flaps are nearly square on the lid side with a chamfer and
-  slope on the other. Glue areas export and draw hatched, with no outline.
+  slope on the other. Glue areas export and draw with fine dark hatching rising to the right (`GLUE_HATCH`), no outline.
   Edge features get `startFree`/`endFree` (1 when the neighbouring panel's
   same edge is a plain cut) and `startNext`/`endNext` (1 when it carries a
-  feature). A dust flap's far side steps back 2 × thickness from the fold
+  feature). A dust flap's far side steps back one thickness from the fold
   beside a plain edge, straight up; its relief notch is cut only beside a lid.
-  Relief notches, the glue flap's set-in and these overhangs all scale with
-  `thickness`. The 3D board is textured: paper grain, or kraft with flutes. New presets must render without diagnostics and keep the cut
+  Every such allowance is one board `thickness` (minimum 0.2 mm): the raised
+  lid hinge, the tuck fold's step, the tuck's side clearance, the hook past
+  the fold, the dust flap set-back; the relief notch is as wide as the board (radius thickness / 2). The glue flap runs the full panel height, its ends on the body edges. The 3D board is textured: paper grain, or kraft with flutes. Folds stop at windows: `render` trims any fold inside a hole (`trimFoldsAtHoles`) and reports the length as `foldsCut`; a customer change that cuts more fold than the template is rejected by `verifyCustomization`. The 3D fold SVG still gets the whole fold (`foldsInHoles`) plus `window` outlines; the rig drops faces inside a window (`extractWindows` → `buildFoldRig(segments, config, windows)`). New presets must render without diagnostics and keep the cut
   outline closed at several sizes (see `panels.test.ts`).
 
 ### Packaging checks, nicks, 3D
@@ -171,9 +172,11 @@ Phases (each ends with a commit message for the user to commit):
   `reserveRulers` so toggling never moves the drawing. On-screen SVG arrows and
   labels scale by the CSS variable `--ruler-scale` to keep their size when zoomed.
   The measure tool also snaps to fold-line ends and along fold lines.
-- The client draws the template's rulers at the size the customer typed: for an
-  inner or outer size each end moves inside or outside the crease (`rulerInset`
-  in `previewSvg`). Tucks fold 6° past square too. The 3D viewer fits the model
+- A dimension type keeps the typed numbers; the dieline grows (inner) or shrinks
+  (outer) by the allowance (`resolveDimensions`: inner adds 2 × thickness, plus
+  `INNER_CLEARANCE` 1 mm on width and length; outer takes off 2 × thickness). Rulers that measure width, length
+  or height show the typed number, and their ends step in (inner) or out (outer)
+  by a visible amount, not to scale (`typedRulers`, in the client and the Studio). Tucks fold 6° past square too. The 3D viewer fits the model
   with drei `Bounds`, lights it with a local `Environment` of light formers, and
   gives flute materials a kraft liner with flute ridges by pitch (`board.ts`).
 - The product page shows `checkDieline` problems at the chosen size (Persian

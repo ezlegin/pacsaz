@@ -2,9 +2,10 @@
 
 import type { DielineType } from "@/app/(PANEL)/dielines/DielinesList";
 import { bleeds, materials } from "@repo/dieline-core/data/materials";
+import { resolveDimensions } from "@repo/dieline-engine";
 import { useEditor, useStore } from "@repo/editor";
 import { cn } from "@repo/ui/lib/utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type DimensionType = "manufacture" | "inner" | "outer";
 
@@ -20,10 +21,11 @@ const TYPE_LABELS: Record<DimensionType, string> = {
  * what this dieline offers. Nothing here is saved into the template.
  *
  * Size fields hold what the customer would type; the editor draws the
- * crease-to-crease size, which differs by a constant per side for inner and
- * outer sizes (the same rule as the client's `manufactureSize`). Keeping only
- * that offset, not the typed size, keeps this panel in step with the size
- * fields in the top bar.
+ * crease-to-crease size, which differs by a constant per axis for inner and
+ * outer sizes (`resolveDimensions`, as on the site). A new dimension type keeps
+ * the typed numbers and resizes the drawing; rulers go on showing the typed
+ * number. Keeping only that offset, not the typed size, keeps this panel in step
+ * with the size fields in the top bar.
  */
 export default function PreviewSettings({ dieline }: { dieline: DielineType }) {
   const store = useStore();
@@ -39,17 +41,27 @@ export default function PreviewSettings({ dieline }: { dieline: DielineType }) {
   const [type, setType] = useState<DimensionType>((dieline.settings.dimensionType as DimensionType) ?? types[0] ?? "manufacture");
 
   const material = materials.find((m) => m.value === materialKey) ?? offered[0] ?? materials[0]!;
-  const offsetFor = (t: DimensionType, thickness: number) =>
-    t === "manufacture" ? 0 : t === "inner" ? material.offset.inner * 2 : -(thickness !== material.thickness ? thickness : material.offset.outer) * 2;
+  const offsetFor = (t: DimensionType, thickness: number) => resolveDimensions({ width: 0, length: 0, height: 0 }, t, thickness);
 
   const offset = offsetFor(type, inputs.thickness);
-  const typed = (key: "width" | "length" | "height") => Math.round((inputs[key] - offset) * 100) / 100;
+  const typed = (key: "width" | "length" | "height") => Math.round((inputs[key] - offset[key]) * 100) / 100;
 
-  // Re-applies the typed size under a new type, material or thickness.
+  useEffect(() => {
+    store.setDisplay({ sizeDelta: offset });
+    // The object is new each render; its numbers are what matter.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [store, offset.width, offset.height]);
+
+  // Re-applies the typed size under a new type or thickness.
   const reapply = (next: { type?: DimensionType; thickness?: number }) => {
     const thickness = next.thickness ?? inputs.thickness;
-    const d = offsetFor(next.type ?? type, thickness) - offset;
-    store.setInputs({ thickness, width: inputs.width + d, length: inputs.length + d, height: inputs.height + d });
+    const d = offsetFor(next.type ?? type, thickness);
+    store.setInputs({
+      thickness,
+      width: inputs.width + d.width - offset.width,
+      length: inputs.length + d.length - offset.length,
+      height: inputs.height + d.height - offset.height,
+    });
   };
 
   return (
@@ -61,7 +73,7 @@ export default function PreviewSettings({ dieline }: { dieline: DielineType }) {
           {(["length", "width", "height"] as const).map((key) => (
             <label key={key} className="space-y-0.5">
               <span className="text-[11px] capitalize text-muted-foreground">{key}</span>
-              <Num value={typed(key)} min={1} onChange={(v) => store.setInputs({ [key]: v + offset })} />
+              <Num value={typed(key)} min={1} onChange={(v) => store.setInputs({ [key]: v + offset[key] })} />
             </label>
           ))}
         </div>

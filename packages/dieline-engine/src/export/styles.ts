@@ -34,3 +34,9 @@ export const DXF_LAYERS: Record<Exclude<LineType, "guide">, string> = {
   halfCut: "HALF_CUT",
   glue: "GLUE",
 };
+
+/**
+ * Glue areas are filled with fine dark diagonal hatching, rising to the right,
+ * as on a printed drawing. Sizes in millimetres of the drawing.
+ */
+export const GLUE_HATCH = { color: "#1f1f1f", spacing: 1, width: 0.25 } as const;

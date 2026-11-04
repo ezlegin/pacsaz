@@ -210,7 +210,7 @@ function StudioLayout({ title, leading, trailing, onSave, onError, sizeRange, se
           {sidebar === "layers" ? <Outline /> : <IssuesPanel />}
         </aside>
         <main className="relative min-w-0 flex-1" data-editor-canvas>
-          <Canvas className="h-full w-full" showGuides={display.guides} showRulers={display.rulers} />
+          <Canvas className="h-full w-full" showGuides={display.guides} />
         </main>
         <Inspector settings={settings} />
       </div>

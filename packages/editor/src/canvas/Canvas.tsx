@@ -40,7 +40,7 @@ import {
 import { handlesFor, type Handle } from "../model/handles";
 import { moveNodes } from "../model/move";
 import { constrain45, constrainPlace, drawnPath, placedShape, type DrawPoint } from "../model/draw";
-import { foldTargets, nearestOnFold, niceStep, snapMoving, snappedDelta, snapTargets, wouldCycle, type SnapResult, type SnapTarget } from "../model/snap";
+import { foldTargets, nearestOnFold, niceStep, rulerCoord, snapMoving, snappedDelta, snapTargets, wouldCycle, type SnapResult, type SnapTarget } from "../model/snap";
 import { useEditor, useStore } from "../state/react";
 import type { View } from "../state/store";
 import { useAnalysis } from "../state/analysis";
@@ -95,14 +95,13 @@ export type CanvasProps = {
   className?: string;
   /** Show construction guides (panel outlines). */
   showGuides?: boolean;
-  showRulers?: boolean;
 };
 
 /**
  * The interactive dieline canvas. Everything it changes goes through the editor
  * store, so the panels around it (Phase 3) stay in sync for free.
  */
-export function Canvas({ className, showGuides = true, showRulers = true }: CanvasProps) {
+export function Canvas({ className, showGuides = true }: CanvasProps) {
   const store = useStore();
   const doc = useEditor((s) => s.doc);
   const result = useEditor((s) => s.result);
@@ -112,7 +111,7 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
   const scope = useEditor((s) => s.scope);
   const tool = useEditor((s) => s.tool);
   const display = useEditor((s) => s.display);
-  const shownRulers = useShownRulers(result, display.overall);
+  const shownRulers = useShownRulers(result, display.overall, display.sizeDelta);
   const nicks = useEditor((s) => s.nicks);
   const { ghosts, issues } = useAnalysis();
 
@@ -661,8 +660,6 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
   const addRuler = () => {
     const { a, b } = measure;
     if (!a || !b) return;
-    const coord = (m: MeasurePoint, axis: "x" | "y", i: 0 | 1) =>
-      m.target?.anchor ? refExpr(m.target.nodeName, m.target.anchor, axis) : formatNumber(m.p[i]);
     store.apply((d) => ({
       ...d,
       rulers: [
@@ -670,8 +667,8 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
         {
           id: newId(),
           name: uniqueName(d.rulers.map((r) => r.name), "ruler"),
-          from: { x: coord(a, "x", 0), y: coord(a, "y", 1) },
-          to: { x: coord(b, "x", 0), y: coord(b, "y", 1) },
+          from: { x: rulerCoord(result, a, "x"), y: rulerCoord(result, a, "y") },
+          to: { x: rulerCoord(result, b, "x"), y: rulerCoord(result, b, "y") },
           offset: "0",
         },
       ],
@@ -870,7 +867,7 @@ export function Canvas({ className, showGuides = true, showRulers = true }: Canv
           );
         })()}
 
-        {showRulers && <ScreenRulers view={view} width={size.width} height={size.height} cursor={cursor} />}
+        <ScreenRulers view={view} width={size.width} height={size.height} cursor={cursor} />
       </svg>
 
       {single?.kind === "panels" && tool === "select" && !dragging && <EdgeChips node={single} />}
