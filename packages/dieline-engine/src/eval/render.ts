@@ -56,6 +56,8 @@ export type NodeInfo = {
   anchors: Record<string, Pt>;
   /** Named measurements, usable as `@name.width`. */
   scalars: Record<string, number>;
+  /** The local point that sits at the node's `x`/`y`: its reference point. */
+  origin: Pt;
   /**
    * The node's own evaluated transform, relative to its parent. The editor uses
    * it (with the parents') to map pointer movement into the node's frame.
@@ -160,6 +162,7 @@ class Context {
   private readonly built = new Map<string, Built | null>();
   private readonly building = new Set<string>();
   private readonly placements = new Map<string, Placement>();
+  private readonly origins = new Map<string, Pt>();
   private readonly placing = new Set<string>();
   private readonly hidden = new Map<string, boolean>();
 
@@ -226,6 +229,7 @@ class Context {
           bounds: world ? pathsBounds(world.paths) : null,
           anchors: world?.anchors ?? {},
           scalars: world?.scalars ?? {},
+          origin: this.origins.get(node.id) ?? [0, 0],
           placement,
         };
 
@@ -375,7 +379,19 @@ class Context {
       scalars = { width: local.maxX - local.minX, height: local.maxY - local.minY, ...scalars };
     }
 
-    const placement = this.placement(node);
+    let placement = this.placement(node);
+    // A reference point needs the node's size, so it is applied here, once the
+    // geometry exists. Groups keep their frame: their children are placed through
+    // it, possibly before the group is built.
+    const origin = node.transform?.origin;
+    if (origin && local && node.kind !== "group") {
+      const point = BOX_ANCHORS(local)[origin]!;
+      const [x, y] = placePoint([-point[0], -point[1]], placement);
+      placement = { ...placement, x, y };
+      this.placements.set(node.id, placement);
+      this.origins.set(node.id, point);
+    }
+
     return {
       paths: placePaths(paths, placement),
       anchors: Object.fromEntries(

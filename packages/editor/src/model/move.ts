@@ -2,6 +2,7 @@ import {
   findNode,
   formatNumber,
   offsetExpr,
+  placePoint,
   refExpr,
   updateNode,
   type DielineDocument,
@@ -50,7 +51,8 @@ export function moveNodes(
     const parents = parentChain(result, id);
     const local = worldToLocalVector(delta, parents);
     const t: Transform = located.node.transform ?? {};
-    const placement = info.placement;
+    // The node's reference point, which is what its transform positions.
+    const position = placePoint(info.origin, info.placement);
 
     const axis = (key: "x" | "y", i: 0 | 1): string | undefined => {
       const current = t[key];
@@ -67,7 +69,7 @@ export function moveNodes(
       // `- 320` that is just today's size frozen in, and would drift as soon as
       // the dimensions change; those snaps still align exactly, but keep the
       // formula and adjust its constant instead.
-      const newOrigin = placement[key] + moved;
+      const newOrigin = position[i] + moved;
       const linked = snap && Math.abs(newOrigin - snap.target.point[i]) < 1e-6;
 
       if (snap && linked && roots.length === 1 && !options.plain && worldFrame && !wouldCycle(doc, result, id, snap.target.nodeId)) {
@@ -75,7 +77,7 @@ export function moveNodes(
       }
 
       if (Math.abs(moved) < 1e-9) return current;
-      if (options.plain) return formatNumber(placement[key] + moved);
+      if (options.plain) return formatNumber(position[i] + moved);
       return offsetExpr(current ?? "0", moved);
     };
 

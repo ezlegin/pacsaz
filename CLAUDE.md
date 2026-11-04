@@ -240,6 +240,10 @@ Phases (each ends with a commit message for the user to commit):
   diagnostic's `field`, which is how a field shows its own error.
 - `ExpressionInput` opens an undo gesture on focus and closes it on blur, so one
   field edit is one undo step; Escape cancels back to the value on focus.
+- New shapes default to `origin: "center"` (`createShape`). `transform.origin` is the
+  reference point: the point of a shape's bounds placed at
+  `x`/`y`. `render` folds it into `NodeInfo.placement` and reports it as
+  `NodeInfo.origin`; the position a transform holds is `placePoint(origin, placement)`.
 - Commands for the palette live in `commands.ts`; add new actions there so they
   are searchable.
 

@@ -2,6 +2,7 @@
 
 import {
   allNodes,
+  ORIGINS,
   formatNumber,
   newId,
   renameNode,
@@ -470,6 +471,25 @@ function Placement({ node }: { node: Node }) {
         <F id={node.id} path="transform.x" label="X" optional placeholder="0" />
         <F id={node.id} path="transform.y" label="Y" optional placeholder="0" />
       </Row>
+      {node.kind !== "group" && (
+        <Row label="Reference">
+          <div className="grid grid-cols-3 gap-px rounded border bg-border p-px" role="group" aria-label="Reference point">
+            {ORIGINS.map((o) => (
+              <button
+                key={o}
+                type="button"
+                title={o === t.origin ? `${o} (click to use the drawn origin)` : o}
+                aria-pressed={o === t.origin}
+                onClick={() => set("transform.origin", o === t.origin ? undefined : o)}
+                className="grid size-4 place-items-center bg-background hover:bg-muted"
+              >
+                <span className={o === t.origin ? "size-2 rounded-full bg-blue-600" : "size-1 rounded-full bg-muted-foreground/50"} />
+              </button>
+            ))}
+          </div>
+          <span className="text-[11px] text-muted-foreground">Point placed at X, Y</span>
+        </Row>
+      )}
       <Row label="Rotate">
         <F id={node.id} path="transform.rotate" label="°" optional placeholder="0" />
         <Pill on={!!t.mirrorX} onChange={(on) => set("transform.mirrorX", on || undefined)} title="Mirror left–right">

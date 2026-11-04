@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Node } from "../spec/types";
 import { byKind, errors, isClosedOutline, rect, renderNodes } from "./helpers";
+import { emptyDocument, render, type DielineDocument } from "../index";
 
 const near = (actual: number | undefined, expected: number) => expect(actual).toBeCloseTo(expected, 6);
 
@@ -136,6 +137,24 @@ describe("transforms", () => {
     ]);
     expect(r.nodes.inner!.bounds).toEqual({ minX: 55, minY: 5, maxX: 65, maxY: 15 });
     expect(r.nodes.follower!.bounds!.minX).toBe(65);
+  });
+});
+
+describe("reference point", () => {
+  const box = (origin?: "center" | "topRight", rotate?: string) =>
+    ({ ...emptyDocument(), nodes: [{ id: "r", name: "r", kind: "rect", lineType: "cut", width: "40", height: "20", transform: { x: "100", y: "50", ...(origin ? { origin } : {}), ...(rotate ? { rotate } : {}) } }] }) as DielineDocument;
+  const inputs = { width: 100, length: 50, height: 80, thickness: 0.5 };
+
+  it("puts the chosen point of the bounds at x, y", () => {
+    expect(render(box("center"), inputs).nodes.r!.bounds).toEqual({ minX: 80, minY: 40, maxX: 120, maxY: 60 });
+    expect(render(box("topRight"), inputs).nodes.r!.anchors.topRight).toEqual([100, 50]);
+    expect(render(box(), inputs).nodes.r!.anchors.bottomLeft).toEqual([100, 50]);
+  });
+
+  it("rotates about the reference point", () => {
+    const [x, y] = render(box("center", "90"), inputs).nodes.r!.anchors.center!;
+    expect(x).toBeCloseTo(100);
+    expect(y).toBeCloseTo(50);
   });
 });
 

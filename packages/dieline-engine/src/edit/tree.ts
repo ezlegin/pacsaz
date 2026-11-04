@@ -130,7 +130,7 @@ export function uniqueName(taken: Iterable<string>, base: string): string {
 
 /** Fields that hold identifiers or enums, never expressions. */
 const NOT_EXPR = new Set([
-  "id", "name", "label", "kind", "lineType", "type", "action", "component",
+  "id", "name", "origin", "label", "kind", "lineType", "type", "action", "component",
   "openSide", "axis", "op", "description", "unit", "hinge", "fold", "category", "sizeBy", "direction",
 ]);
 

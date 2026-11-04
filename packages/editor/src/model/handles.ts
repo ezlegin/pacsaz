@@ -1,6 +1,7 @@
 import {
   formatNumber,
   offsetExpr,
+  placePoint,
   type Expr,
   type Node,
   type NodeInfo,
@@ -127,17 +128,22 @@ function rectHandles(info: NodeInfo): Handle[] {
           if (sx !== 0) next.width = adjust(n.width, w, sx * dx, o.plain);
           if (sy !== 0) next.height = adjust(n.height, h, sy * dy, o.plain);
 
-          // Dragging the left or bottom side also moves the origin, along the
-          // rect's own axes (which may be rotated inside its parent).
-          const shift: Pt = [sx === -1 ? dx : 0, sy === -1 ? dy : 0];
+          // The reference point moves so the opposite side stays put: all the
+          // way with the left or bottom side when it sits on the far corner,
+          // along the rect's own axes (which may be rotated inside its parent).
+          const origin = n.transform?.origin;
+          const fx = !origin ? 0 : /right/i.test(origin) ? 1 : /left/i.test(origin) ? 0 : 0.5;
+          const fy = !origin ? 0 : /top/i.test(origin) ? 1 : /bottom/i.test(origin) ? 0 : 0.5;
+          const shift: Pt = [sx === -1 ? dx * (1 - fx) : sx === 1 ? dx * fx : 0, sy === -1 ? dy * (1 - fy) : sy === 1 ? dy * fy : 0];
           if (shift[0] || shift[1]) {
             const p = info.placement;
             const v = linear(shift, p);
+            const at = placePoint(info.origin, p);
             const t = n.transform ?? {};
             next.transform = {
               ...t,
-              ...(v[0] ? { x: adjust(t.x, p.x, v[0], o.plain) } : {}),
-              ...(v[1] ? { y: adjust(t.y, p.y, v[1], o.plain) } : {}),
+              ...(v[0] ? { x: adjust(t.x, at[0], v[0], o.plain) } : {}),
+              ...(v[1] ? { y: adjust(t.y, at[1], v[1], o.plain) } : {}),
             };
           }
           return next;

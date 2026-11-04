@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ORIGINS } from "./types";
 import {
   LINE_TYPES,
   SPEC_VERSION,
@@ -37,6 +38,7 @@ const transform = z
   .object({
     x: expr.optional(),
     y: expr.optional(),
+    origin: z.enum(ORIGINS).optional(),
     rotate: expr.optional(),
     mirrorX: z.boolean().optional(),
     mirrorY: z.boolean().optional(),

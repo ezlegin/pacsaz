@@ -52,6 +52,9 @@ export const LINE_TYPES: readonly LineType[] = [
 
 //! Placement -------------------------------------------------------------------
 
+export const ORIGINS = ["topLeft", "top", "topRight", "left", "center", "right", "bottomLeft", "bottom", "bottomRight"] as const;
+export type Origin = (typeof ORIGINS)[number];
+
 /**
  * Where a node sits inside its parent. The geometry is built in the node's own
  * local frame, then mirrored about the local axes, then rotated about the local
@@ -60,6 +63,11 @@ export const LINE_TYPES: readonly LineType[] = [
 export type Transform = {
   x?: Expr;
   y?: Expr;
+  /**
+   * The point of the node's bounds that sits at `x`/`y` and that it rotates and
+   * mirrors about. Unset, that is the local origin the shape was drawn from.
+   */
+  origin?: Origin;
   rotate?: Expr;
   mirrorX?: boolean;
   mirrorY?: boolean;

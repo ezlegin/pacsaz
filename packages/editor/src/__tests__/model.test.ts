@@ -4,6 +4,7 @@ import { edgeSlots } from "../model/body";
 import { describe, expect, it } from "vitest";
 import { applyCompletion, completionsAt } from "../model/completions";
 import { addCutout, changeCount, removeCutout, setEdgeArg, setEdgePart, setParam, setPartOffset, setPartShown, updateCutout } from "../model/customize";
+import { createShape } from "../model/create";
 import { constrain45, constrainPlace, drawnPath, placedShape } from "../model/draw";
 import { handlesFor } from "../model/handles";
 import { moveNodes } from "../model/move";
@@ -264,9 +265,9 @@ describe("drawing", () => {
     expect(node).toMatchObject({ kind: "rect", width: "30", height: "20", transform: { x: "@side1.topLeft.x", y: "@side1.topLeft.y" } });
   });
 
-  it("takes the origin from the lower-left point when dragged backwards", () => {
+  it("keeps the drawn area and a centre reference when dragged backwards", () => {
     const node = placedShape(tuckEndBox, result, null, "rect", { p: [60, 120], target: corner }, { p: [30, 100] }, "crease");
-    expect(node).toMatchObject({ width: "30", height: "20", lineType: "crease", transform: { x: "30", y: "100" } });
+    expect(node).toMatchObject({ width: "30", height: "20", lineType: "crease", transform: { x: "45", y: "110", origin: "center" } });
   });
 
   it("writes local numbers inside a moved group", () => {
@@ -370,5 +371,29 @@ describe("rulers measured on folds", () => {
     const ruler = { id: "r", name: "r", from: { x: "0", y: "0" }, to: { x: expr, y: "0" }, offset: "0" };
     const grown = render({ ...doc, rulers: [ruler] }, { ...INPUTS, width: 140 });
     expect(grown.rulers[0]!.value).toBe(grown.nodes.panel!.bounds!.maxX);
+  });
+});
+
+describe("reference point", () => {
+  const doc = docOf([rect("a", "40", "20", { transform: { x: "100", y: "50", origin: "center" } })]);
+  const result = render(doc, INPUTS);
+
+  it("keeps the opposite side still when a side is dragged", () => {
+    const left = handlesFor(findNode(doc, "a")!.node, result).find((h) => h.local[0] < 0.01 && h.local[1] > 1 && h.local[1] < 19)!;
+    const next = render(updateNode(doc, "a", (n) => left.apply(n, [6, 0], { plain: false })), INPUTS);
+    expect(next.nodes.a!.bounds).toMatchObject({ minX: 86, maxX: 120 });
+  });
+
+  it("writes the reference point when moved to a plain number", () => {
+    const moved = moveNodes(doc, result, ["a"], [5, 0], { plain: true });
+    expect(findNode(moved, "a")!.node.transform?.x).toBe("105");
+  });
+});
+
+describe("new shapes", () => {
+  it("default to a centre reference point and land where they were drawn", () => {
+    const shape = createShape(emptyDocument(), "rect", { x: "10", y: "20" }, { w: 40, h: 30 });
+    expect(shape.transform?.origin).toBe("center");
+    expect(render(docOf([shape]), INPUTS).nodes[shape.id]!.bounds).toEqual({ minX: 10, minY: 20, maxX: 50, maxY: 50 });
   });
 });
