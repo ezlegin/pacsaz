@@ -517,7 +517,27 @@ class Context {
     const line = (a: Pt, b: Pt, lineType: LineType) => paths.push({ kind: "line", a, b, lineType, nodeId: node.id });
 
     // Folds between neighbouring panels.
-    for (const span of spans.slice(1)) line([span.x0, 0], [span.x0, height], node.fold ?? "crease");
+    const stop = Math.max(0.2, this.env.builtins.thickness) / 2;
+    const relief = (i: number, side: "top" | "bottom") =>
+      [i - 1, i].some((j) => {
+        const feature = node.panels[j]?.[side];
+        return !!feature && !!this.env.components.get(feature.component)?.edge?.relief;
+      })
+        ? stop
+        : 0;
+    // How far the body's outer edge stops short of a corner, to meet the hole of
+    // the flap there. Top edges start at the left, bottom edges at the right, and
+    // a flip swaps them.
+    const outerStop = (i: number, side: "top" | "bottom", left: boolean) => {
+      const feature = node.panels[i]?.[side];
+      const straight = feature && this.env.components.get(feature.component)?.edge?.straight;
+      if (!straight) return 0;
+      const atStart = (side === "top") === left ? !feature.flip : !!feature.flip;
+      return straight === "both" || straight === (atStart ? "start" : "end") ? stop : 0;
+    };
+    spans.forEach((span, i) => {
+      if (i > 0) line([span.x0, relief(i, "bottom")], [span.x0, height - relief(i, "top")], node.fold ?? "crease");
+    });
 
     const edge = (
       feature: EdgeFeature | undefined,
@@ -586,8 +606,13 @@ class Context {
 
     const first = node.panels[0]?.name ?? "first";
     const last = node.panels[node.panels.length - 1]?.name ?? "last";
-    edge(node.left, [0, 0], [0, height], { ...IDENTITY, rotate: 90 }, height, "left", `${first}.left`);
-    edge(node.right, [total, height], [total, 0], { ...IDENTITY, x: total, y: height, rotate: -90 }, height, "right", `${last}.right`);
+    const lastIndex = node.panels.length - 1;
+    const lb = outerStop(0, "bottom", true);
+    const lt = outerStop(0, "top", true);
+    const rb = outerStop(lastIndex, "bottom", false);
+    const rt = outerStop(lastIndex, "top", false);
+    edge(node.left, [0, lb], [0, height - lt], { ...IDENTITY, y: lb, rotate: 90 }, height - lb - lt, "left", `${first}.left`);
+    edge(node.right, [total, height - rt], [total, rb], { ...IDENTITY, x: total, y: height - rt, rotate: -90 }, height - rb - rt, "right", `${last}.right`);
 
     return { paths, anchors, scalars };
   }

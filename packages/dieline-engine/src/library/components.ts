@@ -228,6 +228,190 @@ export const thumbNotch: ComponentDef = {
   ],
 };
 
-export const LIBRARY: ComponentDef[] = [tuckLid, dustFlap, glueFlap, slottedFlap, plainFlap, thumbNotch];
+/**
+ * Between two lock flaps the board is cut away by a round hole, one circle of
+ * radius `k` centred on the panel fold and rising `c` past the flaps' hinge
+ * line. Each flap draws its half, from the fold to where its own side leaves
+ * the circle: a straight side at (k, c), or a sloped side at (tx, ty) on the
+ * hinge line. The body stops its fold at the top (`edge.relief`). A straight
+ * side keeps its half at the end of a body too, and the body moves the glue
+ * flap or cut edge beside it up to the top of the circle (`edge.straight`).
+ */
+const RELIEF_VARIABLES = [
+  { name: "k", expr: "max(0.2, thickness)" },
+  { name: "c", expr: "k / 2" },
+  // Where the circle crosses the hinge line: a sloped side and the hinge both end there.
+  { name: "hx", expr: "k * 0.866" },
+  { name: "tx", expr: "hx" },
+  { name: "ty", expr: "0" },
+];
+const STRAIGHT_START = ["k", "c"] as [Expr, Expr];
+const SLOPED_START = ["startNext ? tx : 0", "startNext ? ty : 0"] as [Expr, Expr];
+const STRAIGHT_END = to("edge - k", "c");
+const SLOPED_END = to("edge - (endNext ? tx : 0)", "endNext ? ty : 0");
+
+// Only a sloped side needs a neighbour for its half: alone it runs into the body's corner.
+const startHole = (x: Expr, y: Expr): Node => ({
+  ...path("startHole", "cut", ["0", "-c"], [{ type: "arc", x, y, radius: "k" }]),
+  rules: x === "k" ? [] : [{ id: "noFlap", when: "!startNext", action: "hide" }],
+});
+const endHole = (x: Expr, y: Expr): Node => ({
+  ...path("endHole", "cut", [x, y], [{ type: "arc", x: "edge", y: "-c", radius: "k" }]),
+  rules: x === "edge - k" ? [] : [{ id: "noFlap", when: "!endNext", action: "hide" }],
+});
+
+/**
+ * The snap lock (1-2-3) bottom: four flaps that fold in order and lock without
+ * glue. Each flap meets its opposite in the middle of the box, S / 2 deep, and
+ * runs on past it; there the back flap's tab enters the front flap's notch.
+ */
+const LOCK_VARIABLES = [
+  ...RELIEF_VARIABLES,
+  { name: "S", expr: "min(length, width)" },
+  { name: "d", expr: "S / 2 + (depth > 0 ? depth : S / 4)" },
+  { name: "rt", expr: "min(k * 2, S / 8)" },
+  // On a square box the faces are as wide as the sides: the tab keeps a third.
+  { name: "tw", expr: "max(edge - S, edge / 3)" },
+];
+const lockParams = [auto("depth", "Overlap past the middle")];
+
+export const snapLockNotched: ComponentDef = {
+  id: "lib:snapLockNotched",
+  name: "Snap lock: notched flap",
+  category: "Locks",
+  description: "Snap lock bottom, wide panel: a full flap with a notch that takes the tab of the opposite flap.",
+  edge: { hinge: "none", relief: true, straight: "both" },
+  params: lockParams,
+  variables: [...LOCK_VARIABLES, { name: "n", expr: "(edge - tw) / 2 - k" }],
+  nodes: [
+    path("outline", "cut", STRAIGHT_START, [
+      to("k", "d"),
+      to("n", "d", "rt"),
+      to("n", "S / 2"),
+      to("edge - n", "S / 2"),
+      to("edge - n", "d", "rt"),
+      to("edge - k", "d"),
+      STRAIGHT_END,
+    ]),
+    startHole("k", "c"),
+    endHole("edge - k", "c"),
+    line("hinge", "crease", ["hx", "0"], ["edge - hx", "0"]),
+  ],
+};
+
+export const snapLockTab: ComponentDef = {
+  id: "lib:snapLockTab",
+  name: "Snap lock: tab flap",
+  category: "Locks",
+  description: "Snap lock bottom, wide panel: slopes in from both folds to a tab that enters the opposite notch.",
+  edge: { hinge: "none", relief: true },
+  params: lockParams,
+  variables: [...LOCK_VARIABLES, { name: "m", expr: "(edge - tw) / 2" }],
+  nodes: [
+    path("outline", "cut", SLOPED_START, [to("m", "S / 2"), to("m", "d", "rt"), to("edge - m", "d", "rt"), to("edge - m", "S / 2"), SLOPED_END]),
+    startHole("tx", "ty"),
+    endHole("edge - tx", "ty"),
+    line("hinge", "crease", ["startNext ? hx : 0", "0"], ["edge - (endNext ? hx : 0)", "0"]),
+  ],
+};
+
+export const snapLockSide: ComponentDef = {
+  id: "lib:snapLockSide",
+  name: "Snap lock: side flap",
+  category: "Locks",
+  description: "Snap lock bottom, narrow panel: slopes in from the start of the edge to a tab along the end. Flip it for the other side panel.",
+  edge: { hinge: "none", relief: true, straight: "end" },
+  params: lockParams,
+  variables: [...LOCK_VARIABLES, { name: "m", expr: "edge / 2 + k" }],
+  nodes: [
+    path("outline", "cut", SLOPED_START, [to("m", "edge / 2"), to("m", "d", "rt"), to("edge - k", "d"), STRAIGHT_END]),
+    startHole("tx", "ty"),
+    endHole("edge - k", "c"),
+    line("hinge", "crease", ["startNext ? hx : 0", "0"], ["edge - hx", "0"]),
+  ],
+};
+
+/**
+ * The auto-lock (crash-lock) bottom: two main flaps carry a triangle that is
+ * glued to the side flap beside it, so the bottom opens by itself when the flat
+ * carton is squared up. Both flaps are drawn left to right as seen on a bottom
+ * edge, which is the far end first in the edge frame: flip them there.
+ */
+export const autoLockMain: ComponentDef = {
+  id: "lib:autoLockMain",
+  name: "Auto-lock: main flap",
+  category: "Locks",
+  description: "Auto-lock bottom, wide panel: a flap past the middle of the box, with a step and a folding glue triangle at the end of the edge.",
+  edge: { hinge: "none", relief: true, straight: "start" },
+  params: [auto("depth", "Overlap past the middle")],
+  variables: [
+    ...RELIEF_VARIABLES,
+    { name: "S", expr: "min(length, width)" },
+    { name: "s", expr: "S / 2" },
+    { name: "o", expr: "depth > 0 ? depth : S * 0.29" },
+    { name: "d", expr: "s + o" },
+    // The free side leans in, so it clears the opposite flap when it closes.
+    { name: "lean", expr: "S * 0.085" },
+    // The step in the far edge is a chamfer that ends on the middle of the panel.
+    { name: "ch", expr: "min(o * 0.8, edge / 2 - k - lean - 1)" },
+    // The triangle's fold runs at 45° from the apex to the notch at the panel fold.
+    { name: "ax", expr: "max(edge - s, edge / 2 + 1)" },
+    { name: "ay", expr: "edge - ax" },
+    { name: "rt", expr: "min(k * 2, o / 4)" },
+    // The glue area keeps a margin inside the triangle; `gd` is that margin
+    // measured along an axis from the 45° edges.
+    { name: "gm", expr: "min(k, o / 6)" },
+    { name: "gd", expr: "gm * sqrt(2)" },
+  ],
+  nodes: [
+    path("outline", "cut", STRAIGHT_START, [
+      to("k + lean", "d"),
+      to("edge / 2 - ch", "d"),
+      to("edge / 2", "d - ch", "k"),
+      to("edge / 2", "ay"),
+      to("ax", "ay"),
+      to("ax + o", "ay + o"),
+      to("edge - k", "ay + o", "rt"),
+      to("edge - k", "4.7 * k"),
+      to("edge - 3.5 * k", "2.2 * k"),
+      SLOPED_END,
+    ]),
+    startHole("k", "c"),
+    endHole("edge - tx", "ty"),
+    line("hinge", "crease", ["hx", "0"], ["edge - (endNext ? hx : 0)", "0"]),
+    line("triangleFold", "crease", ["ax", "ay"], ["edge - 2.85 * k", "2.85 * k"]),
+    path(
+      "glueArea",
+      "glue",
+      ["ax + gd", "ay"],
+      [
+        to("ax + o - gm + gd", "ay + o - gm"),
+        to("edge - k - gm - rt / 2", "ay + o - gm"),
+        to("edge - k - gm", "ay + o - gm - rt / 2"),
+        to("edge - k - gm", "4.7 * k - gm + gd"),
+        to("edge - 2.85 * k", "2.85 * k + gd"),
+      ],
+      true,
+    ),
+  ],
+};
+
+export const autoLockSide: ComponentDef = {
+  id: "lib:autoLockSide",
+  name: "Auto-lock: side flap",
+  category: "Locks",
+  description: "Auto-lock bottom, narrow panel: reaches the middle of the box, and the main flap's triangle is glued on it.",
+  edge: { hinge: "none", relief: true, straight: "start" },
+  params: [],
+  variables: [...RELIEF_VARIABLES, { name: "s", expr: "edge / 2" }],
+  nodes: [
+    path("outline", "cut", STRAIGHT_START, [to("max(k + 1, edge * 0.22)", "s"), to("s", "s"), SLOPED_END]),
+    startHole("k", "c"),
+    endHole("edge - tx", "ty"),
+    line("hinge", "crease", ["hx", "0"], ["edge - (endNext ? hx : 0)", "0"]),
+  ],
+};
+
+export const LIBRARY: ComponentDef[] = [tuckLid, dustFlap, glueFlap, slottedFlap, plainFlap, snapLockNotched, snapLockTab, snapLockSide, autoLockMain, autoLockSide, thumbNotch];
 
 export const EDGE_COMPONENTS = LIBRARY.filter((c) => c.edge);

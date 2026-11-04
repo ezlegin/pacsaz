@@ -119,12 +119,12 @@ export function checkDieline(result: RenderResult, options: CheckOptions = {}): 
     return d <= tol * 5 && t > 1e-6 && t < 1 - 1e-6;
   });
   const atFold = (p: Pt) => foldEnds.some((f) => distance(f, p) <= tol * 5);
-  // A friction lock's hook: a short cut (at most 3 mm) ending in the board,
-  // with a fold beginning on it.
+  // A friction lock's hook: a short cut ending in the board, with a fold
+  // beginning on it. Hooks grow with the board, so the limit covers thick flutes.
   const isHook = (p: Pt) =>
     cutSegs.some((s) => {
       const ends = distance(s.a, p) <= tol * 5 || distance(s.b, p) <= tol * 5;
-      return ends && distance(s.a, s.b) <= 3 && foldEnds.some((f) => toSegment(f, s.a, s.b).d <= tol * 5);
+      return ends && distance(s.a, s.b) <= 8 && foldEnds.some((f) => toSegment(f, s.a, s.b).d <= tol * 5);
     });
   const loose = [...ends.values()].filter((e) => e.count === 1 && !atFold(e.p) && !onCut(e.p) && !isHook(e.p));
   const paired = new Set<number>();

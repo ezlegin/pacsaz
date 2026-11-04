@@ -82,6 +82,7 @@ export function buildCommands(store: EditorStore, host: CommandHost): Command[] 
     { id: "fit", label: "Fit dieline to screen", group: "View", keys: "Shift+/", run: () => store.requestFit() },
     { id: "fit-sel", label: "Zoom to selection", group: "View", keys: "Shift+2", enabled: sel.length > 0, run: () => store.requestFit(sel) },
     { id: "snap", label: s.snapping ? "Turn snapping off" : "Turn snapping on", group: "View", keys: "S", run: () => store.setSnapping(!s.snapping) },
+    { id: "grid", label: s.display.grid ? "Hide grid" : "Show grid", group: "View", run: () => store.setDisplay({ grid: !s.display.grid }) },
     { id: "guides", label: s.display.guides ? "Hide guides" : "Show guides", group: "View", run: () => store.setDisplay({ guides: !s.display.guides }) },
     { id: "overall", label: s.display.overall ? "Hide overall rulers" : "Show overall rulers", group: "View", run: () => store.setDisplay({ overall: !s.display.overall }) },
     { id: "bleed", label: s.display.bleed ? "Hide bleed" : "Show bleed", group: "View", run: () => store.setDisplay({ bleed: !s.display.bleed }) },

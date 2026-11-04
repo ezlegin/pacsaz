@@ -419,7 +419,13 @@ export type ComponentDef = {
    * body draws along the edge: a crease for flaps, "none" for features such as a
    * notch that draw the edge themselves.
    */
-  edge?: { hinge: LineType | "none" };
+  edge?: {
+    hinge: LineType | "none";
+    /** The feature cuts a round hole on the panel fold beside it, half a board past the edge: the fold stops there. */
+    relief?: boolean;
+    /** Which ends keep their half of that hole at the end of a body, where the outer edge moves to meet it. */
+    straight?: "start" | "end" | "both";
+  };
   /** Grouping in pickers, e.g. "Closures", "Flaps", "Cut-outs". */
   category?: string;
 };

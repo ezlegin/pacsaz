@@ -16,6 +16,7 @@ import { NodeInspector } from "./panels/NodeInspector";
 import { Outline } from "./panels/Outline";
 import { ToolRail } from "./panels/ToolRail";
 import { TopBar } from "./panels/TopBar";
+import { persistPreferences } from "./state/preferences";
 import { EditorProvider, useEditor, useStore } from "./state/react";
 import type { EditorStore, Tool } from "./state/store";
 
@@ -74,6 +75,8 @@ function StudioLayout({ title, leading, trailing, onSave, onError, sizeRange, se
   const store = useStore();
   const [sidebar, setSidebar] = useState<"layers" | "checks">("layers");
   const issueCount = useIssueCount();
+
+  useEffect(() => persistPreferences(store), [store]);
 
   useEffect(() => {
     store.setSizeRange(sizeRange ?? null);

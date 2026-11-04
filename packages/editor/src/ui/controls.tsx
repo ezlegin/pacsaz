@@ -18,7 +18,7 @@ import {
   Undo,
   type LucideIcon,
 } from "lucide-react";
-import { useRef, useState, type ButtonHTMLAttributes, type ReactNode } from "react";
+import { Fragment, useRef, useState, type ButtonHTMLAttributes, type ReactNode } from "react";
 
 export const NODE_ICONS: Record<NodeKind, LucideIcon> = {
   rect: Square,
@@ -102,11 +102,24 @@ export function SelectField<T extends string>({
   title,
 }: {
   value: T;
-  options: readonly { value: T; label: string }[];
+  /** Options sharing a `group` show under its heading; keep them next to each other. */
+  options: readonly { value: T; label: string; group?: string }[];
   onChange: (value: T) => void;
   className?: string;
   title?: string;
 }) {
+  const option = (o: { value: T; label: string }) => (
+    <option key={o.value} value={o.value}>
+      {o.label}
+    </option>
+  );
+  const sections = options.reduce<{ group?: string; items: { value: T; label: string }[] }[]>((all, o) => {
+    const last = all[all.length - 1];
+    if (last && last.group === o.group) last.items.push(o);
+    else all.push({ group: o.group, items: [o] });
+    return all;
+  }, []);
+
   return (
     <select
       title={title}
@@ -117,11 +130,15 @@ export function SelectField<T extends string>({
         className,
       )}
     >
-      {options.map((o) => (
-        <option key={o.value} value={o.value}>
-          {o.label}
-        </option>
-      ))}
+      {sections.map((s, i) =>
+        s.group ? (
+          <optgroup key={s.group} label={s.group}>
+            {s.items.map(option)}
+          </optgroup>
+        ) : (
+          <Fragment key={i}>{s.items.map(option)}</Fragment>
+        ),
+      )}
     </select>
   );
 }

@@ -7,7 +7,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { edgeSlots, type EdgeSlot } from "../model/body";
 import { setIn } from "../model/fields";
 import { useEditor, useStore } from "../state/react";
-import { useEdgeComponents } from "../panels/BodyInspector";
+import { groupByCategory, useEdgeComponents } from "../panels/BodyInspector";
 import { toScreen } from "./viewport";
 
 /** How far outside the edge a chip sits, in screen pixels. */
@@ -71,7 +71,7 @@ export function EdgeChips({ node }: { node: PanelsNode }) {
 
       {open && (
         <div
-          className="absolute z-20 w-52 rounded-md border bg-popover p-1 text-xs shadow-lg"
+          className="absolute z-20 max-h-80 w-52 overflow-y-auto rounded-md border bg-popover p-1 text-xs shadow-lg"
           style={{ left: place(open).left + 12, top: place(open).top + 12 }}
           onPointerDown={(e) => e.stopPropagation()}
         >
@@ -79,11 +79,15 @@ export function EdgeChips({ node }: { node: PanelsNode }) {
           <MenuItem active={!open.feature} onClick={() => choose(open, "")}>
             Plain cut edge
           </MenuItem>
-          {components.map((c) => (
-            <MenuItem key={c.id} active={open.feature?.component === c.id} onClick={() => choose(open, c.id)}>
-              <span>{c.name}</span>
-              {c.category && <span className="ml-auto text-[10px] text-muted-foreground">{c.category}</span>}
-            </MenuItem>
+          {groupByCategory(components).map(([category, list]) => (
+            <div key={category}>
+              <div className="px-2 pb-0.5 pt-1.5 text-[10px] font-medium text-muted-foreground">{category}</div>
+              {list.map((c) => (
+                <MenuItem key={c.id} active={open.feature?.component === c.id} onClick={() => choose(open, c.id)}>
+                  {c.name}
+                </MenuItem>
+              ))}
+            </div>
           ))}
         </div>
       )}

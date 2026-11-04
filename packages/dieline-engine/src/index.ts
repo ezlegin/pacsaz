@@ -44,7 +44,7 @@ export {
 export { placePoint, IDENTITY, type Placement } from "./geometry/math";
 
 export { LIBRARY, EDGE_COMPONENTS } from "./library/components";
-export { PRESETS, presetBody, type PresetId } from "./library/presets";
+export { BOTTOM_TYPES, bottomFeatures, PRESETS, presetBody, type BottomType, type PresetId } from "./library/presets";
 
 export { toSVG, exportBounds, rulerPrims, rulerArrows, rulerEnds, rulerLabel, closedPathD, loopsD, type SvgOptions } from "./export/svg";
 export { cutParts, sheetLoops, overallRulers } from "./geometry/sheet";

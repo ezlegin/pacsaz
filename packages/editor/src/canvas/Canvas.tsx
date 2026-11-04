@@ -718,7 +718,7 @@ export function Canvas({ className, showGuides = true }: CanvasProps) {
       onContextMenu={(e) => e.preventDefault()}
     >
       <svg width={size.width} height={size.height} className="absolute inset-0 block">
-        <Grid view={view} width={size.width} height={size.height} />
+        {display.grid && <Grid view={view} width={size.width} height={size.height} />}
 
         <g transform={worldMatrix(view)}>
           {display.bleed && <BleedSheet result={result} />}

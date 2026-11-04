@@ -1,6 +1,6 @@
-import { emptyDocument, findNode, render, updateNode, type DielineDocument, type Node, type PanelsNode, type RenderInputs } from "@repo/dieline-engine";
+import { emptyDocument, findNode, presetBody, render, updateNode, type DielineDocument, type Node, type PanelsNode, type RenderInputs } from "@repo/dieline-engine";
 import { rteBox, tuckEndBox } from "@repo/dieline-engine/fixtures";
-import { edgeSlots } from "../model/body";
+import { bottomTypeOf, edgeSlots, setBottomType } from "../model/body";
 import { describe, expect, it } from "vitest";
 import { applyCompletion, completionsAt } from "../model/completions";
 import { addCutout, changeCount, removeCutout, setEdgeArg, setEdgePart, setParam, setPartOffset, setPartShown, updateCutout } from "../model/customize";
@@ -11,6 +11,7 @@ import { moveNodes } from "../model/move";
 import { groupNodes, ungroupNode } from "../model/ops";
 import { niceStep, rulerCoord, snapMoving, snappedDelta, snapTargets, wouldCycle } from "../model/snap";
 import { pickable, worldToLocalVector } from "../model/frames";
+import { parsePreferences } from "../state/preferences";
 import { EditorStore } from "../state/store";
 
 const INPUTS: RenderInputs = { width: 100, length: 60, height: 120, thickness: 0.5 };
@@ -395,5 +396,24 @@ describe("new shapes", () => {
     const shape = createShape(emptyDocument(), "rect", { x: "10", y: "20" }, { w: 40, h: 30 });
     expect(shape.transform?.origin).toBe("center");
     expect(render(docOf([shape]), INPUTS).nodes[shape.id]!.bounds).toEqual({ minX: 10, minY: 20, maxX: 50, maxY: 50 });
+  });
+});
+
+describe("bottom type", () => {
+  it("sets every panel at once and reads back, and shows custom after a hand edit", () => {
+    const body = setBottomType(presetBody("reverseTuckEnd", "body"), "snapLock");
+    expect(bottomTypeOf(body)).toBe("snapLock");
+    expect(body.panels.map((p) => p.bottom?.component)).toEqual(["lib:snapLockNotched", "lib:snapLockSide", "lib:snapLockTab", "lib:snapLockSide"]);
+    expect(bottomTypeOf(setBottomType(body, "autoLock"))).toBe("autoLock");
+    expect(bottomTypeOf(setBottomType(body, "reverseTuck"))).toBe("reverseTuck");
+    expect(bottomTypeOf({ ...body, panels: body.panels.map((p, i) => (i ? p : { ...p, bottom: undefined })) })).toBeNull();
+  });
+});
+
+describe("view preferences", () => {
+  it("keeps only known on/off values", () => {
+    expect(parsePreferences('{"bleed":false,"snapping":true,"sizeDelta":3,"nicks":"yes"}')).toEqual({ bleed: false, snapping: true });
+    expect(parsePreferences("not json")).toEqual({});
+    expect(parsePreferences(null)).toEqual({});
   });
 });

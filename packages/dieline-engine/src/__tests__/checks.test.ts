@@ -20,6 +20,23 @@ describe("design checks", () => {
     }
   });
 
+  it.each(PRESETS.map((p) => p.id))("takes the %s preset's friction locks as hooks on thick board", (id) => {
+    expect(checkDieline(render(doc({ nodes: [presetBody(id, "body")] }), { width: 60, length: 120, height: 80, thickness: 3 }))).toEqual([]);
+  });
+
+  it("draws the auto-lock's glue area inside its triangle", () => {
+    const result = render(doc({ nodes: [presetBody("autoLockBottom", "body")] }), INPUTS);
+    expect(result.paths.filter((p) => p.lineType === "glue").length).toBeGreaterThan(10);
+  });
+
+  it("moves the glue flap up to the hole of a lock flap at the end of the body", () => {
+    const body = presetBody("snapLockBottom", "body");
+    const result = render(doc({ nodes: [{ ...body, left: body.right, right: undefined }] }), { ...INPUTS, thickness: 2 });
+    expect(checkDieline(result)).toEqual([]);
+    const creases = result.paths.flatMap((p) => (p.kind === "line" && p.lineType === "crease" && p.a[0] === 0 && p.b[0] === 0 ? [p.a[1], p.b[1]] : []));
+    expect(Math.min(...creases)).toBe(1);
+  });
+
   it("finds nothing wrong with the hand-drawn tuck end", () => {
     expect(checkDieline(render(tuckEndBox, INPUTS)).filter((i) => i.severity === "error")).toEqual([]);
   });

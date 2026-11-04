@@ -24,6 +24,7 @@ export type EditorState = {
   view: View;
   snapping: boolean;
   display: {
+    grid: boolean;
     guides: boolean;
     /** Each part's overall width and height. The template's own rulers always show. */
     overall: boolean;
@@ -80,7 +81,7 @@ export class EditorStore {
       drawLineType: "cut",
       view: { x: 0, y: 0, zoom: 1 },
       snapping: true,
-      display: { guides: true, overall: true, sizeDelta: { width: 0, length: 0, height: 0 }, bleed: true, ghosts: false, nicks: false, issues: true, preview3d: false },
+      display: { grid: true, guides: true, overall: true, sizeDelta: { width: 0, length: 0, height: 0 }, bleed: true, ghosts: false, nicks: false, issues: true, preview3d: false },
       sizeRange: null,
       nicks: { width: 0.5, spacing: 60 },
       canUndo: false,

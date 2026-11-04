@@ -112,7 +112,11 @@ Phases (each ends with a commit message for the user to commit):
   "everything before a trailing x/y is the point name".
 - Built-in components live in `dieline-engine/src/library/components.ts`, written
   in the spec format (`lib:tuckLid`, `lib:dustFlap`, `lib:glueFlap`,
-  `lib:slottedFlap`, `lib:plainFlap`, `lib:thumbNotch`). Size params default to 0
+  `lib:slottedFlap`, `lib:plainFlap`, `lib:thumbNotch`, and the snap lock bottom:
+  `lib:snapLockNotched`, `lib:snapLockTab`, `lib:snapLockSide`; the auto-lock bottom:
+  `lib:autoLockMain`, `lib:autoLockSide`. Lock flaps share one round hole centred
+  on each panel fold; `edge.relief` makes the body stop that fold at the hole. The
+  body's Bottom setting (`bottomFeatures`) sets all four bottom edges at once). Size params default to 0
   meaning "auto" and are resolved in the component's variables. A document
   component with the same id shadows a built-in one.
 - Presets (`library/presets.ts`): reverse tuck end, straight tuck end, sleeve,

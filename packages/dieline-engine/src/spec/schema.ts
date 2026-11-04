@@ -254,7 +254,7 @@ const component = z.object({
   variables: z.array(variable),
   nodes: z.array(node),
   anchors: z.array(z.object({ name, at: point })).optional(),
-  edge: z.object({ hinge: z.union([lineType, z.literal("none")]) }).optional(),
+  edge: z.object({ hinge: z.union([lineType, z.literal("none")]), relief: z.boolean().optional(), straight: z.enum(["start", "end", "both"]).optional() }).optional(),
   category: z.string().max(100).optional(),
 });
 

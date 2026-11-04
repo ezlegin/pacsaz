@@ -1,12 +1,14 @@
 "use client";
 
 import {
+  BOTTOM_TYPES,
   EDGE_COMPONENTS,
   LINE_STYLES,
   LINE_TYPES,
   mapExprs,
   newId,
   updateNode,
+  type BottomType,
   type ComponentDef,
   type DielineDocument,
   type EdgeFeature,
@@ -15,6 +17,7 @@ import {
 } from "@repo/dieline-engine";
 import { ArrowDown, ArrowUp, FlipHorizontal2, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { bottomTypeOf, setBottomType } from "../model/body";
 import { useEditor, useStore } from "../state/react";
 import { useNodeField, useNodeSetter } from "../ui/bindings";
 import { IconButton, LineTypeSelect, Pill, Row, Section, SelectField, TextInput } from "../ui/controls";
@@ -81,6 +84,19 @@ export function BodyInspector({ node }: { node: PanelsNode }) {
         <Row label="Folds">
           <LineTypeSelect value={node.fold ?? "crease"} onChange={(v) => set("fold", v && v !== "crease" ? v : undefined)} />
         </Row>
+        {panels.length === 4 && (
+          <Row label="Bottom">
+            <SelectField
+              title="Sets the bottom edge of every panel at once"
+              value={bottomTypeOf(node) ?? "custom"}
+              options={[...(bottomTypeOf(node) ? [] : [{ value: "custom", label: "Custom" }]), ...BOTTOM_TYPES.map((t) => ({ value: t.id, label: t.name }))]}
+              onChange={(v) => {
+                if (v === "custom") return;
+                store.apply((d) => updateNode(d, node.id, (n) => (n.kind === "panels" ? setBottomType(n, v as BottomType) : n)));
+              }}
+            />
+          </Row>
+        )}
       </Section>
 
       <Section
@@ -125,6 +141,16 @@ export function BodyInspector({ node }: { node: PanelsNode }) {
   );
 }
 
+/** Components in their categories, in the order each category first appears. */
+export function groupByCategory(components: ComponentDef[]): [string, ComponentDef[]][] {
+  const groups = new Map<string, ComponentDef[]>();
+  for (const c of components) {
+    const category = c.category ?? "Other";
+    groups.set(category, [...(groups.get(category) ?? []), c]);
+  }
+  return [...groups];
+}
+
 /** Pick what sits on one edge and set its options. */
 function FeatureEditor({ node, path, label, feature }: { node: PanelsNode; path: string; label: string; feature?: EdgeFeature }) {
   const set = useNodeSetter(node.id);
@@ -136,7 +162,7 @@ function FeatureEditor({ node, path, label, feature }: { node: PanelsNode; path:
 
   const options = [
     { value: "", label: "Plain cut edge" },
-    ...components.map((c) => ({ value: c.id, label: c.category ? `${c.category} · ${c.name}` : c.name })),
+    ...components.map((c) => ({ value: c.id, label: c.name, group: c.category ?? "Other" })),
     ...(feature && !def ? [{ value: feature.component, label: `Missing: ${feature.component}` }] : []),
   ];
 
