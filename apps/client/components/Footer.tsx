@@ -50,9 +50,9 @@ const LINK_GROUPS = [
   },
 ];
 
-const Footer = () => {
+const Footer = ({ flush }: { flush?: boolean }) => {
   return (
-    <footer className={cn(layoutPaddings, "relative mt-16 overflow-hidden")}>
+    <footer className={cn(layoutPaddings, "relative overflow-hidden", !flush && "mt-16")}>
       {/* brand hairline across the very top */}
       <div
         aria-hidden
@@ -149,7 +149,7 @@ const Footer = () => {
         </div>
 
         {/* ------------------------------- CTA strip --------------------------- */}
-        <div className="mt-12 flex flex-col gap-4 rounded-3xl border bg-muted/40 p-5 sm:flex-row sm:items-center sm:justify-between">
+        {!flush && <div className="mt-12 flex flex-col gap-4 rounded-3xl border bg-muted/40 p-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
             <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
               <Sparkles className="size-5" strokeWidth={1.9} />
@@ -171,7 +171,7 @@ const Footer = () => {
             شروع کن
             <ArrowUpRight className="size-3.5" />
           </Link>
-        </div>
+        </div>}
 
         {/* ------------------------------ bottom bar --------------------------- */}
         <div className="mt-10 flex flex-col-reverse items-center gap-6 border-t py-6 sm:flex-row sm:justify-between">

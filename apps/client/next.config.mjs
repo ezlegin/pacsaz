@@ -18,7 +18,7 @@ const nextConfig = {
   turbopack: {
     root: path.join(appDir, "..", ".."),
   },
-  transpilePackages: ["@repo/ui", "@repo/editor", "@repo/dieline-engine"],
+  transpilePackages: ["@repo/ui", "@repo/editor", "@repo/dieline-engine", "@repo/dieline-3d"],
   images: {
     remotePatterns: [
       {

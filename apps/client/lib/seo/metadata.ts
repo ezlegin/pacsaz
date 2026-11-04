@@ -67,10 +67,10 @@ export const buildMetadata = ({
 }: MetadataInput): Metadata => {
   const url = canonicalFor(path);
   const card = image ?? OG_IMAGE;
-  const fullTitle = `${title} | ${SITE_NAME}`;
+  const fullTitle = absoluteTitle ?? `${title} | ${SITE_NAME}`;
 
   return {
-    title: absoluteTitle ?? title,
+    title: absoluteTitle ? { absolute: absoluteTitle } : title,
     description,
     ...(keywords?.length ? { keywords } : {}),
     alternates: {

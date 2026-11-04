@@ -10,7 +10,8 @@
     "./geometry": "./src/geometry.ts",
     "./viewer": "./src/viewer.tsx",
     "./ArtworkPlacer": "./src/ArtworkPlacer.tsx",
-    "./rig": "./src/rig.ts"
+    "./rig": "./src/rig.ts",
+    "./stage": "./src/stage.tsx"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.9",

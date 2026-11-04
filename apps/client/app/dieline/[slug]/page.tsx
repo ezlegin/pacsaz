@@ -7,14 +7,17 @@ import {
   dielineProductSchema,
   SITE_NAME,
 } from "@/lib/seo";
+import { clampSize } from "@/lib/dieline/engine";
 import { getSessionUser } from "@repo/auth/session";
 import { CustomDielineSettings, prisma } from "@repo/db";
+import { materials } from "@repo/dieline-core/data/materials";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 interface Props {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ settingsId: string }>;
+  /** `w`, `l`, `h` and `m` carry the size and material chosen on the home page. */
+  searchParams: Promise<{ settingsId?: string; w?: string; l?: string; h?: string; m?: string }>;
 }
 
 const getDieline = async (slug: string) => {
@@ -31,9 +34,34 @@ const getDieline = async (slug: string) => {
   });
 };
 
+type Dieline = NonNullable<Awaited<ReturnType<typeof getDieline>>>;
+
+/**
+ * Starts a template at a size asked for in the URL. The range and the material
+ * are the template's own limits, so a hand-edited link can only pick from what
+ * is on sale; anything unusable falls back to the template's default. The
+ * canonical URL has no query, so these links do not compete with the page.
+ */
+const withRequestedSize = (dieline: Dieline, query: { w?: string; l?: string; h?: string; m?: string }): Dieline => {
+  if (!dieline.settings) return dieline;
+
+  const requested = { width: Number(query.w), length: Number(query.l), height: Number(query.h) };
+  if (!Object.values(requested).every((value) => Number.isFinite(value) && value > 0)) return dieline;
+
+  const size = clampSize(
+    requested,
+    { width: dieline.minWidth, length: dieline.minLength, height: dieline.minHeight },
+    { width: dieline.maxWidth, length: dieline.maxLength, height: dieline.maxHeight },
+  );
+  const material = dieline.materials.split(",").includes(query.m ?? "") ? query.m! : dieline.defaultMaterial;
+  const thickness = materials.find((item) => item.value === material)?.thickness ?? dieline.settings.thickness;
+
+  return { ...dieline, defaultMaterial: material, settings: { ...dieline.settings, ...size, material, thickness } };
+};
+
 export default async function DielinePage({ params, searchParams }: Props) {
   const user = await getSessionUser();
-  const { settingsId } = await searchParams;
+  const { settingsId, w, l, h, m } = await searchParams;
   const { slug } = await params;
   const dieline = await getDieline(slug);
 
@@ -70,7 +98,7 @@ export default async function DielinePage({ params, searchParams }: Props) {
       />
 
       <DielineGenerator
-        dieline={dieline}
+        dieline={withRequestedSize(dieline, { w, l, h, m })}
         customSettings={customSettings}
         user={user}
       />

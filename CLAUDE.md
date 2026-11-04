@@ -226,6 +226,20 @@ Phases (each ends with a commit message for the user to commit):
 - Saved copies and download history store the overlay as JSON in
   `CustomDielineSettings.customization` (empty for a plain resize).
 
+### Home page (`apps/client/components/Home/`)
+
+- A bright studio: light theme only, brand violet the only colour. The owner
+  rejected dark, stark and multicolour looks, and scroll-pinned category rows.
+- `Showcase` is one pinned scene around `FoldStage` (`@repo/dieline-3d/stage`): the
+  real template as a closed 3D box the visitor sizes with `BoxDock`, unfolding on
+  scroll. Motion values drive it, never React state. The stage reverses the rig's
+  fold direction so the print ends up outside.
+- Below it, drawings come from `lib/dieline/homeBox.ts`, so the page works on an
+  empty catalogue; the engine loads on the first edit.
+- `/dieline/[slug]?w=&l=&h=&m=` opens a template at that size and material, clamped.
+- FAQ answers use `<details>` to stay in the HTML; `HOW_TO_STEPS` feeds both the
+  visible steps and the `HowTo` data.
+
 ## `@repo/editor` rules
 
 - All document changes go through `EditorStore.apply` (one undo step) or a

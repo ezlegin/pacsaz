@@ -43,7 +43,7 @@ const fmt = (n: number) => {
 // SVG's Y axis points down; the engine's points up.
 const flip = (p: Pt): string => `${fmt(p[0])} ${fmt(-p[1])}`;
 
-function primToD(prim: Prim): string {
+export function primToD(prim: Prim): string {
   switch (prim.kind) {
     case "line":
       return `M${flip(prim.a)}L${flip(prim.b)}`;

@@ -536,6 +536,17 @@ export const faqSchema = (
  * `HowTo` for the product's core task. Answer engines surface these steps
  * directly, and it is the same sequence the editor actually implements.
  */
+/**
+ * How a dieline gets made. Shown on the home page and stated in its `HowTo` data,
+ * from this one list, because structured data has to match the visible page.
+ */
+export const HOW_TO_STEPS = [
+  { name: "انتخاب قالب", text: "از کتابخانه قالب‌ها یک دایلاین پایه انتخاب کن." },
+  { name: "وارد کردن ابعاد", text: "عرض، طول و ارتفاع بسته را وارد کن؛ به‌صورت ابعاد تولید، داخلی یا خارجی." },
+  { name: "تنظیم متریال و ضخامت", text: "متریال مقوا و ضخامت آن را انتخاب کن تا خطوط تا و بلید درست محاسبه شوند." },
+  { name: "دانلود خروجی", text: "فایل DXF، PDF یا SVG دایلاین را دانلود کن و برای چاپ به چاپخانه بفرست." },
+] as const;
+
 export const howToSchema = (): WithContext =>
   withContext({
     "@type": "HowTo",
@@ -546,32 +557,12 @@ export const howToSchema = (): WithContext =>
     inLanguage: SITE_LANG,
     totalTime: "PT5M",
     tool: [{ "@type": "HowToTool", name: SITE_NAME }],
-    step: [
-      {
-        "@type": "HowToStep",
-        position: 1,
-        name: "انتخاب قالب",
-        text: "از کتابخانه قالب‌ها یک دایلاین پایه انتخاب کن یا از قالب خالی شروع کن.",
-      },
-      {
-        "@type": "HowToStep",
-        position: 2,
-        name: "وارد کردن ابعاد",
-        text: "عرض، طول و ارتفاع بسته را وارد کن؛ ابعاد تولید، داخلی و خارجی هم‌زمان محاسبه می‌شوند.",
-      },
-      {
-        "@type": "HowToStep",
-        position: 3,
-        name: "تنظیم متریال و ضخامت",
-        text: "متریال مقوا و ضخامت آن را انتخاب کن تا خطوط تا و بلید درست محاسبه شوند.",
-      },
-      {
-        "@type": "HowToStep",
-        position: 4,
-        name: "دانلود خروجی",
-        text: "فایل DXF، PDF یا SVG دایلاین را دانلود کن و برای چاپ به چاپخانه بفرست.",
-      },
-    ],
+    step: HOW_TO_STEPS.map((step, index) => ({
+      "@type": "HowToStep",
+      position: index + 1,
+      name: step.name,
+      text: step.text,
+    })),
     publisher: { "@id": ORGANIZATION_ID },
   });
 
