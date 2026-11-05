@@ -9,8 +9,21 @@ import {
   typedRulers,
   type Customization,
   type DielineDocument,
+  type Issue,
+  type IssueCode,
   type RenderResult,
 } from "@repo/dieline-engine";
+
+/** The Studio's design checks, said for a customer. */
+export const PROBLEM_TEXT: Record<IssueCode | "build", string> = {
+  build: "بخشی از قالب در این ابعاد ساخته نمی‌شود.",
+  gap: "خط برش در جایی باز مانده و قطعه کامل جدا نمی‌شود.",
+  openCut: "انتهای یک خط برش آزاد مانده است.",
+  doubleKnife: "دو خط برش روی هم افتاده‌اند.",
+  crossing: "خطوط برش از روی هم رد می‌شوند.",
+  danglingFold: "یک خط تا وسط مقوا تمام می‌شود.",
+  tinySegment: "تکه‌ای از خطوط برای برش بیش از حد کوتاه است.",
+};
 
 /**
  * The client app's bridge to `@repo/dieline-engine`. Shared by the browser
@@ -66,7 +79,28 @@ function rulerFont(result: RenderResult): number {
   return b ? Math.max(4, Math.max(b.maxX - b.minX, b.maxY - b.minY) / 40) : 4;
 }
 
-export function previewSvg(result: RenderResult, options: { watermark: boolean; overallRulers: boolean; size?: Size; typed?: Size }): string {
+/**
+ * A red dot where each design check found a problem, as in the Studio, with the
+ * explanation on hover. Sized like ruler labels: they read --ruler-scale, so they
+ * stay the same size on screen when the preview is zoomed.
+ */
+function issueMarkers(issues: Issue[], font: number): string {
+  return issues
+    .map(({ at, code }) => {
+      const place = `transform: translate(${at[0]}px, ${-at[1]}px) scale(var(--ruler-scale, 1))`;
+      return (
+        `<g data-issue="${code}" style="${place}"><title>${PROBLEM_TEXT[code]}</title>` +
+        `<circle r="${font * 0.4}" fill="rgb(239 68 68 / 0.2)"/>` +
+        `<circle r="${font * 0.18}" fill="rgb(239 68 68)" stroke="#fff" stroke-width="${font * 0.05}"/></g>`
+      );
+    })
+    .join("");
+}
+
+export function previewSvg(
+  result: RenderResult,
+  options: { watermark: boolean; overallRulers: boolean; size?: Size; typed?: Size; issues?: Issue[] },
+): string {
   // The drawing is at the crease size; rulers show the number the customer typed.
   const { size, typed } = options;
   if (size && typed) {
@@ -87,7 +121,8 @@ export function previewSvg(result: RenderResult, options: { watermark: boolean; 
     // The preview is scaled to fit, so labels grow with the drawing to stay readable.
     rulerFontSize: rulerFont(result),
   });
-  if (!options.watermark) return svg;
+  const markers = issueMarkers(options.issues ?? [], rulerFont(result));
+  if (!options.watermark) return svg.replace("</svg>", `${markers}</svg>`);
 
   const box = /viewBox="([^"]+)"/.exec(svg)?.[1]?.split(" ").map(Number);
   if (!box || box.length !== 4) return svg;
@@ -101,7 +136,7 @@ export function previewSvg(result: RenderResult, options: { watermark: boolean; 
     "</svg>",
     `<defs><pattern id="watermark" patternUnits="userSpaceOnUse" x="${x}" y="${y}" width="${tile}" height="${tile}">` +
       `<image href="/watermark.png" width="${tile}" height="${tile}" opacity="0.5" preserveAspectRatio="xMidYMid meet"/></pattern>${clip}</defs>` +
-      `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="url(#watermark)"${clip ? ` clip-path="url(#watermark-sheet)"` : ""} pointer-events="none"/></svg>`,
+      `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="url(#watermark)"${clip ? ` clip-path="url(#watermark-sheet)"` : ""} pointer-events="none"/>${markers}</svg>`,
   );
 }
 

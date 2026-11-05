@@ -11,6 +11,7 @@ import {
 import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import { cn } from "@repo/ui/lib/utils";
 import { TriangleAlert } from "lucide-react";
+import { PROBLEM_TEXT } from "@/lib/dieline/engine";
 import type { IssueCode } from "@repo/dieline-engine";
 import Image from "next/image";
 import { Section } from "./DetailsSection";
@@ -37,16 +38,6 @@ interface Props {
   user: UserType | null;
 }
 
-/** The Studio's design checks, said for a customer. */
-const PROBLEM_TEXT: Record<IssueCode | "build", string> = {
-  build: "بخشی از قالب در این ابعاد ساخته نمی‌شود.",
-  gap: "خط برش در جایی باز مانده و قطعه کامل جدا نمی‌شود.",
-  openCut: "انتهای یک خط برش آزاد مانده است.",
-  doubleKnife: "دو خط برش روی هم افتاده‌اند.",
-  crossing: "خطوط برش از روی هم رد می‌شوند.",
-  danglingFold: "یک خط تا وسط مقوا تمام می‌شود.",
-  tinySegment: "تکه‌ای از خطوط برای برش بیش از حد کوتاه است.",
-};
 
 export default function DielineSettings({ slug, isRendering, user, problems }: Props) {
   const {

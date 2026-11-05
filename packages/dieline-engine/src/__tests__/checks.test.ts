@@ -26,6 +26,13 @@ describe("design checks", () => {
     expect(checkDieline(result)).toEqual([]);
   });
 
+  it.each(PRESETS.map((p) => p.id))("finds no tiny cuts in the %s preset on thin paper", (id) => {
+    for (const thickness of [0.1, 0.2, 0.3]) {
+      const issues = checkDieline(render(doc({ nodes: [presetBody(id, "body")] }), { width: 90, length: 50, height: 160, thickness }));
+      expect(issues.filter((i) => i.code === "tinySegment")).toEqual([]);
+    }
+  });
+
   it.each(PRESETS.map((p) => p.id))("takes the %s preset's friction locks as hooks on thick board", (id) => {
     expect(checkDieline(render(doc({ nodes: [presetBody(id, "body")] }), { width: 60, length: 120, height: 80, thickness: 3 }))).toEqual([]);
   });

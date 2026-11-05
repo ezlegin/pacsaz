@@ -130,9 +130,9 @@ Phases (each ends with a commit message for the user to commit):
   same edge is a plain cut) and `startNext`/`endNext` (1 when it carries a
   feature). A dust flap's far side steps back one thickness from the fold
   beside a plain edge, straight up; its relief notch is cut only beside a lid.
-  Every such allowance is one board `thickness` (minimum 0.2 mm): the raised
+  Every such allowance is one board `thickness` (minimum 0.3 mm): the raised
   lid hinge, the tuck fold's step, the tuck's side clearance, the hook past
-  the fold, the dust flap set-back; the relief notch is as wide as the board (radius thickness / 2). The glue flap runs the full panel height, its ends on the body edges. The 3D board is textured: paper grain, or kraft with flutes. Folds stop at windows: `render` trims any fold inside a hole (`trimFoldsAtHoles`) and reports the length as `foldsCut`; a customer change that cuts more fold than the template is rejected by `verifyCustomization`. The 3D fold SVG still gets the whole fold (`foldsInHoles`) plus `window` outlines; the rig drops faces inside a window (`extractWindows` → `buildFoldRig(segments, config, windows)`). New presets must render without diagnostics and keep the cut
+  the fold, the dust flap set-back; the relief notch is as wide as the board (radius thickness / 2), at least 0.5 mm. The glue flap runs the full panel height, its ends on the body edges. The 3D board is textured: paper grain, or kraft with flutes. Folds stop at windows: `render` trims any fold inside a hole (`trimFoldsAtHoles`) and reports the length as `foldsCut`; a customer change that cuts more fold than the template is rejected by `verifyCustomization`. The 3D fold SVG still gets the whole fold (`foldsInHoles`) plus `window` outlines; the rig drops faces inside a window (`extractWindows` → `buildFoldRig(segments, config, windows)`). New presets must render without diagnostics and keep the cut
   outline closed at several sizes (see `panels.test.ts`).
 
 ### Packaging checks, nicks, 3D

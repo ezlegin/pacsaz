@@ -517,7 +517,7 @@ class Context {
     const line = (a: Pt, b: Pt, lineType: LineType) => paths.push({ kind: "line", a, b, lineType, nodeId: node.id });
 
     // Folds between neighbouring panels.
-    const stop = Math.max(0.2, this.env.builtins.thickness) / 2;
+    const stop = Math.max(0.3, this.env.builtins.thickness) / 2;
     const relief = (i: number, side: "top" | "bottom") =>
       [i - 1, i].some((j) => {
         const feature = node.panels[j]?.[side];
