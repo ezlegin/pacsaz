@@ -122,4 +122,32 @@ const check = (label: string, actual: unknown, expected: unknown) => {
   check("single dangling edge yields no faces", single.faces.length, 0);
 }
 
+/* -------------------------------------------------------------------------- */
+/* Folds that end on a cut line: rounding must not lose the junction          */
+/* -------------------------------------------------------------------------- */
+{
+  // Stops 0.003 short of the far side, as a fold does on a chorded relief hole.
+  const short = buildPlanarFaces([
+    { a: [0, 0], b: [100, 0], kind: "trim" },
+    { a: [100, 0], b: [100, 100], kind: "trim" },
+    { a: [100, 100], b: [0, 100], kind: "trim" },
+    { a: [0, 100], b: [0, 0], kind: "trim" },
+    { a: [0, 25], b: [99.997, 25], kind: "fold" },
+  ]);
+  check("fold just short of a cut still splits", short.faces.length, 2);
+
+  // The auto-lock triangle at 1.5 mm: 4.275 sits on a vertex grid boundary.
+  const boundary = buildPlanarFaces([
+    { a: [40, 25], b: [65, 25], kind: "trim" },
+    { a: [40, 25], b: [40, 60], kind: "trim" },
+    { a: [40, 60], b: [120, 60], kind: "trim" },
+    { a: [120, 60], b: [88.5, 7.05], kind: "trim" },
+    { a: [88.5, 7.05], b: [84.75, 3.3], kind: "trim" },
+    { a: [84.75, 3.3], b: [65, 3.3], kind: "trim" },
+    { a: [65, 3.3], b: [65, 25], kind: "trim" },
+    { a: [65, 25], b: [85.725, 4.275], kind: "fold" },
+  ]);
+  check("fold ending on a grid boundary still splits", boundary.faces.length, 2);
+}
+
 console.log(failures === 0 ? "\nALL GEOMETRY CHECKS PASSED" : `\n${failures} FAILED`);

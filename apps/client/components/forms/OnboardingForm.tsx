@@ -45,7 +45,14 @@ const STEP_FIELDS: Record<number, (keyof OnboardingFormType)[]> = {
   4: [],
 };
 
-const OnboardingForm = ({ phoneNumber }: { phoneNumber: string }) => {
+const OnboardingForm = ({
+  phoneNumber,
+  returnTo,
+}: {
+  phoneNumber: string;
+  /** Where the visitor was before signing in. */
+  returnTo: string;
+}) => {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const { startLoading, stopLoading, isLoading } = useLoading();
@@ -92,7 +99,7 @@ const OnboardingForm = ({ phoneNumber }: { phoneNumber: string }) => {
 
     startLoading();
     const res = await updateUserDataFromOnboardingForm(form.getValues());
-    handleRes(res, { onSuccess: () => router.push("/panel") });
+    handleRes(res, { onSuccess: () => router.push(returnTo) });
     stopLoading();
   };
 

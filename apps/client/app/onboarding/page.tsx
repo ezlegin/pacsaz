@@ -1,14 +1,20 @@
 import OnboardingForm from "@/components/forms/OnboardingForm";
 import { buildMetadata, SITE_NAME } from "@/lib/seo";
+import { safePath } from "@/lib/safePath";
 import { loginPageRoute } from "@/proxy";
 import { getSessionUser } from "@repo/auth/session";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-const page = async () => {
+const page = async ({
+  searchParams,
+}: {
+  searchParams: Promise<{ callbackUrl?: string }>;
+}) => {
+  const returnTo = safePath((await searchParams).callbackUrl);
   const user = await getSessionUser();
   if (!user) redirect(loginPageRoute);
-  if (user.onboardingCompleted) redirect("/panel");
+  if (user.onboardingCompleted) redirect(returnTo);
 
   return (
     <div className="relative flex min-h-[calc(100vh-var(--app-top-offset))] items-center justify-center overflow-hidden bg-muted/30 px-4 py-12">
@@ -49,7 +55,7 @@ const page = async () => {
         />
       </svg>
 
-      <OnboardingForm phoneNumber={user.phoneNumber} />
+      <OnboardingForm phoneNumber={user.phoneNumber} returnTo={returnTo} />
     </div>
   );
 };

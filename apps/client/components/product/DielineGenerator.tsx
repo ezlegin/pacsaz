@@ -5,10 +5,11 @@ import { CustomDielineSettings } from "@repo/db";
 import { useAppDispatch, useAppSelector } from "@repo/store/hooks";
 import { setDeveloperTool } from "@repo/store/slices/developerToolsSlice";
 import dynamic from "next/dynamic";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { UserType } from "./DielineDownloadButton";
 import DielineLoadingOverlay from "./DielineLoadingOverlay";
 import DielineSettings from "./DielineSettings";
+import LoginDialog from "./LoginDialog";
 import ProductInfo from "./ProductInfo";
 import { useEngineDieline } from "./useEngineDieline";
 import { customizeOptions } from "@repo/dieline-engine";
@@ -31,6 +32,7 @@ const DielineGenerator = ({
   customSettings?: CustomDielineSettings | null;
 }) => {
   const dispatch = useAppDispatch();
+  const [loginOpen, setLoginOpen] = useState(false);
 
   const { isRendering, template, problems } = useEngineDieline(
     { ...dieline, customSettings },
@@ -51,6 +53,7 @@ const DielineGenerator = ({
   return (
     <div className="relative grid h-full min-h-0 grid-cols-[320px_1fr_290px] gap-3 p-3">
       <DielineLoadingOverlay />
+      <LoginDialog open={loginOpen} onOpenChange={setLoginOpen} />
 
       {/* ------------------------------- settings ------------------------------ */}
       <DielineSettings
@@ -105,7 +108,17 @@ const DielineGenerator = ({
           it too (with the plan badge) and land on the page that explains it.
         */}
         <div className="absolute left-1 top-1 z-10">
-          {customizable ? (
+          {customizable && !user ? (
+            <button
+              type="button"
+              onClick={() => setLoginOpen(true)}
+              className="flex items-center gap-1.5 rounded-full border border-primary/30 bg-background/85 px-3 py-1.5 text-[11px] font-bold text-primary shadow-sm backdrop-blur transition-colors hover:bg-primary/10"
+            >
+              <PencilRuler className="size-3.5" />
+              شخصی‌سازی قالب
+              <Diamond />
+            </button>
+          ) : customizable ? (
             <Link
               href={`/dieline/${dieline.slug}/customize`}
               className="flex items-center gap-1.5 rounded-full border border-primary/30 bg-background/85 px-3 py-1.5 text-[11px] font-bold text-primary shadow-sm backdrop-blur transition-colors hover:bg-primary/10"

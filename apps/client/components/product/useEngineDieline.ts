@@ -79,8 +79,8 @@ export function useEngineDieline(dieline: EngineDieline, options: { watermark: b
         thickness: s.thickness,
         dimensionType: type,
         format: "pdf",
-        // Each part's overall size is shown unless the visitor turns it off.
-        showOverallRulers: true,
+        // Off by default: the template's own rulers always show, these are extra.
+        showOverallRulers: false,
         // Fold directions are authored in the Studio and saved with the template.
         foldConfig: template?.folds ? JSON.stringify({ version: 1, ...template.folds }) : "",
       }),

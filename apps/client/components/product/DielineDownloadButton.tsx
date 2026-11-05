@@ -16,8 +16,8 @@ import { BookmarkPlus, Download } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import LoginCard from "../forms/LoginCard";
 import SaveDielineForm from "../forms/SaveDielineForm";
+import LoginDialog from "./LoginDialog";
 import { useAppSelector } from "@repo/store/hooks";
 
 export interface UserType extends User {
@@ -42,7 +42,8 @@ const DielineDownloadButton = ({ slug, isRendering, user, customization, savedDi
   const settings = useAppSelector((s) => s.dielineSettings);
   const svg = useAppSelector((s) => s.svg.svg);
   const { startLoading, stopLoading, isLoading } = useLoading();
-  const [openPopup, setOpenPopup] = useState<"login" | "save" | null>(null);
+  const [savePopup, setSavePopup] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
 
   const setts = {
     id: 0,
@@ -57,7 +58,7 @@ const DielineDownloadButton = ({ slug, isRendering, user, customization, savedDi
 
   const onDownload = async () => {
     if (!user) {
-      router.push("/login?callbackUrl=/subscription");
+      setLoginOpen(true);
       return;
     }
 
@@ -101,40 +102,32 @@ const DielineDownloadButton = ({ slug, isRendering, user, customization, savedDi
 
   const onOpenSavePopup = () => {
     startLoading();
-    setOpenPopup("save");
+    setSavePopup(true);
     stopLoading();
   };
 
   return (
     <>
-      <Dialog open={!!openPopup} onOpenChange={() => setOpenPopup(null)}>
+      <LoginDialog open={loginOpen} onOpenChange={setLoginOpen} />
+
+      <Dialog open={savePopup} onOpenChange={setSavePopup}>
         <DialogContent
           overlayClassname="bg-accent/20 backdrop-blur-[4px]"
           showCloseButton={false}
-          className={cn(
-            openPopup === "login" ? "sm:max-w-2xl" : "sm:max-w-lg",
-            "border-none p-6",
-          )}
+          className="border-none p-6 sm:max-w-lg"
         >
-          <DialogTitle className="sr-only" />
-          {openPopup === "login" ? (
-            <LoginCard />
-          ) : (
-            <>
-              <DialogTitle>ذخیره قالب</DialogTitle>
-              <SaveDielineForm
-                settings={setts}
-                slug={slug}
-                plan={user?.plan!}
-                customization={customization}
-                savedDieline={savedDieline}
-                onSaved={(id) => {
-                  setOpenPopup(null);
-                  onSaved?.(id);
-                }}
-              />
-            </>
-          )}
+          <DialogTitle>ذخیره قالب</DialogTitle>
+          <SaveDielineForm
+            settings={setts}
+            slug={slug}
+            plan={user?.plan!}
+            customization={customization}
+            savedDieline={savedDieline}
+            onSaved={(id) => {
+              setSavePopup(false);
+              onSaved?.(id);
+            }}
+          />
         </DialogContent>
       </Dialog>
 

@@ -13,6 +13,13 @@ import type { Face, Pt, Segment, SegmentKind } from "./types";
 /** Endpoints closer than this are the same vertex, in mm. */
 const SNAP_TOLERANCE = 0.05;
 
+/**
+ * How far an end may stop short of the line it meets, in mm: coordinate rounding
+ * plus a chord's sag. Far below the snap tolerance, because the chords of a relief
+ * hole on thin board are shorter than that.
+ */
+const TOUCH_TOLERANCE = 0.01;
+
 type HalfEdge = {
   id: number;
   from: number;
@@ -63,6 +70,29 @@ const distanceToSegmentSq = (p: Pt, a: Pt, b: Pt): number => {
  */
 const splitSegments = (segments: Segment[]): Segment[] => {
   const cuts: number[][] = segments.map(() => []);
+  /** Where another segment's end touches this one, by position along it. */
+  const touches: Map<number, Pt>[] = segments.map(() => new Map());
+
+  /**
+   * A line that ends on another one rarely hits it exactly: arcs arrive as chords
+   * and coordinates are rounded, so a fold ending on a round relief hole can stop
+   * a hair short of it. Missing that junction loses the fold, and with it the
+   * flap's hinge, at sizes that depend on nothing but the rounding. So an end
+   * within `TOUCH_TOLERANCE` counts as touching, and the segment is split at
+   * that very point, so that both sides share one vertex.
+   */
+  const touch = (index: number, p: Pt) => {
+    const { a, b } = segments[index]!;
+    const tolerance = TOUCH_TOLERANCE * TOUCH_TOLERANCE;
+    if (distanceToSegmentSq(p, a, b) > tolerance) return;
+    if (Math.hypot(p[0] - a[0], p[1] - a[1]) < 1e-6) return;
+    if (Math.hypot(p[0] - b[0], p[1] - b[1]) < 1e-6) return;
+
+    const dx = b[0] - a[0];
+    const dy = b[1] - a[1];
+    const t = ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / (dx * dx + dy * dy);
+    touches[index]!.set(+Math.max(0, Math.min(1, t)).toFixed(6), p);
+  };
 
   /**
    * A cut is accepted when it lands on the segment including its endpoints.
@@ -88,6 +118,11 @@ const splitSegments = (segments: Segment[]): Segment[] => {
       const [dx, dy] = sj.b;
       const sx = dx - cx;
       const sy = dy - cy;
+
+      touch(i, sj.a);
+      touch(i, sj.b);
+      touch(j, si.a);
+      touch(j, si.b);
 
       // Proper intersection of two segments.
       const denom = rx * sy - ry * sx;
@@ -131,16 +166,27 @@ const splitSegments = (segments: Segment[]): Segment[] => {
 
   for (let i = 0; i < segments.length; i++) {
     const segment = segments[i]!;
-    const ts = Array.from(new Set(cuts[i]!.map((t) => +t.toFixed(6)))).sort(
-      (a, b) => a - b,
-    );
+    const ts = Array.from(
+      new Set([...cuts[i]!.map((t) => +t.toFixed(6)), ...touches[i]!.keys()]),
+    ).sort((a, b) => a - b);
 
     let previous = segment.a;
     for (const t of ts) {
-      const point: Pt = [
+      const exact: Pt = [
         segment.a[0] + (segment.b[0] - segment.a[0]) * t,
         segment.a[1] + (segment.b[1] - segment.a[1]) * t,
       ];
+      // The touching end itself, not a value a rounding error away from it, which
+      // could fall in the next cell of the vertex grid and split the junction.
+      const near = (p: Pt, tolerance: number) =>
+        Math.hypot(p[0] - exact[0], p[1] - exact[1]) < tolerance;
+      // A segment's own ends stay as they are for the same reason: recomputed from
+      // `t`, 4.275 becomes 4.274999999999999, which is the next cell at this size.
+      const point = near(segment.a, 1e-6)
+        ? segment.a
+        : near(segment.b, 1e-6)
+          ? segment.b
+          : ([...touches[i]!.values()].find((p) => near(p, TOUCH_TOLERANCE)) ?? exact);
 
       if (Math.hypot(point[0] - previous[0], point[1] - previous[1]) > 1e-6) {
         output.push({ a: previous, b: point, kind: segment.kind });

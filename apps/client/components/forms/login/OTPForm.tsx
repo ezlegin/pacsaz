@@ -3,6 +3,7 @@
 import { authenticator } from "@/actions/login/authenticator";
 import { sendOtpCode, verifyOtp } from "@/actions/login/otp";
 import { handleRes } from "@/lib/handleRes";
+import { safePath } from "@/lib/safePath";
 import { otpFormSchema, OTPFormType } from "@/lib/validatoinSchema";
 import { useLoading } from "@repo/lib/utils/useLoading";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,6 +31,8 @@ import { LoginStep } from "./LoginForm";
 interface Props {
   setLoginStep: (val: LoginStep) => void;
   phoneNumber: string;
+  /** Replaces the redirect, for a login shown over the current page. */
+  onLoggedIn?: (onboardingCompleted: boolean) => void;
 }
 
 const RESEND_SECONDS = 60;
@@ -41,7 +44,7 @@ const fa = (value: number) =>
 const formatPhone = (phone: string) =>
   phone.replace(/^(\d{4})(\d{3})(\d{4})$/, "$1 $2 $3");
 
-export function OTPForm({ setLoginStep, phoneNumber }: Props) {
+export function OTPForm({ setLoginStep, phoneNumber, onLoggedIn }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl");
@@ -92,7 +95,15 @@ export function OTPForm({ setLoginStep, phoneNumber }: Props) {
     if (otpRes.success) {
       const authRes = await authenticator(phoneNumber);
       handleRes(authRes, {
-        onSuccess: () => router.push(callbackUrl ?? "/panel"),
+        onSuccess: () => {
+          const onboarded = !!authRes.onboardingCompleted;
+          if (onLoggedIn) return onLoggedIn(onboarded);
+
+          const target = safePath(callbackUrl);
+          router.push(
+            onboarded ? target : `/onboarding?callbackUrl=${encodeURIComponent(target)}`,
+          );
+        },
       });
     }
 

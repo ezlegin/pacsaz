@@ -19,7 +19,11 @@ const HIGHLIGHTS = [
  * Login shell: a branded hero beside the form. The hero is a CSS/SVG
  * composition — no bitmap — so it scales and themes with the rest of the site.
  */
-const LoginCard = () => {
+const LoginCard = ({
+  onLoggedIn,
+}: {
+  onLoggedIn?: (onboardingCompleted: boolean) => void;
+}) => {
   return (
     <div className="relative z-10 w-full max-w-5xl">
       <div className="grid overflow-hidden rounded-3xl border bg-background shadow-2xl shadow-primary/10 lg:grid-cols-[1.05fr_1fr]">
@@ -184,7 +188,7 @@ const LoginCard = () => {
             </span>
           </div>
 
-          <LoginForm />
+          <LoginForm onLoggedIn={onLoggedIn} />
 
           <p className="mt-auto pt-7 text-center text-[10px] leading-5 text-muted-foreground">
             ورود به‌منزله‌ی پذیرش{" "}

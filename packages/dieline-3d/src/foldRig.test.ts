@@ -24,7 +24,7 @@ const rotateZ = (p: Pt, pivot: Pt, angle: number): Pt => {
 };
 
 /* -------------------------------------------------------------------------- */
-/* 1. Three-panel strip: root in the middle by area tie, flat tree           */
+/* 1. Three-panel strip: the largest panel, in the middle, is the root        */
 /* -------------------------------------------------------------------------- */
 {
   const segments: Segment[] = [
@@ -32,8 +32,8 @@ const rotateZ = (p: Pt, pivot: Pt, angle: number): Pt => {
     { a: [30, 0], b: [30, 10], kind: "trim" },
     { a: [30, 10], b: [0, 10], kind: "trim" },
     { a: [0, 10], b: [0, 0], kind: "trim" },
-    { a: [10, 0], b: [10, 10], kind: "fold" },
-    { a: [20, 0], b: [20, 10], kind: "fold" },
+    { a: [9, 0], b: [9, 10], kind: "fold" },
+    { a: [21, 0], b: [21, 10], kind: "fold" },
   ];
 
   const rig = buildFoldRig(segments);

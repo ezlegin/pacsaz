@@ -13,7 +13,11 @@ const STEPS = [
   { id: "otp", label: "کد تایید", icon: ShieldCheck },
 ] as const;
 
-const LoginForm = () => {
+const LoginForm = ({
+  onLoggedIn,
+}: {
+  onLoggedIn?: (onboardingCompleted: boolean) => void;
+}) => {
   const [loginStep, setLoginStep] = useState<LoginStep>("input");
   const [phoneNumber, setPhoneNumber] = useState<string>("");
 
@@ -73,7 +77,11 @@ const LoginForm = () => {
           setPhoneNumber={setPhoneNumber}
         />
       ) : (
-        <OTPForm setLoginStep={setLoginStep} phoneNumber={phoneNumber} />
+        <OTPForm
+          setLoginStep={setLoginStep}
+          phoneNumber={phoneNumber}
+          onLoggedIn={onLoggedIn}
+        />
       )}
     </div>
   );
