@@ -11,6 +11,7 @@ export const createDieline = async (data: DielineMetadataFormType) => {
   const {
     slug,
     title,
+    description,
     bleed,
     dimensionTypes,
     materials,
@@ -35,6 +36,7 @@ export const createDieline = async (data: DielineMetadataFormType) => {
       data: {
         slug,
         title,
+        description,
         minHeight: minDimensions.height,
         minLength: minDimensions.length,
         minWidth: minDimensions.width,
@@ -119,6 +121,7 @@ export const updateDieline = async (
   const {
     slug,
     title,
+    description,
     bleed,
     dimensionTypes,
     materials,
@@ -143,6 +146,7 @@ export const updateDieline = async (
     const updatedDieline = await prisma.dieline.update({
       where: { id },
       data: {
+        description,
         minHeight: minDimensions.height,
         minLength: minDimensions.length,
         minWidth: minDimensions.width,

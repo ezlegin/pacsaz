@@ -12,6 +12,10 @@ import { pagination } from "@repo/lib/utils/pagination";
 
 export const PAGE_SIZE = 32;
 
+/** The page number in a `?page=` value; anything unusable is the first page. */
+export const pageNumber = (page?: string): number =>
+  Math.max(1, Number.parseInt(page ?? "1", 10) || 1);
+
 /**
  * A dieline belongs to a category through either the model relation or the usage
  * relation, and the filter has to match both.
@@ -80,7 +84,7 @@ export async function getCatalogue({
   page?: string;
 }): Promise<Catalogue> {
   const { skip } = pagination(page ?? "", PAGE_SIZE);
-  const currentPage = Math.max(1, Number.parseInt(page ?? "1", 10) || 1);
+  const currentPage = pageNumber(page);
 
   /**
    * Without a `category` the OR clause matched nothing, so the plain catalogue

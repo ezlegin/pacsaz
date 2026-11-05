@@ -69,6 +69,7 @@ const DielineSettingsForm = ({
       },
       title: dieline?.title ?? "",
       slug: dieline?.slug ?? "",
+      description: dieline?.description ?? "",
       dimensionTypes: dieline?.dimensionTypes ?? "manufacture,inner,outer",
       materials: dieline?.materials ?? "glossyCardboard,artPaper,fFlute,eFlute",
       defaultMaterial: dieline?.defaultMaterial ?? "glossyCardboard",
@@ -130,6 +131,31 @@ const DielineSettingsForm = ({
                 <FormControl>
                   <Input {...field} placeholder="slug" />
                 </FormControl>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel>Description</FormLabel>
+                <FormControl>
+                  {/* Native textarea: the kit has none, and this text is Persian. */}
+                  <textarea
+                    {...field}
+                    dir="rtl"
+                    rows={6}
+                    placeholder="Persian, 100-200 words: what this box is, what it suits, how it closes."
+                    className="w-full rounded-md border bg-transparent px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  />
+                </FormControl>
+                <p className="text-xs text-muted-foreground">
+                  Shown on the dieline page. The first 160 characters become the
+                  search snippet, so open with the most useful sentence. Words:{" "}
+                  {field.value.trim().split(/\s+/).filter(Boolean).length}
+                </p>
               </FormItem>
             )}
           />

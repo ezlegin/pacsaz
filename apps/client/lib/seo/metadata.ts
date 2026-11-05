@@ -22,6 +22,8 @@ type MetadataInput = {
   description: string;
   /** Site-root-relative path used for the canonical, `og:url` and the OG image. */
   path: string;
+  /** Page of a paginated listing; each page past the first is its own document. */
+  page?: number;
   /** Indexing directive. Defaults to indexable. */
   noIndex?: boolean;
   /** Overrides the site-wide social card, e.g. a dieline preview. */
@@ -44,9 +46,9 @@ const normalisePath = (path: string): string => {
 /**
  * The canonical form of a URL.
  *
- * Query strings are stripped: `/dielines?page=2` and `/dielines` are the same
- * document, and letting both be canonical is how a catalogue ends up competing
- * with itself in the index.
+ * Query strings are stripped, so size links such as `?w=100` do not compete with
+ * the page. Pagination is the exception, added by `buildMetadata`: page 2 lists
+ * different dielines, and pointing it at page 1 would ask Google to drop them.
  */
 export const canonicalFor = (path: string): string => {
   const clean = normalisePath(path).split("?")[0]?.split("#")[0] ?? "/";
@@ -57,6 +59,7 @@ export const buildMetadata = ({
   title,
   description,
   path,
+  page = 1,
   noIndex = false,
   image,
   languages,
@@ -65,12 +68,14 @@ export const buildMetadata = ({
   keywords,
   absoluteTitle,
 }: MetadataInput): Metadata => {
-  const url = canonicalFor(path);
+  const pageSuffix = page > 1 ? ` - صفحه ${page.toLocaleString("fa-IR")}` : "";
+  const url = canonicalFor(path) + (page > 1 ? `?page=${page}` : "");
   const card = image ?? OG_IMAGE;
-  const fullTitle = absoluteTitle ?? `${title} | ${SITE_NAME}`;
+  const pageTitle = `${title}${pageSuffix}`;
+  const fullTitle = absoluteTitle ?? `${pageTitle} | ${SITE_NAME}`;
 
   return {
-    title: absoluteTitle ? { absolute: absoluteTitle } : title,
+    title: absoluteTitle ? { absolute: absoluteTitle } : pageTitle,
     description,
     ...(keywords?.length ? { keywords } : {}),
     alternates: {
@@ -87,8 +92,9 @@ export const buildMetadata = ({
       images: [
         {
           url: card.url,
-          width: card.width ?? OG_IMAGE.width,
-          height: card.height ?? OG_IMAGE.height,
+          // Declared only when known: a dieline preview can be any shape.
+          ...(card.width ? { width: card.width } : {}),
+          ...(card.height ? { height: card.height } : {}),
           alt: card.alt ?? title,
         },
       ],

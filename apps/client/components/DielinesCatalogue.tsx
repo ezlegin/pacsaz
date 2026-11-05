@@ -3,7 +3,7 @@ import DielinesGrid from "@/components/DielinesGrid";
 import DielinesSidebar from "@/components/DielinesSidebar";
 import JsonLd from "@/components/JsonLd";
 import Pagination from "@/components/Pagination";
-import { getCatalogue, PAGE_SIZE } from "@/lib/catalogue";
+import { getCatalogue, PAGE_SIZE, pageNumber } from "@/lib/catalogue";
 import {
   absoluteUrl,
   breadcrumbSchema,
@@ -47,6 +47,8 @@ const DielinesCatalogue = async ({
 
   // An unknown category is a 404, not an empty listing.
   if (missingCategory) notFound();
+  // So is a page past the end: otherwise any `?page=999` is an indexable empty page.
+  if (pageNumber(page) > 1 && dielines.length === 0) notFound();
 
   const path = activeCategory
     ? `/dielines/category/${activeCategory.slug}`

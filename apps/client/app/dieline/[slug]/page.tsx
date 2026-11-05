@@ -1,10 +1,10 @@
-import DielineGenerator from "@/components/product/DielineGenerator";
+import DielineGenerator from "@/components/product/DielineGeneratorClient";
 import JsonLd from "@/components/JsonLd";
 import {
   breadcrumbSchema,
   buildMetadata,
   dielineDescription,
-  dielineProductSchema,
+  dielineSchema,
   SITE_NAME,
 } from "@/lib/seo";
 import { clampSize } from "@/lib/dieline/engine";
@@ -80,12 +80,7 @@ export default async function DielinePage({ params, searchParams }: Props) {
     <>
       <JsonLd
         data={[
-          dielineProductSchema(dieline, {
-            path,
-            // The file is downloadable once subscribed; the offer reflects that
-            // rather than pretending the dieline itself is free.
-            freeOffer: false,
-          }),
+          dielineSchema(dieline, { path }),
           breadcrumbSchema(
             [
               { name: "صفحه اصلی", path: "/" },
@@ -140,7 +135,7 @@ export async function generateMetadata({
     // A dieline preview is the strongest social card the site has; fall back to
     // the branded cover when the row has no image yet.
     image: image
-      ? { url: image, width: 1200, height: 630, alt: `دایلاین ${dieline.title}` }
+      ? { url: image, alt: `دایلاین ${dieline.title}` }
       : undefined,
     publishedTime: dieline.createdAt.toISOString(),
     modifiedTime: dieline.updatedAt.toISOString(),

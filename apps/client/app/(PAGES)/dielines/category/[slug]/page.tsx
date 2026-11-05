@@ -1,5 +1,5 @@
 import DielinesCatalogue from "@/components/DielinesCatalogue";
-import { getCatalogue } from "@/lib/catalogue";
+import { getCatalogue, pageNumber } from "@/lib/catalogue";
 import { buildMetadata, SITE_NAME } from "@/lib/seo";
 import type { Metadata } from "next";
 
@@ -35,7 +35,7 @@ const page = async ({ params, searchParams }: Props) => {
 
 export default page;
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const { slug } = await params;
 
   // Reuses the page's own lookup, so the metadata can never describe a category
@@ -49,6 +49,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const count = totalDielines.toLocaleString("fa-IR", { useGrouping: false });
 
   return buildMetadata({
+    page: pageNumber((await searchParams).page),
     title: `دایلاین ${activeCategory.title}`,
     description: `${count} قالب دایلاین آماده در دسته «${activeCategory.title}»؛ ساخته‌شده با ${SITE_NAME}. ابعاد و متریال را دلخواه تغییر بده و خروجی DXF، PDF یا SVG آماده‌ی چاپ دانلود کن.`,
     path: `/dielines/category/${activeCategory.slug}`,

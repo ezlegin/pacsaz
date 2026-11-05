@@ -109,10 +109,11 @@ export const CONTACT = {
   hours: "Sa-We 09:00-14:00",
 } as const;
 
-/** The branded short links published on the site. */
-export const SOCIAL_PROFILES: string[] = [
-  "https://trustseal.enamad.ir/?id=8198265&Code=MgGrRlsux4O6hcApzFke6ZHyDZIVsRrI",
-];
+/**
+ * The brand's own profiles (Instagram, LinkedIn, ...), for `sameAs`. That property
+ * says "this is the same entity", so a trust seal or a directory does not belong.
+ */
+export const SOCIAL_PROFILES: string[] = [];
 
 /** An external course the footer links out to, credited as the trainer. */
 export const RELATED_COURSE_URL = "https://igraphical.ir/courses/packaging";
@@ -123,6 +124,8 @@ export const RELATED_COURSE_URL = "https://igraphical.ir/courses/packaging";
  * relative `alternates.canonical` values against.
  */
 export const absoluteUrl = (path = "/"): string => {
+  // Images live on Cloudinary; prefixing the origin would produce a dead URL.
+  if (/^https?:\/\//.test(path)) return path;
   const base = (SITE_URL ?? "https://pacsaz.ir").replace(/\/+$/, "");
   if (!path || path === "/") return `${base}/`;
   return `${base}/${path.replace(/^\/+/, "")}`;

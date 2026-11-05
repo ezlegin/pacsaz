@@ -85,7 +85,6 @@ export const metadata: Metadata = {
     type: "website",
     siteName: SITE_NAME,
     locale: "fa_IR",
-    alternateLocale: ["en_US"],
     url: "/",
     title: `${SITE_NAME} | ${SITE_TAGLINE}`,
     description: SITE_DESCRIPTION,

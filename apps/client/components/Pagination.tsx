@@ -4,9 +4,10 @@
 "use client";
 
 import { cn } from "@repo/ui/lib/utils";
-import { Button } from "@repo/ui/components/button";
+import { buttonVariants } from "@repo/ui/components/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
 interface Props {
@@ -39,17 +40,28 @@ const PaginationBar = ({
 }: Props) => {
   const pageCount = Math.ceil(totalItems / pageSize);
 
-  const router = useRouter();
   const searchParams = useSearchParams();
   const currentPage = parseInt(searchParams.get(paramName) || "1");
 
-  const pageHandler = (pageAction: PageAction) => {
-    const page = currentPage + (pageAction === "inc" ? 1 : -1);
+  /**
+   * Real links rather than click handlers: a crawler follows `href`s and never
+   * clicks, so a button-driven pager hides everything past the first page.
+   * Page 1 drops the parameter, because the bare URL is its canonical.
+   */
+  const pageHref = (page: number) => {
     const params = new URLSearchParams(Array.from(searchParams.entries()));
-    params.set(paramName, page.toString());
+    if (page <= 1) params.delete(paramName);
+    else params.set(paramName, page.toString());
 
-    router.push(`?${params.toString()}`);
+    const query = params.toString();
+    return query ? `?${query}` : "?";
   };
+
+  const linkClass = cn(
+    buttonVariants({ variant: "outline", size: "icon" }),
+    "size-8 rounded-xl",
+  );
+  const disabledClass = cn(linkClass, "pointer-events-none opacity-50");
 
   if (pageCount < 2) return null;
 
@@ -69,16 +81,20 @@ const PaginationBar = ({
       </p>
 
       <div className="flex items-center gap-1.5">
-        <Button
-          size="icon"
-          variant="outline"
-          className="size-8 rounded-xl"
-          onClick={() => pageHandler("dec")}
-          disabled={currentPage <= 1}
-          aria-label={isFa ? "صفحه قبل" : "Previous page"}
-        >
-          <ChevronRight className="size-4" />
-        </Button>
+        {currentPage > 1 ? (
+          <Link
+            href={pageHref(currentPage - 1)}
+            rel="prev"
+            className={linkClass}
+            aria-label={isFa ? "صفحه قبل" : "Previous page"}
+          >
+            <ChevronRight className="size-4" />
+          </Link>
+        ) : (
+          <span aria-disabled className={disabledClass}>
+            <ChevronRight className="size-4" />
+          </span>
+        )}
 
         <span
           className={cn(
@@ -90,21 +106,23 @@ const PaginationBar = ({
             : `${currentPage} / ${pageCount}`}
         </span>
 
-        <Button
-          size="icon"
-          variant="outline"
-          className="size-8 rounded-xl"
-          onClick={() => pageHandler("inc")}
-          disabled={currentPage >= pageCount}
-          aria-label={isFa ? "صفحه بعد" : "Next page"}
-        >
-          <ChevronLeft className="size-4" />
-        </Button>
+        {currentPage < pageCount ? (
+          <Link
+            href={pageHref(currentPage + 1)}
+            rel="next"
+            className={linkClass}
+            aria-label={isFa ? "صفحه بعد" : "Next page"}
+          >
+            <ChevronLeft className="size-4" />
+          </Link>
+        ) : (
+          <span aria-disabled className={disabledClass}>
+            <ChevronLeft className="size-4" />
+          </span>
+        )}
       </div>
     </div>
   );
 };
 
 export default Pagination;
-
-type PageAction = "inc" | "dec";

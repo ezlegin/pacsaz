@@ -125,6 +125,8 @@ model Dieline {
   id              Int      @id @default(autoincrement())
   title           String
   slug            String   @unique
+  /// Persian prose shown on the dieline page and used for its search snippet.
+  description     String   @default("")
   specification   String
   variable        String
   createdAt       DateTime @default(now())

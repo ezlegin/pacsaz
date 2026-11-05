@@ -149,6 +149,7 @@ const dimension = z.object({
 export const dielineMetadataFormSchema = z.object({
   title: z.string().min(1),
   slug: z.string().min(1),
+  description: z.string(),
   bleed: z.number(),
   defaultDimensions: dimension,
   minDimensions: dimension,

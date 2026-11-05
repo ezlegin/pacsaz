@@ -8,7 +8,7 @@ import { loadTemplate } from "@/lib/dieline/engine";
 import { buildDrawing, buildFoldSvg, presetDocument, unionBounds, viewBoxOf, type BoxInputs, type BoxSize } from "@/lib/dieline/homeBox";
 import {
   buildMetadata,
-  dielineProductSchema,
+  dielineSchema,
   faqSchema,
   howToSchema,
   itemListSchema,
@@ -170,15 +170,12 @@ const page = async () => {
       items: BOX_FAMILY.map((item) => ({ name: item.title, path: `/#${item.id}` })),
     }),
     /**
-     * The dieline the hero renders as a live example, described as a product so
-     * the home page also carries a concrete, priceable entity.
+     * The dieline the hero renders as a live example, so the home page also
+     * carries a concrete entity.
      */
     ...(dieline
       ? [
-          dielineProductSchema(dieline, {
-            path: `/dieline/${dieline.slug}`,
-            freeOffer: true,
-          }),
+          dielineSchema(dieline, { path: `/dieline/${dieline.slug}` }),
         ]
       : []),
   ];

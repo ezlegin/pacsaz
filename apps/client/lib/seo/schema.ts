@@ -12,6 +12,7 @@
  * entity, which is what the brand entity needs to be recognised as.
  */
 
+import { materials as materialList } from "@repo/dieline-core/data/materials";
 import {
   absoluteUrl,
   breadcrumbId,
@@ -30,6 +31,10 @@ import {
 } from "./site";
 
 export type JsonLdNode = Record<string, unknown>;
+
+/** The Persian name of a stored material value such as `glossyCardboard`. */
+export const materialLabel = (value: string): string =>
+  materialList.find((item) => item.value === value)?.label ?? value;
 
 /** A complete JSON-LD document, i.e. one that carries `@context`. */
 export type WithContext<T extends JsonLdNode = JsonLdNode> = T & {
@@ -84,7 +89,7 @@ export const organizationSchema = (): WithContext => {
     image: absoluteUrl(OG_IMAGE.url),
     email: CONTACT.email,
     telephone: CONTACT.telephone,
-    sameAs: SOCIAL_PROFILES,
+    ...(SOCIAL_PROFILES.length ? { sameAs: SOCIAL_PROFILES } : {}),
     contactPoint: [
       {
         "@type": "ContactPoint",
@@ -120,17 +125,10 @@ export const organizationSchema = (): WithContext => {
       "package design",
       "FEFCO",
     ],
-    makesOffer: {
-      "@type": "Offer",
-      itemOffered: { "@id": WEBSITE_ID },
-    },
   });
 };
 
-/**
- * The site itself, plus the sitelinks search box. `SearchAction` points at the
- * catalogue because that is the only route the site can actually search.
- */
+/** The site itself. No `SearchAction`: the catalogue has no search to point at. */
 export const websiteSchema = (): WithContext =>
   withContext({
     "@type": "WebSite",
@@ -141,14 +139,6 @@ export const websiteSchema = (): WithContext =>
     description: SITE_DESCRIPTION,
     inLanguage: SITE_LANG,
     publisher: { "@id": ORGANIZATION_ID },
-    potentialAction: {
-      "@type": "SearchAction",
-      target: {
-        "@type": "EntryPoint",
-        urlTemplate: `${absoluteUrl("/dielines")}?q={search_term_string}`,
-      },
-      "query-input": "required name=search_term_string",
-    },
   });
 
 /* -------------------------------------------------------------------------- */
@@ -354,6 +344,7 @@ export const webPageSchema = ({
 export type DielineForSchema = {
   title: string;
   slug: string;
+  description: string;
   materials: string;
   dimensionTypes: string;
   minWidth: number;
@@ -371,19 +362,15 @@ export type DielineForSchema = {
 };
 
 /**
- * A downloadable dieline, modelled as a `Product`.
+ * A dieline template, modelled as a `CreativeWork`.
  *
- * `Product` is deliberate: it is what Google can turn into a rich result with
- * price and availability, and a dieline genuinely is the thing being sold —
- * access to it is what a subscription buys. `additionalType` records that it is
- * a digital template, which answer engines pick up.
- *
- * The dieline file itself is not a URL a crawler can fetch (it is generated
- * client-side and gated behind a plan), so no `contentUrl` is claimed.
+ * Not a `Product`: Google requires a price, a review or a rating on one, and a
+ * dieline has none of these because access is sold by subscription. Declaring it
+ * would only produce errors in Search Console.
  */
-export const dielineProductSchema = (
+export const dielineSchema = (
   dieline: DielineForSchema,
-  { path, freeOffer }: { path: string; freeOffer: boolean },
+  { path }: { path: string },
 ): WithContext => {
   const image = dieline.dielineImage?.url
     ? [dieline.dielineImage.url, dieline.modelImage?.url].filter(
@@ -402,26 +389,19 @@ export const dielineProductSchema = (
     .filter(Boolean);
 
   return withContext({
-    "@type": ["Product", "CreativeWork"],
-    "@id": `${absoluteUrl(path)}#product`,
+    "@type": "CreativeWork",
+    "@id": `${absoluteUrl(path)}#dieline`,
     additionalType: "https://schema.org/DigitalDocument",
     name: `دایلاین ${dieline.title}`,
     alternateName: dieline.title,
     url: absoluteUrl(path),
-    /**
-     * `Dieline.specification` is a JSON geometry document, not prose — it is
-     * parsed into a spec tree by the editor. Echoing it into structured data
-     * would publish raw JSON as the product description, so the text is written
-     * from the fields that are actually human-readable: the title, the size
-     * range and the materials.
-     */
     description: dielineDescription(dieline),
     inLanguage: SITE_LANG,
     image,
     datePublished: dieline.createdAt.toISOString(),
     dateModified: dieline.updatedAt.toISOString(),
     ...(category.length ? { category } : {}),
-    ...(materials.length ? { material: materials.join("، ") } : {}),
+    ...(materials.length ? { material: materials.map(materialLabel).join("، ") } : {}),
     keywords: [
       "دایلاین",
       "قالب بسته‌بندی",
@@ -429,7 +409,6 @@ export const dielineProductSchema = (
       ...category,
       "طراحی جعبه",
     ].join(", "),
-    brand: { "@id": ORGANIZATION_ID },
     publisher: { "@id": ORGANIZATION_ID },
     isPartOf: { "@id": WEBSITE_ID },
     /**
@@ -437,25 +416,6 @@ export const dielineProductSchema = (
      * engine can quote them — this is the question users actually ask.
      */
     additionalProperty: buildDimensionProperties(dieline),
-    isAccessibleForFree: freeOffer,
-    offers: {
-      "@type": "Offer",
-      url: absoluteUrl(path),
-      availability: "https://schema.org/InStock",
-      priceCurrency: "IRR",
-      ...(freeOffer
-        ? { price: 0 }
-        : {
-            // The product is sold by subscription; the offer therefore points at
-            // the pricing page instead of inventing a per-item price.
-            priceSpecification: {
-              "@type": "PriceSpecification",
-              priceCurrency: "IRR",
-              valueAddedTaxIncluded: false,
-              url: absoluteUrl("/subscription"),
-            },
-          }),
-    },
   });
 };
 
@@ -487,17 +447,25 @@ const buildDimensionProperties = (dieline: DielineForSchema): JsonLdNode[] => {
     });
 };
 
+/** Cuts text for a snippet at a sentence or word end, never mid-word. */
+const clipSnippet = (text: string, max = 160): string => {
+  const clean = text.replace(/\s+/g, " ").trim();
+  if (clean.length <= max) return clean;
+
+  const head = clean.slice(0, max);
+  const sentence = Math.max(head.lastIndexOf("."), head.lastIndexOf("؛"));
+  if (sentence > max * 0.6) return head.slice(0, sentence + 1);
+  return `${head.slice(0, head.lastIndexOf(" "))}…`;
+};
+
 /**
- * The product blurb, assembled from the real columns rather than invented copy,
- * so the same sentence can appear in the meta description and the body.
- *
- * Kept inside the ~175-character window Google renders for a snippet: the sizes
- * are the reason someone clicks this result, so they must not be the part that
- * gets truncated. `specification` is deliberately not used — it is a JSON
- * geometry document, not text.
+ * The search snippet: the opening of the written description, or, while a template
+ * has none, a sentence built from its real columns. `specification` is never used:
+ * it is the template's geometry, which is what subscribers pay for.
  */
 export const dielineDescription = (dieline: {
   title: string;
+  description: string;
   minWidth: number;
   minLength: number;
   minHeight: number;
@@ -505,6 +473,8 @@ export const dielineDescription = (dieline: {
   maxLength: number;
   maxHeight: number;
 }): string => {
+  if (dieline.description.trim()) return clipSnippet(dieline.description);
+
   const size = [
     `${dieline.minWidth}×${dieline.minLength}×${dieline.minHeight}`,
     `${dieline.maxWidth}×${dieline.maxLength}×${dieline.maxHeight}`,

@@ -16,9 +16,14 @@ export default async function Layout({
 }) {
   const { slug } = await params;
   const dieline = await prisma.dieline.findFirst({
-    where: { slug },
+    where: { slug, active: true },
     // The structured data and the description block both name the categories.
-    include: { categoryByModel: true, categoryByUsage: true },
+    include: {
+      categoryByModel: true,
+      categoryByUsage: true,
+      dielineImage: true,
+      modelImage: true,
+    },
   });
 
   if (!dieline) return notFound();
@@ -114,20 +119,16 @@ export default async function Layout({
             </div>
           </div>
         </div>
+      </div>
 
-        {/*
-          The crawlable description of the dieline.
-
-          This block is the only server-rendered prose on a route whose body is
-          otherwise a client-only editor: without it the HTML a crawler receives
-          contains no `h1`, no sizes, no materials and no links, which leaves the
-          page with nothing to rank for. It is confined to the small-screen column
-          because on a desktop the editor owns the viewport and the canvas is
-          measured against that geometry.
-        */}
-        <div className="mx-auto w-full max-w-3xl border-t px-5 py-12">
-          <DielineDetails dieline={dieline} />
-        </div>
+      {/*
+        The description of the dieline, below the editor on every screen. It is the
+        only server-rendered prose on this route, and showing the same content to
+        visitors and crawlers is what keeps it from being hidden text. The editor's
+        box above has a fixed height, so the canvas geometry is unaffected.
+      */}
+      <div className="w-full border-t bg-background px-5 py-12">
+        <DielineDetails dieline={dieline} />
       </div>
     </div>
   );

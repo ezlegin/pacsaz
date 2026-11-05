@@ -1,4 +1,5 @@
 import DielinesCatalogue from "@/components/DielinesCatalogue";
+import { pageNumber } from "@/lib/catalogue";
 import { buildMetadata, SITE_NAME } from "@/lib/seo";
 import type { Metadata } from "next";
 import { permanentRedirect } from "next/navigation";
@@ -33,7 +34,8 @@ const page = async ({ searchParams }: Props) => {
 
 export default page;
 
-export const metadata: Metadata = buildMetadata({
+export const generateMetadata = async ({ searchParams }: Props): Promise<Metadata> => buildMetadata({
+  page: pageNumber((await searchParams).page),
   title: "کتابخانه قالب‌های دایلاین بسته‌بندی",
   description: `قالب‌های دایلاین آماده و لایه‌باز ${SITE_NAME} برای جعبه‌های تاشو، نمایشی، پستی، پاکت و اسلیو. ابعاد و متریال را دلخواه تغییر بده و خروجی DXF، PDF یا SVG آماده‌ی چاپ بگیر.`,
   path: "/dielines",

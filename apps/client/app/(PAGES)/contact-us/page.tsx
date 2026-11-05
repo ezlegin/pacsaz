@@ -85,7 +85,7 @@ const page = async () => {
               url: absoluteUrl("/"),
               email: CONTACT.email,
               telephone: CONTACT.telephone,
-              sameAs: SOCIAL_PROFILES,
+              ...(SOCIAL_PROFILES.length ? { sameAs: SOCIAL_PROFILES } : {}),
               contactPoint: [
                 {
                   "@type": "ContactPoint",

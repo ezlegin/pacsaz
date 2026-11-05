@@ -1,5 +1,6 @@
 import { FAQ_ITEMS } from "@/data/faq";
 import { absoluteUrl, CONTACT, SITE_NAME, SITE_TAGLINE } from "@/lib/seo/site";
+import { dielineDescription } from "@/lib/seo/schema";
 import { prisma } from "@repo/db";
 
 /**
@@ -104,7 +105,17 @@ async function catalogueSection(): Promise<string | null> {
   try {
     const dielines = await prisma.dieline.findMany({
       where: { active: true },
-      select: { title: true, slug: true, specification: true },
+      select: {
+        title: true,
+        slug: true,
+        description: true,
+        minWidth: true,
+        minLength: true,
+        minHeight: true,
+        maxWidth: true,
+        maxLength: true,
+        maxHeight: true,
+      },
       orderBy: { updatedAt: "desc" },
       take: CATALOGUE_LIMIT,
     });
@@ -116,7 +127,7 @@ async function catalogueSection(): Promise<string | null> {
       "",
       ...dielines.map(
         (dieline) =>
-          `- [${dieline.title}](${absoluteUrl(`/dieline/${dieline.slug}`)}): ${dieline.specification}`,
+          `- [${dieline.title}](${absoluteUrl(`/dieline/${dieline.slug}`)}): ${dielineDescription(dieline)}`,
       ),
       "",
     ].join("\n");

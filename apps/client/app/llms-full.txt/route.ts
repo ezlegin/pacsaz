@@ -1,6 +1,7 @@
 import { FAQ_CATEGORIES, FAQ_ITEMS } from "@/data/faq";
 import { termsAndConditions, termsGroups } from "@/data/terms";
 import { absoluteUrl, CONTACT, SITE_NAME, SITE_TAGLINE } from "@/lib/seo/site";
+import { dielineDescription, materialLabel } from "@/lib/seo/schema";
 import { prisma } from "@repo/db";
 
 /**
@@ -93,7 +94,7 @@ async function catalogue(): Promise<string | null> {
       select: {
         title: true,
         slug: true,
-        specification: true,
+        description: true,
         materials: true,
         minWidth: true,
         minLength: true,
@@ -117,7 +118,8 @@ async function catalogue(): Promise<string | null> {
           "",
           `- نشانی: ${absoluteUrl(`/dieline/${dieline.slug}`)}`,
           `- ابعاد قابل تنظیم: عرض ${dieline.minWidth}–${dieline.maxWidth} mm، طول ${dieline.minLength}–${dieline.maxLength} mm، ارتفاع ${dieline.minHeight}–${dieline.maxHeight} mm`,
-          `- متریال: ${dieline.materials}`,
+          `- متریال: ${dieline.materials.split(",").map(materialLabel).join("، ")}`,
+          `- توضیح: ${dielineDescription(dieline)}`,
           "",
         ].join("\n"),
       ),

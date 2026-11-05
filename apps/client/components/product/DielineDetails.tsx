@@ -1,6 +1,8 @@
+import { materialLabel } from "@/lib/seo";
 import { Dieline } from "@repo/db";
 import { cn } from "@repo/ui/lib/utils";
 import { ArrowLeft, Boxes, Check, Ruler, Tag } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 const fa = (value: number) =>
@@ -17,7 +19,7 @@ type DielineDetailsData = Pick<
   Dieline,
   | "title"
   | "slug"
-  | "specification"
+  | "description"
   | "materials"
   | "dimensionTypes"
   | "minWidth"
@@ -29,6 +31,8 @@ type DielineDetailsData = Pick<
 > & {
   categoryByModel?: { id: number; title: string; slug: string }[];
   categoryByUsage?: { id: number; title: string; slug: string }[];
+  dielineImage?: { url: string } | null;
+  modelImage?: { url: string } | null;
 };
 
 /**
@@ -41,7 +45,8 @@ type DielineDetailsData = Pick<
  * categories as links back into the catalogue, and a trail to the catalogue — so
  * the page has something to rank for and something to describe in an answer.
  *
- * Everything here comes from the database row; nothing is invented.
+ * Everything here comes from the database row; nothing is invented. Paragraphs of
+ * the written description are separated by line breaks in the admin form.
  */
 const DielineDetails = ({
   dieline,
@@ -54,6 +59,22 @@ const DielineDetails = ({
     .split(",")
     .map((material) => material.trim())
     .filter(Boolean);
+
+  const paragraphs = dieline.description
+    .split(/\n+/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
+
+  const images = [
+    dieline.dielineImage && {
+      url: dieline.dielineImage.url,
+      alt: `نقشه‌ی باز دایلاین ${dieline.title}`,
+    },
+    dieline.modelImage && {
+      url: dieline.modelImage.url,
+      alt: `مدل جعبه ${dieline.title}`,
+    },
+  ].filter((image) => !!image);
 
   const categories = [
     ...(dieline.categoryByModel ?? []),
@@ -117,6 +138,36 @@ const DielineDetails = ({
         </p>
       </header>
 
+      {/* ------------------------------ description ----------------------------- */}
+      {paragraphs.length > 0 && (
+        <div className="space-y-3 text-sm leading-8">
+          {paragraphs.map((paragraph) => (
+            <p key={paragraph}>{paragraph}</p>
+          ))}
+        </div>
+      )}
+
+      {/* -------------------------------- images -------------------------------- */}
+      {images.length > 0 && (
+        <div className="grid gap-4 sm:grid-cols-2">
+          {images.map((image) => (
+            <figure key={image.url} className="space-y-2">
+              <Image
+                src={image.url}
+                alt={image.alt}
+                width={640}
+                height={480}
+                sizes="(min-width: 640px) 384px, 100vw"
+                className="aspect-[4/3] w-full rounded-2xl border bg-white object-contain"
+              />
+              <figcaption className="text-center text-[11px] text-muted-foreground">
+                {image.alt}
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      )}
+
       {/* -------------------------------- specs --------------------------------- */}
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="rounded-2xl border bg-background p-5">
@@ -174,7 +225,7 @@ const DielineDetails = ({
                     key={material}
                     className="rounded-lg bg-muted px-2.5 py-1 text-[11px] text-muted-foreground"
                   >
-                    {material}
+                    {materialLabel(material)}
                   </li>
                 ))}
               </ul>
