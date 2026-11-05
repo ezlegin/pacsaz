@@ -270,8 +270,12 @@ const endHole = (x: Expr, y: Expr): Node => ({
 const LOCK_VARIABLES = [
   ...RELIEF_VARIABLES,
   { name: "S", expr: "min(length, width)" },
-  { name: "d", expr: "S / 2 + (depth > 0 ? depth : S / 4)" },
-  { name: "rt", expr: "min(k * 2, S / 8)" },
+  { name: "L", expr: "max(length, width)" },
+  // 0 on a long bottom, 1 on a square one: proportions shift between the two.
+  { name: "nearSquare", expr: "max(0, S / L - 0.75) * 4" },
+  { name: "d", expr: "S / 2 + (depth > 0 ? depth : S * (0.25 - 0.03 * nearSquare))" },
+  // Tips are nearly sharp on a long bottom and rounded generously on a square one.
+  { name: "rt", expr: "min(k * 2, S / 8) + nearSquare * S * 0.05" },
   // On a square box the faces are as wide as the sides: the tab keeps a third.
   { name: "tw", expr: "max(edge - S, edge / 3)" },
 ];
@@ -329,16 +333,20 @@ export const snapLockSide: ComponentDef = {
   params: [...lockParams, { name: "wedge", label: "Tab edge: -1 widens to a barb, 1 narrows, 0 straight", default: 0, min: -1, max: 1 }],
   variables: [
     ...LOCK_VARIABLES,
-    { name: "m", expr: "edge / 2 + k" },
-    // Runs along the long side of the bottom, so its reach follows that side: the
-    // two side flaps stop a board short of the middle, whatever the proportions.
-    { name: "reach", expr: "depth > 0 ? d : max(edge / 2, max(length, width) / 2 - k)" },
-    // The tab widens towards its tip, into a barb that holds the bottom shut.
-    // A square box has no tab to lean.
-    { name: "lean", expr: "wedge * max(0, min(edge * 0.12, edge / 4 - k, reach - edge / 2))" },
+    // Past the middle of the flap, so the barb hooks well behind the notch's floor.
+    { name: "m", expr: "edge / 2 - S * 0.02" },
+    // The barb stays crisp: a big radius would take away what it grips with.
+    { name: "barb", expr: "min(k * 2, S / 8)" },
+    // Level with the other flaps on a long bottom. Nearer square the two side flaps
+    // would collide, so they stop 3% of the long side short of the middle.
+    { name: "reach", expr: "depth > 0 ? d : min(d, L * 0.47)" },
+    // Where the slope ends: half the panel, or a shallower slope on a short reach.
+    { name: "sy", expr: "min(edge / 2, reach * 0.7)" },
+    // The tab widens towards its tip into a barb that holds the bottom shut.
+    { name: "lean", expr: "wedge * (reach - sy) * 0.2" },
   ],
   nodes: [
-    path("outline", "cut", SLOPED_START, [to("m", "edge / 2"), to("m + lean", "reach", "rt"), to("edge - k", "reach"), STRAIGHT_END]),
+    path("outline", "cut", SLOPED_START, [to("m", "sy"), to("m + lean", "reach", "barb"), to("edge - k", "reach"), STRAIGHT_END]),
     startHole("tx", "ty"),
     endHole("edge - k", "c"),
     line("hinge", "crease", ["startNext ? hx : 0", "0"], ["edge - hx", "0"]),

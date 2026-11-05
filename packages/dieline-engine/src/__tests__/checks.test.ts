@@ -20,7 +20,7 @@ describe("design checks", () => {
     }
   });
 
-  it.each([[90, 50, 0.5], [120, 33, 2], [60, 60, 1], [40, 150, 1]])("keeps the snap lock whole with long side flaps at %d x %d", (width, length, thickness) => {
+  it.each([[90, 50, 0.5], [120, 33, 2], [60, 60, 1], [100, 100, 0.5], [100, 90, 2], [40, 150, 1]])("keeps the barbed snap lock whole at %d x %d", (width, length, thickness) => {
     const result = render(doc({ nodes: [presetBody("snapLockBottom", "body")] }), { width, length, height: 100, thickness });
     expect(result.diagnostics).toEqual([]);
     expect(checkDieline(result)).toEqual([]);
