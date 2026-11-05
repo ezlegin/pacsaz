@@ -13,6 +13,13 @@ import type { FoldRig } from "./types";
  *    first, then flaps hinged on flaps (the tuck bends while its lid is still
  *    open), and the lid closes last, carrying the bent tuck into the box.
  *
+ * A snap lock bottom has an order of its own. Its four flaps overlap, so they go
+ * in one after another: the notched flap, both side flaps together, then the tab
+ * flap, each pressed 20° past square. With all four there, they ease back to
+ * square together. All four stay flat, so they finish in layers one board apart
+ * instead of cutting through each other: the notched flap outside, the tab flap on
+ * it, the side flaps within. The flaps' bend lines only identify the lock.
+ *
  * Viewers start closed, so dragging the slider back reverses this: the lid
  * opens, the tuck straightens, the dust flaps open, the bottom, then the sides.
  *
@@ -29,6 +36,11 @@ export type FoldWindow = {
   end: number;
   /** Fold angle at full closure (radians), when it differs from the node's own. */
   angle?: number;
+  /**
+   * Goes past the final angle first, then eases back to it during this window,
+   * sliding `layer` board thicknesses into the box as it does.
+   */
+  press?: { angle: number; start: number; end: number; layer: number };
 };
 
 const ALWAYS: FoldWindow = { start: 0, end: 1 };
@@ -36,6 +48,10 @@ const ALWAYS: FoldWindow = { start: 0, end: 1 };
 /** How far past square a dust flap or the glue flap tucks in. */
 const TUCK_IN = (6 * Math.PI) / 180;
 const SQUARE = Math.PI / 2;
+/** How far past its final angle a snap lock flap is pressed. */
+const LOCK_PRESS = (20 * Math.PI) / 180;
+/** How many board thicknesses into the box each stage's flaps finish. */
+const LOCK_LAYER: Record<1 | 2 | 3, number> = { 1: 0, 2: 2, 3: 1 };
 
 export function foldSchedule(rig: FoldRig): FoldWindow[] {
   const nodes = rig.nodes;
@@ -107,18 +123,47 @@ export function foldSchedule(rig: FoldRig): FoldWindow[] {
 
   //! Flaps ------------------------------------------------------------------------
 
+  /**
+   * A snap lock is the flaps that carry bends: the notched flap has one on each
+   * prong, the tab flap one across its tongue, and the two left are the side flaps.
+   */
+  const bends = (i: number) => nodes.filter((n) => n.parent === i && n.kind === "bend").length;
+  const lockStage = new Map<number, 1 | 2 | 3>();
+  for (const side of ["bottom", "top"] as const) {
+    const flaps = [...group.entries()].filter(([, g]) => g.side === side && g.level === 1).map(([i]) => i);
+    const notched = flaps.find((i) => bends(i) === 2);
+    const tab = flaps.find((i) => bends(i) === 1);
+    if (notched === undefined || tab === undefined) continue;
+    for (const flap of flaps) lockStage.set(flap, flap === notched ? 1 : flap === tab ? 3 : 2);
+  }
+
   // Stage of a flap: dust flaps (lone first-level flaps), then deeper flaps from
   // the deepest up, then the lids that carry them.
   const flapStage = (i: number): string => {
     const g = group.get(i)!;
+    // A bend moves with its flap, so the tab is already flexed as it goes in.
+    if (nodes[i]!.kind === "bend") return flapStage(nodes[i]!.parent!);
+    const lock = lockStage.get(i);
+    if (lock) return `${g.side}:lock${lock}`;
     if (g.level === 1) return `${g.side}:${hasChildren.has(i) ? "lid" : "dust"}`;
     return `${g.side}:level${g.level}`;
   };
   for (const side of ["bottom", "top"] as const) {
     const mine = [...group.entries()].filter(([, g]) => g.side === side);
     const deeper = [...new Set(mine.map(([, g]) => g.level).filter((l) => l > 1))].sort((a, b) => b - a);
-    const keys = [`${side}:dust`, ...deeper.map((l) => `${side}:level${l}`), `${side}:lid`];
-    for (const key of keys) if (mine.some(([i]) => flapStage(i) === key)) stages.push(key);
+    const keys = [
+      `${side}:lock1`,
+      `${side}:lock2`,
+      `${side}:lock3`,
+      `${side}:settle`,
+      `${side}:dust`,
+      ...deeper.map((l) => `${side}:level${l}`),
+      `${side}:lid`,
+    ];
+    const locked = mine.some(([i]) => lockStage.has(i));
+    for (const key of keys) {
+      if (mine.some(([i]) => flapStage(i) === key) || (locked && key === `${side}:settle`)) stages.push(key);
+    }
   }
 
   if (stages.length === 0) return nodes.map(() => ALWAYS);
@@ -139,6 +184,15 @@ export function foldSchedule(rig: FoldRig): FoldWindow[] {
     const g = group.get(i);
     if (!g) return ALWAYS;
     const window = windowOf(flapStage(i));
+    if (node.kind === "bend") return { ...window, angle: 0 };
+    const lock = lockStage.get(i);
+    if (lock) {
+      const settle = windowOf(`${g.side}:settle`);
+      return {
+        ...window,
+        press: { angle: node.angle + LOCK_PRESS, start: settle.start, end: settle.end, layer: LOCK_LAYER[lock] },
+      };
+    }
     // Only an untouched square fold is deepened; an authored angle is kept.
     // Dust flaps under a lid, and a tuck on its lid, go a little past square so
     // the lid lands over the dust flaps and the tuck slides inside the box.
@@ -146,6 +200,15 @@ export function foldSchedule(rig: FoldRig): FoldWindow[] {
     const dust = flapStage(i).endsWith(":dust") && lidOn.has(g.side);
     return square && (dust || g.level > 1) ? { ...window, angle: node.angle + TUCK_IN } : window;
   });
+}
+
+/** The fold angle of a panel with this window at overall `progress`. */
+export function foldAngle(window: FoldWindow, nodeAngle: number, progress: number): number {
+  const angle = window.angle ?? nodeAngle;
+  const { press } = window;
+  if (!press) return angle * stageProgress(window, progress);
+  if (progress <= press.start) return press.angle * stageProgress(window, progress);
+  return press.angle + (angle - press.angle) * stageProgress(press, progress);
 }
 
 /** How far a panel with this window has folded at overall `progress`, 0–1. */

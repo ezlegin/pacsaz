@@ -206,7 +206,7 @@ const splitSegments = (segments: Segment[]): Segment[] => {
 
 /** Removes duplicate edges, preferring the "cut" kinds over folds. */
 const dedupe = (segments: Segment[]): Segment[] => {
-  const rank: Record<SegmentKind, number> = { trim: 0, perf: 1, fold: 2 };
+  const rank: Record<SegmentKind, number> = { trim: 0, perf: 1, fold: 2, bend: 3 };
   const seen = new Map<string, Segment>();
 
   for (const segment of segments) {

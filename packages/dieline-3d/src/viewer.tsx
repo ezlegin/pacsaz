@@ -1,8 +1,8 @@
 "use client";
 
-import { Bounds, Environment, Lightformer, OrbitControls } from "@react-three/drei";
-import { Canvas } from "@react-three/fiber";
-import { useEffect, useMemo, useState } from "react";
+import { Bounds, OrbitControls } from "@react-three/drei";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { applyArtwork, applyFold, buildRigScene, materialStyleFor, type RigScene } from "./build";
 import { composeArtwork, type ArtworkTransform } from "./artwork";
@@ -12,17 +12,38 @@ import { parseFoldConfig } from "./foldConfig";
 import type { FoldRig } from "./types";
 
 /**
- * Studio backdrop: a grey sweep, darker at the top, as in a product shot. Drawn
- * by CSS behind a transparent canvas. Dark enough that a white board still reads
- * against it, neutral enough not to tint the kraft stock.
+ * The world: a grey gradient, darker at the top, drawn by CSS behind a transparent
+ * canvas. Dark enough that a white board stands out, neutral so kraft stays kraft.
  */
-const BACKDROP = "radial-gradient(ellipse at 50% 85%, #fbfbfb 0%, #ededed 55%, #dcdcdc 100%)";
+const BACKDROP = "linear-gradient(to bottom, #b2b2b2 0%, #c9c9c9 45%, #e8e8e8 100%)";
 
 /** Highlight colour for the panel selected in an editor. */
 const SELECTION_COLOR = "#7c3aed";
 
 /** Why the viewer has nothing to draw. */
 export type ViewerEmptyReason = "pending" | "no-geometry" | "failed";
+
+/** The key light's direction in view space: up and to the viewer's left. */
+const KEY_DIRECTION = new THREE.Vector3(-0.9, 0.5, 0.6).normalize();
+
+/**
+ * A light that moves with the camera, so whichever way the model is turned, the
+ * face on the left is bright and the one on the right soft grey. A light fixed in
+ * the world leaves the back of the box dark.
+ */
+const KeyLight = ({ distance }: { distance: number }) => {
+  const light = useRef<THREE.DirectionalLight>(null);
+  const camera = useThree((state) => state.camera);
+
+  useFrame(() => {
+    light.current?.position
+      .copy(KEY_DIRECTION)
+      .applyQuaternion(camera.quaternion)
+      .multiplyScalar(distance);
+  });
+
+  return <directionalLight ref={light} intensity={2} />;
+};
 
 /**
  * Imperative bridge between the fold rig and React Three Fiber.
@@ -317,6 +338,8 @@ export const DielineViewer = ({
     <div className={`relative overflow-hidden ${className ?? ""}`} style={{ background: BACKDROP }}>
       <Canvas
         dpr={[1, 2]}
+        // No tone mapping, so a white board under full light stays white.
+        flat
         gl={{ antialias: true, alpha: true }}
         camera={{
           /* Start above and to the right, looking down at the model. */
@@ -331,23 +354,15 @@ export const DielineViewer = ({
         }}
       >
         {/*
-          Soft studio light: a large softbox overhead and strips on either side,
-          reflected by the board (an environment built here, nothing downloaded),
-          plus a soft key from the front left so the faces of the box shade
-          differently, and a gentle back light so the reverse is never black.
+          The key light follows the camera; the ambient light keeps the faces
+          turned away from it a soft grey. No environment map, because reflections
+          are what make card look like plastic.
         */}
-        <Environment resolution={256}>
-          <Lightformer form="rect" intensity={2.2} position={[0, 5, 0]} rotation-x={Math.PI / 2} scale={[10, 10, 1]} />
-          <Lightformer form="rect" intensity={1.2} position={[-5, 1, 2]} rotation-y={Math.PI / 2} scale={[8, 3, 1]} />
-          <Lightformer form="rect" intensity={0.9} position={[5, 1, 2]} rotation-y={-Math.PI / 2} scale={[8, 3, 1]} />
-          <Lightformer form="rect" intensity={0.6} position={[0, 1, 6]} scale={[8, 4, 1]} />
-        </Environment>
-        <hemisphereLight args={["#ffffff", "#b9b9b9", 0.35]} />
-        <directionalLight position={[-span * 0.8, span * 1.2, span]} intensity={0.9} />
-        <directionalLight position={[span * 0.6, span * 0.4, -span]} intensity={0.35} />
+        <ambientLight intensity={1.4} />
+        <KeyLight distance={span} />
 
         {/* Fit the model to the viewer on first view and whenever it is rebuilt or resized. */}
-        <Bounds fit clip observe margin={1.35} maxDuration={0}>
+        <Bounds fit clip observe margin={1.75} maxDuration={0}>
           <RigObject
             scene={scene}
             rig={rig}
@@ -361,7 +376,7 @@ export const DielineViewer = ({
           enablePan
           enableDamping
           dampingFactor={0.12}
-          minDistance={span * 0.2}
+          minDistance={span * 0.45}
           maxDistance={span * 4}
         />
       </Canvas>

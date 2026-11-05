@@ -50,7 +50,7 @@ export function bottomFeatures(type: BottomType): (EdgeFeature | undefined)[] {
     case "reverseTuck":
       return [undefined, feature("lib:dustFlap", { flip: true }), feature("lib:tuckLid"), feature("lib:dustFlap")];
     case "snapLock":
-      return [feature("lib:snapLockNotched"), feature("lib:snapLockSide", { flip: true }), feature("lib:snapLockTab"), feature("lib:snapLockSide")];
+      return [feature("lib:snapLockNotched"), feature("lib:snapLockSide", { flip: true, args: { wedge: "-1" } }), feature("lib:snapLockTab"), feature("lib:snapLockSide", { args: { wedge: "-1" } })];
     case "autoLock":
       return [
         feature("lib:autoLockMain", { flip: true }),
@@ -94,9 +94,9 @@ export function presetBody(id: PresetId, name: string): PanelsNode {
         ...base,
         panels: [
           panel("front", FACE, feature("lib:tuckLid"), feature("lib:snapLockNotched")),
-          panel("side1", SIDE, feature("lib:dustFlap", { flip: true }), feature("lib:snapLockSide", { flip: true })),
+          panel("side1", SIDE, feature("lib:dustFlap", { flip: true }), feature("lib:snapLockSide", { flip: true, args: { wedge: "-1" } })),
           panel("back", FACE, undefined, feature("lib:snapLockTab")),
-          panel("side2", SIDE, feature("lib:dustFlap"), feature("lib:snapLockSide")),
+          panel("side2", SIDE, feature("lib:dustFlap"), feature("lib:snapLockSide", { args: { wedge: "-1" } })),
         ],
       };
 

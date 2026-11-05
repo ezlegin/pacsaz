@@ -6,7 +6,7 @@ import type { LineType } from "../spec/types";
 
 /**
  * The layered SVG the 3D fold rig (`@repo/dieline-3d`) reads: one path each with
- * the ids `trim`, `fold` and `perf`, plus `window` with each window's outline.
+ * the ids `trim`, `fold`, `perf` and `bend`, plus `window` with each window's outline.
  * Arcs are written as short chords because the rig works on straight segments
  * anyway.
  *
@@ -14,12 +14,13 @@ import type { LineType } from "../spec/types";
  * side are still hinged along that line. The rig drops the pieces of board the
  * whole fold makes inside a window, using the `window` outlines.
  */
-const LAYER: Partial<Record<LineType, "trim" | "fold" | "perf">> = {
+const LAYER: Partial<Record<LineType, "trim" | "fold" | "perf" | "bend">> = {
   cut: "trim",
   crease: "fold",
   reverseCrease: "fold",
   cutCrease: "fold",
   perf: "perf",
+  bend: "bend",
 };
 
 const f = (n: number) => String(Math.round(n * 1000) / 1000);
@@ -35,7 +36,7 @@ function polyline(p: Path): Pt[] {
 }
 
 export function toFoldSVG(result: RenderResult): string {
-  const layers: Record<"trim" | "fold" | "perf", string[]> = { trim: [], fold: [], perf: [] };
+  const layers: Record<"trim" | "fold" | "perf" | "bend", string[]> = { trim: [], fold: [], perf: [], bend: [] };
   for (const p of [...result.paths, ...result.foldsInHoles]) {
     const layer = LAYER[p.lineType];
     if (!layer) continue;

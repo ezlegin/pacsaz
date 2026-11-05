@@ -22,10 +22,11 @@ export const LINE_STYLES: Record<LineType, LineStyle> = {
   halfCut: { color: "#0891b2", dash: [2, 1], weight: 0.8, label: "Half cut" },
   glue: { color: "#16a34a", dash: [1.5, 1], weight: 0.8, label: "Glue area" },
   guide: { color: "#9ca3af", dash: [1, 1], weight: 0.6, label: "Guide" },
+  bend: { color: "#9ca3af", dash: [1, 1], weight: 0.6, label: "Bend (3D only)" },
 };
 
 /** DXF layer names, the way die makers expect to find them. */
-export const DXF_LAYERS: Record<Exclude<LineType, "guide">, string> = {
+export const DXF_LAYERS: Record<Exclude<LineType, "guide" | "bend">, string> = {
   cut: "CUT",
   crease: "CREASE",
   reverseCrease: "REVERSE_CREASE",

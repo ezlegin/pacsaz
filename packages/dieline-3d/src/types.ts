@@ -10,7 +10,7 @@
 export type Pt = [number, number];
 
 /** Which generator layer a segment came from. */
-export type SegmentKind = "trim" | "fold" | "perf";
+export type SegmentKind = "trim" | "fold" | "perf" | "bend";
 
 export type Segment = {
   a: Pt;

@@ -41,6 +41,8 @@ const FOLDABLE: Record<string, SegmentKind> = {
   trim: "trim",
   fold: "fold",
   perf: "perf",
+  // Board that flexes without a crease: a hinge like a fold, told apart by the schedule.
+  bend: "bend",
 };
 
 const attr = (tag: string, name: string): string | null => {

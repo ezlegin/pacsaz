@@ -41,6 +41,7 @@ export const DielineLayer = memo(function DielineLayer({
         </pattern>
       </defs>
       {groups.map((g) => {
+        if (g.lineType === "bend") return null;
         if (g.lineType === "guide" && !showGuides) return null;
         if (g.lineType === "glue") return null;
         const style = LINE_STYLES[g.lineType];
@@ -67,7 +68,7 @@ export const DielineLayer = memo(function DielineLayer({
 export const GhostLayer = memo(function GhostLayer({ result, color }: { result: RenderResult; color: string }) {
   const d = useMemo(
     () =>
-      groupPaths(result.paths.filter((p) => p.lineType !== "guide" && p.lineType !== "glue"))
+      groupPaths(result.paths.filter((p) => p.lineType !== "guide" && p.lineType !== "glue" && p.lineType !== "bend"))
         .map((g) => g.d)
         .join(""),
     [result],

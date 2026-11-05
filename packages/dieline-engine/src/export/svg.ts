@@ -134,6 +134,7 @@ export function toSVG(result: RenderResult, options: SvgOptions = {}): string {
   const groups = new Map<string, Path[]>();
   const paths = options.nicks ? addNicks(result.paths, options.nicks) : result.paths;
   for (const p of paths) {
+    if (p.lineType === "bend") continue;
     if (p.lineType === "guide" && !options.includeGuides) continue;
     const key = `${p.nodeId}\u0000${p.lineType}`;
     const list = groups.get(key);

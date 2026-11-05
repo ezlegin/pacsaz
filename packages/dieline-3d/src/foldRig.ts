@@ -30,7 +30,7 @@ type Adjacency = {
   faceB: number;
   from: Pt;
   to: Pt;
-  kind: "fold" | "perf";
+  kind: "fold" | "perf" | "bend";
 };
 
 const sub = (a: Pt, b: Pt): Pt => [a[0] - b[0], a[1] - b[1]];
@@ -71,7 +71,7 @@ const collectAdjacency = (
         faceB: faces.b,
         from: edge.a,
         to: edge.b,
-        kind: edge.kind === "perf" ? "perf" : "fold",
+        kind: edge.kind,
       });
     }
   }

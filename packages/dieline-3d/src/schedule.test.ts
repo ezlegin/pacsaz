@@ -1,5 +1,5 @@
 import { buildFoldRig } from "./foldRig";
-import { foldSchedule, stageProgress } from "./schedule";
+import { foldAngle, foldSchedule, stageProgress } from "./schedule";
 import type { Pt, Segment } from "./types";
 
 let failures = 0;
@@ -79,5 +79,66 @@ assert("dust, then tuck, then lid", dust.end <= tuck.start + 1e-9 && tuck.end <=
 assert("dust flap tucks past square under the lid", (dust.angle ?? 0) > Math.PI / 2);
 assert("glue flap tucks past square", (glue.angle ?? 0) > Math.PI / 2);
 assert("lid keeps its own angle", lid.angle === undefined);
+
+/*
+  A snap lock bottom: panels 20, 10, 20, 10 wide with flaps 8 deep, separated by
+  small gaps. The first flap has a notch and the third narrows to a tab.
+*/
+const lockSegs: Segment[] = [
+  ...loop([
+    [0, 0], [60, 0], [60, 34], [56, 38], [50.5, 38], [50.5, 30], [50, 30], [49, 30], [45, 38], [35, 38], [31, 30], [30, 30],
+    [29.5, 30], [29.5, 34], [25, 38], [20.5, 38], [20.5, 30], [20, 30], [19.5, 30], [19.5, 38], [15, 38], [15, 34], [5, 34], [5, 38], [0, 38],
+  ]),
+  { a: [20, 0], b: [20, 30], kind: "fold" },
+  { a: [30, 0], b: [30, 30], kind: "fold" },
+  { a: [50, 0], b: [50, 30], kind: "fold" },
+  { a: [0, 30], b: [19.5, 30], kind: "fold" },
+  { a: [20.5, 30], b: [29.5, 30], kind: "fold" },
+  { a: [31, 30], b: [49, 30], kind: "fold" },
+  { a: [50.5, 30], b: [60, 30], kind: "fold" },
+  { a: [0, 34], b: [5, 34], kind: "bend" },
+  { a: [15, 34], b: [19.5, 34], kind: "bend" },
+  { a: [33, 34], b: [47, 34], kind: "bend" },
+];
+const rig3 = buildFoldRig(lockSegs);
+const s3 = foldSchedule(rig3);
+const flaps3 = rig3.nodes
+  .map((n, i) => ({ i, y: n.face.centroid[1], x: n.face.centroid[0], kind: n.kind }))
+  .filter((n) => n.y > 30 && n.kind !== "bend")
+  .sort((a, b) => a.x - b.x);
+assert("snap lock has four flaps", flaps3.length === 4, JSON.stringify(rig3.stats));
+if (flaps3.length === 4) {
+  const [one, sideA, three, sideB] = flaps3.map((f) => s3[f.i]!);
+  assert("notched flap first", one!.end <= sideA!.start + 1e-9, JSON.stringify(s3));
+  assert("side flaps fold together", sideA!.start === sideB!.start);
+  assert("tab flap third", sideA!.end <= three!.start + 1e-9);
+  const press = one!.press!;
+  assert("all flaps settle together after the third", press.start >= three!.end - 1e-9 && three!.press!.start === press.start);
+  const node = rig3.nodes[flaps3[0]!.i]!;
+  const deg = (r: number) => Math.round((r * 180) / Math.PI);
+  assert("pressed to 110 before settling", deg(foldAngle(one!, node.angle, press.start)) === 110);
+  assert("finishes square", [one, sideA, sideB, three].map((w) => deg(foldAngle(w!, node.angle, 1))).join() === "90,90,90,90");
+  assert("layers run notched, tab, sides", [one, three, sideA, sideB].map((w) => w!.press!.layer).join() === "0,1,2,2");
+  const parts = rig3.nodes.flatMap((n, i) => (n.kind === "bend" ? [foldAngle(s3[i]!, n.angle, 1)] : []));
+  assert("the flaps stay straight", parts.length === 3 && parts.every((a) => a === 0));
+  const bent = rig3.nodes.flatMap((n, i) => (n.kind === "bend" ? [{ n, w: s3[i]! }] : []));
+  assert("three parts bend, each with its flap", bent.length === 3 && bent.every(({ n, w }) => w.start === s3[n.parent!]!.start));
+}
+
+/* Plain deep flaps, as on a wide FEFCO 0201, are not a lock. */
+const plainSegs: Segment[] = [
+  ...loop([
+    [0, 0], [60, 0], [60, 38], [50.5, 38], [50.5, 30], [50, 30], [49.5, 30], [49.5, 38], [30.5, 38], [30.5, 30], [30, 30],
+    [29.5, 30], [29.5, 38], [20.5, 38], [20.5, 30], [20, 30], [19.5, 30], [19.5, 38], [0, 38],
+  ]),
+  { a: [20, 0], b: [20, 30], kind: "fold" },
+  { a: [30, 0], b: [30, 30], kind: "fold" },
+  { a: [50, 0], b: [50, 30], kind: "fold" },
+  { a: [0, 30], b: [19.5, 30], kind: "fold" },
+  { a: [20.5, 30], b: [29.5, 30], kind: "fold" },
+  { a: [30.5, 30], b: [49.5, 30], kind: "fold" },
+  { a: [50.5, 30], b: [60, 30], kind: "fold" },
+];
+assert("plain deep flaps are not pressed", foldSchedule(buildFoldRig(plainSegs)).every((w) => !w.press));
 
 console.log(failures === 0 ? "\nALL FOLD SCHEDULE CHECKS PASSED" : `\n${failures} FAILED`);

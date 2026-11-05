@@ -20,6 +20,12 @@ describe("design checks", () => {
     }
   });
 
+  it.each([[90, 50, 0.5], [120, 33, 2], [60, 60, 1], [40, 150, 1]])("keeps the snap lock whole with long side flaps at %d x %d", (width, length, thickness) => {
+    const result = render(doc({ nodes: [presetBody("snapLockBottom", "body")] }), { width, length, height: 100, thickness });
+    expect(result.diagnostics).toEqual([]);
+    expect(checkDieline(result)).toEqual([]);
+  });
+
   it.each(PRESETS.map((p) => p.id))("takes the %s preset's friction locks as hooks on thick board", (id) => {
     expect(checkDieline(render(doc({ nodes: [presetBody(id, "body")] }), { width: 60, length: 120, height: 80, thickness: 3 }))).toEqual([]);
   });

@@ -264,6 +264,8 @@ const endHole = (x: Expr, y: Expr): Node => ({
  * The snap lock (1-2-3) bottom: four flaps that fold in order and lock without
  * glue. Each flap meets its opposite in the middle of the box, S / 2 deep, and
  * runs on past it; there the back flap's tab enters the front flap's notch.
+ * Past the middle the board flexes into the box, so the tab and the prongs beside
+ * the notch end behind the opposite flap: the `bend` lines, which only the 3D reads.
  */
 const LOCK_VARIABLES = [
   ...RELIEF_VARIABLES,
@@ -296,6 +298,8 @@ export const snapLockNotched: ComponentDef = {
     startHole("k", "c"),
     endHole("edge - k", "c"),
     line("hinge", "crease", ["hx", "0"], ["edge - hx", "0"]),
+    line("startProng", "bend", ["k", "S / 2"], ["n", "S / 2"]),
+    line("endProng", "bend", ["edge - n", "S / 2"], ["edge - k", "S / 2"]),
   ],
 };
 
@@ -312,6 +316,7 @@ export const snapLockTab: ComponentDef = {
     startHole("tx", "ty"),
     endHole("edge - tx", "ty"),
     line("hinge", "crease", ["startNext ? hx : 0", "0"], ["edge - (endNext ? hx : 0)", "0"]),
+    line("tongue", "bend", ["m", "S / 2"], ["edge - m", "S / 2"]),
   ],
 };
 
@@ -321,10 +326,19 @@ export const snapLockSide: ComponentDef = {
   category: "Locks",
   description: "Snap lock bottom, narrow panel: slopes in from the start of the edge to a tab along the end. Flip it for the other side panel.",
   edge: { hinge: "none", relief: true, straight: "end" },
-  params: lockParams,
-  variables: [...LOCK_VARIABLES, { name: "m", expr: "edge / 2 + k" }],
+  params: [...lockParams, { name: "wedge", label: "Tab edge: -1 widens to a barb, 1 narrows, 0 straight", default: 0, min: -1, max: 1 }],
+  variables: [
+    ...LOCK_VARIABLES,
+    { name: "m", expr: "edge / 2 + k" },
+    // Runs along the long side of the bottom, so its reach follows that side: the
+    // two side flaps stop a board short of the middle, whatever the proportions.
+    { name: "reach", expr: "depth > 0 ? d : max(edge / 2, max(length, width) / 2 - k)" },
+    // The tab widens towards its tip, into a barb that holds the bottom shut.
+    // A square box has no tab to lean.
+    { name: "lean", expr: "wedge * max(0, min(edge * 0.12, edge / 4 - k, reach - edge / 2))" },
+  ],
   nodes: [
-    path("outline", "cut", SLOPED_START, [to("m", "edge / 2"), to("m", "d", "rt"), to("edge - k", "d"), STRAIGHT_END]),
+    path("outline", "cut", SLOPED_START, [to("m", "edge / 2"), to("m + lean", "reach", "rt"), to("edge - k", "reach"), STRAIGHT_END]),
     startHole("tx", "ty"),
     endHole("edge - k", "c"),
     line("hinge", "crease", ["startNext ? hx : 0", "0"], ["edge - hx", "0"]),

@@ -14,7 +14,7 @@ export function toDXF(result: RenderResult, options: { includeBleed?: boolean; n
   const paths = options.nicks ? addNicks(result.paths, options.nicks) : result.paths;
 
   for (const p of paths) {
-    if (p.lineType === "guide") continue;
+    if (p.lineType === "guide" || p.lineType === "bend") continue;
     const layer = DXF_LAYERS[p.lineType];
     const list = byLayer.get(layer);
     if (list) list.push(p);

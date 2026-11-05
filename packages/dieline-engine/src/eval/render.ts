@@ -755,7 +755,7 @@ export function render(doc: DielineDocument, inputs: RenderInputs): RenderResult
   const nodes = context.infos();
   const rulers = context.rulers(doc.rulers);
 
-  const production = paths.filter((p) => p.lineType !== "guide");
+  const production = paths.filter((p) => p.lineType !== "guide" && p.lineType !== "bend");
 
   let bleed: Prim[] = [];
   if (inputs.bleed && inputs.bleed > 0) {

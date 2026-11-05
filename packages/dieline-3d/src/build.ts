@@ -1,4 +1,4 @@
-import { foldSchedule, stageProgress, type FoldWindow } from "./schedule";
+import { foldAngle, foldSchedule, stageProgress, type FoldWindow } from "./schedule";
 import * as THREE from "three";
 import { boardTextures, type BoardTextures } from "./board";
 import type { FoldRig, Pt, RigNode } from "./types";
@@ -29,14 +29,14 @@ export type MaterialStyle = {
 const WHITE_BOARD: MaterialStyle = {
   color: "#f4f4f2",
   edge: "#d8d8d4",
-  roughness: 0.72,
+  roughness: 0.9,
   label: "مقوای سفید",
 };
 
 const KRAFT_BOARD: MaterialStyle = {
   color: "#c8a273",
   edge: "#a98454",
-  roughness: 0.88,
+  roughness: 0.95,
   label: "مقوای کارتنی",
 };
 
@@ -62,6 +62,12 @@ export type RigScene = {
   group: THREE.Group;
   /** Pivot groups, parallel to `rig.nodes`, for driving the fold animation. */
   pivots: THREE.Group[];
+  /** Where each pivot sits in its parent before any layering. */
+  rest: THREE.Vector3[];
+  /** Modelled board thickness, in mm: one flap layer. */
+  thickness: number;
+  /** One-piece faces over closed locks, shown from `from` in the fold. */
+  caps: { mesh: THREE.Mesh; from: number }[];
   size: THREE.Vector3;
   style: MaterialStyle;
   /** Surface textures: paper grain, or kraft liner and flute ridges. Null outside a browser. */
@@ -386,7 +392,7 @@ export const buildRigScene = ({
       bumpMap: board?.bumpMap ?? null,
       bumpScale: board && style === KRAFT_BOARD ? 0.5 : 0.15,
       roughness: style.roughness,
-      metalness: 0.02,
+      metalness: 0,
       side: THREE.DoubleSide,
       // Slight polygon offset keeps coincident faces from z-fighting when the
       // box is fully closed.
@@ -403,6 +409,65 @@ export const buildRigScene = ({
     mesh.userData.panelIndex = index;
 
     pivot.add(mesh);
+  });
+
+  /* ----------------------------- closed bottoms ---------------------------- */
+  /**
+   * A closed snap lock is one flat face: pressed home, the seams between its flaps
+   * barely show. So a plain sheet covers the whole bottom once it has closed. It
+   * rides on the notched flap, just outside it, and takes the board's texture and
+   * any artwork from the same flat-pattern mapping as the panels.
+   */
+  const caps: RigScene["caps"] = [];
+
+  scheduleOf(rig).forEach((window, index) => {
+    const node = rig.nodes[index]!;
+    const bends = rig.nodes.filter((n) => n.parent === index && n.kind === "bend");
+    const mesh = pivots[index]!.children.find((child) => (child as THREE.Mesh).isMesh) as THREE.Mesh | undefined;
+    if (!window.press || bends.length !== 2 || node.parent === null || !mesh) return;
+
+    const along = Math.hypot(node.axis[0], node.axis[1]);
+    const u: Pt = [node.axis[0] / along, node.axis[1] / along];
+    const dot = (a: Pt, b: Pt) => a[0] * b[0] + a[1] * b[1];
+    const from = (p: Pt): Pt => [p[0] - node.pivot[0], p[1] - node.pivot[1]];
+
+    // Across the flap, away from the hinge, and half the box's depth to the bend.
+    const toFlap = from(node.face.centroid);
+    const side = dot(toFlap, [-u[1], u[0]]) > 0 ? 1 : -1;
+    const v: Pt = [-u[1] * side, u[0] * side];
+    const depth = 2 * dot(from(bends[0]!.pivot), v);
+
+    // The panel's full width, so the sheet also covers the relief holes.
+    const spans = rig.nodes[node.parent]!.face.outline.map((p) => dot(from(p), u));
+    const start = Math.min(...spans);
+    const end = Math.max(...spans);
+
+    const hinge = hinges[index]!;
+    const corners = [[start, 0], [end, 0], [end, depth], [start, depth]].map(([a, b]) =>
+      toWorld([node.pivot[0] + u[0] * a! + v[0] * b!, node.pivot[1] + u[1] * a! + v[1] * b!], center),
+    );
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute(
+      "position",
+      new THREE.Float32BufferAttribute(corners.flatMap((c) => [c.x - hinge.x, c.y - hinge.y, -safeThickness / 2 - 0.02]), 3),
+    );
+    geometry.setAttribute(
+      "uv",
+      new THREE.Float32BufferAttribute(
+        corners.flatMap((c) => [(c.x + rig.bounds.width / 2) / rig.bounds.width, (c.y + rig.bounds.height / 2) / rig.bounds.height]),
+        2,
+      ),
+    );
+    geometry.setIndex([0, 1, 2, 0, 2, 3]);
+    geometry.computeVertexNormals();
+
+    const cap = new THREE.Mesh(geometry, mesh.material);
+    cap.name = `cap-${index}`;
+    cap.userData.panelIndex = index;
+    cap.visible = false;
+    pivots[index]!.add(cap);
+    caps.push({ mesh: cap, from: window.press.end });
   });
 
   /* ---------------------------- perforations ------------------------------- */
@@ -488,7 +553,9 @@ export const buildRigScene = ({
   const size = new THREE.Vector3();
   box.getSize(size);
 
-  return { group: root, pivots, size, style, board };
+  const rest = pivots.map((pivot) => pivot.position.clone());
+
+  return { group: root, pivots, rest, thickness: safeThickness, caps, size, style, board };
 };
 
 // The schedule only depends on the rig, and the slider calls `applyFold` per frame.
@@ -527,9 +594,19 @@ export const applyFold = (
     axis.normalize();
 
     const window = schedule[index] ?? { start: 0, end: 1 };
-    const amount = stageProgress(window, clamped);
-    pivot.quaternion.setFromAxisAngle(axis, node.sign * (window.angle ?? node.angle) * amount);
+    pivot.quaternion.setFromAxisAngle(axis, node.sign * foldAngle(window, node.angle, clamped));
+
+    // A layered flap slides along its parent panel, towards the inside of the box.
+    if (window.press?.layer) {
+      const parent = rig.nodes[node.parent]!.face.centroid;
+      const inward = new THREE.Vector3(parent[0] - node.pivot[0], node.pivot[1] - parent[1], 0);
+      inward.addScaledVector(axis, -inward.dot(axis)).normalize();
+      const slide = window.press.layer * scene.thickness * stageProgress(window.press, clamped);
+      pivot.position.copy(scene.rest[index]!).addScaledVector(inward, slide);
+    }
   });
+
+  for (const { mesh, from } of scene.caps) mesh.visible = clamped >= from - 1e-9;
 
   scene.group.updateMatrixWorld(true);
 };

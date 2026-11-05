@@ -37,7 +37,9 @@ export type LineType =
   /** Glue area outline. Informational, not a tool line. */
   | "glue"
   /** Construction geometry. Rendered in the editor, never exported for production. */
-  | "guide";
+  | "guide"
+  /** Where the board flexes without a crease. Only the 3D fold reads it; never drawn or exported. */
+  | "bend";
 
 export const LINE_TYPES: readonly LineType[] = [
   "cut",
@@ -48,6 +50,7 @@ export const LINE_TYPES: readonly LineType[] = [
   "halfCut",
   "glue",
   "guide",
+  "bend",
 ];
 
 //! Placement -------------------------------------------------------------------
