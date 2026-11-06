@@ -66,7 +66,9 @@ export function foldSchedule(rig: FoldRig): FoldWindow[] {
   // Resolve parents before children: depth order.
   const order = nodes.map((_, i) => i).filter((i) => nodes[i]!.depth >= 0).sort((a, b) => nodes[a]!.depth - nodes[b]!.depth);
 
-  const body = new Set<number>([root]);
+  // Every piece's root: a tray's sleeve is a body of its own.
+  const roots = nodes.flatMap((n, i) => (n.parent === null && !n.isHole ? [i] : []));
+  const body = new Set<number>(roots);
   const group = new Map<number, { side: "top" | "bottom"; level: number }>();
 
   for (const i of order) {
@@ -96,7 +98,7 @@ export function foldSchedule(rig: FoldRig): FoldWindow[] {
   //! Body panels ------------------------------------------------------------------
 
   const rootX = nodes[root]!.face.centroid[0];
-  const others = [...body].filter((i) => i !== root);
+  const others = [...body].filter((i) => !roots.includes(i));
   // The glue flap: a narrow panel at an end of the chain.
   const widths = [...body].map(width).sort((a, b) => a - b);
   const median = widths[Math.floor(widths.length / 2)] ?? 0;
@@ -198,7 +200,8 @@ export function foldSchedule(rig: FoldRig): FoldWindow[] {
     // the lid lands over the dust flaps and the tuck slides inside the box.
     const square = Math.abs(node.angle - SQUARE) < 1e-6;
     const dust = flapStage(i).endsWith(":dust") && lidOn.has(g.side);
-    return square && (dust || g.level > 1) ? { ...window, angle: node.angle + TUCK_IN } : window;
+    // A lid carrying flaps of its own is not a tuck: it closes square.
+    return square && (dust || (g.level > 1 && !hasChildren.has(i))) ? { ...window, angle: node.angle + TUCK_IN } : window;
   });
 }
 

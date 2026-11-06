@@ -148,7 +148,13 @@ export function FoldPreview({
     if (selected === null || !node || !onFoldsChange) return;
     const others = (folds?.overrides ?? []).filter((o) => o.faceIndex !== selected);
     const overrides = patch ? [...others, { faceIndex: selected, ...patch, vertexCount: node.face.outline.length }] : others;
-    onFoldsChange(overrides.length ? { faceCount: panelCount, overrides: overrides.sort((a, b) => a.faceIndex - b.faceIndex) } : undefined);
+    // The root is the template's own choice: editing a panel's fold keeps it.
+    const rootFace = folds?.rootFace;
+    onFoldsChange(
+      overrides.length || rootFace !== undefined
+        ? { faceCount: panelCount, ...(rootFace !== undefined ? { rootFace } : {}), overrides: overrides.sort((a, b) => a.faceIndex - b.faceIndex) }
+        : undefined,
+    );
   };
 
   const editable = !!onFoldsChange;

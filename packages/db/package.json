@@ -15,6 +15,7 @@
     "prisma:push": "prisma db push",
     "prisma:generate-admin": "tsx src/lib/generateAdmin.ts",
     "seed:tarrifs": "tsx src/seed/tarrifs.ts",
+    "seed:templates": "tsx src/seed/templates.ts",
     "test": "tsx src/test-script.ts",
     "lint": "eslint . --max-warnings 0",
     "check-types": "tsc --noEmit"

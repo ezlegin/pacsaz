@@ -20,6 +20,11 @@ describe("design checks", () => {
     }
   });
 
+  it("takes ends a rounding error apart as joined, even across a grid boundary", () => {
+    const nodes = [line("a", [0, 0], [10, 57.25]), line("b", [10, 57.24999999999999], [20, 0]), line("c", [20, 0], [0, 0])];
+    expect(codes(nodes)).toEqual([]);
+  });
+
   it.each([[90, 50, 0.5], [120, 33, 2], [60, 60, 1], [100, 100, 0.5], [100, 90, 2], [40, 150, 1]])("keeps the barbed snap lock whole at %d x %d", (width, length, thickness) => {
     const result = render(doc({ nodes: [presetBody("snapLockBottom", "body")] }), { width, length, height: 100, thickness });
     expect(result.diagnostics).toEqual([]);

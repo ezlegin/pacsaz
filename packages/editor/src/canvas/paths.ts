@@ -47,6 +47,7 @@ export function groupPaths(paths: readonly Path[]): PathGroup[] {
 /** Path data per leaf node id, for hit areas and highlights. */
 export function pathsByNode(result: RenderResult): Map<string, string> {
   const out = new Map<string, string>();
-  for (const p of result.paths) out.set(p.nodeId, (out.get(p.nodeId) ?? "") + primD(p));
+  // Bend lines exist only for the 3D fold, so selecting a body must not show them.
+  for (const p of result.paths) if (p.lineType !== "bend") out.set(p.nodeId, (out.get(p.nodeId) ?? "") + primD(p));
   return out;
 }

@@ -39,6 +39,8 @@ export type FoldConfig = {
   version: 1;
   /** Face count when authored, for drift detection. */
   faceCount: number;
+  /** Index of the panel that stays still, when the largest is not the right one. */
+  rootFace?: number;
   overrides: FoldOverride[];
 };
 
@@ -84,6 +86,7 @@ export const parseFoldConfig = (
       version: 1,
       faceCount:
         typeof parsed.faceCount === "number" ? parsed.faceCount : 0,
+      ...(typeof parsed.rootFace === "number" ? { rootFace: parsed.rootFace } : {}),
       overrides,
     };
   } catch {

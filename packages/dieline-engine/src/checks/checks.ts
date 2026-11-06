@@ -143,6 +143,8 @@ export function checkDieline(result: RenderResult, options: CheckOptions = {}): 
     if (best >= 0 && bestD <= gapDistance) {
       paired.add(i);
       paired.add(best);
+      // The same point, split across two cells of the end grid by a rounding error.
+      if (bestD <= tol) return;
       const o = loose[best]!;
       push({
         code: "gap",

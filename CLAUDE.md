@@ -135,6 +135,12 @@ Phases (each ends with a commit message for the user to commit):
   the fold, the dust flap set-back; the relief notch is as wide as the board (radius thickness / 2), at least 0.5 mm. The glue flap runs the full panel height, its ends on the body edges. The 3D board is textured: paper grain, or kraft with flutes. Folds stop at windows: `render` trims any fold inside a hole (`trimFoldsAtHoles`) and reports the length as `foldsCut`; a customer change that cuts more fold than the template is rejected by `verifyCustomization`. The 3D fold SVG still gets the whole fold (`foldsInHoles`) plus `window` outlines; the rig drops faces inside a window (`extractWindows` → `buildFoldRig(segments, config, windows)`). New presets must render without diagnostics and keep the cut
   outline closed at several sizes (see `panels.test.ts`).
 
+- Starter templates are in `packages/db/src/seed/templates.ts`
+  (`pnpm --filter @repo/db seed:templates`, `-- --check` to only validate). Every
+  corner of a template's size range must render clean on every material, or it is
+  not saved. A dieline may hold separate pieces (tray and sleeve): the fold rig
+  roots a tree in each.
+
 ### Packaging checks, nicks, 3D
 
 - `checkDieline(result)` (`dieline-engine/src/checks/checks.ts`) finds gaps and

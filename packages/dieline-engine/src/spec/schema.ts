@@ -271,6 +271,7 @@ const ruler = z.object({
 const folds = z
   .object({
     faceCount: z.number().int().min(0),
+    rootFace: z.number().int().min(0).optional(),
     overrides: z
       .array(
         z

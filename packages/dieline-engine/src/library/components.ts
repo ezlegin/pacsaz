@@ -426,6 +426,251 @@ export const autoLockSide: ComponentDef = {
   ],
 };
 
-export const LIBRARY: ComponentDef[] = [tuckLid, dustFlap, glueFlap, slottedFlap, plainFlap, snapLockNotched, snapLockTab, snapLockSide, autoLockMain, autoLockSide, thumbNotch];
+/**
+ * The gable top: on each wide panel a roof half as deep as the box, so the two
+ * meet in the middle, then a handle flap that stands up, doubled with its opposite.
+ * Rounded ears and a slot for the hand finish the flap.
+ */
+export const gableRoof: ComponentDef = {
+  id: "lib:gableRoof",
+  name: "Gable roof with handle",
+  category: "Closures",
+  description: "Wide panel of a gable carton: a roof to the middle of the box and a handle flap with a hand slot.",
+  edge: { hinge: "crease" },
+  params: [auto("roof", "Roof depth"), auto("handle", "Handle flap height")],
+  variables: [
+    { name: "S", expr: "min(length, width)" },
+    { name: "r", expr: "roof > 0 ? roof : S / 2" },
+    { name: "h", expr: "handle > 0 ? handle : S / 2" },
+    // Rounded ears at the ends, then a step up to the flat top.
+    { name: "a", expr: "min(edge * 0.1, h * 0.4)" },
+    { name: "ey", expr: "r + h * 0.72" },
+    { name: "g", expr: "h * 0.22" },
+    // The hand slot, in the middle of the flap's width.
+    { name: "cx", expr: "edge / 2" },
+    { name: "sh", expr: "h * 0.36" },
+    { name: "sw", expr: "max(edge * 0.3, sh * 2.2)" },
+    { name: "sr", expr: "sh / 2" },
+    { name: "sy", expr: "r + h * 0.3" },
+  ],
+  nodes: [
+    path("outline", "cut", ["0", "0"], [
+      to("0", "ey"),
+      { type: "arc", x: "a", y: "ey", radius: "a / 2", clockwise: true },
+      to("a + g", "r + h"),
+      to("edge - a - g", "r + h"),
+      to("edge - a", "ey"),
+      { type: "arc", x: "edge", y: "ey", radius: "a / 2", clockwise: true },
+      to("edge", "0"),
+    ]),
+    line("roofFold", "crease", ["0", "r"], ["edge", "r"]),
+    path(
+      "handSlot",
+      "cut",
+      ["cx - sw / 2 + sr", "sy"],
+      [
+        to("cx + sw / 2 - sr", "sy"),
+        { type: "arc", x: "cx + sw / 2 - sr", y: "sy + sh", radius: "sr" },
+        to("cx - sw / 2 + sr", "sy + sh"),
+        { type: "arc", x: "cx - sw / 2 + sr", y: "sy", radius: "sr" },
+      ],
+      true,
+    ),
+  ],
+};
+
+/** The gable's end: a rounded triangle under the roofs, with a slit so it tucks in. */
+export const gableGusset: ComponentDef = {
+  id: "lib:gableGusset",
+  name: "Gable gusset",
+  category: "Closures",
+  description: "Narrow panel of a gable carton: a rounded triangle with a slit up its middle, closed under the roofs.",
+  edge: { hinge: "crease" },
+  params: [auto("peak", "Height")],
+  variables: [
+    { name: "a", expr: "peak > 0 ? peak : edge * 0.62" },
+    { name: "rd", expr: "edge * 0.12" },
+    { name: "cx", expr: "edge / 2" },
+    { name: "sw", expr: "max(1.5, thickness * 2)" },
+    { name: "sl", expr: "a * 0.62" },
+  ],
+  nodes: [
+    path("outline", "cut", ["0", "0"], [to("cx", "a", "rd"), to("edge", "0")]),
+    path(
+      "slit",
+      "cut",
+      ["cx + sw / 2", "sw"],
+      [
+        to("cx + sw / 2", "sl"),
+        { type: "arc", x: "cx - sw / 2", y: "sl", radius: "sw / 2" },
+        to("cx - sw / 2", "sw"),
+        { type: "arc", x: "cx + sw / 2", y: "sw", radius: "sw / 2" },
+      ],
+      true,
+    ),
+  ],
+};
+
+/**
+ * The keyboard box (جعبه کیبوردی): a mailer that locks itself. Its double side walls
+ * are the body's panels; these are its edges. Measured from real samples. The tabs
+ * follow the box's depth, so each count has its own nodes, shown by a rule.
+ */
+const KEYBOARD_VARIABLES = [
+  { name: "W", expr: "min(length, width)" },
+  { name: "h", expr: "height" },
+  { name: "tabs", expr: "count > 0 ? count : clamp(round(W / 120), 1, 5)" },
+  { name: "tw", expr: "19.7 + W * 0.086" },
+];
+const keyboardCount = [{ name: "count", label: "Tabs on each side (0 = auto)", default: 0, min: 0, max: 5, step: 1, unit: "count" as const }];
+const KEYBOARD_COUNTS = [1, 2, 3, 4, 5];
+const countRule = (k: number) => [{ id: "count", when: `tabs != ${k}`, action: "hide" as const }];
+/** Tab centres along the depth, from the far end. */
+const tabCentres = (k: number) => Array.from({ length: k }, (_, i) => `W / 2 + (${(k - 1) / 2 - i}) * W / ${k + 0.5}`);
+
+/** One slot along a side fold of the base, which runs from y = 0 down to -W here. */
+const keyboardSlot = (name: string, x0: Expr, x1: Expr, c: Expr, clockwise: boolean, k: number): Node => {
+  const y0 = `-(${c}) - tw / 2 - 1 + sw / 2`;
+  const y1 = `-(${c}) + tw / 2 + 1 - sw / 2`;
+  return {
+    ...path(name, "cut", [x0, y0], [
+      { type: "arc", x: x1, y: y0, radius: "sw / 2", clockwise },
+      to(x1, y1),
+      { type: "arc", x: x0, y: y1, radius: "sw / 2", clockwise },
+    ], true),
+    rules: countRule(k),
+  };
+};
+
+/** Back wall, lid and everything on it, on the base's back edge; also cuts the base's slots. */
+export const keyboardLid: ComponentDef = {
+  id: "lib:keyboardLid",
+  name: "Keyboard box: lid",
+  category: "Keyboard box",
+  description: "Back wall with end flaps, the lid with its side flaps, and a front with rounded ears. Cuts the slots along the base.",
+  edge: { hinge: "none" },
+  params: keyboardCount,
+  variables: [
+    ...KEYBOARD_VARIABLES,
+    { name: "a", expr: "2" },
+    { name: "b", expr: "4.5" },
+    { name: "g", expr: "2.5" },
+    { name: "e", expr: "h * 0.85" },
+    { name: "f", expr: "h * 1.3" },
+    { name: "lf", expr: "h - 2" },
+    { name: "lfs", expr: "min(lf * 0.42, W * 0.3)" },
+    { name: "lr", expr: "min(lf * 0.2, W * 0.12)" },
+    { name: "Y1", expr: "h" },
+    { name: "Y2", expr: "Y1 + W + 1" },
+    { name: "Y3", expr: "Y2 + h" },
+    { name: "sw", expr: "max(4, thickness * 2.2)" },
+  ],
+  nodes: [
+    path("outline", "cut", ["0", "0"], [
+      to("a", "0"),
+      to("a", "g"),
+      to("a - f", "g"),
+      to("a - f", "Y1 - 1.5"),
+      to("a", "Y1 - 1.5"),
+      to("b", "Y1"),
+      to("b - lf", "Y1 + lfs", "lr"),
+      to("b - lf", "Y2 - lfs", "lr"),
+      to("b", "Y2"),
+      to("a - e", "Y2", "h * 0.15"),
+      to("a - e", "Y3 - 1", "min(e, h) * 0.75"),
+      to("a", "Y3 - 1"),
+      to("edge - a", "Y3 - 1"),
+      to("edge - a + e", "Y3 - 1", "min(e, h) * 0.75"),
+      to("edge - a + e", "Y2", "h * 0.15"),
+      to("edge - b", "Y2"),
+      to("edge - b + lf", "Y2 - lfs", "lr"),
+      to("edge - b + lf", "Y1 + lfs", "lr"),
+      to("edge - b", "Y1"),
+      to("edge - a", "Y1 - 1.5"),
+      to("edge - a + f", "Y1 - 1.5"),
+      to("edge - a + f", "g"),
+      to("edge - a", "g"),
+      to("edge - a", "0"),
+      to("edge", "0"),
+    ]),
+    line("hinge", "crease", ["a", "0"], ["edge - a", "0"]),
+    line("lidHinge", "crease", ["b", "Y1"], ["edge - b", "Y1"]),
+    line("lidFront", "crease", ["b", "Y2"], ["edge - b", "Y2"]),
+    line("backFlapStart", "crease", ["a", "g"], ["a", "Y1 - 1.5"]),
+    line("backFlapEnd", "crease", ["edge - a", "g"], ["edge - a", "Y1 - 1.5"]),
+    line("lidFlapStart", "crease", ["b", "Y1"], ["b", "Y2"]),
+    line("lidFlapEnd", "crease", ["edge - b", "Y1"], ["edge - b", "Y2"]),
+    line("earStart", "crease", ["a", "Y2"], ["a", "Y3 - 1"]),
+    line("earEnd", "crease", ["edge - a", "Y2"], ["edge - a", "Y3 - 1"]),
+    ...KEYBOARD_COUNTS.flatMap((k) =>
+      tabCentres(k).flatMap((c, i) => [
+        keyboardSlot(`slotStart${k}${i}`, "-1 + sw", "-1", c, true, k),
+        keyboardSlot(`slotEnd${k}${i}`, "edge + 1 - sw", "edge + 1", c, false, k),
+      ]),
+    ),
+  ],
+};
+
+/** The front wall, with an end flap on each side, on the base's front edge. */
+export const keyboardFront: ComponentDef = {
+  id: "lib:keyboardFront",
+  name: "Keyboard box: front wall",
+  category: "Keyboard box",
+  description: "Front wall with an end flap on each side, which fold in behind the side walls.",
+  edge: { hinge: "none" },
+  params: [],
+  variables: [
+    { name: "h", expr: "height" },
+    { name: "a", expr: "2" },
+    { name: "g", expr: "2.5" },
+    { name: "f", expr: "h * 1.3" },
+  ],
+  nodes: [
+    path("outline", "cut", ["0", "0"], [
+      to("a", "0"),
+      to("a", "g"),
+      to("a - f", "g"),
+      to("a - f", "h"),
+      to("edge - a + f", "h"),
+      to("edge - a + f", "g"),
+      to("edge - a", "g"),
+      to("edge - a", "0"),
+      to("edge", "0"),
+    ]),
+    line("hinge", "crease", ["a", "0"], ["edge - a", "0"]),
+    line("flapStart", "crease", ["a", "g"], ["a", "h"]),
+    line("flapEnd", "crease", ["edge - a", "g"], ["edge - a", "h"]),
+  ],
+};
+
+/** The inner wall's free edge, with the tabs that enter the base's slots. */
+export const keyboardTabs: ComponentDef = {
+  id: "lib:keyboardTabs",
+  name: "Keyboard box: tabs",
+  category: "Keyboard box",
+  description: "Edge of the inner wall, with tabs that lock into the slots along the base. Their number follows the depth.",
+  edge: { hinge: "none" },
+  params: keyboardCount,
+  variables: [...KEYBOARD_VARIABLES, { name: "td", expr: "max(3, thickness * 1.5)" }],
+  nodes: KEYBOARD_COUNTS.map((k) => ({
+    ...path(
+      `edge${k}`,
+      "cut",
+      ["0", "0"],
+      [
+        ...[...tabCentres(k)].reverse().flatMap((c) => [
+          to(`${c} - tw / 2 - 1.5`, "0"),
+          to(`${c} - tw / 2`, "td"),
+          to(`${c} + tw / 2`, "td"),
+          to(`${c} + tw / 2 + 1.5`, "0"),
+        ]),
+        to("edge", "0"),
+      ],
+    ),
+    rules: countRule(k),
+  })),
+};
+
+export const LIBRARY: ComponentDef[] = [tuckLid, dustFlap, glueFlap, slottedFlap, plainFlap, snapLockNotched, snapLockTab, snapLockSide, autoLockMain, autoLockSide, thumbNotch, gableRoof, gableGusset, keyboardLid, keyboardFront, keyboardTabs];
 
 export const EDGE_COMPONENTS = LIBRARY.filter((c) => c.edge);

@@ -6,13 +6,15 @@ import type { EdgeFeature, Expr, PanelsNode } from "../spec/types";
  * it stays editable after it is placed.
  */
 
-export type PresetId = "reverseTuckEnd" | "straightTuckEnd" | "snapLockBottom" | "autoLockBottom" | "sleeve" | "fefco0201";
+export type PresetId = "reverseTuckEnd" | "straightTuckEnd" | "snapLockBottom" | "autoLockBottom" | "gableHandle" | "keyboardBox" | "sleeve" | "fefco0201";
 
 export const PRESETS: { id: PresetId; name: string; description: string }[] = [
   { id: "reverseTuckEnd", name: "Reverse tuck end", description: "Tuck lids at opposite ends on opposite panels. The classic folding carton." },
   { id: "straightTuckEnd", name: "Straight tuck end", description: "Both tuck lids on the back panel." },
   { id: "snapLockBottom", name: "Snap lock bottom", description: "Tuck lid on top; the bottom's four flaps lock into each other without glue." },
   { id: "autoLockBottom", name: "Auto-lock bottom", description: "Tuck lid on top; a pre-glued crash-lock bottom that opens when the carton is squared up." },
+  { id: "gableHandle", name: "Gable handle carton", description: "A carrying carton: roofs meet in the middle under a doubled handle, on a snap lock bottom." },
+  { id: "keyboardBox", name: "Keyboard box", description: "A self-locking mailer: double side walls tab into slots along the base, under a one-piece lid." },
   { id: "sleeve", name: "Sleeve", description: "Four panels and a glue flap, open at both ends." },
   { id: "fefco0201", name: "FEFCO 0201 case", description: "Regular slotted corrugated case with full-depth-half flaps." },
 ];
@@ -110,6 +112,39 @@ export function presetBody(id: PresetId, name: string): PanelsNode {
           panel("side2", SIDE, feature("lib:dustFlap"), feature("lib:autoLockSide", { flip: true })),
         ],
       };
+
+    case "gableHandle":
+      return {
+        ...base,
+        panels: [
+          panel("front", FACE, feature("lib:gableRoof"), feature("lib:snapLockNotched")),
+          panel("side1", SIDE, feature("lib:gableGusset"), feature("lib:snapLockSide", { flip: true, args: { wedge: "-1" } })),
+          panel("back", FACE, feature("lib:gableRoof"), feature("lib:snapLockTab")),
+          panel("side2", SIDE, feature("lib:gableGusset"), feature("lib:snapLockSide", { args: { wedge: "-1" } })),
+        ],
+      };
+
+    case "keyboardBox": {
+      const wall = "height";
+      const top = "max(2, thickness * 2.5)";
+      const inner = "height - 1.5";
+      const { right: _none, ...body } = base;
+      return {
+        ...body,
+        height: SIDE,
+        left: feature("lib:keyboardTabs"),
+        right: feature("lib:keyboardTabs"),
+        panels: [
+          panel("inner1", inner),
+          panel("top1", top),
+          panel("wall1", wall),
+          panel("base", FACE, feature("lib:keyboardLid"), feature("lib:keyboardFront")),
+          panel("wall2", wall),
+          panel("top2", top),
+          panel("inner2", inner),
+        ],
+      };
+    }
 
     case "sleeve":
       return {

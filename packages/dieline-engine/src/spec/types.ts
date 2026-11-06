@@ -169,6 +169,8 @@ export type CutoutRules = {
  */
 export type FoldSettings = {
   faceCount: number;
+  /** The panel that stays still. Unset, it is the largest, which can be a lid. */
+  rootFace?: number;
   overrides: { faceIndex: number; direction: "in" | "out"; angle: number; vertexCount?: number }[];
 };
 

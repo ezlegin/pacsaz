@@ -115,11 +115,16 @@ const pickRoot = (faces: { id: number; area: number }[]): number => {
   return root;
 };
 
-/** Breadth-first spanning tree over the hinge graph, rooted at `rootId`. */
+/**
+ * Breadth-first spanning tree over the hinge graph, rooted at `rootId`. A dieline
+ * can hold separate pieces, such as a tray and its sleeve: each gets a tree of its
+ * own, rooted at its largest face, or it would stay flat.
+ */
 const buildTree = (
   faceCount: number,
   hinges: Hinge[],
   rootId: number,
+  faces: { id: number; area: number }[],
 ): { parent: (number | null)[]; hingeOf: (number | null)[]; depth: number[] } => {
   const parent: (number | null)[] = new Array(faceCount).fill(null);
   const hingeOf: (number | null)[] = new Array(faceCount).fill(null);
@@ -138,22 +143,30 @@ const buildTree = (
     neighbours.set(hinge.b, b);
   });
 
-  const visited = new Set<number>([rootId]);
-  const queue: number[] = [rootId];
-  depth[rootId] = 0;
+  const visited = new Set<number>();
+  const grow = (start: number) => {
+    visited.add(start);
+    depth[start] = 0;
+    const queue: number[] = [start];
 
-  while (queue.length > 0) {
-    const current = queue.shift()!;
+    while (queue.length > 0) {
+      const current = queue.shift()!;
 
-    for (const { other, hinge } of neighbours.get(current) ?? []) {
-      if (visited.has(other)) continue;
+      for (const { other, hinge } of neighbours.get(current) ?? []) {
+        if (visited.has(other)) continue;
 
-      visited.add(other);
-      parent[other] = current;
-      hingeOf[other] = hinge;
-      depth[other] = depth[current]! + 1;
-      queue.push(other);
+        visited.add(other);
+        parent[other] = current;
+        hingeOf[other] = hinge;
+        depth[other] = depth[current]! + 1;
+        queue.push(other);
+      }
     }
+  };
+
+  grow(rootId);
+  for (const face of [...faces].sort((a, b) => b.area - a.area)) {
+    if (!visited.has(face.id) && neighbours.has(face.id)) grow(face.id);
   }
 
   return { parent, hingeOf, depth };
@@ -267,7 +280,8 @@ export const buildFoldRig = (
   };
 
   /* -------------------------------- tree --------------------------------- */
-  const rootId = pickRoot(faces);
+  const rootFace = config?.rootFace === undefined ? undefined : faces[config.rootFace];
+  const rootId = rootFace?.id ?? pickRoot(faces);
 
   if (rootId < 0) {
     return {
@@ -289,7 +303,7 @@ export const buildFoldRig = (
   faces.forEach((face, index) => indexOf.set(face.id, index));
 
   const faceCount = faces.length;
-  const { parent, hingeOf, depth } = buildTree(faceCount, hinges, rootId);
+  const { parent, hingeOf, depth } = buildTree(faceCount, hinges, rootId, faces);
 
   /* -------------------------------- nodes -------------------------------- */
   const nodes: RigNode[] = faces.map((face, index) => {
