@@ -217,6 +217,7 @@ const node: z.ZodType<Node> = z.lazy(() =>
             width: expr,
             top: edgeFeature.optional(),
             bottom: edgeFeature.optional(),
+            inset: z.object({ left: expr.optional(), right: expr.optional() }).strict().optional(),
           }),
         )
         .min(1)
@@ -272,6 +273,7 @@ const folds = z
   .object({
     faceCount: z.number().int().min(0),
     rootFace: z.number().int().min(0).optional(),
+    rest: z.enum(["end", "base"]).optional(),
     overrides: z
       .array(
         z

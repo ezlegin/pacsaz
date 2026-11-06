@@ -1,6 +1,6 @@
 import { buildPlanarFaces } from "./planar";
 import { applyFoldOverrides, type FoldConfig } from "./foldConfig";
-import { isEnclosedBy, pointInPolygon } from "./polygon";
+import { isEnclosedBy, pointInPolygon, signedArea } from "./polygon";
 import type { FoldRig, Hinge, Pt, RigNode, Segment } from "./types";
 
 /**
@@ -366,21 +366,36 @@ export const buildFoldRig = (
    * The face stays in `nodes` — removing it would shift indices and silently
    * re-attach authored fold overrides to the wrong panels.
    */
+  // A window wholly inside one panel is cut out of that panel first.
+  const enclosed = detectWindows(nodes);
   // Pieces a fold makes inside a window that crosses it are openings too, cut
-  // out of the panels either side by their own outlines already.
+  // out of the panels either side by their own outlines already. A piece of a
+  // window is never larger than the window: a panel around a centred window has
+  // its centroid inside it too, and must stay board.
   let openings = 0;
   for (const node of nodes) {
-    if (windows.some((w) => pointInPolygon(node.face.centroid, w))) {
+    if (node.isHole) continue;
+    const inside = (w: Pt[]) => node.face.area <= Math.abs(signedArea(w)) * 1.01 && pointInPolygon(node.face.centroid, w);
+    if (windows.some(inside)) {
       node.isHole = true;
       openings++;
     }
   }
-  const holeCount = detectWindows(nodes) + openings;
+  const holeCount = enclosed + openings;
 
   // Windows are not panels, so they must not be reported as orphaned panels.
   const orphanCount = nodes.filter(
     (node) => node.depth < 0 && !node.isHole,
   ).length;
+
+  nodes.forEach((node, index) => {
+    if (node.parent === null) return;
+    const mine = faces[index]!.id;
+    const theirs = faces[node.parent]!.id;
+    node.spans = hinges
+      .filter((h) => (h.a === mine && h.b === theirs) || (h.a === theirs && h.b === mine))
+      .map((h) => [h.from, h.to] as [Pt, Pt]);
+  });
 
   return {
     nodes: applyFoldOverrides(nodes, config),

@@ -162,7 +162,8 @@ function FeatureEditor({ node, path, label, feature }: { node: PanelsNode; path:
 
   const options = [
     { value: "", label: "Plain cut edge" },
-    ...components.map((c) => ({ value: c.id, label: c.name, group: c.category ?? "Other" })),
+    // The select only groups neighbouring options, so each category is gathered first.
+    ...groupByCategory(components).flatMap(([group, defs]) => defs.map((c) => ({ value: c.id, label: c.name, group }))),
     ...(feature && !def ? [{ value: feature.component, label: `Missing: ${feature.component}` }] : []),
   ];
 

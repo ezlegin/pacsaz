@@ -76,6 +76,12 @@ export type RigNode = {
   /** Outlines of the windows cut out of this panel. */
   holes: Pt[][];
   kind: Exclude<SegmentKind, "trim">;
+  /**
+   * Every crease piece this panel shares with its parent, its own hinge among
+   * them. A fold broken by a slot is several pieces on one line; the panel turns
+   * about one, but the board bends along all of them.
+   */
+  spans?: [Pt, Pt][];
 };
 
 export type FoldRig = {

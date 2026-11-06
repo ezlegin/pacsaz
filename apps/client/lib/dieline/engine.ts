@@ -74,24 +74,26 @@ export function clampSize(raw: Size, min: Size, max: Size): Size {
  * The drawing shown on the product page. Strokes keep their width on screen at
  * any zoom; visitors who are not signed in see it under a watermark.
  */
-function rulerFont(result: RenderResult): number {
-  const b = result.bounds;
-  return b ? Math.max(4, Math.max(b.maxX - b.minX, b.maxY - b.minY) / 40) : 4;
-}
+/**
+ * One screen pixel in drawing units. The preview's SVG is drawn 1 mm to the unit,
+ * and its rulers and markers are scaled by --ruler-scale to undo the zoom, so
+ * these sizes are exact on screen, the same as the editor's.
+ */
+const PX = 25.4 / 96;
 
 /**
  * A red dot where each design check found a problem, as in the Studio, with the
  * explanation on hover. Sized like ruler labels: they read --ruler-scale, so they
  * stay the same size on screen when the preview is zoomed.
  */
-function issueMarkers(issues: Issue[], font: number): string {
+function issueMarkers(issues: Issue[]): string {
   return issues
     .map(({ at, code }) => {
       const place = `transform: translate(${at[0]}px, ${-at[1]}px) scale(var(--ruler-scale, 1))`;
       return (
         `<g data-issue="${code}" style="${place}"><title>${PROBLEM_TEXT[code]}</title>` +
-        `<circle r="${font * 0.4}" fill="rgb(239 68 68 / 0.2)"/>` +
-        `<circle r="${font * 0.18}" fill="rgb(239 68 68)" stroke="#fff" stroke-width="${font * 0.05}"/></g>`
+        `<circle r="${9 * PX}" fill="rgb(239 68 68 / 0.18)"/>` +
+        `<circle r="${5 * PX}" fill="rgb(239 68 68)" stroke="#fff" stroke-width="${1.5 * PX}"/></g>`
       );
     })
     .join("");
@@ -116,12 +118,14 @@ export function previewSvg(
     reserveRulers: true,
     includeBleed: true,
     nonScalingStroke: true,
-    strokeWidth: 1.2,
+    // The editor's line width, in screen pixels (the preview undoes its zoom).
+    strokeWidth: 1.25,
     sheetFill: "#ffffff",
     // The preview is scaled to fit, so labels grow with the drawing to stay readable.
-    rulerFontSize: rulerFont(result),
+    // 12 px on screen at any zoom, as in the editor.
+    rulerFontSize: 12 * PX,
   });
-  const markers = issueMarkers(options.issues ?? [], rulerFont(result));
+  const markers = issueMarkers(options.issues ?? []);
   if (!options.watermark) return svg.replace("</svg>", `${markers}</svg>`);
 
   const box = /viewBox="([^"]+)"/.exec(svg)?.[1]?.split(" ").map(Number);
@@ -132,12 +136,14 @@ export function previewSvg(
   // Only the printed sheet is marked: inside the bleed (or the outline without one), never over a window.
   const sheet = loopsD(sheetLoops(result));
   const clip = sheet ? `<clipPath id="watermark-sheet"><path d="${sheet}" clip-rule="evenodd"/></clipPath>` : "";
-  return svg.replace(
-    "</svg>",
+  const mark =
     `<defs><pattern id="watermark" patternUnits="userSpaceOnUse" x="${x}" y="${y}" width="${tile}" height="${tile}">` +
-      `<image href="/watermark.png" width="${tile}" height="${tile}" opacity="0.5" preserveAspectRatio="xMidYMid meet"/></pattern>${clip}</defs>` +
-      `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="url(#watermark)"${clip ? ` clip-path="url(#watermark-sheet)"` : ""} pointer-events="none"/>${markers}</svg>`,
-  );
+    `<image href="/watermark.png" width="${tile}" height="${tile}" opacity="0.5" preserveAspectRatio="xMidYMid meet"/></pattern>${clip}</defs>` +
+    `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="url(#watermark)"${clip ? ` clip-path="url(#watermark-sheet)"` : ""} pointer-events="none"/>`;
+  // On the paper, under the bleed and every line, so the lines keep their full colour.
+  const paper = /<path data-sheet=""[^>]*\/>/.exec(svg);
+  const marked = paper ? svg.replace(paper[0], paper[0] + mark) : svg.replace("</svg>", `${mark}</svg>`);
+  return marked.replace("</svg>", `${markers}</svg>`);
 }
 
 export { toFoldSVG };

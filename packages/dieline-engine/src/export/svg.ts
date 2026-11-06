@@ -1,7 +1,7 @@
 import type { RenderResult, RulerInfo } from "../eval/render";
 import { closedLoops } from "../geometry/bleed";
 import { overallRulers, sheetLoops } from "../geometry/sheet";
-import { add, angleOf, polar, scale, sub, unit, unionBounds, pathsBounds, sweep } from "../geometry/math";
+import { add, angleOf, distance, polar, scale, sub, unit, unionBounds, pathsBounds, sweep } from "../geometry/math";
 import type { Bounds, Path, Prim, Pt } from "../geometry/types";
 import type { LineType } from "../spec/types";
 import { addNicks, type NickOptions } from "./nicks";
@@ -88,13 +88,26 @@ export function loopsD(loops: readonly Pt[][]): string {
     .join("");
 }
 
+/** On screen (non-scaling strokes), dash units are pixels: short enough to read as a dashed line, not a broken one. */
+const SCREEN_DASH = 1;
+
+/**
+ * A non-scaling stroke `width` px wide. Browsers leave CSS transforms out of
+ * non-scaling strokes, so a viewer that zooms by scaling the page sets
+ * --stroke-scale to undo its zoom; without it the line is simply `width` px.
+ */
+function screenStroke(width: number, dash: number[] = []): string {
+  const px = (v: number) => `calc(${fmt(v)}px * var(--stroke-scale, 1))`;
+  const dashes = dash.length ? ` stroke-dasharray="${dash.map(fmt).join(" ")}"` : "";
+  const style = `stroke-width: ${px(width)}${dash.length ? `; stroke-dasharray: ${dash.map(px).join(" ")}` : ""}`;
+  return ` stroke-width="${fmt(width)}"${dashes} style="${style}" vector-effect="non-scaling-stroke"`;
+}
+
 function strokeAttrs(style: LineStyle, base: number, nonScaling: boolean): string {
   const width = base * style.weight;
-  const dash = style.dash.length
-    ? ` stroke-dasharray="${style.dash.map((d) => fmt(nonScaling ? d * 4 : d)).join(" ")}"`
-    : "";
-  const vector = nonScaling ? ` vector-effect="non-scaling-stroke"` : "";
-  return `stroke="${style.color}" stroke-width="${fmt(width)}"${dash}${vector}`;
+  if (nonScaling) return `stroke="${style.color}"${screenStroke(width, style.dash.map((d) => d * SCREEN_DASH))}`;
+  const dash = style.dash.length ? ` stroke-dasharray="${style.dash.map(fmt).join(" ")}"` : "";
+  return `stroke="${style.color}" stroke-width="${fmt(width)}"${dash}`;
 }
 
 /** The bounds an SVG of this result will show, before padding. */
@@ -121,12 +134,13 @@ export function toSVG(result: RenderResult, options: SvgOptions = {}): string {
 
   if (options.sheetFill) {
     const d = loopsD(sheetLoops(result));
-    if (d) body.push(`<path d="${d}" fill="${options.sheetFill}" fill-rule="evenodd" stroke="none"/>`);
+    // Marked, so a viewer can lay things on the paper under the lines (a watermark).
+    if (d) body.push(`<path data-sheet="" d="${d}" fill="${options.sheetFill}" fill-rule="evenodd" stroke="none"/>`);
   }
 
   if (options.includeBleed && result.bleed.length) {
     body.push(
-      `<path d="${result.bleed.map(primToD).join("")}" fill="none" stroke="#22c55e" stroke-width="${fmt(base * 0.6)}"${nonScaling ? ` vector-effect="non-scaling-stroke"` : ""}/>`,
+      `<path d="${result.bleed.map(primToD).join("")}" fill="none" stroke="#22c55e"${nonScaling ? screenStroke(base * 0.6) : ` stroke-width="${fmt(base * 0.6)}"`}/>`,
     );
   }
 
@@ -225,15 +239,18 @@ export function rulerLabel(r: RulerInfo): string {
 function rulerSVG(r: RulerInfo, color: string, fontSize: number, base: number, nonScaling: boolean): string {
   const prims = rulerPrims(r);
   const { a, b, dir } = rulerEnds(r);
-  const size = fontSize * 0.55;
+  // On screen the arrows are two thirds of the text, as in the editor (12 px text, 8 px arrows).
+  const size = fontSize * (nonScaling ? 2 / 3 : 0.55);
 
   // Keep the label readable: never upside down. It sits on the line, which a
   // white halo breaks around it.
   let angle = -angleOf(dir);
   if (angle > 90 || angle <= -90) angle += 180;
   const mid = flip(scale(add(a, b), 0.5)).split(" ");
+  // On screen, the editor's type: system UI, medium weight, a 5 px halo at 12 px.
+  const face = nonScaling ? `font-family="ui-sans-serif, system-ui, sans-serif" font-weight="500"` : `font-family="sans-serif"`;
   const text = (attrs: string) =>
-    `<text ${attrs} fill="${color}" font-size="${fmt(fontSize)}" font-family="sans-serif" text-anchor="middle" dominant-baseline="central" stroke="#ffffff" stroke-width="${fmt(fontSize * 0.5)}" paint-order="stroke">${rulerLabel(r)}</text>`;
+    `<text ${attrs} fill="${color}" font-size="${fmt(fontSize)}" ${face} text-anchor="middle" dominant-baseline="central" stroke="#ffffff" stroke-width="${fmt(fontSize * (nonScaling ? 5 / 12 : 0.5))}" paint-order="stroke">${rulerLabel(r)}</text>`;
 
   let marks: string;
   if (nonScaling) {
@@ -248,9 +265,10 @@ function rulerSVG(r: RulerInfo, color: string, fontSize: number, base: number, n
     // The back of the head points along the line, into the ruler.
     const back = -angleOf(dir);
     marks =
-      `<path d="${head}" fill="${color}" stroke="none" ${at(a, back)}/>` +
-      `<path d="${head}" fill="${color}" stroke="none" ${at(b, back + 180)}/>` +
-      text(`x="0" y="0" ${at(scale(add(a, b), 0.5), angle)}`);
+      // Tagged so a zoomable viewer can hide them on a ruler too short to hold them.
+      `<path data-ruler-arrow="" d="${head}" fill="${color}" stroke="none" ${at(a, back)}/>` +
+      `<path data-ruler-arrow="" d="${head}" fill="${color}" stroke="none" ${at(b, back + 180)}/>` +
+      text(`data-ruler-label="" x="0" y="0" ${at(scale(add(a, b), 0.5), angle)}`);
   } else {
     const arrows = rulerArrows(r, size).map((t) => `M${t.map(flip).join("L")}Z`).join("");
     const [x, y] = mid;
@@ -258,8 +276,8 @@ function rulerSVG(r: RulerInfo, color: string, fontSize: number, base: number, n
   }
 
   return (
-    `<g data-ruler-id="${escapeAttr(r.id)}">` +
-    `<path d="${prims.map(primToD).join("")}" fill="none" stroke="${color}" stroke-width="${fmt(base * 0.6)}"${nonScaling ? ` vector-effect="non-scaling-stroke"` : ""}/>` +
+    `<g data-ruler-id="${escapeAttr(r.id)}" data-ruler-length="${fmt(distance(a, b))}">` +
+    `<path d="${prims.map(primToD).join("")}" fill="none" stroke="${color}"${nonScaling ? screenStroke(base * 0.6) : ` stroke-width="${fmt(base * 0.6)}"`}/>` +
     marks +
     `</g>`
   );

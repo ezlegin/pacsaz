@@ -35,6 +35,8 @@ export type EditorState = {
     nicks: boolean;
     issues: boolean;
     preview3d: boolean;
+    /** The board the 3D preview shows (a material key, as the site's): paper grain, or kraft with flutes. */
+    material: string;
   };
   /** The smallest and largest sizes the template is sold in, for ghosts and checks. */
   sizeRange: { min: Dimensions; max: Dimensions } | null;
@@ -81,7 +83,7 @@ export class EditorStore {
       drawLineType: "cut",
       view: { x: 0, y: 0, zoom: 1 },
       snapping: true,
-      display: { grid: true, guides: true, overall: true, sizeDelta: { width: 0, length: 0, height: 0 }, bleed: true, ghosts: false, nicks: false, issues: true, preview3d: false },
+      display: { grid: true, guides: true, overall: true, sizeDelta: { width: 0, length: 0, height: 0 }, bleed: true, ghosts: false, nicks: false, issues: true, preview3d: false, material: "glossyCardboard" },
       sizeRange: null,
       nicks: { width: 0.5, spacing: 60 },
       canUndo: false,

@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { buildFoldRig } from "./foldRig";
-import { applyArtwork, applyFold, buildRigScene, materialStyleFor } from "./build";
+import { applyArtwork, applyFold, buildRigScene, materialStyleFor, trimAtCrease } from "./build";
 import type { Pt, Segment } from "./types";
 
 let failures = 0;
@@ -633,6 +633,16 @@ const farthestFromHinge = (index: number) => {
     spread < 260,
     `spread=${spread.toFixed(1)}mm (flat pattern is 100x60)`,
   );
+}
+
+// A panel is pulled back from a crease only along the crease: the cut edge that
+// carries on past the crease's end keeps its full width, stepping in at the end.
+{
+  // Base 0..10 x 0..10 (y down), crease on its top edge from x 2 to x 8.
+  const base: Pt[] = [[0, 0], [2, 0], [8, 0], [10, 0], [10, 10], [0, 10]];
+  const out = trimAtCrease(base, [2, 0], [1, 0], [0, 1], 0, 6, 1.5);
+  const key = (p: Pt) => p.map((v) => +v.toFixed(3)).join(",");
+  check("trimmed only along the crease", out.map(key).join(" "), "0,0 2,0 2,1.5 8,1.5 8,0 10,0 10,10 0,10");
 }
 
 console.log(failures === 0 ? "\nALL 3D BUILD CHECKS PASSED" : `\n${failures} FAILED`);

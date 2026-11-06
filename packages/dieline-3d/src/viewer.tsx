@@ -182,6 +182,8 @@ export const DielineViewer = ({
   }, [svg, isRendering, foldConfig]);
 
   const rig = build.rig;
+  // A mailer or tray lies on its still panel; a carton stands on its end.
+  const lying = useMemo(() => parseFoldConfig(foldConfig)?.rest === "base", [foldConfig]);
 
   const scene = useMemo(() => {
     if (!rig) return null;
@@ -363,12 +365,16 @@ export const DielineViewer = ({
 
         {/* Fit the model to the viewer on first view and whenever it is rebuilt or resized. */}
         <Bounds fit clip observe margin={1.75} maxDuration={0}>
-          <RigObject
-            scene={scene}
-            rig={rig}
-            progress={progress}
-            onPanelClick={onPanelClick}
-          />
+          {/* The sheet is drawn in the XY plane and folds towards +Z; lying it
+              down turns +Z up, so the walls rise from the ground. */}
+          <group rotation={[lying ? -Math.PI / 2 : 0, 0, 0]}>
+            <RigObject
+              scene={scene}
+              rig={rig}
+              progress={progress}
+              onPanelClick={onPanelClick}
+            />
+          </group>
         </Bounds>
 
         <OrbitControls

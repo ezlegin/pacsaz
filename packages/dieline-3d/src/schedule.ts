@@ -51,6 +51,8 @@ const SQUARE = Math.PI / 2;
 /** How far past its final angle a snap lock flap is pressed. */
 const LOCK_PRESS = (20 * Math.PI) / 180;
 /** How many board thicknesses into the box each stage's flaps finish. */
+/** How many board thicknesses an ear sits in from the wall edge: into the gap of a double wall. */
+const EAR_LAYER = 1.5;
 const LOCK_LAYER: Record<1 | 2 | 3, number> = { 1: 0, 2: 2, 3: 1 };
 
 export function foldSchedule(rig: FoldRig): FoldWindow[] {
@@ -139,6 +141,9 @@ export function foldSchedule(rig: FoldRig): FoldWindow[] {
     for (const flap of flaps) lockStage.set(flap, flap === notched ? 1 : flap === tab ? 3 : 2);
   }
 
+  const mirrored = mirrorStages();
+  if (mirrored) return mirrored;
+
   // Stage of a flap: dust flaps (lone first-level flaps), then deeper flaps from
   // the deepest up, then the lids that carry them.
   const flapStage = (i: number): string => {
@@ -166,6 +171,71 @@ export function foldSchedule(rig: FoldRig): FoldWindow[] {
     for (const key of keys) {
       if (mine.some(([i]) => flapStage(i) === key) || (locked && key === `${side}:settle`)) stages.push(key);
     }
+  }
+
+  /**
+   * A symmetric body with no glue flap (a mailer: base in the middle, double walls
+   * either side) closes like a tray: mirrored panels move together. In order:
+   * both end walls; their ears; the outer side walls over the ears; the inner
+   * walls, folding down into the base's slots; the lid's own flaps (and the
+   * tuck's ears); then the lid; the tuck last.
+   */
+  function mirrorStages(): FoldWindow[] | null {
+    if (glue !== undefined || lockStage.size > 0 || others.length === 0) return null;
+    const near = (a: number, b: number) => Math.abs(a - b) <= Math.max(1, Math.abs(a) * 0.02);
+    const offset = (i: number) => nodes[i]!.face.centroid[0] - rootX;
+    const paired = others.every((i) =>
+      others.some((j) => j !== i && nodes[j]!.depth === nodes[i]!.depth && near(width(j), width(i)) && near(-offset(j), offset(i))),
+    );
+    if (!paired) return null;
+
+    const flaps = [...group.entries()].filter(([i]) => nodes[i]!.kind !== "bend");
+    const deepest = (side: "top" | "bottom") => Math.max(0, ...flaps.filter(([, g]) => g.side === side).map(([, g]) => g.level));
+    const lidSide = deepest("top") >= deepest("bottom") ? "top" : "bottom";
+    const leaf = (i: number) => !hasChildren.has(i) || nodes.every((n) => n.parent !== i || n.kind === "bend" || n.isHole);
+
+    // Stages, closing: 0 both end walls; 1 their ears; 2 the outer side walls
+    // over the ears; 3 the inner walls down into the base's slots; 4 the lid's own
+    // flaps; then the lid and each deeper flap carrying more.
+    const INNER = 3;
+    const stageOf = new Map<number, number>();
+    for (const [i, g] of flaps) {
+      const ear = g.level === 2 && leaf(i);
+      if (g.level === 1) stageOf.set(i, 0);
+      else if (g.side !== lidSide || ear) stageOf.set(i, 1);
+      else if (leaf(i)) stageOf.set(i, 4);
+      else stageOf.set(i, 3 + g.level);
+    }
+    for (const i of others) stageOf.set(i, nodes[i]!.depth === 1 ? 2 : INNER);
+    // Close the numbering up, so an empty stage takes no time.
+    const used = [...new Set(stageOf.values())].sort((a, b) => a - b);
+    const step = 1 / used.length;
+    const windowAt = (k: number): FoldWindow => {
+      const n = used.indexOf(k);
+      return { start: n * step, end: (n + 1) * step };
+    };
+
+    return nodes.map((node, i) => {
+      if (node.parent === null || node.isHole) return ALWAYS;
+      // A bend moves with its flap.
+      let owner = i;
+      while (nodes[owner]!.kind === "bend" && nodes[owner]!.parent !== null) owner = nodes[owner]!.parent!;
+      const k = stageOf.get(owner);
+      if (k === undefined) return ALWAYS;
+      const window = windowAt(k);
+      if (node.kind === "bend") return { ...window, angle: 0 };
+      const level = group.get(i)?.level ?? 0;
+      // An ear on a wall goes between the double walls that close over it, not
+      // inside them: it stays square and slides off the wall's edge into the gap
+      // as the inner walls come down.
+      if (k === 1 && level === 2 && leaf(i)) {
+        const walls = windowAt(INNER);
+        return { ...window, press: { angle: node.angle, start: walls.start, end: walls.end, layer: EAR_LAYER } };
+      }
+      // Nothing here folds past square: the lid's side flaps and the tuck's ears
+      // stand against the walls, they do not tuck under anything.
+      return window;
+    });
   }
 
   if (stages.length === 0) return nodes.map(() => ALWAYS);

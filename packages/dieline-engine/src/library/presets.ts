@@ -29,6 +29,9 @@ export const BOTTOM_TYPES: { id: BottomType; name: string }[] = [
 ];
 
 const feature = (component: string, extra: Partial<EdgeFeature> = {}): EdgeFeature => ({ component, ...extra });
+/** Half a board: how much shorter the keyboard box's inner walls are at each end. */
+const CLEAR = "max(0.25, thickness / 2)";
+
 const panel = (name: string, width: Expr, top?: EdgeFeature, bottom?: EdgeFeature) => ({
   id: newId(),
   name,
@@ -126,22 +129,24 @@ export function presetBody(id: PresetId, name: string): PanelsNode {
 
     case "keyboardBox": {
       const wall = "height";
-      const top = "max(2, thickness * 2.5)";
-      const inner = "height - 1.5";
+      const top = "thickness + 2";
+      const inner = "height - 0.75 * thickness";
       const { right: _none, ...body } = base;
       return {
         ...body,
         height: SIDE,
         left: feature("lib:keyboardTabs"),
         right: feature("lib:keyboardTabs"),
+        // The inner walls are one board shorter at each end, so they drop in past
+        // the folded ears; the strip over each double wall slopes up to the outer wall.
         panels: [
-          panel("inner1", inner),
-          panel("top1", top),
+          { ...panel("inner1", inner), inset: { left: CLEAR, right: CLEAR } },
+          { ...panel("top1", top), inset: { left: CLEAR } },
           panel("wall1", wall),
           panel("base", FACE, feature("lib:keyboardLid"), feature("lib:keyboardFront")),
           panel("wall2", wall),
-          panel("top2", top),
-          panel("inner2", inner),
+          { ...panel("top2", top), inset: { right: CLEAR } },
+          { ...panel("inner2", inner), inset: { left: CLEAR, right: CLEAR } },
         ],
       };
     }

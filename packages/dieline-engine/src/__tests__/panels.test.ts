@@ -24,6 +24,44 @@ const cutsAndCreases = (r: ReturnType<typeof render>) => ({
 });
 
 describe("box bodies", () => {
+  it("shortens an inset panel at both ends and slopes a panel inset on one side", () => {
+    const node = body({
+      panels: [
+        { id: "p1", name: "inner", width: "length", inset: { left: "2", right: "2" } },
+        { id: "p2", name: "strip", width: "10", inset: { left: "2" } },
+        { id: "p3", name: "wall", width: "width" },
+      ],
+    });
+    const r = render(doc({ nodes: [node] }), INPUTS);
+    expect(errors(r)).toEqual([]);
+    const { cut, crease } = cutsAndCreases(r);
+    const has = (lines: typeof cut, a: [number, number], b: [number, number]) =>
+      lines.some((p) => p.kind === "line" && ((near(p.a, a) && near(p.b, b)) || (near(p.a, b) && near(p.b, a))));
+    const near = (p: [number, number], q: [number, number]) => Math.abs(p[0] - q[0]) < 1e-6 && Math.abs(p[1] - q[1]) < 1e-6;
+    // The inner panel's top and bottom sit 2 in; the fold beside it is 4 shorter.
+    expect(has(cut, [0, 118], [60, 118])).toBe(true);
+    expect(has(cut, [60, 2], [0, 2])).toBe(true);
+    expect(has(crease, [60, 2], [60, 118])).toBe(true);
+    // The strip slopes from the inner panel's edge up to the wall's.
+    expect(has(cut, [60, 118], [70, 120])).toBe(true);
+    expect(has(crease, [70, 0], [70, 120])).toBe(true);
+    // The outer side edge is pulled in to the shortened ends.
+    expect(has(cut, [0, 2], [0, 118])).toBe(true);
+    expect(isClosedOutline(cut)).toBe(true);
+    expect(parseDocument(JSON.parse(JSON.stringify(doc({ nodes: [node] }))))).toMatchObject({ ok: true });
+  });
+
+  it("refuses a part on a sloping edge", () => {
+    const node = body({
+      panels: [
+        { id: "p1", name: "strip", width: "10", inset: { left: "2" }, top: { component: "lib:plainFlap" } },
+        { id: "p2", name: "wall", width: "width" },
+      ],
+    });
+    const r = render(doc({ nodes: [node] }), INPUTS);
+    expect(r.diagnostics.some((d) => d.target.type === "node" && d.target.field === "panels.0.top.component")).toBe(true);
+  });
+
   it("lays panels side by side with folds between and cut edges around", () => {
     const r = render(doc({ nodes: [body()] }), INPUTS);
     expect(errors(r)).toEqual([]);

@@ -505,7 +505,13 @@ class Context {
       seen.add(panel.name);
       const w = ev.num(panel.width, `panels.${i}.width`);
       if (!(w > 0)) throw new GeometryError("Width must be greater than 0", `panels.${i}.width`);
-      const span = { x0: x, x1: x + w, w };
+      const inset = (side: "left" | "right") => {
+        const field = `panels.${i}.inset.${side}`;
+        const value = ev.opt(panel.inset?.[side], field, 0);
+        if (value < 0 || value >= height / 2) throw new GeometryError("Inset must be at least 0 and less than half the height", field);
+        return value;
+      };
+      const span = { x0: x, x1: x + w, w, il: inset("left"), ir: inset("right") };
       x += w;
       return span;
     });
@@ -535,8 +541,12 @@ class Context {
       const atStart = (side === "top") === left ? !feature.flip : !!feature.flip;
       return straight === "both" || straight === (atStart ? "start" : "end") ? stop : 0;
     };
+    // A fold runs between the shorter of the two panels' edges where they meet.
+    const insetAt = (i: number) => Math.max(spans[i - 1]?.ir ?? 0, spans[i]?.il ?? 0);
     spans.forEach((span, i) => {
-      if (i > 0) line([span.x0, relief(i, "bottom")], [span.x0, height - relief(i, "top")], node.fold ?? "crease");
+      if (i === 0) return;
+      const inset = insetAt(i);
+      line([span.x0, Math.max(inset, relief(i, "bottom"))], [span.x0, height - Math.max(inset, relief(i, "top"))], node.fold ?? "crease");
     });
 
     const edge = (
@@ -552,9 +562,14 @@ class Context {
       free: { start: boolean; end: boolean } = { start: false, end: false },
       // Whether the neighbouring panel carries a feature on the same edge (a lid beside a dust flap).
       next: { start: boolean; end: boolean } = { start: false, end: false },
+      // A cut edge's ends pulled in along it, in the feature's frame before a flip.
+      inset: { start: number; end: number } = { start: 0, end: 0 },
     ) => {
       if (!feature) {
-        line(a, b, "cut");
+        const dx = b[0] - a[0];
+        const dy = b[1] - a[1];
+        const len = Math.hypot(dx, dy) || 1;
+        line([a[0] + (dx / len) * inset.start, a[1] + (dy / len) * inset.start], [b[0] - (dx / len) * inset.end, b[1] - (dy / len) * inset.end], "cut");
         return;
       }
 
@@ -568,6 +583,9 @@ class Context {
           endFree: (feature.flip ? free.start : free.end) ? 1 : 0,
           startNext: (feature.flip ? next.end : next.start) ? 1 : 0,
           endNext: (feature.flip ? next.start : next.end) ? 1 : 0,
+          // How far the edge's ends are pulled in (a shortened inner wall's outer edge).
+          startInset: feature.flip ? inset.end : inset.start,
+          endInset: feature.flip ? inset.start : inset.end,
         });
         // Flipping mirrors the feature end to end about the middle of its edge.
         const flip: Placement = feature.flip ? { ...IDENTITY, mirrorX: true, x: length } : IDENTITY;
@@ -585,7 +603,7 @@ class Context {
     };
 
     node.panels.forEach((panel, i) => {
-      const { x0, x1, w } = spans[i]!;
+      const { x0, x1, w, il, ir } = spans[i]!;
       Object.assign(anchors, panelAnchors(panel.name, x0, x1, height));
       scalars[`${panel.name}.width`] = w;
 
@@ -593,12 +611,19 @@ class Context {
       // A neighbour's edge with no feature is a plain cut, and so is the end of the body.
       const plain = (j: number, side: "top" | "bottom") => !node.panels[j]?.[side];
       const featured = (j: number, side: "top" | "bottom") => j >= 0 && j < node.panels.length && !!node.panels[j]![side];
+      // A feature needs a straight edge square to the folds: a sloping one has none.
+      if (il !== ir) {
+        for (const side of ["top", "bottom"] as const) {
+          if (panel[side]) this.error(node.id, `panels.${i}.${side}.component`, "A panel with different insets at its two sides has a sloping edge and cannot carry a part");
+        }
+      }
+      const sloped = il !== ir;
       // Top edges run left to right, bottom edges right to left.
-      edge(panel.top, [x0, height], [x1, height], { ...IDENTITY, x: x0, y: height }, w, `panels.${i}.top`, `${panel.name}.top`, {
+      edge(sloped ? undefined : panel.top, [x0, height - il], [x1, height - ir], { ...IDENTITY, x: x0, y: height - il }, w, `panels.${i}.top`, `${panel.name}.top`, {
         start: plain(i - 1, "top"),
         end: plain(i + 1, "top"),
       }, { start: featured(i - 1, "top"), end: featured(i + 1, "top") });
-      edge(panel.bottom, [x1, 0], [x0, 0], { ...IDENTITY, x: x1, rotate: 180 }, w, `panels.${i}.bottom`, `${panel.name}.bottom`, {
+      edge(sloped ? undefined : panel.bottom, [x1, ir], [x0, il], { ...IDENTITY, x: x1, y: ir, rotate: 180 }, w, `panels.${i}.bottom`, `${panel.name}.bottom`, {
         start: plain(i + 1, "bottom"),
         end: plain(i - 1, "bottom"),
       }, { start: featured(i + 1, "bottom"), end: featured(i - 1, "bottom") });
@@ -611,8 +636,19 @@ class Context {
     const lt = outerStop(0, "top", true);
     const rb = outerStop(lastIndex, "bottom", false);
     const rt = outerStop(lastIndex, "top", false);
-    edge(node.left, [0, lb], [0, height - lt], { ...IDENTITY, y: lb, rotate: 90 }, height - lb - lt, "left", `${first}.left`);
-    edge(node.right, [total, height - rt], [total, rb], { ...IDENTITY, x: total, y: height - rt, rotate: -90 }, height - rb - rt, "right", `${last}.right`);
+    // An inset outer panel's side edge keeps its frame on the body's corners, so a
+    // part on it (the keyboard box's tabs) stays measured from them; its ends are
+    // pulled in to the shortened top and bottom.
+    const firstInset = spans[0]?.il ?? 0;
+    const lastInset = spans[lastIndex]?.ir ?? 0;
+    edge(node.left, [0, lb], [0, height - lt], { ...IDENTITY, y: lb, rotate: 90 }, height - lb - lt, "left", `${first}.left`, undefined, undefined, {
+      start: Math.max(0, firstInset - lb),
+      end: Math.max(0, firstInset - lt),
+    });
+    edge(node.right, [total, height - rt], [total, rb], { ...IDENTITY, x: total, y: height - rt, rotate: -90 }, height - rb - rt, "right", `${last}.right`, undefined, undefined, {
+      start: Math.max(0, lastInset - rt),
+      end: Math.max(0, lastInset - rb),
+    });
 
     return { paths, anchors, scalars };
   }

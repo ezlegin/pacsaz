@@ -107,6 +107,20 @@ Phases (each ends with a commit message for the user to commit):
   (edge, 0), feature towards +y; `edge` is in scope inside them. The body maps
   that frame onto the real edge (top: as is; bottom: rotated 180°; left: 90°;
   right: −90°), and `flip` mirrors it end to end.
+- A panel's `inset` (`left`/`right`) pulls its top and bottom edges in, both
+  ends alike; different values slope the edge (no part allowed there). Folds run
+  between the shorter edges; outer side edges keep their frame on the body's
+  corners and get `startInset`/`endInset`. The keyboard box's inner walls are half
+  a board shorter, the strip over each double wall slopes up to the outer wall.
+- The keyboard box (`lib:keyboardLid`, `lib:keyboardFront`, `lib:keyboardTabs`,
+  preset `keyboardBox`) is measured from a real die, `Sample.pdf` in the repo
+  root (315 × 202 × 62 on 3 mm board): board-following lengths are in
+  `thickness`, shapes in the height, so at 3 mm it matches that die within
+  0.3 mm. Reliefs where flaps fold side by side are half circles of radius
+  thickness / 2 touching the flap's fold. Two deliberate differences: the
+  front base fold stops at its reliefs instead of running under 1 mm of cut,
+  and the base's side folds stop along the slots (a cut on a crease is a
+  double knife).
 - Panels expose dotted anchors and scalars: `@body.front.topLeft.x`,
   `@body.front.width`, plus `bodyWidth`/`bodyHeight`. `lookupRef` reads a path as
   "everything before a trailing x/y is the point name".

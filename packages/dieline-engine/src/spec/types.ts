@@ -171,6 +171,12 @@ export type FoldSettings = {
   faceCount: number;
   /** The panel that stays still. Unset, it is the largest, which can be a lid. */
   rootFace?: number;
+  /**
+   * How the model is set down in the 3D view. "end" (the default) stands the
+   * still panel up facing the viewer, as a carton stands on its end; "base"
+   * lays it on the ground, as a mailer or tray sits on its bottom.
+   */
+  rest?: "end" | "base";
   overrides: { faceIndex: number; direction: "in" | "out"; angle: number; vertexCount?: number }[];
 };
 
@@ -351,6 +357,13 @@ export type Panel = {
   width: Expr;
   top?: EdgeFeature;
   bottom?: EdgeFeature;
+  /**
+   * How far this panel's top and bottom edges sit in from the body's, at its
+   * left and right side; both ends alike. An inner wall is shortened so it drops
+   * in past what it closes over; a panel with different values at its two sides
+   * gets a sloping edge (the strip between an inner and an outer wall).
+   */
+  inset?: { left?: Expr; right?: Expr };
 };
 
 /**

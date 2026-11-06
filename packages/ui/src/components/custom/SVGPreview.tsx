@@ -6,7 +6,7 @@ import { Separator } from "@repo/ui/components/separator";
 import { Spinner } from "@repo/ui/components/spinner";
 import { cn } from "@repo/ui/lib/utils";
 import { Ruler, ZoomIn, ZoomOut } from "lucide-react";
-import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import {
   ReactZoomPanPinchRef,
   TransformComponent,
@@ -106,6 +106,16 @@ export default function SvgPreview({
   };
 
   svg = scaleSVGStrokeWidth(svg!, scaleFraction);
+  // Undoes the whole zoom (the drawing is scaled as a page), so line widths, ruler
+  // text and arrows are their size in screen pixels at any zoom, as in the editor.
+  const zoomUndo = scale ? 1 / (scale * scaleFraction) : 1;
+
+  // As in the editor, a ruler too short on screen to hold them drops its arrows,
+  // and then its number, instead of piling them on top of each other when zoomed out.
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => fitRulerMarks(contentRef.current));
+    return () => cancelAnimationFrame(frame);
+  }, [svg, scaleFraction, scale]);
 
   return (
     <div
@@ -117,11 +127,14 @@ export default function SvgPreview({
         ref={transformRef}
         centerOnInit
         limitToBounds={false}
-        minScale={0.05}
+        // Zooming out past half the fitted view shows nothing more, just a speck.
+        minScale={scale ? scale * 0.5 : 0.05}
         maxScale={isEditorType ? 3 : 1.5}
         panning={{ disabled: isRendering || disablePanning }}
         wheel={{
           disabled: isRendering || disableWheel,
+          // Small steps, so one notch of the wheel is a gentle zoom.
+          step: 0.05,
         }}
         velocityAnimation={{ disabled: true }}
         alignmentAnimation={{ disabled: true }}
@@ -146,10 +159,19 @@ export default function SvgPreview({
             >
               {/*
                 Ruler arrows and labels read --ruler-scale, so they keep their size on
-                screen while zooming in. Zoomed out past the fitted view they shrink with
-                the drawing instead, or the labels would grow over everything.
+                screen at any zoom, as in the editor; a ruler too short for them hides
+                them (fitRulerMarks).
               */}
-              <div className="relative" ref={contentRef} style={{ "--ruler-scale": Math.min(1, 1 / scaleFraction) } as CSSProperties}>
+              {/*
+                --stroke-scale undoes the whole zoom for line widths: the drawing is
+                scaled as a page, which non-scaling strokes do not see, so a 1.6 px
+                line would otherwise come out under a pixel wide and look faint.
+              */}
+              <div
+                className="relative"
+                ref={contentRef}
+                style={{ "--ruler-scale": zoomUndo, "--stroke-scale": zoomUndo } as CSSProperties}
+              >
                 {isRendering && (
                   <Spinner className="scale-200 text-primary absolute top-1/2 -translate-y-1/2 left-1/2 translate-x-1/2" />
                 )}
@@ -202,6 +224,31 @@ export default function SvgPreview({
       </TransformWrapper>
     </div>
   );
+}
+
+/**
+ * Shows a ruler's arrows only when the ruler is at least 2.5 arrows long on
+ * screen, and its number only when there is room for it beside both arrows.
+ * Sizes are read from the page, so the --ruler-scale zoom compensation counts.
+ */
+function fitRulerMarks(root: HTMLElement | null) {
+  const svg = root?.querySelector("svg");
+  const box = svg?.viewBox.baseVal;
+  if (!svg || !box || !box.width) return;
+  const perUnit = svg.getBoundingClientRect().width / box.width;
+  for (const ruler of svg.querySelectorAll<SVGGElement>("g[data-ruler-length]")) {
+    const length = Number(ruler.dataset.rulerLength) * perUnit;
+    const arrows = [...ruler.querySelectorAll<SVGElement>("[data-ruler-arrow]")];
+    const label = ruler.querySelector<SVGElement>("[data-ruler-label]");
+    const size = (el: Element | null | undefined) => {
+      const r = el?.getBoundingClientRect();
+      return r ? Math.max(r.width, r.height) : 0;
+    };
+    const arrow = size(arrows[0]);
+    const showArrows = length > arrow * 2.5;
+    for (const a of arrows) a.style.visibility = showArrows ? "" : "hidden";
+    if (label) label.style.visibility = length > size(label) + arrow * 2 ? "" : "hidden";
+  }
 }
 
 function scaleSVGStrokeWidth(svg: string, newSclaeAmount: number) {

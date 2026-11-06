@@ -41,6 +41,8 @@ export type FoldConfig = {
   faceCount: number;
   /** Index of the panel that stays still, when the largest is not the right one. */
   rootFace?: number;
+  /** "base" lays the still panel on the ground; "end" (default) stands it up. */
+  rest?: "end" | "base";
   overrides: FoldOverride[];
 };
 
@@ -87,6 +89,7 @@ export const parseFoldConfig = (
       faceCount:
         typeof parsed.faceCount === "number" ? parsed.faceCount : 0,
       ...(typeof parsed.rootFace === "number" ? { rootFace: parsed.rootFace } : {}),
+      ...(parsed.rest === "base" || parsed.rest === "end" ? { rest: parsed.rest } : {}),
       overrides,
     };
   } catch {

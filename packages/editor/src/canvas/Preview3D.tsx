@@ -17,10 +17,12 @@ export function Preview3D() {
   const result = useEditor((s) => s.result);
   const thickness = useEditor((s) => s.inputs.thickness);
   const folds = useEditor((s) => s.doc.folds);
+  const material = useEditor((s) => s.display.material);
   return (
     <FoldPreview
       result={result}
       thickness={thickness}
+      material={material}
       folds={folds}
       onFoldsChange={(next) =>
         store.apply((d) => {
@@ -37,6 +39,9 @@ export function Preview3D() {
 
 export type FoldPreviewStrings = {
   title: string;
+  rest: string;
+  restEnd: string;
+  restBase: string;
   fold: string;
   close: string;
   loading: string;
@@ -78,6 +83,9 @@ const FOLD_EN: FoldPreviewStrings = {
   outward: "Out",
   angle: "Angle",
   root: "This is the panel everything folds around.",
+  rest: "Rests on",
+  restEnd: "Its end",
+  restBase: "Its base",
   dragHint: "Drag to move",
   imageSize: "Image size",
   resetImage: "Reset placement",
@@ -99,9 +107,12 @@ export function FoldPreview({
   folds,
   onFoldsChange,
   artwork: allowArtwork,
+  material = "glossyCardboard",
 }: {
   result: RenderResult;
   thickness: number;
+  /** The board to show, as the site's material keys: flute materials get kraft and flutes. */
+  material?: string;
   onClose?: () => void;
   strings?: Partial<FoldPreviewStrings>;
   /** Placement of the small, docked view (the large one is always centred). */
@@ -148,11 +159,22 @@ export function FoldPreview({
     if (selected === null || !node || !onFoldsChange) return;
     const others = (folds?.overrides ?? []).filter((o) => o.faceIndex !== selected);
     const overrides = patch ? [...others, { faceIndex: selected, ...patch, vertexCount: node.face.outline.length }] : others;
-    // The root is the template's own choice: editing a panel's fold keeps it.
-    const rootFace = folds?.rootFace;
+    // The root and the resting side are the template's own choices: editing a panel's fold keeps them.
+    save({ rootFace: folds?.rootFace, rest: folds?.rest, overrides });
+  };
+
+  const save = ({ rootFace, rest, overrides }: Pick<FoldSettings, "rootFace" | "rest" | "overrides">) => {
+    if (!onFoldsChange) return;
+    // Nothing authored is stored as nothing, so an untouched template keeps no fold settings.
+    const chosen = rest === "base" ? rest : undefined;
     onFoldsChange(
-      overrides.length || rootFace !== undefined
-        ? { faceCount: panelCount, ...(rootFace !== undefined ? { rootFace } : {}), overrides: overrides.sort((a, b) => a.faceIndex - b.faceIndex) }
+      overrides.length || rootFace !== undefined || chosen
+        ? {
+            faceCount: panelCount,
+            ...(rootFace !== undefined ? { rootFace } : {}),
+            ...(chosen ? { rest: chosen } : {}),
+            overrides: [...overrides].sort((a, b) => a.faceIndex - b.faceIndex),
+          }
         : undefined,
     );
   };
@@ -222,7 +244,7 @@ export function FoldPreview({
           <Suspense fallback={<p className="p-4 text-xs text-muted-foreground">{t.loading}</p>}>
             <DielineViewer
               svg={svg}
-              material="glossyCardboard"
+              material={material}
               thickness={thickness}
               progress={progress}
               foldConfig={foldConfig}
@@ -250,6 +272,30 @@ export function FoldPreview({
           </div>
         )}
       </div>
+
+      {editable && (
+        <div className="flex h-8 shrink-0 items-center gap-1.5 border-t px-2 text-[11px]">
+          <span className="text-muted-foreground">{t.rest}</span>
+          {(
+            [
+              ["end", t.restEnd],
+              ["base", t.restBase],
+            ] as const
+          ).map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => save({ rootFace: folds?.rootFace, rest: value, overrides: folds?.overrides ?? [] })}
+              className={cn(
+                "rounded border px-1.5 py-0.5",
+                (folds?.rest ?? "end") === value ? "border-blue-500 bg-blue-500/10 text-blue-700" : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {editable && (
         <div className="flex min-h-9 shrink-0 flex-wrap items-center gap-1.5 border-t px-2 py-1 text-[11px]">

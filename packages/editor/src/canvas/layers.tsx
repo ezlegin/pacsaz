@@ -9,7 +9,7 @@ import { primD, pt } from "./paths";
 import { gridSteps, toScreen } from "./viewport";
 
 /** On screen, dashes are drawn in pixels so they read the same at every zoom. */
-const DASH_PX = 3;
+const DASH_PX = 1;
 
 /** The dieline itself, in world coordinates. Re-renders only when the result changes. */
 export const DielineLayer = memo(function DielineLayer({

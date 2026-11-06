@@ -36,12 +36,12 @@ const bottom = schedule[at(20, 27.5)]!;
 const left = schedule[at(5, 15)]!;
 const right = schedule[at(35, 15)]!;
 
-assert("four stages of a quarter each", Math.abs(top.end - top.start - 0.25) < 1e-9, JSON.stringify(schedule));
-assert("sides first, one by one", Math.min(left.start, right.start) === 0 && (left.end <= right.start + 1e-9 || right.end <= left.start + 1e-9));
-assert("bottom flap after the sides", Math.abs(bottom.start - Math.max(left.end, right.end)) < 1e-9);
-assert("top flap closes last", Math.abs(top.start - bottom.end) < 1e-9 && top.end === 1);
+// Symmetric with no glue flap: it closes like a tray, mirrored panels together.
+assert("two stages of a half each", Math.abs(top.end - top.start - 0.5) < 1e-9, JSON.stringify(schedule));
+assert("both end flaps first, together", top.start === 0 && bottom.start === 0 && Math.abs(top.end - 0.5) < 1e-9 && bottom.end === top.end);
+assert("then both sides at once", left.start === right.start && left.end === right.end && Math.abs(left.start - 0.5) < 1e-9 && left.end === 1);
+assert("progress maps into a stage", stageProgress(top, 0.25) === 0.5 && stageProgress(left, 0.3) === 0 && stageProgress(top, 0.9) === 1);
 assert("root never moves", schedule[at(20, 15)]!.start === 0 && schedule[at(20, 15)]!.end === 1);
-assert("progress maps into a stage", stageProgress(bottom, 0.625) === 0.5 && stageProgress(bottom, 0.3) === 0 && stageProgress(bottom, 0.9) === 1);
 
 /*
   A tuck end: lid with a tuck on the root's top, a dust flap on the left side's

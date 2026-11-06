@@ -68,10 +68,75 @@ export type RigScene = {
   thickness: number;
   /** One-piece faces over closed locks, shown from `from` in the fold. */
   caps: { mesh: THREE.Mesh; from: number }[];
+  /** The bent board at each fold, reshaped on every `applyFold`. */
+  bends: Bend[];
   size: THREE.Vector3;
   style: MaterialStyle;
   /** Surface textures: paper grain, or kraft liner and flute ridges. Null outside a browser. */
   board: BoardTextures | null;
+};
+
+/**
+ * The strip of board that bends at one fold. It hangs in the parent's pivot and
+ * runs from the parent's trimmed edge, round the crease, to the child's trimmed
+ * edge wherever the child's rotation has taken it.
+ */
+type Bend = {
+  index: number;
+  mesh: THREE.Mesh;
+  /** Crease direction, in the parent's frame. */
+  along: THREE.Vector3;
+  /** Where this piece starts along the crease, from the panel's pivot. */
+  start: number;
+  length: number;
+  /** In the board's plane, at right angles to the crease, towards the parent. */
+  towardParent: THREE.Vector3;
+  /** Flat (world, unrotated) position of the crease start, for texture mapping. */
+  flatStart: THREE.Vector2;
+};
+
+/** Steps round a bend: enough that it reads as a curve, few enough to rebuild every frame. */
+const BEND_STEPS = 8;
+/** Vertices in one copy of a bend's grid: step x end (0, 1) x face (outer, inner). */
+const BEND_GRID = (BEND_STEPS + 1) * 2 * 2;
+const bendVertex = (step: number, end: number, face: number) => (step * 2 + end) * 2 + face;
+
+/** How far, in mm, a bend strip runs on under each panel it joins. */
+const BEND_OVERLAP = 0.2;
+
+/** How wide the bend is: a few board thicknesses, as a crease rounds over in real board. */
+export const bendWidth = (thickness: number) => Math.max(1.5 * thickness, 1);
+
+/**
+ * Pulls a panel's outline back from one crease, only along the crease's own
+ * length, so the bend strip there fits in between. Points on or near the crease
+ * move straight off it by `reach`. Where the outline carries on along the same
+ * line past an end of the crease (a cut edge beside a shorter flap), the point at
+ * that end is kept as well, so the outline steps in there instead of losing a
+ * sliver along the whole edge; the step is exactly the strip's cut end.
+ */
+export const trimAtCrease = (polygon: Pt[], origin: Pt, unit: Pt, inward: Pt, first: number, last: number, reach: number): Pt[] => {
+  const eps = 1e-6;
+  const along = (p: Pt) => (p[0] - origin[0]) * unit[0] + (p[1] - origin[1]) * unit[1];
+  const depth = (p: Pt) => (p[0] - origin[0]) * inward[0] + (p[1] - origin[1]) * inward[1];
+  const within = (p: Pt) => along(p) >= first - eps && along(p) <= last + eps;
+  const onLine = (p: Pt) => Math.abs(depth(p)) < 1e-4;
+  const outside = (p: Pt) => onLine(p) && !within(p);
+  const out: Pt[] = [];
+  polygon.forEach((v, i) => {
+    const d = depth(v);
+    if (!within(v) || d < -1e-4 || d >= reach - eps) {
+      out.push(v);
+      return;
+    }
+    const moved: Pt = [v[0] + inward[0] * (reach - d), v[1] + inward[1] * (reach - d)];
+    const prev = polygon[(i - 1 + polygon.length) % polygon.length]!;
+    const next = polygon[(i + 1) % polygon.length]!;
+    if (onLine(v) && outside(prev)) out.push(v);
+    out.push(moved);
+    if (onLine(v) && outside(next)) out.push(v);
+  });
+  return out;
 };
 
 /** Flat (SVG, y-down) point -> world (y-up) point, centred on the pattern. */
@@ -104,8 +169,14 @@ const buildPanelGeometry = (
   thickness: number,
   bounds: { width: number; height: number },
   hingeSegments: { from: Pt; to: Pt }[],
+  /** How far the panel was trimmed back from its creases for the bends. */
+  creaseGap = 0,
 ): THREE.BufferGeometry | null => {
   const toPoints = (pts: Pt[]) => pts.map((p) => toWorld(p, center));
+  // Triangulation drops a repeated point by itself; dropping it here first keeps
+  // the flat and world rings in step, edge for edge.
+  const same = (p: Pt, q: Pt) => Math.abs(p[0] - q[0]) < 1e-6 && Math.abs(p[1] - q[1]) < 1e-6;
+  outline = outline.filter((p, i) => !same(p, outline[(i + 1) % outline.length]!));
 
   const contour = toPoints(outline);
   if (contour.length < 3) return null;
@@ -199,10 +270,12 @@ const buildPanelGeometry = (
       const px = mid[0] - hinge.from[0];
       const py = mid[1] - hinge.from[1];
       const t = (px * dx + py * dy) / lengthSq;
-      if (t < 0 || t > 1) return false;
+      if (t < -1e-6 || t > 1 + 1e-6) return false;
 
+      // On the crease, on the edge trimmed back from it, or the short step where
+      // that trim ends: the bend strip joins the panel there, so no wall shows.
       const cross = Math.abs(px * dy - py * dx) / Math.sqrt(lengthSq);
-      return cross < 0.08;
+      return cross < creaseGap + 0.08;
     });
   };
 
@@ -356,6 +429,7 @@ export const buildRigScene = ({
    * its neighbours. Derived from the rig: each non-root node's pivot and axis is
    * the hinge it rotates about.
    */
+  const bends: Bend[] = [];
   const hingeSegments = rig.nodes
     .filter((node) => node.parent !== null)
     .map((node) => ({
@@ -370,13 +444,37 @@ export const buildRigScene = ({
     // Windows are not panels; they are cut out of their container.
     if (node.isHole) return;
 
+    /*
+     * The panel stops half a bend short of each of its creases, on both sides of
+     * the fold, and the bend strip fills the gap. Only this panel's own creases
+     * trim it: its hinge to its parent, and its children's hinges.
+     */
+    const reach = bendWidth(safeThickness) / 2;
+    let outline = node.face.outline;
+    const own = rig.nodes.filter((other, j) => (j === index && other.parent !== null) || (other.parent === index && !other.isHole));
+    for (const crease of own) {
+      const length = Math.hypot(crease.axis[0], crease.axis[1]);
+      if (length < 1e-6) continue;
+      const unit: Pt = [crease.axis[0] / length, crease.axis[1] / length];
+      const normal: Pt = [-unit[1], unit[0]];
+      const c = node.face.centroid;
+      const side = (c[0] - crease.pivot[0]) * normal[0] + (c[1] - crease.pivot[1]) * normal[1] >= 0 ? 1 : -1;
+      // The same extent the bend strip covers: from the first crease piece to the last.
+      const ends = (crease.spans?.length ? crease.spans.flat() : [crease.pivot, [crease.pivot[0] + crease.axis[0], crease.pivot[1] + crease.axis[1]] as Pt]).map(
+        (p) => (p[0] - crease.pivot[0]) * unit[0] + (p[1] - crease.pivot[1]) * unit[1],
+      );
+      const trimmed = trimAtCrease(outline, crease.pivot, unit, [normal[0] * side, normal[1] * side], Math.min(...ends), Math.max(...ends), reach);
+      if (trimmed.length >= 3) outline = trimmed;
+    }
+
     const geometry = buildPanelGeometry(
-      node.face.outline,
+      outline,
       node.holes,
       center,
       safeThickness,
       rig.bounds,
       hingeSegments,
+      reach,
     );
     if (!geometry) return;
 
@@ -409,6 +507,75 @@ export const buildRigScene = ({
     mesh.userData.panelIndex = index;
 
     pivot.add(mesh);
+
+    /*
+     * The board bends round at a fold rather than breaking into a corner: a strip
+     * joins this panel to its parent, so the box is one sheet. Its shape follows
+     * the fold angle, so it is built empty here and filled by `shapeBend`.
+     */
+    if (node.parent !== null && !rig.nodes[node.parent]!.isHole) {
+      // One strip along the whole fold. A fold broken by slots is several pieces
+      // on one line; the panels are trimmed back along all of it, so the strip
+      // runs from the first piece to the last and leaves no slit between them.
+      const axisLength = Math.hypot(node.axis[0], node.axis[1]);
+      const unit: Pt = axisLength > 1e-9 ? [node.axis[0] / axisLength, node.axis[1] / axisLength] : [1, 0];
+      const project = (p: Pt) => (p[0] - node.pivot[0]) * unit[0] + (p[1] - node.pivot[1]) * unit[1];
+      const spans = (node.spans?.length ? node.spans : [[node.pivot, [node.pivot[0] + node.axis[0], node.pivot[1] + node.axis[1]]] as [Pt, Pt]]).map(
+        ([a, b]) => ({ start: Math.min(project(a), project(b)), end: Math.max(project(a), project(b)) }),
+      );
+      const first = Math.min(...spans.map((p) => p.start));
+      const last = Math.max(...spans.map((p) => p.end));
+      for (const { start, length } of [{ start: first, length: last - first }]) {
+        if (length <= 1e-3 || axisLength <= 1e-9) continue;
+        const along = new THREE.Vector3(node.axis[0], -node.axis[1], 0).normalize();
+        const parentCentroid = toWorld(rig.nodes[node.parent]!.face.centroid, center);
+        const hingeWorld = hinges[index]!;
+        const towardParent = new THREE.Vector3(-along.y, along.x, 0);
+        if (towardParent.x * (parentCentroid.x - hingeWorld.x) + towardParent.y * (parentCentroid.y - hingeWorld.y) < 0) towardParent.negate();
+
+        const geometry = new THREE.BufferGeometry();
+        // Two copies of the grid: the faces, and the cut ends. The ends get their
+        // own vertices so their sideways normals do not bleed into the faces and
+        // show the bend as a shaded line.
+        const vertexCount = BEND_GRID * 2;
+        geometry.setAttribute("position", new THREE.Float32BufferAttribute(new Float32Array(vertexCount * 3), 3));
+        geometry.setAttribute("normal", new THREE.Float32BufferAttribute(new Float32Array(vertexCount * 3), 3));
+        geometry.setAttribute("uv", new THREE.Float32BufferAttribute(new Float32Array(vertexCount * 2), 2));
+        const indices: number[] = [];
+        for (let k = 0; k < BEND_STEPS; k++) {
+          for (const face of [0, 1]) {
+            const [a0, a1, b0, b1] = [bendVertex(k, 0, face), bendVertex(k, 1, face), bendVertex(k + 1, 0, face), bendVertex(k + 1, 1, face)];
+            // The inner face looks the other way, so it winds the other way.
+            if (face === 0) indices.push(a0, b0, a1, a1, b0, b1);
+            else indices.push(a0, a1, b0, a1, b1, b0);
+          }
+          // The two ends of the strip, along the outline's cut edges.
+          for (const end of [0, 1]) {
+            const [o0, i0, o1, i1] = [k, k, k + 1, k + 1].map((step, j) => BEND_GRID + bendVertex(step, end, j % 2));
+            // The two ends face opposite ways along the crease.
+            if (end === 0) indices.push(o0!, i0!, o1!, o1!, i0!, i1!);
+            else indices.push(o0!, o1!, i0!, o1!, i1!, i0!);
+          }
+        }
+        // Which way the triangles must wind for the board's top to face the
+        // viewer depends on the fold's direction; drawn both sides, a triangle
+        // seen from its back is lit as if facing away, and the bend goes dark.
+        const flat = new THREE.Vector3().crossVectors(along, towardParent.clone().negate());
+        if (flat.z > 0) {
+          for (let t = 0; t < indices.length; t += 3) [indices[t + 1], indices[t + 2]] = [indices[t + 2]!, indices[t + 1]!];
+        }
+        geometry.setIndex(indices);
+
+        const bend = new THREE.Mesh(geometry, materialInstance);
+        bend.name = `bend-${index}`;
+        bend.userData.panelIndex = index;
+        bend.castShadow = true;
+        bend.receiveShadow = true;
+        bend.frustumCulled = false;
+        pivots[node.parent]!.add(bend);
+        bends.push({ index, mesh: bend, along, start, length, towardParent, flatStart: hingeWorld.clone() });
+      }
+    }
   });
 
   /* ----------------------------- closed bottoms ---------------------------- */
@@ -555,7 +722,10 @@ export const buildRigScene = ({
 
   const rest = pivots.map((pivot) => pivot.position.clone());
 
-  return { group: root, pivots, rest, thickness: safeThickness, caps, size, style, board };
+  const scene: RigScene = { group: root, pivots, rest, thickness: safeThickness, caps, bends, size, style, board };
+  // Shape the bends once, flat, so a scene that is never folded still shows them.
+  for (const bend of bends) shapeBend(scene, bend, rig);
+  return scene;
 };
 
 // The schedule only depends on the rig, and the slider calls `applyFold` per frame.
@@ -607,8 +777,90 @@ export const applyFold = (
   });
 
   for (const { mesh, from } of scene.caps) mesh.visible = clamped >= from - 1e-9;
+  for (const bend of scene.bends) shapeBend(scene, bend, rig);
 
   scene.group.updateMatrixWorld(true);
+};
+
+/**
+ * Reshapes one fold's strip to the child's current rotation. In the parent's
+ * frame the strip's middle line is a quadratic curve from the parent's trimmed
+ * edge, through the crease, to the child's trimmed edge: it leaves each panel
+ * along that panel's surface, so the sheet has no corner, only a bend. The two
+ * faces sit half a board either side of it.
+ */
+const shapeBend = (scene: RigScene, bend: Bend, rig: FoldRig) => {
+  const pivot = scene.pivots[bend.index];
+  const rest = scene.rest[bend.index];
+  if (!pivot || !rest) return;
+  const position = bend.mesh.geometry.getAttribute("position") as THREE.BufferAttribute;
+  const uv = bend.mesh.geometry.getAttribute("uv") as THREE.BufferAttribute;
+  const normals = bend.mesh.geometry.getAttribute("normal") as THREE.BufferAttribute;
+  // A little past where the panels stop, so the strip overlaps them: the panels'
+  // trimmed edges have points the strip has not (at each slot), and edges that
+  // only meet would open hairline cracks at a low angle.
+  const reach = bendWidth(scene.thickness) / 2 + BEND_OVERLAP;
+  const half = scene.thickness / 2;
+  const width = Math.max(rig.bounds.width, 1e-3);
+  const height = Math.max(rig.bounds.height, 1e-3);
+
+  const towardChild = bend.towardParent.clone().negate().applyQuaternion(pivot.quaternion);
+  // The board's +Z side when flat, so the faces keep their sides as it bends.
+  const flip = new THREE.Vector3().crossVectors(bend.along, bend.towardParent.clone().negate()).z < 0 ? -1 : 1;
+  const p0 = new THREE.Vector3();
+  const p1 = new THREE.Vector3();
+  const p2 = new THREE.Vector3();
+  const d0 = new THREE.Vector3();
+  const d1 = new THREE.Vector3();
+  const point = new THREE.Vector3();
+  const tangent = new THREE.Vector3();
+  const normal = new THREE.Vector3();
+
+  for (let step = 0; step <= BEND_STEPS; step++) {
+    const s = step / BEND_STEPS;
+    for (const end of [0, 1]) {
+      const offset = bend.start + end * bend.length;
+      // The crease moves with the child's pivot (a layered ear slides).
+      p1.copy(pivot.position).addScaledVector(bend.along, offset);
+      p0.copy(rest).addScaledVector(bend.along, offset).addScaledVector(bend.towardParent, reach);
+      p2.copy(p1).addScaledVector(towardChild, reach);
+
+      // B(s) = (1-s)^2 p0 + 2s(1-s) p1 + s^2 p2, and its direction.
+      point.set(0, 0, 0).addScaledVector(p0, (1 - s) ** 2).addScaledVector(p1, 2 * s * (1 - s)).addScaledVector(p2, s * s);
+      d0.subVectors(p1, p0);
+      d1.subVectors(p2, p1);
+      tangent.set(0, 0, 0).addScaledVector(d0, 1 - s).addScaledVector(d1, s);
+      if (tangent.lengthSq() < 1e-12) tangent.copy(bend.towardParent).negate();
+      normal.crossVectors(bend.along, tangent).normalize().multiplyScalar(flip);
+
+      // Texture: where this point lies on the flat sheet.
+      const fx = bend.flatStart.x + bend.along.x * offset + bend.towardParent.x * reach * (1 - 2 * s);
+      const fy = bend.flatStart.y + bend.along.y * offset + bend.towardParent.y * reach * (1 - 2 * s);
+
+      for (const face of [0, 1]) {
+        const i = bendVertex(step, end, face);
+        const z = face === 0 ? half : -half;
+        const sign = face === 0 ? 1 : -1;
+        const x = point.x + normal.x * z;
+        const y = point.y + normal.y * z;
+        const w = point.z + normal.z * z;
+        // The faces' normals come straight from the curve, so they match the
+        // panels' exactly where the strip meets them.
+        position.setXYZ(i, x, y, w);
+        normals.setXYZ(i, normal.x * sign, normal.y * sign, normal.z * sign);
+        uv.setXY(i, (fx + width / 2) / width, (fy + height / 2) / height);
+        // The cut end faces out along the crease.
+        const endSign = end === 0 ? -1 : 1;
+        position.setXYZ(BEND_GRID + i, x, y, w);
+        normals.setXYZ(BEND_GRID + i, bend.along.x * endSign, bend.along.y * endSign, bend.along.z * endSign);
+        uv.setXY(BEND_GRID + i, (fx + width / 2) / width, (fy + height / 2) / height);
+      }
+    }
+  }
+  position.needsUpdate = true;
+  normals.needsUpdate = true;
+  uv.needsUpdate = true;
+  bend.mesh.geometry.computeBoundingSphere();
 };
 
 /**

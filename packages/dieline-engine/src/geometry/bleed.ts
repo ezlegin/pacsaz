@@ -12,7 +12,10 @@ import type { Path, Prim, Pt } from "./types";
  */
 
 const KEY = 100; // endpoints within 0.01 mm are the same point
-const key = (p: Pt) => `${Math.round(p[0] * KEY)},${Math.round(p[1] * KEY)}`;
+// Float noise is snapped off first: two ends that meet can land either side of a
+// half-step of the grid (126.12499999 and 126.12500001), and would never join.
+const snap = (v: number) => Math.round(Math.round(v * 1e6) / 1e6 * KEY);
+const key = (p: Pt) => `${snap(p[0])},${snap(p[1])}`;
 const ARC_STEP = 5; // degrees per chord when flattening
 const JOIN_STEP = 10; // degrees per chord of a round corner
 
@@ -279,7 +282,19 @@ export function trimFoldsAtHoles(paths: Path[]): { paths: Path[]; trimmed: numbe
   if (!holes.length) return { paths, trimmed: 0, removed: [] };
   let trimmed = 0;
   const removed: Path[] = [];
-  const inAnyHole = (p: Pt) => holes.some((h) => insidePolygon(p, h));
+  // A hole's straight side may run along a fold, a slot set tangent to it: the
+  // cut does the fold's job there, and both would be a double knife.
+  const onEdge = (p: Pt, a: Pt, b: Pt) => {
+    const dx = b[0] - a[0];
+    const dy = b[1] - a[1];
+    const l2 = dx * dx + dy * dy;
+    if (l2 < 1e-12) return false;
+    const t = ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / l2;
+    if (t < -1e-9 || t > 1 + 1e-9) return false;
+    return Math.hypot(a[0] + dx * t - p[0], a[1] + dy * t - p[1]) < 1e-6;
+  };
+  const onHoleSide = (p: Pt) => holes.some((h) => h.some((v, i) => onEdge(p, v, h[(i + 1) % h.length]!)));
+  const inAnyHole = (p: Pt) => onHoleSide(p) || holes.some((h) => insidePolygon(p, h));
 
   const out = paths.flatMap((path): Path[] => {
     if (!FOLD_TYPES.has(path.lineType)) return [path];
@@ -296,6 +311,12 @@ export function trimFoldsAtHoles(paths: Path[]): { paths: Path[]; trimmed: numbe
       for (let i = 0; i < h.length; i++) {
         const hit = intersect(a, b, h[i]!, h[(i + 1) % h.length]!);
         if (hit && hit.t > 1e-9 && hit.t < 1 - 1e-9 && hit.u >= -1e-9 && hit.u <= 1 + 1e-9) ts.push(hit.t);
+        // A side lying on the fold crosses nothing; its ends split the fold instead.
+        const v = h[i]!;
+        if (onEdge(v, a, b)) {
+          const t = ((v[0] - a[0]) * (b[0] - a[0]) + (v[1] - a[1]) * (b[1] - a[1])) / ((b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2);
+          if (t > 1e-9 && t < 1 - 1e-9) ts.push(t);
+        }
       }
     }
     const len = Math.hypot(b[0] - a[0], b[1] - a[1]);

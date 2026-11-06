@@ -203,4 +203,21 @@ const rotateZ = (p: Pt, pivot: Pt, angle: number): Pt => {
   check("empty rig is degenerate", rig.stats.degenerate, true);
 }
 
+// A window in the middle of a panel cuts that panel, it does not remove it:
+// the panel's centroid is inside the window too.
+{
+  const sq = (x0: number, y0: number, x1: number, y1: number): Segment[] => {
+    const pts: Pt[] = [[x0, y0], [x1, y0], [x1, y1], [x0, y1]];
+    return pts.map((a, i) => ({ a, b: pts[(i + 1) % 4]!, kind: "trim" as const }));
+  };
+  const window: Pt[] = [[20, 10], [40, 10], [40, 20], [20, 20]];
+  const rig = buildFoldRig(
+    [...sq(0, 0, 90, 30), { a: [60, 0], b: [60, 30], kind: "fold" }, ...sq(20, 10, 40, 20)],
+    null,
+    [window],
+  );
+  const panel = rig.nodes.find((n) => Math.abs(n.face.area - 1800) < 1);
+  assert("panel around a window stays board", panel !== undefined && !panel.isHole && panel.holes.length === 1);
+}
+
 console.log(failures === 0 ? "\nALL FOLD RIG CHECKS PASSED" : `\n${failures} FAILED`);

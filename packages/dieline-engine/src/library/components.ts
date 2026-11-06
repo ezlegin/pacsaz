@@ -513,25 +513,34 @@ export const gableGusset: ComponentDef = {
 
 /**
  * The keyboard box (جعبه کیبوردی): a mailer that locks itself. Its double side walls
- * are the body's panels; these are its edges. Measured from real samples. The tabs
- * follow the box's depth, so each count has its own nodes, shown by a rule.
+ * are the body's panels; these are its edges. Every size here is taken from a real
+ * die (315 × 202 × 62 on 3 mm board): lengths that follow the board are written
+ * in `thickness`, shapes in the box height, so that die is reproduced exactly.
+ * The tabs follow the box's depth, so each count has its own nodes, shown by a rule.
  */
 const KEYBOARD_VARIABLES = [
   { name: "W", expr: "min(length, width)" },
   { name: "h", expr: "height" },
   { name: "tabs", expr: "count > 0 ? count : clamp(round(W / 120), 1, 5)" },
-  { name: "tw", expr: "19.7 + W * 0.086" },
+  { name: "tw", expr: "18.6 + W * 0.086", description: "Tab length at its tip; its base is a board longer" },
+  // Half a board, at least 0.25 mm: the radius of every relief where two flaps fold side by side.
+  { name: "rr", expr: "max(0.25, thickness / 2)" },
+  { name: "sw", expr: "thickness + 2", description: "Slot width" },
 ];
 const keyboardCount = [{ name: "count", label: "Tabs on each side (0 = auto)", default: 0, min: 0, max: 5, step: 1, unit: "count" as const }];
 const KEYBOARD_COUNTS = [1, 2, 3, 4, 5];
 const countRule = (k: number) => [{ id: "count", when: `tabs != ${k}`, action: "hide" as const }];
 /** Tab centres along the depth, from the far end. */
-const tabCentres = (k: number) => Array.from({ length: k }, (_, i) => `W / 2 + (${(k - 1) / 2 - i}) * W / ${k + 0.5}`);
+const tabCentres = (k: number) => Array.from({ length: k }, (_, i) => `W / 2 + (${(k - 1) / 2 - i}) * W / ${k + 0.525}`);
 
-/** One slot along a side fold of the base, which runs from y = 0 down to -W here. */
+/**
+ * One slot along a side fold of the base, which runs from y = 0 down to -W here:
+ * as wide as `sw`, fully round at both ends, two millimetres longer than the tab's
+ * tip at each end. Its outer side lies on the fold.
+ */
 const keyboardSlot = (name: string, x0: Expr, x1: Expr, c: Expr, clockwise: boolean, k: number): Node => {
-  const y0 = `-(${c}) - tw / 2 - 1 + sw / 2`;
-  const y1 = `-(${c}) + tw / 2 + 1 - sw / 2`;
+  const y0 = `-(${c}) - tw / 2 - 2 + sw / 2`;
+  const y1 = `-(${c}) + tw / 2 + 2 - sw / 2`;
   return {
     ...path(name, "cut", [x0, y0], [
       { type: "arc", x: x1, y: y0, radius: "sw / 2", clockwise },
@@ -547,65 +556,95 @@ export const keyboardLid: ComponentDef = {
   id: "lib:keyboardLid",
   name: "Keyboard box: lid",
   category: "Keyboard box",
-  description: "Back wall with end flaps, the lid with its side flaps, and a front with rounded ears. Cuts the slots along the base.",
+  description: "Back wall with end flaps, the lid with its side flaps, and a tuck with round ears. Cuts the slots along the base.",
   edge: { hinge: "none" },
   params: keyboardCount,
   variables: [
     ...KEYBOARD_VARIABLES,
-    { name: "a", expr: "2" },
-    { name: "b", expr: "4.5" },
-    { name: "g", expr: "2.5" },
-    { name: "e", expr: "h * 0.85" },
-    { name: "f", expr: "h * 1.3" },
-    { name: "lf", expr: "h - 2" },
-    { name: "lfs", expr: "min(lf * 0.42, W * 0.3)" },
-    { name: "lr", expr: "min(lf * 0.2, W * 0.12)" },
-    { name: "Y1", expr: "h" },
-    { name: "Y2", expr: "Y1 + W + 1" },
-    { name: "Y3", expr: "Y2 + h" },
-    { name: "sw", expr: "max(4, thickness * 2.2)" },
+    // Folds in from the base's corners: the back wall's end flaps and the tuck's
+    // ears half a board, the lid's side flaps 3.5 mm further.
+    { name: "a", expr: "rr" },
+    { name: "b", expr: "a + 3.5" },
+    { name: "f", expr: "h * 1.306", description: "End flap reach from its fold" },
+    { name: "Y1", expr: "h", description: "Lid hinge" },
+    { name: "Y2", expr: "Y1 + W + rr", description: "Lid front fold" },
+    { name: "Y3", expr: "Y2 + h", description: "Tuck's top edge" },
+    // Where an end flap or an ear meets a lid side flap beside the lid's folds, the
+    // cut turns through a small half circle that just touches the side flap's fold.
+    { name: "rl", expr: "max(0.25, thickness * 0.4)" },
+    { name: "dl", expr: "rl * 0.17" },
+    { name: "lf", expr: "h - rr", description: "Lid side flap reach from its fold" },
+    { name: "lfs", expr: "min(lf * 0.381, W * 0.3)", description: "Where its slope meets its side" },
+    { name: "lr", expr: "min(lf * 0.248, W * 0.12)", description: "Its corner rounds" },
+    // The tuck's ears, as on the die: a step down from the tuck's top edge, a
+    // quarter ellipse out to the ear's widest point (flat where it meets the
+    // step, upright at the widest point), a short upright, and a round corner into
+    // a straight foot just above the lid front fold. The ellipse is drawn as two
+    // circular arcs that meet smoothly, within 0.2 mm of it.
+    // 2.5 mm on the die (h = 62), in proportion to the box.
+    { name: "st", expr: "h * 0.0403" },
+    { name: "e", expr: "h * 0.8363", description: "Ear reach from its fold" },
+    { name: "eb", expr: "h * 0.729", description: "Ellipse height" },
+    { name: "er", expr: "h * 0.2097", description: "Round corner into the foot" },
+    { name: "eFy", expr: "Y2 - dl + rl", description: "The ear's foot" },
+    { name: "Yc", expr: "max(Y3 - st - eb, eFy + er)", description: "Height of the ear's widest point" },
+    { name: "eh", expr: "Y3 - st - Yc" },
+    { name: "r2", expr: "eh * 0.91" },
+    { name: "r1", expr: "((e - r2) ^ 2 + eh ^ 2 - r2 ^ 2) / (2 * (eh - r2))" },
+    { name: "jx", expr: "(e - r2) * r1 / (r1 - r2)", description: "Where the two arcs meet, out from the fold" },
+    { name: "jy", expr: "Yc + (eh - r1) + (r1 - eh) * r1 / (r1 - r2)" },
   ],
   nodes: [
     path("outline", "cut", ["0", "0"], [
-      to("a", "0"),
-      to("a", "g"),
-      to("a - f", "g"),
-      to("a - f", "Y1 - 1.5"),
-      to("a", "Y1 - 1.5"),
-      to("b", "Y1"),
+      // Relief at the base corner, then the end flap, one board off the base fold.
+      { type: "arc", x: "0", y: "2 * rr", radius: "rr" },
+      to("a - f", "2 * rr"),
+      to("a - f", "Y1 + dl - rl"),
+      to("b - rl", "Y1 + dl - rl"),
+      { type: "arc", x: "b - rl", y: "Y1 + dl + rl", radius: "rl" },
+      // The lid's side flap.
       to("b - lf", "Y1 + lfs", "lr"),
       to("b - lf", "Y2 - lfs", "lr"),
-      to("b", "Y2"),
-      to("a - e", "Y2", "h * 0.15"),
-      to("a - e", "Y3 - 1", "min(e, h) * 0.75"),
-      to("a", "Y3 - 1"),
-      to("edge - a", "Y3 - 1"),
-      to("edge - a + e", "Y3 - 1", "min(e, h) * 0.75"),
-      to("edge - a + e", "Y2", "h * 0.15"),
-      to("edge - b", "Y2"),
+      to("b - rl", "Y2 - dl - rl"),
+      { type: "arc", x: "b - rl", y: "Y2 - dl + rl", radius: "rl" },
+      // The tuck's ear, the tuck, the other ear.
+      to("a - e", "eFy", "er"),
+      to("a - e", "Yc"),
+      { type: "arc", x: "a - jx", y: "jy", radius: "r2", clockwise: true },
+      { type: "arc", x: "a", y: "Y3 - st", radius: "r1", clockwise: true },
+      to("a + st", "Y3"),
+      to("edge - a - st", "Y3"),
+      to("edge - a", "Y3 - st"),
+      { type: "arc", x: "edge - a + jx", y: "jy", radius: "r1", clockwise: true },
+      { type: "arc", x: "edge - a + e", y: "Yc", radius: "r2", clockwise: true },
+      to("edge - a + e", "eFy", "er"),
+      to("edge - b + rl", "eFy"),
+      { type: "arc", x: "edge - b + rl", y: "Y2 - dl - rl", radius: "rl" },
       to("edge - b + lf", "Y2 - lfs", "lr"),
       to("edge - b + lf", "Y1 + lfs", "lr"),
-      to("edge - b", "Y1"),
-      to("edge - a", "Y1 - 1.5"),
-      to("edge - a + f", "Y1 - 1.5"),
-      to("edge - a + f", "g"),
-      to("edge - a", "g"),
-      to("edge - a", "0"),
-      to("edge", "0"),
+      to("edge - b + rl", "Y1 + dl + rl"),
+      { type: "arc", x: "edge - b + rl", y: "Y1 + dl - rl", radius: "rl" },
+      to("edge - a + f", "Y1 + dl - rl"),
+      to("edge - a + f", "2 * rr"),
+      to("edge", "2 * rr"),
+      { type: "arc", x: "edge", y: "0", radius: "rr" },
     ]),
-    line("hinge", "crease", ["a", "0"], ["edge - a", "0"]),
+    // The base fold runs corner to corner; the others end where their flaps' cuts meet them.
+    line("hinge", "crease", ["0", "0"], ["edge", "0"]),
     line("lidHinge", "crease", ["b", "Y1"], ["edge - b", "Y1"]),
     line("lidFront", "crease", ["b", "Y2"], ["edge - b", "Y2"]),
-    line("backFlapStart", "crease", ["a", "g"], ["a", "Y1 - 1.5"]),
-    line("backFlapEnd", "crease", ["edge - a", "g"], ["edge - a", "Y1 - 1.5"]),
+    line("backFlapStart", "crease", ["a", "rr"], ["a", "Y1 + dl - rl"]),
+    line("backFlapEnd", "crease", ["edge - a", "rr"], ["edge - a", "Y1 + dl - rl"]),
     line("lidFlapStart", "crease", ["b", "Y1"], ["b", "Y2"]),
     line("lidFlapEnd", "crease", ["edge - b", "Y1"], ["edge - b", "Y2"]),
-    line("earStart", "crease", ["a", "Y2"], ["a", "Y3 - 1"]),
-    line("earEnd", "crease", ["edge - a", "Y2"], ["edge - a", "Y3 - 1"]),
+    line("earStart", "crease", ["a", "Y2 - dl + rl"], ["a", "Y3 - st"]),
+    line("earEnd", "crease", ["edge - a", "Y2 - dl + rl"], ["edge - a", "Y3 - st"]),
     ...KEYBOARD_COUNTS.flatMap((k) =>
       tabCentres(k).flatMap((c, i) => [
-        keyboardSlot(`slotStart${k}${i}`, "-1 + sw", "-1", c, true, k),
-        keyboardSlot(`slotEnd${k}${i}`, "edge + 1 - sw", "edge + 1", c, false, k),
+        // Wholly on the base, the outer side on the fold, so the inner wall's tab
+        // drops in right against the wall.
+        keyboardSlot(`slotStart${k}${i}`, "sw", "0", c, true, k),
+        keyboardSlot(`slotEnd${k}${i}`, "edge - sw", "edge", c, false, k),
       ]),
     ),
   ],
@@ -621,25 +660,29 @@ export const keyboardFront: ComponentDef = {
   params: [],
   variables: [
     { name: "h", expr: "height" },
-    { name: "a", expr: "2" },
-    { name: "g", expr: "2.5" },
-    { name: "f", expr: "h * 1.3" },
+    { name: "rr", expr: "max(0.25, thickness / 2)" },
+    // A millimetre further in than the back wall's, and half a board lower than the box.
+    { name: "a", expr: "rr + 1" },
+    { name: "hf", expr: "h - rr", description: "Front wall height" },
+    { name: "f", expr: "h * 1.306" },
   ],
   nodes: [
     path("outline", "cut", ["0", "0"], [
-      to("a", "0"),
-      to("a", "g"),
-      to("a - f", "g"),
-      to("a - f", "h"),
-      to("edge - a + f", "h"),
-      to("edge - a + f", "g"),
-      to("edge - a", "g"),
-      to("edge - a", "0"),
+      // The relief just touches the end flap's fold; the flap stands one board off the base fold.
+      to("a - rr", "0"),
+      { type: "arc", x: "a - rr", y: "2 * rr", radius: "rr" },
+      to("a - f", "2 * rr"),
+      to("a - f", "hf"),
+      to("edge - a + f", "hf"),
+      to("edge - a + f", "2 * rr"),
+      to("edge - a + rr", "2 * rr"),
+      { type: "arc", x: "edge - a + rr", y: "0", radius: "rr" },
       to("edge", "0"),
     ]),
-    line("hinge", "crease", ["a", "0"], ["edge - a", "0"]),
-    line("flapStart", "crease", ["a", "g"], ["a", "h"]),
-    line("flapEnd", "crease", ["edge - a", "g"], ["edge - a", "h"]),
+    // Stops at the reliefs, so no cut runs along it.
+    line("hinge", "crease", ["a - rr", "0"], ["edge - a + rr", "0"]),
+    line("flapStart", "crease", ["a", "rr"], ["a", "hf"]),
+    line("flapEnd", "crease", ["edge - a", "rr"], ["edge - a", "hf"]),
   ],
 };
 
@@ -651,20 +694,20 @@ export const keyboardTabs: ComponentDef = {
   description: "Edge of the inner wall, with tabs that lock into the slots along the base. Their number follows the depth.",
   edge: { hinge: "none" },
   params: keyboardCount,
-  variables: [...KEYBOARD_VARIABLES, { name: "td", expr: "max(3, thickness * 1.5)" }],
+  variables: [...KEYBOARD_VARIABLES, { name: "td", expr: "max(2.5, thickness * 1.25)", description: "Tab depth" }],
   nodes: KEYBOARD_COUNTS.map((k) => ({
     ...path(
       `edge${k}`,
       "cut",
-      ["0", "0"],
+      ["startInset", "0"],
       [
         ...[...tabCentres(k)].reverse().flatMap((c) => [
-          to(`${c} - tw / 2 - 1.5`, "0"),
+          to(`${c} - tw / 2 - rr`, "0"),
           to(`${c} - tw / 2`, "td"),
           to(`${c} + tw / 2`, "td"),
-          to(`${c} + tw / 2 + 1.5`, "0"),
+          to(`${c} + tw / 2 + rr`, "0"),
         ]),
-        to("edge", "0"),
+        to("edge - endInset", "0"),
       ],
     ),
     rules: countRule(k),

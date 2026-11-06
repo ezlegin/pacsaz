@@ -46,6 +46,11 @@ export default function PreviewSettings({ dieline }: { dieline: DielineType }) {
   const offset = offsetFor(type, inputs.thickness);
   const typed = (key: "width" | "length" | "height") => Math.round((inputs[key] - offset[key]) * 100) / 100;
 
+  // The 3D dock shows the chosen board, as the site does: kraft with flutes for flute materials.
+  useEffect(() => {
+    store.setDisplay({ material: material.value });
+  }, [store, material.value]);
+
   useEffect(() => {
     store.setDisplay({ sizeDelta: offset });
     // The object is new each render; its numbers are what matter.
