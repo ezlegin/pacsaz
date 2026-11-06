@@ -1,14 +1,19 @@
 "use server";
 
+import { requireAdmin } from "@/lib/session";
 import { prisma, Prisma } from "@repo/db";
 
+// Server action (the user picker of the payment form), so it checks the caller.
 export const searchUsers = async (query: string) => {
-  const where: Prisma.UserWhereInput = query
+  await requireAdmin();
+
+  const q = typeof query === "string" ? query.trim() : "";
+  const where: Prisma.UserWhereInput = q
     ? {
         OR: [
-          { email: { contains: query } },
-          { phoneNumber: { contains: query } },
-          { fullName: { contains: query } },
+          { email: { contains: q, mode: "insensitive" } },
+          { phoneNumber: { contains: q } },
+          { fullName: { contains: q, mode: "insensitive" } },
         ],
       }
     : {};

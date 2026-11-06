@@ -1,13 +1,68 @@
 "use server";
 
-import { DielineMetadataFormType } from "@/lib/validationSchema/validatoinSchema";
+import { actionError } from "@/lib/actionError";
+import { deleteImage, uploadCloudFile } from "@/lib/cloudinary";
+import { requireAdmin } from "@/lib/session";
+import {
+  DielineMetadataFormType,
+  dielineMetadataFormSchema,
+} from "@/lib/validationSchema/validatoinSchema";
 import { prisma, type DimensionType } from "@repo/db";
-import { parseDocument } from "@repo/dieline-engine";
+import { emptyDocument, parseDocument } from "@repo/dieline-engine";
 import { materials as allMats } from "@repo/dieline-core/data/materials";
 import { UploadApiResponse } from "cloudinary";
-import { deleteImage, uploadCloudFile } from "./cloudinary";
 
-export const createDieline = async (data: DielineMetadataFormType) => {
+const dimensionTypeValues: DimensionType[] = ["manufacture", "inner", "outer"];
+
+/**
+ * Server-side check of the dieline record form. Beyond the schema: the size
+ * range must contain the default size, every material and dimension type must
+ * be a known one, and the default material must be among the offered ones,
+ * because the product page and the download check trust these fields.
+ */
+const checkMetadata = (
+  data: DielineMetadataFormType,
+): { ok: true; data: DielineMetadataFormType } | { ok: false; error: string } => {
+  const parsed = dielineMetadataFormSchema.safeParse(data);
+  if (!parsed.success) return { ok: false, error: "Please check the form fields." };
+  const d = parsed.data;
+
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(d.slug))
+    return { ok: false, error: "The slug may only use lowercase letters, digits and dashes." };
+
+  for (const axis of ["width", "length", "height"] as const) {
+    const min = d.minDimensions[axis];
+    const max = d.maxDimensions[axis];
+    const def = d.defaultDimensions[axis];
+    if (!(min > 0) || !(max >= min) || !(def >= min && def <= max))
+      return { ok: false, error: `The ${axis} range is wrong: it needs 0 < min ≤ default ≤ max.` };
+  }
+  if (!(d.bleed >= 0)) return { ok: false, error: "The bleed can't be negative." };
+
+  const mats = d.materials.split(",").filter(Boolean);
+  if (mats.length === 0) return { ok: false, error: "Pick at least one material." };
+  if (mats.some((m) => !allMats.some((known) => known.value === m)))
+    return { ok: false, error: "Unknown material in the list." };
+  if (!mats.includes(d.defaultMaterial))
+    return { ok: false, error: "The default material must be one of the offered materials." };
+
+  const types = d.dimensionTypes.split(",").filter(Boolean);
+  if (types.length === 0 || types.some((t) => !dimensionTypeValues.includes(t as DimensionType)))
+    return { ok: false, error: "Pick at least one valid dimension type." };
+
+  return { ok: true, data: d };
+};
+
+export const createDieline = async (input: DielineMetadataFormType) => {
+  try {
+    await requireAdmin();
+  } catch (error) {
+    return { error: actionError(error) };
+  }
+  const checked = checkMetadata(input);
+  if (!checked.ok) return { error: checked.error };
+  const data = checked.data;
+
   const {
     slug,
     title,
@@ -26,7 +81,6 @@ export const createDieline = async (data: DielineMetadataFormType) => {
   } = data;
 
   try {
-    // todo: use TSX
     const existingDieline = await prisma.dieline.findFirst({ where: { slug } });
     if (existingDieline) {
       return { error: "Slug Should Be Unique." };
@@ -46,10 +100,9 @@ export const createDieline = async (data: DielineMetadataFormType) => {
         dimensionTypes,
         materials,
         defaultMaterial,
-        specification: JSON.stringify({
-          nodes: [],
-          rulers: [],
-        }),
+        // A v2 document, so the editor opens it as one instead of as an old
+        // specification.
+        specification: JSON.stringify(emptyDocument()),
         variable: JSON.stringify([]),
         categoryByModel: {
           connect: categoryByModel.map((i) => ({ slug: i })),
@@ -59,8 +112,9 @@ export const createDieline = async (data: DielineMetadataFormType) => {
         },
         settings: {
           create: {
-            material: materials.split(",")[0]!, // todo: get from form
-            dimensionType: "manufacture", // todo: get from form
+            material: defaultMaterial,
+            // The first allowed type is what the product page opens with.
+            dimensionType: (dimensionTypes.split(",")[0] || "manufacture") as DimensionType,
             thickness:
               allMats.find((m) => m.value === defaultMaterial)?.thickness ??
               0.5,
@@ -109,15 +163,23 @@ export const createDieline = async (data: DielineMetadataFormType) => {
 
     return { success: "Dieline Created Successfully.", slug };
   } catch (error) {
-    console.error(error);
-    return { error: (error as Error).message };
+    return { error: actionError(error) };
   }
 };
 
 export const updateDieline = async (
-  data: DielineMetadataFormType,
+  input: DielineMetadataFormType,
   id: number,
 ) => {
+  try {
+    await requireAdmin();
+  } catch (error) {
+    return { error: actionError(error) };
+  }
+  const checked = checkMetadata(input);
+  if (!checked.ok) return { error: checked.error };
+  const data = checked.data;
+
   const {
     slug,
     title,
@@ -229,8 +291,7 @@ export const updateDieline = async (
 
     return { success: "Dieline Settings Updated Successfully.", slug };
   } catch (error) {
-    console.error(error);
-    return { error: (error as Error).message };
+    return { error: actionError(error) };
   }
 };
 
@@ -244,6 +305,8 @@ export const saveDielineDocument = async (
   json: string,
 ): Promise<{ ok: true } | { ok: false; error: string }> => {
   try {
+    await requireAdmin();
+
     let input: unknown;
     try {
       input = JSON.parse(json);
@@ -264,27 +327,39 @@ export const saveDielineDocument = async (
 
     return { ok: true };
   } catch (error) {
-    console.error(error);
-    return { ok: false, error: (error as Error).message };
+    return { ok: false, error: actionError(error) };
   }
 };
 
 export const deleteDieline = async (id: number) => {
   try {
+    await requireAdmin();
     const existingDieline = await prisma.dieline.findFirst({ where: { id } });
-    if (!existingDieline) throw new Error("Dieline Not Found.");
+    if (!existingDieline) return { error: "Dieline not found." };
+
+    // Download history cascades with the dieline and saved copies point at it,
+    // so deleting a template customers used would erase their records. Those
+    // are switched off (inactive) instead.
+    const [downloads, saved] = await Promise.all([
+      prisma.downloadHistory.count({ where: { dielineId: id } }),
+      prisma.savedDieline.count({ where: { dielineId: id } }),
+    ]);
+    if (downloads > 0 || saved > 0)
+      return {
+        error: `Customers downloaded or saved this dieline (${downloads} downloads, ${saved} saved copies). Set it inactive instead.`,
+      };
 
     await prisma.dieline.delete({ where: { id } });
 
     return { success: "Dieline Deleted Successfully." };
   } catch (error) {
-    console.error(error);
-    return { error: (error as Error).message };
+    return { error: actionError(error) };
   }
 };
 
 export const setDielineStatus = async (status: boolean, id: number) => {
   try {
+    await requireAdmin();
     await prisma.dieline.update({
       where: { id },
       data: { active: status },
@@ -294,41 +369,41 @@ export const setDielineStatus = async (status: boolean, id: number) => {
 
     return { success: `Dieline Set ${statusLabel}` };
   } catch (error) {
-    console.error(error);
-    return { error: (error as Error).message };
+    return { error: actionError(error) };
   }
 };
 
 export const deleteDielineImage = async (publicId: string) => {
   try {
+    await requireAdmin();
     const { error } = await deleteImage(publicId);
-    if (error) throw new Error(error);
+    if (error) return { error };
 
     await prisma.dielineImage.delete({ where: { publicId } });
 
     return { success: "Dieline Image Deleted Successfully." };
   } catch (error) {
-    console.error(error);
-    return { error: (error as Error).message };
+    return { error: actionError(error) };
   }
 };
 
 export const deleteModelImage = async (publicId: string) => {
   try {
+    await requireAdmin();
     const { error } = await deleteImage(publicId);
-    if (error) throw new Error(error);
+    if (error) return { error };
 
     await prisma.modelImage.delete({ where: { publicId } });
 
     return { success: "Model Image Deleted Successfully." };
   } catch (error) {
-    console.error(error);
-    return { error: (error as Error).message };
+    return { error: actionError(error) };
   }
 };
 
 export const duplicateDieline = async (dielineId: number) => {
   try {
+    await requireAdmin();
     const existingDieline = await prisma.dieline.findFirst({
       where: { id: dielineId },
       include: {
@@ -339,7 +414,7 @@ export const duplicateDieline = async (dielineId: number) => {
         settings: true,
       },
     });
-    if (!existingDieline) throw new Error("Dieline Not Found.");
+    if (!existingDieline) return { error: "Dieline not found." };
 
     const duplicatedSlug = `${existingDieline.slug}-copy-${Date.now()}`;
     const duplicatedTitle = `${existingDieline.title} Copy`;
@@ -348,6 +423,7 @@ export const duplicateDieline = async (dielineId: number) => {
       data: {
         slug: duplicatedSlug,
         title: duplicatedTitle,
+        description: existingDieline.description,
         minHeight: existingDieline.minHeight,
         minLength: existingDieline.minLength,
         minWidth: existingDieline.minWidth,
@@ -380,6 +456,7 @@ export const duplicateDieline = async (dielineId: number) => {
             height: existingDieline.settings?.height ?? 0,
             length: existingDieline.settings?.length ?? 0,
             width: existingDieline.settings?.width ?? 0,
+            foldConfig: existingDieline.settings?.foldConfig ?? "",
           },
         },
       },
@@ -389,7 +466,6 @@ export const duplicateDieline = async (dielineId: number) => {
       success: "Dieline Duplicated Successfully.",
     };
   } catch (error) {
-    console.error(error);
-    return { error: (error as Error).message };
+    return { error: actionError(error) };
   }
 };

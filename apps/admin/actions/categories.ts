@@ -1,97 +1,90 @@
 "use server";
 
-import { CategoriesFormType } from "@/lib/validationSchema/validatoinSchema";
+import { ActionResult, actionError } from "@/lib/actionError";
+import { requireAdmin } from "@/lib/session";
+import {
+  CategoriesFormType,
+  categoriesFormSchema,
+} from "@/lib/validationSchema/validatoinSchema";
 import { prisma } from "@repo/db";
+
+type CategoryKind = "model" | "usage";
+
+/**
+ * The two category tables have the same shape, so one delegate stands in for
+ * either. The cast is what keeps TypeScript from asking for a union call
+ * signature it can't build.
+ */
+const table = (type: CategoryKind) =>
+  (type === "model"
+    ? prisma.dielineCategoryByModel
+    : prisma.dielineCategoryByUsage) as typeof prisma.dielineCategoryByModel;
+
+const validKind = (type: unknown): type is CategoryKind =>
+  type === "model" || type === "usage";
 
 export const createCategory = async (
   data: CategoriesFormType,
-  type: "model" | "usage",
-) => {
+  type: CategoryKind,
+): Promise<ActionResult> => {
   try {
-    const existingCategory =
-      type === "model"
-        ? await prisma.dielineCategoryByModel.findFirst({
-            where: { slug: data.slug },
-          })
-        : await prisma.dielineCategoryByUsage.findFirst({
-            where: { slug: data.slug },
-          });
-    if (existingCategory) return { error: "Slug Should Be Unique." };
+    await requireAdmin();
 
-    if (type === "model") {
-      await prisma.dielineCategoryByModel.create({ data });
-    } else {
-      await prisma.dielineCategoryByUsage.create({ data });
-    }
+    const parsed = categoriesFormSchema.safeParse(data);
+    if (!parsed.success || !validKind(type))
+      return { error: "Please check the form fields." };
 
-    return { success: "Category Created Successfully." };
+    const existing = await table(type).findFirst({ where: { slug: parsed.data.slug } });
+    if (existing) return { error: "The slug must be unique." };
+
+    await table(type).create({ data: parsed.data });
+
+    return { success: "Category created." };
   } catch (error) {
-    console.error(error);
-    return { error: (error as Error).message };
+    return { error: actionError(error) };
   }
 };
 
 export const updateCategory = async (
   data: CategoriesFormType,
-  type: "model" | "usage",
+  type: CategoryKind,
   id: number,
-) => {
+): Promise<ActionResult> => {
   try {
-    const existingCategory =
-      type === "model"
-        ? await prisma.dielineCategoryByModel.findFirst({
-            where: { id },
-          })
-        : await prisma.dielineCategoryByUsage.findFirst({
-            where: { id },
-          });
-    if (!existingCategory) return { error: "Category Not Found." };
+    await requireAdmin();
 
-    const existingCategoryBySlug =
-      type === "model"
-        ? await prisma.dielineCategoryByModel.findFirst({
-            where: { slug: data.slug, id: { not: id } },
-          })
-        : await prisma.dielineCategoryByUsage.findFirst({
-            where: { slug: data.slug, id: { not: id } },
-          });
-    if (existingCategoryBySlug)
-      return { error: "There is another category with this slug." };
+    const parsed = categoriesFormSchema.safeParse(data);
+    if (!parsed.success || !validKind(type))
+      return { error: "Please check the form fields." };
 
-    if (type === "model") {
-      await prisma.dielineCategoryByModel.update({ where: { id }, data });
-    } else {
-      await prisma.dielineCategoryByUsage.update({ where: { id }, data });
-    }
+    const existing = await table(type).findUnique({ where: { id } });
+    if (!existing) return { error: "Category not found." };
 
-    return { success: "Category Updated Successfully." };
+    const bySlug = await table(type).findFirst({
+      where: { slug: parsed.data.slug, id: { not: id } },
+    });
+    if (bySlug) return { error: "There is another category with this slug." };
+
+    await table(type).update({ where: { id }, data: parsed.data });
+
+    return { success: "Category updated." };
   } catch (error) {
-    console.error(error);
-    return { error: (error as Error).message };
+    return { error: actionError(error) };
   }
 };
 
-export const deleteCategory = async (id: number, type: "model" | "usage") => {
+export const deleteCategory = async (
+  id: number,
+  type: CategoryKind,
+): Promise<ActionResult> => {
   try {
-    const existingCategory =
-      type === "model"
-        ? await prisma.dielineCategoryByModel.findFirst({
-            where: { id },
-          })
-        : await prisma.dielineCategoryByUsage.findFirst({
-            where: { id },
-          });
-    if (!existingCategory) return { error: "Category Not Found." };
+    await requireAdmin();
+    if (!validKind(type)) return { error: "Unknown category type." };
 
-    if (type === "model") {
-      await prisma.dielineCategoryByModel.delete({ where: { id } });
-    } else {
-      await prisma.dielineCategoryByUsage.delete({ where: { id } });
-    }
+    await table(type).delete({ where: { id } });
 
-    return { success: "Category Updated Successfully." };
+    return { success: "Category deleted." };
   } catch (error) {
-    console.error(error);
-    return { error: (error as Error).message };
+    return { error: actionError(error) };
   }
 };

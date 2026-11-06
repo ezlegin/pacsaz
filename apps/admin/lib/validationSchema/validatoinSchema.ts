@@ -95,7 +95,8 @@ export const adminFormSchema = z.object({
   fullName: z.string().min(1),
   email: z.string().email(),
   phoneNumber: z.string().min(1),
-  password: z.string().min(6).optional(),
+  // Empty on an update means "keep the current password".
+  password: z.string().min(6).optional().or(z.literal("")),
 });
 export type AdminFormType = z.infer<typeof adminFormSchema>;
 

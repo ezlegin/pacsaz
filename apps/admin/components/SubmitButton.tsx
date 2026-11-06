@@ -17,7 +17,10 @@ const SubmitButton = ({
   return (
     <Button
       size={"lg"}
-      disabled={!form.formState.isValid || !form.formState.isDirty}
+      type="submit"
+      // Disabled while saving too: a second click used to submit again, which
+      // for a payment means a second payment and subscription.
+      disabled={isLoading || !form.formState.isValid || !form.formState.isDirty}
       className={cn("w-full", className)}
     >
       <Spinner isLoading={isLoading} />

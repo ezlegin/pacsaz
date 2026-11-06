@@ -7,6 +7,9 @@ import {
 } from "@/lib/validationSchema/validatoinSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Admin } from "@repo/db";
+
+/** An admin as the panel may show it: never with the password hash. */
+export type AdminRow = Omit<Admin, "password">;
 import { handleRes } from "@repo/lib/utils/handleRes";
 import { useLoading } from "@repo/lib/utils/useLoading";
 import {
@@ -15,13 +18,14 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@repo/ui/components/form";
 import { Input } from "@repo/ui/components/input";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import SubmitButton from "../SubmitButton";
 
-export function AdminForm({ admin }: { admin?: Admin }) {
+export function AdminForm({ admin }: { admin?: AdminRow }) {
   const router = useRouter();
   const { startLoading, stopLoading, isLoading } = useLoading();
   const form = useForm<AdminFormType>({
@@ -95,8 +99,14 @@ export function AdminForm({ admin }: { admin?: Admin }) {
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input type="password" {...field} />
+                <Input
+                  type="password"
+                  autoComplete="new-password"
+                  placeholder={admin ? "Leave empty to keep the current one" : "At least 6 characters"}
+                  {...field}
+                />
               </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />

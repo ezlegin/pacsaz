@@ -1,39 +1,58 @@
-import PageTitle from "@/components/PageTitle";
-import { globalPageSize } from "@repo/lib/data/consts";
 import Pagination from "@/components/Pagination";
-import CustomersList from "./CustomersList";
 import Search from "@/components/Search";
-import { prisma } from "@repo/db";
+import { contains, searchText } from "@/lib/listQuery";
+import { Prisma, prisma } from "@repo/db";
+import { globalPageSize } from "@repo/lib/data/consts";
 import { pagination } from "@repo/lib/utils/pagination";
+import { UserCheck } from "lucide-react";
+import { Page, PageHeader } from "../components/PanelUI";
+import CustomersList from "./CustomersList";
 
 interface Props {
-  searchParams: Promise<{ page: string }>;
+  searchParams: Promise<{ page?: string; search?: string }>;
 }
 
 const page = async ({ searchParams }: Props) => {
-  const { page } = await searchParams;
-  const { skip, take } = pagination(page, globalPageSize);
+  const { page, search } = await searchParams;
+  const { skip, take } = pagination(page ?? "", globalPageSize);
+  const q = searchText(search);
 
-  const customers = await prisma.customer.findMany({
-    include: { user: true },
-    orderBy: { createdAt: "desc" },
-    skip,
-    take,
-  });
-  const totalCustomers = await prisma.customer.count();
+  const where: Prisma.CustomerWhereInput = q
+    ? {
+        OR: [
+          { fullName: contains(q) },
+          { email: contains(q) },
+          { phoneNumber: { contains: q } },
+          { user: { fullName: contains(q) } },
+        ],
+      }
+    : {};
+
+  const [customers, total] = await Promise.all([
+    prisma.customer.findMany({
+      where,
+      include: { user: true },
+      orderBy: { createdAt: "desc" },
+      skip,
+      take,
+    }),
+    prisma.customer.count({ where }),
+  ]);
 
   return (
-    <div className="space-y-3">
-      <PageTitle title="Customers" />
+    <Page>
+      <PageHeader
+        icon={UserCheck}
+        title="Customers"
+        description="Contacts that users keep in their own panel for the dielines they make."
+      />
 
-      <div className="flex justify-between">
-        <Search placeholder="Search Customers" />
-      </div>
+      <Search placeholder="Search customer or user" className="max-w-sm" />
 
       <CustomersList data={customers} />
 
-      <Pagination pageSize={globalPageSize} totalItems={totalCustomers} />
-    </div>
+      <Pagination pageSize={globalPageSize} totalItems={total} />
+    </Page>
   );
 };
 

@@ -28,19 +28,23 @@ function CategoriesList({
       <TableRow key={data.slug}>
         <TableCell>{data.title}</TableCell>
         <TableCell className="text-center">
-          <a target="_blank" href={`${mainURL}/dieline/${data.slug}`}>
+          {/* The client's category page; this used to link to /dieline/<slug>,
+              which is a template page and 404s for a category. */}
+          <a
+            target="_blank"
+            href={`${mainURL}/dielines/category/${data.slug}`}
+            className="font-mono text-xs text-muted-foreground hover:text-primary hover:underline"
+          >
             {data.slug}
           </a>
         </TableCell>
         <TableCell className="text-center">{data._count.dieline}</TableCell>
-        <TableCell className="flex justify-end gap-3">
+        <TableCell className="flex justify-end gap-2">
           <ActionButton icon={Pencil}>
-            <DialogTitle className="capitalize">
-              Update Category By {type}
-            </DialogTitle>
+            <DialogTitle>Edit {type} category</DialogTitle>
             <CategoriesForm type={type} category={data} />
           </ActionButton>
-          <DeleteButton deleteFn={deleteCategory} id={data.id} args={type} />
+          <DeleteButton deleteFn={deleteCategory} id={data.id} args={type} itemLabel={`the category "${data.title}"`} />
         </TableCell>
       </TableRow>
     );
@@ -48,7 +52,7 @@ function CategoriesList({
 
   return (
     <Card>
-      <Table columns={columns} data={data} renderRows={renderRows} dir="ltr" />
+      <Table columns={columns} data={data} renderRows={renderRows} dir="ltr" noDataMessage="No categories match." />
     </Card>
   );
 }
@@ -59,5 +63,5 @@ const columns = [
   { label: "Label", className: "" },
   { label: "Slug", className: "" },
   { label: "Dielines", className: "" },
-  { label: "Action", className: "" },
+  { label: "Actions", className: "" },
 ];

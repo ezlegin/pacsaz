@@ -13,7 +13,7 @@ import NewButton from "./NewButton";
 const PopupNewDialog = ({
   children,
   buttonTitle,
-  icon = false,
+  icon = true,
   dialogClassName,
 }: {
   children: ReactNode;
@@ -25,7 +25,6 @@ const PopupNewDialog = ({
     <Dialog>
       <DialogTrigger asChild>
         <NewButton title={buttonTitle} icon={icon} />
-        {/* INSTALL LUDICE REACT V0.562.0 TO FIX TYPE ERROR */}
       </DialogTrigger>
       <DialogContent className={dialogClassName}>{children}</DialogContent>
     </Dialog>

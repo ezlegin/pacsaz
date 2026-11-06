@@ -1,29 +1,45 @@
 import { deleteAdmin } from "@/actions/admin";
-import DeleteButton from "@/components/DeleteButton";
-import { AdminForm } from "@/components/forms/AdminForm";
-import { Admin } from "@repo/db";
 import ActionButton from "@/components/ActionButton";
+import DeleteButton from "@/components/DeleteButton";
+import { AdminForm, type AdminRow } from "@/components/forms/AdminForm";
+import { Badge } from "@repo/ui/components/badge";
 import Card from "@repo/ui/components/custom/Card";
 import Table from "@repo/ui/components/custom/Table";
 import { DialogTitle } from "@repo/ui/components/dialog";
 import { TableCell, TableRow } from "@repo/ui/components/table";
 import { Pencil } from "lucide-react";
 
-const AdminsList = ({ data }: { data: Admin[] }) => {
-  const renderRows = (admin: Admin) => {
+const AdminsList = ({
+  data,
+  currentAdminId,
+}: {
+  data: AdminRow[];
+  currentAdminId: number;
+}) => {
+  const renderRows = (admin: AdminRow) => {
+    const isMe = admin.id === currentAdminId;
     return (
       <TableRow key={admin.id}>
         <TableCell className="text-left">{admin.id}</TableCell>
-        <TableCell className="text-center">{admin.fullName}</TableCell>
+        <TableCell className="text-center">
+          {admin.fullName}
+          {isMe && (
+            <Badge variant="outline" className="ml-2">
+              You
+            </Badge>
+          )}
+        </TableCell>
         <TableCell className="text-center">{admin.phoneNumber}</TableCell>
         <TableCell className="text-center">{admin.email}</TableCell>
 
-        <TableCell className="flex justify-end gap-3">
+        <TableCell className="flex justify-end gap-2">
           <ActionButton icon={Pencil}>
-            <DialogTitle>Update User</DialogTitle>
+            <DialogTitle>Edit admin</DialogTitle>
             <AdminForm admin={admin} />
           </ActionButton>
-          <DeleteButton deleteFn={deleteAdmin} id={admin.id} />
+          {!isMe && (
+            <DeleteButton deleteFn={deleteAdmin} id={admin.id} itemLabel={`the admin "${admin.fullName}"`} />
+          )}
         </TableCell>
       </TableRow>
     );
@@ -31,7 +47,7 @@ const AdminsList = ({ data }: { data: Admin[] }) => {
 
   return (
     <Card>
-      <Table columns={columns} data={data} renderRows={renderRows} dir="ltr" />
+      <Table columns={columns} data={data} renderRows={renderRows} dir="ltr" noDataMessage="No admins match." />
     </Card>
   );
 };
@@ -40,8 +56,8 @@ export default AdminsList;
 
 const columns = [
   { label: "Id" },
-  { label: "Full Name" },
-  { label: "Phone Number" },
+  { label: "Full name" },
+  { label: "Phone number" },
   { label: "Email" },
-  { label: "Action" },
+  { label: "Actions" },
 ];

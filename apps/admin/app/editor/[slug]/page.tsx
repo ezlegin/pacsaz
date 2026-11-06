@@ -1,6 +1,7 @@
 import { prisma } from "@repo/db";
 import { emptyDocument, parseDocument, type DielineDocument } from "@repo/dieline-engine";
-import { notFound } from "next/navigation";
+import { getCurrentAdmin } from "@/lib/session";
+import { notFound, redirect } from "next/navigation";
 import StudioEditor from "./StudioEditor";
 
 interface Props {
@@ -23,6 +24,9 @@ function loadDocument(specification: string): { doc: DielineDocument; legacy: bo
 }
 
 const page = async ({ params }: Props) => {
+  // The editor sits outside the (PANEL) layout, so it checks the admin itself.
+  if (!(await getCurrentAdmin())) redirect("/login");
+
   const { slug } = await params;
 
   const dieline = await prisma.dieline.findFirst({

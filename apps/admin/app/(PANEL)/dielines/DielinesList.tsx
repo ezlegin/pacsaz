@@ -70,7 +70,7 @@ const DielinesList = ({
             <ArrowUpRight size={11} />
           </a>
         </TableCell>
-        <TableCell className="text-center">{dieline.slug}</TableCell>
+        <TableCell className="text-center font-mono text-xs text-muted-foreground">{dieline.slug}</TableCell>
         <TableCell className="text-center flex gap-2 justify-center items-center">
           <Tooltip>
             <TooltipTrigger>
@@ -102,7 +102,7 @@ const DielinesList = ({
         <TableCell>
           <div className="flex justify-end gap-2">
             <ActionButton dialogClassName="min-w-4xl" icon={Settings}>
-              <DialogTitle>Update Dieline</DialogTitle>
+              <DialogTitle>Dieline settings</DialogTitle>
               <DielineSettingsForm categories={categories} dieline={dieline} />
             </ActionButton>
             <ActionButton
@@ -111,7 +111,7 @@ const DielinesList = ({
               target="_blank"
             />
             <DuplicateButton dielineId={dieline.id} />
-            <DeleteButton id={dieline.id} deleteFn={deleteDieline} />
+            <DeleteButton id={dieline.id} deleteFn={deleteDieline} itemLabel={`the dieline "${dieline.title}"`} />
           </div>
         </TableCell>
       </TableRow>
@@ -120,7 +120,7 @@ const DielinesList = ({
 
   return (
     <Card>
-      <Table columns={columns} data={data} renderRows={renderRows} dir="ltr" />
+      <Table columns={columns} data={data} renderRows={renderRows} dir="ltr" noDataMessage="No dielines match." />
     </Card>
   );
 };
@@ -128,11 +128,11 @@ const DielinesList = ({
 export default DielinesList;
 
 const columns = [
-  { label: "ID", className: "" },
+  { label: "Image", className: "" },
   { label: "Title", className: "" },
   { label: "Slug", className: "" },
   { label: "Categories", className: "" },
-  { label: "Downloaded", className: "" },
+  { label: "Downloads", className: "" },
   { label: "Active", className: "" },
-  { label: "Action", className: "" },
+  { label: "Actions", className: "" },
 ];

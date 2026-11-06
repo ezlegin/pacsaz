@@ -38,7 +38,12 @@ export function LoginForm() {
 
     const res = await verifyLogin(data.email, data.password);
 
-    handleRes(res, { onSuccess: () => router.refresh() });
+    handleRes(res, {
+      onSuccess: () => {
+        router.replace("/");
+        router.refresh();
+      },
+    });
 
     stopLoading();
   };

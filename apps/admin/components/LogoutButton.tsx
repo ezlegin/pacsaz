@@ -6,9 +6,14 @@ import { LogOut } from "lucide-react";
 
 const LogoutButton = () => {
   return (
-    <Button variant={"ghost"} onClick={() => signOut()}>
-      <span>Log Out</span>
-      <LogOut size={20} className="text-destructive/50" />
+    <Button
+      variant="ghost"
+      size="sm"
+      className="text-muted-foreground hover:text-destructive"
+      onClick={() => signOut({ redirectTo: "/login" })}
+    >
+      <LogOut />
+      Log out
     </Button>
   );
 };

@@ -1,5 +1,6 @@
-"use server";
-
+// Not a "use server" module: these helpers take raw buffers and public ids, and
+// as server actions anyone could have uploaded or deleted files with them. Only
+// the guarded dieline actions call them.
 import { v2 as cloudinary } from "cloudinary";
 
 export interface FileUploadOptions {

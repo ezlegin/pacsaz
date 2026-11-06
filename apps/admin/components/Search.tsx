@@ -53,6 +53,11 @@ const SearchField = ({
   const updateUrl = (searchValue: string | undefined) => {
     const params = new URLSearchParams(Array.from(searchParams.entries()));
 
+    // A new query starts from the first page; staying on page 3 of the old
+    // results usually shows nothing.
+    for (const key of Array.from(params.keys()))
+      if (key === "page" || key.startsWith("pageBy")) params.delete(key);
+
     if (searchValue && searchValue.trim() !== "") {
       params.set("search", searchValue.trim());
     } else {

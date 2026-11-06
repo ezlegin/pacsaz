@@ -4,6 +4,8 @@ import {
   NotificationFormType,
   notificationFormSchema,
 } from "@/lib/validationSchema/validatoinSchema";
+import { actionError } from "@/lib/actionError";
+import { requireAdmin } from "@/lib/session";
 import { prisma } from "@repo/db";
 
 /**
@@ -15,10 +17,14 @@ import { prisma } from "@repo/db";
  */
 export const saveNotification = async (data: NotificationFormType) => {
   try {
+    await requireAdmin();
+
     // The form validates as well, but a server action is a public endpoint, so
     // never trust the arguments it receives.
     const parsed = notificationFormSchema.safeParse(data);
     if (!parsed.success) return { error: "Please fill in the notification text." };
+    if (parsed.data.expiresAt && Number.isNaN(Date.parse(parsed.data.expiresAt)))
+      return { error: "The expiry date is not valid." };
 
     const payload = {
       text: parsed.data.text,
@@ -37,7 +43,6 @@ export const saveNotification = async (data: NotificationFormType) => {
 
     return { success: "Notification Saved." };
   } catch (error) {
-    console.error(error);
-    return { error: (error as Error).name };
+    return { error: actionError(error) };
   }
 };

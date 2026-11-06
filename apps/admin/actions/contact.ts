@@ -1,8 +1,9 @@
 "use server";
 
-import { serverErrorMessage } from "@/data/consts";
 import { isMailConfigured, sendContactReply } from "@/lib/mail";
 import { prisma } from "@repo/db";
+import { requireAdmin } from "@/lib/session";
+import { actionError } from "@/lib/actionError";
 import { revalidatePath } from "next/cache";
 
 export type ContactActionResult =
@@ -34,14 +35,14 @@ export const markContactRead = async (
   id: number,
 ): Promise<ContactActionResult> => {
   try {
+    await requireAdmin();
     await prisma.contact.update({
       where: { id },
       data: { status: "read" },
     });
     return { success: "خوانده شد." };
   } catch (error) {
-    console.error(error);
-    return { error: serverErrorMessage };
+    return { error: actionError(error) };
   }
 };
 
@@ -56,10 +57,11 @@ export const replyToContact = async (
   id: number,
   body: string,
 ): Promise<ReplyResult> => {
-  const reply = body.trim();
+  const reply = typeof body === "string" ? body.trim() : "";
   if (reply.length < 3) return { error: "متن پاسخ خیلی کوتاه است." };
 
   try {
+    await requireAdmin();
     const contact = await prisma.contact.findUnique({ where: { id } });
     if (!contact) return { error: "پیام پیدا نشد." };
 
@@ -96,20 +98,22 @@ export const replyToContact = async (
 
     return { success: "پاسخ با موفقیت ارسال شد.", emailSent: true };
   } catch (error) {
-    console.error(error);
-    return { error: serverErrorMessage };
+    return { error: actionError(error) };
   }
 };
 
 export const deleteContact = async (id: number): DeleteContactResult => {
   try {
+    await requireAdmin();
     await prisma.contact.delete({ where: { id } });
     revalidatePath("/contacts");
     return { success: "پیام حذف شد." };
   } catch (error) {
-    console.error(error);
-    return { error: serverErrorMessage };
+    return { error: actionError(error) };
   }
 };
 
-export const getMailStatus = async () => ({ configured: isMailConfigured() });
+export const getMailStatus = async () => {
+  await requireAdmin();
+  return { configured: isMailConfigured() };
+};

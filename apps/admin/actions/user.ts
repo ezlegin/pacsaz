@@ -1,71 +1,100 @@
 "use server";
 
-import { UserFormType } from "@/lib/validationSchema/validatoinSchema";
+import { ActionResult, actionError } from "@/lib/actionError";
+import { requireAdmin } from "@/lib/session";
+import {
+  UserFormType,
+  userFormSchema,
+} from "@/lib/validationSchema/validatoinSchema";
 import { prisma } from "@repo/db";
 
-export const createUser = async (data: UserFormType) => {
-  const { email, phoneNumber, firstName, lastName } = data;
+const invalid = { error: "Please check the form fields." } as const;
 
+export const createUser = async (data: UserFormType): Promise<ActionResult> => {
   try {
+    await requireAdmin();
+
+    const parsed = userFormSchema.safeParse(data);
+    if (!parsed.success) return invalid;
+    const { email, phoneNumber, firstName, lastName, userType } = parsed.data;
+
     const existingUser = await prisma.user.findFirst({
       where: { OR: [{ email }, { phoneNumber }] },
     });
     if (existingUser)
-      return {
-        error: "There is already a user with this email or phone number.",
-      };
+      return { error: "There is already a user with this email or phone number." };
 
     await prisma.user.create({
       data: {
-        ...data,
+        email,
+        phoneNumber,
+        firstName,
+        lastName,
+        userType,
         fullName: `${firstName} ${lastName}`,
       },
     });
 
-    return { success: "User Created Succesfully." };
+    return { success: "User created." };
   } catch (error) {
-    console.error(error);
-    return { error: (error as Error).message };
+    return { error: actionError(error) };
   }
 };
 
-export const updateUser = async (data: UserFormType, id: number) => {
-  const { firstName, lastName } = data;
+export const updateUser = async (
+  data: UserFormType,
+  id: number,
+): Promise<ActionResult> => {
   try {
-    const existingUser = await prisma.user.findFirst({ where: { id } });
-    if (!existingUser)
-      return {
-        error: "User Not Found.",
-      };
+    await requireAdmin();
+
+    const parsed = userFormSchema.safeParse(data);
+    if (!parsed.success) return invalid;
+    const { email, phoneNumber, firstName, lastName, userType } = parsed.data;
+
+    const existingUser = await prisma.user.findUnique({ where: { id } });
+    if (!existingUser) return { error: "User not found." };
+
+    const taken = await prisma.user.findFirst({
+      where: { OR: [{ email }, { phoneNumber }], id: { not: id } },
+    });
+    if (taken)
+      return { error: "Another user already uses this email or phone number." };
 
     await prisma.user.update({
       where: { id },
       data: {
-        ...data,
+        email,
+        phoneNumber,
+        firstName,
+        lastName,
+        userType,
         fullName: `${firstName} ${lastName}`,
       },
     });
 
-    return { success: "User Updated Succesfully." };
+    return { success: "User updated." };
   } catch (error) {
-    console.error(error);
-    return { error: (error as Error).message };
+    return { error: actionError(error) };
   }
 };
 
-export const deleteUser = async (id: number) => {
+export const deleteUser = async (id: number): Promise<ActionResult> => {
   try {
-    const existingUser = await prisma.user.findFirst({ where: { id } });
-    if (!existingUser)
+    await requireAdmin();
+
+    // Payments cascade with the user, so deleting someone who ever paid would
+    // erase the money history with them. Those accounts stay.
+    const payments = await prisma.payment.count({ where: { userId: id } });
+    if (payments > 0)
       return {
-        error: "User Not Found.",
+        error: `This user has ${payments} payment${payments > 1 ? "s" : ""} on record, so the account can't be deleted.`,
       };
 
     await prisma.user.delete({ where: { id } });
 
-    return { success: "User Deleted Succesfully." };
+    return { success: "User deleted." };
   } catch (error) {
-    console.error(error);
-    return { error: (error as Error).message };
+    return { error: actionError(error) };
   }
 };

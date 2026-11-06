@@ -1,15 +1,10 @@
-import { adminSessionCookieName } from "@repo/lib/data/consts";
+import { verifyAdminToken } from "@repo/auth/adminToken";
 import { NextRequest, NextResponse } from "next/server";
 
 export const loginPageRoute = "/login";
 
 export async function proxy(req: NextRequest) {
-  const { nextUrl, cookies } = req;
-
-  // Namespaced session cookie for this app; the name is shared with the Auth.js
-  // config through @repo/lib/data/consts.
-  const token = cookies.get(adminSessionCookieName)?.value;
-  const isLoggedIn = !!token;
+  const { nextUrl } = req;
 
   // Development-only playgrounds (the editor v2 canvas) need no account. The
   // pages themselves return 404 outside development as well.
@@ -17,21 +12,20 @@ export async function proxy(req: NextRequest) {
     return NextResponse.next();
   }
 
-  const isPrivateRoute = ["/"].some((route) =>
-    nextUrl.pathname.startsWith(route),
-  );
+  const isAuthRoute = nextUrl.pathname.startsWith(loginPageRoute);
 
-  const isAuthRoute = [loginPageRoute].some((route) =>
-    nextUrl.pathname.startsWith(route),
-  );
+  // The token is decrypted and checked, not just looked for: a cookie with the
+  // right name and any value used to open the whole panel.
+  const adminId = await verifyAdminToken(req);
 
-  if (!isLoggedIn && isPrivateRoute && !isAuthRoute) {
+  if (!adminId && !isAuthRoute) {
     return NextResponse.redirect(new URL(loginPageRoute, nextUrl));
   }
 
-  if (isLoggedIn && isAuthRoute) {
-    return NextResponse.redirect(new URL("/", nextUrl));
-  }
+  // A signed-in admin is not sent away from /login here. The token can be valid
+  // for an admin that was deleted since; the panel layout sends that session to
+  // /login, and bouncing it back from there would loop. The login page redirects
+  // a live admin itself.
 
   return NextResponse.next();
 }

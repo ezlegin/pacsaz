@@ -1,25 +1,22 @@
 import { mainURL } from "@/data/envs";
 import { Button } from "@repo/ui/components/button";
-import { Home } from "lucide-react";
+import { SidebarTrigger } from "@repo/ui/components/sidebar";
+import { ExternalLink } from "lucide-react";
 import Link from "next/link";
 import LogoutButton from "./LogoutButton";
 
 const PanelNavbar = () => {
   return (
-    <div className="w-full">
-      <div className="flex justify-between">
-        <div className="flex gap-3">
-          <div className="border bg-accent rounded-md flex justify-center items-center px-3 text-sm">
-            Online: <span className="font-medium ml-1">123</span>
-          </div>
+    <div className="flex items-center justify-between gap-3 border-b pb-4">
+      <SidebarTrigger className="text-muted-foreground" />
 
+      <div className="flex items-center gap-2">
+        <Button asChild variant="outline" size="sm">
           <Link target="_blank" href={mainURL}>
-            <Button variant={"outline"} size={"icon"}>
-              <Home />
-            </Button>
+            <ExternalLink />
+            Open site
           </Link>
-        </div>
-
+        </Button>
         <LogoutButton />
       </div>
     </div>

@@ -8,6 +8,7 @@ import {
   TooltipTrigger,
 } from "@repo/ui/components/tooltip";
 import { Info } from "lucide-react";
+import Link from "next/link";
 
 interface CustomerType extends Customer {
   user: User | null;
@@ -23,17 +24,22 @@ const CustomersList = ({ data }: { data: CustomerType[] }) => {
         <TableCell className="text-center">{data.email}</TableCell>
         <TableCell className="text-center">{data.address}</TableCell>
         <TableCell className="text-right">
-          <Tooltip>
-            <TooltipTrigger>
-              <div className="flex items-center justify-center gap-1">
-                <Info size={10} className="text-muted-foreground" />
-                {data.user?.fullName}
-              </div>
-            </TooltipTrigger>
-            <TooltipContent side="bottom">
-              {data.user?.phoneNumber}
-            </TooltipContent>
-          </Tooltip>
+          {data.user ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link
+                  href={`/users/${data.user.id}`}
+                  className="inline-flex items-center gap-1 hover:text-primary hover:underline"
+                >
+                  <Info size={10} className="text-muted-foreground" />
+                  {data.user.fullName}
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">{data.user.phoneNumber}</TooltipContent>
+            </Tooltip>
+          ) : (
+            <span className="text-muted-foreground">—</span>
+          )}
         </TableCell>
       </TableRow>
     );
@@ -41,7 +47,7 @@ const CustomersList = ({ data }: { data: CustomerType[] }) => {
 
   return (
     <Card>
-      <Table columns={columns} data={data} renderRows={renderRows} dir="ltr" />
+      <Table columns={columns} data={data} renderRows={renderRows} dir="ltr" noDataMessage="No customers match." />
     </Card>
   );
 };

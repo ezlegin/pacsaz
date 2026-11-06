@@ -15,6 +15,9 @@ import {
   TooltipTrigger,
 } from "@repo/ui/components/tooltip";
 import { Info, Pencil } from "lucide-react";
+import PlanCard from "@/components/PlanCard";
+import { format } from "date-fns";
+import Link from "next/link";
 
 export interface PaymentType extends Payment {
   user: User;
@@ -33,13 +36,19 @@ const PaymentsList = ({
     return (
       <TableRow key={data.id}>
         <TableCell>{data.id}</TableCell>
+        <TableCell className="text-center text-xs text-muted-foreground tabular-nums">
+          {format(data.createdAt, "yyyy-MM-dd HH:mm")}
+        </TableCell>
         <TableCell className="text-center">
           <Tooltip>
-            <TooltipTrigger>
-              <div className="flex items-center justify-center gap-1">
+            <TooltipTrigger asChild>
+              <Link
+                href={`/users/${data.userId}`}
+                className="inline-flex items-center justify-center gap-1 hover:text-primary hover:underline"
+              >
                 {data.user.fullName}
                 <Info size={10} className="text-muted-foreground" />
-              </div>
+              </Link>
             </TooltipTrigger>
             <TooltipContent side="bottom">
               {data.user.phoneNumber}
@@ -48,6 +57,18 @@ const PaymentsList = ({
         </TableCell>
         <TableCell className="text-center">
           <PaymentStatus label={data.status} status={data.status} />
+          {data.method === "admin" && (
+            <div className="mt-1 text-[10px] text-muted-foreground">by admin</div>
+          )}
+        </TableCell>
+        <TableCell>
+          <div className="flex justify-center">
+            {data.plan ? (
+              <PlanCard planKey={data.plan.key} planPeriod={data.plan.period} />
+            ) : (
+              <span className="text-xs text-muted-foreground">No subscription</span>
+            )}
+          </div>
         </TableCell>
         <TableCell className="text-center">
           {formatPrice(data.amount)}
@@ -68,12 +89,12 @@ const PaymentsList = ({
           )}
         </TableCell>
         <TableCell className="text-center">{formatPrice(data.total)}</TableCell>
-        <TableCell className="text-center flex justify-end">
+        <TableCell className="text-center flex justify-end gap-2">
           <ActionButton icon={Pencil}>
-            <DialogTitle>Update Coupon</DialogTitle>
+            <DialogTitle>Edit payment #{data.id}</DialogTitle>
             <PaymentForm payment={data} tarrif={tarrif} />
           </ActionButton>
-          <DeleteButton deleteFn={deletePayment} id={data.id} />
+          <DeleteButton deleteFn={deletePayment} id={data.id} itemLabel={`payment #${data.id} and its subscription`} />
         </TableCell>
       </TableRow>
     );
@@ -81,7 +102,7 @@ const PaymentsList = ({
 
   return (
     <Card>
-      <Table columns={columns} data={data} renderRows={renderRows} dir="ltr" />
+      <Table columns={columns} data={data} renderRows={renderRows} dir="ltr" noDataMessage="No payments match." />
     </Card>
   );
 };
@@ -90,10 +111,12 @@ export default PaymentsList;
 
 const columns = [
   { label: "ID" },
+  { label: "Date" },
   { label: "User" },
   { label: "Status" },
+  { label: "Plan" },
   { label: "Amount" },
   { label: "Discount" },
   { label: "Total" },
-  { label: "Edit" },
+  { label: "Actions" },
 ];

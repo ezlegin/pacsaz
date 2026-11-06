@@ -1,4 +1,4 @@
-import { admin } from "@/data/admin";
+import { requireAdmin } from "@/lib/session";
 import { mainURL } from "@/data/envs";
 import {
   EmptyState,
@@ -94,6 +94,7 @@ const MONTHS_IN_PERIOD: Record<PlanPeriod, number> = {
 /* -------------------------------------------------------------------------- */
 
 const page = async () => {
+  const admin = await requireAdmin();
   const now = new Date();
   const last30 = new Date(now.getTime() - 30 * 864e5);
   const thisMonth = monthWindow(0);

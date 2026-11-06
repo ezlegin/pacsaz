@@ -68,7 +68,7 @@ const ContactsList = ({ data }: { data: Contact[] }) => {
 
       <TableCell>
         <div className="flex justify-end">
-          <DeleteButton deleteFn={deleteContact} id={contact.id} />
+          <DeleteButton deleteFn={deleteContact} id={contact.id} itemLabel={`the message from ${contact.fullName}`} />
         </div>
       </TableCell>
     </TableRow>

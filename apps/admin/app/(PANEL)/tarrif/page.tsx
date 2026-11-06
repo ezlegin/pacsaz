@@ -1,47 +1,40 @@
 import { TarrifForm } from "@/components/forms/TarrifForm";
-import PageTitle from "@/components/PageTitle";
-import { prisma } from "@repo/db";
-import { globalPageSize } from "@repo/lib/data/consts";
-import Pagination from "@/components/Pagination";
 import PopupNewDialog from "@/components/PopupNewDialog";
+import { prisma } from "@repo/db";
 import { DialogTitle } from "@repo/ui/components/dialog";
+import { Coins } from "lucide-react";
+import { Page, PageHeader } from "../components/PanelUI";
 import TarrifList from "./TarrifList";
-import { pagination } from "@repo/lib/utils/pagination";
 
-interface Props {
-  searchParams: Promise<{ page: string }>;
-}
-
-const page = async ({ searchParams }: Props) => {
-  const { page } = await searchParams;
-  const { skip, take } = pagination(page, globalPageSize);
-  const tarrif = await prisma.tarrif.findMany({
-    include: {
-      price: true,
-      fairDownload: true,
-      features: true,
-    },
-    orderBy: { id: "desc" },
-    skip,
-    take,
-  });
-  const features = await prisma.tarrifFeature.findMany();
+const page = async () => {
+  // At most one tariff per plan key (three in all), so no paging: the old
+  // pager counted only the rows of the current page.
+  const [tarrif, features] = await Promise.all([
+    prisma.tarrif.findMany({
+      include: { price: true, fairDownload: true, features: true },
+      orderBy: { level: "asc" },
+    }),
+    prisma.tarrifFeature.findMany(),
+  ]);
 
   return (
-    <div className="space-y-3">
-      <PageTitle title="Tarrif" />
-
-      <div className="flex justify-between">
-        <PopupNewDialog buttonTitle="New Tarrif">
-          <DialogTitle>New Tarrif</DialogTitle>
-          <TarrifForm features={features} />
-        </PopupNewDialog>
-      </div>
+    <Page>
+      <PageHeader
+        icon={Coins}
+        title="Tariffs"
+        description="Plans sold on the pricing page: prices and fair-download limits per period, and the features each one lists."
+        actions={
+          tarrif.length < 3 ? (
+            <PopupNewDialog buttonTitle="New tariff">
+              <DialogTitle>New tariff</DialogTitle>
+              <TarrifForm features={features} />
+            </PopupNewDialog>
+          ) : undefined
+        }
+      />
 
       <TarrifList data={tarrif} features={features} />
-
-      <Pagination pageSize={globalPageSize} totalItems={tarrif.length} />
-    </div>
+    </Page>
   );
 };
 

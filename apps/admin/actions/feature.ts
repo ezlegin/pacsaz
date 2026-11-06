@@ -1,52 +1,56 @@
 "use server";
 
-import { FeatureFormType } from "@/lib/validationSchema/validatoinSchema";
+import { ActionResult, actionError } from "@/lib/actionError";
+import { requireAdmin } from "@/lib/session";
+import {
+  FeatureFormType,
+  featureFormSchema,
+} from "@/lib/validationSchema/validatoinSchema";
 import { prisma } from "@repo/db";
 
-export const createFeature = async (data: FeatureFormType) => {
-  try {
-    await prisma.tarrifFeature.create({
-      data: { title: data.title, type: data.type },
-    });
+const invalid = { error: "Please check the form fields." } as const;
 
-    return { success: "Feature Created Successull." };
+export const createFeature = async (data: FeatureFormType): Promise<ActionResult> => {
+  try {
+    await requireAdmin();
+
+    const parsed = featureFormSchema.safeParse(data);
+    if (!parsed.success) return invalid;
+
+    await prisma.tarrifFeature.create({ data: parsed.data });
+
+    return { success: "Feature created." };
   } catch (error) {
-    console.error(error);
-    return { error: (error as Error).name };
+    return { error: actionError(error) };
   }
 };
 
-export const updateFeature = async (data: FeatureFormType, id: number) => {
+export const updateFeature = async (
+  data: FeatureFormType,
+  id: number,
+): Promise<ActionResult> => {
   try {
-    const existingFeature = await prisma.tarrifFeature.findFirst({
-      where: { id },
-    });
-    if (!existingFeature) throw new Error("Feature not found.");
+    await requireAdmin();
 
-    await prisma.tarrifFeature.update({
-      where: { id },
-      data,
-    });
+    const parsed = featureFormSchema.safeParse(data);
+    if (!parsed.success) return invalid;
 
-    return { success: "Feature Updated Successull." };
+    await prisma.tarrifFeature.update({ where: { id }, data: parsed.data });
+
+    return { success: "Feature updated." };
   } catch (error) {
-    console.error(error);
-    return { error: (error as Error).name };
+    return { error: actionError(error) };
   }
 };
 
-export const deleteFeature = async (id: number) => {
+export const deleteFeature = async (id: number): Promise<ActionResult> => {
   try {
-    const existingFeature = await prisma.tarrifFeature.findFirst({
-      where: { id },
-    });
-    if (!existingFeature) throw new Error("Feature not found.");
+    await requireAdmin();
 
     await prisma.tarrifFeature.delete({ where: { id } });
 
-    return { success: "Feature Deleted Successull." };
+    return { success: "Feature deleted." };
   } catch (error) {
-    console.error(error);
-    return { error: (error as Error).name };
+    return { error: actionError(error) };
   }
 };

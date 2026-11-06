@@ -43,7 +43,7 @@ import { cn } from "@repo/ui/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import SearchUsers from "../SearchUsers";
@@ -95,17 +95,29 @@ export function PaymentForm({
   const plan = form.watch("planKey");
   const period = form.watch("period");
   const tarrifPlan = tarrif.find((t) => t.key === plan);
-  const rawTotal = payment?.total ?? tarrifPlan?.price![period] ?? 0;
+  // The coupon applies to the tariff price. It used to apply to the payment's
+  // stored total on an edit, which was already discounted. The server prices the
+  // payment again on save either way.
+  const rawTotal = tarrifPlan?.price?.[period] ?? 0;
+  const firstRun = useRef(true);
 
   useEffect(() => {
-    if (!tarrifPlan) {
-      toast.error("Tarrif not available.");
+    // Opening an existing payment keeps its numbers; only a change of plan or
+    // period starts the price over (and drops the coupon, which may not fit it).
+    if (firstRun.current) {
+      firstRun.current = false;
+      if (payment) return;
+    }
+    if (!tarrifPlan?.price) {
+      toast.error("This tariff has no price yet.");
       return;
     }
 
-    form.setValue("amount", tarrifPlan.price![period]);
+    form.setValue("amount", tarrifPlan.price[period]);
     form.setValue("discountCodeAmount", 0);
-    form.setValue("total", rawTotal);
+    form.setValue("total", tarrifPlan.price[period]);
+    form.setValue("discountCode", "");
+    setDiscountCode(null);
   }, [plan, period]);
 
   const formCode = form.watch("discountCode");

@@ -48,6 +48,11 @@ const FilterSelect = ({
     setValue(newValue);
     const params = new URLSearchParams(Array.from(searchParams.entries()));
 
+    // A new query starts from the first page; staying on page 3 of the old
+    // results usually shows nothing.
+    for (const key of Array.from(params.keys()))
+      if (key === "page" || key.startsWith("pageBy")) params.delete(key);
+
     if (newValue === "all") {
       params.delete(name);
     } else {
@@ -63,18 +68,14 @@ const FilterSelect = ({
 
   return (
     <UiSelect value={value} onValueChange={handleChange}>
-      <SelectTrigger className="w-45">
+      <SelectTrigger className="h-9 w-44">
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent position="item-aligned">
         <SelectItem value={"all"}>{placeholder}</SelectItem>
         {options.map((option) => (
-          <SelectItem
-            key={option.value}
-            value={option.value}
-            className="capitalize"
-          >
-            {option.label.toLowerCase()}
+          <SelectItem key={option.value} value={option.value}>
+            {option.label}
           </SelectItem>
         ))}
       </SelectContent>

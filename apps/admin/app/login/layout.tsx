@@ -1,8 +1,8 @@
-import React, { ReactNode } from "react";
+import { ReactNode } from "react";
 
 const layout = ({ children }: { children: ReactNode }) => {
   return (
-    <div className="bg-accent h-screen flex justify-center items-center">
+    <div className="bg-accent min-h-screen flex justify-center items-center px-4">
       {children}
     </div>
   );

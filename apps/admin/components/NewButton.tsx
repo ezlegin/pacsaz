@@ -4,25 +4,43 @@
 import { Button } from "@repo/ui/components/button";
 import { Plus } from "lucide-react";
 import Link from "next/link";
+import { ComponentProps } from "react";
 
+/**
+ * Without `href` this is a plain button and passes its props on, so it can sit
+ * under a Radix `asChild` trigger (which hands it `onClick`, `aria-*`, a ref).
+ * It used to always render a Link to "", which swallowed those props.
+ */
 const NewButton = ({
-  href = "",
+  href,
   title = "New",
   className,
-  icon = false,
+  icon = true,
+  ...props
 }: {
   href?: string;
   title?: string;
   className?: string;
   icon?: boolean;
-}) => {
-  return (
-    <Link href={href}>
-      <Button className={`px-6 lg:px-7 ${className}`} variant={"default"}>
-        {icon && <Plus />}
-        {title}
+} & Omit<ComponentProps<typeof Button>, "title">) => {
+  const content = (
+    <>
+      {icon && <Plus />}
+      {title}
+    </>
+  );
+
+  if (href)
+    return (
+      <Button asChild className={className}>
+        <Link href={href}>{content}</Link>
       </Button>
-    </Link>
+    );
+
+  return (
+    <Button className={className} {...props}>
+      {content}
+    </Button>
   );
 };
 
