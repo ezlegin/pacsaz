@@ -176,7 +176,7 @@ every layout behaves exactly as it did before.
 > hardcoded `https://pacsaz.ir`. That fallback is the production domain, which is
 > why the mistake is invisible until the site is served somewhere else — and then
 > every canonical link, `og:url` and sitemap entry points at the wrong host. Check
-> the spelling in Vercel as well as in the local `.env` files.
+> the spelling on the server as well as in the local `.env` files.
 
 `apps/admin/.env`:
 
@@ -196,41 +196,9 @@ Then a seed-only group read by `packages/db` to create the first admin:
 
 ## Deployment
 
-Each app is deployed as its **own Vercel project** on its own domain — the
-public site on the root domain, the admin on a subdomain. There is no shared
-path prefix and no `services` configuration.
-
-For both projects set **Root Directory** to `apps/client` / `apps/admin`. Each
-app ships a `vercel.json` whose build command applies migrations, generates the
-Prisma client (it is not committed) and — for the admin — creates the first admin
-account, before building:
-
-```bash
-# apps/client/vercel.json
-pnpm --filter @repo/db run prisma:deploy \
-  && pnpm --filter @repo/db run prisma:generate \
-  && pnpm run build
-
-# apps/admin/vercel.json
-pnpm --filter @repo/db run prisma:deploy \
-  && pnpm --filter @repo/db run prisma:generate \
-  && pnpm --filter @repo/db prisma:generate-admin \
-  && pnpm run build
-```
-
-Both projects deploy against the **same database**, so `prisma:deploy` runs twice
-per release — it is idempotent, but it does mean either project can apply a
-pending migration.
-
-> **Schema changes that have no migration file need `db push`.** `prisma:deploy`
-> only applies what is in `packages/db/src/prisma/migrations`. When a model is
-> added by pushing the schema instead of generating a migration, every database
-> that must have it — production included — needs
-> `pnpm --filter @repo/db exec prisma db push` against that database.
-
-Set every variable from the [Environment](#environment) section in the matching
-project (Production and Preview as needed), and use a **different `AUTH_SECRET`
-per app**.
+Both apps run as Docker containers on our own server behind the shared
+nginx-proxy; images are built by GitHub Actions. See
+[deploy/README.md](deploy/README.md).
 
 ### A note on the build tool
 

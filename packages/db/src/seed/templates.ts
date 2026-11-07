@@ -8,6 +8,8 @@ import { emptyDocument, type DielineDocument, type Node, type PanelsNode, type R
 import { extractSegmentsFromSvg } from "../../../dieline-3d/src/extract";
 import { buildFoldRig } from "../../../dieline-3d/src/foldRig";
 import { prisma } from "../lib/prisma";
+import { CARD_TEMPLATES } from "./cards";
+import { ENVELOPE_TEMPLATES } from "./envelopes";
 
 /**
  * The starter templates, written to the database by slug, so running this again
@@ -317,6 +319,32 @@ const TEMPLATES: Template[] = [
     materials: ["glossyCardboard", "fFlute"],
     bleed: 5,
   },
+  {
+    slug: "snap-lock-box",
+    title: "جعبه کف‌قفلی چهارتکه",
+    description:
+      "کف این جعبه از چهار لبه تشکیل شده که بدون چسب در هم قفل می‌شوند (کف ۱-۲-۳)، و بالای آن درب زبانه‌دار دارد. نسبت به جعبه‌ی درب‌دار ساده وزن بیشتری را تحمل می‌کند و نسبت به کف اتوماتیک ارزان‌تر است، چون کف چسب نمی‌خورد.\nبرای دارو، مکمل، شیشه‌ی عطر، شمع و محصولات نیمه‌سنگین مناسب است.",
+    doc: box("snapLockBottom"),
+    size: { width: 80, length: 60, height: 140 },
+    min: { width: 50, length: 40, height: 50 },
+    max: { width: 250, length: 180, height: 350 },
+    materials: ["glossyCardboard", "fFlute"],
+    bleed: 5,
+  },
+  {
+    slug: "carton-sleeve",
+    title: "روکش کشویی (اسلیو)",
+    description:
+      "روکش چهارطرفه که دو سر آن باز است و با یک لبه‌ی چسب بسته می‌شود. روی جعبه، سینی یا محصول لغزانده می‌شود و فضای چاپ اصلی بسته را می‌سازد؛ با عوض کردن روکش، یک جعبه‌ی ساده برای چند محصول یا مناسبت استفاده می‌شود.\nبرای صابون، شکلات، جعبه‌ی هدیه، پوشاک و ست محصولات کاربرد دارد.",
+    doc: box("sleeve"),
+    size: { width: 150, length: 60, height: 100 },
+    min: { width: 40, length: 20, height: 30 },
+    max: { width: 400, length: 250, height: 400 },
+    materials: ["glossyCardboard", "fFlute", "eFlute"],
+    bleed: 5,
+  },
+  ...CARD_TEMPLATES,
+  ...ENVELOPE_TEMPLATES,
 ];
 
 /** Every corner of the size range, and the sample size, on each material. */

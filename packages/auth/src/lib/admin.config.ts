@@ -8,7 +8,7 @@ export default {
   pages: {
     signIn: "/login",
   },
-  // Vercel terminates TLS and proxies the request, so the host Auth.js would
+  // nginx-proxy terminates TLS and proxies the request, so the host Auth.js would
   // infer is not the public one. Without this, production requests are rejected
   // with `UntrustedHost`.
   trustHost: true,

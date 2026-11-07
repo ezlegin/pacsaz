@@ -1,0 +1,10 @@
+**/node_modules
+**/.next/cache
+**/.turbo
+**/.env*
+.git
+graphify-out
+docs
+*.pdf
+# The prepared standalone apps carry their own traced node_modules.
+!out/**/node_modules

@@ -1,0 +1,104 @@
+# Production stack for https://pacsaz.ir and https://admin.pacsaz.ir, in
+# /opt/pacsaz (see deploy/README.md).
+#
+# The shared jwilder/nginx-proxy + Let's Encrypt companion already own 80/443.
+# The two apps join its external `app_network` with VIRTUAL_HOST /
+# LETSENCRYPT_HOST; Postgres stays on the private network with no host port.
+name: pacsaz
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+x-app: &app
+  restart: unless-stopped
+  env_file: .env.production
+  logging: *logging
+  depends_on:
+    db:
+      condition: service_healthy
+
+services:
+  db:
+    image: postgres:18-alpine
+    container_name: pacsaz-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: pacsaz
+      POSTGRES_USER: pacsaz
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in /opt/pacsaz/.env}
+    # Postgres 18 keeps PGDATA at /var/lib/postgresql/18/docker.
+    volumes:
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pacsaz -d pacsaz"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    shm_size: 128mb
+    mem_limit: 384m
+    logging: *logging
+    networks: [internal]
+
+  client:
+    <<: *app
+    container_name: pacsaz-client
+    image: ghcr.io/ezlegin/pacsaz-client:${CLIENT_TAG:-latest}
+    environment:
+      VIRTUAL_HOST: pacsaz.ir,www.pacsaz.ir
+      VIRTUAL_PORT: "3000"
+      # Set CLIENT_LETSENCRYPT_HOST= (empty) in .env to pause certificate
+      # requests while DNS does not point here yet.
+      LETSENCRYPT_HOST: ${CLIENT_LETSENCRYPT_HOST-pacsaz.ir,www.pacsaz.ir}
+      # Each app signs its sessions with its own secret.
+      AUTH_SECRET: ${CLIENT_AUTH_SECRET:?set CLIENT_AUTH_SECRET in /opt/pacsaz/.env}
+      NODE_OPTIONS: --max-old-space-size=512
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then((r) => process.exit(r.status < 500 ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+    mem_limit: 768m
+    networks: [internal, app_network]
+
+  admin:
+    <<: *app
+    container_name: pacsaz-admin
+    image: ghcr.io/ezlegin/pacsaz-admin:${ADMIN_TAG:-latest}
+    environment:
+      VIRTUAL_HOST: admin.pacsaz.ir
+      VIRTUAL_PORT: "3001"
+      LETSENCRYPT_HOST: ${ADMIN_LETSENCRYPT_HOST-admin.pacsaz.ir}
+      AUTH_SECRET: ${ADMIN_AUTH_SECRET:?set ADMIN_AUTH_SECRET in /opt/pacsaz/.env}
+      NODE_OPTIONS: --max-old-space-size=384
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001/login').then((r) => process.exit(r.status < 500 ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+    mem_limit: 640m
+    networks: [internal, app_network]
+
+  # One-off database work. `docker compose run --rm tools` applies pending
+  # migrations; deploy/README.md lists the admin-account and seed commands.
+  tools:
+    image: ghcr.io/ezlegin/pacsaz-tools:${TOOLS_TAG:-latest}
+    env_file: .env.production
+    profiles: [tools]
+    depends_on:
+      db:
+        condition: service_healthy
+    logging: *logging
+    networks: [internal]
+
+volumes:
+  pgdata:
+
+networks:
+  internal:
+  app_network:
+    external: true

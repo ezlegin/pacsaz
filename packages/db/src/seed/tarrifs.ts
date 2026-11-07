@@ -2,7 +2,7 @@ import { prisma } from "../lib/prisma";
 import type { PlanKey, TarrifFeatureType } from "../generated/prisma/client";
 
 /**
- * Seeds demonstration data for the subscription plans (`Tarrif`) and everything the
+ * Seeds the real data for the subscription plans (`Tarrif`) and everything the
  * pricing UI renders with them: `Price`, `FairDownload`, the shared `TarrifFeature`
  * catalogue and each plan's `SelectedTarrifFeature` rows.
  *
@@ -28,61 +28,66 @@ type TarrifSeed = {
   features: string[];
 };
 
-/** The whole feature catalogue; every plan lists all of them, ticked or not. */
+/**
+ * The whole feature catalogue; every plan lists all of them, ticked or not. Each
+ * row is something the apps actually gate on the plan, so the pricing table never
+ * promises more than the product does:
+ * any plan removes the watermark and downloads (PDF, AI, DXF) within its quota;
+ * `isPremium` (level > 1) unlocks saved copies and the customer list; pro and
+ * organization unlock the customizer and the printed 3D preview (`canCustomize`).
+ */
 const FEATURES: FeatureSeed[] = [
-  { title: "دسترسی به کتابخانه قالب‌ها", type: "general" },
-  { title: "خروجی PDF با اندازه واقعی", type: "general" },
-  { title: "خروجی DXF برای ایلاستریتور و اتوکد", type: "general" },
-  { title: "ویرایشگر حرفه‌ای دایلاین", type: "general" },
-  { title: "ذخیره‌سازی پروژه‌ها", type: "general" },
-  { title: "پشتیبانی اختصاصی", type: "paid" },
-  { title: "دایلاین اختصاصی و سفارشی", type: "paid" },
-  { title: "مدیریت مشتریان و تاریخچه دانلود", type: "paid" },
+  { title: "دسترسی به همه قالب‌ها در هر اندازه دلخواه", type: "general" },
+  { title: "دانلود PDF، AI و DXF در اندازه واقعی", type: "general" },
+  { title: "خطوط برش، تا و بلید در لایه‌های جدا", type: "general" },
+  { title: "پیش‌نمایش سه‌بعدی و تخت بدون واترمارک", type: "general" },
+  { title: "بررسی خودکار خطای دایلاین پیش از دانلود", type: "general" },
+  { title: "ذخیره نسخه‌ها و دانلود دوباره", type: "paid" },
+  { title: "ثبت مشتری و تاریخچه دانلود هر مشتری", type: "paid" },
+  { title: "شخصی‌سازی قالب: پنجره، سوراخ، نوع لبه و گردی گوشه", type: "paid" },
+  { title: "پیش‌نمایش سه‌بعدی با طرح چاپ", type: "paid" },
+  { title: "پشتیبانی در اولویت", type: "paid" },
 ];
 
+const BASE_FEATURES = FEATURES.filter((feature) => feature.type === "general").map((feature) => feature.title);
+
+// Prices are in toman. Longer periods are already cheaper per month (about 15% for
+// three months, 25% for a year), so `discountAmount` stays 0 rather than discounting twice.
 const TARRIFS: TarrifSeed[] = [
   {
     key: "standard",
     title: "استاندارد",
-    shortDescription: "برای شروع و پروژه‌های شخصی",
-    description: "مناسب طراحان تازه‌کار و پروژه‌های کوچک",
+    shortDescription: "برای طراحان مستقل و سفارش‌های گاه‌به‌گاه",
+    description:
+      "همه قالب‌ها را در اندازه دلخواه بسازید و فایل آماده قالب‌سازی بگیرید؛ مناسب طراحی که هر ماه چند جعبه طراحی می‌کند.",
     isRecommended: false,
     discountAmount: 0,
-    price: { monthly: 299_000, threeMonth: 799_000, annual: 2_690_000 },
-    fairDownload: { monthly: 5, threeMonth: 18, annual: 80 },
-    features: [
-      "دسترسی به کتابخانه قالب‌ها",
-      "خروجی PDF با اندازه واقعی",
-      "خروجی DXF برای ایلاستریتور و اتوکد",
-    ],
+    price: { monthly: 390_000, threeMonth: 990_000, annual: 3_490_000 },
+    fairDownload: { monthly: 10, threeMonth: 30, annual: 120 },
+    features: BASE_FEATURES,
   },
   {
     key: "pro",
     title: "حرفه‌ای",
-    shortDescription: "پرفروش‌ترین انتخاب طراحان",
-    description: "برای طراحان و استودیوهای فعال",
+    shortDescription: "برای طراحان و استودیوهای بسته‌بندی",
+    description:
+      "قالب‌ها را برای هر مشتری شخصی‌سازی کنید، نسخه‌ها را ذخیره کنید و طرح چاپ را روی مدل سه‌بعدی ببینید.",
     isRecommended: true,
-    discountAmount: 10,
-    price: { monthly: 599_000, threeMonth: 1_590_000, annual: 5_390_000 },
-    fairDownload: { monthly: 15, threeMonth: 50, annual: 240 },
-    features: [
-      "دسترسی به کتابخانه قالب‌ها",
-      "خروجی PDF با اندازه واقعی",
-      "خروجی DXF برای ایلاستریتور و اتوکد",
-      "ویرایشگر حرفه‌ای دایلاین",
-      "ذخیره‌سازی پروژه‌ها",
-      "پشتیبانی اختصاصی",
-    ],
+    discountAmount: 0,
+    price: { monthly: 790_000, threeMonth: 1_990_000, annual: 6_990_000 },
+    fairDownload: { monthly: 30, threeMonth: 100, annual: 400 },
+    features: FEATURES.filter((feature) => feature.title !== "پشتیبانی در اولویت").map((feature) => feature.title),
   },
   {
     key: "organization",
     title: "سازمانی",
-    shortDescription: "برای تیم‌ها و چاپخانه‌ها",
-    description: "مناسب تیم‌ها، چاپخانه‌ها و کارخانه‌های بسته‌بندی",
+    shortDescription: "برای چاپخانه‌ها و تولیدکنندگان بسته‌بندی",
+    description:
+      "همه امکانات حرفه‌ای با سهمیه دانلود بالا و پشتیبانی در اولویت؛ مناسب چاپخانه و کارگاهی که هر روز دایلاین تحویل می‌دهد.",
     isRecommended: false,
-    discountAmount: 20,
-    price: { monthly: 1_290_000, threeMonth: 3_490_000, annual: 11_900_000 },
-    fairDownload: { monthly: 40, threeMonth: 150, annual: 800 },
+    discountAmount: 0,
+    price: { monthly: 1_890_000, threeMonth: 4_890_000, annual: 16_900_000 },
+    fairDownload: { monthly: 100, threeMonth: 300, annual: 1_200 },
     features: FEATURES.map((feature) => feature.title),
   },
 ];

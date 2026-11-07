@@ -1,0 +1,15 @@
+#!/bin/sh
+# The only command the `pacsaz-deploy` SSH key may run (forced by its
+# authorized_keys entry: restrict,command="/opt/pacsaz/deploy.sh-wrapper").
+# The argument arrives in SSH_ORIGINAL_COMMAND, is validated here, and
+# deploy.sh runs as root through a sudoers rule for exactly that script.
+set -euf  # -f: no filename expansion of the SSH arguments
+# shellcheck disable=SC2086
+set -- ${SSH_ORIGINAL_COMMAND:-latest}
+[ "$#" -le 1 ] || { echo "refused: too many arguments" >&2; exit 2; }
+tag="${1:-latest}"
+if [ "$tag" != latest ] && ! printf '%s' "$tag" | grep -Eqx '[0-9a-f]{40}'; then
+  echo "refused: expected a full 40-character commit sha or \"latest\"" >&2
+  exit 2
+fi
+exec sudo -n /opt/pacsaz/deploy.sh "$tag"

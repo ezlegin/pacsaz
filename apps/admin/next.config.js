@@ -5,8 +5,8 @@ const appDir = path.dirname(fileURLToPath(import.meta.url));
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // This app is deployed as its own Vercel project on its own domain
-  // (admin.pacsaz.ir), so it owns its root and needs no base path.
+  // This app runs as its own container on its own domain (admin.pacsaz.ir),
+  // so it owns its root and needs no base path.
   //
   // The two apps are built from the same packages but run different Auth.js
   // configurations. Baking the value in here keeps each deployment correct
@@ -25,6 +25,11 @@ const nextConfig = {
   turbopack: {
     root: path.join(appDir, "..", ".."),
   },
+  // Production runs in Docker: `standalone` copies only the files the server
+  // needs (traced from the monorepo root, so workspace packages are included)
+  // into .next/standalone, which keeps the image small.
+  output: "standalone",
+  outputFileTracingRoot: path.join(appDir, "..", ".."),
   transpilePackages: ["@repo/ui", "@repo/editor", "@repo/dieline-engine"],
   images: {
     remotePatterns: [

@@ -1,0 +1,7 @@
+# Installed as /etc/cron.d/pacsaz. Times are the server's clock (UTC).
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+15 5 * * * root /opt/pacsaz/cron.sh daily >> /var/log/pacsaz.log 2>&1
+30 5 1 * * root /opt/pacsaz/cron.sh monthly >> /var/log/pacsaz.log 2>&1
+45 0 * * * root /opt/pacsaz/backup.sh >> /var/log/pacsaz.log 2>&1

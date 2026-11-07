@@ -19,6 +19,11 @@ const nextConfig = {
     root: path.join(appDir, "..", ".."),
   },
   transpilePackages: ["@repo/ui", "@repo/editor", "@repo/dieline-engine", "@repo/dieline-3d"],
+  // Production runs in Docker: `standalone` copies only the files the server
+  // needs (traced from the monorepo root, so workspace packages are included)
+  // into .next/standalone, which keeps the image small.
+  output: "standalone",
+  outputFileTracingRoot: path.join(appDir, "..", ".."),
   poweredByHeader: false,
   async headers() {
     return [
