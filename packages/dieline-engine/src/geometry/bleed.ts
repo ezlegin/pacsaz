@@ -212,6 +212,9 @@ function untangle(poly: Pt[]): Pt[] {
   return q;
 }
 
+/** A notch filling less than this share of its mouth × depth narrows to a point: a V, not a slot. */
+const V_FILL = 0.6;
+
 /** Narrowest a gap may be before the bleed bridges it: at least 10 mm, three bleeds on a wide bleed. */
 export const bridgeGap = (distance: number) => Math.max(10, 3 * distance);
 
@@ -233,16 +236,20 @@ function closest(p: Pt, a: Pt, b: Pt): { d: number; q: Pt } {
  *
  * A bridge joins a corner to the nearest point on another edge, no further than
  * `gap`, through open air (it crosses no edge and its middle lies outside the
- * part), cutting off a notch deeper than half the bleed that is the smaller side of
+ * part), cutting off a notch deeper than the bleed that is the smaller side of
  * the loop. The widest notch at a spot wins, so a slot closes at its mouth.
+ *
+ * A wide, shallow V (the notch beside a handle's round ear) is left alone: its
+ * sides' offsets meet in a clean inward corner by themselves, the way a
+ * die-maker draws it, while a bridge would land part way down a curve and kink
+ * the bleed. A V fills about half the box its mouth and depth span, a slot or a
+ * round relief most of it; a V deeper than its mouth is wide (the gap between
+ * two bottom flaps) is still bridged, or the bleed would run down it in a spike.
  */
 function bridgeNotches(poly: Pt[], gap: number, depth: number): Pt[] {
   const n = poly.length;
-  // A notch half the bleed deep or more is bridged too: offset, its sides would
-  // meet in a sharp inward V in the bleed (beside a handle's ear, say).
-  const minDepth = depth / 2;
   const total = Math.abs(signedArea(poly));
-  type Bridge = { i: number; k: number; q: Pt; area: number; forward: boolean };
+  type Bridge = { i: number; k: number; q: Pt; area: number; length: number; forward: boolean };
   const found: Bridge[] = [];
   const crossesEdge = (a: Pt, b: Pt) =>
     poly.some((v, e) => {
@@ -280,7 +287,7 @@ function bridgeNotches(poly: Pt[], gap: number, depth: number): Pt[] {
       const { d, q } = closest(p, a, b);
       if (d > gap || d < 1e-6) continue;
       // A notch deeper than the bleed runs at least its width plus twice the bleed.
-      const need = d + 2 * minDepth;
+      const need = d + 2 * depth;
       // The notch runs forward from i to the segment k, or backward from i to k + 1.
       for (const forward of [true, false]) {
         const r = forward ? run(i, k) : run((k + 1) % n, i);
@@ -295,17 +302,22 @@ function bridgeNotches(poly: Pt[], gap: number, depth: number): Pt[] {
         let reach = 0;
         for (let s = i; s !== (forward ? (k + 1) % n : k); s = forward ? (s + 1) % n : (s - 1 + n) % n) {
           reach = Math.max(reach, closest(poly[s]!, p, q).d);
-          if (reach > minDepth) break;
         }
-        if (reach <= minDepth) continue;
-        found.push({ i, k, q, area, forward });
+        if (reach <= depth) continue;
+        if (area < V_FILL * d * reach && reach < d) continue;
+        found.push({ i, k, q, area, length: d, forward });
       }
     }
   }
   if (!found.length) return poly;
 
   // Apply the widest notches first; a notch inside one already closed is skipped.
-  found.sort((a, b) => b.area - a.area);
+  // A bridge's length counts against it (squared, as an area), so of two bridges
+  // closing one slot the straight one across wins over a diagonal to a corner
+  // further along, which closes a sliver more but cuts the corner; across a
+  // slot's mouth still beats deeper in, which is as long and closes less.
+  const score = (b: Bridge) => b.area - b.length * b.length;
+  found.sort((a, b) => score(b) - score(a));
   const gone = new Set<number>();
   const cuts: { from: number; to: number; q: Pt; forward: boolean }[] = [];
   for (const b of found) {
@@ -328,56 +340,7 @@ function bridgeNotches(poly: Pt[], gap: number, depth: number): Pt[] {
     const extra = insertAfter.get(s);
     if (extra && !gone.has(s)) out.push(extra);
   }
-  return tightenBridges(cleaned(out), poly, depth, gap);
-}
-
-/**
- * A bridge joins a corner to the nearest point across the notch, which on a
- * curve (a handle's round ear beside a V) is part way down it: the bleed would
- * dip into a kink there; on a straight edge it lands part way along it, and
- * the bleed folds into the corner it leaves. Each end of a bridge slides on
- * over inward corners no deeper than the bridge is long (or the bleed, at
- * least; never past `gap`), so it leaves a curve on its tangent and runs on to
- * the next outer corner, as a knife-maker draws it. Edges of `original` are not bridges.
- */
-function tightenBridges(poly: Pt[], original: Pt[], depth: number, gap: number): Pt[] {
-  const edge = (a: Pt, b: Pt) => `${key(a)}|${key(b)}`;
-  const edges = new Set(original.map((p, i) => edge(p, original[(i + 1) % original.length]!)));
-  const isBridge = (a: Pt, b: Pt) => !edges.has(edge(a, b));
-  const crossesEdge = (q: Pt[], a: Pt, b: Pt) =>
-    q.some((v, e) => {
-      const hit = intersect(a, b, v, q[(e + 1) % q.length]!);
-      return !!hit && hit.t > 1e-6 && hit.t < 1 - 1e-6 && hit.u > 1e-6 && hit.u < 1 - 1e-6;
-    });
-  // Inward (clockwise on a counter-clockwise loop) and no deeper than the bridge
-  // across it is long: dropping it only prints over the notch's own waste.
-  const shallowDip = (u: Pt, p: Pt, w: Pt, bridge: number) =>
-    (p[0] - u[0]) * (w[1] - p[1]) - (p[1] - u[1]) * (w[0] - p[0]) < -1e-9 &&
-    closest(p, u, w).d <= Math.min(gap, Math.max(depth, bridge));
-
-  let q = poly;
-  for (let pass = 0; pass < 1000; pass++) {
-    const n = q.length;
-    if (n < 4) return q;
-    let drop = -1;
-    for (let j = 0; j < n && drop < 0; j++) {
-      const a = q[j]!;
-      const b = q[(j + 1) % n]!;
-      if (!isBridge(a, b)) continue;
-      const before = q[(j - 1 + n) % n]!;
-      const after = q[(j + 2) % n]!;
-      const bridge = Math.hypot(b[0] - a[0], b[1] - a[1]);
-      if (shallowDip(before, a, b, bridge) && !crossesEdge(q, before, b)) drop = j;
-      else if (shallowDip(a, b, after, bridge) && !crossesEdge(q, a, after)) drop = (j + 1) % n;
-    }
-    if (drop < 0) return q;
-    // The new segment joins two points that were not neighbours: it is a bridge too.
-    const u = q[(drop - 1 + n) % n]!;
-    const w = q[(drop + 1) % n]!;
-    edges.delete(edge(u, w));
-    q = q.filter((_, i) => i !== drop);
-  }
-  return q;
+  return cleaned(out);
 }
 
 function distanceTo(poly: Pt[], p: Pt): number {

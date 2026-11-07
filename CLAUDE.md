@@ -190,7 +190,7 @@ Phases (each ends with a commit message for the user to commit):
 - Polygons can be sized by side (`sizeBy: "side"`); the Triangle tool draws
   three-sided polygons that way.
 - Bleed (`geometry/bleed.ts`) is the outermost closed cut loop offset outward
-  with round corners, after narrow notches (gaps up to `bridgeGap`: 10 mm, or 3 × bleed) are closed across their mouth so no hairline runs down a slot (any notch at least half the bleed deep; each bridge then slides on to the curve's tangent and the next outer corner, so a handle's ear bleeds as one straight line to the top); it does not use makerjs (too slow, and wrong on narrow
+  with round corners, after narrow notches (gaps up to `bridgeGap`: 10 mm, or 3 × bleed) are closed across their mouth so no hairline runs down a slot (a wide, shallow V, like the notch beside a handle's ear, offsets to a clean inward corner by itself and is not bridged, `V_FILL`; bridges rank by area minus length², so a slot closes straight across, not diagonally to a corner); it does not use makerjs (too slow, and wrong on narrow
   notches). `export.test.ts` checks it on every preset at several distances.
 
 ### 3D folding
