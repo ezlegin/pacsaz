@@ -212,6 +212,122 @@ function untangle(poly: Pt[]): Pt[] {
   return q;
 }
 
+/** Narrowest a gap may be before the bleed bridges it: at least 10 mm, three bleeds on a wide bleed. */
+export const bridgeGap = (distance: number) => Math.max(10, 3 * distance);
+
+/** Distance from `p` to the segment `a`–`b`, and the closest point on it. */
+function closest(p: Pt, a: Pt, b: Pt): { d: number; q: Pt } {
+  const dx = b[0] - a[0];
+  const dy = b[1] - a[1];
+  const t = Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / (dx * dx + dy * dy || 1)));
+  const q: Pt = [a[0] + t * dx, a[1] + t * dy];
+  return { d: Math.hypot(p[0] - q[0], p[1] - q[1]), q };
+}
+
+/**
+ * Closes every narrow notch of a part's outline (a slot, a gap between flaps)
+ * across its mouth, so the bleed runs straight over it. Offsetting into a gap
+ * about twice the bleed wide leaves a hairline or a sliver of print down the
+ * middle of it, which no press can hold; the notch is waste, so printing
+ * over it costs nothing.
+ *
+ * A bridge joins a corner to the nearest point on another edge, no further than
+ * `gap`, through open air (it crosses no edge and its middle lies outside the
+ * part), cutting off a notch deeper than the bleed that is the smaller side of
+ * the loop. The widest notch at a spot wins, so a slot closes at its mouth.
+ */
+function bridgeNotches(poly: Pt[], gap: number, depth: number): Pt[] {
+  const n = poly.length;
+  const total = Math.abs(signedArea(poly));
+  type Bridge = { i: number; k: number; q: Pt; area: number; forward: boolean };
+  const found: Bridge[] = [];
+  const crossesEdge = (a: Pt, b: Pt) =>
+    poly.some((v, e) => {
+      const hit = intersect(a, b, v, poly[(e + 1) % n]!);
+      return !!hit && hit.t > 1e-6 && hit.t < 1 - 1e-6 && hit.u > 1e-6 && hit.u < 1 - 1e-6;
+    });
+
+  // Running sums along the loop, so a notch's length and area cost nothing:
+  // `along` is the distance to each vertex, `cross` the shoelace sum up to it.
+  const along = [0];
+  const cross = [0];
+  for (let s = 1; s <= n; s++) {
+    const a = poly[s - 1]!;
+    const b = poly[s % n]!;
+    along.push(along[s - 1]! + Math.hypot(b[0] - a[0], b[1] - a[1]));
+    cross.push(cross[s - 1]! + a[0] * b[1] - b[0] * a[1]);
+  }
+  const perimeter = along[n]!;
+  const loopCross = cross[n]!;
+  /** Length and shoelace sum walking forward from vertex `from` to vertex `to`. */
+  const run = (from: number, to: number) =>
+    to >= from
+      ? { len: along[to]! - along[from]!, cross: cross[to]! - cross[from]! }
+      : { len: perimeter - along[from]! + along[to]!, cross: loopCross - cross[from]! + cross[to]! };
+  const wedge = (a: Pt, b: Pt) => a[0] * b[1] - b[0] * a[1];
+
+  for (let i = 0; i < n; i++) {
+    const p = poly[i]!;
+    for (let k = 0; k < n; k++) {
+      // Not the vertex's own edges, nor the ones right beside them.
+      const dk = (k - i + n) % n;
+      if (dk <= 1 || dk >= n - 2) continue;
+      const a = poly[k]!;
+      const b = poly[(k + 1) % n]!;
+      const { d, q } = closest(p, a, b);
+      if (d > gap || d < 1e-6) continue;
+      // A notch deeper than the bleed runs at least its width plus twice the bleed.
+      const need = d + 2 * depth;
+      // The notch runs forward from i to the segment k, or backward from i to k + 1.
+      for (const forward of [true, false]) {
+        const r = forward ? run(i, k) : run((k + 1) % n, i);
+        const end = forward ? a : b;
+        const len = r.len + Math.hypot(q[0] - end[0], q[1] - end[1]);
+        if (len < need) continue;
+        // Closed by the bridge: i … k → q → i forward, q → k + 1 … i → q backward.
+        const area = Math.abs(forward ? r.cross + wedge(a, q) + wedge(q, p) : wedge(q, b) + r.cross + wedge(p, q)) / 2;
+        if (area >= total / 2) continue;
+        const mid: Pt = [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2];
+        if (insidePolygon(mid, poly) || distanceTo(poly, mid) < 1e-6 || crossesEdge(p, q)) continue;
+        let reach = 0;
+        for (let s = i; s !== (forward ? (k + 1) % n : k); s = forward ? (s + 1) % n : (s - 1 + n) % n) {
+          reach = Math.max(reach, closest(poly[s]!, p, q).d);
+          if (reach > depth) break;
+        }
+        if (reach <= depth) continue;
+        found.push({ i, k, q, area, forward });
+      }
+    }
+  }
+  if (!found.length) return poly;
+
+  // Apply the widest notches first; a notch inside one already closed is skipped.
+  found.sort((a, b) => b.area - a.area);
+  const gone = new Set<number>();
+  const cuts: { from: number; to: number; q: Pt; forward: boolean }[] = [];
+  for (const b of found) {
+    const span: number[] = [];
+    if (b.forward) for (let s = (b.i + 1) % n; s !== (b.k + 1) % n; s = (s + 1) % n) span.push(s);
+    else for (let s = (b.i - 1 + n) % n; s !== b.k; s = (s - 1 + n) % n) span.push(s);
+    if (gone.has(b.i) || span.some((s) => gone.has(s))) continue;
+    for (const s of span) gone.add(s);
+    cuts.push({ from: b.i, to: b.forward ? b.k : (b.k + 1) % n, q: b.q, forward: b.forward });
+  }
+  // Walk the loop, dropping each notch's vertices and putting its bridge end in their place.
+  const insertAfter = new Map<number, Pt>();
+  for (const c of cuts) {
+    if (c.forward) insertAfter.set(c.from, c.q);
+    else insertAfter.set(c.to, c.q);
+  }
+  const out: Pt[] = [];
+  for (let s = 0; s < n; s++) {
+    if (!gone.has(s)) out.push(poly[s]!);
+    const extra = insertAfter.get(s);
+    if (extra && !gone.has(s)) out.push(extra);
+  }
+  return cleaned(out);
+}
+
 function distanceTo(poly: Pt[], p: Pt): number {
   let best = Number.POSITIVE_INFINITY;
   for (let i = 0; i < poly.length; i++) {
@@ -252,6 +368,8 @@ function offsetLoop(loop: Pt[], distance: number, hole: boolean): Pt[] | null {
   // `rawOffset` grows a counter-clockwise loop outward; a window runs clockwise
   // so the same code grows it into its own opening.
   if (signedArea(poly) < 0 !== hole) poly = [...poly].reverse();
+  // Only a part's outline: a window's narrow neck is part of the window.
+  if (!hole) poly = bridgeNotches(poly, bridgeGap(distance), distance);
   const out = untangle(rawOffset(poly, distance)).filter((p) => distanceTo(poly, p) > distance - 1e-3);
   if (out.length < 3) return null;
   // A window narrower than twice the bleed closes up: what remains turns the wrong way or is a sliver.

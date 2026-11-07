@@ -113,8 +113,8 @@ Phases (each ends with a commit message for the user to commit):
   corners and get `startInset`/`endInset`. The keyboard box's inner walls are half
   a board shorter, the strip over each double wall slopes up to the outer wall.
 - The keyboard box (`lib:keyboardLid`, `lib:keyboardFront`, `lib:keyboardTabs`,
-  preset `keyboardBox`) is measured from a real die, `Sample.pdf` in the repo
-  root (315 × 202 × 62 on 3 mm board): board-following lengths are in
+  preset `keyboardBox`) is measured from a real die (an earlier `Sample.pdf`,
+  315 × 202 × 62 on 3 mm board): board-following lengths are in
   `thickness`, shapes in the height, so at 3 mm it matches that die within
   0.3 mm. Reliefs where flaps fold side by side are half circles of radius
   thickness / 2 touching the flap's fold. Two deliberate differences: the
@@ -134,7 +134,13 @@ Phases (each ends with a commit message for the user to commit):
   meaning "auto" and are resolved in the component's variables. A document
   component with the same id shadows a built-in one.
 - Presets (`library/presets.ts`): reverse tuck end, straight tuck end, sleeve,
-  FEFCO 0201. Bodies run front, side, back, side, glue; front and back are
+  FEFCO 0201. The FEFCO 0201 is measured from a real B-flute die (`Sample.pdf`
+  in the repo root, 400 × 300 × 300 on 3 mm board) and `panels.test.ts` pins it:
+  body as tall as the side creases (`height - thickness - 1`), front/back flap
+  creases one board further out (`lib:slottedFlap` `raised`), all tips on one
+  line, slots 2 × thickness ending in a half circle centred on the fold, the
+  free-end panel 1 mm short, a 30–50 mm joint (45 at 300 high) with 15° tapers.
+  Bodies run front, side, back, side, glue; front and back are
   `max(length, width)` and the sides `min(...)`, so lids always sit on the wide
   panels and dust flaps on the narrow ones. Tuck lids hinge one board thickness above the body edge and are exactly the box across the opening fold to fold (so closed, the tuck fold lands on the far wall); they carry friction-lock slits (rounding into a short hook past the tuck fold, which sits one thickness below the lid edge) along
   the tuck fold (a slit that runs on as a fold is not an open cut; `closedLoops`
@@ -171,7 +177,7 @@ Phases (each ends with a commit message for the user to commit):
 - Polygons can be sized by side (`sizeBy: "side"`); the Triangle tool draws
   three-sided polygons that way.
 - Bleed (`geometry/bleed.ts`) is the outermost closed cut loop offset outward
-  with round corners; it does not use makerjs (too slow, and wrong on narrow
+  with round corners, after narrow notches (gaps up to `bridgeGap`: 10 mm, or 3 × bleed) are closed across their mouth so no hairline runs down a slot; it does not use makerjs (too slow, and wrong on narrow
   notches). `export.test.ts` checks it on every preset at several distances.
 
 ### 3D folding
@@ -179,7 +185,10 @@ Phases (each ends with a commit message for the user to commit):
 - The fold animation is staged (`dieline-3d/src/schedule.ts`): the glue flap,
   then the body panels one by one (the far end closes onto the glue last), then
   the bottom flaps, then the top flaps. On each side: dust flaps, then flaps on
-  flaps (the tuck bends while its lid is open), then the lid. Dust flaps under a
+  flaps (the tuck bends while its lid is open), then the lid. A side with no lid
+  (FEFCO) closes its inner flaps first, then the outer ones hinged a board
+  further out, so a closed case opens top long, top short, bottom long, bottom
+  short, then the sides. Dust flaps under a
   lid, and the glue flap, fold 6° past square so the lid or the closing panel
   lands over them. Viewers start closed
   (progress 1), so opening reverses it. Body panels hinge on vertical folds,

@@ -141,6 +141,22 @@ export function foldSchedule(rig: FoldRig): FoldWindow[] {
     for (const flap of flaps) lockStage.set(flap, flap === notched ? 1 : flap === tab ? 3 : 2);
   }
 
+  /**
+   * A slotted case (FEFCO 0201) has no lid: the flaps on one side all stand
+   * alone, and the outer ones hinge one board further out than the inner ones,
+   * so they close over them. The inner flaps go in first, then the outer ones;
+   * opening, the outer flaps lift first. Flaps on one hinge line fold together.
+   */
+  const outerFlaps = new Set<number>();
+  for (const side of ["bottom", "top"] as const) {
+    const level1 = [...group.entries()].filter(([i, g]) => g.side === side && g.level === 1 && nodes[i]!.kind !== "bend").map(([i]) => i);
+    if (level1.some((i) => hasChildren.has(i) || lockStage.has(i))) continue;
+    // SVG coordinates: a top hinge further out is higher (smaller y).
+    const out = (i: number) => (side === "top" ? -1 : 1) * nodes[i]!.pivot[1];
+    const innermost = Math.min(...level1.map(out));
+    for (const i of level1) if (out(i) - innermost > 0.05) outerFlaps.add(i);
+  }
+
   const mirrored = mirrorStages();
   if (mirrored) return mirrored;
 
@@ -152,7 +168,7 @@ export function foldSchedule(rig: FoldRig): FoldWindow[] {
     if (nodes[i]!.kind === "bend") return flapStage(nodes[i]!.parent!);
     const lock = lockStage.get(i);
     if (lock) return `${g.side}:lock${lock}`;
-    if (g.level === 1) return `${g.side}:${hasChildren.has(i) ? "lid" : "dust"}`;
+    if (g.level === 1) return `${g.side}:${hasChildren.has(i) ? "lid" : outerFlaps.has(i) ? "outer" : "dust"}`;
     return `${g.side}:level${g.level}`;
   };
   for (const side of ["bottom", "top"] as const) {
@@ -164,6 +180,7 @@ export function foldSchedule(rig: FoldRig): FoldWindow[] {
       `${side}:lock3`,
       `${side}:settle`,
       `${side}:dust`,
+      `${side}:outer`,
       ...deeper.map((l) => `${side}:level${l}`),
       `${side}:lid`,
     ];

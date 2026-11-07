@@ -273,6 +273,26 @@ const TEMPLATES: Template[] = [
     bleed: 5,
   },
   {
+    slug: "fefco-0201",
+    title: "کارتن استاندارد فکو ۰۲۰۱",
+    description:
+      "کارتن فکو ۰۲۰۱ رایج‌ترین کارتن حمل و انبار در دنیاست: چهار دیواره، یک لبه‌ی اتصال کناری و چهار لبه در بالا و چهار لبه در پایین که هر کدام به اندازه‌ی نصف عرض کارتن هستند.\nلبه‌های بلند در وسط کارتن به هم می‌رسند و با چسب نواری بسته می‌شوند. چون همه‌ی برش‌ها خط صاف هستند، این کارتن کم‌هزینه‌ترین بسته‌بندی کارتنی است و برای ارسال، جابه‌جایی، انبارداری و بسته‌بندی ثانویه به کار می‌رود.\nاین کارتن معمولاً با کارتن سه‌لایه‌ی فلوت B یا E تولید می‌شود.",
+    doc: box("fefco0201", {
+      // As on the sample die: the height ruler stands on the back panel, centred
+      // on the body, and reads the typed height (the creases are a board either side).
+      rulers: [
+        ruler("widthRuler", ["@body.front.bottomLeft.x", "@body.bodyHeight * 0.25"], ["@body.front.bottomRight.x", "@body.bodyHeight * 0.25"]),
+        ruler("depthRuler", ["@body.side1.bottomLeft.x", "@body.bodyHeight * 0.75"], ["@body.side1.bottomRight.x", "@body.bodyHeight * 0.75"]),
+        ruler("heightRuler", ["@body.back.bottom.x", "(@body.bodyHeight - height) / 2"], ["@body.back.bottom.x", "(@body.bodyHeight + height) / 2"]),
+      ],
+    }),
+    size: { width: 400, length: 300, height: 300 },
+    min: { width: 100, length: 80, height: 60 },
+    max: { width: 800, length: 600, height: 800 },
+    materials: ["bFlute", "eFlute"],
+    bleed: 3,
+  },
+  {
     slug: "straight-tuck-window",
     title: "جعبه درب‌دار پنجره‌دار",
     description:
@@ -376,7 +396,10 @@ async function main() {
   const dryRun = process.argv.includes("--check");
   let failed = false;
 
-  for (const template of TEMPLATES) {
+  // `--only=slug,slug` seeds just those, so templates edited in the Studio are left alone.
+  const only = process.argv.find((a) => a.startsWith("--only="))?.slice(7).split(",");
+
+  for (const template of TEMPLATES.filter((t) => !only || only.includes(t.slug))) {
     const { document, runs, problems } = validate(template);
     console.log(`${template.slug}: ${runs} renders, ${problems.size ? "PROBLEMS" : "clean"}`);
     for (const [key, count] of problems) console.log(`   ${key}: ${count}`);

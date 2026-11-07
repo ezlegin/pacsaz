@@ -206,3 +206,43 @@ describe("presets", () => {
     expect(parseDocument(JSON.parse(JSON.stringify(rteBox)))).toMatchObject({ ok: true });
   });
 });
+
+describe("FEFCO 0201", () => {
+  // Measured from the real B-flute die in Sample.pdf: 400 × 300 × 300 on 3 mm board,
+  // joint on the front panel's outer edge. y is from the side panels' bottom crease.
+  const { right, ...rest } = presetBody("fefco0201", "body");
+  const r = render(doc({ nodes: [{ ...rest, left: right }] }), { width: 400, length: 300, height: 300, thickness: 3, bleed: 0 } as never);
+  const lines = (type: string) =>
+    r.paths.filter((p) => p.lineType === type && p.kind === "line").map((p) => (p.kind === "line" ? [...p.a, ...p.b].map((n) => +n.toFixed(2)) : []));
+  const hasLine = (type: string, a: [number, number], b: [number, number]) =>
+    lines(type).some((l) => (l[0] === a[0] && l[1] === a[1] && l[2] === b[0] && l[3] === b[1]) || (l[0] === b[0] && l[1] === b[1] && l[2] === a[0] && l[3] === a[1]));
+
+  it("renders clean", () => expect(errors(r)).toEqual([]));
+
+  it("has the sample's panels, creases and flap tips", () => {
+    // Panels 400 / 300 / 400 / 299, folds the side panels' height.
+    for (const x of [0, 400, 700, 1100]) expect(hasLine("crease", [x, 0], [x, 296])).toBe(true);
+    expect(hasLine("cut", [1399, 0], [1399, 296])).toBe(true);
+    // Side creases on the body edge, edge to edge; front and back raised one board.
+    expect(hasLine("crease", [400, 296], [700, 296])).toBe(true);
+    expect(hasLine("crease", [1100, 0], [1399, 0])).toBe(true);
+    expect(hasLine("crease", [3, 299], [397, 299])).toBe(true);
+    expect(hasLine("crease", [703, -3], [1097, -3])).toBe(true);
+    // All tips on one line: 150 from a raised crease, 153 from a side crease.
+    expect(hasLine("cut", [3, 449], [397, 449])).toBe(true);
+    expect(hasLine("cut", [1103, -153], [1396, -153])).toBe(true);
+  });
+
+  it("ends each slot in a half circle of the board's radius", () => {
+    const arcs = r.paths.filter((p) => p.kind === "arc" && p.lineType === "cut");
+    expect(arcs).toHaveLength(16);
+    for (const a of arcs) if (a.kind === "arc") expect(a.r).toBeCloseTo(3);
+    expect(arcs.filter((a) => a.kind === "arc" && Math.abs(a.c[0] - 400) < 1e-6 && Math.abs(a.c[1] - 299) < 1e-6)).toHaveLength(2);
+  });
+
+  it("has a 45 mm joint with 15° tapers along the side height", () => {
+    expect(hasLine("cut", [0, 0], [-45, 12.06])).toBe(true);
+    expect(hasLine("cut", [-45, 12.06], [-45, 283.94])).toBe(true);
+    expect(hasLine("cut", [-45, 283.94], [0, 296])).toBe(true);
+  });
+});

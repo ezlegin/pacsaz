@@ -165,18 +165,39 @@ export const slottedFlap: ComponentDef = {
   id: "lib:slottedFlap",
   name: "Slotted flap (FEFCO)",
   category: "Flaps",
-  description: "Corrugated case flap with half a slot on each side, as on FEFCO 0201.",
-  // The flap draws its own crease between the slots.
+  description: "Corrugated case flap with half a round-ended slot on each side, as on FEFCO 0201.",
+  // The flap draws its own crease: on the body's edge, or raised off it.
   edge: { hinge: "none" },
-  params: [auto("depth", "Depth"), auto("slot", "Slot width")],
+  params: [
+    auto("depth", "Depth from its crease"),
+    auto("slot", "Slot width"),
+    // The outer flaps (front and back) fold over the inner ones, so their crease
+    // sits one board further out; the tips of all flaps still line up.
+    { name: "raised", label: "Crease raised by the board (outer flap)", default: 0, min: 0, max: 1 },
+  ],
   variables: [
-    { name: "d", expr: "depth > 0 ? depth : width / 2" },
-    { name: "s", expr: "slot > 0 ? slot : max(3, 2 * thickness)" },
-    { name: "h", expr: "s / 2" },
+    // Measured from a real die: outer flaps are half the box across the opening
+    // from their crease, so the long flaps meet in the middle.
+    { name: "d", expr: "depth > 0 ? depth : min(width, length) / 2" },
+    { name: "t", expr: "max(0.3, thickness)" },
+    // A slot is two boards wide and ends in a half circle centred on the panel
+    // fold at the outer flaps' crease, so its bottom touches the inner crease.
+    { name: "r", expr: "slot > 0 ? slot / 2 : t" },
+    { name: "c", expr: "raised > 0 ? t : 0" },
+    // Every flap's tip is one board past the outer flaps' depth.
+    { name: "tip", expr: "d + t" },
+    // Where the crease meets the slot: on the straight side, or on the round end.
+    { name: "cx", expr: "c >= r ? r : sqrt(r ^ 2 - (r - c) ^ 2)" },
   ],
   nodes: [
-    path("outline", "cut", ["0", "0"], [to("h", "0"), to("h", "d"), to("edge - h", "d"), to("edge - h", "0"), to("edge", "0")]),
-    line("hinge", "crease", ["h", "0"], ["edge - h", "0"]),
+    path("outline", "cut", ["0", "0"], [
+      { type: "arc", x: "r", y: "r", radius: "r" },
+      to("r", "tip"),
+      to("edge - r", "tip"),
+      to("edge - r", "r"),
+      { type: "arc", x: "edge", y: "0", radius: "r" },
+    ]),
+    line("hinge", "crease", ["c > 0 ? cx : 0", "c"], ["c > 0 ? edge - cx : edge", "c"]),
   ],
 };
 

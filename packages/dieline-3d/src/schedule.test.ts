@@ -141,4 +141,38 @@ const plainSegs: Segment[] = [
 ];
 assert("plain deep flaps are not pressed", foldSchedule(buildFoldRig(plainSegs)).every((w) => !w.press));
 
+/*
+  A FEFCO 0201: four flaps a side, none carrying another. The long panels' flaps
+  hinge one board further out, so the short ones close first and the long ones
+  over them; bottom before top. Opening runs it back: top long, top short,
+  bottom long, bottom short, then the sides.
+*/
+{
+  // Glue x -10..0, panels 0..40 | 40..70 | 70..110 | 110..139, body y 0..30 (y down).
+  // Long panels' flaps hinge at y -1 and 31, short ones' on the body edge; all
+  // tips at y -16 and 46; slots end in a point on the short panels' crease.
+  const outline: Pt[] = [
+    [0, 0], [1, -1], [1, -16], [39, -16], [39, -1], [40, 0], [41, -1], [41, -16], [69, -16], [69, -1], [70, 0],
+    [71, -1], [71, -16], [109, -16], [109, -1], [110, 0], [111, -1], [111, -16], [138, -16], [138, -1], [139, 0],
+    [139, 30], [138, 31], [138, 46], [111, 46], [111, 31], [110, 30], [109, 31], [109, 46], [71, 46], [71, 31], [70, 30],
+    [69, 31], [69, 46], [41, 46], [41, 31], [40, 30], [39, 31], [39, 46], [1, 46], [1, 31], [0, 30], [-10, 27], [-10, 3],
+  ];
+  const fold = (a: Pt, b: Pt): Segment => ({ a, b, kind: "fold" });
+  const fr = buildFoldRig([
+    ...loop(outline),
+    ...[0, 40, 70, 110].map((x) => fold([x, 0], [x, 30])),
+    fold([1, -1], [39, -1]), fold([71, -1], [109, -1]), fold([40, 0], [70, 0]), fold([110, 0], [139, 0]),
+    fold([1, 31], [39, 31]), fold([71, 31], [109, 31]), fold([40, 30], [70, 30]), fold([110, 30], [139, 30]),
+  ]);
+  const fs = foldSchedule(fr);
+  const by = (y: number) => fr.nodes.flatMap((n, i) => (n.parent !== null && Math.abs(n.pivot[1] - y) < 0.01 && Math.abs(n.axis[0]) > Math.abs(n.axis[1]) ? [fs[i]!] : []));
+  const [topLong, topShort, bottomLong, bottomShort] = [by(-1), by(0), by(31), by(30)];
+  const body = fs.filter((_, i) => fr.nodes[i]!.parent !== null && Math.abs(fr.nodes[i]!.axis[1]) > Math.abs(fr.nodes[i]!.axis[0]));
+  const same = (ws: typeof fs) => ws.length === 2 && ws[0]!.start === ws[1]!.start;
+  assert("fefco: two flaps in each group, together", [topLong, topShort, bottomLong, bottomShort].every(same), [topLong, topShort, bottomLong, bottomShort].map((g) => g.length).join());
+  const order = [Math.max(...body.map((w) => w.end)), bottomShort[0]?.start, bottomShort[0]?.end, bottomLong[0]?.start, bottomLong[0]?.end, topShort[0]?.start, topShort[0]?.end, topLong[0]?.start].map((v) => v ?? NaN);
+  assert("fefco: sides, bottom short, bottom long, top short, top long", order.every((v, k) => k === 0 || v >= order[k - 1]! - 1e-9) && topLong[0]?.end === 1, JSON.stringify(order));
+  assert("fefco: short flaps stay square under the long ones", [...topShort, ...bottomShort].every((w) => w.angle === undefined));
+}
+
 console.log(failures === 0 ? "\nALL FOLD SCHEDULE CHECKS PASSED" : `\n${failures} FAILED`);

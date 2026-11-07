@@ -47,6 +47,11 @@ const panel = (name: string, width: Expr, top?: EdgeFeature, bottom?: EdgeFeatur
 const FACE = "max(length, width)";
 const SIDE = "min(length, width)";
 
+/** How much the FEFCO 0201's free-end panel and side creases fall short, as on the sample die. */
+const FEFCO_SHORT = "1";
+/** The FEFCO joint (glue flap) depth: 45 mm on the 300 mm high sample, 30–50 mm otherwise. */
+const FEFCO_JOINT = "clamp(height * 0.15, 30, 50)";
+
 /** A closed bottom's feature for each panel of a front, side, back, side body. */
 export function bottomFeatures(type: BottomType): (EdgeFeature | undefined)[] {
   switch (type) {
@@ -158,18 +163,25 @@ export function presetBody(id: PresetId, name: string): PanelsNode {
       };
 
     case "fefco0201": {
-      const flap = () => feature("lib:slottedFlap");
+      // Measured from a real B-flute die (400 × 300 × 300 on 3 mm board, Sample.pdf):
+      // the body is as tall as the side panels' creases, the front and back
+      // creases sit one board further out at each end, and the panel at the free
+      // end is 1 mm short so the joint closes without pushing the case out of square.
+      const inner = () => feature("lib:slottedFlap");
+      const outer = () => feature("lib:slottedFlap", { args: { raised: "1" } });
       return {
         ...base,
-        // The manufacturer's joint of a corrugated case is wider than a carton's glue flap.
-        right: feature("lib:glueFlap", { args: { depth: "max(30, height * 0.1)" } }),
+        height: `height - max(0.3, thickness) - ${FEFCO_SHORT}`,
+        // The manufacturer's joint: deeper than a carton's glue flap, 15° tapers.
+        right: feature("lib:glueFlap", { args: { depth: FEFCO_JOINT, taper: `(${FEFCO_JOINT}) * 0.26795` } }),
         panels: [
-          panel("front", FACE, flap(), flap()),
-          panel("side1", SIDE, flap(), flap()),
-          panel("back", FACE, flap(), flap()),
-          panel("side2", SIDE, flap(), flap()),
+          panel("front", FACE, outer(), outer()),
+          panel("side1", SIDE, inner(), inner()),
+          panel("back", FACE, outer(), outer()),
+          panel("side2", `${SIDE} - ${FEFCO_SHORT}`, inner(), inner()),
         ],
       };
     }
+
   }
 }

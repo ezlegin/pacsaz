@@ -208,3 +208,24 @@ describe("sheet and overall rulers", () => {
     expect(toSVG(r, { includeRulers: true, overallRulers: true })).toContain("100 mm");
   });
 });
+
+describe("bleed over narrow gaps", () => {
+  it("bridges the FEFCO slots instead of running a hairline down them", () => {
+    // 6 mm slots at a 3 mm bleed: the offsets would meet in the middle of each slot.
+    const r = render(doc({ nodes: [presetBody("fefco0201", "body")] }), { width: 400, length: 300, height: 300, thickness: 3, bleed: 3 } as never);
+    const inSlot = r.bleed.some((p) => p.kind === "line" && [p.a, p.b].some(([x, y]) => Math.abs(x - 400) < 3 && y > 0 && y < 449));
+    expect(inSlot).toBe(false);
+    // The bleed crosses the slot's mouth, a bleed past the flap tips.
+    expect(r.bleed.some((p) => p.kind === "line" && Math.abs(p.a[1] - 452) < 1e-6 && Math.abs(p.b[1] - 452) < 1e-6 && Math.min(p.a[0], p.b[0]) < 400 && Math.max(p.a[0], p.b[0]) > 400)).toBe(true);
+  });
+
+  it("keeps following a gap wider than the threshold", () => {
+    // Two flaps 30 mm apart on one strip: the bleed still goes down between them.
+    const comb: Node = {
+      id: "c", name: "c", kind: "path", lineType: "cut", closed: true, start: { x: "0", y: "0" },
+      segments: [{ type: "to", x: "100", y: "0" }, { type: "to", x: "100", y: "80" }, { type: "to", x: "65", y: "80" }, { type: "to", x: "65", y: "20" }, { type: "to", x: "35", y: "20" }, { type: "to", x: "35", y: "80" }, { type: "to", x: "0", y: "80" }],
+    };
+    const r = renderNodes([comb], { bleed: 3 });
+    expect(r.bleed.some((p) => p.kind === "line" && Math.abs(p.a[1] - 23) < 1e-6 && Math.abs(p.b[1] - 23) < 1e-6)).toBe(true);
+  });
+});
