@@ -20,6 +20,12 @@ import type { FoldRig } from "./types";
  * instead of cutting through each other: the notched flap outside, the tab flap on
  * it, the side flaps within. The flaps' bend lines only identify the lock.
  *
+ * A gable top (flat roofs, a handle standing on them, end gussets leaning in
+ * over the roofs to lock under the handle's ears) closes: handles up, roofs
+ * pressed a little past flat, gussets in, then the roofs ease back so the
+ * ears catch in the gussets' slits. Opening is a person's order: push the
+ * roofs in to free the lock, open the gussets, then the roofs.
+ *
  * Viewers start closed, so dragging the slider back reverses this: the lid
  * opens, the tuck straightens, the dust flaps open, the bottom, then the sides.
  *
@@ -54,6 +60,10 @@ const LOCK_PRESS = (20 * Math.PI) / 180;
 /** How many board thicknesses an ear sits in from the wall edge: into the gap of a double wall. */
 const EAR_LAYER = 1.5;
 const LOCK_LAYER: Record<1 | 2 | 3, number> = { 1: 0, 2: 2, 3: 1 };
+/** How far past flat a gable's roofs are pushed in while its gussets go in. */
+const GABLE_PRESS = (12 * Math.PI) / 180;
+/** A lone flap that closes this far short of square leans over the lids instead of under them. */
+const CAP_BELOW = (75 * Math.PI) / 180;
 
 export function foldSchedule(rig: FoldRig): FoldWindow[] {
   const nodes = rig.nodes;
@@ -157,6 +167,19 @@ export function foldSchedule(rig: FoldRig): FoldWindow[] {
     for (const i of level1) if (out(i) - innermost > 0.05) outerFlaps.add(i);
   }
 
+  /**
+   * Gussets: lone first-level flaps that close well short of square on a side
+   * with a lid. They lean in over the closed lids (a gable's ends), so they go
+   * after them, and the lids are held pressed past their angle until they are in.
+   */
+  const capFlaps = new Set<number>();
+  for (const side of ["bottom", "top"] as const) {
+    const level1 = [...group.entries()].filter(([i, g]) => g.side === side && g.level === 1 && nodes[i]!.kind !== "bend").map(([i]) => i);
+    if (!level1.some((i) => hasChildren.has(i))) continue;
+    for (const i of level1) if (!hasChildren.has(i) && !lockStage.has(i) && nodes[i]!.angle < CAP_BELOW) capFlaps.add(i);
+  }
+  const capped = new Set([...capFlaps].map((i) => group.get(i)!.side));
+
   const mirrored = mirrorStages();
   if (mirrored) return mirrored;
 
@@ -168,6 +191,7 @@ export function foldSchedule(rig: FoldRig): FoldWindow[] {
     if (nodes[i]!.kind === "bend") return flapStage(nodes[i]!.parent!);
     const lock = lockStage.get(i);
     if (lock) return `${g.side}:lock${lock}`;
+    if (capFlaps.has(i)) return `${g.side}:cap`;
     if (g.level === 1) return `${g.side}:${hasChildren.has(i) ? "lid" : outerFlaps.has(i) ? "outer" : "dust"}`;
     return `${g.side}:level${g.level}`;
   };
@@ -183,10 +207,13 @@ export function foldSchedule(rig: FoldRig): FoldWindow[] {
       `${side}:outer`,
       ...deeper.map((l) => `${side}:level${l}`),
       `${side}:lid`,
+      `${side}:cap`,
+      `${side}:latch`,
     ];
     const locked = mine.some(([i]) => lockStage.has(i));
     for (const key of keys) {
-      if (mine.some(([i]) => flapStage(i) === key) || (locked && key === `${side}:settle`)) stages.push(key);
+      const filler = (locked && key === `${side}:settle`) || (capped.has(side) && key === `${side}:latch`);
+      if (mine.some(([i]) => flapStage(i) === key) || filler) stages.push(key);
     }
   }
 
@@ -268,7 +295,7 @@ export function foldSchedule(rig: FoldRig): FoldWindow[] {
     if (node.parent === null) return ALWAYS;
     if (body.has(i)) {
       const window = windowOf(`panel:${i}`);
-      return i === glue && Math.abs(node.angle - SQUARE) < 1e-6 ? { ...window, angle: node.angle + TUCK_IN } : window;
+      return i === glue && !node.authored && Math.abs(node.angle - SQUARE) < 1e-6 ? { ...window, angle: node.angle + TUCK_IN } : window;
     }
     const g = group.get(i);
     if (!g) return ALWAYS;
@@ -282,10 +309,23 @@ export function foldSchedule(rig: FoldRig): FoldWindow[] {
         press: { angle: node.angle + LOCK_PRESS, start: settle.start, end: settle.end, layer: LOCK_LAYER[lock] },
       };
     }
+    // A gable: the roofs close past flat and hold there while the gussets go in,
+    // then ease back to lock. Their handles fold back up as far meanwhile (a
+    // handle folds the other way from its roof, so further, not less), and stay
+    // upright: nothing above the roofs moves until the roofs themselves open.
+    if (capped.has(g.side) && !capFlaps.has(i)) {
+      const latch = windowOf(`${g.side}:latch`);
+      const lid = g.level === 1 && hasChildren.has(i);
+      const onLid = g.level === 2 && group.get(node.parent!)?.level === 1 && hasChildren.has(node.parent!);
+      if (lid || onLid) {
+        const angle = node.angle + GABLE_PRESS;
+        return { ...window, press: { angle, start: latch.start, end: latch.end, layer: 0 } };
+      }
+    }
     // Only an untouched square fold is deepened; an authored angle is kept.
     // Dust flaps under a lid, and a tuck on its lid, go a little past square so
     // the lid lands over the dust flaps and the tuck slides inside the box.
-    const square = Math.abs(node.angle - SQUARE) < 1e-6;
+    const square = !node.authored && Math.abs(node.angle - SQUARE) < 1e-6;
     const dust = flapStage(i).endsWith(":dust") && lidOn.has(g.side);
     // A lid carrying flaps of its own is not a tuck: it closes square.
     return square && (dust || (g.level > 1 && !hasChildren.has(i))) ? { ...window, angle: node.angle + TUCK_IN } : window;

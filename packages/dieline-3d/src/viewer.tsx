@@ -143,7 +143,15 @@ export const DielineViewer = ({
       }
 
       const config = parseFoldConfig(foldConfig);
-      const next = buildFoldRig(segments, config, extractWindows(svg));
+      const built = buildFoldRig(segments, config, extractWindows(svg));
+      // The flat pattern is the printed side, as the artwork placer shows it, so
+      // the sheet has to fold away from that side. The rig folds the other way,
+      // which puts the print on the inside and shows its mirror image on the
+      // outside. Same flip as `FoldStage`.
+      const next: FoldRig = {
+        ...built,
+        nodes: built.nodes.map((node) => ({ ...node, sign: (node.sign === 1 ? -1 : 1) as 1 | -1 })),
+      };
       if (next.nodes.length === 0) {
         return { rig: null, reason: "no-geometry" as const };
       }

@@ -217,7 +217,7 @@ const DielinePreview3D = ({
 
       {/* ----------------------------- split view ------------------------------ */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="gap-0 p-0 sm:max-w-6xl">
+        <DialogContent className="gap-0 p-0 sm:max-w-[min(96vw,100rem)]">
           <DialogHeader className="border-b px-5 py-4">
             <DialogTitle>نمای سه‌بعدی</DialogTitle>
             <DialogDescription>
@@ -231,7 +231,7 @@ const DielinePreview3D = ({
             tinted differently so the eye separates "what it looks like" from
             "what goes on it".
           */}
-          <div className="grid gap-3 p-3 lg:grid-cols-[20rem_minmax(0,1fr)]">
+          <div className="grid gap-3 p-3 lg:grid-cols-[minmax(24rem,38%)_minmax(0,1fr)]">
             {/* --------------------------- artwork ----------------------------- */}
             <div className="flex min-h-0 flex-col gap-3 overflow-y-auto rounded-xl border bg-muted/50 p-3">
               <div>
@@ -367,7 +367,7 @@ const DielinePreview3D = ({
                 watermark={watermark}
                 renderEmpty={emptyMessage}
                 onModelInfo={(info) => setHasHinges(info.hasHinges)}
-                className="h-[58vh] w-full"
+                className="h-[72vh] w-full"
               />
 
               {controls()}

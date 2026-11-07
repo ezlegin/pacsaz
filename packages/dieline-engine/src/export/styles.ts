@@ -37,6 +37,21 @@ export const DXF_LAYERS: Record<Exclude<LineType, "guide" | "bend">, string> = {
 };
 
 /**
+ * AutoCAD Color Index per DXF layer, matching `LINE_STYLES` as closely as the
+ * palette allows, so any DXF viewer tells the lines apart without reading layer
+ * names: 5 blue, 1 red, 6 magenta, 30 orange, 4 cyan, 3 green.
+ */
+export const DXF_LAYER_COLORS: Record<string, number> = {
+  CUT: 5,
+  CREASE: 1,
+  REVERSE_CREASE: 1,
+  PERFORATION: 6,
+  CUT_CREASE: 30,
+  HALF_CUT: 4,
+  GLUE: 3,
+};
+
+/**
  * Glue areas are filled with fine dark diagonal hatching, rising to the right,
  * as on a printed drawing. Sizes in millimetres of the drawing.
  */

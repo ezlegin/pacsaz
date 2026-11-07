@@ -124,11 +124,14 @@ export function presetBody(id: PresetId, name: string): PanelsNode {
     case "gableHandle":
       return {
         ...base,
+        // As on the sample die: a deep glue flap (45 mm on a 152 mm side), side
+        // lock flaps with straight tabs, and a grip flap in the back handle's slot.
+        right: feature("lib:glueFlap", { args: { depth: "clamp(min(length, width) * 0.3, 15, 50)" } }),
         panels: [
           panel("front", FACE, feature("lib:gableRoof"), feature("lib:snapLockNotched")),
-          panel("side1", SIDE, feature("lib:gableGusset"), feature("lib:snapLockSide", { flip: true, args: { wedge: "-1" } })),
-          panel("back", FACE, feature("lib:gableRoof"), feature("lib:snapLockTab")),
-          panel("side2", SIDE, feature("lib:gableGusset"), feature("lib:snapLockSide", { args: { wedge: "-1" } })),
+          panel("side1", SIDE, feature("lib:gableGusset"), feature("lib:snapLockSide", { flip: true })),
+          panel("back", FACE, feature("lib:gableRoof", { args: { grip: "1" } }), feature("lib:snapLockTab")),
+          panel("side2", SIDE, feature("lib:gableGusset"), feature("lib:snapLockSide")),
         ],
       };
 

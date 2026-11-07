@@ -249,8 +249,17 @@ function rulerSVG(r: RulerInfo, color: string, fontSize: number, base: number, n
   const mid = flip(scale(add(a, b), 0.5)).split(" ");
   // On screen, the editor's type: system UI, medium weight, a 5 px halo at 12 px.
   const face = nonScaling ? `font-family="ui-sans-serif, system-ui, sans-serif" font-weight="500"` : `font-family="sans-serif"`;
-  const text = (attrs: string) =>
-    `<text ${attrs} fill="${color}" font-size="${fmt(fontSize)}" ${face} text-anchor="middle" dominant-baseline="central" stroke="#ffffff" stroke-width="${fmt(fontSize * (nonScaling ? 5 / 12 : 0.5))}" paint-order="stroke">${rulerLabel(r)}</text>`;
+  // The halo is a separate white copy drawn first, not `paint-order="stroke"`:
+  // PDF converters and Illustrator ignore paint-order and paint the white stroke
+  // over the fill, hiding the label.
+  const text = (attrs: string) => {
+    const common = `${attrs} font-size="${fmt(fontSize)}" ${face} text-anchor="middle" dominant-baseline="central"`;
+    const label = rulerLabel(r);
+    return (
+      `<text ${common} fill="#ffffff" stroke="#ffffff" stroke-width="${fmt(fontSize * (nonScaling ? 5 / 12 : 0.5))}" stroke-linejoin="round">${label}</text>` +
+      `<text ${common} fill="${color}">${label}</text>`
+    );
+  };
 
   let marks: string;
   if (nonScaling) {
@@ -276,7 +285,7 @@ function rulerSVG(r: RulerInfo, color: string, fontSize: number, base: number, n
   }
 
   return (
-    `<g data-ruler-id="${escapeAttr(r.id)}" data-ruler-length="${fmt(distance(a, b))}">` +
+    `<g data-ruler-id="${escapeAttr(r.id)}"${r.dimension ? ` data-ruler-dim="${r.dimension}"` : ""} data-ruler-length="${fmt(distance(a, b))}">` +
     `<path d="${prims.map(primToD).join("")}" fill="none" stroke="${color}"${nonScaling ? screenStroke(base * 0.6) : ` stroke-width="${fmt(base * 0.6)}"`}/>` +
     marks +
     `</g>`

@@ -8,6 +8,18 @@ import { Spinner } from "@repo/ui/components/spinner";
 import { useEffect, useState } from "react";
 import { clamp } from "@repo/lib/utils/clamp";
 
+/**
+ * Marks which size the visitor is pointing at or typing in, on the page root,
+ * so every drawing on the page lights up the rulers that size changes
+ * (`data-ruler-dim`, styled in globals.css). An attribute rather than React
+ * state: the preview is server-built SVG markup, and CSS reaches into it freely.
+ */
+function markDimension(dimKey: DimensionKey | null) {
+  const root = document.documentElement;
+  if (dimKey) root.dataset.dimFocus = dimKey;
+  else delete root.dataset.dimFocus;
+}
+
 export function DimensionInput({
   label,
   min,
@@ -60,12 +72,21 @@ export function DimensionInput({
   if (value === 0) return null;
 
   return (
-    <div className="space-y-1">
+    <div
+      className="space-y-1"
+      onMouseEnter={() => markDimension(dimKey)}
+      // Leaving keeps the mark while the field is still being typed in.
+      onMouseLeave={(e) => markDimension(e.currentTarget.contains(document.activeElement) ? dimKey : null)}
+      onFocus={() => markDimension(dimKey)}
+      onBlur={() => markDimension(null)}
+    >
       <p className="text-xs text-muted-foreground">{label}</p>
       <div className="relative">
         <Input
           disabled={isRendering && dimKey === blurredInput}
           dir="ltr"
+          // Room for the "mm" suffix, so a narrow field never puts it over the number.
+          className="pe-8"
           value={localValue ?? 0}
           onFocus={(e) => e.target.select()}
           onChange={(e) => setLocalValue(Number(e.target.value))}

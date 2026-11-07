@@ -150,6 +150,7 @@ export const applyFoldOverrides = (
       sign,
       valley: override.direction === "in",
       angle: degreesToRadians(override.angle),
+      authored: true,
     };
   });
 };

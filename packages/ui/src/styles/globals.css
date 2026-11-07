@@ -326,3 +326,34 @@ html > body[data-scroll-locked] {
     display: none !important;
   }
 }
+
+/*
+ * Pointing at a size field (length, width, height) lights up the rulers that
+ * field changes in every drawing on the page. The field marks the page root
+ * with `data-dim-focus`; the engine tags each ruler with `data-ruler-dim`.
+ * Only the ruler's own colour changes: its label's white halo stays white.
+ */
+[data-ruler-dim] path,
+[data-ruler-dim] text {
+  transition: stroke 150ms, fill 150ms;
+}
+:root[data-dim-focus="width"] [data-ruler-dim="width"],
+:root[data-dim-focus="length"] [data-ruler-dim="length"],
+:root[data-dim-focus="height"] [data-ruler-dim="height"] {
+  filter: drop-shadow(0 0 3px rgb(124 58 237 / 0.45));
+}
+:root[data-dim-focus="width"] [data-ruler-dim="width"] path[fill="none"],
+:root[data-dim-focus="length"] [data-ruler-dim="length"] path[fill="none"],
+:root[data-dim-focus="height"] [data-ruler-dim="height"] path[fill="none"] {
+  stroke: #7c3aed;
+}
+:root[data-dim-focus="width"] [data-ruler-dim="width"] :is(path:not([fill="none"]), text:last-of-type),
+:root[data-dim-focus="length"] [data-ruler-dim="length"] :is(path:not([fill="none"]), text:last-of-type),
+:root[data-dim-focus="height"] [data-ruler-dim="height"] :is(path:not([fill="none"]), text:last-of-type) {
+  fill: #7c3aed;
+}
+:root[data-dim-focus="width"] [data-ruler-dim="width"] text,
+:root[data-dim-focus="length"] [data-ruler-dim="length"] text,
+:root[data-dim-focus="height"] [data-ruler-dim="height"] text {
+  font-weight: 700;
+}

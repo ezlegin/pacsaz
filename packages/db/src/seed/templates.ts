@@ -1,6 +1,7 @@
 import { checkDieline } from "../../../dieline-engine/src/checks/checks";
 import { render } from "../../../dieline-engine/src/eval/render";
 import { toFoldSVG } from "../../../dieline-engine/src/export/fold";
+import { GABLE_GUSSET_LEAN } from "../../../dieline-engine/src/library/components";
 import { presetBody } from "../../../dieline-engine/src/library/presets";
 import { parseDocument } from "../../../dieline-engine/src/spec/schema";
 import { emptyDocument, type DielineDocument, type Node, type PanelsNode, type Ruler } from "../../../dieline-engine/src/spec/types";
@@ -356,9 +357,36 @@ function withFolds(template: Template, doc: DielineDocument): DielineDocument {
   });
 
   if (template.slug === "gable-handle-box") {
-    // The handle flaps stand up: they fold away from the box, the other way from the roofs.
-    const handles = [...faces].sort((a, b) => a.node.face.centroid[1] - b.node.face.centroid[1]).slice(0, 2);
-    return { ...doc, folds: { faceCount: rig.stats.faceCount, overrides: handles.map((f) => override(f, "out", 90)) } };
+    // The roofs fold flat and meet in the middle, the handle flaps fold back up
+    // to stand back to back, and the gussets lean in over the roofs until their
+    // slits catch the handles' ears; the grip flap stays in its handle. Faces are told apart by where they hang
+    // in the fold tree: everything above the body's top (SVG y grows downwards,
+    // the root is a body panel) is the top; a roof hangs off a body panel and
+    // carries a handle, a gusset hangs off a body panel and carries nothing.
+    const root = rig.nodes.find((n) => n.parent === null && !n.isHole)!;
+    const top = faces.filter(({ node }) => node.face.centroid[1] < root.face.centroid[1] - height / 2);
+    const inTop = new Set(top.map((f) => f.faceIndex));
+    const onBody = top.filter((f) => f.node.parent !== null && !inTop.has(f.node.parent));
+    const roofs = onBody.filter((f) => top.some((c) => c.node.parent === f.faceIndex));
+    const gussets = onBody.filter((f) => !roofs.includes(f));
+    const handles = top.filter((f) => roofs.some((r) => r.faceIndex === f.node.parent));
+    const grips = top.filter((f) => handles.some((h) => h.faceIndex === f.node.parent));
+    // The rig may read the grip flap as part of the slot's opening; then there is no grip face.
+    if (roofs.length !== 2 || handles.length !== 2 || gussets.length !== 2) {
+      throw new Error(`gable-handle-box: unexpected fold tree (${roofs.length} roofs, ${handles.length} handles, ${gussets.length} gussets)`);
+    }
+    return {
+      ...doc,
+      folds: {
+        faceCount: rig.stats.faceCount,
+        overrides: [
+          ...roofs.map((f) => override(f, "in", 90)),
+          ...handles.map((f) => override(f, "out", 90)),
+          ...gussets.map((f) => override(f, "in", GABLE_GUSSET_LEAN)),
+          ...grips.map((f) => override(f, "in", 0)),
+        ],
+      },
+    };
   }
 
   if (template.slug === "keyboard-box") {

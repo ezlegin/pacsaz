@@ -46,8 +46,9 @@ export function Section({
                 <Info className="size-3.5" />
               </button>
             </DialogTrigger>
-            <DialogContent dir="rtl" showCloseButton={false}>
-              <DialogHeader dir="rtl">{infoContent}</DialogHeader>
+            {/* Wide enough for the guide's figure, scrolling on short screens. */}
+            <DialogContent dir="rtl" showCloseButton={false} className="max-h-[88vh] overflow-y-auto sm:max-w-lg">
+              <DialogHeader dir="rtl" className="text-right">{infoContent}</DialogHeader>
             </DialogContent>
           </Dialog>
         </div>

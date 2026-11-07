@@ -65,6 +65,29 @@ describe("export", () => {
     expect(dxf).toContain("CUT");
     expect(dxf).toContain("CREASE");
     expect(dxf).not.toContain("GUIDE");
+    // Bleed is a design aid; the die maker must never get it.
+    expect(dxf).not.toContain("BLEED");
+  });
+
+  it("colours DXF layers blue for cut and red for crease", () => {
+    const dxf = toDXF(result).split(/\r?\n/).map((l) => l.trim());
+    // A LAYER table entry: 2 <name> ... 62 <colour>.
+    const colourOf = (layer: string) => {
+      const at = dxf.findIndex((l, i) => l === layer && dxf[i - 1] === "2" && dxf.slice(i - 6, i).includes("LAYER"));
+      const code = dxf.indexOf("62", at);
+      return Number(dxf[code + 1]);
+    };
+    expect(colourOf("CUT")).toBe(5);
+    expect(colourOf("CREASE")).toBe(1);
+  });
+
+  it("writes glue before cut and crease, so they draw over its outline", () => {
+    const dxf = toDXF(render(rteBox, INPUTS));
+    const entities = dxf.slice(dxf.indexOf("ENTITIES"));
+    const firstGlue = entities.indexOf("\nGLUE");
+    expect(firstGlue).toBeGreaterThan(-1);
+    expect(firstGlue).toBeLessThan(entities.indexOf("\nCUT"));
+    expect(firstGlue).toBeLessThan(entities.indexOf("\nCREASE"));
   });
 });
 
@@ -96,7 +119,10 @@ describe("documents", () => {
     const size = { width: 100, length: 50, height: 80 };
 
     const all = (d: number) => ({ width: d, length: d, height: d });
-    expect(typedRulers(result, size, all(0))).toBe(result.rulers);
+    // Nothing moves at the crease size, but the ruler still says what it measures.
+    const [same, other] = typedRulers(result, size, all(0));
+    expect(same).toEqual({ ...result.rulers[0], dimension: "width" });
+    expect(other).toBe(result.rulers[1]);
     const [inner, flap] = typedRulers(result, size, all(4));
     expect(inner).toMatchObject({ from: [1.5, 0], to: [98.5, 0], value: 96 });
     expect(flap).toEqual(result.rulers[1]);

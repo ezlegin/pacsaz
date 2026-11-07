@@ -72,6 +72,8 @@ export type RulerInfo = {
   to: Pt;
   offset: number;
   value: number;
+  /** The box dimension this ruler measures, when it measures one (`typedRulers`). */
+  dimension?: "width" | "length" | "height";
 };
 
 export type RenderResult = {

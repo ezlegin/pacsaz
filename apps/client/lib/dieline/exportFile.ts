@@ -20,7 +20,7 @@ export async function buildDielineFile(
   info: { slug: string; bleed: number },
 ): Promise<{ base64: string; mime: string }> {
   if (format === "dxf") {
-    return { base64: Buffer.from(toDXF(result, { includeBleed: true }), "utf8").toString("base64"), mime: "application/dxf" };
+    return { base64: Buffer.from(toDXF(result), "utf8").toString("base64"), mime: "application/dxf" };
   }
 
   // Illustrator opens PDFs directly, so "ai" is the same file with its own name.

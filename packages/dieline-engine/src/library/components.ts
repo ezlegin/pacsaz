@@ -448,9 +448,26 @@ export const autoLockSide: ComponentDef = {
 };
 
 /**
- * The gable top: on each wide panel a roof half as deep as the box, so the two
- * meet in the middle, then a handle flap that stands up, doubled with its opposite.
- * Rounded ears and a slot for the hand finish the flap.
+ * How a gable carton closes: the roofs fold flat over the box and meet in the
+ * middle, the handle flaps fold back up and stand back to back, and each
+ * gusset leans in over the roofs like a cone until the top of its slit catches
+ * the notch under the handles' ears. The ear, the gusset's peak and its slit
+ * are all in proportion to the box depth, so that lean is the same at every
+ * size: the slit's top sits an ear's width in from the end wall.
+ */
+const GABLE_EAR = 0.36; // Ear width, as a share of the handle flap's height (half the depth).
+const GABLE_PEAK = 0.63; // Gusset peak (sharp, before rounding), as a share of the depth.
+const GABLE_SLIT = 0.58; // Slit length, as a share of the peak.
+/** How far each gusset leans in from upright, in degrees. */
+export const GABLE_GUSSET_LEAN = (Math.asin((GABLE_EAR * 0.5) / (GABLE_SLIT * GABLE_PEAK)) * 180) / Math.PI;
+
+/**
+ * The gable top, measured from a sample die: on each wide panel a roof half as
+ * deep as the box, then a handle flap as deep again with a hand slot. Closed,
+ * the roofs lie flat and meet in the middle, and the handle flaps stand up back
+ * to back. Rounded ears at the top corners, past a notch, catch in the gussets' slits.
+ * `grip` makes the slot a flap folding in on a crease along its top, which
+ * pads the hand (the sample has it on the back panel only).
  */
 export const gableRoof: ComponentDef = {
   id: "lib:gableRoof",
@@ -458,21 +475,27 @@ export const gableRoof: ComponentDef = {
   category: "Closures",
   description: "Wide panel of a gable carton: a roof to the middle of the box and a handle flap with a hand slot.",
   edge: { hinge: "crease" },
-  params: [auto("roof", "Roof depth"), auto("handle", "Handle flap height")],
+  params: [
+    auto("roof", "Roof depth"),
+    auto("handle", "Handle flap height"),
+    { name: "grip", label: "Slot folds in as a grip flap (1) or is cut out (0)", default: 0, min: 0, max: 1 },
+  ],
   variables: [
     { name: "S", expr: "min(length, width)" },
     { name: "r", expr: "roof > 0 ? roof : S / 2" },
     { name: "h", expr: "handle > 0 ? handle : S / 2" },
-    // Rounded ears at the ends, then a step up to the flat top.
-    { name: "a", expr: "min(edge * 0.1, h * 0.4)" },
-    { name: "ey", expr: "r + h * 0.72" },
-    { name: "g", expr: "h * 0.22" },
+    // A round ear at each end, a notch below it, then a slope up to the flat top.
+    { name: "a", expr: `min(edge * 0.1, h * ${GABLE_EAR})` },
+    { name: "ey", expr: "r + h * 0.62" },
+    { name: "g", expr: "h * 0.24" },
     // The hand slot, in the middle of the flap's width.
     { name: "cx", expr: "edge / 2" },
-    { name: "sh", expr: "h * 0.36" },
+    { name: "sh", expr: "h * 0.4" },
     { name: "sw", expr: "max(edge * 0.3, sh * 2.2)" },
     { name: "sr", expr: "sh / 2" },
-    { name: "sy", expr: "r + h * 0.3" },
+    { name: "sy", expr: "r + h * 0.29" },
+    { name: "sl", expr: "cx - sw / 2 + sr" },
+    { name: "sR", expr: "cx + sw / 2 - sr" },
   ],
   nodes: [
     path("outline", "cut", ["0", "0"], [
@@ -485,18 +508,30 @@ export const gableRoof: ComponentDef = {
       to("edge", "0"),
     ]),
     line("roofFold", "crease", ["0", "r"], ["edge", "r"]),
-    path(
-      "handSlot",
-      "cut",
-      ["cx - sw / 2 + sr", "sy"],
-      [
-        to("cx + sw / 2 - sr", "sy"),
-        { type: "arc", x: "cx + sw / 2 - sr", y: "sy + sh", radius: "sr" },
-        to("cx - sw / 2 + sr", "sy + sh"),
-        { type: "arc", x: "cx - sw / 2 + sr", y: "sy", radius: "sr" },
-      ],
-      true,
-    ),
+    {
+      ...path(
+        "handSlot",
+        "cut",
+        ["sl", "sy"],
+        [
+          to("sR", "sy"),
+          { type: "arc", x: "sR", y: "sy + sh", radius: "sr" },
+          to("sl", "sy + sh"),
+          { type: "arc", x: "sl", y: "sy", radius: "sr" },
+        ],
+        true,
+      ),
+      rules: [{ id: "grip", when: "grip", action: "hide" }],
+    },
+    {
+      ...path("gripCut", "cut", ["sl", "sy + sh"], [
+        { type: "arc", x: "sl", y: "sy", radius: "sr" },
+        to("sR", "sy"),
+        { type: "arc", x: "sR", y: "sy + sh", radius: "sr" },
+      ]),
+      rules: [{ id: "cutOut", when: "!grip", action: "hide" }],
+    },
+    { ...line("gripFold", "crease", ["sl", "sy + sh"], ["sR", "sy + sh"]), rules: [{ id: "cutOut", when: "!grip", action: "hide" }] },
   ],
 };
 
@@ -509,11 +544,13 @@ export const gableGusset: ComponentDef = {
   edge: { hinge: "crease" },
   params: [auto("peak", "Height")],
   variables: [
-    { name: "a", expr: "peak > 0 ? peak : edge * 0.62" },
-    { name: "rd", expr: "edge * 0.12" },
+    // As on the sample die: sides at about 52°, meeting 0.63 of the width up,
+    // the tip rounded off generously.
+    { name: "a", expr: `peak > 0 ? peak : edge * ${GABLE_PEAK}` },
+    { name: "rd", expr: "edge * 0.18" },
     { name: "cx", expr: "edge / 2" },
     { name: "sw", expr: "max(1.5, thickness * 2)" },
-    { name: "sl", expr: "a * 0.62" },
+    { name: "sl", expr: `a * ${GABLE_SLIT}` },
   ],
   nodes: [
     path("outline", "cut", ["0", "0"], [to("cx", "a", "rd"), to("edge", "0")]),

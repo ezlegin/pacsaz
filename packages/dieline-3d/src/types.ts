@@ -60,6 +60,12 @@ export type RigNode = {
   sign: 1 | -1;
   angle: number;
   /**
+   * True when the angle comes from an authored fold override. The fold
+   * schedule then uses it exactly: it never deepens an authored 90° the way it
+   * tucks an untouched square flap a few degrees past.
+   */
+  authored?: boolean;
+  /**
    * True when the panel folds toward the viewer of the flat pattern (+Z), which
    * is what a person calls folding "in". Inference always aims at +Z, so the
    * default is `true`; an authored override can make a crease a mountain.

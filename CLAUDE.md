@@ -155,6 +155,17 @@ Phases (each ends with a commit message for the user to commit):
   the fold, the dust flap set-back; the relief notch is as wide as the board (radius thickness / 2), at least 0.5 mm. The glue flap runs the full panel height, its ends on the body edges. The 3D board is textured: paper grain, or kraft with flutes. Folds stop at windows: `render` trims any fold inside a hole (`trimFoldsAtHoles`) and reports the length as `foldsCut`; a customer change that cuts more fold than the template is rejected by `verifyCustomization`. The 3D fold SVG still gets the whole fold (`foldsInHoles`) plus `window` outlines; the rig drops faces inside a window (`extractWindows` → `buildFoldRig(segments, config, windows)`). New presets must render without diagnostics and keep the cut
   outline closed at several sizes (see `panels.test.ts`).
 
+- The gable handle carton is measured from a Pacdora sample die (302 × 152 × 182):
+  roof and handle flap each half the box deep, gusset sides at about 52° with a
+  generously rounded tip, a 45 mm glue flap, straight side lock tabs, and a grip
+  flap (`lib:gableRoof` `grip`) folding in on a crease in the back handle's slot.
+  Closed (the owner's description): the roofs fold flat 90° in and meet in the
+  middle, the handle flaps fold 90° out to stand back to back, and the gussets
+  lean in like a cone (`GABLE_GUSSET_LEAN`, ≈ 30°) until the top of each slit
+  catches the notch under the handles' ears. Ear, peak and slit are ratios of
+  the depth, so the lean holds at every size; the seed stores these folds.
+  Authored fold angles are used exactly (`RigNode.authored`): the schedule only
+  tucks an untouched square flap 6° past.
 - Starter templates are in `packages/db/src/seed/templates.ts`
   (`pnpm --filter @repo/db seed:templates`, `-- --check` to only validate). Every
   corner of a template's size range must render clean on every material, or it is
@@ -169,7 +180,9 @@ Phases (each ends with a commit message for the user to commit):
   issues** (`checks.test.ts`); it already caught dust flaps running down the
   lid's cut line.
 - `addNicks(paths, { width, spacing })` splits cut lines for bridges; `toSVG` /
-  `toDXF` take `nicks` too. `toFoldSVG(result)` writes the `trim`/`fold`/`perf`
+  `toDXF` take `nicks` too. DXF never holds bleed; each layer has its ACI
+  colour (`DXF_LAYER_COLORS`) and GLUE is written first so cut and crease draw
+  over it. `toFoldSVG(result)` writes the `trim`/`fold`/`perf`
   SVG that `@repo/dieline-3d` folds.
 - In the Studio, `useAnalysis()` (`editor/src/state/analysis.ts`) renders the
   template at `sizeRange.min/max` (ghosts) and runs the checks at all three
@@ -177,7 +190,7 @@ Phases (each ends with a commit message for the user to commit):
 - Polygons can be sized by side (`sizeBy: "side"`); the Triangle tool draws
   three-sided polygons that way.
 - Bleed (`geometry/bleed.ts`) is the outermost closed cut loop offset outward
-  with round corners, after narrow notches (gaps up to `bridgeGap`: 10 mm, or 3 × bleed) are closed across their mouth so no hairline runs down a slot; it does not use makerjs (too slow, and wrong on narrow
+  with round corners, after narrow notches (gaps up to `bridgeGap`: 10 mm, or 3 × bleed) are closed across their mouth so no hairline runs down a slot (any notch at least half the bleed deep; each bridge then slides on to the curve's tangent and the next outer corner, so a handle's ear bleeds as one straight line to the top); it does not use makerjs (too slow, and wrong on narrow
   notches). `export.test.ts` checks it on every preset at several distances.
 
 ### 3D folding

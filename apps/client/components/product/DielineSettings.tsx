@@ -69,7 +69,7 @@ export default function DielineSettings({ slug, isRendering, user, problems }: P
       {/* -------------------------------- body ------------------------------- */}
       <div className="scrollbar-soft min-h-0 flex-1 space-y-5 overflow-y-auto p-5">
         <Section title="ابعاد" infoContent={<DimensionGuide />}>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-2">
             {DIMENSIONS.map(({ key, label }) => (
               <DimensionInput
                 key={key}
@@ -185,7 +185,11 @@ export default function DielineSettings({ slug, isRendering, user, problems }: P
         >
           <ThicknessInput isRendering={isRendering} isPremium={isPremium} />
         </Section>
+      </div>
 
+      {/* ------------------------------- footer ------------------------------ */}
+      <div className="shrink-0 space-y-4 border-t bg-muted/20 p-4">
+        {/* The format sits by the button it sets, not among the drawing settings. */}
         <Section title="فرمت فایل" infoContent={<FormatGuide />}>
           <ToggleGroup
             type="single"
@@ -222,10 +226,7 @@ export default function DielineSettings({ slug, isRendering, user, problems }: P
             </div>
           </ToggleGroup>
         </Section>
-      </div>
 
-      {/* ------------------------------- footer ------------------------------ */}
-      <div className="shrink-0 border-t bg-muted/20 p-4">
         <DielineDownloadButton
           isRendering={isRendering}
           slug={slug}

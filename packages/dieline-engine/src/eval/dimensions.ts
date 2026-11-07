@@ -33,7 +33,6 @@ export function resolveDimensions(size: Dimensions, type: DimensionType, thickne
  * be seen, not to scale, because the real difference can be too small to notice.
  */
 export function typedRulers(result: RenderResult, size: Dimensions, delta: Dimensions): RulerInfo[] {
-  if (!delta.width && !delta.length && !delta.height) return result.rulers;
   const b = result.bounds;
   const nudge = (b ? Math.max(b.maxX - b.minX, b.maxY - b.minY) : 100) * 0.0075;
   return result.rulers.map((r) => {
@@ -45,6 +44,8 @@ export function typedRulers(result: RenderResult, size: Dimensions, delta: Dimen
     const order = Math.abs(dy) > Math.abs(dx) ? [...keys].reverse() : keys;
     const key = order.find((k) => Math.abs(size[k] - r.value) < 0.01);
     if (!key || !len) return r;
+    // Tagged even when nothing moves, so a viewer can point at the ruler a size field changes.
+    if (!delta[key]) return { ...r, dimension: key };
     const move = Math.sign(delta[key]) * Math.min(nudge, len * 0.08);
     const ux = dx / len;
     const uy = dy / len;
@@ -53,6 +54,7 @@ export function typedRulers(result: RenderResult, size: Dimensions, delta: Dimen
       from: [r.from[0] + ux * move, r.from[1] + uy * move],
       to: [r.to[0] - ux * move, r.to[1] - uy * move],
       value: r.value - delta[key],
+      dimension: key,
     };
   });
 }
