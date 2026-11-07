@@ -350,13 +350,32 @@ const buildPanelGeometry = (
   return geometry;
 };
 
+/** Clear window film: a faint sheen and a hint of the inside, like thin PET. */
+const FILM = new THREE.MeshPhysicalMaterial({
+  color: "#dbe7f5",
+  transparent: true,
+  opacity: 0.38,
+  roughness: 0.04,
+  metalness: 0,
+  clearcoat: 1,
+  clearcoatRoughness: 0.03,
+  side: THREE.DoubleSide,
+  depthWrite: false,
+});
+
 export const buildRigScene = ({
   rig,
   material,
   thickness,
+  film,
 }: {
   rig: FoldRig;
   material: string;
+  /**
+   * Glaze windows with clear film, as a window box ships: every hole cut inside a
+   * panel, plus these outlines of windows that cross a fold (flat coordinates).
+   */
+  film?: Pt[][];
   /** Board thickness in mm, taken from the selected material or custom value. */
   thickness: number;
 }): RigScene => {
@@ -370,6 +389,17 @@ export const buildRigScene = ({
 
   const root = new THREE.Group();
   const pivots: THREE.Group[] = new Array(rig.nodes.length);
+
+  // Each window's film hangs on the smallest board panel around its centre.
+  const filmOwner = (film ?? []).map((window) => {
+    const mid: Pt = [window.reduce((sum, p) => sum + p[0], 0) / window.length, window.reduce((sum, p) => sum + p[1], 0) / window.length];
+    let owner = -1;
+    rig.nodes.forEach((node, index) => {
+      if (node.isHole || !pointInPolygon(mid, node.face.outline)) return;
+      if (owner < 0 || Math.abs(node.face.area) < Math.abs(rig.nodes[owner]!.face.area)) owner = index;
+    });
+    return owner;
+  });
 
   // Guard against a non-positive thickness producing invisible panels.
   const safeThickness = Math.max(thickness, 0.1);
@@ -507,6 +537,20 @@ export const buildRigScene = ({
     mesh.userData.panelIndex = index;
 
     pivot.add(mesh);
+
+    // The film is glued behind the window, so it sits in the board's thickness
+    // and folds with its panel.
+    if (film) {
+      for (const hole of [...node.holes, ...film.filter((_, w) => filmOwner[w] === index)]) {
+        const shape = new THREE.Shape(hole.map((point) => toWorld(point, center)));
+        const glass = new THREE.ShapeGeometry(shape);
+        glass.translate(-hingeWorld.x, -hingeWorld.y, safeThickness / 2);
+        const sheet = new THREE.Mesh(glass, FILM);
+        sheet.name = `film-${index}`;
+        sheet.renderOrder = 2;
+        pivot.add(sheet);
+      }
+    }
 
     /*
      * The board bends round at a fold rather than breaking into a corner: a strip

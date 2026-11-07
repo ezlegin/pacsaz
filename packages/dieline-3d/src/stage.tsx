@@ -1,6 +1,6 @@
 "use client";
 
-import { Environment, Lightformer } from "@react-three/drei";
+import { BoardLights } from "./lights";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
@@ -62,6 +62,8 @@ export type FoldStageProps = {
   /** A design printed onto the flat sheet. */
   print?: PrintRun;
   className?: string;
+  /** Clear film behind every window. */
+  film?: boolean;
   /** Called once the model is on screen, so a caller can drop its placeholder. */
   onReady?: () => void;
 };
@@ -194,6 +196,42 @@ const Director = ({
   const offset = useMemo(() => new THREE.Vector3(), []);
   const tilt = useMemo(() => ({ x: 0, y: 0 }), []);
   const pointer = useRef({ x: 0, y: 0 });
+  // Where the visitor has turned the box by dragging, on top of the set view.
+  const orbit = useMemo(() => ({ azimuth: 0, polar: 0 }), []);
+  const gl = useThree((state) => state.gl);
+
+  useEffect(() => {
+    const element = gl.domElement;
+    element.style.cursor = "grab";
+    // Vertical swipes still scroll the page on touch; sideways ones turn the box.
+    element.style.touchAction = "pan-y";
+    let last: { x: number; y: number } | null = null;
+    const down = (event: PointerEvent) => {
+      last = { x: event.clientX, y: event.clientY };
+      element.style.cursor = "grabbing";
+    };
+    const move = (event: PointerEvent) => {
+      if (!last) return;
+      orbit.azimuth -= (event.clientX - last.x) * 0.008;
+      orbit.polar = THREE.MathUtils.clamp(orbit.polar - (event.clientY - last.y) * 0.006, -0.9, 0.7);
+      last = { x: event.clientX, y: event.clientY };
+      invalidate();
+    };
+    const up = () => {
+      last = null;
+      element.style.cursor = "grab";
+    };
+    element.addEventListener("pointerdown", down);
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+    window.addEventListener("pointercancel", up);
+    return () => {
+      element.removeEventListener("pointerdown", down);
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      window.removeEventListener("pointercancel", up);
+    };
+  }, [gl, orbit, invalidate]);
 
   const ink = print?.progress;
   const paint = print?.paint;
@@ -256,14 +294,15 @@ const Director = ({
     const closing = smooth(Math.max(0, (p - 0.7) / 0.3));
     const distance = THREE.MathUtils.lerp(flatDistance * 1.16, closedDistance * 1.12, closing);
 
-    // The closed box answers the cursor and drifts on its own, so it feels held.
+    // The closed box barely answers the cursor and drifts a little, so it feels
+    // held; dragging is how the visitor really turns it.
     if (sway) {
       tilt.x += (pointer.current.x - tilt.x) * 0.06;
       tilt.y += (pointer.current.y - tilt.y) * 0.06;
     }
-    const drift = sway ? Math.sin(state.clock.elapsedTime * 0.45) * 0.2 : 0;
-    const azimuth = (CLOSED_AZIMUTH + drift + tilt.x * 0.7) * t;
-    const polar = THREE.MathUtils.lerp(Math.PI / 2, CLOSED_POLAR + tilt.y * 0.25, t);
+    const drift = sway ? Math.sin(state.clock.elapsedTime * 0.45) * 0.06 : 0;
+    const azimuth = (CLOSED_AZIMUTH + drift + tilt.x * 0.08) * t + orbit.azimuth;
+    const polar = THREE.MathUtils.clamp(THREE.MathUtils.lerp(Math.PI / 2, CLOSED_POLAR + tilt.y * 0.03, t) + orbit.polar, 0.15, Math.PI - 0.15);
 
     center.lerpVectors(frame.flatCenter, frame.closedCenter, t);
     offset.setFromSphericalCoords(distance, polar, azimuth);
@@ -284,7 +323,7 @@ const Director = ({
  * the panels both follow `progress`. The product page's `DielineViewer` is the
  * tool; this one has one job, showing a sheet become a box.
  */
-export const FoldStage = ({ svg, material, thickness, foldConfig, progress, shift = 0, sway = false, paused = false, insetTop = 0, print, className, onReady }: FoldStageProps) => {
+export const FoldStage = ({ svg, material, thickness, foldConfig, progress, shift = 0, sway = false, paused = false, insetTop = 0, print, film = false, className, onReady }: FoldStageProps) => {
   const rig = useMemo(() => {
     try {
       const segments = extractSegmentsFromSvg(svg);
@@ -301,22 +340,15 @@ export const FoldStage = ({ svg, material, thickness, foldConfig, progress, shif
     }
   }, [svg, foldConfig]);
 
-  const scene = useMemo(() => (rig ? buildRigScene({ rig, material, thickness }) : null), [rig, material, thickness]);
+  const scene = useMemo(() => (rig ? buildRigScene({ rig, material, thickness, film: film ? extractWindows(svg) : undefined }) : null), [rig, material, thickness, film, svg]);
 
   useEffect(() => () => scene?.board?.dispose(), [scene]);
 
   if (!rig || !scene) return null;
 
   return (
-    <Canvas className={className} frameloop={paused ? "never" : sway ? "always" : "demand"} dpr={[1, 2]} gl={{ antialias: true, alpha: true }} camera={{ fov: FOV, position: [0, 0, 1000] }}>
-      <Environment resolution={256}>
-        <Lightformer form="rect" intensity={2.4} position={[0, 5, 2]} rotation-x={Math.PI / 2} scale={[10, 10, 1]} />
-        <Lightformer form="rect" intensity={1.3} position={[-5, 1, 3]} rotation-y={Math.PI / 2} scale={[8, 3, 1]} />
-        <Lightformer form="rect" intensity={0.7} color="#c4b5fd" position={[5, 1, 2]} rotation-y={-Math.PI / 2} scale={[8, 3, 1]} />
-        <Lightformer form="rect" intensity={0.8} position={[0, 1, 6]} scale={[8, 4, 1]} />
-      </Environment>
-      <hemisphereLight args={["#ffffff", "#8b84a8", 0.4]} />
-      <directionalLight position={[-300, 500, 500]} intensity={1} />
+    <Canvas className={className} flat frameloop={paused ? "never" : sway ? "always" : "demand"} dpr={[1, 2]} gl={{ antialias: true, alpha: true }} camera={{ fov: FOV, position: [0, 0, 1000] }}>
+      <BoardLights distance={rig.bounds.width + rig.bounds.height} />
 
       <Director scene={scene} rig={rig} progress={progress} shift={shift} sway={sway} insetTop={insetTop} print={print} onReady={onReady} />
     </Canvas>

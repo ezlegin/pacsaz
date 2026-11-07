@@ -1,173 +1,247 @@
 "use client";
 
 import { cn } from "@repo/ui/lib/utils";
-import { ArrowLeft } from "lucide-react";
-import { motion, motionValue, useInView, useMotionTemplate, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
+import { ArrowLeft, Box, Check, FileDown, PackageOpen, Palette, Ratio, ShieldCheck } from "lucide-react";
+import { animate, motionValue, useInView, useReducedMotion } from "motion/react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import BoxDock from "./BoxDock";
+import { fa } from "./format";
 import { useHomeBox } from "./HomeBoxProvider";
-import { paintBlueprint, paintPack } from "./paintPack";
+import { paintPack } from "./paintPack";
+import { printSheet, withPrint } from "./printSheet";
 
 const FoldStage = dynamic(() => import("@repo/dieline-3d/stage"), { ssr: false });
 
-const LAYERS = [
-  { title: "خط برش", text: "جایی که تیغ مقوا را می‌برد؛ مسیری بسته و بدون گسستگی." },
-  { title: "خط تا", text: "مقوا فشرده می‌شود و نمی‌برد، تا همان‌جا بدون ترک خم شود." },
-  { title: "بلید", text: "حاشیه‌ی چاپی بیرون خط برش، تا لبه‌ی سفید دیده نشود." },
-  { title: "ناحیه‌ی چسب", text: "زبانه‌ای بدون ورنی که دو سر بدنه را به هم می‌چسباند." },
+type View = "3d" | "2d";
+
+const PROMISES = [
+  { icon: ShieldCheck, text: "کنترل فنی پیش از دانلود" },
+  { icon: FileDown, text: "خروجی DXF، PDF و SVG" },
+  { icon: Check, text: "محاسبه‌ی ضخامت مقوا" },
 ];
 
-const CLOSED = motionValue(1);
-const STILL = motionValue(0.16);
-
 /**
- * The page's first act, one pinned scene: a real box, built from the real
- * template, that the visitor sizes with their own hands. Scrolling unfolds it
- * into its dieline, then strips the print off to show the bare sheet.
+ * The hero: the pitch on one side and a working box on the other. The visitor
+ * sizes it, opens and closes it, and flips between the 3D box and its flat
+ * dieline, all without the page taking over their scroll wheel.
  *
- * All the words are ordinary HTML, so the page reads the same with no WebGL.
+ * The words and the flat drawing are server HTML; the 3D stage loads after.
  */
 const Showcase = () => {
-  const { settledFoldSvg, material, foldConfig, size, href, drawing } = useHomeBox();
-  const track = useRef<HTMLElement>(null);
+  const { settledFoldSvg, material, foldConfig, size, href, drawing, preview, title } = useHomeBox();
+  const stageBox = useRef<HTMLDivElement>(null);
+  const slider = useRef<HTMLInputElement>(null);
   const reduced = !!useReducedMotion();
-  const onScreen = useInView(track, { margin: "10% 0px" });
-  const [ready, setReady] = useState(false);
+  const onScreen = useInView(stageBox, { margin: "10% 0px" });
+  const [view, setView] = useState<View>("3d");
   const [mounted, setMounted] = useState(false);
-  const [wide, setWide] = useState(true);
+  const [ready, setReady] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [designed, setDesigned] = useState(true);
+  const [sheet, setSheet] = useState<string | null>(null);
 
-  useEffect(() => {
-    setMounted(true);
-    const query = window.matchMedia("(min-width: 1024px)");
-    const update = () => setWide(query.matches);
-    update();
-    query.addEventListener("change", update);
-    return () => query.removeEventListener("change", update);
-  }, []);
+  // One motion value per page: the stage reads it every frame, React never does.
+  const progress = useMemo(() => motionValue(1), []);
+  // How much of the sheet the press has inked: the design sweeps on and off.
+  const ink = useMemo(() => motionValue(1), []);
 
-  const { scrollYProgress } = useScroll({ target: track, offset: ["start start", "end end"] });
-  const eased = useSpring(scrollYProgress, { stiffness: 100, damping: 26, mass: 0.35 });
+  useEffect(() => setMounted(true), []);
 
-  const unfolded = useTransform(eased, [0.1, 0.55], [1, 0]);
-  const inked = useTransform(eased, [0.64, 0.84], [1, 0]);
-  const sideways = useTransform(eased, [0.08, 0.5], [wide ? 0.17 : 0, wide ? -0.17 : 0]);
+  // The slider follows the value while it animates, without a re-render per frame.
+  useEffect(
+    () =>
+      progress.on("change", (value) => {
+        const input = slider.current;
+        if (!input) return;
+        input.value = String(Math.round((1 - value) * 100));
+        input.style.setProperty("--fill", `${(1 - value) * 100}%`);
+      }),
+    [progress],
+  );
 
-  const heroOpacity = useTransform(eased, [0, 0.07, 0.12], [1, 1, 0]);
-  const heroY = useTransform(eased, [0, 0.12], [0, -60]);
-  const heroEvents = useTransform(heroOpacity, (value) => (value > 0.4 ? "auto" : "none"));
-  const mapOpacity = useTransform(eased, [0.18, 0.25, 0.54, 0.6], [0, 1, 1, 0]);
-  const mapY = useTransform(eased, [0.18, 0.25, 0.54, 0.6], [50, 0, 0, -50]);
-  const layerOpacity = useTransform(eased, [0.64, 0.7, 1], [0, 1, 1]);
-  const layerY = useTransform(eased, [0.64, 0.72], [50, 0]);
-  const wordX = useTransform(eased, [0, 0.6], ["0%", "-12%"]);
-  const lightOpacity = useTransform(eased, [0, 0.5, 1], [1, 0.75, 0.45]);
-  const bar = useMotionTemplate`${useTransform(eased, [0, 1], [0, 100])}%`;
+  const toggle = useCallback(() => {
+    const next = !open;
+    setOpen(next);
+    animate(progress, next ? 0 : 1, reduced ? { duration: 0 } : { duration: 1.8, ease: [0.45, 0, 0.2, 1] });
+  }, [open, progress, reduced]);
 
-  const onReady = useCallback(() => setReady(true), []);
   const kraft = !["glossyCardboard", "artPaper"].includes(material.value);
-  const print = useMemo(
-    () => ({ paint: paintPack(size, kraft), paintBare: paintBlueprint(drawing.cuts, drawing.folds), progress: reduced ? CLOSED : inked }),
-    [size, kraft, drawing.cuts, drawing.folds, reduced, inked],
+  const paint = useMemo(() => paintPack(size, kraft), [size, kraft]);
+  const print = useMemo(() => ({ paint, progress: ink }), [paint, ink]);
+
+  const showDesign = useCallback(() => {
+    const next = !designed;
+    setDesigned(next);
+    animate(ink, next ? 1 : 0, reduced ? { duration: 0 } : { duration: 1.2, ease: [0.45, 0, 0.2, 1] });
+  }, [designed, ink, reduced]);
+
+  // The flat print is painted only when the 2D view asks for it, once the type has loaded.
+  useEffect(() => {
+    if (view !== "2d" || !designed) return;
+    let stale = false;
+    void document.fonts.ready.then(() => {
+      if (stale) return;
+      try {
+        setSheet(printSheet(paint, settledFoldSvg, drawing));
+      } catch {
+        setSheet(null);
+      }
+    });
+    return () => {
+      stale = true;
+    };
+  }, [view, designed, paint, settledFoldSvg, drawing]);
+
+  const flat = useMemo(() => (designed && sheet ? withPrint(preview, sheet, drawing) : preview), [designed, sheet, preview, drawing]);
+
+  const designButton = (
+    <button type="button" onClick={showDesign} aria-pressed={designed} className={cn("btn-chip", !designed && "btn-chip-off")}>
+      <Palette className="size-4" />
+      {designed ? "پنهان کردن طرح" : "نمایش طرح"}
+    </button>
   );
 
   return (
-    <section ref={track} aria-labelledby="hero-title" className={cn("relative", !reduced && "h-[520svh]")}>
-      <div className={cn("relative h-svh min-h-[40rem] overflow-hidden", !reduced && "sticky top-0")}>
-        <motion.div aria-hidden className="stage-light" style={{ opacity: lightOpacity }} />
-        <div aria-hidden className="stage-floor" />
-        <motion.div aria-hidden dir="ltr" className="stage-word" style={{ x: wordX }}>
-          PACSAZ
-        </motion.div>
+    <section aria-labelledby="hero-title" className="hero relative isolate overflow-hidden">
+      <div aria-hidden className="hero-light" />
+      <div aria-hidden className="hero-grid" />
 
-        {mounted && (
-          <div className={cn("stage-canvas absolute inset-0", ready && "stage-canvas-on")}>
-            <FoldStage
-              className="!absolute inset-0"
-              svg={settledFoldSvg}
-              material={material.value}
-              thickness={material.thickness}
-              foldConfig={foldConfig}
-              progress={reduced ? CLOSED : unfolded}
-              print={print}
-              shift={reduced ? STILL : sideways}
-              sway={!reduced}
-              paused={!onScreen}
-              insetTop={wide ? 72 : 260}
-              onReady={onReady}
-            />
-          </div>
-        )}
+      <div className="mx-auto grid w-full max-w-[86rem] items-center gap-10 px-5 pt-10 pb-16 md:px-12 md:pt-16 lg:grid-cols-12 lg:gap-12 lg:pb-24">
+        {/* The pitch */}
+        <div className="lg:col-span-5">
+          <p className="hero-badge">
+            <span className="size-1.5 rounded-full bg-primary" />
+            طراحی پارامتریک دایلاین
+          </p>
+          <h1 id="hero-title" className="mt-5 text-[2.2rem] leading-[1.25] font-black sm:text-5xl xl:text-[3.6rem]">
+            دایلاین جعبه‌ات را
+            <span className="text-light block pb-1">در چند ثانیه بساز</span>
+          </h1>
+          <p className="mt-5 max-w-lg text-base leading-8 text-[var(--soft)] md:text-lg md:leading-9">
+            قالب را انتخاب کن، ابعاد و جنس مقوا را بده؛ پک‌ساز نقشه‌ی برش و تای دقیق را می‌کشد، کنترل فنی می‌کند و فایل آماده‌ی قالب‌سازی تحویل می‌دهد.
+          </p>
 
-        <div className="pointer-events-none absolute inset-0 mx-auto max-w-[92rem] px-5 md:px-12">
-          {/* Act one */}
-          <motion.div
-            className="absolute inset-x-5 top-20 md:inset-x-12 lg:top-1/2 lg:right-12 lg:left-auto lg:w-[32rem] lg:-translate-y-[46%]"
-            style={reduced ? undefined : { opacity: heroOpacity, y: heroY, pointerEvents: heroEvents }}
-          >
-            <h1 id="hero-title" className="text-[2.1rem] leading-[1.22] font-black sm:text-5xl xl:text-[3.75rem]">
-              طراحی دایلاین بسته‌بندی،
-              <span className="text-light block pb-1">بدون آزمون و خطا</span>
-            </h1>
-            <p className="mt-4 max-w-md text-sm leading-7 text-[var(--soft)] md:text-lg md:leading-9">
-              اندازه‌ی جعبه را با دست خودت تغییر بده و ببین. پک‌ساز نقشه‌ی برش و تای دقیق آن را می‌کشد و فایل آماده‌ی چاپ تحویل می‌دهد.
-            </p>
-            <div className="mt-5 flex flex-wrap gap-3 max-lg:hidden">
-              <Link href={href} className="btn-primary pointer-events-auto">
-                ساخت همین جعبه
-                <ArrowLeft className="size-4" />
-              </Link>
-              <Link href="/dielines" className="btn-glass pointer-events-auto">
-                کتابخانه‌ی قالب‌ها
-              </Link>
-            </div>
-            <div className="pointer-events-auto mt-6 max-lg:hidden">
-              <BoxDock />
-            </div>
-          </motion.div>
-
-          <motion.div className="pointer-events-auto absolute inset-x-5 bottom-5 lg:hidden" style={reduced ? undefined : { opacity: heroOpacity, pointerEvents: heroEvents }}>
-            <BoxDock />
-            <Link href={href} className="btn-primary mt-3 w-full">
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link href="/dielines" className="btn-primary">
+              انتخاب قالب
+              <ArrowLeft className="size-4" />
+            </Link>
+            <Link href={href} className="btn-glass">
               ساخت همین جعبه
             </Link>
-          </motion.div>
+          </div>
 
-          {/* Act two */}
-          <motion.div
-            className="absolute inset-x-5 top-24 md:inset-x-12 lg:top-1/2 lg:right-auto lg:left-12 lg:w-[30rem] lg:-translate-y-1/2"
-            style={reduced ? { position: "static" } : { opacity: mapOpacity, y: mapY }}
-          >
-            <p className="eyebrow">هر جعبه یک نقشه دارد</p>
-            <h2 className="mt-3 text-3xl leading-[1.25] font-black md:text-6xl">دایلاین چیست؟</h2>
-            <p className="mt-4 text-sm leading-7 text-[var(--soft)] md:text-lg md:leading-9">
-              دایلاین نقشه‌ی تخت و بازشده‌ی جعبه است؛ نشان می‌دهد تیغ کجا مقوا را ببرد و کجا آن را خط بزند تا جعبه پس از تا شدن درست بسته شود. طرح چاپی روی همین نقشه چیده
-              می‌شود و قالب‌ساز از روی آن تیغ را می‌سازد.
-            </p>
-          </motion.div>
-
-          {/* Act three */}
-          <motion.div
-            className="absolute inset-x-5 bottom-5 lg:top-1/2 lg:right-auto lg:bottom-auto lg:left-12 lg:w-[30rem] lg:-translate-y-1/2"
-            style={reduced ? { position: "static" } : { opacity: layerOpacity, y: layerY }}
-          >
-            <h2 className="text-2xl font-black md:text-5xl">چهار لایه‌ی یک نقشه</h2>
-            <ul className="mt-4 grid grid-cols-2 gap-2 md:mt-6 md:gap-3">
-              {LAYERS.map((layer) => (
-                <li key={layer.title} className="glass !rounded-2xl p-3 md:p-4">
-                  <h3 className="text-sm font-bold md:text-base">{layer.title}</h3>
-                  <p className="mt-1 text-xs leading-6 text-[var(--soft)] md:text-sm">{layer.text}</p>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
+          <ul className="mt-9 grid gap-3 text-xs whitespace-nowrap text-[var(--soft)] sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+            {PROMISES.map(({ icon: Icon, text }) => (
+              <li key={text} className="flex items-center gap-2">
+                <span className="grid size-6 shrink-0 place-items-center rounded-md bg-violet-100 text-primary">
+                  <Icon className="size-3.5" strokeWidth={2.4} />
+                </span>
+                {text}
+              </li>
+            ))}
+          </ul>
         </div>
 
-        <motion.div aria-hidden className="absolute bottom-6 left-1/2 -translate-x-1/2 max-lg:hidden" style={{ opacity: heroOpacity }}>
-          <div className="scroll-cue" />
-        </motion.div>
-        <motion.span aria-hidden className="absolute right-0 bottom-0 h-px bg-violet-400" style={{ width: bar }} />
+        {/* The studio */}
+        <div className="lg:col-span-7">
+          <div className="studio">
+            <div className="flex items-center justify-between gap-3 px-4 pt-4 md:px-5">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-bold">{title}</p>
+                <p dir="ltr" className="text-right text-xs text-[var(--soft)] tabular-nums">
+                  {fa(size.width)} × {fa(size.length)} × {fa(size.height)} mm
+                </p>
+              </div>
+              <div role="tablist" aria-label="نمای جعبه" className="segmented">
+                {(
+                  [
+                    { value: "3d", label: "سه‌بعدی", icon: Box },
+                    { value: "2d", label: "دایلاین", icon: Ratio },
+                  ] as const
+                ).map(({ value, label, icon: Icon }) => (
+                  <button key={value} type="button" role="tab" aria-selected={view === value} onClick={() => setView(value)} className={cn(view === value && "on")}>
+                    <Icon className="size-3.5" />
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div ref={stageBox} className="relative mx-4 mt-3 aspect-[4/3] overflow-hidden rounded-2xl bg-[#f6f6f8] md:mx-5 md:aspect-[16/11]">
+              {/* Flat drawing, in the product page's colours: always in the HTML, also the 3D placeholder. */}
+              <div
+                role="img"
+                aria-label={`دایلاین ${title}`}
+                className={cn("hero-preview absolute inset-0 p-6 transition-opacity duration-500", view === "3d" && ready ? "opacity-0" : "opacity-100")}
+                data-print-hide
+                dangerouslySetInnerHTML={{ __html: view === "2d" ? flat : preview }}
+              />
+
+              {mounted && (
+                <div className={cn("absolute inset-0 transition-opacity duration-700", view === "3d" && ready ? "opacity-100" : "pointer-events-none opacity-0")}>
+                  <FoldStage
+                    className="!absolute inset-0"
+                    svg={settledFoldSvg}
+                    material={material.value}
+                    thickness={material.thickness}
+                    foldConfig={foldConfig}
+                    progress={progress}
+                    print={print}
+                    sway={!reduced}
+                    paused={!onScreen || view !== "3d"}
+                    onReady={() => setReady(true)}
+                  />
+                </div>
+              )}
+
+            </div>
+
+            <div className="px-4 pt-3 md:px-5">
+              {view === "3d" ? (
+                <div className="flex items-center gap-3">
+                  <label className="flex min-w-0 flex-1 items-center gap-3 text-xs text-[var(--soft)]">
+                    <span className="shrink-0">باز</span>
+                    <input
+                      ref={slider}
+                      dir="ltr"
+                      type="range"
+                      min={0}
+                      max={100}
+                      defaultValue={0}
+                      aria-label="باز شدن جعبه"
+                      onChange={(event) => progress.set(1 - Number(event.target.value) / 100)}
+                      onPointerUp={(event) => setOpen(Number(event.currentTarget.value) > 50)}
+                      className="size-range"
+                      style={{ "--fill": "0%" } as React.CSSProperties}
+                    />
+                    <span className="shrink-0">بسته</span>
+                  </label>
+                  {designButton}
+                  <button type="button" onClick={toggle} className="btn-chip">
+                    <PackageOpen className="size-4" />
+                    {open ? "ببند" : "باز کن"}
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div dir="ltr" className="flex flex-wrap gap-3 text-[11px] text-[var(--soft)]">
+                  <span className="flex items-center gap-1.5"><i className="legend legend-cut" />برش</span>
+                  <span className="flex items-center gap-1.5"><i className="legend legend-fold" />تا</span>
+                  <span className="tabular-nums">{fa(Math.round(drawing.blank.width))} × {fa(Math.round(drawing.blank.height))} mm</span>
+                  </div>
+                  {designButton}
+                </div>
+              )}
+            </div>
+
+            <div className="p-4 md:p-5">
+              <BoxDock />
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );

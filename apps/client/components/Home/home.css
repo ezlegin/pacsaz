@@ -82,52 +82,182 @@
   color: var(--glow);
 }
 
-/* ------------------------------- the stage ------------------------------- */
+/* --------------------------------- hero --------------------------------- */
 
-.stage-light {
+.hero-light {
   position: absolute;
   inset: 0;
+  z-index: -1;
   background:
-    radial-gradient(42vmax 32vmax at 34% 46%, rgb(196 181 253 / 0.55), transparent 70%),
-    radial-gradient(36vmax 24vmax at 94% 0%, rgb(221 214 254 / 0.6), transparent 70%);
+    radial-gradient(40rem 28rem at 30% 40%, rgb(196 181 253 / 0.45), transparent 70%),
+    radial-gradient(30rem 20rem at 95% 0%, rgb(221 214 254 / 0.7), transparent 70%);
 }
-.stage-word {
+.hero-grid {
   position: absolute;
-  inset-inline: 0;
-  top: 50%;
-  translate: 0 -50%;
-  text-align: center;
-  font-size: 27vw;
-  font-weight: 900;
-  line-height: 1;
-  letter-spacing: -0.03em;
-  color: transparent;
-  -webkit-text-stroke: 1px rgb(124 58 237 / 0.16);
-  user-select: none;
-  white-space: nowrap;
-}
-.stage-floor {
-  position: absolute;
-  inset-inline: 0;
-  bottom: -30%;
-  height: 70%;
+  inset: 0;
+  z-index: -1;
   background-image:
-    linear-gradient(rgb(124 58 237 / 0.1) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(124 58 237 / 0.1) 1px, transparent 1px);
-  background-size: 64px 64px;
-  transform: perspective(600px) rotateX(62deg);
-  mask-image: radial-gradient(60% 70% at 40% 20%, black, transparent);
+    linear-gradient(rgb(124 58 237 / 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(124 58 237 / 0.07) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(70% 60% at 50% 30%, black, transparent);
 }
-.stage-canvas {
-  opacity: 0;
-  transform: scale(0.92) translateY(2%);
-  transition:
-    opacity 1.2s,
-    transform 1.6s var(--ease-out-soft);
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #5b21b6;
+  background: white;
+  box-shadow: inset 0 0 0 1px rgb(124 58 237 / 0.2);
 }
-.stage-canvas-on {
+.studio {
+  border-radius: 1.75rem;
+  background: white;
+  box-shadow:
+    inset 0 0 0 1px rgb(76 29 149 / 0.08),
+    0 40px 80px -40px rgb(76 29 149 / 0.45);
+}
+.segmented {
+  display: flex;
+  flex: none;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border-radius: 0.8rem;
+  background: rgb(237 233 254 / 0.7);
+}
+.segmented button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--soft);
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+.segmented button.on {
+  background: white;
+  color: #6d28d9;
+  box-shadow: 0 1px 3px rgb(76 29 149 / 0.15);
+}
+.segmented button:focus-visible,
+.btn-chip:focus-visible,
+.cat-tile:focus-visible,
+.tpl:focus-visible {
+  outline: 2px solid var(--glow);
+  outline-offset: 2px;
+}
+.btn-chip {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.9rem;
+  border-radius: 0.65rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: white;
+  background: #6d28d9;
+  cursor: pointer;
+}
+.btn-chip-off {
+  color: #6d28d9;
+  background: rgb(237 233 254 / 0.8);
+}
+.hero-bleed {
+  fill: rgb(124 58 237 / 0.06);
+}
+.hero-glue {
+  fill: url(#glue-hatch);
+}
+.hero-preview svg {
+  width: 100%;
+  height: 100%;
+}
+/* The product page's die-maker colours (LINE_STYLES): blue cut, red crease. */
+.legend {
+  display: inline-block;
+  width: 1rem;
+  border-top: 1.5px solid #1d4ed8;
+}
+.legend-fold {
+  border-top: 1.5px dashed #dc2626;
+}
+
+/* ------------------------------ categories ------------------------------ */
+
+.cat-tile {
+  position: relative;
+  display: flex;
+  min-height: 7.5rem;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.5rem;
+  overflow: hidden;
+  padding: 1rem 1.1rem;
+  border-radius: 1.25rem;
+  background: white;
+  box-shadow: inset 0 0 0 1px var(--line);
+  transition: box-shadow 0.3s, transform 0.3s var(--ease-out-soft);
+}
+.cat-tile:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    inset 0 0 0 1px rgb(124 58 237 / 0.3),
+    0 20px 40px -28px rgb(76 29 149 / 0.5);
+}
+.cat-art {
+  position: absolute;
+  top: 0.6rem;
+  inset-inline-end: 0.6rem;
+  width: 55%;
+  height: 70%;
+  opacity: 0.5;
+  transition: opacity 0.3s;
+}
+.cat-tile:hover .cat-art {
   opacity: 1;
-  transform: none;
+}
+
+/* ------------------------------- templates ------------------------------ */
+
+.tpl {
+  display: block;
+  overflow: hidden;
+  border-radius: 1.25rem;
+  background: var(--night);
+  box-shadow: inset 0 0 0 1px var(--line);
+  transition: box-shadow 0.3s, transform 0.3s var(--ease-out-soft);
+}
+.tpl:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    inset 0 0 0 1px rgb(124 58 237 / 0.3),
+    0 24px 44px -30px rgb(76 29 149 / 0.5);
+}
+.tpl-media {
+  position: relative;
+  aspect-ratio: 1;
+  background: #f6f6f8;
+}
+
+.step-dot {
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  place-items: center;
+  border-radius: 0.9rem;
+  font-size: 1.125rem;
+  font-weight: 900;
+  color: white;
+  background: linear-gradient(180deg, #8b5cf6, #6d28d9);
+  box-shadow: 0 10px 22px -10px rgb(124 58 237 / 0.7);
 }
 
 .size-range {
@@ -167,29 +297,6 @@
   outline-offset: 2px;
 }
 
-.scroll-cue {
-  width: 1.5rem;
-  height: 2.4rem;
-  border-radius: 999px;
-  box-shadow: inset 0 0 0 1.5px rgb(76 29 149 / 0.3);
-}
-.scroll-cue::after {
-  content: "";
-  display: block;
-  width: 3px;
-  height: 7px;
-  margin: 7px auto 0;
-  border-radius: 3px;
-  background: #7c3aed;
-  animation: cue 1.8s var(--ease-out-soft) infinite;
-}
-@keyframes cue {
-  to {
-    transform: translateY(12px);
-    opacity: 0;
-  }
-}
-
 /* ------------------------------ neon drawings ----------------------------- */
 
 .neon-cut,
@@ -197,21 +304,25 @@
   fill: none;
   vector-effect: non-scaling-stroke;
 }
+/* The die-maker colours of LINE_STYLES, as on the product page: blue cut, red crease. */
 .neon-cut {
-  stroke: var(--ink);
+  stroke: #1d4ed8;
   stroke-width: 1.2px;
 }
 .neon-fold {
-  stroke: #7c3aed;
+  stroke: #dc2626;
   stroke-width: 1px;
-  stroke-dasharray: 5 4;
+  stroke-dasharray: 5 3;
 }
 .neon-sheet {
-  fill: rgb(124 58 237 / 0.05);
+  fill: #ffffff;
   transition: fill 0.4s;
 }
 
 /* Light follows the cursor across a card; `--x` and `--y` come from Spotlight. */
+.spot svg {
+  border-radius: 1rem;
+}
 .spot {
   position: relative;
   overflow: hidden;
@@ -237,14 +348,12 @@
     inset 0 0 0 1px rgb(124 58 237 / 0.3),
     0 24px 44px -32px rgb(76 29 149 / 0.5);
 }
-.spot:hover .neon-sheet {
-  fill: rgb(124 58 237 / 0.12);
-}
+
 
 /* The sizes light up in turn, like a pulse leaving the smallest box. */
 .contours path {
   fill: none;
-  stroke: var(--glow);
+  stroke: #1d4ed8;
   stroke-width: 1.2px;
   vector-effect: non-scaling-stroke;
   opacity: 0.22;
@@ -266,6 +375,8 @@
 .plates {
   position: relative;
   height: 12rem;
+  /* The stack rises out of its box as the plates lift, so it starts lower to sit centred. */
+  margin-top: 3rem;
   transform: perspective(900px) rotateX(58deg) rotateZ(-38deg);
   transform-style: preserve-3d;
 }
@@ -286,14 +397,6 @@
 }
 .spot:hover .plate {
   transform: translateZ(calc(var(--i) * 48px));
-}
-
-.step-number {
-  font-size: 7rem;
-  font-weight: 900;
-  line-height: 1;
-  color: transparent;
-  -webkit-text-stroke: 1.5px rgb(124 58 237 / 0.45);
 }
 
 /* ------------------------------ the white sheet --------------------------- */
@@ -347,8 +450,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .contours path,
-  .scroll-cue::after {
+  .contours path {
     animation: none;
   }
 }

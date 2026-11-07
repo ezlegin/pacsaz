@@ -19,6 +19,8 @@ export type HomeBoxInitial = {
   materials: BoxMaterial[];
   drawing: Drawing;
   foldSvg: string;
+  /** The flat drawing in the product page's colours. */
+  preview: string;
   /** Fits the largest box the sliders reach, so the drawing grows on a fixed scale. */
   viewBox: string;
 };
@@ -58,6 +60,7 @@ export const HomeBoxProvider = ({ initial, children }: { initial: HomeBoxInitial
   const [material, setMaterial] = useState(initial.materials[0]!);
   const [drawing, setDrawing] = useState(initial.drawing);
   const [foldSvg, setFoldSvg] = useState(initial.foldSvg);
+  const [preview, setPreview] = useState(initial.preview);
   const [settledFoldSvg, setSettledFoldSvg] = useState(initial.foldSvg);
   const [edited, setEdited] = useState(false);
   const [, startTransition] = useTransition();
@@ -81,11 +84,12 @@ export const HomeBoxProvider = ({ initial, children }: { initial: HomeBoxInitial
     let stale = false;
     const inputs = { size, dimensionType: initial.dimensionType, thickness: material.thickness, bleed: initial.bleed };
 
-    void loadEngine().then(({ buildDrawing, buildFoldSvg }) => {
+    void loadEngine().then(({ buildDrawing, buildFoldSvg, buildPreviewSvg }) => {
       if (stale) return;
       startTransition(() => {
         setDrawing(buildDrawing(initial.doc, inputs));
         setFoldSvg(buildFoldSvg(initial.doc, inputs));
+        setPreview(buildPreviewSvg(initial.doc, inputs));
       });
     });
 
@@ -107,6 +111,7 @@ export const HomeBoxProvider = ({ initial, children }: { initial: HomeBoxInitial
       material,
       drawing,
       foldSvg,
+      preview,
       settledFoldSvg,
       edited,
       href: `/dieline/${initial.slug}?${query}`,
@@ -114,7 +119,7 @@ export const HomeBoxProvider = ({ initial, children }: { initial: HomeBoxInitial
       setMaterial: chooseMaterial,
       warmUp: () => void loadEngine(),
     };
-  }, [initial, size, material, drawing, foldSvg, settledFoldSvg, edited, setDimension, chooseMaterial]);
+  }, [initial, size, material, drawing, foldSvg, preview, settledFoldSvg, edited, setDimension, chooseMaterial]);
 
   return <Context.Provider value={value}>{children}</Context.Provider>;
 };

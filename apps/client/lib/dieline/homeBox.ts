@@ -10,6 +10,7 @@ import {
   resolveDimensions,
   sheetLoops,
   toFoldSVG,
+  toSVG,
   type Bounds,
   type DielineDocument,
   type DimensionType,
@@ -113,6 +114,13 @@ export function buildDrawing(doc: DielineDocument, inputs: BoxInputs): Drawing {
     issues: checkDieline(result).length,
   };
 }
+
+/**
+ * The drawing as the product page shows it: the engine's own SVG, die-maker
+ * colours (blue cut, red crease, hatched glue), white sheet inside the bleed.
+ */
+export const buildPreviewSvg = (doc: DielineDocument, inputs: BoxInputs) =>
+  toSVG(renderBox(doc, inputs), { includeBleed: true, nonScalingStroke: true, strokeWidth: 1.25, sheetFill: "#ffffff" });
 
 /** The fold SVG `@repo/dieline-3d` builds its rig from. */
 export const buildFoldSvg = (doc: DielineDocument, inputs: BoxInputs) => toFoldSVG(renderBox(doc, inputs));

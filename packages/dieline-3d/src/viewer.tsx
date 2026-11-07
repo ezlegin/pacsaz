@@ -1,8 +1,9 @@
 "use client";
 
 import { Bounds, OrbitControls } from "@react-three/drei";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { BoardLights } from "./lights";
+import { Canvas } from "@react-three/fiber";
+import { useEffect, useMemo, useState } from "react";
 import * as THREE from "three";
 import { applyArtwork, applyFold, buildRigScene, materialStyleFor, type RigScene } from "./build";
 import { composeArtwork, type ArtworkTransform } from "./artwork";
@@ -22,28 +23,6 @@ const SELECTION_COLOR = "#7c3aed";
 
 /** Why the viewer has nothing to draw. */
 export type ViewerEmptyReason = "pending" | "no-geometry" | "failed";
-
-/** The key light's direction in view space: up and to the viewer's left. */
-const KEY_DIRECTION = new THREE.Vector3(-0.9, 0.5, 0.6).normalize();
-
-/**
- * A light that moves with the camera, so whichever way the model is turned, the
- * face on the left is bright and the one on the right soft grey. A light fixed in
- * the world leaves the back of the box dark.
- */
-const KeyLight = ({ distance }: { distance: number }) => {
-  const light = useRef<THREE.DirectionalLight>(null);
-  const camera = useThree((state) => state.camera);
-
-  useFrame(() => {
-    light.current?.position
-      .copy(KEY_DIRECTION)
-      .applyQuaternion(camera.quaternion)
-      .multiplyScalar(distance);
-  });
-
-  return <directionalLight ref={light} intensity={2} />;
-};
 
 /**
  * Imperative bridge between the fold rig and React Three Fiber.
@@ -360,8 +339,7 @@ export const DielineViewer = ({
           turned away from it a soft grey. No environment map, because reflections
           are what make card look like plastic.
         */}
-        <ambientLight intensity={1.4} />
-        <KeyLight distance={span} />
+        <BoardLights distance={span} />
 
         {/* Fit the model to the viewer on first view and whenever it is rebuilt or resized. */}
         <Bounds fit clip observe margin={1.75} maxDuration={0}>

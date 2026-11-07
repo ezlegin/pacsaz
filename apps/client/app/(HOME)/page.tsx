@@ -5,7 +5,7 @@ import JsonLd from "@/components/JsonLd";
 import SubscriptionList from "@/components/SubscriptionList";
 import { faqsByCategory } from "@/data/faq";
 import { loadTemplate } from "@/lib/dieline/engine";
-import { buildDrawing, buildFoldSvg, presetDocument, unionBounds, viewBoxOf, type BoxInputs, type BoxSize } from "@/lib/dieline/homeBox";
+import { buildDrawing, buildFoldSvg, buildPreviewSvg, presetDocument, unionBounds, viewBoxOf, type BoxInputs, type BoxSize } from "@/lib/dieline/homeBox";
 import {
   buildMetadata,
   dielineSchema,
@@ -26,16 +26,32 @@ import type { Metadata } from "next";
 const HERO_SLUG = "tuck-end";
 const FALLBACK = { width: 60, length: 100, height: 160, bleed: 3 };
 
-/** One white board and two flutes: enough to see thickness change the drawing. */
-const HERO_MATERIALS = ["glossyCardboard", "eFlute", "bFlute"];
+/** One white board and one flute: enough to see thickness change the drawing. */
+const HERO_MATERIALS = ["glossyCardboard", "fFlute"];
 
-const BOX_FAMILY: { id: PresetId; title: string; latin: string; text: string }[] = [
-  { id: "reverseTuckEnd", title: "جعبه دو درب معکوس", latin: "Reverse Tuck End", text: "درب‌ها در دو جهت مخالف باز می‌شوند. رایج‌ترین جعبه‌ی مقوایی برای محصولات سبک، از دارو تا لوازم آرایشی." },
-  { id: "straightTuckEnd", title: "جعبه دو درب هم‌جهت", latin: "Straight Tuck End", text: "هر دو درب روی یک دیواره‌اند، پس جلوی جعبه یکدست می‌ماند. مناسب محصولات لوکس و قفسه‌ی فروشگاه." },
-  { id: "snapLockBottom", title: "جعبه کف قفلی", latin: "Snap Lock Bottom", text: "چهار لبه‌ی کف بدون چسب در هم قفل می‌شوند و کف جعبه وزن بیشتری را تحمل می‌کند." },
-  { id: "autoLockBottom", title: "جعبه کف اتوماتیک", latin: "Auto-Lock Bottom", text: "کف از پیش چسب خورده و با باز کردن جعبه خودش فرم می‌گیرد. مناسب خط بسته‌بندی سریع." },
-  { id: "sleeve", title: "روکش کشویی", latin: "Sleeve", text: "چهار دیواره با دو سر باز، برای کشیدن روی جعبه، سینی یا مجموعه‌ای از چند محصول." },
-  { id: "fefco0201", title: "کارتن استاندارد", latin: "FEFCO 0201", text: "کارتن شیاردار با لبه‌هایی که وسط به هم می‌رسند. پرکاربردترین کارتن حمل و انبار." },
+/**
+ * The body types the editor builds (`PresetId`), shown as the home page's
+ * categories. `slug` is the catalogue template built on that body, when there is one.
+ */
+/**
+ * Sizes the body types are drawn at, where the carton default does not suit:
+ * the keyboard box is measured from a wide, shallow die on 3 mm board, and
+ * corrugated cartons are thick board too.
+ */
+const FAMILY_SIZE: Partial<Record<PresetId, Partial<BoxInputs>>> = {
+  keyboardBox: { size: { width: 315, length: 202, height: 62 }, thickness: 3 },
+  fefco0201: { thickness: 3 },
+};
+
+const BOX_FAMILY: { id: PresetId; title: string; latin: string; slug?: string }[] = [
+  { id: "straightTuckEnd", title: "درب هم‌جهت", latin: "Straight Tuck End", slug: "tuck-end" },
+  { id: "reverseTuckEnd", title: "درب معکوس", latin: "Reverse Tuck End", slug: "reverse-tuck-end" },
+  { id: "autoLockBottom", title: "کف اتوماتیک", latin: "Auto-Lock Bottom", slug: "auto-lock-box" },
+  { id: "snapLockBottom", title: "کف قفلی", latin: "Snap Lock Bottom" },
+  { id: "keyboardBox", title: "جعبه کیبوردی", latin: "Keyboard Box", slug: "keyboard-box" },
+  { id: "gableHandle", title: "دسته‌دار شیروانی", latin: "Gable Handle", slug: "gable-handle-box" },
+  { id: "sleeve", title: "روکش کشویی", latin: "Sleeve", slug: "tray-with-sleeve" },
+  { id: "fefco0201", title: "کارتن استاندارد", latin: "FEFCO 0201" },
 ];
 
 /** A hero slider's range: around the default, never beyond what the template sells. */
@@ -45,7 +61,7 @@ const rangeOf = (value: number, min: number, max: number) => ({
 });
 
 const page = async () => {
-  const [tarrif, features, dieline] = await Promise.all([
+  const [tarrif, features, dieline, live] = await Promise.all([
     prisma.tarrif.findMany({
       include: { price: true, fairDownload: true, features: true },
     }),
@@ -61,6 +77,8 @@ const page = async () => {
         categoryByUsage: true,
       },
     }),
+    // Which body types have a live template to open.
+    prisma.dieline.findMany({ where: { active: true, slug: { in: BOX_FAMILY.flatMap((item) => item.slug ?? []) } }, select: { slug: true } }),
   ]);
 
   /**
@@ -84,11 +102,12 @@ const page = async () => {
     height: rangeOf(size.height, usable?.minHeight ?? 1, usable?.maxHeight ?? 0),
   };
 
-  const offered = usable ? usable.materials.split(",") : HERO_MATERIALS;
-  const heroMaterials = [...new Set([...HERO_MATERIALS.filter((value) => offered.includes(value)), ...offered])]
+  // A fixed pair, white board and the thinnest flute, whatever the template sells:
+  // the hero shows thickness at work, and the product page clamps the material.
+  const heroMaterials = HERO_MATERIALS
     .map((value) => materials.find((item) => item.value === value))
     .filter((item) => item !== undefined)
-    .slice(0, 3)
+    .slice(0, 2)
     .map(({ value, label, thickness }) => ({ value, label, thickness }));
   const firstMaterial = heroMaterials[0] ?? { value: "glossyCardboard", label: "مقوا گلاسه", thickness: 0.5 };
 
@@ -114,11 +133,17 @@ const page = async () => {
     materials: heroMaterials.length ? heroMaterials : [firstMaterial],
     drawing,
     foldSvg: buildFoldSvg(doc, inputs),
+    preview: buildPreviewSvg(doc, inputs),
     viewBox: viewBoxOf(unionBounds([drawing, biggest]), 6),
   };
 
   const familyInputs: BoxInputs = { size: { width: 60, length: 100, height: 150 }, dimensionType: "manufacture", thickness: 0.5, bleed: 3 };
-  const family: BoxFamilyItem[] = BOX_FAMILY.map((item) => ({ ...item, drawing: buildDrawing(presetDocument(item.id), familyInputs) }));
+  const opens = new Set(live.map((row) => row.slug));
+  const family: BoxFamilyItem[] = BOX_FAMILY.map(({ slug, ...item }) => ({
+    ...item,
+    href: slug && opens.has(slug) ? `/dieline/${slug}` : "/dielines",
+    drawing: buildDrawing(presetDocument(item.id), { ...familyInputs, ...FAMILY_SIZE[item.id] }),
+  }));
 
   /** One preset at growing sizes: the picture of what "parametric" means. */
   const sizes = [0.5, 0.65, 0.8, 1, 1.25, 1.55].map((scale) =>
@@ -165,7 +190,7 @@ const page = async () => {
     faqSchema([...productFaqs, ...subscriptionFaqs], "/"),
     itemListSchema({
       name: "ساختارهای پایه‌ی جعبه",
-      description: "شش ساختار رایج جعبه و کارتن که در این صفحه معرفی شده‌اند.",
+      description: "ساختارهای رایج جعبه و کارتن که در این صفحه معرفی شده‌اند.",
       path: "/",
       items: BOX_FAMILY.map((item) => ({ name: item.title, path: `/#${item.id}` })),
     }),
@@ -189,8 +214,8 @@ const page = async () => {
       </HomeBoxProvider>
 
       <BoxGallery items={family} />
-      <Production sizes={sizes} />
       <Steps />
+      <Production sizes={sizes} />
 
       <div className="paper">
         <section id="subscription" aria-label="اشتراک پک‌ساز" className="scroll-mt-20 pt-24 md:pt-32">

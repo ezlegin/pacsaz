@@ -9,47 +9,65 @@ import Link from "next/link";
 import { fa } from "./format";
 import { Reveal, Spotlight } from "./HomeMotion";
 
-export type BoxFamilyItem = { id: string; title: string; latin: string; text: string; drawing: Drawing };
+/** The product page's glue: fine dark hatching rising to the right (GLUE_HATCH), in mm. */
+const GlueHatch = () => (
+  <defs>
+    <pattern id="glue-hatch" patternUnits="userSpaceOnUse" width="1.5" height="1.5" patternTransform="rotate(-45)">
+      <line x1="0" y1="0" x2="0" y2="1.5" stroke="#1f1f1f" strokeWidth="0.25" />
+    </pattern>
+  </defs>
+);
+
+export type BoxFamilyItem = { id: string; title: string; latin: string; href: string; drawing: Drawing };
 
 const MEASURE = "mx-auto w-full max-w-[86rem] px-5 md:px-12";
 const CHECKS = ["خط برش باز و گسسته", "دو تیغ روی هم", "خط‌های متقاطع", "خط تای رها در مقوا", "پاره‌خط‌های بیش از حد کوچک"];
 const DIE_LAYERS = ["GLUE", "PERFORATION", "CREASE", "CUT"];
 const COURSE_FACTS = ["۱۰.۵ ساعت ویدیو", "۱۰ فصل آموزشی", "مدرک پایان دوره"];
 
-/** The six structures in a plain grid. Drawings are the engine's own presets. */
+/** The body types the editor builds, as the page's categories: one card each, the engine's own drawing. */
 export const BoxGallery = ({ items }: { items: BoxFamilyItem[] }) => (
-  <section aria-labelledby="family-title" className={`${MEASURE} py-24 md:py-32`}>
-    <Reveal className="flex flex-wrap items-end justify-between gap-4">
-      <div>
-        <p className="eyebrow">ساختارهای جعبه</p>
-        <h2 id="family-title" className="mt-2 text-3xl font-black md:text-5xl">
-          هر محصول، جعبه‌ی خودش را می‌خواهد
-        </h2>
-      </div>
-      <Link href="/dielines" className="btn-glass">
-        کتابخانه‌ی قالب‌ها
-        <ArrowLeft className="size-4" />
-      </Link>
-    </Reveal>
-
-    <Spotlight className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-      {items.map((item) => (
-        <article key={item.id} id={item.id} className="spot scroll-mt-24 p-6 md:p-7">
-          <div className="aspect-[4/3]">
-            <svg viewBox={viewBoxOf(item.drawing.bounds, 6)} aria-hidden className="size-full" data-print-hide>
-              <path d={item.drawing.sheet} className="neon-sheet" fillRule="evenodd" />
-              <path d={item.drawing.folds} className="neon-fold" />
-              <path d={item.drawing.cuts} className="neon-cut" />
-            </svg>
-          </div>
-          <h3 className="mt-4 text-lg font-bold">{item.title}</h3>
-          <p dir="ltr" className="mt-0.5 text-right text-xs text-primary">
-            {item.latin}
-          </p>
-          <p className="mt-2 text-sm leading-7 text-[var(--soft)]">{item.text}</p>
-        </article>
-      ))}
-    </Spotlight>
+  <section aria-labelledby="family-title" className="bg-white py-20 md:py-28">
+    <div className={MEASURE}>
+      <Reveal className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="eyebrow">دسته‌بندی جعبه‌ها</p>
+          <h2 id="family-title" className="mt-2 text-3xl font-black md:text-5xl">
+            هر محصول، جعبه‌ی خودش را می‌خواهد
+          </h2>
+        </div>
+        <Link href="/dielines" className="btn-glass">
+          کتابخانه‌ی قالب‌ها
+          <ArrowLeft className="size-4" />
+        </Link>
+      </Reveal>
+      <ul className="mt-10 grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-5 lg:grid-cols-4">
+        {items.map((item) => (
+          <li key={item.id} id={item.id} className="scroll-mt-24">
+            <Link href={item.href} className="tpl group">
+              <div className="tpl-media">
+                <svg viewBox={viewBoxOf(item.drawing.bounds, 8)} role="img" aria-label={item.title} className="absolute inset-0 size-full p-5" data-print-hide>
+                  <GlueHatch />
+                  <path d={item.drawing.sheet} className="neon-sheet" fillRule="evenodd" />
+                  <path d={item.drawing.glue} className="hero-glue" />
+                  <path d={item.drawing.folds} className="neon-fold" />
+                  <path d={item.drawing.cuts} className="neon-cut" />
+                </svg>
+              </div>
+              <div className="flex items-center justify-between gap-2 p-4">
+                <div className="min-w-0">
+                  <h3 className="truncate text-sm font-bold md:text-base">{item.title}</h3>
+                  <p dir="ltr" className="mt-0.5 truncate text-right text-xs text-[var(--soft)]">{item.latin}</p>
+                </div>
+                <span className="grid size-8 shrink-0 place-items-center rounded-full bg-violet-50 text-primary transition-colors group-hover:bg-primary group-hover:text-white">
+                  <ArrowLeft className="size-4" />
+                </span>
+              </div>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
   </section>
 );
 
@@ -121,18 +139,19 @@ export const Production = ({ sizes }: { sizes: Drawing[] }) => (
 
 /** The same steps the page's `HowTo` data states, from one list. */
 export const Steps = () => (
-  <section aria-labelledby="steps-title" className={`${MEASURE} pb-28 md:pb-40`}>
-    <Reveal>
-      <h2 id="steps-title" className="text-3xl font-black md:text-6xl">
+  <section aria-labelledby="steps-title" className={`${MEASURE} py-24 md:py-32`}>
+    <Reveal className="max-w-2xl">
+      <p className="eyebrow">چطور کار می‌کند</p>
+      <h2 id="steps-title" className="mt-2 text-3xl font-black md:text-5xl">
         چهار قدم تا فایل نهایی
       </h2>
     </Reveal>
-    <ol className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+    <ol className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {HOW_TO_STEPS.map((step, index) => (
         <li key={step.name}>
-          <Reveal delay={index * 0.1}>
-            <span className="step-number tabular-nums">{fa(index + 1)}</span>
-            <h3 className="mt-3 text-lg font-bold">{step.name}</h3>
+          <Reveal delay={index * 0.08} className="spot h-full p-6">
+            <span className="step-dot tabular-nums">{fa(index + 1)}</span>
+            <h3 className="mt-5 text-lg font-bold">{step.name}</h3>
             <p className="mt-2 text-sm leading-7 text-[var(--soft)]">{step.text}</p>
           </Reveal>
         </li>

@@ -249,13 +249,22 @@ Phases (each ends with a commit message for the user to commit):
 ### Home page (`apps/client/components/Home/`)
 
 - A bright studio: light theme only, brand violet the only colour. The owner
-  rejected dark, stark and multicolour looks, and scroll-pinned category rows.
-- `Showcase` is one pinned scene around `FoldStage` (`@repo/dieline-3d/stage`): the
-  real template as a closed 3D box the visitor sizes with `BoxDock`, unfolding on
-  scroll. Motion values drive it, never React state. The stage reverses the rig's
-  fold direction so the print ends up outside.
-- Below it, drawings come from `lib/dieline/homeBox.ts`, so the page works on an
-  empty catalogue; the engine loads on the first edit.
+  rejected dark, stark and multicolour looks, scroll-pinned category rows, and a
+  scroll-jacked hero (the old 520svh pinned unfold scene was dropped as bad UX).
+- `Showcase` is a normal-height hero: the pitch beside a "studio" card holding
+  `FoldStage` (`@repo/dieline-3d/stage`) with a 3D / dieline toggle, an open/close
+  button and slider (one motion value, never React state per frame), and
+  `BoxDock`. The flat SVG is server HTML and the 3D placeholder, drawn with
+  the engine's `toSVG` in die-maker colours (all home drawings use them).
+- `paintPack` is the box print (a Pacsaz welcome pack on glossy board: logo
+  from `logoPaths.ts`, copy, barcode, violet band; plain kraft on flute). One
+  "نمایش طرح" toggle sweeps it on/off the 3D board and lays it on the 2D sheet
+  inside the bleed (`printSheet.ts`, panels from the same fold rig).
+- Then: the box categories, which are the editor's body types (`PresetId`, the
+  engine's own drawings, each linking to the template built on it when live),
+  steps, production claims, plans, FAQ, course, final call.
+  Preset drawings come from `lib/dieline/homeBox.ts`; the engine loads on the
+  first edit.
 - `/dieline/[slug]?w=&l=&h=&m=` opens a template at that size and material, clamped.
 - FAQ answers use `<details>` to stay in the HTML; `HOW_TO_STEPS` feeds both the
   visible steps and the `HowTo` data.

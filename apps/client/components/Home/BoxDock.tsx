@@ -16,7 +16,7 @@ const BoxDock = () => {
   const { size, range, materials, material, drawing, setDimension, setMaterial, warmUp } = useHomeBox();
 
   return (
-    <form aria-label="ابعاد جعبه" onSubmit={(event) => event.preventDefault()} onPointerEnter={warmUp} onFocus={warmUp} className="glass p-4 md:p-5">
+    <form aria-label="ابعاد جعبه" onSubmit={(event) => event.preventDefault()} onPointerEnter={warmUp} onFocus={warmUp} className="rounded-2xl bg-[#f8f6fe] p-4">
       <div className="grid gap-x-5 gap-y-1 grid-cols-3">
         {FIELDS.map(({ key, label }) => (
           <label key={key} className="block min-w-0 text-xs text-muted-foreground">
