@@ -16,6 +16,9 @@ const FoldStage = dynamic(() => import("@repo/dieline-3d/stage"), { ssr: false }
 
 type View = "3d" | "2d";
 
+/** Pixels of the stage's top the floating title and view switch cover. */
+const STAGE_HEADER = 56;
+
 const PROMISES = [
   { icon: ShieldCheck, text: "کنترل فنی پیش از دانلود" },
   { icon: FileDown, text: "خروجی DXF، PDF و SVG" },
@@ -57,6 +60,8 @@ const Showcase = () => {
         if (!input) return;
         input.value = String(Math.round((1 - value) * 100));
         input.style.setProperty("--fill", `${(1 - value) * 100}%`);
+        // The shadow under the box fades as it opens into a sheet.
+        stageBox.current?.style.setProperty("--closed", String(value));
       }),
     [progress],
   );
@@ -115,11 +120,11 @@ const Showcase = () => {
             <span className="size-1.5 rounded-full bg-primary" />
             طراحی پارامتریک دایلاین
           </p>
-          <h1 id="hero-title" className="mt-5 text-[2.2rem] leading-[1.25] font-black sm:text-5xl xl:text-[3.6rem]">
+          <h1 id="hero-title" className="mt-6 text-[2.4rem] leading-[1.22] font-black tracking-tight sm:text-[3.25rem] xl:text-[4.1rem]">
             دایلاین جعبه‌ات را
-            <span className="text-light block pb-1">در چند ثانیه بساز</span>
+            <span className="text-light block pb-2">در چند ثانیه بساز</span>
           </h1>
-          <p className="mt-5 max-w-lg text-base leading-8 text-[var(--soft)] md:text-lg md:leading-9">
+          <p className="mt-5 max-w-[30rem] text-base leading-8 text-[var(--soft)] md:text-[1.0625rem] md:leading-9">
             قالب را انتخاب کن، ابعاد و جنس مقوا را بده؛ پک‌ساز نقشه‌ی برش و تای دقیق را می‌کشد، کنترل فنی می‌کند و فایل آماده‌ی قالب‌سازی تحویل می‌دهد.
           </p>
 
@@ -133,12 +138,10 @@ const Showcase = () => {
             </Link>
           </div>
 
-          <ul className="mt-9 grid gap-3 text-xs whitespace-nowrap text-[var(--soft)] sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+          <ul className="hero-promises mt-10">
             {PROMISES.map(({ icon: Icon, text }) => (
-              <li key={text} className="flex items-center gap-2">
-                <span className="grid size-6 shrink-0 place-items-center rounded-md bg-violet-100 text-primary">
-                  <Icon className="size-3.5" strokeWidth={2.4} />
-                </span>
+              <li key={text}>
+                <Icon className="size-4 shrink-0 text-primary" strokeWidth={2.2} />
                 {text}
               </li>
             ))}
@@ -148,34 +151,14 @@ const Showcase = () => {
         {/* The studio */}
         <div className="lg:col-span-7">
           <div className="studio">
-            <div className="flex items-center justify-between gap-3 px-4 pt-4 md:px-5">
-              <div className="min-w-0">
-                <p className="truncate text-sm font-bold">{title}</p>
-                <p dir="ltr" className="text-right text-xs text-[var(--soft)] tabular-nums">
-                  {fa(size.width)} × {fa(size.length)} × {fa(size.height)} mm
-                </p>
-              </div>
-              <div role="tablist" aria-label="نمای جعبه" className="segmented">
-                {(
-                  [
-                    { value: "3d", label: "سه‌بعدی", icon: Box },
-                    { value: "2d", label: "دایلاین", icon: Ratio },
-                  ] as const
-                ).map(({ value, label, icon: Icon }) => (
-                  <button key={value} type="button" role="tab" aria-selected={view === value} onClick={() => setView(value)} className={cn(view === value && "on")}>
-                    <Icon className="size-3.5" />
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
+            <div ref={stageBox} className="stage relative aspect-[4/3] md:aspect-[16/11]" style={{ "--closed": 1 } as React.CSSProperties}>
+              <div aria-hidden className={cn("stage-floor", view === "3d" && ready ? "opacity-100" : "opacity-0")} />
 
-            <div ref={stageBox} className="relative mx-4 mt-3 aspect-[4/3] overflow-hidden rounded-2xl bg-[#f6f6f8] md:mx-5 md:aspect-[16/11]">
               {/* Flat drawing, in the product page's colours: always in the HTML, also the 3D placeholder. */}
               <div
                 role="img"
                 aria-label={`دایلاین ${title}`}
-                className={cn("hero-preview absolute inset-0 p-6 transition-opacity duration-500", view === "3d" && ready ? "opacity-0" : "opacity-100")}
+                className={cn("hero-preview absolute inset-0 px-6 pt-16 pb-12 transition-opacity md:pt-20 duration-500", view === "3d" && ready ? "opacity-0" : "opacity-100")}
                 data-print-hide
                 dangerouslySetInnerHTML={{ __html: view === "2d" ? flat : preview }}
               />
@@ -191,15 +174,44 @@ const Showcase = () => {
                     progress={progress}
                     print={print}
                     sway={!reduced}
+                    insetTop={STAGE_HEADER}
                     paused={!onScreen || view !== "3d"}
                     onReady={() => setReady(true)}
                   />
                 </div>
               )}
 
+              {/* The box's name and the view switch float on the stage; only the switch takes clicks. */}
+              <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between gap-3 p-4 md:p-5">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-bold md:text-[0.9375rem]">{title}</p>
+                  <p dir="ltr" className="mt-0.5 text-right text-xs text-[var(--soft)] tabular-nums">
+                    {fa(size.width)} × {fa(size.length)} × {fa(size.height)} mm
+                  </p>
+                </div>
+                <div role="tablist" aria-label="نمای جعبه" className="segmented pointer-events-auto">
+                  {(
+                    [
+                      { value: "3d", label: "سه‌بعدی", icon: Box },
+                      { value: "2d", label: "دایلاین", icon: Ratio },
+                    ] as const
+                  ).map(({ value, label, icon: Icon }) => (
+                    <button key={value} type="button" role="tab" aria-selected={view === value} onClick={() => setView(value)} className={cn(view === value && "on")}>
+                      <Icon className="size-3.5" />
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* The same check the download runs, live on the size being shown. */}
+              <p className={cn("stage-check", drawing.issues > 0 && "stage-check-warn")}>
+                <ShieldCheck className="size-3.5" strokeWidth={2.4} />
+                {drawing.issues === 0 ? "بدون خطای فنی" : `${fa(drawing.issues)} هشدار فنی`}
+              </p>
             </div>
 
-            <div className="px-4 pt-3 md:px-5">
+            <div className="px-4 pt-4 md:px-6">
               {view === "3d" ? (
                 <div className="flex items-center gap-3">
                   <label className="flex min-w-0 flex-1 items-center gap-3 text-xs text-[var(--soft)]">
@@ -237,7 +249,7 @@ const Showcase = () => {
               )}
             </div>
 
-            <div className="p-4 md:p-5">
+            <div className="px-4 pt-4 pb-5 md:px-6 md:pb-6">
               <BoxDock />
             </div>
           </div>

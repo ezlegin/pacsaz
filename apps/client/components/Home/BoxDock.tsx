@@ -16,7 +16,7 @@ const BoxDock = () => {
   const { size, range, materials, material, drawing, setDimension, setMaterial, warmUp } = useHomeBox();
 
   return (
-    <form aria-label="ابعاد جعبه" onSubmit={(event) => event.preventDefault()} onPointerEnter={warmUp} onFocus={warmUp} className="rounded-2xl bg-[#f8f6fe] p-4">
+    <form aria-label="ابعاد جعبه" onSubmit={(event) => event.preventDefault()} onPointerEnter={warmUp} onFocus={warmUp} className="border-t border-[var(--line)] pt-4">
       <div className="grid gap-x-5 gap-y-1 grid-cols-3">
         {FIELDS.map(({ key, label }) => (
           <label key={key} className="block min-w-0 text-xs text-muted-foreground">
@@ -41,7 +41,7 @@ const BoxDock = () => {
         ))}
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
         <fieldset className="flex gap-1 rounded-xl bg-violet-100/60 p-1">
           <legend className="sr-only">جنس مقوا</legend>
           {materials.map((option) => (
@@ -62,9 +62,6 @@ const BoxDock = () => {
           طول تیغ{" "}
           <span dir="ltr" className="font-bold text-[var(--ink)] tabular-nums">
             {fa(drawing.knife / 1000, 2)} m
-          </span>
-          <span className={cn("ms-3 font-bold", drawing.issues === 0 ? "text-primary" : "text-destructive")}>
-            {drawing.issues === 0 ? "بدون خطای فنی" : `${fa(drawing.issues)} هشدار`}
           </span>
         </p>
       </div>
