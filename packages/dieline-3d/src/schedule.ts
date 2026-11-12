@@ -47,7 +47,36 @@ export type FoldWindow = {
    * sliding `layer` board thicknesses into the box as it does.
    */
   press?: { angle: number; start: number; end: number; layer: number };
+  /**
+   * A corner web's half: its angle follows its wall, which rises to `web`
+   * (radians) in the same window, so the web's two halves stay joined at their
+   * crease the whole way (see `webAngle`), not only when the walls are up.
+   */
+  web?: number;
+  /** The web folds into the box rather than out of the corner. */
+  webIn?: boolean;
+  /**
+   * A web authored in a later step than its walls: it first follows the walls
+   * up (during `start`–`end`), then turns on to the panel's own angle during
+   * this window, both halves together as one doubled flap round the corner.
+   */
+  webThen?: { start: number; end: number };
 };
+
+/**
+ * How far a corner web's half turns from its wall while two walls rise
+ * together to `wall` over a square corner, with the web's crease on the
+ * corner's diagonal. Both halves turn by the same φ. Turning out of the corner
+ * their crease points meet when cos φ − sin θ · sin φ = cos θ (45° with the
+ * walls upright); turning into the box, when cos φ + sin θ · sin φ = cos θ
+ * (135°: both halves along the diagonal, inside). Neither is proportional to
+ * θ, and a straight-line fold would part the halves by millimetres mid-step.
+ */
+export function webAngle(wall: number, inward = false): number {
+  const s = Math.sin(wall);
+  const meet = Math.acos(Math.cos(wall) / Math.sqrt(1 + s * s));
+  return inward ? meet + Math.atan(s) : meet - Math.atan(s);
+}
 
 const ALWAYS: FoldWindow = { start: 0, end: 1 };
 
@@ -60,12 +89,119 @@ const LOCK_PRESS = (20 * Math.PI) / 180;
 /** How many board thicknesses an ear sits in from the wall edge: into the gap of a double wall. */
 const EAR_LAYER = 1.5;
 const LOCK_LAYER: Record<1 | 2 | 3, number> = { 1: 0, 2: 2, 3: 1 };
-/** How far past flat a gable's roofs are pushed in while its gussets go in. */
-const GABLE_PRESS = (12 * Math.PI) / 180;
+/**
+ * How far past flat a gable's roofs are pushed in while its gussets go in.
+ * The roofs turn on their outer folds, so the deeper they dip, the further
+ * their inner edges draw back and part the handles standing on them: by
+ * 2 · roof · (1 − cos press). At 5° a 75 mm roof parts them about 0.6 mm, less
+ * than a board; at 12° it was over 3 mm, an open seam down the handle.
+ */
+const GABLE_PRESS = (5 * Math.PI) / 180;
 /** A lone flap that closes this far short of square leans over the lids instead of under them. */
 const CAP_BELOW = (75 * Math.PI) / 180;
 
+/**
+ * Folds a template authors step by step (`FoldOverride.step`) come first, in
+ * their order, every panel of a step together and to its authored angle. The
+ * rest keep the inferred order after them, with the time those authored panels
+ * would have taken there closed up, so nothing pauses. Each authored step lasts
+ * as long as the shortest inferred stage.
+ */
 export function foldSchedule(rig: FoldRig): FoldWindow[] {
+  const inferred = inferredSchedule(rig);
+  const nodes = rig.nodes;
+  const stepOf = (i: number): number | undefined => {
+    // A bend moves with the panel it belongs to.
+    let owner = i;
+    while (nodes[owner]!.kind === "bend" && nodes[owner]!.parent !== null) owner = nodes[owner]!.parent!;
+    const node = nodes[owner]!;
+    return node.parent === null || node.isHole ? undefined : node.step;
+  };
+  const steps = [...new Set(nodes.map((_, i) => stepOf(i)).filter((s): s is number => s !== undefined))].sort((a, b) => a - b);
+  if (steps.length === 0) return inferred;
+
+  // The time the remaining panels use, gaps closed up.
+  const rest = nodes.flatMap((node, i) => {
+    const w = inferred[i]!;
+    if (node.parent === null || node.isHole || stepOf(i) !== undefined || w === ALWAYS) return [];
+    return w.press ? [w, w.press] : [w];
+  });
+  const spans = rest
+    .map((w) => [w.start, w.end] as [number, number])
+    .filter(([a, b]) => b > a)
+    .sort((a, b) => a[0] - b[0])
+    .reduce<[number, number][]>((merged, [a, b]) => {
+      const last = merged[merged.length - 1];
+      if (last && a <= last[1] + 1e-9) last[1] = Math.max(last[1], b);
+      else merged.push([a, b]);
+      return merged;
+    }, []);
+  const covered = spans.reduce((sum, [a, b]) => sum + (b - a), 0);
+  const stage = rest.length ? Math.min(...rest.map((w) => w.end - w.start).filter((d) => d > 0)) : 1;
+  const total = steps.length * stage + covered;
+  const authored = (steps.length * stage) / total;
+  const each = authored / steps.length;
+  // Inferred time, with the gaps removed, onto what is left after the authored steps.
+  const later = (t: number) => {
+    let before = 0;
+    for (const [a, b] of spans) before += Math.max(0, Math.min(t, b) - a);
+    return covered > 0 ? authored + (before / covered) * (1 - authored) : 1;
+  };
+
+  // Corner webs: a half that turns on a wall and shares an outline edge with a
+  // half on the neighbouring wall, both walls rising together off one panel,
+  // the halves in that step or a later one. The pair closes a loop the fold
+  // tree cannot see.
+  const sharesEdge = (a: number, b: number) =>
+    nodes[a]!.face.outline.filter((p) => nodes[b]!.face.outline.some((q) => Math.hypot(p[0] - q[0], p[1] - q[1]) < 1e-6)).length >= 2;
+  const isWebHalf = (i: number) => {
+    const node = nodes[i]!;
+    const wall = node.parent;
+    if (node.kind === "bend" || node.step === undefined || wall === null) return false;
+    const wallStep = nodes[wall]!.step;
+    if (wallStep === undefined || wallStep > node.step) return false;
+    return nodes.some((other, j) => {
+      const otherWall = other.parent;
+      return (
+        j !== i &&
+        other.step === node.step &&
+        otherWall !== null &&
+        otherWall !== wall &&
+        nodes[otherWall]!.parent === nodes[wall]!.parent &&
+        nodes[otherWall]!.step === wallStep &&
+        Math.abs(nodes[otherWall]!.angle - nodes[wall]!.angle) < 1e-6 &&
+        sharesEdge(i, j)
+      );
+    });
+  };
+  const windowOfStep = (step: number): FoldWindow => {
+    const k = steps.indexOf(step);
+    return { start: k * each, end: (k + 1) * each };
+  };
+
+  return nodes.map((node, i) => {
+    const w = inferred[i]!;
+    const step = stepOf(i);
+    if (step !== undefined) {
+      const window = windowOfStep(step);
+      if (node.kind === "bend") return { ...window, angle: 0 };
+      if (!isWebHalf(i)) return window;
+      const wall = nodes[node.parent!]!;
+      const rising = windowOfStep(wall.step!);
+      const web = { web: wall.angle, webIn: node.valley };
+      return wall.step === step ? { ...window, ...web } : { ...rising, ...web, webThen: window };
+    }
+    if (w === ALWAYS) return w;
+    return {
+      ...w,
+      start: later(w.start),
+      end: later(w.end),
+      ...(w.press ? { press: { ...w.press, start: later(w.press.start), end: later(w.press.end) } } : {}),
+    };
+  });
+}
+
+function inferredSchedule(rig: FoldRig): FoldWindow[] {
   const nodes = rig.nodes;
   const root = nodes.findIndex((n) => n.parent === null);
   if (root < 0) return nodes.map(() => ALWAYS);
@@ -334,6 +470,11 @@ export function foldSchedule(rig: FoldRig): FoldWindow[] {
 
 /** The fold angle of a panel with this window at overall `progress`. */
 export function foldAngle(window: FoldWindow, nodeAngle: number, progress: number): number {
+  if (window.web !== undefined) {
+    const standing = webAngle(window.web * stageProgress(window, progress), window.webIn);
+    if (!window.webThen) return standing;
+    return standing + (nodeAngle - standing) * stageProgress(window.webThen, progress);
+  }
   const angle = window.angle ?? nodeAngle;
   const { press } = window;
   if (!press) return angle * stageProgress(window, progress);

@@ -282,10 +282,27 @@ const folds = z
             direction: z.enum(["in", "out"]),
             angle: z.number().finite().min(0).max(180),
             vertexCount: z.number().int().min(0).optional(),
+            step: z.number().int().min(1).max(100).optional(),
           })
           .strict(),
       )
       .max(500),
+    pieces: z
+      .array(
+        z
+          .object({
+            face: z.number().int().min(0),
+            x: z.number().finite().min(-100000).max(100000),
+            y: z.number().finite().min(-100000).max(100000),
+            z: z.number().finite().min(-100000).max(100000),
+            rx: z.number().finite().min(-3600).max(3600),
+            ry: z.number().finite().min(-3600).max(3600),
+            rz: z.number().finite().min(-3600).max(3600),
+          })
+          .strict(),
+      )
+      .max(50)
+      .optional(),
   })
   .strict();
 

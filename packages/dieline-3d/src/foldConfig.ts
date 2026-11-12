@@ -33,6 +33,12 @@ export type FoldOverride = {
   angle: number;
   /** Outline vertex count when authored, for drift detection. */
   vertexCount?: number;
+  /**
+   * When it folds, counted from the flat sheet: every panel of step 1 folds
+   * together first, then step 2, and so on. Panels without a step keep the
+   * inferred order, after the authored steps (see `foldSchedule`).
+   */
+  step?: number;
 };
 
 export type FoldConfig = {
@@ -44,7 +50,14 @@ export type FoldConfig = {
   /** "base" lays the still panel on the ground; "end" (default) stands it up. */
   rest?: "end" | "base";
   overrides: FoldOverride[];
+  /** Where each separate piece stands, by its still panel's face (see `placePieces`). */
+  pieces?: PiecePlacement[];
 };
+
+/** Millimetres with Y up, and degrees about the piece's centre, applied X, Y, then Z. */
+export type PiecePlacement = { face: number; x: number; y: number; z: number; rx: number; ry: number; rz: number };
+
+const finite = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
 
 /** Creases close to 90°; a card folds to 180°. */
 export const DEFAULT_FOLD_ANGLE = 90;
@@ -81,6 +94,7 @@ export const parseFoldConfig = (
         ),
         vertexCount:
           typeof item.vertexCount === "number" ? item.vertexCount : undefined,
+        ...(typeof item.step === "number" && Number.isInteger(item.step) && item.step > 0 ? { step: item.step } : {}),
       });
     }
 
@@ -91,6 +105,13 @@ export const parseFoldConfig = (
       ...(typeof parsed.rootFace === "number" ? { rootFace: parsed.rootFace } : {}),
       ...(parsed.rest === "base" || parsed.rest === "end" ? { rest: parsed.rest } : {}),
       overrides,
+      ...(Array.isArray(parsed.pieces)
+        ? {
+            pieces: parsed.pieces
+              .filter((p): p is PiecePlacement => !!p && typeof p.face === "number")
+              .map((p) => ({ face: p.face, x: finite(p.x), y: finite(p.y), z: finite(p.z), rx: finite(p.rx), ry: finite(p.ry), rz: finite(p.rz) })),
+          }
+        : {}),
     };
   } catch {
     return null;
@@ -151,6 +172,7 @@ export const applyFoldOverrides = (
       valley: override.direction === "in",
       angle: degreesToRadians(override.angle),
       authored: true,
+      ...(override.step === undefined ? {} : { step: override.step }),
     };
   });
 };

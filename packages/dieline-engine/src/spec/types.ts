@@ -177,8 +177,21 @@ export type FoldSettings = {
    * lays it on the ground, as a mailer or tray sits on its bottom.
    */
   rest?: "end" | "base";
-  overrides: { faceIndex: number; direction: "in" | "out"; angle: number; vertexCount?: number }[];
+  /**
+   * `step` orders the fold animation from the flat sheet: panels of step 1 fold
+   * together first, then step 2; panels without one follow in the inferred order.
+   */
+  overrides: { faceIndex: number; direction: "in" | "out"; angle: number; vertexCount?: number; step?: number }[];
+  /**
+   * Where each separate piece (a tray and its sleeve) stands in the 3D view: a
+   * piece is named by its still panel's face index. Millimetres from where the
+   * sheet puts it, with Y up; degrees about the piece's own centre, applied X,
+   * then Y, then Z.
+   */
+  pieces?: PiecePlacement[];
 };
+
+export type PiecePlacement = { face: number; x: number; y: number; z: number; rx: number; ry: number; rz: number };
 
 /** The template's Customize-mode settings that are not attached to one node. */
 export type DocumentCustomize = {

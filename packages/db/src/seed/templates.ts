@@ -439,9 +439,44 @@ function withFolds(template: Template, doc: DielineDocument): DielineDocument {
     };
     const lips = faces.filter((f) => beyond(f, 2 * height));
     const inner = faces.filter((f) => beyond(f, height) && !lips.includes(f));
+    // Step 1, all at once: the four walls stand up off the base, and each corner
+    // web's two halves turn into the tray to meet, folded flat along the
+    // corner's diagonal, inside. Step 2: each web, doubled, swings on round the
+    // corner to lie flat against its long wall: the half on the long wall folds
+    // right back onto it, the half on the end wall lies square to that wall.
+    // Step 3: the end walls' lips fold out. Step 4: the end walls' inner walls
+    // fold over into the tray, so their lips land on the base.
+    const base = faces.find(({ node }) => node.parent === null && Math.abs(node.face.centroid[0] - L / 2) < 1 && Math.abs(node.face.centroid[1] + W / 2) < 1);
+    const walls = faces.filter((f) => base && f.node.parent === base.faceIndex);
+    const webs = faces.filter((f) => {
+      if (!walls.some((w) => w.faceIndex === f.node.parent)) return false;
+      const [x, svgY] = f.node.face.centroid;
+      const y = -svgY;
+      return (x < 0 || x > L) && (y < 0 || y > W);
+    });
+    // The end walls' parts lie beyond the base's short sides.
+    const onEnd = ({ node }: (typeof faces)[number]) => node.face.centroid[0] < 0 || node.face.centroid[0] > L;
+    if (!base || walls.length !== 4 || webs.length !== 8 || inner.filter(onEnd).length !== 2 || lips.filter(onEnd).length !== 2) {
+      throw new Error(`tray-with-sleeve: unexpected fold tree (${base ? 1 : 0} base, ${walls.length} walls, ${webs.length} web halves)`);
+    }
     return {
       ...doc,
-      folds: { faceCount: rig.stats.faceCount, overrides: [...inner.map((f) => override(f, "in", 180)), ...lips.map((f) => override(f, "out", 90))] },
+      folds: {
+        faceCount: rig.stats.faceCount,
+        // A tray sits on its base.
+        rest: "base",
+        overrides: [
+          ...walls.map((f) => ({ ...override(f, "in", 90), step: 1 })),
+          ...webs.map((f) => {
+            const wall = walls.find((w) => w.faceIndex === f.node.parent)!;
+            const y = -wall.node.face.centroid[1];
+            const onLongWall = y > W || y < 0;
+            return { ...override(f, "in", onLongWall ? 180 : 90), step: 2 };
+          }),
+          ...inner.map((f) => ({ ...override(f, "in", 180), ...(onEnd(f) ? { step: 4 } : {}) })),
+          ...lips.map((f) => ({ ...override(f, "out", 90), ...(onEnd(f) ? { step: 3 } : {}) })),
+        ],
+      },
     };
   }
 

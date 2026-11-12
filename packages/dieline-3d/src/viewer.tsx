@@ -5,11 +5,11 @@ import { BoardLights } from "./lights";
 import { Canvas } from "@react-three/fiber";
 import { useEffect, useMemo, useState } from "react";
 import * as THREE from "three";
-import { applyArtwork, applyFold, buildRigScene, materialStyleFor, type RigScene } from "./build";
+import { applyArtwork, applyFold, buildRigScene, materialStyleFor, placePieces, type RigScene } from "./build";
 import { composeArtwork, type ArtworkTransform } from "./artwork";
 import { extractSegmentsFromSvg, extractWindows } from "./extract";
 import { buildFoldRig } from "./foldRig";
-import { parseFoldConfig } from "./foldConfig";
+import { parseFoldConfig, type PiecePlacement } from "./foldConfig";
 import type { FoldRig } from "./types";
 
 /**
@@ -35,13 +35,22 @@ const RigObject = ({
   scene,
   rig,
   progress,
+  pieces,
+  lying,
   onPanelClick,
 }: {
   scene: RigScene;
   rig: FoldRig;
   progress: number;
-  onPanelClick?: (panelIndex: number) => void;
+  pieces?: readonly PiecePlacement[];
+  lying: boolean;
+  onPanelClick?: (panelIndex: number, click: PanelClick) => void;
 }) => {
+  // Stand each piece where the template places it; folding never moves a piece's still panel.
+  useEffect(() => {
+    placePieces(scene, rig, pieces, lying);
+  }, [scene, rig, pieces, lying]);
+
   // Drive the fold. Also runs on mount so the initial pose is correct.
   useEffect(() => {
     applyFold(scene, rig, progress);
@@ -52,17 +61,21 @@ const RigObject = ({
       object={scene.group}
       onClick={
         onPanelClick
-          ? (event: { stopPropagation: () => void; object: THREE.Object3D }) => {
+          ? (event: { stopPropagation: () => void; object: THREE.Object3D; nativeEvent?: MouseEvent }) => {
               event.stopPropagation();
 
               const index = event.object.userData?.panelIndex;
-              if (typeof index === "number") onPanelClick(index);
+              const native = event.nativeEvent;
+              if (typeof index === "number") onPanelClick(index, { additive: !!native && (native.shiftKey || native.ctrlKey || native.metaKey) });
             }
           : undefined
       }
     />
   );
 };
+
+/** How a panel was clicked: `additive` with Shift, Ctrl or Cmd held, to add to a selection. */
+export type PanelClick = { additive: boolean };
 
 export type DielineViewerProps = {
   /** The generated dieline SVG (already exported by the generator). */
@@ -102,14 +115,21 @@ export type DielineViewerProps = {
    */
   onModelInfo?: (info: { hasHinges: boolean; hingeCount: number }) => void;
   /** Called with the panel index when a panel is clicked. */
-  onPanelClick?: (panelIndex: number) => void;
+  onPanelClick?: (panelIndex: number, click: PanelClick) => void;
   /** Panel index to highlight, for editor selection. */
   selectedPanel?: number | null;
+  /** Several panels to highlight at once; joins `selectedPanel`. */
+  selectedPanels?: readonly number[];
   /**
    * Rendered when there is nothing to draw. Injected because the client is
    * Persian and the admin panel is English.
    */
   renderEmpty?: (reason: ViewerEmptyReason) => React.ReactNode;
+  /**
+   * Lets the camera go as close and as far as it likes: for an editor working
+   * on details. A customer's view keeps the model framed.
+   */
+  unlimitedZoom?: boolean;
 };
 
 export const DielineViewer = ({
@@ -126,7 +146,9 @@ export const DielineViewer = ({
   onModelInfo,
   onPanelClick,
   selectedPanel,
+  selectedPanels,
   renderEmpty,
+  unlimitedZoom = false,
 }: DielineViewerProps) => {
   /**
    * The rig is derived data, so it is memoised on its actual inputs. Any change
@@ -171,6 +193,7 @@ export const DielineViewer = ({
   const rig = build.rig;
   // A mailer or tray lies on its still panel; a carton stands on its end.
   const lying = useMemo(() => parseFoldConfig(foldConfig)?.rest === "base", [foldConfig]);
+  const pieces = useMemo(() => parseFoldConfig(foldConfig)?.pieces, [foldConfig]);
 
   const scene = useMemo(() => {
     if (!rig) return null;
@@ -183,9 +206,11 @@ export const DielineViewer = ({
     }
   }, [rig, material, thickness]);
 
-  /** Outline the selected panel so an editor can show what is being edited. */
+  /** Outline the selected panels so an editor can show what is being edited. */
+  const selectedKey = [...(selectedPanels ?? []), ...(selectedPanel == null ? [] : [selectedPanel])].join(",");
   useEffect(() => {
     if (!scene) return;
+    const chosen = new Set(selectedKey ? selectedKey.split(",").map(Number) : []);
 
     scene.group.traverse((object) => {
       const mesh = object as THREE.Mesh;
@@ -194,12 +219,12 @@ export const DielineViewer = ({
       const material3d = mesh.material as THREE.MeshStandardMaterial;
       if (!material3d?.emissive) return;
 
-      const isSelected = mesh.userData.panelIndex === selectedPanel;
+      const isSelected = chosen.has(mesh.userData.panelIndex);
       material3d.emissive.set(isSelected ? SELECTION_COLOR : "#000000");
       material3d.emissiveIntensity = isSelected ? 0.4 : 0;
       material3d.needsUpdate = true;
     });
-  }, [scene, selectedPanel]);
+  }, [scene, selectedKey]);
 
   /**
    * Artwork is composed into a texture in two stages, on purpose.
@@ -338,8 +363,8 @@ export const DielineViewer = ({
             cameraDistance * 0.95,
           ],
           fov: 42,
-          near: 1,
-          far: span * 20,
+          near: unlimitedZoom ? Math.max(0.01, span * 0.0005) : 1,
+          far: span * (unlimitedZoom ? 400 : 20),
         }}
       >
         {/*
@@ -350,7 +375,8 @@ export const DielineViewer = ({
         <BoardLights distance={span} />
 
         {/* Fit the model to the viewer on first view and whenever it is rebuilt or resized. */}
-        <Bounds fit clip observe margin={1.75} maxDuration={0}>
+        {/* Fitting sets near and far for a framed view; an unlimited one keeps its own. */}
+        <Bounds fit clip={!unlimitedZoom} observe margin={1.75} maxDuration={0}>
           {/* The sheet is drawn in the XY plane and folds towards +Z; lying it
               down turns +Z up, so the walls rise from the ground. */}
           <group rotation={[lying ? -Math.PI / 2 : 0, 0, 0]}>
@@ -358,6 +384,8 @@ export const DielineViewer = ({
               scene={scene}
               rig={rig}
               progress={progress}
+              pieces={pieces}
+              lying={lying}
               onPanelClick={onPanelClick}
             />
           </group>
@@ -368,8 +396,9 @@ export const DielineViewer = ({
           enablePan
           enableDamping
           dampingFactor={0.12}
-          minDistance={span * 0.45}
-          maxDistance={span * 4}
+          minDistance={unlimitedZoom ? 0 : span * 0.45}
+          maxDistance={unlimitedZoom ? Infinity : span * 4}
+          zoomToCursor={unlimitedZoom}
         />
       </Canvas>
 

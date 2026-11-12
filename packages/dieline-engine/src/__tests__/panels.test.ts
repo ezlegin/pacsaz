@@ -133,15 +133,15 @@ describe("box bodies", () => {
 
   it("rounds each friction-lock slit into a hook past the tuck fold, which sits below the edge", () => {
     // A 90 mm lid on a 160 mm tall body, 0.5 mm board: the hinge is raised one board to 160.5, the lid
-    // is 50 deep fold to fold (the box across the opening), so the tuck fold is at 210.5 and the edge at 211.
+    // is one board short of the 50 mm across the opening (49.5), so the tuck fold is at 210 and the edge at 210.5.
     const r = render(doc({ nodes: [body({ panels: [{ id: "p", name: "p", width: "90", top: { component: "lib:tuckLid" } }] })] }), { ...INPUTS, width: 50, length: 90, height: 160, thickness: 0.5 });
     // The fold sits one board (0.5 mm) below the edge; each hook rounds off the slit and ends
     // another board past the fold.
-    const hooks = r.paths.filter((p) => p.kind === "line" && p.lineType === "cut" && p.a[0] === p.b[0] && Math.min(p.a[1], p.b[1]) === 210);
+    const hooks = r.paths.filter((p) => p.kind === "line" && p.lineType === "cut" && p.a[0] === p.b[0] && Math.min(p.a[1], p.b[1]) === 209.5);
     expect(hooks).toHaveLength(2);
     expect(r.paths.filter((p) => p.kind === "arc" && p.lineType === "cut" && Math.abs(p.r - 0.4) < 1e-6)).toHaveLength(2);
     const creases = r.paths.filter((p) => p.kind === "line" && p.lineType === "crease" && p.a[1] === p.b[1]).map((p) => (p.kind === "line" ? p.a[1] : 0));
-    expect(creases.sort()).toEqual([160.5, 210.5]);
+    expect(creases.sort()).toEqual([160.5, 210]);
   });
 
   it("notches a dust flap only beside a lid", () => {
@@ -193,17 +193,36 @@ describe("presets", () => {
   it("matches the hand-drawn tuck end's outer size", () => {
     const r = render(rteBox, INPUTS);
     // front + side + back + side + glue flap (a quarter of the 60 mm side, 15). Front and back take the larger
-    // of length and width (100), so the lids sit on them, as deep as the sides
-    // (60), with a tuck sized from the lid's own 100 mm width (15).
+    // of length and width (100), so the lids sit on them, one board short of the
+    // sides (59.5), with a tuck sized from the lid's own 100 mm width (15).
     expect(r.bounds!.maxX).toBeCloseTo(100 + 60 + 100 + 60 + 15);
     // Plus the raised hinge and the tuck fold's step below the lid's edge, one board (0.5 mm) each.
-    expect(r.bounds!.maxY).toBeCloseTo(120 + 60 + 15 + 1);
-    expect(r.bounds!.minY).toBeCloseTo(-75 - 1);
+    expect(r.bounds!.maxY).toBeCloseTo(120 + 59.5 + 15 + 1);
+    expect(r.bounds!.minY).toBeCloseTo(-74.5 - 1);
     expect(r.rulers[0]!.value).toBe(100);
   });
 
   it("is a valid document", () => {
     expect(parseDocument(JSON.parse(JSON.stringify(rteBox)))).toMatchObject({ ok: true });
+  });
+
+  it("keeps the step each authored fold animates in", () => {
+    const fold = { faceIndex: 2, direction: "out", angle: 45, vertexCount: 5 };
+    const withSteps = (step: unknown) => JSON.parse(JSON.stringify({ ...rteBox, folds: { faceCount: 10, overrides: [{ ...fold, step }] } }));
+    const parsed = parseDocument(withSteps(1));
+    expect(parsed.ok && parsed.document.folds?.overrides[0]?.step).toBe(1);
+    // Steps count from 1, whole numbers only.
+    expect(parseDocument(withSteps(0)).ok).toBe(false);
+    expect(parseDocument(withSteps(1.5)).ok).toBe(false);
+  });
+
+  it("keeps where each piece stands in 3D, and refuses a broken placement", () => {
+    const withPieces = (pieces: unknown) => JSON.parse(JSON.stringify({ ...rteBox, folds: { faceCount: 10, overrides: [], pieces } }));
+    const placed = { face: 17, x: 150, y: 0, z: -20, rx: 0, ry: 90, rz: 0 };
+    const parsed = parseDocument(withPieces([placed]));
+    expect(parsed.ok && parsed.document.folds?.pieces).toEqual([placed]);
+    expect(parseDocument(withPieces([{ face: 17, x: 1 }])).ok).toBe(false);
+    expect(parseDocument(withPieces([{ ...placed, extra: 1 }])).ok).toBe(false);
   });
 });
 

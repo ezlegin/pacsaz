@@ -142,7 +142,7 @@ Phases (each ends with a commit message for the user to commit):
   free-end panel 1 mm short, a 30–50 mm joint (45 at 300 high) with 15° tapers.
   Bodies run front, side, back, side, glue; front and back are
   `max(length, width)` and the sides `min(...)`, so lids always sit on the wide
-  panels and dust flaps on the narrow ones. Tuck lids hinge one board thickness above the body edge and are exactly the box across the opening fold to fold (so closed, the tuck fold lands on the far wall); they carry friction-lock slits (rounding into a short hook past the tuck fold, which sits one thickness below the lid edge) along
+  panels and dust flaps on the narrow ones. Tuck lids hinge one board thickness above the body edge and are one board thickness short of the box across the opening, fold to fold (so closed, the tuck fold lands on the far wall's inner face and the tuck turns down inside it); they carry friction-lock slits (rounding into a short hook past the tuck fold, which sits one thickness below the lid edge) along
   the tuck fold (a slit that runs on as a fold is not an open cut; `closedLoops`
   drops slits); dust flaps are nearly square on the lid side with a chamfer and
   slope on the other. Glue areas export and draw with fine dark hatching rising to the right (`GLUE_HATCH`), no outline.
@@ -156,7 +156,8 @@ Phases (each ends with a commit message for the user to commit):
   outline closed at several sizes (see `panels.test.ts`).
 
 - The gable handle carton is measured from a Pacdora sample die (302 × 152 × 182):
-  roof and handle flap each half the box deep, gusset sides at about 52° with a
+  roof and handle flap each half the box deep (the roof half a board less, so
+  closed the two handle flaps stand side by side, not inside each other), gusset sides at about 52° with a
   generously rounded tip, a 45 mm glue flap, straight side lock tabs, and a grip
   flap (`lib:gableRoof` `grip`) folding in on a crease in the back handle's slot.
   Closed (the owner's description): the roofs fold flat 90° in and meet in the
@@ -229,7 +230,24 @@ Phases (each ends with a commit message for the user to commit):
   text in `DielineSettings`), not a rule of thumb.
 - Fold direction and angle per panel are authored in the Studio's 3D dock (click
   a panel) and saved in the template as `doc.folds`, keyed by rig face index with
-  `vertexCount`/`faceCount` for drift detection. The client passes them to the
+  `vertexCount`/`faceCount` for drift detection. An override may carry a `step`
+  (1, 2, ...): those panels fold first, a step at a time from the flat sheet,
+  each step's panels together; the rest keep the inferred order after them.
+  A corner web's halves (both walls rising in one step, halves sharing an edge)
+  follow their walls on `webAngle`, so they stay joined mid-fold. A web authored in a later step than its walls follows them
+  up first, then turns on to its own angle in its step (`webThen`). The tray
+  (seed): step 1 the four walls up, each web standing into the tray on the
+  diagonal (135°); step 2 each web flat against its long wall (180° / 90°). Step 3 the end
+  walls' lips out; step 4 the end walls' inner walls over into the tray.
+- The Studio's 3D dock (`editor/src/canvas/Preview3D.tsx`, logic in
+  `editor/src/model/folds.ts`) authors all of it: Shift/Ctrl-click picks several
+  panels; direction, angle and **step** apply to all of them; a step player
+  stops the fold at the end of each step. `folds.pieces` places each separate
+  piece (by its still panel's face): mm with Y up and degrees about that
+  panel's centre, in the viewer's world frame (`placePieces`), at every point
+  of the fold. Large, the dock is full screen with unlimited zoom
+  (`unlimitedZoom`, editor only). Folds authored here live in the database: re-seeding a
+  template (`seed:templates -- --only=slug`) replaces them with the seed's. The client passes them to the
   viewer as its `foldConfig`. `@repo/dieline-3d/rig` exposes the rig without
   three.js for this.
 - The Studio's Settings tab is how the template is previewed (`settings` prop on

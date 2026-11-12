@@ -1,6 +1,7 @@
 import { foldAngle, foldSchedule, stageProgress, type FoldWindow } from "./schedule";
 import * as THREE from "three";
 import { boardTextures, type BoardTextures } from "./board";
+import type { PiecePlacement } from "./foldConfig";
 import type { FoldRig, Pt, RigNode } from "./types";
 
 /**
@@ -778,6 +779,46 @@ const scheduleOf = (rig: FoldRig): FoldWindow[] => {
   let s = schedules.get(rig);
   if (!s) schedules.set(rig, (s = foldSchedule(rig)));
   return s;
+};
+
+/**
+ * Stands each piece where its placement says. A piece hangs from its still
+ * panel's pivot, which folding never turns, so placing that pivot carries the
+ * whole piece. Placements are in the viewer's world frame (Y up), so `lying`
+ * (the template resting on its base, the scene turned -90° about X) is undone
+ * here: the numbers mean the same thing whichever way the template rests.
+ * Rotation is about the still panel's centre, X then Y then Z.
+ */
+export const placePieces = (scene: RigScene, rig: FoldRig, pieces: readonly PiecePlacement[] | undefined, lying: boolean) => {
+  const center: Pt = [(rig.bounds.min[0] + rig.bounds.max[0]) / 2, (rig.bounds.min[1] + rig.bounds.max[1]) / 2];
+  const toScene = new THREE.Matrix4().makeRotationX(lying ? -Math.PI / 2 : 0);
+  const fromScene = toScene.clone().invert();
+  const byFace = new Map((pieces ?? []).map((p) => [p.face, p]));
+  const deg = THREE.MathUtils.degToRad;
+
+  rig.nodes.forEach((node, index) => {
+    if (node.parent !== null || node.isHole) return;
+    const pivot = scene.pivots[index];
+    if (!pivot) return;
+    const placed = byFace.get(index);
+    if (!placed) {
+      pivot.position.set(0, 0, 0);
+      pivot.quaternion.identity();
+      return;
+    }
+    const xs = node.face.outline.map((p) => p[0]);
+    const ys = node.face.outline.map((p) => p[1]);
+    const mid = toWorld([(Math.min(...xs) + Math.max(...xs)) / 2, (Math.min(...ys) + Math.max(...ys)) / 2], center);
+    const c = new THREE.Vector3(mid.x, mid.y, 0).applyMatrix4(toScene);
+    const turn = new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler(deg(placed.rx), deg(placed.ry), deg(placed.rz), "XYZ"));
+    const world = new THREE.Matrix4()
+      .makeTranslation(c.x + placed.x, c.y + placed.y, c.z + placed.z)
+      .multiply(turn)
+      .multiply(new THREE.Matrix4().makeTranslation(-c.x, -c.y, -c.z));
+    const local = fromScene.clone().multiply(world).multiply(toScene);
+    local.decompose(pivot.position, pivot.quaternion, new THREE.Vector3());
+  });
+  scene.group.updateMatrixWorld(true);
 };
 
 /**

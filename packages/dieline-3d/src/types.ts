@@ -65,6 +65,8 @@ export type RigNode = {
    * tucks an untouched square flap a few degrees past.
    */
   authored?: boolean;
+  /** The authored step this panel folds in, counted from the flat sheet. */
+  step?: number;
   /**
    * True when the panel folds toward the viewer of the flat pattern (+Z), which
    * is what a person calls folding "in". Inference always aims at +Z, so the

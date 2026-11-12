@@ -1,5 +1,5 @@
 import { buildFoldRig } from "./foldRig";
-import { foldAngle, foldSchedule, stageProgress } from "./schedule";
+import { foldAngle, foldSchedule, stageProgress, webAngle } from "./schedule";
 import type { Pt, Segment } from "./types";
 
 let failures = 0;
@@ -173,6 +173,59 @@ assert("plain deep flaps are not pressed", foldSchedule(buildFoldRig(plainSegs))
   const order = [Math.max(...body.map((w) => w.end)), bottomShort[0]?.start, bottomShort[0]?.end, bottomLong[0]?.start, bottomLong[0]?.end, topShort[0]?.start, topShort[0]?.end, topLong[0]?.start].map((v) => v ?? NaN);
   assert("fefco: sides, bottom short, bottom long, top short, top long", order.every((v, k) => k === 0 || v >= order[k - 1]! - 1e-9) && topLong[0]?.end === 1, JSON.stringify(order));
   assert("fefco: short flaps stay square under the long ones", [...topShort, ...bottomShort].every((w) => w.angle === undefined));
+}
+
+// Authored steps: the two sides as step 1 fold together first; the flaps keep
+// their own order after them, with no pause where the sides used to be.
+{
+  const sides = [at(5, 15), at(35, 15)];
+  const authored = buildFoldRig(segments, {
+    version: 1,
+    faceCount: 0,
+    overrides: sides.map((faceIndex) => ({ faceIndex, direction: "in" as const, angle: 90, step: 1 })),
+  });
+  const ws = foldSchedule(authored);
+  const [a, b] = sides.map((i) => ws[i]!);
+  const flaps = [at(20, 2.5), at(20, 27.5)].map((i) => ws[i]!);
+  assert("step 1 first, both sides together", a!.start === 0 && b!.start === 0 && a!.end === b!.end && a!.end > 0, JSON.stringify(ws));
+  assert(
+    "the rest follows straight after and ends the fold",
+    Math.abs(Math.min(...flaps.map((w) => w.start)) - a!.end) < 1e-9 && Math.max(...flaps.map((w) => w.end)) === 1,
+    JSON.stringify(flaps),
+  );
+  assert("an authored step folds to its own angle", Math.abs(foldAngle(a!, authored.nodes[sides[0]!]!.angle, a!.end) - Math.PI / 2) < 1e-9);
+}
+
+// A corner web's halves turn out 45° once the walls stand, and follow the walls
+// on a curve, not a straight line, in between.
+{
+  const deg = (r: number) => (r * 180) / Math.PI;
+  const rad = (d: number) => (d * Math.PI) / 180;
+  assert("web: flat at a flat wall", Math.abs(webAngle(0)) < 1e-12);
+  assert("web: 45° at an upright wall", Math.abs(deg(webAngle(rad(90))) - 45) < 1e-9);
+  // The crease points of both halves meet: cos φ − sin θ · sin φ = cos θ.
+  const meets = [10, 30, 45, 60, 80].every((d) => {
+    const t = rad(d);
+    const f = webAngle(t);
+    return Math.abs(Math.cos(f) - Math.sin(t) * Math.sin(f) - Math.cos(t)) < 1e-12;
+  });
+  assert("web: halves stay joined all the way up", meets);
+  assert("web: not proportional to the wall", Math.abs(deg(webAngle(rad(45))) - 22.5) > 1, `${deg(webAngle(rad(45))).toFixed(2)}°`);
+  // Folded into the box: 135°, both halves along the diagonal inside.
+  assert("web in: flat at a flat wall", Math.abs(webAngle(0, true)) < 1e-12);
+  assert("web in: 135° at an upright wall", Math.abs(deg(webAngle(rad(90), true)) - 135) < 1e-9);
+  const meetsIn = [10, 30, 45, 60, 80].every((d) => {
+    const t = rad(d);
+    const f = webAngle(t, true);
+    return Math.abs(Math.cos(f) + Math.sin(t) * Math.sin(f) - Math.cos(t)) < 1e-12;
+  });
+  assert("web in: halves stay joined all the way up", meetsIn);
+  // A web in a later step than its walls: up with the walls to 135°, then on to
+  // its own angle (180° flat on the long wall) in its step.
+  const later = { start: 0, end: 0.5, web: Math.PI / 2, webIn: true, webThen: { start: 0.5, end: 1 } };
+  const at = (p: number) => deg(foldAngle(later, Math.PI, p));
+  assert("web then: stands at 135° when the walls are up", Math.abs(at(0.5) - 135) < 1e-9, `${at(0.5)}`);
+  assert("web then: lies flat at its own angle", Math.abs(at(1) - 180) < 1e-9 && Math.abs(at(0.75) - 157.5) < 1e-9, `${at(0.75)} ${at(1)}`);
 }
 
 console.log(failures === 0 ? "\nALL FOLD SCHEDULE CHECKS PASSED" : `\n${failures} FAILED`);

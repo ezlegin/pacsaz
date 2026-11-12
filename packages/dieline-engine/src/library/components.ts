@@ -49,9 +49,12 @@ export const tuckLid: ComponentDef = {
   edge: { hinge: "none" },
   params: [auto("depth", "Lid depth, fold to fold"), auto("tuck", "Tuck depth"), auto("lock", "Friction lock length")],
   variables: [
-    // Fold to fold, the lid is exactly as deep as the box across the opening,
-    // so closed, the tuck fold sits right on the far wall's top edge.
-    { name: "d", expr: `depth > 0 ? depth : ${ACROSS}` },
+    // Fold to fold, the lid is one board short of the box across the opening.
+    // It closes on top of the walls, and its tuck turns down inside the far
+    // wall, so the tuck fold has to land on that wall's inner face, where the
+    // dust flap beside a lid steps back to. As deep as the box, it ends on the
+    // wall's outer edge and the tuck has to be forced in over the board.
+    { name: "d", expr: `depth > 0 ? depth : ${ACROSS} - max(0.3, thickness)` },
     // The lid's hinge is raised off the body's edge by the board, so the lid
     // closes on top of the walls instead of pinching their edges.
     { name: "s", expr: "max(0.3, thickness)" },
@@ -482,7 +485,10 @@ export const gableRoof: ComponentDef = {
   ],
   variables: [
     { name: "S", expr: "min(length, width)" },
-    { name: "r", expr: "roof > 0 ? roof : S / 2" },
+    // Each roof stops half a board short of the middle: closed, the two handle
+    // flaps then stand back to back, side by side, instead of both on the
+    // centre line inside each other.
+    { name: "r", expr: "roof > 0 ? roof : S / 2 - max(0.3, thickness) / 2" },
     { name: "h", expr: "handle > 0 ? handle : S / 2" },
     // A round ear at each end, a notch below it, then a slope up to the flat top.
     { name: "a", expr: `min(edge * 0.1, h * ${GABLE_EAR})` },

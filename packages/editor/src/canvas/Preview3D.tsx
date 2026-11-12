@@ -2,16 +2,30 @@
 
 import { toFoldSVG, type FoldSettings, type RenderResult } from "@repo/dieline-engine";
 import { ArtworkPlacer } from "@repo/dieline-3d/ArtworkPlacer";
-import { buildFoldRig, DEFAULT_FOLD_ANGLE, extractSegmentsFromSvg, extractWindows } from "@repo/dieline-3d/rig";
+import { buildFoldRig, DEFAULT_FOLD_ANGLE, extractSegmentsFromSvg, extractWindows, foldSchedule, parseFoldConfig, rigPieces } from "@repo/dieline-3d/rig";
 import { cn } from "@repo/ui/lib/utils";
-import { Box, ImagePlus, Maximize2, Minimize2, Trash2, X } from "lucide-react";
-import { lazy, Suspense, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { Box, ImagePlus, Maximize2, Minimize2, Play, RotateCcw, Trash2, X } from "lucide-react";
+import { lazy, Suspense, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import {
+  common,
+  compactFoldSteps,
+  foldSteps,
+  nextFoldStep,
+  piecePlacement,
+  setPanelFolds,
+  setPanelSteps,
+  setPiecePlacement,
+  stepTimeline,
+  withRest,
+  type FoldPanel,
+  type FoldPatch,
+} from "../model/folds";
 import { useEditor, useStore } from "../state/react";
 
 // three.js is heavy; it loads the first time the dock opens, not with the editor.
 const DielineViewer = lazy(() => import("@repo/dieline-3d/viewer").then((m) => ({ default: m.DielineViewer })));
 
-/** The Studio's dock: the template folded, with fold directions and angles editable. */
+/** The Studio's dock: the template folded, with fold directions, angles and steps editable. */
 export function Preview3D() {
   const store = useStore();
   const result = useEditor((s) => s.result);
@@ -53,12 +67,28 @@ export type FoldPreviewStrings = {
   image: string;
   removeImage: string;
   panel: string;
+  panels: string;
   pickPanel: string;
   auto: string;
   inward: string;
   outward: string;
   angle: string;
   root: string;
+  rootSkipped: string;
+  mixed: string;
+  step: string;
+  newStep: string;
+  steps: string;
+  flat: string;
+  closed: string;
+  play: string;
+  selectStep: string;
+  clear: string;
+  pieces: string;
+  piece: string;
+  position: string;
+  rotation: string;
+  resetPiece: string;
   dragHint: string;
   imageSize: string;
   resetImage: string;
@@ -77,12 +107,28 @@ const FOLD_EN: FoldPreviewStrings = {
   image: "Put an image on the model",
   removeImage: "Remove the image",
   panel: "Panel",
-  pickPanel: "Click a panel to set which way it folds and how far.",
+  panels: "panels",
+  pickPanel: "Click a panel to set how it folds; Shift-click to pick several.",
   auto: "Auto",
   inward: "In",
   outward: "Out",
   angle: "Angle",
   root: "This is the panel everything folds around.",
+  rootSkipped: "(the still panel is left out)",
+  mixed: "mixed",
+  step: "Step",
+  newStep: "New step",
+  steps: "Steps",
+  flat: "Flat",
+  closed: "Closed",
+  play: "Play the fold from flat",
+  selectStep: "Select step",
+  clear: "Clear selection",
+  pieces: "Pieces",
+  piece: "Piece",
+  position: "Position (mm)",
+  rotation: "Rotation (°)",
+  resetPiece: "Back where the sheet puts it",
   rest: "Rests on",
   restEnd: "Its end",
   restBase: "Its base",
@@ -93,10 +139,14 @@ const FOLD_EN: FoldPreviewStrings = {
 
 type Artwork = { url: string; transform: { scale: number; cx: number; cy: number } };
 
+/** How long one step takes when the player runs, in milliseconds. */
+const STEP_MS = 900;
+
 /**
  * A docked 3D view of any render result; the Studio and the Customizer both use
- * it. With `onFoldsChange` panels can be clicked to set their fold direction and
- * angle; with `artwork` an image can be printed on the model (never uploaded).
+ * it. With `onFoldsChange` panels can be clicked (Shift-click for several) to set
+ * their fold direction, angle and the step they fold in; with `artwork` an image
+ * can be printed on the model (never uploaded).
  */
 export function FoldPreview({
   result,
@@ -125,25 +175,45 @@ export function FoldPreview({
   const [progress, setProgress] = useState(1);
   // Opens large in the middle of the canvas; it can be shrunk into a corner.
   const [expanded, setExpanded] = useState(true);
-  const [selected, setSelected] = useState<number | null>(null);
+  const [selected, setSelected] = useState<number[]>([]);
   const [artwork, setArtwork] = useState<Artwork | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
+  const playing = useRef<number | null>(null);
 
   // Rebuilding the rig on every keystroke would stutter; the deferred value lets
   // typing stay responsive and the 3D view catch up.
   const deferred = useDeferredValue(result);
   const svg = useMemo(() => toFoldSVG(deferred), [deferred]);
+  const foldConfig = useMemo(() => (folds ? JSON.stringify({ version: 1, ...folds }) : null), [folds]);
 
-  // The same rig the viewer builds, for naming panels and recording overrides.
-  const rig = useMemo(() => {
+  // The rig with nothing authored: what a panel does on its own, which is what
+  // "Auto" means and what a panel put into a step starts from.
+  const inferredRig = useMemo(() => {
     try {
       return buildFoldRig(extractSegmentsFromSvg(svg), null, extractWindows(svg));
     } catch {
       return null;
     }
   }, [svg]);
-  const panelCount = rig ? rig.nodes.filter((n) => !n.isHole).length : 0;
-  const foldConfig = useMemo(() => (folds ? JSON.stringify({ version: 1, ...folds }) : null), [folds]);
+  // The rig the viewer folds: the steps' places on the fold slider, and its pieces.
+  const foldedRig = useMemo(() => {
+    try {
+      return buildFoldRig(extractSegmentsFromSvg(svg), parseFoldConfig(foldConfig), extractWindows(svg));
+    } catch {
+      return null;
+    }
+  }, [svg, foldConfig]);
+  const timeline = useMemo(() => (foldedRig ? stepTimeline(foldedRig.nodes, foldSchedule(foldedRig)) : []), [foldedRig]);
+  const pieces = useMemo(() => (foldedRig ? rigPieces(foldedRig) : []), [foldedRig]);
+  const [piece, setPiece] = useState<number | null>(null);
+  const activePiece = pieces.find((p) => p.face === piece) ?? null;
+  const panelCount = inferredRig ? inferredRig.nodes.filter((n) => !n.isHole).length : 0;
+
+  // A rebuilt template may have fewer panels; forget any that are gone.
+  useEffect(() => {
+    if (!inferredRig) return;
+    setSelected((s) => (s.every((i) => inferredRig.nodes[i] && !inferredRig.nodes[i]!.isHole) ? s : s.filter((i) => inferredRig.nodes[i] && !inferredRig.nodes[i]!.isHole)));
+  }, [inferredRig]);
 
   useEffect(() => {
     const url = artwork?.url;
@@ -152,48 +222,86 @@ export function FoldPreview({
     };
   }, [artwork?.url]);
 
-  const node = selected !== null ? rig?.nodes[selected] : undefined;
-  const override = folds?.overrides.find((o) => o.faceIndex === selected);
+  useEffect(() => () => {
+    if (playing.current !== null) cancelAnimationFrame(playing.current);
+  }, []);
 
-  const setOverride = (patch: { direction: "in" | "out"; angle: number } | null) => {
-    if (selected === null || !node || !onFoldsChange) return;
-    const others = (folds?.overrides ?? []).filter((o) => o.faceIndex !== selected);
-    const overrides = patch ? [...others, { faceIndex: selected, ...patch, vertexCount: node.face.outline.length }] : others;
-    // The root and the resting side are the template's own choices: editing a panel's fold keeps them.
-    save({ rootFace: folds?.rootFace, rest: folds?.rest, overrides });
+  /** Runs the fold slider from one place to another, a step's worth of time per step. */
+  const playTo = useCallback((to: number, from?: number) => {
+    if (playing.current !== null) cancelAnimationFrame(playing.current);
+    const start = from ?? progress;
+    const span = Math.abs(to - start);
+    if (span < 1e-6) return setProgress(to);
+    const steps = Math.max(1, timeline.length + 1);
+    const duration = Math.max(250, span * steps * STEP_MS);
+    const began = performance.now();
+    const tick = (now: number) => {
+      const k = Math.min(1, (now - began) / duration);
+      const eased = k * k * (3 - 2 * k);
+      setProgress(start + (to - start) * eased);
+      playing.current = k < 1 ? requestAnimationFrame(tick) : null;
+    };
+    playing.current = requestAnimationFrame(tick);
+  }, [progress, timeline.length]);
+
+  const stopPlaying = () => {
+    if (playing.current !== null) cancelAnimationFrame(playing.current);
+    playing.current = null;
   };
 
-  const save = ({ rootFace, rest, overrides }: Pick<FoldSettings, "rootFace" | "rest" | "overrides">) => {
-    if (!onFoldsChange) return;
-    // Nothing authored is stored as nothing, so an untouched template keeps no fold settings.
-    const chosen = rest === "base" ? rest : undefined;
-    onFoldsChange(
-      overrides.length || rootFace !== undefined || chosen
-        ? {
-            faceCount: panelCount,
-            ...(rootFace !== undefined ? { rootFace } : {}),
-            ...(chosen ? { rest: chosen } : {}),
-            overrides: [...overrides].sort((a, b) => a.faceIndex - b.faceIndex),
-          }
-        : undefined,
-    );
-  };
+  const nodes = inferredRig?.nodes ?? [];
+  const chosen = selected.filter((i) => nodes[i] && !nodes[i]!.isHole);
+  // The still panel never folds, so it is left out of every edit.
+  const movable = chosen.filter((i) => nodes[i]!.parent !== null);
+  const panels: FoldPanel[] = movable.map((i) => {
+    const node = nodes[i]!;
+    return { faceIndex: i, vertexCount: node.face.outline.length, valley: node.valley, angle: (node.angle * 180) / Math.PI };
+  });
+  const overrides = movable.map((i) => folds?.overrides.find((o) => o.faceIndex === i));
+  const direction = common(overrides.map((o) => o?.direction ?? "auto"));
+  const angle = common(overrides.map((o) => o?.angle));
+  const step = common(overrides.map((o) => o?.step ?? null));
+  const steps = foldSteps(folds);
 
   const editable = !!onFoldsChange;
+  const save = (next: FoldSettings | undefined) => onFoldsChange?.(compactFoldSteps(next));
+  const setFold = (patch: FoldPatch | "auto") => save(setPanelFolds(folds, panels, patch, panelCount));
+  const setStep = (value: number | null) => save(setPanelSteps(folds, panels, value, panelCount));
+
+  const placement = activePiece ? piecePlacement(folds, activePiece.face) : null;
+  const place = (patch: Parameters<typeof setPiecePlacement>[2]) => {
+    if (activePiece) save(setPiecePlacement(folds, activePiece.face, patch, panelCount));
+  };
+
+  const pick = (i: number, additive: boolean) => {
+    setPiece(null);
+    if (additive) setSelected((s) => (s.includes(i) ? s.filter((j) => j !== i) : [...s, i]));
+    else setSelected((s) => (s.length === 1 && s[0] === i ? [] : [i]));
+  };
+
+  const chip = (on: boolean) =>
+    cn("rounded border", expanded ? "px-2 py-1" : "px-1.5 py-0.5", on ? "border-blue-500 bg-blue-500/10 text-blue-700" : "text-muted-foreground hover:text-foreground");
+  // The full-screen view is for working in, so its controls are a size up.
+  const bar = expanded ? "text-[13px]" : "text-[11px]";
 
   return (
     <div
       dir="ltr"
       className={cn(
-        "absolute z-20 flex flex-col overflow-hidden rounded-lg border bg-background shadow-xl",
-        expanded
-          ? "left-1/2 top-1/2 h-[min(640px,88%)] w-[min(1000px,92%)] -translate-x-1/2 -translate-y-1/2"
-          : cn("bottom-10 right-3 h-[340px] w-[360px]", className),
+        "flex flex-col overflow-hidden border bg-background shadow-xl",
+        // Large, it takes the whole screen; small, it docks in a corner of the canvas.
+        expanded ? "fixed inset-0 z-50" : cn("absolute bottom-10 right-3 z-20 h-[400px] w-[400px] rounded-lg", className),
       )}
       data-own-wheel
       onPointerDown={(e) => e.stopPropagation()}
+      onKeyDown={(e) => {
+        if (e.key === "Escape" && selected.length) {
+          e.stopPropagation();
+          setSelected([]);
+        }
+      }}
     >
-      <div className="flex h-8 shrink-0 items-center gap-1.5 border-b px-2 text-xs">
+      <div className={cn("flex shrink-0 items-center gap-1.5 border-b px-2", expanded ? "h-11 text-sm" : "h-8 text-xs")}>
         <Box className="size-3.5 text-muted-foreground" />
         <span className="font-medium">{t.title}</span>
         <input
@@ -203,8 +311,11 @@ export function FoldPreview({
           step={0.005}
           value={progress}
           title={t.fold}
-          onChange={(e) => setProgress(Number(e.target.value))}
-          className="ml-auto w-28"
+          onChange={(e) => {
+            stopPlaying();
+            setProgress(Number(e.target.value));
+          }}
+          className={cn("ml-auto", expanded ? "w-64" : "w-28")}
         />
         {allowArtwork && (
           <>
@@ -239,6 +350,34 @@ export function FoldPreview({
         )}
       </div>
 
+      {/* The step player: the fold stopped at the end of each step, flat to closed. */}
+      {timeline.length > 0 && (
+        <div className={cn("flex min-h-8 shrink-0 flex-wrap items-center gap-1 border-b px-2 py-1", bar)}>
+          <DockButton title={t.play} onClick={() => playTo(1, 0)}>
+            <Play className="size-3.5" />
+          </DockButton>
+          <span className="mr-1 text-muted-foreground">{t.steps}</span>
+          <button type="button" className={chip(progress < 1e-3)} onClick={() => playTo(0)}>
+            {t.flat}
+          </button>
+          {timeline.map(({ step: s, start, end }) => (
+            <button
+              key={s}
+              type="button"
+              title={`${t.step} ${s}`}
+              // Lit while the fold is inside this step or just finished it.
+              className={chip(progress > start + 1e-3 && progress <= end + 1e-3)}
+              onClick={() => playTo(end, progress > end - 1e-3 || progress < start - 1e-3 ? start : undefined)}
+            >
+              {s}
+            </button>
+          ))}
+          <button type="button" className={chip(progress > 1 - 1e-3)} onClick={() => playTo(1)}>
+            {t.closed}
+          </button>
+        </div>
+      )}
+
       <div className="flex min-h-0 flex-1">
         <div className="relative min-h-0 min-w-0 flex-1 bg-muted/30">
           <Suspense fallback={<p className="p-4 text-xs text-muted-foreground">{t.loading}</p>}>
@@ -249,8 +388,9 @@ export function FoldPreview({
               progress={progress}
               foldConfig={foldConfig}
               artwork={artwork}
-              selectedPanel={editable ? selected : null}
-              onPanelClick={editable ? (i) => setSelected(i === selected ? null : i) : undefined}
+              selectedPanels={editable ? (activePiece ? activePiece.members : chosen) : undefined}
+              unlimitedZoom={editable}
+              onPanelClick={editable ? (i, click) => pick(i, click.additive) : undefined}
               className="h-full w-full"
               renderEmpty={(reason) => (
                 <p className="p-4 text-xs text-muted-foreground">
@@ -274,7 +414,7 @@ export function FoldPreview({
       </div>
 
       {editable && (
-        <div className="flex h-8 shrink-0 items-center gap-1.5 border-t px-2 text-[11px]">
+        <div className={cn("flex min-h-8 shrink-0 flex-wrap items-center gap-1.5 border-t px-2 py-1", bar)}>
           <span className="text-muted-foreground">{t.rest}</span>
           {(
             [
@@ -282,68 +422,148 @@ export function FoldPreview({
               ["base", t.restBase],
             ] as const
           ).map(([value, label]) => (
-            <button
-              key={value}
-              type="button"
-              onClick={() => save({ rootFace: folds?.rootFace, rest: value, overrides: folds?.overrides ?? [] })}
-              className={cn(
-                "rounded border px-1.5 py-0.5",
-                (folds?.rest ?? "end") === value ? "border-blue-500 bg-blue-500/10 text-blue-700" : "text-muted-foreground hover:text-foreground",
-              )}
-            >
+            <button key={value} type="button" onClick={() => save(withRest(folds, value, panelCount))} className={chip((folds?.rest ?? "end") === value)}>
               {label}
+            </button>
+          ))}
+          <span className="ml-3 text-muted-foreground">{t.pieces}</span>
+          {pieces.map((p, k) => (
+            <button
+              key={p.face}
+              type="button"
+              title={`${p.members.length} ${t.panels}`}
+              onClick={() => {
+                setSelected([]);
+                setPiece(piece === p.face ? null : p.face);
+              }}
+              className={chip(piece === p.face)}
+            >
+              {pieces.length > 1 ? `${t.piece} ${k + 1}` : t.piece}
             </button>
           ))}
         </div>
       )}
 
+      {editable && activePiece && placement && (
+        <div className={cn("flex min-h-9 shrink-0 flex-wrap items-center gap-x-3 gap-y-1 border-t px-2 py-1", bar)}>
+          <span className="font-medium">{pieces.length > 1 ? `${t.piece} ${pieces.indexOf(activePiece) + 1}` : t.piece}</span>
+          <span className="flex items-center gap-1">
+            <span className="text-muted-foreground">{t.position}</span>
+            {(["x", "y", "z"] as const).map((axis) => (
+              <NumberField key={axis} label={axis.toUpperCase()} value={placement[axis]} step={5} onChange={(v) => place({ [axis]: v })} wide={expanded} />
+            ))}
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="text-muted-foreground">{t.rotation}</span>
+            {(
+              [
+                ["rx", "X"],
+                ["ry", "Y"],
+                ["rz", "Z"],
+              ] as const
+            ).map(([axis, label]) => (
+              <NumberField key={axis} label={label} value={placement[axis]} step={15} onChange={(v) => place({ [axis]: v })} wide={expanded} />
+            ))}
+          </span>
+          <button type="button" title={t.resetPiece} className={chip(false)} onClick={() => place(null)}>
+            <RotateCcw className="size-3" />
+          </button>
+          <ClearButton title={t.clear} onClick={() => setPiece(null)} />
+        </div>
+      )}
+
       {editable && (
-        <div className="flex min-h-9 shrink-0 flex-wrap items-center gap-1.5 border-t px-2 py-1 text-[11px]">
-          {!node ? (
-            <span className="text-muted-foreground">{t.pickPanel}</span>
-          ) : node.parent === null ? (
-            <span className="text-muted-foreground">
-              {t.panel} {selected! + 1}: {t.root}
-            </span>
+        <div className={cn("flex min-h-9 shrink-0 flex-col justify-center gap-1 border-t px-2 py-1", bar)}>
+          {chosen.length === 0 ? (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-muted-foreground">{t.pickPanel}</span>
+              {steps.length > 0 && (
+                <>
+                  <span className="ml-auto text-muted-foreground">{t.selectStep}</span>
+                  {steps.map(({ step: s, faces }) => (
+                    <button key={s} type="button" title={`${faces.length} ${t.panels}`} className={chip(false)} onClick={() => setSelected(faces)}>
+                      {s}
+                    </button>
+                  ))}
+                </>
+              )}
+            </div>
+          ) : movable.length === 0 ? (
+            <div className="flex items-center gap-1.5">
+              <span className="text-muted-foreground">
+                {t.panel} {chosen[0]! + 1}: {t.root}
+              </span>
+              <ClearButton title={t.clear} onClick={() => setSelected([])} />
+            </div>
           ) : (
             <>
-              <span className="font-medium">
-                {t.panel} {selected! + 1}
-              </span>
-              {(
-                [
-                  ["auto", t.auto],
-                  ["in", t.inward],
-                  ["out", t.outward],
-                ] as const
-              ).map(([value, label]) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => setOverride(value === "auto" ? null : { direction: value, angle: override?.angle ?? DEFAULT_FOLD_ANGLE })}
-                  className={cn(
-                    "rounded border px-1.5 py-0.5",
-                    (override?.direction ?? "auto") === value ? "border-blue-500 bg-blue-500/10 text-blue-700" : "text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  {label}
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="font-medium">
+                  {movable.length === 1 ? `${t.panel} ${movable[0]! + 1}` : `${movable.length} ${t.panels}`}
+                </span>
+                {movable.length < chosen.length && <span className="text-muted-foreground">{t.rootSkipped}</span>}
+                {(
+                  [
+                    ["auto", t.auto],
+                    ["in", t.inward],
+                    ["out", t.outward],
+                  ] as const
+                ).map(([value, label]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setFold(value === "auto" ? "auto" : { direction: value, angle: angle ?? overrides.find((o) => o)?.angle ?? DEFAULT_FOLD_ANGLE })}
+                    className={chip(direction === value)}
+                  >
+                    {label}
+                  </button>
+                ))}
+                {direction === undefined && <span className="text-muted-foreground">{t.mixed}</span>}
+                {direction !== undefined && direction !== "auto" && (
+                  <label className="ml-1 flex items-center gap-1">
+                    {t.angle}
+                    <input
+                      type="range"
+                      min={0}
+                      max={180}
+                      step={5}
+                      value={angle ?? DEFAULT_FOLD_ANGLE}
+                      onChange={(e) => setFold({ direction, angle: Number(e.target.value) })}
+                      className={expanded ? "w-40" : "w-24"}
+                    />
+                    <input
+                      type="number"
+                      min={0}
+                      max={180}
+                      step={1}
+                      value={angle ?? ""}
+                      placeholder={t.mixed}
+                      onChange={(e) => {
+                        const value = Number(e.target.value);
+                        if (e.target.value !== "" && Number.isFinite(value)) setFold({ direction, angle: Math.min(180, Math.max(0, value)) });
+                      }}
+                      className="w-12 rounded border bg-background px-1 font-mono"
+                    />
+                    °
+                  </label>
+                )}
+                <ClearButton title={t.clear} onClick={() => setSelected([])} />
+              </div>
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="text-muted-foreground">{t.step}</span>
+                <button type="button" onClick={() => setStep(null)} className={chip(step === null)}>
+                  {t.auto}
                 </button>
-              ))}
-              {override && (
-                <label className="ml-1 flex items-center gap-1">
-                  {t.angle}
-                  <input
-                    type="range"
-                    min={0}
-                    max={180}
-                    step={5}
-                    value={override.angle}
-                    onChange={(e) => setOverride({ direction: override.direction, angle: Number(e.target.value) })}
-                    className="w-24"
-                  />
-                  <span className="w-8 font-mono">{override.angle}°</span>
-                </label>
-              )}
+                {steps.map(({ step: s }) => (
+                  <button key={s} type="button" onClick={() => setStep(s)} className={chip(step === s)}>
+                    {s}
+                  </button>
+                ))}
+                <button type="button" onClick={() => setStep(nextFoldStep(folds))} className={chip(false)}>
+                  + {t.newStep}
+                </button>
+                {step === undefined && <span className="text-muted-foreground">{t.mixed}</span>}
+              </div>
             </>
           )}
         </div>
@@ -356,6 +576,45 @@ function DockButton({ title, onClick, children }: { title: string; onClick: () =
   return (
     <button type="button" title={title} className="rounded p-1 text-muted-foreground hover:bg-accent hover:text-foreground" onClick={onClick}>
       {children}
+    </button>
+  );
+}
+
+/**
+ * A number typed or nudged with the arrow keys (Shift for ten times the step).
+ * It commits as you type, once the text is a number.
+ */
+function NumberField({ label, value, step, onChange, wide }: { label: string; value: number; step: number; onChange: (value: number) => void; wide: boolean }) {
+  const [text, setText] = useState(String(value));
+  useEffect(() => setText(String(value)), [value]);
+  return (
+    <label className="flex items-center gap-0.5">
+      <span className="font-mono text-muted-foreground">{label}</span>
+      <input
+        type="number"
+        value={text}
+        step={step}
+        onChange={(e) => {
+          setText(e.target.value);
+          const next = Number(e.target.value);
+          if (e.target.value.trim() !== "" && Number.isFinite(next)) onChange(next);
+        }}
+        onKeyDown={(e) => {
+          if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
+          e.preventDefault();
+          const by = (e.shiftKey ? 10 : 1) * step * (e.key === "ArrowUp" ? 1 : -1);
+          onChange(Math.round((value + by) * 1000) / 1000);
+        }}
+        className={cn("rounded border bg-background px-1 font-mono", wide ? "w-20" : "w-14")}
+      />
+    </label>
+  );
+}
+
+function ClearButton({ title, onClick }: { title: string; onClick: () => void }) {
+  return (
+    <button type="button" title={title} className="ml-auto rounded p-0.5 text-muted-foreground hover:bg-accent hover:text-foreground" onClick={onClick}>
+      <X className="size-3" />
     </button>
   );
 }
