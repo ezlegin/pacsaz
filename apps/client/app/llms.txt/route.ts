@@ -58,7 +58,7 @@ async function buildLlmsTxt(): Promise<string> {
     },
     {
       label: "پلن‌ها و قیمت‌ها",
-      path: "/subscription",
+      path: "/pricing",
       note: "اشتراک ماهانه، سه‌ماهه و سالانه",
     },
     {
@@ -69,6 +69,7 @@ async function buildLlmsTxt(): Promise<string> {
     { label: "درباره ما", path: "/about-us", note: "درباره تیم و محصول" },
     { label: "تماس با ما", path: "/contact-us", note: "راه‌های ارتباطی" },
     { label: "قوانین و مقررات", path: "/terms", note: "شرایط استفاده" },
+    { label: "حریم خصوصی", path: "/privacy", note: "اطلاعاتی که نگه می‌داریم و چرا" },
   ];
   for (const page of pages) {
     lines.push(`- [${page.label}](${absoluteUrl(page.path)}): ${page.note}`);

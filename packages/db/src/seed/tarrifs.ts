@@ -35,26 +35,33 @@ type TarrifSeed = {
  * promises more than the product does:
  * any plan removes the watermark, lets the customer lay an image over the dieline and downloads (PDF, AI, DXF) within its quota;
  * `isPremium` (level > 1) unlocks saved copies and the customer list; pro and
- * organization unlock the customizer and the printed 3D preview (`canCustomize`).
+ * organization unlock the customizer (`canCustomize`). Artwork on the dieline
+ * and the 3D model is in every paid plan.
  */
 const FEATURES: FeatureSeed[] = [
   { title: "دسترسی به همه قالب‌ها در هر اندازه دلخواه", type: "general" },
   { title: "دانلود PDF، AI و DXF در اندازه واقعی", type: "general" },
   { title: "خطوط برش، تا و بلید در لایه‌های جدا", type: "general" },
   { title: "پیش‌نمایش سه‌بعدی و تخت بدون واترمارک", type: "general" },
-  { title: "بارگذاری تصویر روی دایلاین و دیدن طرح نهایی", type: "general" },
+  { title: "بارگذاری طرح چاپ و دیدن آن روی دایلاین و مدل سه‌بعدی", type: "general" },
   { title: "بررسی خودکار خطای دایلاین پیش از دانلود", type: "general" },
   { title: "ذخیره نسخه‌ها و دانلود دوباره", type: "paid" },
   { title: "ثبت مشتری و تاریخچه دانلود هر مشتری", type: "paid" },
   { title: "شخصی‌سازی قالب: پنجره، سوراخ، نوع لبه و گردی گوشه", type: "paid" },
-  { title: "پیش‌نمایش سه‌بعدی با طرح چاپ", type: "paid" },
+  { title: "بالاترین سهمیه دانلود در میان پلن‌ها", type: "paid" },
   { title: "پشتیبانی در اولویت", type: "paid" },
 ];
 
+/** Only the organization plan has these; its quota is ten times Standard's in every period. */
+const ORGANIZATION_ONLY = ["بالاترین سهمیه دانلود در میان پلن‌ها", "پشتیبانی در اولویت"];
+
 const BASE_FEATURES = FEATURES.filter((feature) => feature.type === "general").map((feature) => feature.title);
 
-// Prices are in toman. Longer periods are already cheaper per month (about 15% for
-// three months, 25% for a year), so `discountAmount` stays 0 rather than discounting twice.
+// Final prices, in toman. Three months cost about 2.6 months (12% off) and a year
+// costs exactly 9 months, the "three months free" the pricing page promises, so
+// `discountAmount` stays 0 rather than discounting twice. Downloads scale with
+// the period; organization has ten times standard's in every period, so it has
+// the highest download quota.
 const TARRIFS: TarrifSeed[] = [
   {
     key: "standard",
@@ -64,8 +71,8 @@ const TARRIFS: TarrifSeed[] = [
       "همه قالب‌ها را در اندازه دلخواه بسازید و فایل آماده قالب‌سازی بگیرید؛ مناسب طراحی که هر ماه چند جعبه طراحی می‌کند.",
     isRecommended: false,
     discountAmount: 0,
-    price: { monthly: 390_000, threeMonth: 990_000, annual: 3_490_000 },
-    fairDownload: { monthly: 10, threeMonth: 30, annual: 120 },
+    price: { monthly: 490_000, threeMonth: 1_290_000, annual: 4_410_000 },
+    fairDownload: { monthly: 20, threeMonth: 60, annual: 240 },
     features: BASE_FEATURES,
   },
   {
@@ -73,12 +80,12 @@ const TARRIFS: TarrifSeed[] = [
     title: "حرفه‌ای",
     shortDescription: "برای طراحان و استودیوهای بسته‌بندی",
     description:
-      "قالب‌ها را برای هر مشتری شخصی‌سازی کنید، نسخه‌ها را ذخیره کنید و طرح چاپ را روی مدل سه‌بعدی ببینید.",
+      "قالب‌ها را برای هر مشتری شخصی‌سازی کنید، نسخه‌ها را ذخیره کنید و فهرست مشتریان خود را داشته باشید.",
     isRecommended: true,
     discountAmount: 0,
-    price: { monthly: 790_000, threeMonth: 1_990_000, annual: 6_990_000 },
-    fairDownload: { monthly: 30, threeMonth: 100, annual: 400 },
-    features: FEATURES.filter((feature) => feature.title !== "پشتیبانی در اولویت").map((feature) => feature.title),
+    price: { monthly: 990_000, threeMonth: 2_590_000, annual: 8_910_000 },
+    fairDownload: { monthly: 60, threeMonth: 180, annual: 720 },
+    features: FEATURES.filter((feature) => !ORGANIZATION_ONLY.includes(feature.title)).map((feature) => feature.title),
   },
   {
     key: "organization",
@@ -88,8 +95,8 @@ const TARRIFS: TarrifSeed[] = [
       "همه امکانات حرفه‌ای با سهمیه دانلود بالا و پشتیبانی در اولویت؛ مناسب چاپخانه و کارگاهی که هر روز دایلاین تحویل می‌دهد.",
     isRecommended: false,
     discountAmount: 0,
-    price: { monthly: 1_890_000, threeMonth: 4_890_000, annual: 16_900_000 },
-    fairDownload: { monthly: 100, threeMonth: 300, annual: 1_200 },
+    price: { monthly: 2_490_000, threeMonth: 6_490_000, annual: 22_410_000 },
+    fairDownload: { monthly: 200, threeMonth: 600, annual: 2_400 },
     features: FEATURES.map((feature) => feature.title),
   },
 ];

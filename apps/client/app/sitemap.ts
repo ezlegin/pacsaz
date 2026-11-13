@@ -26,11 +26,12 @@ const PUBLIC_PAGES: {
 }[] = [
   { path: "/", changeFrequency: "daily", priority: 1 },
   { path: "/dielines", changeFrequency: "daily", priority: 0.9 },
-  { path: "/subscription", changeFrequency: "weekly", priority: 0.7 },
+  { path: "/pricing", changeFrequency: "weekly", priority: 0.7 },
   { path: "/faq", changeFrequency: "monthly", priority: 0.6 },
   { path: "/about-us", changeFrequency: "monthly", priority: 0.5 },
   { path: "/contact-us", changeFrequency: "monthly", priority: 0.4 },
   { path: "/terms", changeFrequency: "yearly", priority: 0.2 },
+  { path: "/privacy", changeFrequency: "yearly", priority: 0.2 },
 ];
 
 /**

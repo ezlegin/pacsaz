@@ -64,7 +64,7 @@ export default async function CustomizePage({ params, searchParams }: Props) {
         title="ویرایش پیشرفته، ویژه‌ی اشتراک حرفه‌ای"
         text="بال‌ها و درب‌ها را عوض کنید، پنجره و سوراخ آویز اضافه کنید و گزینه‌های طراح قالب را تنظیم کنید؛ همه با بررسی خودکار قابلیت تولید."
       >
-        <Link href="/subscription">
+        <Link href="/pricing">
           <Button variant="gradient">
             <Diamond /> مشاهده‌ی اشتراک‌ها
           </Button>

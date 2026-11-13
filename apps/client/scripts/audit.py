@@ -36,7 +36,7 @@ HTML_ROUTES = [
     "/",
     "/dielines",
     "/faq",
-    "/subscription",
+    "/pricing",
     "/about-us",
     "/contact-us",
     "/terms",
@@ -397,7 +397,7 @@ def main() -> None:
         record("/dieline/*", WARN, "no dieline URLs in the sitemap")
 
     # Graph-level checks on the routes that carry a non-trivial entity.
-    for route in ["/", "/dielines", "/faq", "/subscription"]:
+    for route in ["/", "/dielines", "/faq", "/pricing"]:
         audit_graph(route)
     if categories:
         audit_graph(urllib.parse.urlparse(categories[0]).path)

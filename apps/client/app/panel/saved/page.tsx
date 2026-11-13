@@ -46,7 +46,7 @@ const SavedPage = async ({ searchParams }: Props) => {
             title="این بخش مخصوص پلن‌های حرفه‌ای و سازمانی است"
             description="با ارتقای اشتراک می‌توانی ابعاد، متریال و بلید هر قالب را ذخیره کنی و بی‌نهایت نسخه‌ی شخصی داشته باشی."
             action={
-              <Link href="/subscription">
+              <Link href="/pricing">
                 <Button variant="gradient">مشاهده پلن‌ها</Button>
               </Link>
             }

@@ -8,7 +8,7 @@ import {
 } from "@/lib/seo";
 import { prisma } from "@repo/db";
 
-const PATH = "/subscription";
+const PATH = "/pricing";
 
 const page = async () => {
   const tarrif = await prisma.tarrif.findMany({

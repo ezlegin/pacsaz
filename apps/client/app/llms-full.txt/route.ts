@@ -1,5 +1,5 @@
 import { FAQ_CATEGORIES, FAQ_ITEMS } from "@/data/faq";
-import { termsAndConditions, termsGroups } from "@/data/terms";
+import { privacy, terms } from "@/data/legal";
 import { absoluteUrl, CONTACT, SITE_NAME, SITE_TAGLINE } from "@/lib/seo/site";
 import { dielineDescription, materialLabel } from "@/lib/seo/schema";
 import { prisma } from "@repo/db";
@@ -54,31 +54,13 @@ async function build(): Promise<string> {
     }
   }
 
-  lines.push("## قوانین و مقررات", "");
-  for (const group of termsGroups) {
-    lines.push(`### ${group.title}`, "");
-    if (group.description) lines.push(`${group.description}`, "");
-
-    // `items` holds indices into the flat list, not the clauses themselves.
-    for (const index of group.items) {
-      const clause = termsAndConditions[index];
-      if (clause) lines.push(`- ${clause}`);
-    }
-    lines.push("");
-  }
-
-  /**
-   * Any clause the groups do not reference is emitted separately, so a newly
-   * added term cannot silently drop out of this file.
-   */
-  const referenced = new Set(termsGroups.flatMap((group) => group.items));
-  const unreferenced = termsAndConditions.filter(
-    (_, index) => !referenced.has(index),
-  );
-  if (unreferenced.length) {
-    lines.push("### بندهای تکمیلی", "");
-    for (const item of unreferenced) lines.push(`- ${item}`);
-    lines.push("");
+  for (const doc of [terms, privacy]) {
+    lines.push(`## ${doc.title}`, "", doc.intro, "");
+    doc.sections.forEach((section, index) => {
+      lines.push(`### ماده ${index + 1}. ${section.title}`, "");
+      for (const clause of section.clauses) lines.push(`- ${clause}`);
+      lines.push("");
+    });
   }
 
   const catalogueSection = await catalogue();

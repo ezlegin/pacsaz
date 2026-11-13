@@ -56,7 +56,7 @@ export function InputForm({ setLoginStep, setPhoneNumber }: Props) {
     stopLoading();
   };
 
-  /** 912 745 2859 */
+  /** 912 123 4567 */
   const formatted = digits
     .replace(/^(\d{3})(\d{0,3})(\d{0,4})$/, (_m, a, b, c) =>
       [a, b, c].filter(Boolean).join(" "),
@@ -118,7 +118,7 @@ export function InputForm({ setLoginStep, setPhoneNumber }: Props) {
                       inputMode="numeric"
                       autoComplete="tel"
                       dir="ltr"
-                      placeholder="912 745 2859"
+                      placeholder="912 123 4567"
                       className="h-12 pl-14 pr-10 text-left font-bold tracking-wider tabular-nums"
                       onChange={(e) =>
                         field.onChange(

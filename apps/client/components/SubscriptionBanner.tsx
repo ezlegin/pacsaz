@@ -105,7 +105,7 @@ const SubscriptionBanner = ({
           </div>
 
           <a
-            href="/subscription"
+            href="/pricing"
             className="shrink-0 rounded-xl bg-white px-3 py-1.5 text-[11px] font-bold text-violet-700"
           >
             مشاهده
@@ -180,7 +180,7 @@ const SubscriptionBanner = ({
 
           <div className="flex items-center gap-2">
             <a
-              href="/subscription"
+              href="/pricing"
               className="group flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-gradient-to-l from-violet-500 to-purple-600 px-3 py-2 text-[11px] font-bold text-white shadow-sm transition-all duration-300 hover:gap-2.5 hover:shadow-md hover:shadow-primary/25"
             >
               فعال‌سازی اشتراک

@@ -34,17 +34,11 @@
     background-color 0.2s;
 }
 .btn-primary {
-  background: linear-gradient(180deg, #8b5cf6, #6d28d9);
+  background-color: #6d28d9;
   color: white;
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.3),
-    0 12px 28px -12px rgb(124 58 237 / 0.7);
 }
 .btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.3),
-    0 16px 34px -12px rgb(124 58 237 / 0.8);
+  background-color: #5b21b6;
 }
 .btn-glass {
   background: white;
@@ -63,17 +57,11 @@
 .glass {
   border-radius: 1.5rem;
   background: rgb(255 255 255 / 0.78);
-  box-shadow:
-    inset 0 0 0 1px rgb(76 29 149 / 0.09),
-    0 24px 48px -30px rgb(76 29 149 / 0.35);
-  backdrop-filter: blur(16px);
+  box-shadow: inset 0 0 0 1px rgb(76 29 149 / 0.09);
 }
 
 .text-light {
-  background: linear-gradient(100deg, #5b21b6, #7c3aed 55%, #a78bfa);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: #6d28d9;
 }
 
 .eyebrow {
@@ -84,24 +72,6 @@
 
 /* --------------------------------- hero --------------------------------- */
 
-.hero-light {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background:
-    radial-gradient(40rem 28rem at 30% 40%, rgb(196 181 253 / 0.45), transparent 70%),
-    radial-gradient(30rem 20rem at 95% 0%, rgb(221 214 254 / 0.7), transparent 70%);
-}
-.hero-grid {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background-image:
-    linear-gradient(rgb(124 58 237 / 0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(124 58 237 / 0.07) 1px, transparent 1px);
-  background-size: 48px 48px;
-  mask-image: radial-gradient(70% 60% at 50% 30%, black, transparent);
-}
 .hero-badge {
   display: inline-flex;
   align-items: center;
@@ -134,16 +104,29 @@
   border: 1px solid rgb(76 29 149 / 0.1);
   border-radius: 1.75rem;
   background: white;
-  box-shadow:
-    0 2px 4px rgb(76 29 149 / 0.04),
-    0 50px 90px -45px rgb(76 29 149 / 0.5);
 }
-/* A photo sweep: light falls from above onto lavender paper, the box stands in it. */
+/* A plain neutral stage: no tint, so the box's own colours read true. */
 .stage {
   overflow: hidden;
-  background:
-    radial-gradient(70% 60% at 50% 38%, rgb(255 255 255 / 0.85), transparent 72%),
-    linear-gradient(180deg, #f4f0fe, #e7dffc);
+  background-color: #f4f4f6;
+}
+/*
+ * The hero's paper carries a quiet pattern of small squares, two sizes on an
+ * offset lattice, faint enough to read as texture rather than a drawing.
+ */
+.hero {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' fill='none' stroke='%232a1f46' stroke-opacity='0.07'%3E%3Crect x='8.5' y='8.5' width='7' height='7' rx='1'/%3E%3Crect x='37.5' y='37.5' width='4' height='4' rx='0.5'/%3E%3C/svg%3E");
+  background-size: 56px 56px;
+  background-position: center top;
+}
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 30%;
+  z-index: -1;
+  background: linear-gradient(transparent, var(--night));
+  pointer-events: none;
 }
 .stage-floor {
   position: absolute;
@@ -152,7 +135,7 @@
   width: 34%;
   height: 9%;
   border-radius: 50%;
-  background: rgb(76 29 149 / 0.28);
+  background: rgb(30 20 50 / 0.16);
   filter: blur(18px);
   translate: -50% 0;
   /* `--closed` is the fold: 1 a standing box, 0 a flat sheet with no floor under it. */
@@ -350,9 +333,7 @@
   height: 1.25rem;
   border-radius: 999px;
   background: white;
-  box-shadow:
-    inset 0 0 0 5px #7c3aed,
-    0 3px 10px rgb(76 29 149 / 0.35);
+  box-shadow: inset 0 0 0 5px #7c3aed;
   transition: transform 0.15s;
 }
 .size-range::-moz-range-thumb {

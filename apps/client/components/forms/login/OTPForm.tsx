@@ -40,7 +40,7 @@ const RESEND_SECONDS = 60;
 const fa = (value: number) =>
   value.toLocaleString("fa-IR", { useGrouping: false });
 
-/** `09127452859` -> `0912 745 2859` for display only. */
+/** `09121234567` -> `0912 123 4567` for display only. */
 const formatPhone = (phone: string) =>
   phone.replace(/^(\d{4})(\d{3})(\d{4})$/, "$1 $2 $3");
 

@@ -219,7 +219,7 @@ const buildOfferCatalogue = (
         price: amount,
         priceCurrency: "IRR",
         availability: "https://schema.org/InStock",
-        url: absoluteUrl("/subscription"),
+        url: absoluteUrl("/pricing"),
         category: "subscription",
         priceSpecification: {
           "@type": "UnitPriceSpecification",

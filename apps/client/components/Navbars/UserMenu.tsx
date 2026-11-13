@@ -132,7 +132,7 @@ const UserMenu = ({ user }: { user: NavbarUser }) => {
 
           {!user.plan && (
             <Link
-              href="/subscription"
+              href="/pricing"
               onClick={() => setOpen(false)}
               className="flex items-center justify-center gap-1.5 rounded-lg bg-gradient-to-l from-violet-500 to-purple-600 px-3 py-1.5 text-[11px] font-bold text-white transition-opacity hover:opacity-90"
             >

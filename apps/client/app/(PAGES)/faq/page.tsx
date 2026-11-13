@@ -69,7 +69,7 @@ const page = () => {
             </Link>
 
             <Link
-              href="/subscription"
+              href="/pricing"
               className="rounded-xl border bg-background px-4 py-2.5 text-xs font-medium transition-colors hover:border-primary/30 hover:text-primary"
             >
               مشاهده‌ی پلن‌ها

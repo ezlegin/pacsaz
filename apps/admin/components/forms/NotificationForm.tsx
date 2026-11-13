@@ -126,7 +126,7 @@ function NotificationForm({
               <FormItem>
                 <FormLabel>CTA link</FormLabel>
                 <FormControl>
-                  <Input placeholder="/subscription" {...field} />
+                  <Input placeholder="/pricing" {...field} />
                 </FormControl>
                 <Hint>An internal path or a full URL.</Hint>
                 <FormMessage />

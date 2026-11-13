@@ -1,8 +1,7 @@
-import { termsAndConditions } from "@/data/terms";
+import { privacy, terms } from "@/data/legal";
 import { ScrollArea } from "@repo/ui/components/scroll-area";
 import { ArrowUpRight, ScrollText, ShieldCheck } from "lucide-react";
 import Link from "next/link";
-import Terms from "../Terms";
 
 const Step4 = () => {
   const fa = (value: number) =>
@@ -15,8 +14,8 @@ const Step4 = () => {
           قوانین و مقررات را بپذیر
         </h2>
         <p className="text-xs leading-6 text-muted-foreground">
-          ثبت‌نام شما به‌منزله‌ی تایید کامل {fa(termsAndConditions.length)} بند
-          قوانین پک‌ساز است. لطفاً پیش از تایید، حداقل بخش‌های مربوط به مسئولیت
+          ثبت‌نام شما به‌منزله‌ی پذیرش {fa(terms.sections.length)} ماده‌ی قوانین
+          پک‌ساز و سیاست حریم خصوصی است. لطفاً پیش از تایید، حداقل بخش‌های مربوط به مسئولیت
           کاربر را بخوانید.
         </p>
       </header>
@@ -70,7 +69,23 @@ const Step4 = () => {
           className="h-72 w-full rounded-2xl border bg-muted/20 p-4"
         >
           <div className="pl-3 text-muted-foreground">
-            <Terms style="raw" />
+            {[terms, privacy].map((doc) => (
+              <div key={doc.title} className="space-y-4 pb-6">
+                <p className="text-sm font-bold text-foreground">{doc.title}</p>
+                {doc.sections.map((section, index) => (
+                  <div key={section.id} className="space-y-1.5">
+                    <p className="text-xs font-bold text-foreground">
+                      ماده {fa(index + 1)}. {section.title}
+                    </p>
+                    {section.clauses.map((clause, clauseIndex) => (
+                      <p key={clauseIndex} className="text-xs leading-6">
+                        {fa(index + 1)}.{fa(clauseIndex + 1)} {clause}
+                      </p>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            ))}
           </div>
         </ScrollArea>
       </div>

@@ -20,9 +20,9 @@ import {
   Sparkles,
 } from "lucide-react";
 
-const EMAIL = "pacsaz.ir@gmail.com";
-const PHONE = "09962224177";
-const PHONE_LABEL = "۰۹۹۶-۲۲۲-۴۱۷۷";
+const EMAIL = CONTACT.email;
+const PHONE = CONTACT.phone;
+const PHONE_LABEL = CONTACT.telephoneLabel;
 
 const page = async () => {
   const user = await getSessionUser();

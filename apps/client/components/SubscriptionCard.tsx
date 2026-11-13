@@ -15,7 +15,7 @@ const PERIOD_SUFFIX: Record<PlanPeriod, string> = {
 const faDigits = (value: number) =>
   Math.round(value).toLocaleString("fa-IR", { useGrouping: false });
 
-/** Prices are stored in Rial-ish units; the UI shows them in thousand Toman. */
+/** Prices are stored in toman (the gateway multiplies by 10); the UI shows thousand toman. */
 const formatPrice = (value: number) => (value / 1000).toLocaleString("fa-IR");
 
 /**
@@ -91,7 +91,7 @@ export const SubscriptionCard = ({
             >
               {formatPrice(finalPrice)}
             </span>
-            <span className="text-sm font-semibold">تومان</span>
+            <span className="text-sm font-semibold">هزار تومان</span>
             <span className="text-xs text-muted-foreground">
               / {PERIOD_SUFFIX[period]}
             </span>

@@ -134,12 +134,9 @@ const PaymentCard = ({
   const onStartPayment = async () => {
     startLoading();
     const res = await createPayment({
-      total: totalPrice,
-      amount: tarrif.price![period],
       plan: tarrif.key,
       period,
       discountCode: appliedDiscountCode,
-      discountCodeAmount,
     });
 
     if (res.error) {

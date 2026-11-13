@@ -1,18 +1,31 @@
 "use server";
 
 import { serverErrorMessage } from "@/data/consts";
-import { OnboardingFormType, ProfileFormType } from "@/lib/validatoinSchema";
+import {
+  onboardingFormSchema,
+  OnboardingFormType,
+  profileFormSchema,
+  ProfileFormType,
+} from "@/lib/validatoinSchema";
+import { getSessionUser } from "@repo/auth/session";
 import { notifyWelcome } from "@/lib/notifications/send";
 import { prisma } from "@repo/db";
 
-export const updateUserProfile = async (data: ProfileFormType, id: number) => {
+/**
+ * Both actions change the signed-in user only. They used to take the user's id
+ * or phone number from the browser, which let anyone rewrite anyone's profile.
+ * `id` is kept for the callers but ignored.
+ */
+export const updateUserProfile = async (data: ProfileFormType, _id?: number) => {
   try {
-    const existingUser = await prisma.user.findFirst({ where: { id } });
-    if (!existingUser) return { error: "User Not Found." };
+    const user = await getSessionUser();
+    if (!user) return { error: "ابتدا وارد شوید." };
+    const parsed = profileFormSchema.safeParse(data);
+    if (!parsed.success) return { error: "اطلاعات وارد شده معتبر نیست." };
 
     await prisma.user.update({
-      where: { id },
-      data,
+      where: { id: user.id },
+      data: parsed.data,
     });
 
     return { success: "کاربر با موفقیت به روزرسانی شد." };
@@ -25,11 +38,13 @@ export const updateUserProfile = async (data: ProfileFormType, id: number) => {
 export const updateUserDataFromOnboardingForm = async (
   data: OnboardingFormType,
 ) => {
-  const { email, firstName, lastName, usageGoal, userType, phoneNumber } = data;
+  const parsed = onboardingFormSchema.safeParse(data);
+  if (!parsed.success) return { error: "اطلاعات وارد شده معتبر نیست." };
+  const { email, firstName, lastName, usageGoal, userType } = parsed.data;
   try {
-    const existingUser = await prisma.user.findUnique({
-      where: { phoneNumber },
-    });
+    const session = await getSessionUser();
+    const phoneNumber = session?.phoneNumber ?? "";
+    const existingUser = session;
     if (!existingUser)
       throw new Error("کاربری با مشخصات شما وجود ندارد. لطفا مجددا وارد شوید.");
 

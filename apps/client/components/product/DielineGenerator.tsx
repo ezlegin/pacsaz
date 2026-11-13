@@ -36,7 +36,7 @@ const DielineGenerator = ({
 
   const { isRendering, template, problems } = useEngineDieline(
     { ...dieline, customSettings },
-    { watermark: !user },
+    { watermark: !user?.plan },
   );
 
   const customizable = !!template && customizeOptions(template).any;

@@ -25,7 +25,7 @@ const NavbarButtons = async () => {
   if (!user) {
     return (
       <div className="flex items-center gap-2">
-        <Link href="/subscription">
+        <Link href="/pricing">
           <Button variant="ghost" className="text-muted-foreground">
             <Diamond />
             اشتراک
@@ -85,7 +85,7 @@ const NavbarButtons = async () => {
         </Link>
       ) : (
         <Link
-          href="/subscription"
+          href="/pricing"
           className="group inline-flex items-center gap-2 rounded-xl border border-primary/25 bg-primary/[0.07] px-3 py-2 text-[11px] font-bold text-primary transition-all duration-200 hover:border-primary/45 hover:shadow-sm"
         >
           <Diamond />
@@ -127,7 +127,7 @@ export const MobileAccountPanel = async () => {
             ورود / ثبت‌نام
           </Button>
         </Link>
-        <Link href="/subscription" className="block">
+        <Link href="/pricing" className="block">
           <Button variant="outline" size="lg" className="w-full">
             <Diamond />
             مشاهده پلن‌ها

@@ -37,11 +37,11 @@ import { watermarkPattern } from "@/public";
  * Previewing artwork on the 3D model is a paid capability.
  *
  * Decided from the active plan's key rather than an ad-hoc flag, so it follows the
- * pricing tiers directly: `standard` does not include it, `pro` and `organization`
- * do. Nothing is enforced server-side because the feature is preview-only and the
+ * pricing tiers directly: every paid plan (`standard`, `pro`, `organization`)
+ * includes it. Nothing is enforced server-side because the feature is preview-only and the
  * image never leaves the browser.
  */
-const ARTWORK_PLAN_KEYS = ["pro", "organization"] as const;
+const ARTWORK_PLAN_KEYS = ["standard", "pro", "organization"] as const;
 
 const canUseArtwork = (user: UserType | null): boolean =>
   Boolean(
@@ -476,7 +476,7 @@ const DielinePreview3D = ({
               asChild
               className="group flex-1 bg-gradient-to-l from-violet-500 to-purple-600 text-white shadow-sm transition-all duration-300 hover:shadow-lg hover:shadow-primary/30"
             >
-              <Link href="/subscription">
+              <Link href="/pricing">
                 <Sparkles className="size-3.5" />
                 ارتقای پلن
                 <ArrowLeft className="size-3.5 transition-transform duration-300 group-hover:-translate-x-0.5" />

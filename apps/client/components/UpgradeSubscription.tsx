@@ -79,7 +79,7 @@ const UpgradeSubscription = ({
             </Label>
           </Card>
         ))}
-        <Link target="_blank" href={"/subscription"} className="w-fit">
+        <Link target="_blank" href={"/pricing"} className="w-fit">
           <Button
             size={"sm"}
             variant={"link"}

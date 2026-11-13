@@ -195,6 +195,10 @@ const LoginCard = ({
             <Link href="/terms" className="font-medium text-primary hover:underline">
               قوانین و مقررات
             </Link>{" "}
+            و{" "}
+            <Link href="/privacy" className="font-medium text-primary hover:underline">
+              حریم خصوصی
+            </Link>{" "}
             پک‌ساز است.
           </p>
         </section>

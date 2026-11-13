@@ -29,7 +29,7 @@ export interface TarrifType extends Tarrif {
 const PERIODS: { value: PlanPeriod; label: string; hint?: string }[] = [
   { value: "monthly", label: "ماهیانه" },
   { value: "threeMonth", label: "۳ ماهه" },
-  { value: "annual", label: "سالیانه", hint: "۳۰٪ تخفیف" },
+  { value: "annual", label: "سالیانه", hint: "۲۵٪ تخفیف" },
 ];
 
 const SubscriptionList = ({

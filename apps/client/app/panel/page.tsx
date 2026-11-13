@@ -170,7 +170,7 @@ const Page = async () => {
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
-                <Link href="/subscription">
+                <Link href="/pricing">
                   <Button variant="gradient" size="xl" className="group">
                     مشاهده پلن‌ها و فعال‌سازی
                     <ArrowLeft className="size-4 transition-transform duration-300 group-hover:-translate-x-1" />
@@ -240,7 +240,7 @@ const Page = async () => {
               </div>
 
               <Link
-                href="/subscription"
+                href="/pricing"
                 className="text-xs font-medium text-primary hover:underline"
               >
                 مقایسه کامل پلن‌ها
@@ -381,7 +381,7 @@ const Page = async () => {
             </div>
           </div>
 
-          <Link href="/subscription">
+          <Link href="/pricing">
             <Button variant="gradient" className="group w-full sm:w-auto">
               فعال‌سازی اشتراک
               <ArrowLeft className="size-4 transition-transform duration-300 group-hover:-translate-x-1" />

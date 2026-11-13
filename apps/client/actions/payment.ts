@@ -1,5 +1,6 @@
 "use server";
 
+import { quote } from "@/lib/payment/quote";
 import {
   initiateZarinpalPayment,
   verifyZarrinPalPurchase,
@@ -32,29 +33,33 @@ type Response = Promise<
 >;
 
 export const createPayment = async (params: {
-  amount: number;
-  total: number;
   plan: PlanKey;
   period: PlanPeriod;
   discountCode: string | null;
-  discountCodeAmount: number;
 }) => {
-  const { amount, discountCode, discountCodeAmount, period, plan, total } =
-    params;
+  const { discountCode, period, plan } = params;
   try {
-    const tarrif = await prisma.tarrif.findUnique({ where: { key: plan } });
+    if (!(["monthly", "threeMonth", "annual"] as PlanPeriod[]).includes(period))
+      return { error: "دوره‌ی اشتراک معتبر نیست." };
+    const tarrif = await prisma.tarrif.findUnique({ where: { key: plan }, include: { price: true } });
     if (!tarrif) return { error: "Tarrif Not Found." };
 
-    // A campaign coupon has the same shape as any other percent coupon, so
-    // checkout needs no special case; look it up by code as usual.
+    // The price is worked out here from the database, never taken from the
+    // browser: a client-sent total let anyone pay what they liked. A campaign
+    // coupon has the same shape as any other percent coupon.
     let couponId: number | undefined = undefined;
+    let coupon = null;
     if (discountCode) {
-      const existingCoupon = await prisma.coupon.findUnique({
+      coupon = await prisma.coupon.findUnique({
         where: { code: discountCode },
+        include: { tarrif: { select: { key: true } } },
       });
-      if (!existingCoupon) return { error: "Coupon Invalid." };
-      couponId = existingCoupon.id;
+      if (!coupon) return { error: "کد تخفیف نا معتبر می باشد." };
+      couponId = coupon.id;
     }
+    const priced = quote(tarrif, period, coupon);
+    if ("error" in priced) return { error: priced.error };
+    const { amount, discount: discountCodeAmount, total } = priced;
 
     const user = await getSessionUser();
     if (!user) return { error: "User Not Found." };
@@ -143,10 +148,30 @@ export const verifyPayment = async (
         }),
       ])) as Payment & { tarrif: Tarrif & { fairDownload: FairDownload } };
       if (!payment) throw new Error("توکن پرداخت معتبر نمی باشد.");
+      if (payment.userId !== user.id) throw new Error("توکن پرداخت معتبر نمی باشد.");
 
+      // A payment is activated once. Reloading the result page verifies again
+      // (the gateway answers "already verified"), which used to create a fresh
+      // plan with its download count back at zero.
+      if (payment.status === "success") {
+        const plan = await ts.plan.findUnique({ where: { paymentId: payment.id } });
+        if (!plan) throw new Error("اشتراک این پرداخت پیدا نشد. با پشتیبانی تماس بگیرید.");
+        return {
+          success: "این پرداخت قبلاً تایید شده است.",
+          plan: {
+            paymentId: payment.id,
+            amount: payment.amount,
+            periodLabel: mapPeriodLabel(payment.period),
+            endsAt: plan.endsAt,
+            fairDownload: plan.fairDownload,
+          },
+        };
+      }
+
+      // Verify what the gateway actually charged: the total after the coupon.
       const verifyPayment = await verifyZarrinPalPurchase(
         payment.authority!,
-        payment.amount,
+        payment.total,
         status,
       );
 
@@ -163,6 +188,10 @@ export const verifyPayment = async (
         where: { id: payment.id },
         data: { status: "success" },
       });
+
+      // A coupon's limit only means something if its uses are counted.
+      if (payment.couponId)
+        await ts.coupon.update({ where: { id: payment.couponId }, data: { used: { increment: 1 } } });
 
       // Scoped to this user: activating one subscription must only retire that
       // user's own previous plan. Without the `userId` filter a single purchase

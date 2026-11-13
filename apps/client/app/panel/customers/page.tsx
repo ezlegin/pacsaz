@@ -49,7 +49,7 @@ const page = async ({ searchParams }: Props) => {
             title="این بخش مخصوص پلن‌های حرفه‌ای و سازمانی است"
             description="با ارتقای اشتراک می‌توانی مشتری‌ها را ثبت کنی، قالب‌های ذخیره‌شده را به آن‌ها نسبت بدهی و پروژه‌ها را منظم نگه داری."
             action={
-              <Link href="/subscription">
+              <Link href="/pricing">
                 <Button variant="gradient" className="group">
                   مشاهده پلن‌ها
                 </Button>

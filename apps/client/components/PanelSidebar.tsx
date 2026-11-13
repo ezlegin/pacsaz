@@ -119,7 +119,7 @@ const PanelSubscribePromo = async () => {
           </div>
 
           <Link
-            href="/subscription"
+            href="/pricing"
             className="group flex items-center justify-center gap-1.5 rounded-xl bg-white px-3 py-2 text-[11px] font-extrabold text-violet-700 transition-all duration-300 hover:gap-2.5"
           >
             فعال‌سازی اشتراک

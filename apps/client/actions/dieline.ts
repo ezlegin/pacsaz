@@ -10,6 +10,7 @@ import { getSessionUser } from "@repo/auth/session";
 import { DimensionType, prisma, type Plan } from "@repo/db";
 import { parseCustomization, validateCustomization, type Customization } from "@repo/dieline-engine";
 import { MaterialKey } from "@repo/store/types";
+import { materials } from "@repo/dieline-core/data/materials";
 
 export interface Settings {
   width: number;
@@ -69,8 +70,18 @@ export const downloadDieline = async (
     if (plan.downloaded >= plan.fairDownload) return { error: "شما به حداکثر تعداد دانلود رسیده اید." };
     if (!["pdf", "ai", "dxf"].includes(format)) return { error: "فرمت فایل معتبر نیست." };
 
-    const dieline = await prisma.dieline.findFirst({ where: { slug, active: true } });
+    const dieline = await prisma.dieline.findFirst({ where: { slug, active: true }, include: { settings: true } });
     if (!dieline) return { error: "قالب یافت نشد." };
+
+    // Bleed and thickness are premium settings: on Standard the panel locks
+    // them to the template's values (or the chosen material's own thickness),
+    // and the server holds to the same.
+    if (!plan.isPremium && dieline.settings) {
+      const materialThickness = materials.find((m) => m.value === settings.material)?.thickness;
+      const thicknessOk = [dieline.settings.thickness, materialThickness].includes(settings.thickness);
+      if (settings.bleed !== dieline.settings.bleed || !thicknessOk)
+        return { error: "تغییر بلید و ضخامت در پلن شما فعال نیست." };
+    }
 
     const accepted = acceptCustomization(customizationJson, dieline.specification, plan);
     if (!accepted.ok) return { error: accepted.error };
@@ -101,7 +112,13 @@ export const downloadDieline = async (
           },
         },
       });
-      await ts.plan.update({ where: { id: plan.id }, data: { downloaded: { increment: 1 } } });
+      // Counted only while under the quota, in the same step, so two downloads
+      // fired at once cannot both slip past the check above.
+      const counted = await ts.plan.updateMany({
+        where: { id: plan.id, downloaded: { lt: plan.fairDownload } },
+        data: { downloaded: { increment: 1 } },
+      });
+      if (counted.count === 0) throw new QuotaReached();
     });
 
     const dims = `${s.width}x${s.length}${s.height ? `x${s.height}` : ""}mm`;
@@ -111,10 +128,13 @@ export const downloadDieline = async (
       fileName: `${slug}-${dims}${accepted.stored ? "-custom" : ""}.${format}`,
     };
   } catch (error) {
+    if (error instanceof QuotaReached) return { error: "شما به حداکثر تعداد دانلود رسیده اید." };
     console.error(error);
     return { error: serverErrorMessage };
   }
 };
+
+class QuotaReached extends Error {}
 
 export const createSaveDieline = async (
   data: SaveDielineFormType,
@@ -136,6 +156,8 @@ export const createSaveDieline = async (
   try {
     const user = await getSessionUser();
     if (!user) throw new Error("Use Not Found.");
+    // Saved copies are a premium feature; the form's disabled button is not a gate.
+    if (!user.plan?.isPremium) return { error: "ذخیره‌ی نسخه‌ها در پلن شما فعال نیست." };
 
     const existingDieline = await prisma.dieline.findFirst({ where: { slug } });
     if (!existingDieline) throw new Error("Dieline Not Found.");
@@ -200,6 +222,7 @@ export const updateSavedDieline = async (
   try {
     const user = await getSessionUser();
     if (!user) throw new Error("User Not Found.");
+    if (!user.plan?.isPremium) return { error: "ذخیره‌ی نسخه‌ها در پلن شما فعال نیست." };
 
     // Only the owner may change a saved copy.
     const existingDieline = await prisma.savedDieline.findFirst({

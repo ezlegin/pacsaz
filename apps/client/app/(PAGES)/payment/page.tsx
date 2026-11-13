@@ -17,7 +17,7 @@ const page = async ({ searchParams }: Props) => {
 
   const { period, plan } = await searchParams;
 
-  if (!plan || !period) redirect("/subscription");
+  if (!plan || !period) redirect("/pricing");
 
   const tarrif = await prisma.tarrif.findFirst({
     where: { key: plan },

@@ -190,7 +190,7 @@ const PaymentResult = ({
                 </>
               ) : (
                 <>
-                  <Link href="/subscription" className="w-full">
+                  <Link href="/pricing" className="w-full">
                     <Button
                       size="xl"
                       variant={status === "pending" ? "outline" : "gradient"}

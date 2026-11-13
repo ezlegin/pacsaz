@@ -1,3 +1,4 @@
+import { CONTACT } from "@/lib/seo/site";
 import { cn } from "@repo/ui/lib/utils";
 import {
   ArrowUpRight,
@@ -11,9 +12,9 @@ import Link from "next/link";
 import { layoutPaddings } from "./Navbars/Navbar";
 import PacsazLogo from "./PacsazLogo";
 
-const EMAIL = "pacsaz.ir@gmail.com";
-const PHONE = "09962224177";
-const PHONE_LABEL = "۰۹۹۶-۲۲۲-۴۱۷۷";
+const EMAIL = CONTACT.email;
+const PHONE = CONTACT.phone;
+const PHONE_LABEL = CONTACT.telephoneLabel;
 const ENamadUrl =
   "https://trustseal.enamad.ir/?id=8198265&Code=MgGrRlsux4O6hcApzFke6ZHyDZIVsRrI";
 const ENamadLogo =
@@ -26,7 +27,7 @@ const LINK_GROUPS = [
     links: [
       { label: "صفحه اصلی", href: "/" },
       { label: "قالب‌ها", href: "/dielines" },
-      { label: "اشتراک‌ها", href: "/subscription" },
+      { label: "اشتراک‌ها", href: "/pricing" },
       { label: "آموزش", href: COURSE_URL, external: true },
     ],
   },
@@ -46,6 +47,7 @@ const LINK_GROUPS = [
       { label: "سوالات متداول", href: "/faq" },
       { label: "تماس با ما", href: "/contact-us" },
       { label: "قوانین و مقررات", href: "/terms" },
+      { label: "حریم خصوصی", href: "/privacy" },
     ],
   },
 ];

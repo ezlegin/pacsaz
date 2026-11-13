@@ -110,8 +110,6 @@ const Showcase = () => {
 
   return (
     <section aria-labelledby="hero-title" className="hero relative isolate overflow-hidden">
-      <div aria-hidden className="hero-light" />
-      <div aria-hidden className="hero-grid" />
 
       <div className="mx-auto grid w-full max-w-[86rem] items-center gap-10 px-5 pt-10 pb-16 md:px-12 md:pt-16 lg:grid-cols-12 lg:gap-12 lg:pb-24">
         {/* The pitch */}

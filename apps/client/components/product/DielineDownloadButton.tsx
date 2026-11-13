@@ -63,7 +63,7 @@ const DielineDownloadButton = ({ slug, isRendering, user, customization, savedDi
     }
 
     if (!user.plan) {
-      router.push("/subscription");
+      router.push("/pricing");
       return;
     }
 
@@ -87,7 +87,7 @@ const DielineDownloadButton = ({ slug, isRendering, user, customization, savedDi
         action: {
           label: "تمدید اشتراک",
           onClick: () => {
-            router.push("/subscription");
+            router.push("/pricing");
           },
         },
       });

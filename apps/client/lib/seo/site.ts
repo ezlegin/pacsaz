@@ -98,11 +98,24 @@ export const OG_IMAGE = {
   alt: `${SITE_NAME} — ${SITE_TAGLINE}`,
 } as const;
 
+/**
+ * The site's email and phone come from `.env` (`PACSAZ_EMAIL`, `PACSAZ_PHONE`,
+ * the phone as a mobile number such as 09xxxxxxxxx), so changing them needs no
+ * code change. Server-only: pages that show them are server components.
+ */
+const PHONE = (process.env.PACSAZ_PHONE ?? "").replace(/\D/g, "");
+const PHONE_LOCAL = PHONE.startsWith("98") ? `0${PHONE.slice(2)}` : PHONE;
+
 export const CONTACT = {
-  email: "pacsaz.ir@gmail.com",
+  email: process.env.PACSAZ_EMAIL ?? "",
+  /** Local form, for `tel:` links. */
+  phone: PHONE_LOCAL,
   /** E.164, as required by schema.org `telephone`. */
-  telephone: "+989962224177",
-  telephoneLabel: "۰۹۹۶-۲۲۲-۴۱۷۷",
+  telephone: PHONE_LOCAL ? `+98${PHONE_LOCAL.slice(1)}` : "",
+  /** 0996-222-4177 in Persian digits. */
+  telephoneLabel: PHONE_LOCAL.replace(/^(\d{4})(\d{3})(\d+)$/, "$1-$2-$3").replace(/\d/g, (d) =>
+    String.fromCharCode(0x06f0 + Number(d)),
+  ),
   areaServed: "IR",
   country: "IR",
   /** Staffed support hours, published in the footer. Used in `ContactPoint`. */

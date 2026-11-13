@@ -66,9 +66,13 @@ export default async function DielinePage({ params, searchParams }: Props) {
   const dieline = await getDieline(slug);
 
   let customSettings: CustomDielineSettings | null = null;
-  if (settingsId) {
+  // Only the signed-in user's own saved copy or past download may be reopened.
+  if (settingsId && user) {
     customSettings = await prisma.customDielineSettings.findFirst({
-      where: { id: +settingsId },
+      where: {
+        id: Number(settingsId) || 0,
+        OR: [{ savedDieline: { userId: user.id } }, { downloadHistory: { userId: user.id } }],
+      },
     });
   }
 

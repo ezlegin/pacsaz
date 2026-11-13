@@ -87,7 +87,7 @@ export const formatJalali = (date: Date) => {
   }
 };
 
-const CTA = `${siteUrl}/subscription`;
+const CTA = `${siteUrl}/pricing`;
 
 //! ---------------------------------------------------------------------------
 
