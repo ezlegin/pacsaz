@@ -74,6 +74,9 @@ model Otp {
   phoneNumber String
   code        String
   expiresAt   DateTime
+  /// Wrong guesses so far. The code dies after five, so the 90,000 possible
+  /// codes cannot be tried in the two minutes it lives.
+  attempts    Int      @default(0)
 
   @@unique([code, phoneNumber])
 }
@@ -530,4 +533,14 @@ model NotificationBar {
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+//! RATE LIMITS --------------------------------
+/// One fixed-window counter per key, such as `sms:ip:1.2.3.4` or
+/// `download:user:12`. In Postgres rather than in memory so the limits hold
+/// across restarts and across both apps; see `src/data/rateLimit.ts`.
+model RateLimit {
+  key     String   @id
+  count   Int
+  resetAt DateTime
 }

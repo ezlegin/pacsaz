@@ -23,7 +23,7 @@ const page = async ({ searchParams }: Props) => {
     where: { key: plan },
     include: { price: true },
   });
-  createPaymentTrack({ period, plan, userId: user.id }); //todo
+  void createPaymentTrack({ period, plan });
 
   if (!tarrif) return <div>Tarrif Doesn't Exist.</div>;
 

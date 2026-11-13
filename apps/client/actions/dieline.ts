@@ -7,6 +7,7 @@ import { buildDielineFile, type FileFormat } from "@/lib/dieline/exportFile";
 import { verifyRequest } from "@/lib/dieline/verify";
 import { SaveDielineFormType } from "@/lib/validatoinSchema";
 import { getSessionUser } from "@repo/auth/session";
+import { rateLimit, waitFa } from "@repo/db/data/rateLimit";
 import { DimensionType, prisma, type Plan } from "@repo/db";
 import { parseCustomization, validateCustomization, type Customization } from "@repo/dieline-engine";
 import { MaterialKey } from "@repo/store/types";
@@ -68,6 +69,10 @@ export const downloadDieline = async (
     const plan = user.plan;
     if (!plan) return { error: "برای دانلود به اشتراک فعال نیاز دارید." };
     if (plan.downloaded >= plan.fairDownload) return { error: "شما به حداکثر تعداد دانلود رسیده اید." };
+    // Each download renders on the server: 10 a minute per account is far
+    // above real use and keeps a script from tying up the CPU.
+    const pace = await rateLimit(`download:user:${user.id}`, 10, 60);
+    if (!pace.ok) return { error: `دانلودها پشت سر هم زیاد شد. ${waitFa(pace.retryAfterSeconds)} دیگر دوباره تلاش کنید.` };
     if (!["pdf", "ai", "dxf"].includes(format)) return { error: "فرمت فایل معتبر نیست." };
 
     const dieline = await prisma.dieline.findFirst({ where: { slug, active: true }, include: { settings: true } });

@@ -1,4 +1,5 @@
 import { prisma } from "@repo/db";
+import { rateLimit, resetRateLimit } from "@repo/db/data/rateLimit";
 import { adminSessionCookieName, onDevelepe } from "@repo/lib/data/consts";
 import { NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
@@ -67,11 +68,16 @@ export default {
           throw new Error("Invalid Credentials");
         }
 
+        // 10 tries per account per 15 minutes, whoever is trying.
+        if (!(await rateLimit(`admin-login:email:${email.toLowerCase()}`, 10, 900)).ok)
+          throw new Error("Invalid Credentials");
+
         const admin = await prisma.admin.findUnique({ where: { email } });
         if (!admin) throw new Error("Invalid Credentials");
 
         const isValidPassword = await bcrypt.compare(password, admin.password);
         if (!isValidPassword) throw new Error("Invalid Credentials");
+        await resetRateLimit(`admin-login:email:${email.toLowerCase()}`);
 
         return { id: admin.id.toString() };
       },

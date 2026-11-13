@@ -31,6 +31,23 @@ const nextConfig = {
   output: "standalone",
   outputFileTracingRoot: path.join(appDir, "..", ".."),
   transpilePackages: ["@repo/ui", "@repo/editor", "@repo/dieline-engine"],
+  poweredByHeader: false,
+  // The panel is never framed by anyone (DENY stops clickjacking a staff
+  // session into clicking a delete), and search engines have no business here.
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "Strict-Transport-Security", value: "max-age=63072000" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "Referrer-Policy", value: "same-origin" },
+          { key: "X-Robots-Tag", value: "noindex, nofollow" },
+        ],
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {

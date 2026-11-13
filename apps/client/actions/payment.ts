@@ -296,13 +296,14 @@ const notifyPaymentFailure = async (authority: string) => {
   }
 };
 
-export const createPaymentTrack = async (params: {
-  userId: number;
-  plan: PlanKey;
-  period: PlanPeriod;
-}) => {
+/** Records that the signed-in user opened checkout. Never trusts a sent user id. */
+export const createPaymentTrack = async (params: { plan: PlanKey; period: PlanPeriod }) => {
   try {
-    await prisma.paymentTrack.create({ data: params });
+    const user = await getSessionUser();
+    if (!user) return;
+    await prisma.paymentTrack.create({
+      data: { plan: params.plan, period: params.period, userId: user.id },
+    });
   } catch (error) {
     console.error(error);
   }

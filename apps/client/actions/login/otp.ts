@@ -1,34 +1,47 @@
 "use server";
 
 import { serverErrorMessage } from "@/data/consts";
-import { InputFormType } from "@/lib/validatoinSchema";
+import { inputFormSchema, InputFormType } from "@/lib/validatoinSchema";
 import { prisma } from "@repo/db";
 import { addMinutes } from "date-fns";
 import { sendOtpSms } from "@repo/lib/sms";
+import { randomInt } from "node:crypto";
+import { clientIp, rateLimit, waitFa } from "@repo/db/data/rateLimit";
+import { headers } from "next/headers";
 
+/** A five-digit code from the system's secure random source, not `Math.random`. */
 function generateOtpCode() {
-  return Math.floor(10000 + Math.random() * 90000).toString();
+  return randomInt(10000, 100000).toString();
 }
 
 export const sendOtpCode = async (data: InputFormType) => {
-  const { phoneNumber } = data;
+  // Validated here too: an action is a public endpoint, not only the form.
+  const parsed = inputFormSchema.safeParse(data);
+  if (!parsed.success) return { error: "شماره موبایل معتبر نیست." };
+  const { phoneNumber } = parsed.data;
   const code = generateOtpCode();
   try {
-    const existingOtps = await prisma.otp.findMany({ where: { phoneNumber } });
-    const lastOtp = existingOtps.at(-1);
-    if (lastOtp && lastOtp.expiresAt > new Date())
-      return { success: "کد تایید قبلا برای شما ارسال شده است." };
+    // Every SMS costs money: at most 5 requests an hour from one IP, and 5 an
+    // hour to one number, so neither a script nor a grudge can run up the bill.
+    const ip = clientIp(await headers());
+    for (const limit of [
+      await rateLimit(`sms:ip:${ip}`, 5, 3600),
+      await rateLimit(`sms:phone:${phoneNumber}`, 5, 3600),
+    ]) {
+      if (!limit.ok)
+        return { error: `درخواست‌های زیادی ثبت شده است. ${waitFa(limit.retryAfterSeconds)} دیگر دوباره تلاش کنید.` };
+    }
 
-    await prisma.otp.deleteMany({
-      where: { phoneNumber },
+    // One live code per number: a second request inside its two minutes sends
+    // nothing, which also keeps anyone from flooding a number with SMS.
+    const live = await prisma.otp.findFirst({
+      where: { phoneNumber, expiresAt: { gt: new Date() } },
     });
+    if (live) return { success: "کد تایید قبلا برای شما ارسال شده است." };
 
+    await prisma.otp.deleteMany({ where: { phoneNumber } });
     await prisma.otp.create({
-      data: {
-        code,
-        phoneNumber,
-        expiresAt: addMinutes(new Date(), 2),
-      },
+      data: { code, phoneNumber, expiresAt: addMinutes(new Date(), 2) },
     });
 
     const res = await sendOtpSms(phoneNumber, code);
@@ -38,40 +51,5 @@ export const sendOtpCode = async (data: InputFormType) => {
   } catch (error) {
     console.error(error);
     return { error: serverErrorMessage };
-  }
-};
-
-export const verifyOtp = async (phoneNumber: string, code: string) => {
-  try {
-    const existingOtp = await prisma.otp.findFirst({
-      where: {
-        phoneNumber,
-        code,
-        expiresAt: { gt: new Date() },
-      },
-    });
-
-    if (!existingOtp) return { error: "کد معتبر نمی باشد." };
-
-    await prisma.otp.delete({ where: { id: existingOtp.id } });
-
-    const existingUser = await prisma.user.findUnique({
-      where: { phoneNumber },
-    });
-
-    if (!existingUser)
-      await prisma.user.create({
-        data: {
-          email: "",
-          firstName: "کاربر",
-          fullName: "کاربر",
-          phoneNumber,
-        },
-      });
-
-    return { success: "کد معتبر! خوش آمدید.", isNewUser: !!!existingUser };
-  } catch (error) {
-    console.error(error);
-    return { error: (error as Error).message };
   }
 };

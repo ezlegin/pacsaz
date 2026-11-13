@@ -1,4 +1,5 @@
-"use server";
+// Not "use server": that would publish these gateway calls as public actions
+// anyone could invoke. They are plain server code, used by actions/payment.ts.
 
 import ZarinPal from "zarinpal-node-sdk";
 import { siteUrl } from "./consts";

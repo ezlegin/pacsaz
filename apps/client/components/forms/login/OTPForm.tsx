@@ -1,7 +1,7 @@
 "use client";
 
-import { authenticator } from "@/actions/login/authenticator";
-import { sendOtpCode, verifyOtp } from "@/actions/login/otp";
+import { signInWithCode } from "@/actions/login/authenticator";
+import { sendOtpCode } from "@/actions/login/otp";
 import { handleRes } from "@/lib/handleRes";
 import { safePath } from "@/lib/safePath";
 import { otpFormSchema, OTPFormType } from "@/lib/validatoinSchema";
@@ -83,29 +83,26 @@ export function OTPForm({ setLoginStep, phoneNumber, onLoggedIn }: Props) {
   const onSubmit = async ({ otp }: OTPFormType) => {
     startLoading();
 
-    const otpRes = await verifyOtp(phoneNumber, otp);
+    const authRes = await signInWithCode(phoneNumber, otp);
 
-    if (otpRes.error) {
-      toast.error(otpRes.error);
+    if (authRes.error) {
+      toast.error(authRes.error);
       form.setValue("otp", "");
       stopLoading();
       return;
     }
 
-    if (otpRes.success) {
-      const authRes = await authenticator(phoneNumber);
-      handleRes(authRes, {
-        onSuccess: () => {
-          const onboarded = !!authRes.onboardingCompleted;
-          if (onLoggedIn) return onLoggedIn(onboarded);
+    handleRes(authRes, {
+      onSuccess: () => {
+        const onboarded = !!authRes.onboardingCompleted;
+        if (onLoggedIn) return onLoggedIn(onboarded);
 
-          const target = safePath(callbackUrl);
-          router.push(
-            onboarded ? target : `/onboarding?callbackUrl=${encodeURIComponent(target)}`,
-          );
-        },
-      });
-    }
+        const target = safePath(callbackUrl);
+        router.push(
+          onboarded ? target : `/onboarding?callbackUrl=${encodeURIComponent(target)}`,
+        );
+      },
+    });
 
     stopLoading();
   };
