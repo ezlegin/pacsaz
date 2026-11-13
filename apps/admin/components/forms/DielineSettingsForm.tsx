@@ -35,8 +35,12 @@ import {
 } from "@repo/ui/components/select";
 import { ToggleGroup, ToggleGroupItem } from "@repo/ui/components/toggle-group";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import ImageField from "../ImageField";
+import DielineCapture from "../DielineCapture";
+import ModelCapture from "../ModelCapture";
 
 const DielineSettingsForm = ({
   categories,
@@ -46,6 +50,8 @@ const DielineSettingsForm = ({
   dieline?: DielineType;
 }) => {
   const settings = dieline?.settings;
+  const [capturedModel, setCapturedModel] = useState<string | null>(null);
+  const [capturedDieline, setCapturedDieline] = useState<string | null>(null);
   const router = useRouter();
   const { startLoading, stopLoading, isLoading } = useLoading();
   const form = useForm<DielineMetadataFormType>({
@@ -170,7 +176,19 @@ const DielineSettingsForm = ({
                 image={dieline?.dielineImage?.url}
                 formFieldName="dielineImage"
                 deleteImageFn={deleteDielineImage}
-              />
+                preview={capturedDieline}
+              >
+                {dieline && (
+                  <DielineCapture
+                    dieline={dieline}
+                    onCapture={(file) => {
+                      form.setValue("dielineImage", file, { shouldDirty: true });
+                      setCapturedDieline(URL.createObjectURL(file));
+                      toast.success("Dieline image captured. Update the dieline to save it.");
+                    }}
+                  />
+                )}
+              </ImageField>
             </div>
 
             <div className="space-y-1">
@@ -182,7 +200,20 @@ const DielineSettingsForm = ({
                 image={dieline?.modelImage?.url}
                 formFieldName="modelImage"
                 deleteImageFn={deleteModelImage}
-              />
+                preview={capturedModel}
+              >
+                {/* Only a saved dieline has a model to capture. */}
+                {dieline && (
+                  <ModelCapture
+                    dieline={dieline}
+                    onCapture={(file) => {
+                      form.setValue("modelImage", file, { shouldDirty: true });
+                      setCapturedModel(URL.createObjectURL(file));
+                      toast.success("Model image captured. Update the dieline to save it.");
+                    }}
+                  />
+                )}
+              </ImageField>
             </div>
           </div>
 

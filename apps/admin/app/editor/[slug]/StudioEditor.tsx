@@ -10,8 +10,10 @@ import { Button } from "@repo/ui/components/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@repo/ui/components/dialog";
 import { ArrowLeft, Settings2 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { toast } from "sonner";
+
+const noSubscribe = () => () => {};
 
 export default function StudioEditor({
   dieline,
@@ -55,6 +57,12 @@ export default function StudioEditor({
     });
   }, [store, dieline.settings]);
 
+  // The 3D dock shows the template's board from the start (kraft with flutes for
+  // flute materials), not only once the Settings tab has been opened.
+  useEffect(() => {
+    store.setDisplay({ material: dieline.settings.material || dieline.defaultMaterial });
+  }, [store, dieline.settings.material, dieline.defaultMaterial]);
+
   useEffect(() => {
     if (legacy) {
       toast.info("This dieline was made with the old editor. It opens empty here; saving replaces the old drawing.", {
@@ -62,6 +70,12 @@ export default function StudioEditor({
       });
     }
   }, [legacy]);
+
+  // The editor is a browser tool (canvas, pointer, saved view preferences), so it
+  // is drawn only once the page is in the browser: rendered on the server, its
+  // Radix ids never matched the client's (a hydration error on every open).
+  const inBrowser = useSyncExternalStore(noSubscribe, () => true, () => false);
+  if (!inBrowser) return <div className="h-screen bg-background" />;
 
   return (
     <Studio

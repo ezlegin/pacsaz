@@ -254,8 +254,42 @@ export function Canvas({ className, showGuides = true }: CanvasProps) {
   const tolerance = () => SNAP_PX / store.get().view.zoom;
 
   // Shift keeps the second point of a measurement on 0°, 45°, 90°, ... from the first.
-  const measureEnd = (world: Pt, shift: boolean, useSnap: boolean): MeasurePoint =>
-    shift && measure.a && !measure.b ? { p: constrain45(measure.a.p, world) } : rulerPoint(world, useSnap);
+  // The angle wins, then snapping slides the end along that direction to where it
+  // meets a snapped x or y (a line's edge, a point's alignment) or onto a point
+  // lying on it, so a held angle still lands on the dieline.
+  const measureEnd = (world: Pt, shift: boolean, useSnap: boolean): MeasurePoint => {
+    if (!(shift && measure.a && !measure.b)) return rulerPoint(world, useSnap);
+    const a = measure.a.p;
+    const c = constrain45(a, world);
+    if (!useSnap) return { p: c };
+    const len = Math.hypot(c[0] - a[0], c[1] - a[1]);
+    if (len < 1e-9) return { p: c };
+    const d: Pt = [(c[0] - a[0]) / len, (c[1] - a[1]) / len];
+    const tol = tolerance();
+    const along = (t: number): Pt => [a[0] + d[0] * t, a[1] + d[1] * t];
+    const candidates: MeasurePoint[] = [];
+    const snap = snapMoving([c], rulerTargets, tol);
+    // A point target sitting on the ray: land on it exactly.
+    if (snap.x && snap.y && snap.x.target === snap.y.target) {
+      const p: Pt = [snap.x.value, snap.y.value];
+      const t = (p[0] - a[0]) * d[0] + (p[1] - a[1]) * d[1];
+      const q = along(t);
+      if (Math.hypot(q[0] - p[0], q[1] - p[1]) < 1e-6) candidates.push({ p, target: snap.x.target });
+    }
+    if (snap.x && Math.abs(d[0]) > 1e-9) candidates.push({ p: along((snap.x.value - a[0]) / d[0]) });
+    if (snap.y && Math.abs(d[1]) > 1e-9) candidates.push({ p: along((snap.y.value - a[1]) / d[1]) });
+    const onFold = nearestOnFold(result, c, tol);
+    if (onFold) {
+      const t = (onFold[0] - a[0]) * d[0] + (onFold[1] - a[1]) * d[1];
+      const q = along(t);
+      if (Math.hypot(q[0] - onFold[0], q[1] - onFold[1]) < tol / 4) candidates.push({ p: q });
+    }
+    const near = candidates
+      .map((m) => ({ m, dist: Math.hypot(m.p[0] - c[0], m.p[1] - c[1]) }))
+      .filter(({ dist }) => dist <= tol * 1.5)
+      .sort((x, y) => (x.m.target ? -1 : 0) - (y.m.target ? -1 : 0) || x.dist - y.dist);
+    return near[0]?.m ?? { p: c };
+  };
 
   // The measure tool also lands on fold lines: their ends first, then anywhere along one.
   const rulerTargets = useMemo(() => (tool === "measure" ? [...measureTargets, ...foldTargets(result)] : measureTargets), [tool, measureTargets, result]);

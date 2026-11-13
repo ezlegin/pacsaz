@@ -395,6 +395,33 @@ export const buildFoldRig = (
       openings++;
     }
   }
+  // A cut loop on a fold line (the keyboard box's slots, where the base's side
+  // folds stop) has board all round it, but from two panels, so no single panel
+  // encloses it. It hinges to nothing; if every side of it has board just
+  // beyond, it is an opening, not a loose piece standing in the slot.
+  const hinged = new Set(nodes.flatMap((node, index) => (node.parent === null ? [] : [index, node.parent])));
+  nodes.forEach((node, index) => {
+    if (node.isHole || hinged.has(index)) return;
+    const others = nodes.filter((other, j) => j !== index && !other.isHole);
+    const ring = node.face.outline;
+    const surrounded = ring.every((a, i) => {
+      const b = ring[(i + 1) % ring.length]!;
+      const length = Math.hypot(b[0] - a[0], b[1] - a[1]);
+      if (length < 1e-6) return true;
+      const mid: Pt = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+      const step = 0.3 / length;
+      const sides: Pt[] = [
+        [mid[0] - (b[1] - a[1]) * step, mid[1] + (b[0] - a[0]) * step],
+        [mid[0] + (b[1] - a[1]) * step, mid[1] - (b[0] - a[0]) * step],
+      ];
+      const beyond = sides.find((p) => !pointInPolygon(p, ring));
+      return !beyond || others.some((other) => pointInPolygon(beyond, other.face.outline));
+    });
+    if (surrounded) {
+      node.isHole = true;
+      openings++;
+    }
+  });
   const holeCount = enclosed + openings;
 
   // Windows are not panels, so they must not be reported as orphaned panels.

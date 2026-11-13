@@ -4,19 +4,24 @@ import * as THREE from "three";
 
 /** The key light's direction in view space: up and to the viewer's left. */
 const KEY_DIRECTION = new THREE.Vector3(-0.9, 0.5, 0.6).normalize();
+/**
+ * From where the viewer stands, a touch above: every face towards the camera
+ * is lit, as on a product photo. Faces turned further away still shade off.
+ */
+const FROM_VIEWER = new THREE.Vector3(0.1, 0.25, 1).normalize();
 
 /**
  * A light that moves with the camera, so whichever way the model is turned, the
  * face on the left is bright and the one on the right soft grey. A light fixed in
  * the world leaves the back of the box dark.
  */
-const KeyLight = ({ distance }: { distance: number }) => {
+const KeyLight = ({ distance, fromViewer }: { distance: number; fromViewer: boolean }) => {
   const light = useRef<THREE.DirectionalLight>(null);
   const camera = useThree((state) => state.camera);
 
   useFrame(() => {
     light.current?.position
-      .copy(KEY_DIRECTION)
+      .copy(fromViewer ? FROM_VIEWER : KEY_DIRECTION)
       .applyQuaternion(camera.quaternion)
       .multiplyScalar(distance);
   });
@@ -30,9 +35,9 @@ const KeyLight = ({ distance }: { distance: number }) => {
  * the faces turned away from it a soft grey. No environment map, because
  * reflections are what make card look like plastic. Pair with a `flat` canvas.
  */
-export const BoardLights = ({ distance }: { distance: number }) => (
+export const BoardLights = ({ distance, fromViewer = false }: { distance: number; fromViewer?: boolean }) => (
   <>
-    <ambientLight intensity={1.4} />
-    <KeyLight distance={distance} />
+    <ambientLight intensity={fromViewer ? 1.2 : 1.4} />
+    <KeyLight distance={distance} fromViewer={fromViewer} />
   </>
 );

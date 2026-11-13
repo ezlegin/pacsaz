@@ -43,6 +43,7 @@ export default function PreviewSettings({ dieline }: { dieline: DielineType }) {
   const material = materials.find((m) => m.value === materialKey) ?? offered[0] ?? materials[0]!;
   const offsetFor = (t: DimensionType, thickness: number) => resolveDimensions({ width: 0, length: 0, height: 0 }, t, thickness);
 
+  const unused = { length: dieline.maxLength === 0, width: dieline.maxWidth === 0, height: dieline.maxHeight === 0 };
   const offset = offsetFor(type, inputs.thickness);
   const typed = (key: "width" | "length" | "height") => Math.round((inputs[key] - offset[key]) * 100) / 100;
 
@@ -75,7 +76,8 @@ export default function PreviewSettings({ dieline }: { dieline: DielineType }) {
 
       <Group title="Dimensions">
         <div className="grid grid-cols-3 gap-1.5">
-          {(["length", "width", "height"] as const).map((key) => (
+          {/* A dimension the template does not use (0 throughout) has no field, as on the site. */}
+          {(["length", "width", "height"] as const).filter((key) => unused[key] !== true).map((key) => (
             <label key={key} className="space-y-0.5">
               <span className="text-[11px] capitalize text-muted-foreground">{key}</span>
               <Num value={typed(key)} min={1} onChange={(v) => store.setInputs({ [key]: v + offset[key] })} />

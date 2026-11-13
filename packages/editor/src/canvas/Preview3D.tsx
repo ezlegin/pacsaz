@@ -531,7 +531,7 @@ export function FoldPreview({
           <span className="flex items-center gap-1">
             <span className="text-muted-foreground">{t.position}</span>
             {(["x", "y", "z"] as const).map((axis) => (
-              <NumberField key={axis} label={axis.toUpperCase()} value={placement[axis]} step={5} onChange={(v) => place({ [axis]: v })} wide={expanded} />
+              <NumberField key={axis} label={axis.toUpperCase()} value={placement[axis]} step={1} onChange={(v) => place({ [axis]: v })} wide={expanded} />
             ))}
           </span>
           <span className="flex items-center gap-1">
@@ -543,7 +543,7 @@ export function FoldPreview({
                 ["rz", "Z"],
               ] as const
             ).map(([axis, label]) => (
-              <NumberField key={axis} label={label} value={placement[axis]} step={15} onChange={(v) => place({ [axis]: v })} wide={expanded} />
+              <NumberField key={axis} label={label} value={placement[axis]} step={1} onChange={(v) => place({ [axis]: v })} wide={expanded} />
             ))}
           </span>
           <button type="button" title={pieceStep === undefined ? t.resetPiece : t.resetMove} className={chip(false)} onClick={() => place(null)}>

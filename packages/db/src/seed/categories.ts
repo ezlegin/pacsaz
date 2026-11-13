@@ -60,7 +60,6 @@ const LINKS: Record<string, { models: Model[]; usages: Usage[] }> = {
   "greeting-card": { models: ["card"], usages: ["occasion", "gift"] },
   "snap-lock-box": { models: ["tuckEnd", "lockBottom"], usages: ["pharma", "cosmetics", "food"] },
   "carton-sleeve": { models: ["sleeve"], usages: ["gift", "food", "apparel"] },
-  "tray-with-sleeve": { models: ["drawer", "sleeve"], usages: ["gift", "food", "apparel"] },
   "diamond-envelope": { models: ["envelope"], usages: ["occasion", "gift"] },
   "wallet-envelope": { models: ["envelope"], usages: ["ecommerce", "occasion"] },
   "pillow-box": { models: ["pillow"], usages: ["gift", "food", "cosmetics", "occasion"] },

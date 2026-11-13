@@ -87,7 +87,8 @@ export function TopBar({
 
       {/* Preview size: what the template is drawn at while editing. */}
       <div className="flex items-center gap-1" title="Preview size (mm)">
-        {SIZE.map((f) => (
+        {/* A dimension the template does not use (0 in its size range) has no field, as on the site. */}
+        {SIZE.filter((f) => !(f.key !== "thickness" && range && range.max[f.key] === 0)).map((f) => (
           <label key={f.key} className="flex h-7 items-center rounded-md border bg-background text-xs focus-within:border-blue-500">
             <span className="pl-1.5 pr-1 text-[11px] text-muted-foreground">{f.label}</span>
             <input

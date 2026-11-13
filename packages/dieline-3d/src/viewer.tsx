@@ -82,6 +82,8 @@ export type PanelClick = { additive: boolean };
  * when `fitKey` changes, so picking panels, editing folds or moving the fold
  * slider keep the zoom and angle the person set.
  */
+const DEFAULT_CAMERA: [number, number, number] = [0.72, 0.5, 0.95];
+
 const FitModel = ({ fitKey, clip }: { fitKey: string; clip: boolean }) => {
   const bounds = useBounds();
   useEffect(() => {
@@ -146,6 +148,13 @@ export type DielineViewerProps = {
   unlimitedZoom?: boolean;
   /** Change it to frame the model again, e.g. from a Fit button. */
   fitRequest?: number;
+  /**
+   * Where the camera looks from, as a direction from the model (Y up). The
+   * model is framed along it; the default is above and to the right.
+   */
+  cameraDirection?: [number, number, number];
+  /** Keeps the drawn frame readable (`canvas.toDataURL`), for product shots. */
+  capture?: boolean;
 };
 
 export const DielineViewer = ({
@@ -166,6 +175,8 @@ export const DielineViewer = ({
   renderEmpty,
   unlimitedZoom = false,
   fitRequest = 0,
+  cameraDirection = DEFAULT_CAMERA,
+  capture = false,
 }: DielineViewerProps) => {
   /**
    * The rig is derived data, so it is memoised on its actual inputs. Any change
@@ -368,13 +379,13 @@ export const DielineViewer = ({
         dpr={[1, 2]}
         // No tone mapping, so a white board under full light stays white.
         flat
-        gl={{ antialias: true, alpha: true }}
+        gl={{ antialias: true, alpha: true, preserveDrawingBuffer: capture }}
         camera={{
           /* Start above and to the right, looking down at the model. */
           position: [
-            cameraDistance * 0.72,
-            cameraDistance * 0.5,
-            cameraDistance * 0.95,
+            cameraDistance * cameraDirection[0],
+            cameraDistance * cameraDirection[1],
+            cameraDistance * cameraDirection[2],
           ],
           fov: 42,
           near: unlimitedZoom ? Math.max(0.01, span * 0.0005) : 1,
@@ -386,7 +397,7 @@ export const DielineViewer = ({
           turned away from it a soft grey. No environment map, because reflections
           are what make card look like plastic.
         */}
-        <BoardLights distance={span} />
+        <BoardLights distance={span} fromViewer={capture} />
 
         {/*
           The model is framed by `FitModel`, not on every resize: the editor's
@@ -394,7 +405,9 @@ export const DielineViewer = ({
           the zoom and angle the person had set. Fitting sets near and far for a
           framed view; an unlimited one keeps its own.
         */}
-        <Bounds margin={1.15} maxDuration={0}>
+        {/* A capture frames loosely: the fit goes by the model's bounds, and from
+            some angles a corner reaches past a tight frame. The shot is trimmed after. */}
+        <Bounds margin={capture ? 1.8 : 1.15} maxDuration={0}>
           {/* The sheet is drawn in the XY plane and folds towards +Z; lying it
               down turns +Z up, so the walls rise from the ground. */}
           <group rotation={[lying ? -Math.PI / 2 : 0, 0, 0]}>

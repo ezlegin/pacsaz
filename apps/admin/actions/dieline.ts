@@ -34,8 +34,10 @@ const checkMetadata = (
     const min = d.minDimensions[axis];
     const max = d.maxDimensions[axis];
     const def = d.defaultDimensions[axis];
+    // A dimension the template does not use (a flat card has no height) is 0 throughout.
+    if (min === 0 && max === 0 && def === 0) continue;
     if (!(min > 0) || !(max >= min) || !(def >= min && def <= max))
-      return { ok: false, error: `The ${axis} range is wrong: it needs 0 < min ≤ default ≤ max.` };
+      return { ok: false, error: `The ${axis} range is wrong: it needs 0 < min ≤ default ≤ max, or 0 for all three if the template does not use it.` };
   }
   if (!(d.bleed >= 0)) return { ok: false, error: "The bleed can't be negative." };
 

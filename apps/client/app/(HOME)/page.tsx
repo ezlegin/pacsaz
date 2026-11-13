@@ -50,7 +50,7 @@ const BOX_FAMILY: { id: PresetId; title: string; latin: string; slug?: string }[
   { id: "snapLockBottom", title: "کف قفلی", latin: "Snap Lock Bottom" },
   { id: "keyboardBox", title: "جعبه کیبوردی", latin: "Keyboard Box", slug: "keyboard-box" },
   { id: "gableHandle", title: "دسته‌دار شیروانی", latin: "Gable Handle", slug: "gable-handle-box" },
-  { id: "sleeve", title: "روکش کشویی", latin: "Sleeve", slug: "tray-with-sleeve" },
+  { id: "sleeve", title: "روکش کشویی", latin: "Sleeve" },
   { id: "fefco0201", title: "کارتن استاندارد", latin: "FEFCO 0201" },
 ];
 

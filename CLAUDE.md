@@ -258,8 +258,9 @@ Phases (each ends with a commit message for the user to commit):
   panel's centre, in the viewer's world frame (`placePieces`), at every point
   of the fold. Turned any way, a piece stays on the ground (its lowest point
   where it is unplaced, recomputed after each `applyFold`); `y` lifts it.
-  Pieces line up front to back on the main piece's centre (the one with the
-  most panels); `z` moves a piece off that line. A placement without `step` is where a piece
+  Pieces line up front to back through the panels they stand on (each base
+  panel's centre on the main piece's, the one with the most panels), so
+  folding never slides a piece; `z` moves a piece off that line. A placement without `step` is where a piece
   starts; one with a `step` is where it is when that step ends, and it moves
   there during the step (`placePieces(…, progress)`). A step may hold only
   piece moves (`FoldRig.moveSteps`); `stepWindows(rig)` gives every step's

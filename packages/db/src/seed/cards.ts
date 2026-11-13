@@ -201,14 +201,20 @@ const labelBand: DielineDocument = {
  * wraps its top; the header between folds double on its middle crease, and a
  * keyhole slot cut in from the side on each half lands on the other, so the
  * folded header hangs on a peg. Both ends keep a small hole for a staple or tie.
+ * As on the real die, the header between the slots is set in on the slots' side,
+ * so it folds inside the faces, and each face rounds into its slot's outer edge;
+ * the two halves round their corners into a point on the middle crease, on both sides.
  */
 const hookY = (half: 1 | 2) => (half === 1 ? "length + height + head / 2" : "length + height + head * 1.5");
+// Drawn downwards: the upper slot leaves the face above at x = 0 and returns to the
+// set-in header; the lower one leaves the header and returns to the face below.
 const slot = (half: 1 | 2): Segment[] => [
-  to("0", `${hookY(half)} + slotW / 2`),
+  half === 2 ? to("0", `${hookY(half)} + slotW / 2`, "rc") : to("inset", `${hookY(half)} + slotW / 2`),
   to("slotD - slotK", `${hookY(half)} + slotW / 2`),
   { type: "arc", x: "slotD - slotK", y: `${hookY(half)} - slotW / 2`, radius: "slotW", clockwise: true, large: true },
-  to("0", `${hookY(half)} - slotW / 2`),
+  half === 2 ? to("inset", `${hookY(half)} - slotW / 2`) : to("0", `${hookY(half)} - slotW / 2`, "rc"),
 ];
+const MID = "length + height + head";
 const hookTag: DielineDocument = {
   ...emptyDocument(),
   variables: [
@@ -218,6 +224,8 @@ const hookTag: DielineDocument = {
     { name: "slotK", expr: "slotW * sqrt(3) / 2", description: "Where the slot meets its round end" },
     { name: "slotD", expr: "width * 0.4", description: "How far the slot reaches in, to its round end's centre" },
     { name: "rc", expr: "min(width, length) * 0.06", description: "Corner radius" },
+    { name: "inset", expr: "min(width * 0.13, slotD - slotK - slotW)", description: "How far the header between the slots is set in" },
+    { name: "mr", expr: "min(slotW, (head - slotW) / 2 - slotW / 2)", description: "Each header half's rounded corner at the middle crease, on both sides; the two meet in a point on the crease" },
     { name: "tieR", expr: "1.5" },
   ],
   nodes: [
@@ -228,11 +236,26 @@ const hookTag: DielineDocument = {
       lineType: "cut",
       closed: true,
       start: { x: "width / 2", y: "0" },
-      segments: [to("width", "0", "rc"), to("width", "total", "rc"), to("0", "total", "rc"), ...slot(2), ...slot(1), to("0", "0", "rc")],
+      segments: [
+        to("width", "0", "rc"),
+        to("width", `${MID} - mr`),
+        { type: "arc", x: "width - mr", y: MID, radius: "mr", clockwise: false, large: false },
+        { type: "arc", x: "width", y: `${MID} + mr`, radius: "mr", clockwise: false, large: false },
+        to("width", "total", "rc"),
+        to("0", "total", "rc"),
+        ...slot(2),
+        to("inset", `${MID} + mr`),
+        { type: "arc", x: "inset + mr", y: MID, radius: "mr", clockwise: false, large: false },
+        { type: "arc", x: "inset", y: `${MID} - mr`, radius: "mr", clockwise: false, large: false },
+        ...slot(1),
+        to("0", "0", "rc"),
+        // Back to the start, so the last corner rounds too (the closing edge has no corner of its own).
+        to("width / 2", "0"),
+      ],
     },
     crease("wrap1", "length"),
     crease("wrap2", "length + height"),
-    crease("middle", "length + height + head"),
+    { id: "middle", name: "middle", kind: "line", lineType: "crease", from: { x: "inset + mr", y: MID }, to: { x: "width - mr", y: MID } },
     crease("wrap3", "length + height + 2 * head"),
     crease("wrap4", "total - length"),
     hole("tie1", "width / 2", "max(3 * tieR, rc)", "tieR"),
@@ -252,7 +275,7 @@ const greetingCard: DielineDocument = {
 };
 
 /** Cards ignore height unless they say otherwise; it is pinned so the field cannot mislead. */
-const FLAT = 1;
+const FLAT = 0;
 
 export const CARD_TEMPLATES: CardTemplate[] = [
   {

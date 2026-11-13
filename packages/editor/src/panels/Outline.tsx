@@ -244,9 +244,11 @@ function RulerField({ index, id, path, label }: { index: number; id: string; pat
 
 function RulerPoint({ index, id, which }: { index: number; id: string; which: "from" | "to" }) {
   return (
-    <Row label={which === "from" ? "From" : "To"}>
+    // No row label: the sidebar is narrow and the expressions need the room. The
+    // first pair is the start, the second the end; the tooltip says which.
+    <div className="flex gap-1" title={which === "from" ? "Start point" : "End point"}>
       <RulerField index={index} id={id} path={`${which}.x`} label="X" />
       <RulerField index={index} id={id} path={`${which}.y`} label="Y" />
-    </Row>
+    </div>
   );
 }

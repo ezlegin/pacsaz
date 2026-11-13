@@ -16,7 +16,7 @@ import { Spinner } from "@repo/ui/components/spinner";
 import { Trash } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 interface Props {
@@ -26,6 +26,10 @@ interface Props {
   image?: string | null;
   formFieldName?: string;
   deleteImageFn: (publicId: string) => ServerResponse;
+  /** Shown below the picture, e.g. a button that makes the image. */
+  children?: React.ReactNode;
+  /** A preview set from outside (a captured image), replacing the current one. */
+  preview?: string | null;
 }
 
 const ImageField = ({
@@ -35,12 +39,17 @@ const ImageField = ({
   image,
   formFieldName,
   deleteImageFn,
+  children,
+  preview,
 }: Props) => {
   //HOOKS
   const [imagePreview, setImagePreview] = useState<string | null | undefined>(
     image,
   );
   const router = useRouter();
+  useEffect(() => {
+    if (preview) setImagePreview(preview);
+  }, [preview]);
   const { isLoading, startLoading, stopLoading } = useLoading();
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>, field: any) => {
@@ -153,6 +162,7 @@ const ImageField = ({
           </FormItem>
         )}
       />
+      {children}
     </div>
   );
 };

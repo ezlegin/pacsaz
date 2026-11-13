@@ -791,9 +791,11 @@ const scheduleOf = (rig: FoldRig): FoldWindow[] => {
  *
  * Whatever the turn, a piece stays on the ground: it drops or rises until its
  * lowest point is where its lowest point is unplaced, and `y` lifts it from
- * there. Pieces line up front to back: each one's centre moves onto the main
- * piece's (the one with the most panels), and `z` moves it off that line. Both
- * change as the pieces fold, so this runs after every `applyFold`.
+ * there. Pieces line up front to back through the panels they stand on: each
+ * one's base panel centre moves onto the main piece's (the one with the most
+ * panels), and `z` moves it off that line. The ground changes as a piece
+ * folds, so this runs after every `applyFold`; the line does not, so folding
+ * never slides a piece forward or back.
  *
  * A placement without a step is where a piece starts; one with a step is where
  * it is when that step ends, and it moves there during the step (`progress`).
@@ -820,8 +822,9 @@ export const placePieces = (scene: RigScene, rig: FoldRig, pieces: readonly Piec
   const box = new THREE.Box3();
   const part = new THREE.Box3();
   const frame = new THREE.Matrix4();
-  // Everything hanging from this pivot, boxed in the world frame (Y up).
-  const bounds = (pivot: THREE.Group) => {
+  // Everything hanging from this pivot, boxed in the world frame (Y up); with
+  // `only`, just that panel's own board on the pivot (not the bends at its folds).
+  const bounds = (pivot: THREE.Group, only?: number) => {
     scene.group.updateMatrixWorld(true);
     // Strip whatever the canvas puts above the scene, then turn it as the viewer does.
     frame.copy(toScene).multiply(scene.group.matrixWorld.clone().invert());
@@ -829,6 +832,7 @@ export const placePieces = (scene: RigScene, rig: FoldRig, pieces: readonly Piec
     pivot.traverse((object) => {
       const mesh = object as THREE.Mesh;
       if (!mesh.isMesh || !mesh.geometry) return;
+      if (only !== undefined && (mesh.parent !== pivot || mesh.userData.panelIndex !== only)) return;
       if (!mesh.geometry.boundingBox) mesh.geometry.computeBoundingBox();
       box.union(part.copy(mesh.geometry.boundingBox!).applyMatrix4(frame.clone().multiply(mesh.matrixWorld)));
     });
@@ -859,8 +863,10 @@ export const placePieces = (scene: RigScene, rig: FoldRig, pieces: readonly Piec
     const turned = bounds(pivot).min.y;
     const lift = (Number.isFinite(ground) && Number.isFinite(turned) ? ground - turned : 0) + placement.y;
     pose(lift, 0);
-    const box = bounds(pivot);
-    const depth = box.isEmpty() ? 0 : (box.min.z + box.max.z) / 2;
+    // The line runs through the panel the piece stands on, which folding never
+    // moves: through the whole piece, the line shifted as walls and flaps rose.
+    const base = bounds(pivot, index);
+    const depth = base.isEmpty() ? 0 : (base.min.z + base.max.z) / 2;
     return [{ pose, lift, depth, extra: placement.z, panels: rigPanelsUnder(rig, index) }];
   });
 
