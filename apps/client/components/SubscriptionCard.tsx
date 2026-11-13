@@ -2,16 +2,9 @@ import { PriceMapper } from "@/lib/map";
 import { FairDownload, PlanPeriod, TarrifFeature } from "@repo/db";
 import { Button } from "@repo/ui/components/button";
 import { cn } from "@repo/ui/lib/utils";
-import {
-  ArrowLeft,
-  Check,
-  Download,
-  Heart,
-  Minus,
-} from "lucide-react";
+import { ArrowLeft, Check, Download, Layers, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { TarrifType } from "./SubscriptionList";
-import { Badge } from "@repo/ui/components/badge";
 
 const PERIOD_SUFFIX: Record<PlanPeriod, string> = {
   monthly: "ماه",
@@ -25,194 +18,160 @@ const faDigits = (value: number) =>
 /** Prices are stored in Rial-ish units; the UI shows them in thousand Toman. */
 const formatPrice = (value: number) => (value / 1000).toLocaleString("fa-IR");
 
+/**
+ * One plan. `features` are only what this plan adds to `below` (the plan it
+ * builds on), so the list reads "everything in Standard, plus: ...". Without
+ * `below` it is the entry plan and lists everything it includes.
+ */
 export const SubscriptionCard = ({
   tarrif,
+  below,
   features,
   period,
 }: {
-  features: TarrifFeature[];
   tarrif: TarrifType;
+  below?: TarrifType;
+  features: TarrifFeature[];
   period: PlanPeriod;
 }) => {
   const isRecommended = tarrif.isRecommended;
   const discount = tarrif.discountAmount ?? 0;
 
   /**
-   * `Price` and `FairDownload` are both optional relations on `Tarrif`, so a plan
-   * created in the admin panel before its pricing rows are filled in arrives here
-   * as `null`. Both used to be forced with `!`, which turned that ordinary state
-   * into a `Cannot read properties of null` crash of the whole page — including
-   * the home page, which embeds this list. Treating a missing price as zero keeps
-   * the card renderable and lets the caller decide whether to show it at all.
+   * `Price` and `FairDownload` are optional relations, so a plan saved in the
+   * admin before its pricing rows are filled in arrives with `null`. A missing
+   * price reads as zero rather than crashing the page (the home page embeds it).
    */
   const finalPrice = tarrif.price ? PriceMapper(period, tarrif.price, 0) : 0;
-  const basePrice = discount >= 100 ? finalPrice : finalPrice / (1 - discount / 100);
+  const basePrice =
+    discount > 0 && discount < 100 ? finalPrice / (1 - discount / 100) : finalPrice;
   const saved = basePrice - finalPrice;
 
   const downloadCount = tarrif.fairDownload
-    ? FairDownloadMap(period, tarrif.fairDownload)
+    ? fairDownloadFor(period, tarrif.fairDownload)
     : 0;
 
   return (
     <div
       className={cn(
-        "relative flex h-full flex-col",
-        isRecommended && "xl:-my-4",
+        "relative flex h-full flex-col rounded-3xl bg-background transition-all duration-300",
+        isRecommended
+          ? "border-2 border-primary shadow-xl shadow-primary/15 xl:-my-4"
+          : "border shadow-sm hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10",
       )}
     >
-      {/* recommendation ribbon */}
-      {/* {isRecommended && (
-        <div className="mb-3 flex items-center justify-center gap-1.5">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-linear-to-l from-violet-500 to-purple-600 px-3 py-1 text-[11px] font-bold text-white shadow-md shadow-primary/30">
-            <Zap className="size-3.5" fill="currentColor" strokeWidth={0} />
-            پیشنهاد پک‌ساز
-          </span>
-        </div>
-      )} */}
+      {isRecommended && (
+        <span className="absolute -top-3.5 right-1/2 inline-flex translate-x-1/2 items-center gap-1.5 rounded-full bg-primary px-3.5 py-1 text-[11px] font-bold whitespace-nowrap text-primary-foreground shadow-md shadow-primary/30">
+          <Sparkles className="size-3.5" />
+          محبوب‌ترین انتخاب
+        </span>
+      )}
 
+      {/* ------------------------- name, price, action ------------------------ */}
       <div
         className={cn(
-          "flex flex-1 flex-col overflow-hidden rounded-3xl bg-background transition-all duration-300",
-          isRecommended
-            ? "p-[1.5px] shadow-xl shadow-primary/20 ring-1 ring-primary/20 hover:shadow-2xl hover:shadow-primary/30"
-            : "border shadow-sm hover:-translate-y-1 hover:border-primary/25 hover:shadow-lg hover:shadow-primary/10",
+          "flex flex-col gap-5 rounded-t-3xl p-6 pb-5",
+          isRecommended && "bg-linear-to-b from-primary/8 to-transparent pt-8",
         )}
       >
-        <div
-          className={cn(
-            "flex flex-1 flex-col",
-            isRecommended &&
-              "rounded-[calc(1.5rem-1.5px)] bg-linear-to-b from-primary/6 to-transparent p-6",
-            !isRecommended && "p-6",
-          )}
-        >
-          {/* ------------------------------ header ----------------------------- */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between gap-3">
-              <h3 className="text-lg font-extrabold tracking-tight">
-                {tarrif.title}
-              </h3>
+        <div className="space-y-1.5">
+          <h3 className="text-xl font-extrabold tracking-tight">{tarrif.title}</h3>
+          <p className="min-h-10 text-xs leading-5 text-muted-foreground">
+            {tarrif.shortDescription || tarrif.description}
+          </p>
+        </div>
 
-              {isRecommended && (
-                <Badge className="py-1">
-                  <Heart className="size-3" fill="white" />
-                  محبوب‌ترین
-                </Badge>
+        <div className="space-y-1.5">
+          <div className="flex items-baseline gap-1.5">
+            <span
+              className={cn(
+                "text-4xl font-black tracking-tight",
+                isRecommended && "text-primary",
               )}
-            </div>
-
-            <p className="min-h-10 text-xs leading-5 text-muted-foreground">
-              {tarrif.shortDescription || tarrif.description}
-            </p>
+            >
+              {formatPrice(finalPrice)}
+            </span>
+            <span className="text-sm font-semibold">تومان</span>
+            <span className="text-xs text-muted-foreground">
+              / {PERIOD_SUFFIX[period]}
+            </span>
           </div>
 
-          {/* ------------------------------- price ----------------------------- */}
-          <div className="mt-5 space-y-2">
-            <div className="flex items-end gap-2">
-              <span
-                className={cn(
-                  "font-extrabold tracking-tight",
-                  isRecommended
-                    ? "bg-linear-to-l from-violet-600 to-purple-600 bg-clip-text text-4xl text-transparent"
-                    : "text-4xl",
-                )}
-              >
-                {formatPrice(finalPrice)}
-              </span>
-              <span className="pb-1 text-sm font-medium">تومان</span>
-              <span className="pb-1 text-xs text-muted-foreground">
-                / {PERIOD_SUFFIX[period]}
-              </span>
-            </div>
-
-            {discount > 0 && (
-              <div className="flex flex-wrap items-center gap-2">
+          <div className="flex h-5 flex-wrap items-center gap-2">
+            {discount > 0 && saved > 0 && (
+              <>
                 <span className="text-xs text-muted-foreground line-through">
                   {formatPrice(basePrice)}
                 </span>
-                <span className="rounded-full bg-green-500/10 px-2 py-0.5 text-[10px] font-bold text-green-600">
-                  {faDigits(saved)} تومان صرفه‌جویی
+                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary">
+                  {faDigits(discount)}٪ تخفیف
                 </span>
-              </div>
+              </>
             )}
           </div>
-
-          {/* -------------------------------- cta ------------------------------ */}
-          <Link
-            href={`/payment?plan=${tarrif.key}&period=${period}`}
-            className="mt-5 block"
-          >
-            <Button
-              variant={isRecommended ? "gradient" : "primaryForeground"}
-              size={isRecommended ? "xl" : "lg"}
-              className="group w-full"
-            >
-              خرید اشتراک
-              <ArrowLeft className="size-4 transition-transform duration-300 group-hover:-translate-x-1" />
-            </Button>
-          </Link>
-
-          {/* --------------------------- download quota ------------------------- */}
-          <div className="mt-5 flex items-center gap-3 rounded-2xl border bg-background/70 p-3.5">
-            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
-              <Download className="size-4" strokeWidth={1.9} />
-            </span>
-            <div className="min-w-0">
-              <p className="text-[11px] text-muted-foreground">
-                دانلود منصفانه
-              </p>
-              <p className="text-sm font-bold">
-                {faDigits(downloadCount)}{" "}
-                <span className="text-xs font-medium text-muted-foreground">
-                  قالب در {PERIOD_SUFFIX[period]}
-                </span>
-              </p>
-            </div>
-          </div>
-
-          {/* ------------------------------ features ---------------------------- */}
-          <ul className="mt-5 flex-1 space-y-2.5 border-t pt-5">
-            {features.map((f) => {
-              const included = tarrif.features.some(
-                (tf) => tf.tarrifFeatureId === f.id,
-              );
-
-              return (
-                <li
-                  key={f.id}
-                  className={cn(
-                    "flex items-center gap-2.5 text-xs",
-                    included ? "text-foreground" : "text-muted-foreground/60",
-                  )}
-                >
-                  <span
-                    className={cn(
-                      "grid size-4 shrink-0 place-items-center rounded-full",
-                      included
-                        ? "bg-green-500/10 text-green-600"
-                        : "bg-muted text-muted-foreground/60",
-                    )}
-                  >
-                    {included ? (
-                      <Check className="size-2" strokeWidth={3} />
-                    ) : (
-                      <Minus className="size-2" strokeWidth={3} />
-                    )}
-                  </span>
-                  <span className={cn(!included && "line-through")}>
-                    {f.title}
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
         </div>
+
+        <Link href={`/payment?plan=${tarrif.key}&period=${period}`} className="block">
+          <Button
+            variant={isRecommended ? "gradient" : "primaryForeground"}
+            size="lg"
+            className="group w-full"
+          >
+            شروع با {tarrif.title}
+            <ArrowLeft className="size-4 transition-transform duration-300 group-hover:-translate-x-1" />
+          </Button>
+        </Link>
+      </div>
+
+      {/* ------------------------------ features ------------------------------ */}
+      <div className="flex flex-1 flex-col gap-4 border-t border-dashed px-6 pt-5 pb-6">
+        <div className="flex items-center gap-3 rounded-2xl bg-muted/60 p-3">
+          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-background text-primary shadow-sm">
+            <Download className="size-4" strokeWidth={2} />
+          </span>
+          <p className="text-sm font-bold">
+            {faDigits(downloadCount)}{" "}
+            <span className="text-xs font-medium text-muted-foreground">
+              دانلود منصفانه در {PERIOD_SUFFIX[period]}
+            </span>
+          </p>
+        </div>
+
+        {below ? (
+          <p className="flex items-start gap-2 text-sm font-semibold leading-6">
+            <Layers className="mt-1 size-4 shrink-0 text-primary" strokeWidth={2} />
+            <span>
+              همه ویژگی‌های پلن{" "}
+              <span className="text-primary">{below.title}</span>، به علاوه:
+            </span>
+          </p>
+        ) : (
+          <p className="text-sm font-semibold">شامل:</p>
+        )}
+
+        <ul className="space-y-1.5">
+          {features.map((f) => (
+            <li key={f.id} className="flex items-start gap-2 text-sm leading-6">
+              <span
+                className={cn(
+                  "mt-1 grid size-4 shrink-0 place-items-center rounded-full",
+                  isRecommended
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-primary/10 text-primary",
+                )}
+              >
+                <Check className="size-2.5" strokeWidth={3.5} />
+              </span>
+              {f.title}
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );
 };
 
-const FairDownloadMap = (period: PlanPeriod, fairDownload: FairDownload) => {
+const fairDownloadFor = (period: PlanPeriod, fairDownload: FairDownload) => {
   switch (period) {
     case "monthly":
       return fairDownload.monthly;

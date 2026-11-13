@@ -27,7 +27,7 @@ const page = async () => {
           tarrif.length < 3 ? (
             <PopupNewDialog buttonTitle="New tariff">
               <DialogTitle>New tariff</DialogTitle>
-              <TarrifForm features={features} />
+              <TarrifForm features={features} plans={tarrif} />
             </PopupNewDialog>
           ) : undefined
         }

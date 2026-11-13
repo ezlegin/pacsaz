@@ -49,9 +49,12 @@ export interface TarrifType extends Tarrif {
 export function TarrifForm({
   tarrif,
   features,
+  plans = [],
 }: {
   tarrif?: TarrifType;
   features: TarrifFeature[];
+  /** Every saved plan, to find the one this plan builds on. */
+  plans?: TarrifType[];
 }) {
   const router = useRouter();
 
@@ -79,6 +82,24 @@ export function TarrifForm({
         tarrif?.features.map((f) => f.tarrifFeatureId.toString()) ?? [],
     },
   });
+
+  /**
+   * The pricing cards read "everything in <plan below>, plus:" and list only
+   * what this plan adds, so the form shows which features already come from
+   * the plan below (the saved plan with the next lower key).
+   */
+  const key = form.watch("key");
+  const selected = form.watch("selectedFeatures");
+  const below = plans
+    .filter((p) => p.id !== tarrif?.id && levelOf[p.key] < levelOf[key])
+    .sort((a, b) => b.level - a.level)[0];
+  const inherited = new Set(below?.features.map((f) => f.tarrifFeatureId) ?? []);
+  const added = features.filter(
+    (f) => selected.includes(f.id.toString()) && !inherited.has(f.id),
+  );
+  const missing = features.filter(
+    (f) => inherited.has(f.id) && !selected.includes(f.id.toString()),
+  );
 
   const onSubmit = async (data: TarrifFormType) => {
     startLoading();
@@ -239,11 +260,16 @@ export function TarrifForm({
 
         <div className="space-y-1">
           <Label>Features</Label>
+          <p className="text-xs text-muted-foreground">
+            {below
+              ? `Builds on "${below.title}". The card shows "everything in ${below.title}, plus:" and lists only the features ${below.title} does not have.`
+              : "Entry plan: the card lists every feature ticked here."}
+          </p>
           <FormField
             control={form.control}
             name="selectedFeatures"
             render={({ field }) => (
-              <div className="max-h-35 overflow-y-auto">
+              <div className="max-h-56 overflow-y-auto rounded-md border p-2">
                 {features.map((item, idx) => {
                   const isChecked = field.value.includes(item.id.toString());
 
@@ -268,6 +294,11 @@ export function TarrifForm({
                       </FormControl>
                       <FormLabel className="text-sm font-normal cursor-pointer">
                         {item.title}
+                        {below && inherited.has(item.id) && (
+                          <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                            in {below.title}
+                          </span>
+                        )}
                       </FormLabel>
                     </FormItem>
                   );
@@ -276,6 +307,31 @@ export function TarrifForm({
             )}
           />
         </div>
+
+        {below && (
+          <div className="space-y-1.5 rounded-md bg-muted/50 p-3 text-xs" dir="rtl">
+            <p className="font-semibold">
+              همه ویژگی‌های پلن {below.title}، به علاوه:
+            </p>
+            {added.length ? (
+              <ul className="list-disc space-y-0.5 pr-4">
+                {added.map((f) => (
+                  <li key={f.id}>{f.title}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-muted-foreground" dir="ltr">
+                Nothing added yet: tick features {below.title} does not have.
+              </p>
+            )}
+            {missing.length > 0 && (
+              <p className="text-amber-600" dir="ltr">
+                Not ticked but in {below.title}: {missing.map((f) => f.title).join(", ")}.
+                The card would still claim them through &quot;everything in {below.title}&quot;.
+              </p>
+            )}
+          </div>
+        )}
 
         <SubmitButton
           form={form}
@@ -288,6 +344,9 @@ export function TarrifForm({
 }
 
 const tarrifKeys: PlanKey[] = ["standard", "pro", "organization"];
+
+/** Same order as `levels` in `actions/tarrif.ts`. */
+const levelOf: Record<PlanKey, number> = { standard: 1, pro: 2, organization: 3 };
 
 const TextInput = ({
   formControl,

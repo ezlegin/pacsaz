@@ -53,7 +53,7 @@ const TarrifList = ({
         <TableCell className="flex justify-end gap-2">
           <ActionButton icon={Pencil}>
             <DialogTitle>Edit tariff</DialogTitle>
-            <TarrifForm tarrif={tarrif} features={features} />
+            <TarrifForm tarrif={tarrif} features={features} plans={data} />
           </ActionButton>
           <DeleteButton deleteFn={deleteTarrif} id={tarrif.id} itemLabel={`the tariff "${tarrif.title}"`} />
         </TableCell>

@@ -132,17 +132,16 @@ const SubscriptionList = ({
         without a filter to preserve the admin's ordering, so this is the one
         place the shape of the data is checked before it reaches a card.
       */}
-      <div className="grid w-full grid-cols-1 items-stretch gap-6 md:grid-cols-2 xl:grid-cols-3">
-        {tarrif
-          .filter((plan) => plan.price !== null)
-          .map((plan) => (
-            <SubscriptionCard
-              key={plan.id}
-              tarrif={plan}
-              period={period}
-              features={features}
-            />
-          ))}
+      <div className="grid w-full grid-cols-1 items-stretch gap-6 pt-4 md:grid-cols-2 xl:grid-cols-3">
+        {tiers(tarrif, features).map(({ plan, below, extra }) => (
+          <SubscriptionCard
+            key={plan.id}
+            tarrif={plan}
+            period={period}
+            below={below}
+            features={extra}
+          />
+        ))}
       </div>
 
       {/* ------------------------------ trust bar ----------------------------- */}
@@ -171,3 +170,26 @@ const SubscriptionList = ({
 };
 
 export default SubscriptionList;
+
+/**
+ * Plans build on each other, so a card lists only what it adds to the plan
+ * below it ("everything in Standard, plus:") instead of repeating every
+ * feature with a tick or a dash. Plans are ordered by `level`; a plan with no
+ * `Price` row is not purchasable and is left out, and the next one then builds
+ * on the last plan actually shown. The lowest plan lists all its features.
+ */
+export function tiers(plans: TarrifType[], features: TarrifFeature[]) {
+  const shown = plans
+    .filter((plan) => plan.price !== null)
+    .sort((a, b) => a.level - b.level);
+
+  return shown.map((plan, index) => {
+    const below = index > 0 ? shown[index - 1] : undefined;
+    const has = (p: TarrifType, id: number) =>
+      p.features.some((f) => f.tarrifFeatureId === id);
+    const extra = features.filter(
+      (f) => has(plan, f.id) && !(below && has(below, f.id)),
+    );
+    return { plan, below, extra };
+  });
+}

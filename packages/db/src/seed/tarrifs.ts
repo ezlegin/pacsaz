@@ -29,10 +29,11 @@ type TarrifSeed = {
 };
 
 /**
- * The whole feature catalogue; every plan lists all of them, ticked or not. Each
+ * The whole feature catalogue. A pricing card lists what its plan adds to the
+ * plan below it, so every higher plan must hold all of the lower plan's. Each
  * row is something the apps actually gate on the plan, so the pricing table never
  * promises more than the product does:
- * any plan removes the watermark and downloads (PDF, AI, DXF) within its quota;
+ * any plan removes the watermark, lets the customer lay an image over the dieline and downloads (PDF, AI, DXF) within its quota;
  * `isPremium` (level > 1) unlocks saved copies and the customer list; pro and
  * organization unlock the customizer and the printed 3D preview (`canCustomize`).
  */
@@ -41,6 +42,7 @@ const FEATURES: FeatureSeed[] = [
   { title: "دانلود PDF، AI و DXF در اندازه واقعی", type: "general" },
   { title: "خطوط برش، تا و بلید در لایه‌های جدا", type: "general" },
   { title: "پیش‌نمایش سه‌بعدی و تخت بدون واترمارک", type: "general" },
+  { title: "بارگذاری تصویر روی دایلاین و دیدن طرح نهایی", type: "general" },
   { title: "بررسی خودکار خطای دایلاین پیش از دانلود", type: "general" },
   { title: "ذخیره نسخه‌ها و دانلود دوباره", type: "paid" },
   { title: "ثبت مشتری و تاریخچه دانلود هر مشتری", type: "paid" },
