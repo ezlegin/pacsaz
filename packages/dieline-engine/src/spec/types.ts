@@ -189,9 +189,16 @@ export type FoldSettings = {
    * then Y, then Z.
    */
   pieces?: PiecePlacement[];
+  /**
+   * The panel each piece stands on, by face index: the still panel its tree
+   * grows from. A piece with none stands on its largest panel, which for a
+   * sleeve may be its top: resting on its base it then lies upside down.
+   */
+  roots?: number[];
 };
 
-export type PiecePlacement = { face: number; x: number; y: number; z: number; rx: number; ry: number; rz: number };
+/** Without `step`, where the piece starts; with one, where it is when that step ends. */
+export type PiecePlacement = { face: number; x: number; y: number; z: number; rx: number; ry: number; rz: number; step?: number };
 
 /** The template's Customize-mode settings that are not attached to one node. */
 export type DocumentCustomize = {

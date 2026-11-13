@@ -2,20 +2,23 @@
 
 import { toFoldSVG, type FoldSettings, type RenderResult } from "@repo/dieline-engine";
 import { ArtworkPlacer } from "@repo/dieline-3d/ArtworkPlacer";
-import { buildFoldRig, DEFAULT_FOLD_ANGLE, extractSegmentsFromSvg, extractWindows, foldSchedule, parseFoldConfig, rigPieces } from "@repo/dieline-3d/rig";
+import { buildFoldRig, DEFAULT_FOLD_ANGLE, extractSegmentsFromSvg, extractWindows, parseFoldConfig, rigPieces, stepWindows } from "@repo/dieline-3d/rig";
 import { cn } from "@repo/ui/lib/utils";
-import { Box, ImagePlus, Maximize2, Minimize2, Play, RotateCcw, Trash2, X } from "lucide-react";
+import { Box, ImagePlus, Maximize2, Minimize2, Play, RotateCcw, Scan, Trash2, X } from "lucide-react";
 import { lazy, Suspense, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import {
   common,
   compactFoldSteps,
+  deleteFoldStep,
   foldSteps,
+  keepFoldPlace,
   nextFoldStep,
+  hasPiecePlacement,
   piecePlacement,
   setPanelFolds,
   setPanelSteps,
   setPiecePlacement,
-  stepTimeline,
+  setStandsOn,
   withRest,
   type FoldPanel,
   type FoldPatch,
@@ -89,6 +92,16 @@ export type FoldPreviewStrings = {
   position: string;
   rotation: string;
   resetPiece: string;
+  resetMove: string;
+  at: string;
+  start: string;
+  movesIn: string;
+  carried: string;
+  atSheet: string;
+  standsOn: string;
+  deleteStep: string;
+  fit: string;
+  standsOnHint: string;
   dragHint: string;
   imageSize: string;
   resetImage: string;
@@ -129,6 +142,16 @@ const FOLD_EN: FoldPreviewStrings = {
   position: "Position (mm)",
   rotation: "Rotation (°)",
   resetPiece: "Back where the sheet puts it",
+  resetMove: "No move in this step",
+  at: "At",
+  start: "Start",
+  movesIn: "Moves in step",
+  carried: "(where the step before left it)",
+  atSheet: "(where the sheet puts it)",
+  standsOn: "Stands on this",
+  deleteStep: "Delete step",
+  fit: "Fit to screen",
+  standsOnHint: "Its piece stands on this panel, drawn side (the inside) up; everything else folds up from it.",
   rest: "Rests on",
   restEnd: "Its end",
   restBase: "Its base",
@@ -177,6 +200,7 @@ export function FoldPreview({
   const [expanded, setExpanded] = useState(true);
   const [selected, setSelected] = useState<number[]>([]);
   const [artwork, setArtwork] = useState<Artwork | null>(null);
+  const [fitRequest, setFitRequest] = useState(0);
   const fileInput = useRef<HTMLInputElement>(null);
   const playing = useRef<number | null>(null);
 
@@ -203,7 +227,17 @@ export function FoldPreview({
       return null;
     }
   }, [svg, foldConfig]);
-  const timeline = useMemo(() => (foldedRig ? stepTimeline(foldedRig.nodes, foldSchedule(foldedRig)) : []), [foldedRig]);
+  // Every authored step, of panels or of piece moves, and where it runs on the fold slider.
+  const timeline = useMemo(() => (foldedRig ? stepWindows(foldedRig) : []), [foldedRig]);
+  // Adding or removing a step re-divides the fold slider; keep the view at
+  // the same moment of the same step instead of wherever the number lands now.
+  const lastTimeline = useRef(timeline);
+  useEffect(() => {
+    const before = lastTimeline.current;
+    lastTimeline.current = timeline;
+    if (JSON.stringify(before) === JSON.stringify(timeline)) return;
+    setProgress((p) => keepFoldPlace(p, before, timeline));
+  }, [timeline]);
   const pieces = useMemo(() => (foldedRig ? rigPieces(foldedRig) : []), [foldedRig]);
   const [piece, setPiece] = useState<number | null>(null);
   const activePiece = pieces.find((p) => p.face === piece) ?? null;
@@ -252,11 +286,16 @@ export function FoldPreview({
   const nodes = inferredRig?.nodes ?? [];
   const chosen = selected.filter((i) => nodes[i] && !nodes[i]!.isHole);
   // The still panel never folds, so it is left out of every edit.
-  const movable = chosen.filter((i) => nodes[i]!.parent !== null);
+  // Which panels stand still is the folded rig's word: a piece may stand on a chosen panel.
+  const movable = chosen.filter((i) => (foldedRig?.nodes[i] ?? nodes[i])!.parent !== null);
   const panels: FoldPanel[] = movable.map((i) => {
     const node = nodes[i]!;
     return { faceIndex: i, vertexCount: node.face.outline.length, valley: node.valley, angle: (node.angle * 180) / Math.PI };
   });
+  // Every panel that folds, as `deleteFoldStep` needs them.
+  const allPanels: FoldPanel[] = nodes.flatMap((node, i) =>
+    node.isHole || (foldedRig?.nodes[i] ?? node).parent === null ? [] : [{ faceIndex: i, vertexCount: node.face.outline.length, valley: node.valley, angle: (node.angle * 180) / Math.PI }],
+  );
   const overrides = movable.map((i) => folds?.overrides.find((o) => o.faceIndex === i));
   const direction = common(overrides.map((o) => o?.direction ?? "auto"));
   const angle = common(overrides.map((o) => o?.angle));
@@ -268,9 +307,12 @@ export function FoldPreview({
   const setFold = (patch: FoldPatch | "auto") => save(setPanelFolds(folds, panels, patch, panelCount));
   const setStep = (value: number | null) => save(setPanelSteps(folds, panels, value, panelCount));
 
-  const placement = activePiece ? piecePlacement(folds, activePiece.face) : null;
+  // Which moment of the piece is being set: its start, or the end of a step.
+  const [pieceStep, setPieceStep] = useState<number | undefined>(undefined);
+  const placement = activePiece ? piecePlacement(folds, activePiece.face, pieceStep) : null;
+  const ownPlacement = activePiece ? hasPiecePlacement(folds, activePiece.face, pieceStep) : false;
   const place = (patch: Parameters<typeof setPiecePlacement>[2]) => {
-    if (activePiece) save(setPiecePlacement(folds, activePiece.face, patch, panelCount));
+    if (activePiece) save(setPiecePlacement(folds, activePiece.face, patch, panelCount, pieceStep));
   };
 
   const pick = (i: number, additive: boolean) => {
@@ -340,6 +382,9 @@ export function FoldPreview({
             )}
           </>
         )}
+        <DockButton title={t.fit} onClick={() => setFitRequest((n) => n + 1)}>
+          <Scan className="size-3.5" />
+        </DockButton>
         <DockButton title={expanded ? t.shrink : t.expand} onClick={() => setExpanded(!expanded)}>
           {expanded ? <Minimize2 className="size-3.5" /> : <Maximize2 className="size-3.5" />}
         </DockButton>
@@ -390,6 +435,7 @@ export function FoldPreview({
               artwork={artwork}
               selectedPanels={editable ? (activePiece ? activePiece.members : chosen) : undefined}
               unlimitedZoom={editable}
+              fitRequest={fitRequest}
               onPanelClick={editable ? (i, click) => pick(i, click.additive) : undefined}
               className="h-full w-full"
               renderEmpty={(reason) => (
@@ -447,6 +493,41 @@ export function FoldPreview({
       {editable && activePiece && placement && (
         <div className={cn("flex min-h-9 shrink-0 flex-wrap items-center gap-x-3 gap-y-1 border-t px-2 py-1", bar)}>
           <span className="font-medium">{pieces.length > 1 ? `${t.piece} ${pieces.indexOf(activePiece) + 1}` : t.piece}</span>
+          {/* The moment being set: the start, or where the piece is when a step ends. */}
+          <span className="flex flex-wrap items-center gap-1">
+            <span className="text-muted-foreground">{t.at}</span>
+            <button
+              type="button"
+              className={chip(pieceStep === undefined)}
+              onClick={() => {
+                setPieceStep(undefined);
+                playTo(0);
+              }}
+            >
+              {t.start}
+            </button>
+            {[...new Set([...timeline.map((w) => w.step), ...(pieceStep !== undefined ? [pieceStep] : [])])]
+              .sort((a, b) => a - b)
+              .map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  title={hasPiecePlacement(folds, activePiece.face, s) ? `${t.movesIn} ${s}` : undefined}
+                  className={cn(chip(pieceStep === s), hasPiecePlacement(folds, activePiece.face, s) && "font-semibold")}
+                  onClick={() => {
+                    setPieceStep(s);
+                    const end = timeline.find((w) => w.step === s)?.end;
+                    if (end !== undefined) playTo(end);
+                  }}
+                >
+                  {s}
+                </button>
+              ))}
+            <button type="button" className={chip(false)} onClick={() => setPieceStep(nextFoldStep(folds))}>
+              + {t.newStep}
+            </button>
+          </span>
+          {!ownPlacement && <span className="text-muted-foreground">{pieceStep === undefined ? t.atSheet : t.carried}</span>}
           <span className="flex items-center gap-1">
             <span className="text-muted-foreground">{t.position}</span>
             {(["x", "y", "z"] as const).map((axis) => (
@@ -465,7 +546,7 @@ export function FoldPreview({
               <NumberField key={axis} label={label} value={placement[axis]} step={15} onChange={(v) => place({ [axis]: v })} wide={expanded} />
             ))}
           </span>
-          <button type="button" title={t.resetPiece} className={chip(false)} onClick={() => place(null)}>
+          <button type="button" title={pieceStep === undefined ? t.resetPiece : t.resetMove} className={chip(false)} onClick={() => place(null)}>
             <RotateCcw className="size-3" />
           </button>
           <ClearButton title={t.clear} onClick={() => setPiece(null)} />
@@ -481,9 +562,20 @@ export function FoldPreview({
                 <>
                   <span className="ml-auto text-muted-foreground">{t.selectStep}</span>
                   {steps.map(({ step: s, faces }) => (
-                    <button key={s} type="button" title={`${faces.length} ${t.panels}`} className={chip(false)} onClick={() => setSelected(faces)}>
-                      {s}
-                    </button>
+                    <span key={s} className="inline-flex items-center">
+                      <button type="button" title={`${faces.length} ${t.panels}`} className={cn(chip(false), "rounded-r-none")} onClick={() => setSelected(faces)}>
+                        {s}
+                      </button>
+                      <button
+                        type="button"
+                        title={`${t.deleteStep} ${s}`}
+                        aria-label={`${t.deleteStep} ${s}`}
+                        className={cn(chip(false), "rounded-l-none border-l-0 hover:text-destructive")}
+                        onClick={() => save(deleteFoldStep(folds, s, allPanels, panelCount))}
+                      >
+                        <X className="size-3" />
+                      </button>
+                    </span>
                   ))}
                 </>
               )}
@@ -526,7 +618,7 @@ export function FoldPreview({
                       type="range"
                       min={0}
                       max={180}
-                      step={5}
+                      step={1}
                       value={angle ?? DEFAULT_FOLD_ANGLE}
                       onChange={(e) => setFold({ direction, angle: Number(e.target.value) })}
                       className={expanded ? "w-40" : "w-24"}
@@ -546,6 +638,20 @@ export function FoldPreview({
                     />
                     °
                   </label>
+                )}
+                {movable.length === 1 && (
+                  <button
+                    type="button"
+                    title={t.standsOnHint}
+                    className={cn(chip(false), "ml-2")}
+                    onClick={() => {
+                      const face = movable[0]!;
+                      const members = pieces.find((p) => p.members.includes(face))?.members ?? [face];
+                      save(setStandsOn(folds, face, members, panelCount));
+                    }}
+                  >
+                    {t.standsOn}
+                  </button>
                 )}
                 <ClearButton title={t.clear} onClick={() => setSelected([])} />
               </div>

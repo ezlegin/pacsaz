@@ -196,6 +196,17 @@ Phases (each ends with a commit message for the user to commit):
 
 ### 3D folding
 
+- **The dieline is drawn from the inside of the board**, and an "in" fold
+  goes towards the drawn side: a template resting on its base rises from the
+  ground, one on its end closes towards the viewer. `DielineViewer` uses the
+  rig as built (it used to flip every fold, treating the drawing as the
+  printed outside, so trays folded downward). Each piece stands on its largest
+  panel unless `folds.roots` names one (the dock's "Stands on this"); the
+  tray's sleeve stands on its under panel. The home page's `FoldStage` still
+  shows a printed sheet face up and folds it away from the camera. Artwork is
+  painted on both faces of the board.
+
+
 - The fold animation is staged (`dieline-3d/src/schedule.ts`): the glue flap,
   then the body panels one by one (the far end closes onto the glue last), then
   the bottom flaps, then the top flaps. On each side: dust flaps, then flaps on
@@ -245,7 +256,14 @@ Phases (each ends with a commit message for the user to commit):
   stops the fold at the end of each step. `folds.pieces` places each separate
   piece (by its still panel's face): mm with Y up and degrees about that
   panel's centre, in the viewer's world frame (`placePieces`), at every point
-  of the fold. Large, the dock is full screen with unlimited zoom
+  of the fold. Turned any way, a piece stays on the ground (its lowest point
+  where it is unplaced, recomputed after each `applyFold`); `y` lifts it.
+  Pieces line up front to back on the main piece's centre (the one with the
+  most panels); `z` moves a piece off that line. A placement without `step` is where a piece
+  starts; one with a `step` is where it is when that step ends, and it moves
+  there during the step (`placePieces(…, progress)`). A step may hold only
+  piece moves (`FoldRig.moveSteps`); `stepWindows(rig)` gives every step's
+  place on the fold, and the dock's piece bar picks Start or a step. Large, the dock is full screen with unlimited zoom
   (`unlimitedZoom`, editor only). Folds authored here live in the database: re-seeding a
   template (`seed:templates -- --only=slug`) replaces them with the seed's. The client passes them to the
   viewer as its `foldConfig`. `@repo/dieline-3d/rig` exposes the rig without

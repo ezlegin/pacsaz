@@ -52,10 +52,16 @@ export type FoldConfig = {
   overrides: FoldOverride[];
   /** Where each separate piece stands, by its still panel's face (see `placePieces`). */
   pieces?: PiecePlacement[];
+  /** The panel each piece stands on, by face index (see `buildFoldRig`). */
+  roots?: number[];
 };
 
-/** Millimetres with Y up, and degrees about the piece's centre, applied X, Y, then Z. */
-export type PiecePlacement = { face: number; x: number; y: number; z: number; rx: number; ry: number; rz: number };
+/**
+ * Millimetres with Y up, and degrees about the piece's centre, applied X, Y,
+ * then Z. Without `step` it is where the piece starts; with one, where it is
+ * when that step ends, moving there during the step.
+ */
+export type PiecePlacement = { face: number; x: number; y: number; z: number; rx: number; ry: number; rz: number; step?: number };
 
 const finite = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
 
@@ -109,9 +115,19 @@ export const parseFoldConfig = (
         ? {
             pieces: parsed.pieces
               .filter((p): p is PiecePlacement => !!p && typeof p.face === "number")
-              .map((p) => ({ face: p.face, x: finite(p.x), y: finite(p.y), z: finite(p.z), rx: finite(p.rx), ry: finite(p.ry), rz: finite(p.rz) })),
+              .map((p) => ({
+                face: p.face,
+                x: finite(p.x),
+                y: finite(p.y),
+                z: finite(p.z),
+                rx: finite(p.rx),
+                ry: finite(p.ry),
+                rz: finite(p.rz),
+                ...(typeof p.step === "number" && Number.isInteger(p.step) && p.step > 0 ? { step: p.step } : {}),
+              })),
           }
         : {}),
+      ...(Array.isArray(parsed.roots) ? { roots: parsed.roots.filter((r): r is number => Number.isInteger(r) && r >= 0) } : {}),
     };
   } catch {
     return null;

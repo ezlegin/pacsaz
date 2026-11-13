@@ -456,7 +456,12 @@ function withFolds(template: Template, doc: DielineDocument): DielineDocument {
     });
     // The end walls' parts lie beyond the base's short sides.
     const onEnd = ({ node }: (typeof faces)[number]) => node.face.centroid[0] < 0 || node.face.centroid[0] > L;
-    if (!base || walls.length !== 4 || webs.length !== 8 || inner.filter(onEnd).length !== 2 || lips.filter(onEnd).length !== 2) {
+    // The sleeve stands on its under panel, the one beside its glue flap: on
+    // its largest panel it could stand on its top, upside down.
+    const sleeve = faces.filter(({ node }) => node.face.centroid[0] > L + 2 * height + 40).sort((a, b) => a.node.face.centroid[1] - b.node.face.centroid[1]);
+    const glueAt = sleeve.reduce((k, f, i) => (Math.abs(f.node.face.area) < Math.abs(sleeve[k]!.node.face.area) ? i : k), 0);
+    const under = glueAt === 0 ? sleeve[1] : glueAt === sleeve.length - 1 ? sleeve[sleeve.length - 2] : undefined;
+    if (!base || walls.length !== 4 || webs.length !== 8 || inner.filter(onEnd).length !== 2 || lips.filter(onEnd).length !== 2 || sleeve.length !== 5 || !under) {
       throw new Error(`tray-with-sleeve: unexpected fold tree (${base ? 1 : 0} base, ${walls.length} walls, ${webs.length} web halves)`);
     }
     return {
@@ -465,6 +470,7 @@ function withFolds(template: Template, doc: DielineDocument): DielineDocument {
         faceCount: rig.stats.faceCount,
         // A tray sits on its base.
         rest: "base",
+        roots: [under.faceIndex],
         overrides: [
           ...walls.map((f) => ({ ...override(f, "in", 90), step: 1 })),
           ...webs.map((f) => {

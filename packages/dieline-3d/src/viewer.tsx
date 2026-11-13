@@ -1,6 +1,6 @@
 "use client";
 
-import { Bounds, OrbitControls } from "@react-three/drei";
+import { Bounds, OrbitControls, useBounds } from "@react-three/drei";
 import { BoardLights } from "./lights";
 import { Canvas } from "@react-three/fiber";
 import { useEffect, useMemo, useState } from "react";
@@ -46,15 +46,13 @@ const RigObject = ({
   lying: boolean;
   onPanelClick?: (panelIndex: number, click: PanelClick) => void;
 }) => {
-  // Stand each piece where the template places it; folding never moves a piece's still panel.
-  useEffect(() => {
-    placePieces(scene, rig, pieces, lying);
-  }, [scene, rig, pieces, lying]);
-
-  // Drive the fold. Also runs on mount so the initial pose is correct.
+  // Drive the fold, then stand each piece where the template places it: a
+  // turned piece is put back on the ground, and its lowest point moves as it
+  // folds. Also runs on mount so the initial pose is correct.
   useEffect(() => {
     applyFold(scene, rig, progress);
-  }, [scene, rig, progress]);
+    placePieces(scene, rig, pieces, lying, progress);
+  }, [scene, rig, progress, pieces, lying]);
 
   return (
     <primitive
@@ -76,6 +74,22 @@ const RigObject = ({
 
 /** How a panel was clicked: `additive` with Shift, Ctrl or Cmd held, to add to a selection. */
 export type PanelClick = { additive: boolean };
+
+/**
+ * Frames the model as it is shown: folded or flat, it fills the view. Runs
+ * after the fold is applied (it comes after the model in the tree, and effects
+ * run in order), so it measures the pose on screen, not the flat sheet. Only
+ * when `fitKey` changes, so picking panels, editing folds or moving the fold
+ * slider keep the zoom and angle the person set.
+ */
+const FitModel = ({ fitKey, clip }: { fitKey: string; clip: boolean }) => {
+  const bounds = useBounds();
+  useEffect(() => {
+    bounds.refresh().reset();
+    if (clip) bounds.clip();
+  }, [bounds, fitKey, clip]);
+  return null;
+};
 
 export type DielineViewerProps = {
   /** The generated dieline SVG (already exported by the generator). */
@@ -130,6 +144,8 @@ export type DielineViewerProps = {
    * on details. A customer's view keeps the model framed.
    */
   unlimitedZoom?: boolean;
+  /** Change it to frame the model again, e.g. from a Fit button. */
+  fitRequest?: number;
 };
 
 export const DielineViewer = ({
@@ -149,6 +165,7 @@ export const DielineViewer = ({
   selectedPanels,
   renderEmpty,
   unlimitedZoom = false,
+  fitRequest = 0,
 }: DielineViewerProps) => {
   /**
    * The rig is derived data, so it is memoised on its actual inputs. Any change
@@ -165,15 +182,12 @@ export const DielineViewer = ({
       }
 
       const config = parseFoldConfig(foldConfig);
-      const built = buildFoldRig(segments, config, extractWindows(svg));
-      // The flat pattern is the printed side, as the artwork placer shows it, so
-      // the sheet has to fold away from that side. The rig folds the other way,
-      // which puts the print on the inside and shows its mirror image on the
-      // outside. Same flip as `FoldStage`.
-      const next: FoldRig = {
-        ...built,
-        nodes: built.nodes.map((node) => ({ ...node, sign: (node.sign === 1 ? -1 : 1) as 1 | -1 })),
-      };
+      // The dieline is drawn from the inside of the board, and the rig folds
+      // every "in" crease towards that side, the way it is drawn. Resting on its
+      // base a box therefore rises from the ground; on its end it closes towards
+      // the viewer. (The home page's `FoldStage` shows a printed sheet face up and
+      // folds it away from the camera instead.)
+      const next: FoldRig = buildFoldRig(segments, config, extractWindows(svg));
       if (next.nodes.length === 0) {
         return { rig: null, reason: "no-geometry" as const };
       }
@@ -374,9 +388,13 @@ export const DielineViewer = ({
         */}
         <BoardLights distance={span} />
 
-        {/* Fit the model to the viewer on first view and whenever it is rebuilt or resized. */}
-        {/* Fitting sets near and far for a framed view; an unlimited one keeps its own. */}
-        <Bounds fit clip={!unlimitedZoom} observe margin={1.75} maxDuration={0}>
+        {/*
+          The model is framed by `FitModel`, not on every resize: the editor's
+          panel bar grows when a panel is picked, and a refit then threw away
+          the zoom and angle the person had set. Fitting sets near and far for a
+          framed view; an unlimited one keeps its own.
+        */}
+        <Bounds margin={1.15} maxDuration={0}>
           {/* The sheet is drawn in the XY plane and folds towards +Z; lying it
               down turns +Z up, so the walls rise from the ground. */}
           <group rotation={[lying ? -Math.PI / 2 : 0, 0, 0]}>
@@ -389,6 +407,8 @@ export const DielineViewer = ({
               onPanelClick={onPanelClick}
             />
           </group>
+          {/* A new template, size or board frames again; fold edits do not. */}
+          <FitModel fitKey={`${svg.length}:${hashOf(svg)}:${thickness}:${lying}:${fitRequest}`} clip={!unlimitedZoom} />
         </Bounds>
 
         <OrbitControls
@@ -396,7 +416,7 @@ export const DielineViewer = ({
           enablePan
           enableDamping
           dampingFactor={0.12}
-          minDistance={unlimitedZoom ? 0 : span * 0.45}
+          minDistance={unlimitedZoom ? 0 : span * 0.1}
           maxDistance={unlimitedZoom ? Infinity : span * 4}
           zoomToCursor={unlimitedZoom}
         />
@@ -440,4 +460,11 @@ function useDecodedImage(url: string | undefined, what: string): HTMLImageElemen
   }, [url, what]);
 
   return image;
+}
+
+/** A short fingerprint of a string, to tell one dieline from another cheaply. */
+function hashOf(text: string): number {
+  let h = 0;
+  for (let i = 0; i < text.length; i += 7) h = (h * 31 + text.charCodeAt(i)) | 0;
+  return h;
 }

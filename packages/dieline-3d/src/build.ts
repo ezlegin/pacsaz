@@ -1,4 +1,4 @@
-import { foldAngle, foldSchedule, stageProgress, type FoldWindow } from "./schedule";
+import { foldAngle, foldSchedule, stageProgress, stepWindows, type FoldWindow } from "./schedule";
 import * as THREE from "three";
 import { boardTextures, type BoardTextures } from "./board";
 import type { PiecePlacement } from "./foldConfig";
@@ -788,38 +788,96 @@ const scheduleOf = (rig: FoldRig): FoldWindow[] => {
  * (the template resting on its base, the scene turned -90° about X) is undone
  * here: the numbers mean the same thing whichever way the template rests.
  * Rotation is about the still panel's centre, X then Y then Z.
+ *
+ * Whatever the turn, a piece stays on the ground: it drops or rises until its
+ * lowest point is where its lowest point is unplaced, and `y` lifts it from
+ * there. Pieces line up front to back: each one's centre moves onto the main
+ * piece's (the one with the most panels), and `z` moves it off that line. Both
+ * change as the pieces fold, so this runs after every `applyFold`.
+ *
+ * A placement without a step is where a piece starts; one with a step is where
+ * it is when that step ends, and it moves there during the step (`progress`).
  */
-export const placePieces = (scene: RigScene, rig: FoldRig, pieces: readonly PiecePlacement[] | undefined, lying: boolean) => {
+export const placePieces = (scene: RigScene, rig: FoldRig, pieces: readonly PiecePlacement[] | undefined, lying: boolean, progress = 1) => {
   const center: Pt = [(rig.bounds.min[0] + rig.bounds.max[0]) / 2, (rig.bounds.min[1] + rig.bounds.max[1]) / 2];
   const toScene = new THREE.Matrix4().makeRotationX(lying ? -Math.PI / 2 : 0);
   const fromScene = toScene.clone().invert();
-  const byFace = new Map((pieces ?? []).map((p) => [p.face, p]));
-  const deg = THREE.MathUtils.degToRad;
-
-  rig.nodes.forEach((node, index) => {
-    if (node.parent !== null || node.isHole) return;
-    const pivot = scene.pivots[index];
-    if (!pivot) return;
-    const placed = byFace.get(index);
-    if (!placed) {
-      pivot.position.set(0, 0, 0);
-      pivot.quaternion.identity();
-      return;
+  const windows = new Map(stepWindows(rig).map((w) => [w.step, w]));
+  const keys = ["x", "y", "z", "rx", "ry", "rz"] as const;
+  // Where a piece is at this point of the fold: its start, carried towards each
+  // step's placement while that step runs.
+  const placementOf = (face: number): PiecePlacement => {
+    const mine = (pieces ?? []).filter((p) => p.face === face);
+    const pose: PiecePlacement = { face, x: 0, y: 0, z: 0, rx: 0, ry: 0, rz: 0, ...mine.find((p) => p.step === undefined) };
+    for (const key of [...mine].filter((p) => p.step !== undefined).sort((a, b) => a.step! - b.step!)) {
+      const w = windows.get(key.step!);
+      const t = w ? stageProgress(w, progress) : 1;
+      for (const k of keys) pose[k] += (key[k] - pose[k]) * t;
     }
+    return pose;
+  };
+  const deg = THREE.MathUtils.degToRad;
+  const box = new THREE.Box3();
+  const part = new THREE.Box3();
+  const frame = new THREE.Matrix4();
+  // Everything hanging from this pivot, boxed in the world frame (Y up).
+  const bounds = (pivot: THREE.Group) => {
+    scene.group.updateMatrixWorld(true);
+    // Strip whatever the canvas puts above the scene, then turn it as the viewer does.
+    frame.copy(toScene).multiply(scene.group.matrixWorld.clone().invert());
+    box.makeEmpty();
+    pivot.traverse((object) => {
+      const mesh = object as THREE.Mesh;
+      if (!mesh.isMesh || !mesh.geometry) return;
+      if (!mesh.geometry.boundingBox) mesh.geometry.computeBoundingBox();
+      box.union(part.copy(mesh.geometry.boundingBox!).applyMatrix4(frame.clone().multiply(mesh.matrixWorld)));
+    });
+    return box.clone();
+  };
+
+  const placed = rig.nodes.flatMap((node, index) => {
+    const pivot = scene.pivots[index];
+    if (node.parent !== null || node.isHole || !pivot) return [];
+    const placement = placementOf(index);
+    pivot.position.set(0, 0, 0);
+    pivot.quaternion.identity();
+    const ground = bounds(pivot).min.y;
+
     const xs = node.face.outline.map((p) => p[0]);
     const ys = node.face.outline.map((p) => p[1]);
     const mid = toWorld([(Math.min(...xs) + Math.max(...xs)) / 2, (Math.min(...ys) + Math.max(...ys)) / 2], center);
     const c = new THREE.Vector3(mid.x, mid.y, 0).applyMatrix4(toScene);
-    const turn = new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler(deg(placed.rx), deg(placed.ry), deg(placed.rz), "XYZ"));
-    const world = new THREE.Matrix4()
-      .makeTranslation(c.x + placed.x, c.y + placed.y, c.z + placed.z)
-      .multiply(turn)
-      .multiply(new THREE.Matrix4().makeTranslation(-c.x, -c.y, -c.z));
-    const local = fromScene.clone().multiply(world).multiply(toScene);
-    local.decompose(pivot.position, pivot.quaternion, new THREE.Vector3());
+    const turn = new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler(deg(placement.rx), deg(placement.ry), deg(placement.rz), "XYZ"));
+    const pose = (lift: number, depth: number) => {
+      const world = new THREE.Matrix4()
+        .makeTranslation(c.x + placement.x, c.y + lift, c.z + depth)
+        .multiply(turn)
+        .multiply(new THREE.Matrix4().makeTranslation(-c.x, -c.y, -c.z));
+      fromScene.clone().multiply(world).multiply(toScene).decompose(pivot.position, pivot.quaternion, new THREE.Vector3());
+    };
+    pose(0, 0);
+    const turned = bounds(pivot).min.y;
+    const lift = (Number.isFinite(ground) && Number.isFinite(turned) ? ground - turned : 0) + placement.y;
+    pose(lift, 0);
+    const box = bounds(pivot);
+    const depth = box.isEmpty() ? 0 : (box.min.z + box.max.z) / 2;
+    return [{ pose, lift, depth, extra: placement.z, panels: rigPanelsUnder(rig, index) }];
   });
+
+  // Front to back, every piece on the main piece's centre line.
+  const main = [...placed].sort((a, b) => b.panels - a.panels)[0];
+  for (const piece of placed) piece.pose(piece.lift, (placed.length > 1 && main ? main.depth - piece.depth : 0) + piece.extra);
   scene.group.updateMatrixWorld(true);
 };
+
+/** How many panels hang from a still panel, itself included. */
+const rigPanelsUnder = (rig: FoldRig, root: number) =>
+  rig.nodes.filter((node, i) => {
+    if (node.isHole) return false;
+    let k = i;
+    for (let guard = 0; rig.nodes[k]!.parent !== null && guard < rig.nodes.length; guard++) k = rig.nodes[k]!.parent!;
+    return k === root;
+  }).length;
 
 /**
  * Applies the fold amount to every pivot. Panels fold in stages (see

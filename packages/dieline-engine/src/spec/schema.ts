@@ -298,11 +298,13 @@ const folds = z
             rx: z.number().finite().min(-3600).max(3600),
             ry: z.number().finite().min(-3600).max(3600),
             rz: z.number().finite().min(-3600).max(3600),
+            step: z.number().int().min(1).max(100).optional(),
           })
           .strict(),
       )
       .max(50)
       .optional(),
+    roots: z.array(z.number().int().min(0)).max(50).optional(),
   })
   .strict();
 

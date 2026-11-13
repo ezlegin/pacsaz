@@ -223,6 +223,18 @@ describe("presets", () => {
     expect(parsed.ok && parsed.document.folds?.pieces).toEqual([placed]);
     expect(parseDocument(withPieces([{ face: 17, x: 1 }])).ok).toBe(false);
     expect(parseDocument(withPieces([{ ...placed, extra: 1 }])).ok).toBe(false);
+    // Where it is when a step ends: steps count from 1, whole numbers only.
+    const moved = parseDocument(withPieces([placed, { ...placed, x: 250, step: 2 }]));
+    expect(moved.ok && moved.document.folds?.pieces?.[1]?.step).toBe(2);
+    expect(parseDocument(withPieces([{ ...placed, step: 0 }])).ok).toBe(false);
+  });
+
+  it("keeps the panel each piece stands on", () => {
+    const withRoots = (roots: unknown) => JSON.parse(JSON.stringify({ ...rteBox, folds: { faceCount: 10, overrides: [], roots } }));
+    const parsed = parseDocument(withRoots([19, 3]));
+    expect(parsed.ok && parsed.document.folds?.roots).toEqual([19, 3]);
+    expect(parseDocument(withRoots([-1])).ok).toBe(false);
+    expect(parseDocument(withRoots([1.5])).ok).toBe(false);
   });
 });
 

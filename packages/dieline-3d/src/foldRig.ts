@@ -118,13 +118,17 @@ const pickRoot = (faces: { id: number; area: number }[]): number => {
 /**
  * Breadth-first spanning tree over the hinge graph, rooted at `rootId`. A dieline
  * can hold separate pieces, such as a tray and its sleeve: each gets a tree of its
- * own, rooted at its largest face, or it would stay flat.
+ * own, or it would stay flat. A piece grows from the panel `chosen` names for it
+ * (the one it stands on), else from its largest face. `fixed` says `rootId` was
+ * chosen too, so it wins in its own piece.
  */
 const buildTree = (
   faceCount: number,
   hinges: Hinge[],
   rootId: number,
   faces: { id: number; area: number }[],
+  chosen: number[] = [],
+  fixed = false,
 ): { parent: (number | null)[]; hingeOf: (number | null)[]; depth: number[] } => {
   const parent: (number | null)[] = new Array(faceCount).fill(null);
   const hingeOf: (number | null)[] = new Array(faceCount).fill(null);
@@ -164,12 +168,21 @@ const buildTree = (
     }
   };
 
-  grow(rootId);
+  if (fixed) grow(rootId);
+  for (const id of chosen) if (!visited.has(id) && neighbours.has(id)) grow(id);
+  if (!visited.has(rootId)) grow(rootId);
   for (const face of [...faces].sort((a, b) => b.area - a.area)) {
     if (!visited.has(face.id) && neighbours.has(face.id)) grow(face.id);
   }
 
   return { parent, hingeOf, depth };
+};
+
+/** The root of the tree a face grows in. */
+const rootOfTree = (parent: (number | null)[], id: number): number => {
+  let k = id;
+  for (let guard = 0; parent[k] !== null && parent[k] !== undefined && guard < parent.length; guard++) k = parent[k]!;
+  return k;
 };
 
 /**
@@ -303,7 +316,8 @@ export const buildFoldRig = (
   faces.forEach((face, index) => indexOf.set(face.id, index));
 
   const faceCount = faces.length;
-  const { parent, hingeOf, depth } = buildTree(faceCount, hinges, rootId, faces);
+  const chosen = (config?.roots ?? []).flatMap((index) => (faces[index] ? [faces[index]!.id] : []));
+  const { parent, hingeOf, depth } = buildTree(faceCount, hinges, rootId, faces, chosen, rootFace !== undefined);
 
   /* -------------------------------- nodes -------------------------------- */
   const nodes: RigNode[] = faces.map((face, index) => {
@@ -399,7 +413,10 @@ export const buildFoldRig = (
 
   return {
     nodes: applyFoldOverrides(nodes, config),
-    rootId: indexOf.get(rootId) ?? 0,
+    // A piece moving in a step takes that step's turn, folding or not.
+    ...(config?.pieces?.some((p) => p.step !== undefined) ? { moveSteps: [...new Set(config.pieces.flatMap((p) => (p.step === undefined ? [] : [p.step])))] } : {}),
+    // A panel chosen in the main piece stands it on that panel instead.
+    rootId: indexOf.get(rootOfTree(parent, rootId)) ?? 0,
     perforations,
     bounds,
     stats: {

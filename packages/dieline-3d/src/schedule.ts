@@ -108,6 +108,28 @@ const CAP_BELOW = (75 * Math.PI) / 180;
  * as long as the shortest inferred stage.
  */
 export function foldSchedule(rig: FoldRig): FoldWindow[] {
+  return timed(rig).windows;
+}
+
+/**
+ * When each authored step runs on the 0–1 fold: the steps of panels and the
+ * steps that only move a piece (`FoldRig.moveSteps`) alike, in order.
+ */
+export function stepWindows(rig: FoldRig): { step: number; start: number; end: number }[] {
+  return timed(rig).steps;
+}
+
+const timings = new WeakMap<FoldRig, { windows: FoldWindow[]; steps: { step: number; start: number; end: number }[] }>();
+
+function timed(rig: FoldRig): { windows: FoldWindow[]; steps: { step: number; start: number; end: number }[] } {
+  const known = timings.get(rig);
+  if (known) return known;
+  const result = schedule(rig);
+  timings.set(rig, result);
+  return result;
+}
+
+function schedule(rig: FoldRig): { windows: FoldWindow[]; steps: { step: number; start: number; end: number }[] } {
   const inferred = inferredSchedule(rig);
   const nodes = rig.nodes;
   const stepOf = (i: number): number | undefined => {
@@ -117,8 +139,9 @@ export function foldSchedule(rig: FoldRig): FoldWindow[] {
     const node = nodes[owner]!;
     return node.parent === null || node.isHole ? undefined : node.step;
   };
-  const steps = [...new Set(nodes.map((_, i) => stepOf(i)).filter((s): s is number => s !== undefined))].sort((a, b) => a - b);
-  if (steps.length === 0) return inferred;
+  // A step may only move a piece; it takes its turn like any other.
+  const steps = [...new Set([...nodes.map((_, i) => stepOf(i)), ...(rig.moveSteps ?? [])].filter((s): s is number => s !== undefined))].sort((a, b) => a - b);
+  if (steps.length === 0) return { windows: inferred, steps: [] };
 
   // The time the remaining panels use, gaps closed up.
   const rest = nodes.flatMap((node, i) => {
@@ -179,7 +202,7 @@ export function foldSchedule(rig: FoldRig): FoldWindow[] {
     return { start: k * each, end: (k + 1) * each };
   };
 
-  return nodes.map((node, i) => {
+  const windows = nodes.map((node, i): FoldWindow => {
     const w = inferred[i]!;
     const step = stepOf(i);
     if (step !== undefined) {
@@ -199,6 +222,7 @@ export function foldSchedule(rig: FoldRig): FoldWindow[] {
       ...(w.press ? { press: { ...w.press, start: later(w.press.start), end: later(w.press.end) } } : {}),
     };
   });
+  return { windows, steps: steps.map((step) => ({ step, ...windowOfStep(step) })) };
 }
 
 function inferredSchedule(rig: FoldRig): FoldWindow[] {

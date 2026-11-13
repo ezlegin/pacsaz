@@ -1,5 +1,5 @@
 import { buildFoldRig } from "./foldRig";
-import { foldAngle, foldSchedule, stageProgress, webAngle } from "./schedule";
+import { foldAngle, foldSchedule, stageProgress, stepWindows, webAngle } from "./schedule";
 import type { Pt, Segment } from "./types";
 
 let failures = 0;
@@ -194,6 +194,23 @@ assert("plain deep flaps are not pressed", foldSchedule(buildFoldRig(plainSegs))
     JSON.stringify(flaps),
   );
   assert("an authored step folds to its own angle", Math.abs(foldAngle(a!, authored.nodes[sides[0]!]!.angle, a!.end) - Math.PI / 2) < 1e-9);
+}
+
+// A step that only moves a piece takes its turn like a step of panels: here
+// the sides fold in step 1 and step 2 is a move with no panel in it.
+{
+  const sides = [at(5, 15), at(35, 15)];
+  const moving = buildFoldRig(segments, {
+    version: 1,
+    faceCount: 0,
+    overrides: sides.map((faceIndex) => ({ faceIndex, direction: "in" as const, angle: 90, step: 1 })),
+    pieces: [{ face: 0, x: 100, y: 0, z: 0, rx: 0, ry: 0, rz: 0, step: 2 }],
+  });
+  const steps = stepWindows(moving);
+  assert("a move-only step is a step", steps.map((s) => s.step).join() === "1,2", JSON.stringify(steps));
+  assert("it runs after step 1, before the rest", Math.abs(steps[1]!.start - steps[0]!.end) < 1e-9 && steps[1]!.end < 1, JSON.stringify(steps));
+  const flaps = [at(20, 2.5), at(20, 27.5)].map((i) => foldSchedule(moving)[i]!);
+  assert("the automatic panels wait for the move", Math.min(...flaps.map((w) => w.start)) >= steps[1]!.end - 1e-9, JSON.stringify(flaps));
 }
 
 // A corner web's halves turn out 45° once the walls stand, and follow the walls

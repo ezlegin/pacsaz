@@ -220,4 +220,37 @@ const rotateZ = (p: Pt, pivot: Pt, angle: number): Pt => {
   assert("panel around a window stays board", panel !== undefined && !panel.isHole && panel.holes.length === 1);
 }
 
+/* -------------------------------------------------------------------------- */
+/* Two pieces, each standing on the panel chosen for it                        */
+/* -------------------------------------------------------------------------- */
+{
+  // Two strips apart: [10 | 30 | 20] and [25 | 25]. Without a choice each piece
+  // stands on its largest panel; `roots` stands either piece on another one.
+  const strip = (x0: number, widths: number[]): Segment[] => {
+    const xs = widths.reduce<number[]>((a, w) => [...a, a[a.length - 1]! + w], [x0]);
+    const right = xs[xs.length - 1]!;
+    return [
+      { a: [x0, 0], b: [right, 0], kind: "trim" },
+      { a: [right, 0], b: [right, 10], kind: "trim" },
+      { a: [right, 10], b: [x0, 10], kind: "trim" },
+      { a: [x0, 10], b: [x0, 0], kind: "trim" },
+      ...xs.slice(1, -1).map((x): Segment => ({ a: [x, 0], b: [x, 10], kind: "fold" })),
+    ];
+  };
+  const segments = [...strip(0, [10, 30, 20]), ...strip(100, [25, 25])];
+  const at = (rig: ReturnType<typeof buildFoldRig>, x: number) => rig.nodes.findIndex((n) => Math.abs(n.face.centroid[0] - x) < 1);
+  const plain = buildFoldRig(segments);
+  const roots = (rig: ReturnType<typeof buildFoldRig>) => rig.nodes.flatMap((n, i) => (n.parent === null && !n.isHole ? [i] : [])).sort((a, b) => a - b);
+  check("each piece stands on its largest panel", roots(plain).includes(at(plain, 25)), true);
+
+  const thin = at(plain, 5);
+  const second = at(plain, 137.5);
+  const chosen = buildFoldRig(segments, { version: 1, faceCount: 0, overrides: [], roots: [thin, second] });
+  check("both pieces stand on the chosen panels", roots(chosen), [thin, second].sort((a, b) => a - b));
+  check("the main root follows the choice", chosen.rootId === thin || chosen.rootId === second, true);
+  // An explicit still panel for the main piece wins in its own piece.
+  const fixed = buildFoldRig(segments, { version: 1, faceCount: 0, overrides: [], rootFace: at(plain, 25), roots: [thin] });
+  check("rootFace wins in its own piece", roots(fixed).includes(at(plain, 25)) && !roots(fixed).includes(thin), true);
+}
+
 console.log(failures === 0 ? "\nALL FOLD RIG CHECKS PASSED" : `\n${failures} FAILED`);

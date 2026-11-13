@@ -105,6 +105,8 @@ export type FoldRig = {
   perforations: Segment[];
   /** Bounding box of the flat pattern, in mm. */
   bounds: { min: Pt; max: Pt; width: number; height: number };
+  /** Steps in which only a piece moves (`FoldConfig.pieces` with a step), no panel folding. */
+  moveSteps?: number[];
   /** Diagnostics so the UI can warn instead of silently showing nonsense. */
   stats: {
     segmentCount: number;
